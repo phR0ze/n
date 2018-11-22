@@ -37,6 +37,19 @@ func (slice *IntSliceImpl) ContainsAny(targets []int) bool {
 	return false
 }
 
+// Distinct removes all duplicates from the underlying slice and returns it
+func (slice *IntSliceImpl) Distinct() []int {
+	result := []int{}
+	hits := map[int]bool{}
+	for i := range slice.Raw {
+		if _, exists := hits[slice.Raw[i]]; !exists {
+			hits[slice.Raw[i]] = true
+			result = append(result, slice.Raw[i])
+		}
+	}
+	return result
+}
+
 //--------------------------------------------------------------------------------------------------
 // StrSlice implementation
 //--------------------------------------------------------------------------------------------------
@@ -71,4 +84,17 @@ func (slice *StrSliceImpl) ContainsAny(targets []string) bool {
 		}
 	}
 	return false
+}
+
+// Distinct removes all duplicates from the underlying slice and returns it
+func (slice *StrSliceImpl) Distinct() []string {
+	result := []string{}
+	hits := map[string]bool{}
+	for i := range slice.Raw {
+		if _, exists := hits[slice.Raw[i]]; !exists {
+			hits[slice.Raw[i]] = true
+			result = append(result, slice.Raw[i])
+		}
+	}
+	return result
 }
