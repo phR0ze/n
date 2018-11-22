@@ -1,6 +1,10 @@
 // Package nub provides helper interfaces and functions reminiscent of C#'s IEnumerable methods
 package nub
 
+import (
+	"strings"
+)
+
 //--------------------------------------------------------------------------------------------------
 // IntSlice implementation
 //--------------------------------------------------------------------------------------------------
@@ -50,7 +54,7 @@ func (slice *IntSliceImpl) Distinct() []int {
 	return result
 }
 
-// Len simply returns the length of the underlying slice
+// Len is a pass through to the underlying slice
 func (slice *IntSliceImpl) Len() int {
 	return len(slice.Raw)
 }
@@ -134,7 +138,12 @@ func (slice *StrSliceImpl) Distinct() []string {
 	return result
 }
 
-// Len simply returns the length of the underlying slice
+// Join is a pass through to the underlying slice
+func (slice *StrSliceImpl) Join(delim string) string {
+	return strings.Join(slice.Raw, delim)
+}
+
+// Len is a pass through to the underlying slice
 func (slice *StrSliceImpl) Len() int {
 	return len(slice.Raw)
 }

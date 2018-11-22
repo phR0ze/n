@@ -142,6 +142,12 @@ func TestStrDistinct(t *testing.T) {
 	}
 }
 
+func TestStrJoin(t *testing.T) {
+	assert.Equal(t, "", StrSlice([]string{}).Join("."))
+	assert.Equal(t, "1", StrSlice([]string{"1"}).Join("."))
+	assert.Equal(t, "1.2", StrSlice([]string{"1", "2"}).Join("."))
+}
+
 func TestStrLen(t *testing.T) {
 	assert.Equal(t, 0, StrSlice([]string{}).Len())
 	assert.Equal(t, 1, StrSlice([]string{"1"}).Len())
