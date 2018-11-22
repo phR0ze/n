@@ -10,12 +10,12 @@ import (
 // IntSlice tests
 //--------------------------------------------------------------------------------------------------
 
-func TestIntContains(t *testing.T) {
+func TestIntSliceContains(t *testing.T) {
 	assert.True(t, IntSlice([]int{1, 2, 3}).Contains(2))
 	assert.False(t, IntSlice([]int{1, 2, 3}).Contains(4))
 }
 
-func TestIntContainsAny(t *testing.T) {
+func TestIntSliceContainsAny(t *testing.T) {
 	assert.True(t, IntSlice([]int{1, 2, 3}).ContainsAny([]int{2}))
 	assert.False(t, IntSlice([]int{1, 2, 3}).ContainsAny([]int{4}))
 }
@@ -156,12 +156,12 @@ func TestIntTakeLastCnt(t *testing.T) {
 // StrSlice tests
 //--------------------------------------------------------------------------------------------------
 
-func TestStrContains(t *testing.T) {
+func TestStrSliceContains(t *testing.T) {
 	assert.True(t, StrSlice([]string{"1", "2", "3"}).Contains("2"))
 	assert.False(t, StrSlice([]string{"1", "2", "3"}).Contains("4"))
 }
 
-func TestStrContainsAny(t *testing.T) {
+func TestStrSliceContainsAny(t *testing.T) {
 	assert.True(t, StrSlice([]string{"1", "2", "3"}).ContainsAny([]string{"2"}))
 	assert.False(t, StrSlice([]string{"1", "2", "3"}).ContainsAny([]string{"4"}))
 }

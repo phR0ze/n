@@ -19,7 +19,7 @@ func IntSlice(slice []int) *IntSliceNub {
 	return &IntSliceNub{Raw: slice}
 }
 
-// Contains provides a reusable to check if the given target exists in the enumerable
+// Contains provides a reusable check for the given target
 func (slice *IntSliceNub) Contains(target int) bool {
 	for i := range slice.Raw {
 		if slice.Raw[i] == target {
@@ -29,7 +29,7 @@ func (slice *IntSliceNub) Contains(target int) bool {
 	return false
 }
 
-// ContainsAny provides a reusable to check if the given target exists in the enumerable
+// ContainsAny provides a reusable check for the given targets
 func (slice *IntSliceNub) ContainsAny(targets []int) bool {
 	for i := range targets {
 		for j := range slice.Raw {
@@ -123,7 +123,7 @@ func StrSlice(slice []string) *StrSliceNub {
 	return &StrSliceNub{Raw: slice}
 }
 
-// Contains provides a reusable to check if the given target exists in the enumerable
+// Contains provides a reusable check for the given target
 func (slice *StrSliceNub) Contains(target string) bool {
 	for i := range slice.Raw {
 		if slice.Raw[i] == target {
@@ -133,7 +133,7 @@ func (slice *StrSliceNub) Contains(target string) bool {
 	return false
 }
 
-// ContainsAny provides a reusable to check if the given target exists in the enumerable
+// ContainsAny provides a reusable check for the given targets
 func (slice *StrSliceNub) ContainsAny(targets []string) bool {
 	for i := range targets {
 		for j := range slice.Raw {
