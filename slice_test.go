@@ -38,6 +38,12 @@ func TestIntDistinct(t *testing.T) {
 	}
 }
 
+func TestIntLen(t *testing.T) {
+	assert.Equal(t, 0, IntSlice([]int{}).Len())
+	assert.Equal(t, 1, IntSlice([]int{1}).Len())
+	assert.Equal(t, 2, IntSlice([]int{1, 2}).Len())
+}
+
 func TestIntTakeFirst(t *testing.T) {
 	{
 		slice := IntSlice([]int{0, 1, 2})
@@ -134,6 +140,12 @@ func TestStrDistinct(t *testing.T) {
 		expected := []string{"1", "2", "3"}
 		assert.Equal(t, expected, data)
 	}
+}
+
+func TestStrLen(t *testing.T) {
+	assert.Equal(t, 0, StrSlice([]string{}).Len())
+	assert.Equal(t, 1, StrSlice([]string{"1"}).Len())
+	assert.Equal(t, 2, StrSlice([]string{"1", "2"}).Len())
 }
 
 func TestStrTakeFirst(t *testing.T) {

@@ -50,6 +50,11 @@ func (slice *IntSliceImpl) Distinct() []int {
 	return result
 }
 
+// Len simply returns the length of the underlying slice
+func (slice *IntSliceImpl) Len() int {
+	return len(slice.Raw)
+}
+
 // TakeFirst updates the underlying slice and returns the item and status
 func (slice *IntSliceImpl) TakeFirst() (int, bool) {
 	if len(slice.Raw) > 0 {
@@ -127,6 +132,11 @@ func (slice *StrSliceImpl) Distinct() []string {
 		}
 	}
 	return result
+}
+
+// Len simply returns the length of the underlying slice
+func (slice *StrSliceImpl) Len() int {
+	return len(slice.Raw)
 }
 
 // TakeFirst updates the underlying slice and returns the item and status
