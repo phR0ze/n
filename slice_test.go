@@ -77,6 +77,27 @@ func TestIntTakeFirst(t *testing.T) {
 	}
 }
 
+func TestIntTakeFirstCnt(t *testing.T) {
+	{
+		slice := IntSlice([]int{0, 1, 2})
+		items := slice.TakeFirstCnt(2)
+		assert.Equal(t, []int{0, 1}, items)
+		assert.Equal(t, []int{2}, slice.Raw)
+	}
+	{
+		slice := IntSlice([]int{0, 1, 2})
+		items := slice.TakeFirstCnt(3)
+		assert.Equal(t, []int{0, 1, 2}, items)
+		assert.Equal(t, []int{}, slice.Raw)
+	}
+	{
+		slice := IntSlice([]int{0, 1, 2})
+		items := slice.TakeFirstCnt(4)
+		assert.Equal(t, []int{0, 1, 2}, items)
+		assert.Equal(t, []int{}, slice.Raw)
+	}
+}
+
 func TestIntTakeLast(t *testing.T) {
 	{
 		slice := IntSlice([]int{0, 1, 2})
@@ -106,6 +127,27 @@ func TestIntTakeLast(t *testing.T) {
 		item, ok := slice.TakeLast()
 		assert.False(t, ok)
 		assert.Equal(t, 0, item)
+		assert.Equal(t, []int{}, slice.Raw)
+	}
+}
+
+func TestIntTakeLastCnt(t *testing.T) {
+	{
+		slice := IntSlice([]int{0, 1, 2})
+		items := slice.TakeLastCnt(2)
+		assert.Equal(t, []int{1, 2}, items)
+		assert.Equal(t, []int{0}, slice.Raw)
+	}
+	{
+		slice := IntSlice([]int{0, 1, 2})
+		items := slice.TakeLastCnt(3)
+		assert.Equal(t, []int{0, 1, 2}, items)
+		assert.Equal(t, []int{}, slice.Raw)
+	}
+	{
+		slice := IntSlice([]int{0, 1, 2})
+		items := slice.TakeLastCnt(4)
+		assert.Equal(t, []int{0, 1, 2}, items)
 		assert.Equal(t, []int{}, slice.Raw)
 	}
 }
@@ -187,6 +229,27 @@ func TestStrTakeFirst(t *testing.T) {
 	}
 }
 
+func TestStrTakeFirstCnt(t *testing.T) {
+	{
+		slice := StrSlice([]string{"0", "1", "2"})
+		items := slice.TakeFirstCnt(2)
+		assert.Equal(t, []string{"0", "1"}, items)
+		assert.Equal(t, []string{"2"}, slice.Raw)
+	}
+	{
+		slice := StrSlice([]string{"0", "1", "2"})
+		items := slice.TakeFirstCnt(3)
+		assert.Equal(t, []string{"0", "1", "2"}, items)
+		assert.Equal(t, []string{}, slice.Raw)
+	}
+	{
+		slice := StrSlice([]string{"0", "1", "2"})
+		items := slice.TakeFirstCnt(4)
+		assert.Equal(t, []string{"0", "1", "2"}, items)
+		assert.Equal(t, []string{}, slice.Raw)
+	}
+}
+
 func TestStrTakeLast(t *testing.T) {
 	{
 		slice := StrSlice([]string{"0", "1", "2"})
@@ -216,6 +279,26 @@ func TestStrTakeLast(t *testing.T) {
 		item, ok := slice.TakeLast()
 		assert.False(t, ok)
 		assert.Equal(t, "", item)
+		assert.Equal(t, []string{}, slice.Raw)
+	}
+}
+func TestStrTakeLastCnt(t *testing.T) {
+	{
+		slice := StrSlice([]string{"0", "1", "2"})
+		items := slice.TakeLastCnt(2)
+		assert.Equal(t, []string{"1", "2"}, items)
+		assert.Equal(t, []string{"0"}, slice.Raw)
+	}
+	{
+		slice := StrSlice([]string{"0", "1", "2"})
+		items := slice.TakeLastCnt(3)
+		assert.Equal(t, []string{"0", "1", "2"}, items)
+		assert.Equal(t, []string{}, slice.Raw)
+	}
+	{
+		slice := StrSlice([]string{"0", "1", "2"})
+		items := slice.TakeLastCnt(4)
+		assert.Equal(t, []string{"0", "1", "2"}, items)
 		assert.Equal(t, []string{}, slice.Raw)
 	}
 }

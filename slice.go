@@ -69,6 +69,20 @@ func (slice *IntSliceImpl) TakeFirst() (int, bool) {
 	return 0, false
 }
 
+// TakeFirstCnt updates the underlying slice and returns the items
+func (slice *IntSliceImpl) TakeFirstCnt(cnt int) (result []int) {
+	if cnt > 0 {
+		if len(slice.Raw) >= cnt {
+			result = slice.Raw[:cnt]
+			slice.Raw = slice.Raw[cnt:]
+		} else {
+			result = slice.Raw
+			slice.Raw = []int{}
+		}
+	}
+	return
+}
+
 // TakeLast updates the underlying slice and returns the item and status
 func (slice *IntSliceImpl) TakeLast() (int, bool) {
 	if len(slice.Raw) > 0 {
@@ -79,15 +93,20 @@ func (slice *IntSliceImpl) TakeLast() (int, bool) {
 	return 0, false
 }
 
-// // TakeLastCnt items from the underlying slice and returns the new slice
-// func (slice *IntSliceImpl) TakeLast() ([]int, int, bool) {
-// 	if len(slice.Raw) > 0 {
-// 		item := slice.Raw[len(slice.Raw)-1]
-// 		slice.Raw = slice.Raw[:len(slice.Raw)-1]
-// 		return slice.Raw, item, true
-// 	}
-// 	return slice.Raw, 0, false
-// }
+// TakeLastCnt updates the underlying slice and returns the items
+func (slice *IntSliceImpl) TakeLastCnt(cnt int) (result []int) {
+	if cnt > 0 {
+		if len(slice.Raw) >= cnt {
+			i := len(slice.Raw) - cnt
+			result = slice.Raw[i:]
+			slice.Raw = slice.Raw[:i]
+		} else {
+			result = slice.Raw
+			slice.Raw = []int{}
+		}
+	}
+	return
+}
 
 //--------------------------------------------------------------------------------------------------
 // StrSlice implementation
@@ -158,6 +177,20 @@ func (slice *StrSliceImpl) TakeFirst() (string, bool) {
 	return "", false
 }
 
+// TakeFirstCnt updates the underlying slice and returns the items
+func (slice *StrSliceImpl) TakeFirstCnt(cnt int) (result []string) {
+	if cnt > 0 {
+		if len(slice.Raw) >= cnt {
+			result = slice.Raw[:cnt]
+			slice.Raw = slice.Raw[cnt:]
+		} else {
+			result = slice.Raw
+			slice.Raw = []string{}
+		}
+	}
+	return
+}
+
 // TakeLast updates the underlying slice and returns the item and status
 func (slice *StrSliceImpl) TakeLast() (string, bool) {
 	if len(slice.Raw) > 0 {
@@ -166,4 +199,19 @@ func (slice *StrSliceImpl) TakeLast() (string, bool) {
 		return item, true
 	}
 	return "", false
+}
+
+// TakeLastCnt updates the underlying slice and returns the items
+func (slice *StrSliceImpl) TakeLastCnt(cnt int) (result []string) {
+	if cnt > 0 {
+		if len(slice.Raw) >= cnt {
+			i := len(slice.Raw) - cnt
+			result = slice.Raw[i:]
+			slice.Raw = slice.Raw[:i]
+		} else {
+			result = slice.Raw
+			slice.Raw = []string{}
+		}
+	}
+	return
 }
