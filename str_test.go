@@ -21,6 +21,26 @@ func TestStrContainsAny(t *testing.T) {
 	assert.False(t, Str("test").ContainsAny([]string{"f", "b"}))
 }
 
+func TestStrHasAnyPrefix(t *testing.T) {
+	assert.True(t, Str("test").HasAnyPrefix([]string{"tes"}))
+	assert.True(t, Str("test").HasAnyPrefix([]string{"bob", "tes"}))
+	assert.False(t, Str("test").HasAnyPrefix([]string{"bob"}))
+}
+
+func TestStrHasAnySuffix(t *testing.T) {
+	assert.True(t, Str("test").HasAnySuffix([]string{"est"}))
+	assert.True(t, Str("test").HasAnySuffix([]string{"bob", "est"}))
+	assert.False(t, Str("test").HasAnySuffix([]string{"bob"}))
+}
+
+func TestStrHasPrefix(t *testing.T) {
+	assert.True(t, Str("test").HasPrefix("tes"))
+}
+
+func TestStrHasSuffix(t *testing.T) {
+	assert.True(t, Str("test").HasSuffix("est"))
+}
+
 func TestStrSplit(t *testing.T) {
 	assert.Equal(t, []string{"1", "2"}, Str("1.2").Split(".").Raw)
 }
