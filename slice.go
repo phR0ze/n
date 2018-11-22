@@ -6,21 +6,21 @@ import (
 )
 
 //--------------------------------------------------------------------------------------------------
-// IntSlice implementation
+// IntSlice Nub
 //--------------------------------------------------------------------------------------------------
 
-// IntSliceImpl ...
-type IntSliceImpl struct {
+// IntSliceNub provides missing functionality and elegant chaining
+type IntSliceNub struct {
 	Raw []int
 }
 
-// IntSlice ...
-func IntSlice(slice []int) *IntSliceImpl {
-	return &IntSliceImpl{Raw: slice}
+// IntSlice creates a new nub
+func IntSlice(slice []int) *IntSliceNub {
+	return &IntSliceNub{Raw: slice}
 }
 
 // Contains provides a reusable to check if the given target exists in the enumerable
-func (slice *IntSliceImpl) Contains(target int) bool {
+func (slice *IntSliceNub) Contains(target int) bool {
 	for i := range slice.Raw {
 		if slice.Raw[i] == target {
 			return true
@@ -30,7 +30,7 @@ func (slice *IntSliceImpl) Contains(target int) bool {
 }
 
 // ContainsAny provides a reusable to check if the given target exists in the enumerable
-func (slice *IntSliceImpl) ContainsAny(targets []int) bool {
+func (slice *IntSliceNub) ContainsAny(targets []int) bool {
 	for i := range targets {
 		for j := range slice.Raw {
 			if slice.Raw[j] == targets[i] {
@@ -41,26 +41,26 @@ func (slice *IntSliceImpl) ContainsAny(targets []int) bool {
 	return false
 }
 
-// Distinct removes all duplicates from the underlying slice and returns it
-func (slice *IntSliceImpl) Distinct() []int {
-	result := []int{}
+// Distinct removes all duplicates from the underlying slice
+func (slice *IntSliceNub) Distinct() *IntSliceNub {
 	hits := map[int]bool{}
-	for i := range slice.Raw {
+	for i := len(slice.Raw) - 1; i >= 0; i-- {
 		if _, exists := hits[slice.Raw[i]]; !exists {
 			hits[slice.Raw[i]] = true
-			result = append(result, slice.Raw[i])
+		} else {
+			slice.Raw = append(slice.Raw[:i], slice.Raw[i+1:]...)
 		}
 	}
-	return result
+	return slice
 }
 
 // Len is a pass through to the underlying slice
-func (slice *IntSliceImpl) Len() int {
+func (slice *IntSliceNub) Len() int {
 	return len(slice.Raw)
 }
 
 // TakeFirst updates the underlying slice and returns the item and status
-func (slice *IntSliceImpl) TakeFirst() (int, bool) {
+func (slice *IntSliceNub) TakeFirst() (int, bool) {
 	if len(slice.Raw) > 0 {
 		item := slice.Raw[0]
 		slice.Raw = slice.Raw[1:]
@@ -70,13 +70,13 @@ func (slice *IntSliceImpl) TakeFirst() (int, bool) {
 }
 
 // TakeFirstCnt updates the underlying slice and returns the items
-func (slice *IntSliceImpl) TakeFirstCnt(cnt int) (result []int) {
+func (slice *IntSliceNub) TakeFirstCnt(cnt int) (result *IntSliceNub) {
 	if cnt > 0 {
 		if len(slice.Raw) >= cnt {
-			result = slice.Raw[:cnt]
+			result = IntSlice(slice.Raw[:cnt])
 			slice.Raw = slice.Raw[cnt:]
 		} else {
-			result = slice.Raw
+			result = IntSlice(slice.Raw)
 			slice.Raw = []int{}
 		}
 	}
@@ -84,7 +84,7 @@ func (slice *IntSliceImpl) TakeFirstCnt(cnt int) (result []int) {
 }
 
 // TakeLast updates the underlying slice and returns the item and status
-func (slice *IntSliceImpl) TakeLast() (int, bool) {
+func (slice *IntSliceNub) TakeLast() (int, bool) {
 	if len(slice.Raw) > 0 {
 		item := slice.Raw[len(slice.Raw)-1]
 		slice.Raw = slice.Raw[:len(slice.Raw)-1]
@@ -94,36 +94,37 @@ func (slice *IntSliceImpl) TakeLast() (int, bool) {
 }
 
 // TakeLastCnt updates the underlying slice and returns the items
-func (slice *IntSliceImpl) TakeLastCnt(cnt int) (result []int) {
+func (slice *IntSliceNub) TakeLastCnt(cnt int) (result *IntSliceNub) {
 	if cnt > 0 {
 		if len(slice.Raw) >= cnt {
 			i := len(slice.Raw) - cnt
-			result = slice.Raw[i:]
+			result = IntSlice(slice.Raw[i:])
 			slice.Raw = slice.Raw[:i]
 		} else {
-			result = slice.Raw
+			result = IntSlice(slice.Raw)
 			slice.Raw = []int{}
 		}
 	}
 	return
+
 }
 
 //--------------------------------------------------------------------------------------------------
-// StrSlice implementation
+// StrSlice Nub
 //--------------------------------------------------------------------------------------------------
 
-// StrSliceImpl ...
-type StrSliceImpl struct {
+// StrSliceNub provides missing functionality and elegant chaining
+type StrSliceNub struct {
 	Raw []string
 }
 
-// StrSlice ...
-func StrSlice(slice []string) *StrSliceImpl {
-	return &StrSliceImpl{Raw: slice}
+// StrSlice creates a new nub
+func StrSlice(slice []string) *StrSliceNub {
+	return &StrSliceNub{Raw: slice}
 }
 
 // Contains provides a reusable to check if the given target exists in the enumerable
-func (slice *StrSliceImpl) Contains(target string) bool {
+func (slice *StrSliceNub) Contains(target string) bool {
 	for i := range slice.Raw {
 		if slice.Raw[i] == target {
 			return true
@@ -133,7 +134,7 @@ func (slice *StrSliceImpl) Contains(target string) bool {
 }
 
 // ContainsAny provides a reusable to check if the given target exists in the enumerable
-func (slice *StrSliceImpl) ContainsAny(targets []string) bool {
+func (slice *StrSliceNub) ContainsAny(targets []string) bool {
 	for i := range targets {
 		for j := range slice.Raw {
 			if slice.Raw[j] == targets[i] {
@@ -144,31 +145,31 @@ func (slice *StrSliceImpl) ContainsAny(targets []string) bool {
 	return false
 }
 
-// Distinct removes all duplicates from the underlying slice and returns it
-func (slice *StrSliceImpl) Distinct() []string {
-	result := []string{}
+// Distinct removes all duplicates from the underlying slice
+func (slice *StrSliceNub) Distinct() *StrSliceNub {
 	hits := map[string]bool{}
-	for i := range slice.Raw {
+	for i := len(slice.Raw) - 1; i >= 0; i-- {
 		if _, exists := hits[slice.Raw[i]]; !exists {
 			hits[slice.Raw[i]] = true
-			result = append(result, slice.Raw[i])
+		} else {
+			slice.Raw = append(slice.Raw[:i], slice.Raw[i+1:]...)
 		}
 	}
-	return result
+	return slice
 }
 
-// Join is a pass through to the underlying slice
-func (slice *StrSliceImpl) Join(delim string) string {
-	return strings.Join(slice.Raw, delim)
+// Join the underlying slice with the given delim
+func (slice *StrSliceNub) Join(delim string) *StrNub {
+	return Str(strings.Join(slice.Raw, delim))
 }
 
 // Len is a pass through to the underlying slice
-func (slice *StrSliceImpl) Len() int {
+func (slice *StrSliceNub) Len() int {
 	return len(slice.Raw)
 }
 
 // TakeFirst updates the underlying slice and returns the item and status
-func (slice *StrSliceImpl) TakeFirst() (string, bool) {
+func (slice *StrSliceNub) TakeFirst() (string, bool) {
 	if len(slice.Raw) > 0 {
 		item := slice.Raw[0]
 		slice.Raw = slice.Raw[1:]
@@ -178,13 +179,13 @@ func (slice *StrSliceImpl) TakeFirst() (string, bool) {
 }
 
 // TakeFirstCnt updates the underlying slice and returns the items
-func (slice *StrSliceImpl) TakeFirstCnt(cnt int) (result []string) {
+func (slice *StrSliceNub) TakeFirstCnt(cnt int) (result *StrSliceNub) {
 	if cnt > 0 {
 		if len(slice.Raw) >= cnt {
-			result = slice.Raw[:cnt]
+			result = StrSlice(slice.Raw[:cnt])
 			slice.Raw = slice.Raw[cnt:]
 		} else {
-			result = slice.Raw
+			result = StrSlice(slice.Raw)
 			slice.Raw = []string{}
 		}
 	}
@@ -192,7 +193,7 @@ func (slice *StrSliceImpl) TakeFirstCnt(cnt int) (result []string) {
 }
 
 // TakeLast updates the underlying slice and returns the item and status
-func (slice *StrSliceImpl) TakeLast() (string, bool) {
+func (slice *StrSliceNub) TakeLast() (string, bool) {
 	if len(slice.Raw) > 0 {
 		item := slice.Raw[len(slice.Raw)-1]
 		slice.Raw = slice.Raw[:len(slice.Raw)-1]
@@ -201,15 +202,15 @@ func (slice *StrSliceImpl) TakeLast() (string, bool) {
 	return "", false
 }
 
-// TakeLastCnt updates the underlying slice and returns the items
-func (slice *StrSliceImpl) TakeLastCnt(cnt int) (result []string) {
+// TakeLastCnt updates the underlying slice and returns a new nub
+func (slice *StrSliceNub) TakeLastCnt(cnt int) (result *StrSliceNub) {
 	if cnt > 0 {
 		if len(slice.Raw) >= cnt {
 			i := len(slice.Raw) - cnt
-			result = slice.Raw[i:]
+			result = StrSlice(slice.Raw[i:])
 			slice.Raw = slice.Raw[:i]
 		} else {
-			result = slice.Raw
+			result = StrSlice(slice.Raw)
 			slice.Raw = []string{}
 		}
 	}
