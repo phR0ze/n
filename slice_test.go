@@ -40,49 +40,67 @@ func TestIntDistinct(t *testing.T) {
 
 func TestIntTakeFirst(t *testing.T) {
 	{
-		data := []int{0, 1, 2}
-		data, item, ok := IntSlice(data).TakeFirst()
-		assert.True(t, ok)
-		assert.Equal(t, 0, item)
-		assert.Equal(t, []int{1, 2}, data)
+		slice := IntSlice([]int{0, 1, 2})
+		results := []int{}
+		expected := []int{0, 1, 2}
+		for item, ok := slice.TakeFirst(); ok; item, ok = slice.TakeFirst() {
+			results = append(results, item)
+		}
+		assert.Equal(t, expected, results)
 	}
 	{
-		data := []int{0}
-		data, item, ok := IntSlice(data).TakeFirst()
+		slice := IntSlice([]int{0, 1, 2})
+		item, ok := slice.TakeFirst()
 		assert.True(t, ok)
 		assert.Equal(t, 0, item)
-		assert.Equal(t, []int{}, data)
+		assert.Equal(t, []int{1, 2}, slice.Raw)
 	}
 	{
-		data := []int{}
-		data, item, ok := IntSlice(data).TakeFirst()
+		slice := IntSlice([]int{0})
+		item, ok := slice.TakeFirst()
+		assert.True(t, ok)
+		assert.Equal(t, 0, item)
+		assert.Equal(t, []int{}, slice.Raw)
+	}
+	{
+		slice := IntSlice([]int{})
+		item, ok := slice.TakeFirst()
 		assert.False(t, ok)
 		assert.Equal(t, 0, item)
-		assert.Equal(t, []int{}, data)
+		assert.Equal(t, []int{}, slice.Raw)
 	}
 }
 
 func TestIntTakeLast(t *testing.T) {
 	{
-		data := []int{0, 1, 2}
-		data, item, ok := IntSlice(data).TakeLast()
+		slice := IntSlice([]int{0, 1, 2})
+		results := []int{}
+		expected := []int{2, 1, 0}
+		for item, ok := slice.TakeLast(); ok; item, ok = slice.TakeLast() {
+			results = append(results, item)
+		}
+		assert.Equal(t, expected, results)
+	}
+	{
+		slice := IntSlice([]int{0, 1, 2})
+		item, ok := slice.TakeLast()
 		assert.True(t, ok)
 		assert.Equal(t, 2, item)
-		assert.Equal(t, []int{0, 1}, data)
+		assert.Equal(t, []int{0, 1}, slice.Raw)
 	}
 	{
-		data := []int{0}
-		data, item, ok := IntSlice(data).TakeLast()
+		slice := IntSlice([]int{0})
+		item, ok := slice.TakeLast()
 		assert.True(t, ok)
 		assert.Equal(t, 0, item)
-		assert.Equal(t, []int{}, data)
+		assert.Equal(t, []int{}, slice.Raw)
 	}
 	{
-		data := []int{}
-		data, item, ok := IntSlice(data).TakeLast()
+		slice := IntSlice([]int{})
+		item, ok := slice.TakeLast()
 		assert.False(t, ok)
 		assert.Equal(t, 0, item)
-		assert.Equal(t, []int{}, data)
+		assert.Equal(t, []int{}, slice.Raw)
 	}
 }
 
@@ -120,48 +138,66 @@ func TestStrDistinct(t *testing.T) {
 
 func TestStrTakeFirst(t *testing.T) {
 	{
-		data := []string{"0", "1", "2"}
-		data, item, ok := StrSlice(data).TakeFirst()
-		assert.True(t, ok)
-		assert.Equal(t, "0", item)
-		assert.Equal(t, []string{"1", "2"}, data)
+		slice := StrSlice([]string{"0", "1", "2"})
+		results := []string{}
+		expected := []string{"0", "1", "2"}
+		for item, ok := slice.TakeFirst(); ok; item, ok = slice.TakeFirst() {
+			results = append(results, item)
+		}
+		assert.Equal(t, expected, results)
 	}
 	{
-		data := []string{"0"}
-		data, item, ok := StrSlice(data).TakeFirst()
+		slice := StrSlice([]string{"0", "1", "2"})
+		item, ok := slice.TakeFirst()
 		assert.True(t, ok)
 		assert.Equal(t, "0", item)
-		assert.Equal(t, []string{}, data)
+		assert.Equal(t, []string{"1", "2"}, slice.Raw)
 	}
 	{
-		data := []string{}
-		data, item, ok := StrSlice(data).TakeFirst()
+		slice := StrSlice([]string{"0"})
+		item, ok := slice.TakeFirst()
+		assert.True(t, ok)
+		assert.Equal(t, "0", item)
+		assert.Equal(t, []string{}, slice.Raw)
+	}
+	{
+		slice := StrSlice([]string{})
+		item, ok := slice.TakeFirst()
 		assert.False(t, ok)
 		assert.Equal(t, "", item)
-		assert.Equal(t, []string{}, data)
+		assert.Equal(t, []string{}, slice.Raw)
 	}
 }
 
 func TestStrTakeLast(t *testing.T) {
 	{
-		data := []string{"0", "1", "2"}
-		data, item, ok := StrSlice(data).TakeLast()
+		slice := StrSlice([]string{"0", "1", "2"})
+		results := []string{}
+		expected := []string{"2", "1", "0"}
+		for item, ok := slice.TakeLast(); ok; item, ok = slice.TakeLast() {
+			results = append(results, item)
+		}
+		assert.Equal(t, expected, results)
+	}
+	{
+		slice := StrSlice([]string{"0", "1", "2"})
+		item, ok := slice.TakeLast()
 		assert.True(t, ok)
 		assert.Equal(t, "2", item)
-		assert.Equal(t, []string{"0", "1"}, data)
+		assert.Equal(t, []string{"0", "1"}, slice.Raw)
 	}
 	{
-		data := []string{"0"}
-		data, item, ok := StrSlice(data).TakeLast()
+		slice := StrSlice([]string{"0"})
+		item, ok := slice.TakeLast()
 		assert.True(t, ok)
 		assert.Equal(t, "0", item)
-		assert.Equal(t, []string{}, data)
+		assert.Equal(t, []string{}, slice.Raw)
 	}
 	{
-		data := []string{}
-		data, item, ok := StrSlice(data).TakeLast()
+		slice := StrSlice([]string{})
+		item, ok := slice.TakeLast()
 		assert.False(t, ok)
 		assert.Equal(t, "", item)
-		assert.Equal(t, []string{}, data)
+		assert.Equal(t, []string{}, slice.Raw)
 	}
 }

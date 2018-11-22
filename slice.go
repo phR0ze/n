@@ -50,25 +50,35 @@ func (slice *IntSliceImpl) Distinct() []int {
 	return result
 }
 
-// TakeFirst item from the underlying slice and returns the new slice, the item and status
-func (slice *IntSliceImpl) TakeFirst() ([]int, int, bool) {
+// TakeFirst updates the underlying slice and returns the item and status
+func (slice *IntSliceImpl) TakeFirst() (int, bool) {
 	if len(slice.Raw) > 0 {
 		item := slice.Raw[0]
 		slice.Raw = slice.Raw[1:]
-		return slice.Raw, item, true
+		return item, true
 	}
-	return slice.Raw, 0, false
+	return 0, false
 }
 
-// TakeLast item from the underlying slice and returns the new slice, the item and status
-func (slice *IntSliceImpl) TakeLast() ([]int, int, bool) {
+// TakeLast updates the underlying slice and returns the item and status
+func (slice *IntSliceImpl) TakeLast() (int, bool) {
 	if len(slice.Raw) > 0 {
 		item := slice.Raw[len(slice.Raw)-1]
 		slice.Raw = slice.Raw[:len(slice.Raw)-1]
-		return slice.Raw, item, true
+		return item, true
 	}
-	return slice.Raw, 0, false
+	return 0, false
 }
+
+// // TakeLastCnt items from the underlying slice and returns the new slice
+// func (slice *IntSliceImpl) TakeLast() ([]int, int, bool) {
+// 	if len(slice.Raw) > 0 {
+// 		item := slice.Raw[len(slice.Raw)-1]
+// 		slice.Raw = slice.Raw[:len(slice.Raw)-1]
+// 		return slice.Raw, item, true
+// 	}
+// 	return slice.Raw, 0, false
+// }
 
 //--------------------------------------------------------------------------------------------------
 // StrSlice implementation
@@ -119,22 +129,22 @@ func (slice *StrSliceImpl) Distinct() []string {
 	return result
 }
 
-// TakeFirst item from the underlying slice and returns the new slice, the item and status
-func (slice *StrSliceImpl) TakeFirst() ([]string, string, bool) {
+// TakeFirst updates the underlying slice and returns the item and status
+func (slice *StrSliceImpl) TakeFirst() (string, bool) {
 	if len(slice.Raw) > 0 {
 		item := slice.Raw[0]
 		slice.Raw = slice.Raw[1:]
-		return slice.Raw, item, true
+		return item, true
 	}
-	return slice.Raw, "", false
+	return "", false
 }
 
-// TakeLast item from the underlying slice and returns the new slice, the item and status
-func (slice *StrSliceImpl) TakeLast() ([]string, string, bool) {
+// TakeLast updates the underlying slice and returns the item and status
+func (slice *StrSliceImpl) TakeLast() (string, bool) {
 	if len(slice.Raw) > 0 {
 		item := slice.Raw[len(slice.Raw)-1]
 		slice.Raw = slice.Raw[:len(slice.Raw)-1]
-		return slice.Raw, item, true
+		return item, true
 	}
-	return slice.Raw, "", false
+	return "", false
 }
