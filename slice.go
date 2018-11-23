@@ -8,19 +8,17 @@ import (
 //--------------------------------------------------------------------------------------------------
 // IntSlice Nub
 //--------------------------------------------------------------------------------------------------
-
-// IntSliceNub provides missing functionality and elegant chaining
-type IntSliceNub struct {
+type intSliceNub struct {
 	Raw []int
 }
 
-// IntSlice creates a new nub
-func IntSlice(slice []int) *IntSliceNub {
-	return &IntSliceNub{Raw: slice}
+// IntSlice creates a new nub from the given int slice
+func IntSlice(slice []int) *intSliceNub {
+	return &intSliceNub{Raw: slice}
 }
 
-// Contains provides a reusable check for the given target
-func (slice *IntSliceNub) Contains(target int) bool {
+// Contains checks if the given target is contained in this slice
+func (slice *intSliceNub) Contains(target int) bool {
 	for i := range slice.Raw {
 		if slice.Raw[i] == target {
 			return true
@@ -29,8 +27,8 @@ func (slice *IntSliceNub) Contains(target int) bool {
 	return false
 }
 
-// ContainsAny provides a reusable check for the given targets
-func (slice *IntSliceNub) ContainsAny(targets []int) bool {
+// ContainsAny checks if any of the targets are contained in this slice
+func (slice *intSliceNub) ContainsAny(targets []int) bool {
 	for i := range targets {
 		for j := range slice.Raw {
 			if slice.Raw[j] == targets[i] {
@@ -42,7 +40,7 @@ func (slice *IntSliceNub) ContainsAny(targets []int) bool {
 }
 
 // Distinct removes all duplicates from the underlying slice
-func (slice *IntSliceNub) Distinct() *IntSliceNub {
+func (slice *intSliceNub) Distinct() *intSliceNub {
 	hits := map[int]bool{}
 	for i := len(slice.Raw) - 1; i >= 0; i-- {
 		if _, exists := hits[slice.Raw[i]]; !exists {
@@ -55,12 +53,12 @@ func (slice *IntSliceNub) Distinct() *IntSliceNub {
 }
 
 // Len is a pass through to the underlying slice
-func (slice *IntSliceNub) Len() int {
+func (slice *intSliceNub) Len() int {
 	return len(slice.Raw)
 }
 
 // TakeFirst updates the underlying slice and returns the item and status
-func (slice *IntSliceNub) TakeFirst() (int, bool) {
+func (slice *intSliceNub) TakeFirst() (int, bool) {
 	if len(slice.Raw) > 0 {
 		item := slice.Raw[0]
 		slice.Raw = slice.Raw[1:]
@@ -70,7 +68,7 @@ func (slice *IntSliceNub) TakeFirst() (int, bool) {
 }
 
 // TakeFirstCnt updates the underlying slice and returns the items
-func (slice *IntSliceNub) TakeFirstCnt(cnt int) (result *IntSliceNub) {
+func (slice *intSliceNub) TakeFirstCnt(cnt int) (result *intSliceNub) {
 	if cnt > 0 {
 		if len(slice.Raw) >= cnt {
 			result = IntSlice(slice.Raw[:cnt])
@@ -84,7 +82,7 @@ func (slice *IntSliceNub) TakeFirstCnt(cnt int) (result *IntSliceNub) {
 }
 
 // TakeLast updates the underlying slice and returns the item and status
-func (slice *IntSliceNub) TakeLast() (int, bool) {
+func (slice *intSliceNub) TakeLast() (int, bool) {
 	if len(slice.Raw) > 0 {
 		item := slice.Raw[len(slice.Raw)-1]
 		slice.Raw = slice.Raw[:len(slice.Raw)-1]
@@ -94,7 +92,7 @@ func (slice *IntSliceNub) TakeLast() (int, bool) {
 }
 
 // TakeLastCnt updates the underlying slice and returns the items
-func (slice *IntSliceNub) TakeLastCnt(cnt int) (result *IntSliceNub) {
+func (slice *intSliceNub) TakeLastCnt(cnt int) (result *intSliceNub) {
 	if cnt > 0 {
 		if len(slice.Raw) >= cnt {
 			i := len(slice.Raw) - cnt
@@ -112,19 +110,27 @@ func (slice *IntSliceNub) TakeLastCnt(cnt int) (result *IntSliceNub) {
 //--------------------------------------------------------------------------------------------------
 // StrSlice Nub
 //--------------------------------------------------------------------------------------------------
-
-// StrSliceNub provides missing functionality and elegant chaining
-type StrSliceNub struct {
+type strSliceNub struct {
 	Raw []string
 }
 
-// StrSlice creates a new nub
-func StrSlice(slice []string) *StrSliceNub {
-	return &StrSliceNub{Raw: slice}
+// StrSlice creates a new nub from the given string slice
+func StrSlice(slice []string) *strSliceNub {
+	return &strSliceNub{Raw: slice}
 }
 
-// Contains provides a reusable check for the given target
-func (slice *StrSliceNub) Contains(target string) bool {
+// AnyContain checks if any items in this slice contain the target
+func (slice *strSliceNub) AnyContain(target string) bool {
+	for i := range slice.Raw {
+		if strings.Contains(slice.Raw[i], target) {
+			return true
+		}
+	}
+	return false
+}
+
+// Contains checks if the given target is contained in this slice
+func (slice *strSliceNub) Contains(target string) bool {
 	for i := range slice.Raw {
 		if slice.Raw[i] == target {
 			return true
@@ -133,8 +139,8 @@ func (slice *StrSliceNub) Contains(target string) bool {
 	return false
 }
 
-// ContainsAny provides a reusable check for the given targets
-func (slice *StrSliceNub) ContainsAny(targets []string) bool {
+// ContainsAny checks if any of the targets are contained in this slice
+func (slice *strSliceNub) ContainsAny(targets []string) bool {
 	for i := range targets {
 		for j := range slice.Raw {
 			if slice.Raw[j] == targets[i] {
@@ -146,7 +152,7 @@ func (slice *StrSliceNub) ContainsAny(targets []string) bool {
 }
 
 // Distinct removes all duplicates from the underlying slice
-func (slice *StrSliceNub) Distinct() *StrSliceNub {
+func (slice *strSliceNub) Distinct() *strSliceNub {
 	hits := map[string]bool{}
 	for i := len(slice.Raw) - 1; i >= 0; i-- {
 		if _, exists := hits[slice.Raw[i]]; !exists {
@@ -159,17 +165,17 @@ func (slice *StrSliceNub) Distinct() *StrSliceNub {
 }
 
 // Join the underlying slice with the given delim
-func (slice *StrSliceNub) Join(delim string) *StrNub {
+func (slice *strSliceNub) Join(delim string) *strNub {
 	return Str(strings.Join(slice.Raw, delim))
 }
 
 // Len is a pass through to the underlying slice
-func (slice *StrSliceNub) Len() int {
+func (slice *strSliceNub) Len() int {
 	return len(slice.Raw)
 }
 
 // TakeFirst updates the underlying slice and returns the item and status
-func (slice *StrSliceNub) TakeFirst() (string, bool) {
+func (slice *strSliceNub) TakeFirst() (string, bool) {
 	if len(slice.Raw) > 0 {
 		item := slice.Raw[0]
 		slice.Raw = slice.Raw[1:]
@@ -179,7 +185,7 @@ func (slice *StrSliceNub) TakeFirst() (string, bool) {
 }
 
 // TakeFirstCnt updates the underlying slice and returns the items
-func (slice *StrSliceNub) TakeFirstCnt(cnt int) (result *StrSliceNub) {
+func (slice *strSliceNub) TakeFirstCnt(cnt int) (result *strSliceNub) {
 	if cnt > 0 {
 		if len(slice.Raw) >= cnt {
 			result = StrSlice(slice.Raw[:cnt])
@@ -193,7 +199,7 @@ func (slice *StrSliceNub) TakeFirstCnt(cnt int) (result *StrSliceNub) {
 }
 
 // TakeLast updates the underlying slice and returns the item and status
-func (slice *StrSliceNub) TakeLast() (string, bool) {
+func (slice *strSliceNub) TakeLast() (string, bool) {
 	if len(slice.Raw) > 0 {
 		item := slice.Raw[len(slice.Raw)-1]
 		slice.Raw = slice.Raw[:len(slice.Raw)-1]
@@ -203,7 +209,7 @@ func (slice *StrSliceNub) TakeLast() (string, bool) {
 }
 
 // TakeLastCnt updates the underlying slice and returns a new nub
-func (slice *StrSliceNub) TakeLastCnt(cnt int) (result *StrSliceNub) {
+func (slice *strSliceNub) TakeLastCnt(cnt int) (result *strSliceNub) {
 	if cnt > 0 {
 		if len(slice.Raw) >= cnt {
 			i := len(slice.Raw) - cnt

@@ -156,6 +156,11 @@ func TestIntTakeLastCnt(t *testing.T) {
 // StrSlice tests
 //--------------------------------------------------------------------------------------------------
 
+func TestStrSliceAnyContain(t *testing.T) {
+	assert.True(t, StrSlice([]string{"one", "two", "three"}).AnyContain("thr"))
+	assert.False(t, StrSlice([]string{"one", "two", "three"}).AnyContain("2"))
+}
+
 func TestStrSliceContains(t *testing.T) {
 	assert.True(t, StrSlice([]string{"1", "2", "3"}).Contains("2"))
 	assert.False(t, StrSlice([]string{"1", "2", "3"}).Contains("4"))

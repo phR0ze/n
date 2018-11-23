@@ -1,5 +1,6 @@
 NAME := nub
 DEPDIR := vendor
+PKGROOT := github.com/phR0ze/nub
 
 default: $(NAME)
 $(NAME): $(DEPDIR)
@@ -14,7 +15,8 @@ update:
 test: $(NAME)
 	@echo -e "\nRunning all go tests:"
 	@echo -e "------------------------------------------------------------------------"
-	go test
+	go test $(PKGROOT)
+	go test $(PKGROOT)/pkg/trace
 
 clean:
 	rm -rf ./vendor
