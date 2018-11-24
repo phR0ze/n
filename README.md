@@ -11,7 +11,7 @@ Collection of missing Go helper functions reminiscent Ruby
 | AnyWhere  | Match slice items against given lambda   | O        | O        | O           |
 | Append    | Add items to the end of the slice        | 1        | 1        | 1           |
 | At        | Get item using neg/pos index notation    | 1        | 1        | 1           |
-| Clear     |             |          |          |             |
+| Clear     | Clear out the underlying slice           | 1        | 1        | 1           |
 | Contains  |             | X        | X        |             |
 | Count     |             |          |          |             |
 | Distinct  |             | X        | X        |             |

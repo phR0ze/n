@@ -47,6 +47,12 @@ func (slice *intSliceNub) At(i int) int {
 	panic(errors.New("Index out of slice bounds"))
 }
 
+// Clear the underlying slice
+func (slice *intSliceNub) Clear() *intSliceNub {
+	slice.Raw = []int{}
+	return slice
+}
+
 // Contains checks if the given target is contained in this slice
 func (slice *intSliceNub) Contains(target int) bool {
 	for i := range slice.Raw {
@@ -190,6 +196,12 @@ func (slice *strSliceNub) At(i int) string {
 	panic(errors.New("Index out of slice bounds"))
 }
 
+// Clear the underlying slice
+func (slice *strSliceNub) Clear() *strSliceNub {
+	slice.Raw = []string{}
+	return slice
+}
+
 // Contains checks if the given target is contained in this slice
 func (slice *strSliceNub) Contains(target string) bool {
 	for i := range slice.Raw {
@@ -325,6 +337,12 @@ func (slice *strMapSliceNub) At(i int) *strMapNub {
 		return StrMap(slice.Raw[len(slice.Raw)+i])
 	}
 	panic(errors.New("Index out of slice bounds"))
+}
+
+// Clear the underlying slice
+func (slice *strMapSliceNub) Clear() *strMapSliceNub {
+	slice.Raw = []map[string]interface{}{}
+	return slice
 }
 
 // ContainsKey checks if the given target is contained in this slice
