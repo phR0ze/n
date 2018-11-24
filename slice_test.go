@@ -96,6 +96,15 @@ func TestIntSliceLen(t *testing.T) {
 	assert.Equal(t, 2, IntSlice([]int{1, 2}).Len())
 }
 
+func TestIntSlicePrepend(t *testing.T) {
+	slice := NewIntSlice().Prepend(1)
+	assert.Equal(t, 1, slice.At(0))
+
+	slice.Prepend(2, 3)
+	assert.Equal(t, 2, slice.At(0))
+	assert.Equal(t, []int{2, 3, 1}, slice.Raw)
+}
+
 func TestIntSliceTakeFirst(t *testing.T) {
 	{
 		slice := IntSlice([]int{0, 1, 2})
@@ -304,6 +313,15 @@ func TestStrSliceLen(t *testing.T) {
 	assert.Equal(t, 2, StrSlice([]string{"1", "2"}).Len())
 }
 
+func TestStrSlicePrepend(t *testing.T) {
+	slice := NewStrSlice().Prepend("1")
+	assert.Equal(t, "1", slice.At(0))
+
+	slice.Prepend("2", "3")
+	assert.Equal(t, "2", slice.At(0))
+	assert.Equal(t, []string{"2", "3", "1"}, slice.Raw)
+}
+
 func TestStrSliceTakeFirst(t *testing.T) {
 	{
 		slice := StrSlice([]string{"0", "1", "2"})
@@ -473,14 +491,14 @@ func TestStrMapSliceClear(t *testing.T) {
 	assert.Equal(t, 0, slice.Len())
 }
 
-func TestStrMapSliceContainsKey(t *testing.T) {
+func TestStrMapSliceContains(t *testing.T) {
 	{
 		raw := []map[string]interface{}{
 			{"1": "one"},
 			{"2": "two"},
 			{"3": "three"},
 		}
-		assert.True(t, StrMapSlice(raw).ContainsKey("1"))
+		assert.True(t, StrMapSlice(raw).Contains("1"))
 	}
 	{
 		raw := []map[string]interface{}{
@@ -488,7 +506,7 @@ func TestStrMapSliceContainsKey(t *testing.T) {
 			{"2": "two"},
 			{"3": "three"},
 		}
-		assert.False(t, StrMapSlice(raw).ContainsKey("4"))
+		assert.False(t, StrMapSlice(raw).Contains("4"))
 	}
 }
 
@@ -499,7 +517,7 @@ func TestStrMapSliceContainsAny(t *testing.T) {
 			{"2": "two"},
 			{"3": "three"},
 		}
-		assert.True(t, StrMapSlice(raw).ContainsAnyKey([]string{"4", "1"}))
+		assert.True(t, StrMapSlice(raw).ContainsAny([]string{"4", "1"}))
 	}
 	{
 		raw := []map[string]interface{}{
@@ -507,7 +525,7 @@ func TestStrMapSliceContainsAny(t *testing.T) {
 			{"2": "two"},
 			{"3": "three"},
 		}
-		assert.False(t, StrMapSlice(raw).ContainsAnyKey([]string{}))
+		assert.False(t, StrMapSlice(raw).ContainsAny([]string{}))
 	}
 }
 
@@ -533,6 +551,22 @@ func TestStrMapSliceLen(t *testing.T) {
 	{
 		assert.Equal(t, 0, StrMapSlice(nil).Len())
 	}
+}
+
+func TestStrMapSlicePrepend(t *testing.T) {
+	slice := NewStrMapSlice()
+	slice.Prepend(map[string]interface{}{"1": "one"})
+	assert.Equal(t, map[string]interface{}{"1": "one"}, slice.At(0).Raw)
+
+	slice.Prepend(map[string]interface{}{"2": "two"}, map[string]interface{}{"3": "three"})
+	assert.Equal(t, map[string]interface{}{"2": "two"}, slice.At(0).Raw)
+
+	expected := []map[string]interface{}{
+		{"2": "two"},
+		{"3": "three"},
+		{"1": "one"},
+	}
+	assert.Equal(t, expected, slice.Raw)
 }
 
 // func TestStrMapSliceTakeFirst(t *testing.T) {

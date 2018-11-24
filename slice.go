@@ -32,8 +32,8 @@ func (slice *intSliceNub) Any() bool {
 }
 
 // Append items to the end of the slice and return new slice
-func (slice *intSliceNub) Append(target ...int) *intSliceNub {
-	slice.Raw = append(slice.Raw, target...)
+func (slice *intSliceNub) Append(items ...int) *intSliceNub {
+	slice.Raw = append(slice.Raw, items...)
 	return slice
 }
 
@@ -93,6 +93,13 @@ func (slice *intSliceNub) Distinct() *intSliceNub {
 // Len is a pass through to the underlying slice
 func (slice *intSliceNub) Len() int {
 	return len(slice.Raw)
+}
+
+// Prepend items to the begining of the slice and return new slice
+func (slice *intSliceNub) Prepend(items ...int) *intSliceNub {
+	items = append(items, slice.Raw...)
+	slice.Raw = items
+	return slice
 }
 
 // TakeFirst updates the underlying slice and returns the item and status
@@ -181,8 +188,8 @@ func (slice *strSliceNub) Any() bool {
 }
 
 // Append items to the end of the slice and return new slice
-func (slice *strSliceNub) Append(target ...string) *strSliceNub {
-	slice.Raw = append(slice.Raw, target...)
+func (slice *strSliceNub) Append(items ...string) *strSliceNub {
+	slice.Raw = append(slice.Raw, items...)
 	return slice
 }
 
@@ -247,6 +254,13 @@ func (slice *strSliceNub) Join(delim string) *strNub {
 // Len is a pass through to the underlying slice
 func (slice *strSliceNub) Len() int {
 	return len(slice.Raw)
+}
+
+// Prepend items to the begining of the slice and return new slice
+func (slice *strSliceNub) Prepend(items ...string) *strSliceNub {
+	items = append(items, slice.Raw...)
+	slice.Raw = items
+	return slice
 }
 
 // TakeFirst updates the underlying slice and returns the item and status
@@ -324,8 +338,8 @@ func (slice *strMapSliceNub) Any() bool {
 }
 
 // Append items to the end of the slice and return new slice
-func (slice *strMapSliceNub) Append(target ...map[string]interface{}) *strMapSliceNub {
-	slice.Raw = append(slice.Raw, target...)
+func (slice *strMapSliceNub) Append(items ...map[string]interface{}) *strMapSliceNub {
+	slice.Raw = append(slice.Raw, items...)
 	return slice
 }
 
@@ -345,8 +359,8 @@ func (slice *strMapSliceNub) Clear() *strMapSliceNub {
 	return slice
 }
 
-// ContainsKey checks if the given target is contained in this slice
-func (slice *strMapSliceNub) ContainsKey(key string) bool {
+// Contains checks if the given target is contained in this slice
+func (slice *strMapSliceNub) Contains(key string) bool {
 	for i := range slice.Raw {
 		if _, exists := slice.Raw[i][key]; exists {
 			return true
@@ -355,8 +369,8 @@ func (slice *strMapSliceNub) ContainsKey(key string) bool {
 	return false
 }
 
-// ContainsAnyKey checks if any of the targets are contained in this slice
-func (slice *strMapSliceNub) ContainsAnyKey(keys []string) bool {
+// ContainsAny checks if any of the targets are contained in this slice
+func (slice *strMapSliceNub) ContainsAny(keys []string) bool {
 	if keys != nil && len(keys) > 0 {
 		for i := range keys {
 			for j := range slice.Raw {
@@ -372,6 +386,13 @@ func (slice *strMapSliceNub) ContainsAnyKey(keys []string) bool {
 // Len is a pass through to the underlying slice
 func (slice *strMapSliceNub) Len() int {
 	return len(slice.Raw)
+}
+
+// Prepend items to the begining of the slice and return new slice
+func (slice *strMapSliceNub) Prepend(items ...map[string]interface{}) *strMapSliceNub {
+	items = append(items, slice.Raw...)
+	slice.Raw = items
+	return slice
 }
 
 // TakeFirst updates the underlying slice and returns the item and status
