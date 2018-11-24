@@ -35,7 +35,7 @@ func CallerTrace(skipfiles ...string) (result []*Entry) {
 
 		if frame.Function != "" {
 			f := path.Base(frame.Function)
-			file := nub.Str(frame.File).Split("/").TakeLastCnt(3).Join("/").Raw
+			file := nub.Str(frame.File).Split("/").TakeLastCnt(3).Join("/").Ex()
 			result = append(result, &Entry{Func: f, Line: frame.Line, File: file})
 		}
 		if !more {

@@ -4,10 +4,15 @@ package nub
 // StrMap Nub
 //--------------------------------------------------------------------------------------------------
 type strMapNub struct {
-	Raw map[string]interface{}
+	raw map[string]interface{}
 }
 
 // StrMap creates a new nub from the given string map
 func StrMap(other map[string]interface{}) *strMapNub {
-	return &strMapNub{Raw: other}
+	return &strMapNub{raw: other}
+}
+
+// Ex processes any deferred execution and returns the underlying map
+func (m *strMapNub) Ex() map[string]interface{} {
+	return m.raw
 }
