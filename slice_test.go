@@ -18,6 +18,11 @@ func TestIntSlice(t *testing.T) {
 	assert.NotNil(t, IntSlice([]int{}).Raw)
 }
 
+func TestIntSliceAny(t *testing.T) {
+	assert.False(t, NewIntSlice().Any())
+	assert.True(t, NewIntSlice().Append(2).Any())
+}
+
 func TestIntSliceAppend(t *testing.T) {
 	{
 		// Append one
@@ -189,6 +194,11 @@ func TestNewStrSlice(t *testing.T) {
 func TestStrSlice(t *testing.T) {
 	assert.NotNil(t, StrSlice(nil).Raw)
 	assert.NotNil(t, StrSlice([]string{}).Raw)
+}
+
+func TestStrSliceAny(t *testing.T) {
+	assert.False(t, NewStrSlice().Any())
+	assert.True(t, NewStrSlice().Append("2").Any())
 }
 
 func TestStrSliceAppend(t *testing.T) {
@@ -372,6 +382,10 @@ func TestNewStrMapSlice(t *testing.T) {
 func TestStrMapSlice(t *testing.T) {
 	assert.NotNil(t, StrMapSlice(nil).Raw)
 	assert.NotNil(t, StrMapSlice([]map[string]interface{}{}).Raw)
+}
+func TestStrMapSliceAny(t *testing.T) {
+	assert.False(t, NewStrMapSlice().Any())
+	assert.True(t, NewStrMapSlice().Append(map[string]interface{}{"1": "one"}).Any())
 }
 
 func TestStrMapSliceAppend(t *testing.T) {

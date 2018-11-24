@@ -25,6 +25,11 @@ func IntSlice(slice []int) *intSliceNub {
 	return &intSliceNub{Raw: []int{}}
 }
 
+// Any checks if the slice has anything in it
+func (slice *intSliceNub) Any() bool {
+	return len(slice.Raw) > 0
+}
+
 // Append items to the end of the slice and return new slice
 func (slice *intSliceNub) Append(target ...int) *intSliceNub {
 	slice.Raw = append(slice.Raw, target...)
@@ -153,6 +158,11 @@ func (slice *strSliceNub) AnyContain(target string) bool {
 	return false
 }
 
+// Any checks if the slice has anything in it
+func (slice *strSliceNub) Any() bool {
+	return len(slice.Raw) > 0
+}
+
 // Append items to the end of the slice and return new slice
 func (slice *strSliceNub) Append(target ...string) *strSliceNub {
 	slice.Raw = append(slice.Raw, target...)
@@ -273,6 +283,11 @@ func StrMapSlice(slice []map[string]interface{}) *strMapSliceNub {
 		return &strMapSliceNub{Raw: slice}
 	}
 	return &strMapSliceNub{Raw: []map[string]interface{}{}}
+}
+
+// Any checks if the slice has anything in it
+func (slice *strMapSliceNub) Any() bool {
+	return len(slice.Raw) > 0
 }
 
 // Append items to the end of the slice and return new slice
