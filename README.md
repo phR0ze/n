@@ -7,10 +7,10 @@ Collection of missing Go helper functions reminiscent Ruby
 | Function  | Description                              | IntSlice | StrSlice | StrMapSlice |
 | --------- | ---------------------------------------- | -------- | -------- | ----------- |
 | NewTYPE   | Creates a new nub encapsulating the TYPE | 1        | 1        | 1           |
-| Any       | Check if the slice has anything in it    | O        | O        | O           |
+| Any       | Check if the slice has anything in it    | 1        | 1        | 1           |
 | AnyWhere  | Match slice items against given lambda   | O        | O        | O           |
 | Append    | Add items to the end of the slice        | 1        | 1        | 1           |
-| At        |             |          |          |             |
+| At        | Get item using neg/pos index notation    | 1        | 1        | 1           |
 | Clear     |             |          |          |             |
 | Contains  |             | X        | X        |             |
 | Count     |             |          |          |             |

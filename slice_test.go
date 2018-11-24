@@ -42,6 +42,17 @@ func TestIntSliceAppend(t *testing.T) {
 	}
 }
 
+func TestIntSliceAt(t *testing.T) {
+	slice := NewIntSlice().Append(1, 2, 3, 4)
+	assert.Equal(t, 4, slice.At(-1))
+	assert.Equal(t, 3, slice.At(-2))
+	assert.Equal(t, 2, slice.At(-3))
+	assert.Equal(t, 1, slice.At(0))
+	assert.Equal(t, 2, slice.At(1))
+	assert.Equal(t, 3, slice.At(2))
+	assert.Equal(t, 4, slice.At(3))
+}
+
 func TestIntSliceContains(t *testing.T) {
 	assert.True(t, IntSlice([]int{1, 2, 3}).Contains(2))
 	assert.False(t, IntSlice([]int{1, 2, 3}).Contains(4))
@@ -218,6 +229,16 @@ func TestStrSliceAppend(t *testing.T) {
 		assert.Equal(t, 3, slice.Len())
 		assert.Equal(t, []string{"2", "4", "6"}, slice.Raw)
 	}
+}
+func TestStrSliceAt(t *testing.T) {
+	slice := NewStrSlice().Append("1", "2", "3", "4")
+	assert.Equal(t, "4", slice.At(-1))
+	assert.Equal(t, "3", slice.At(-2))
+	assert.Equal(t, "2", slice.At(-3))
+	assert.Equal(t, "1", slice.At(0))
+	assert.Equal(t, "2", slice.At(1))
+	assert.Equal(t, "3", slice.At(2))
+	assert.Equal(t, "4", slice.At(3))
 }
 
 func TestStrSliceAnyContain(t *testing.T) {
@@ -406,6 +427,21 @@ func TestStrMapSliceAppend(t *testing.T) {
 		assert.Equal(t, []map[string]interface{}{{"1": "one"}, {"2": "two"}}, slice.Raw)
 	}
 }
+
+func TestStrMapSliceAt(t *testing.T) {
+	slice := NewStrMapSlice()
+	assert.Equal(t, 0, slice.Len())
+	slice.Append(map[string]interface{}{"1": "one"})
+	slice.Append(map[string]interface{}{"2": "two"})
+	slice.Append(map[string]interface{}{"3": "three"})
+
+	assert.Equal(t, map[string]interface{}{"3": "three"}, slice.At(-1).Raw)
+	assert.Equal(t, map[string]interface{}{"2": "two"}, slice.At(-2).Raw)
+	assert.Equal(t, map[string]interface{}{"1": "one"}, slice.At(0).Raw)
+	assert.Equal(t, map[string]interface{}{"2": "two"}, slice.At(1).Raw)
+	assert.Equal(t, map[string]interface{}{"3": "three"}, slice.At(2).Raw)
+}
+
 func TestStrMapSliceContainsKey(t *testing.T) {
 	{
 		raw := []map[string]interface{}{

@@ -2,6 +2,7 @@
 package nub
 
 import (
+	"errors"
 	"strings"
 )
 
@@ -34,6 +35,16 @@ func (slice *intSliceNub) Any() bool {
 func (slice *intSliceNub) Append(target ...int) *intSliceNub {
 	slice.Raw = append(slice.Raw, target...)
 	return slice
+}
+
+// At returns the item at the given index location. Allows for negative notation
+func (slice *intSliceNub) At(i int) int {
+	if i >= 0 && i < len(slice.Raw) {
+		return slice.Raw[i]
+	} else if i < 0 && i*-1 < len(slice.Raw) {
+		return slice.Raw[len(slice.Raw)+i]
+	}
+	panic(errors.New("Index out of slice bounds"))
 }
 
 // Contains checks if the given target is contained in this slice
@@ -169,6 +180,16 @@ func (slice *strSliceNub) Append(target ...string) *strSliceNub {
 	return slice
 }
 
+// At returns the item at the given index location. Allows for negative notation
+func (slice *strSliceNub) At(i int) string {
+	if i >= 0 && i < len(slice.Raw) {
+		return slice.Raw[i]
+	} else if i < 0 && i*-1 < len(slice.Raw) {
+		return slice.Raw[len(slice.Raw)+i]
+	}
+	panic(errors.New("Index out of slice bounds"))
+}
+
 // Contains checks if the given target is contained in this slice
 func (slice *strSliceNub) Contains(target string) bool {
 	for i := range slice.Raw {
@@ -294,6 +315,16 @@ func (slice *strMapSliceNub) Any() bool {
 func (slice *strMapSliceNub) Append(target ...map[string]interface{}) *strMapSliceNub {
 	slice.Raw = append(slice.Raw, target...)
 	return slice
+}
+
+// At returns the item at the given index location. Allows for negative notation
+func (slice *strMapSliceNub) At(i int) *strMapNub {
+	if i >= 0 && i < len(slice.Raw) {
+		return StrMap(slice.Raw[i])
+	} else if i < 0 && i*-1 < len(slice.Raw) {
+		return StrMap(slice.Raw[len(slice.Raw)+i])
+	}
+	panic(errors.New("Index out of slice bounds"))
 }
 
 // ContainsKey checks if the given target is contained in this slice
