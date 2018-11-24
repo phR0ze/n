@@ -12,9 +12,23 @@ type intSliceNub struct {
 	Raw []int
 }
 
+// NewIntSlice creates a new nub
+func NewIntSlice() *intSliceNub {
+	return &intSliceNub{Raw: []int{}}
+}
+
 // IntSlice creates a new nub from the given int slice
 func IntSlice(slice []int) *intSliceNub {
-	return &intSliceNub{Raw: slice}
+	if slice != nil {
+		return &intSliceNub{Raw: slice}
+	}
+	return &intSliceNub{Raw: []int{}}
+}
+
+// Append items to the end of the slice and return new slice
+func (slice *intSliceNub) Append(target ...int) *intSliceNub {
+	slice.Raw = append(slice.Raw, target...)
+	return slice
 }
 
 // Contains checks if the given target is contained in this slice
@@ -29,10 +43,12 @@ func (slice *intSliceNub) Contains(target int) bool {
 
 // ContainsAny checks if any of the targets are contained in this slice
 func (slice *intSliceNub) ContainsAny(targets []int) bool {
-	for i := range targets {
-		for j := range slice.Raw {
-			if slice.Raw[j] == targets[i] {
-				return true
+	if targets != nil && len(targets) > 0 {
+		for i := range targets {
+			for j := range slice.Raw {
+				if slice.Raw[j] == targets[i] {
+					return true
+				}
 			}
 		}
 	}
@@ -114,9 +130,17 @@ type strSliceNub struct {
 	Raw []string
 }
 
+// NewStrSlice creates a new nub
+func NewStrSlice() *strSliceNub {
+	return &strSliceNub{Raw: []string{}}
+}
+
 // StrSlice creates a new nub from the given string slice
 func StrSlice(slice []string) *strSliceNub {
-	return &strSliceNub{Raw: slice}
+	if slice != nil {
+		return &strSliceNub{Raw: slice}
+	}
+	return &strSliceNub{Raw: []string{}}
 }
 
 // AnyContain checks if any items in this slice contain the target
@@ -127,6 +151,12 @@ func (slice *strSliceNub) AnyContain(target string) bool {
 		}
 	}
 	return false
+}
+
+// Append items to the end of the slice and return new slice
+func (slice *strSliceNub) Append(target ...string) *strSliceNub {
+	slice.Raw = append(slice.Raw, target...)
+	return slice
 }
 
 // Contains checks if the given target is contained in this slice
@@ -141,10 +171,12 @@ func (slice *strSliceNub) Contains(target string) bool {
 
 // ContainsAny checks if any of the targets are contained in this slice
 func (slice *strSliceNub) ContainsAny(targets []string) bool {
-	for i := range targets {
-		for j := range slice.Raw {
-			if slice.Raw[j] == targets[i] {
-				return true
+	if targets != nil && len(targets) > 0 {
+		for i := range targets {
+			for j := range slice.Raw {
+				if slice.Raw[j] == targets[i] {
+					return true
+				}
 			}
 		}
 	}
@@ -218,6 +250,110 @@ func (slice *strSliceNub) TakeLastCnt(cnt int) (result *strSliceNub) {
 		} else {
 			result = StrSlice(slice.Raw)
 			slice.Raw = []string{}
+		}
+	}
+	return
+}
+
+//--------------------------------------------------------------------------------------------------
+// StrMapSlice Nub
+//--------------------------------------------------------------------------------------------------
+type strMapSliceNub struct {
+	Raw []map[string]interface{}
+}
+
+// NewStrMapSlice creates a new nub
+func NewStrMapSlice() *strMapSliceNub {
+	return &strMapSliceNub{Raw: []map[string]interface{}{}}
+}
+
+// StrMapSlice creates a new nub from the given string map slice
+func StrMapSlice(slice []map[string]interface{}) *strMapSliceNub {
+	if slice != nil {
+		return &strMapSliceNub{Raw: slice}
+	}
+	return &strMapSliceNub{Raw: []map[string]interface{}{}}
+}
+
+// Append items to the end of the slice and return new slice
+func (slice *strMapSliceNub) Append(target ...map[string]interface{}) *strMapSliceNub {
+	slice.Raw = append(slice.Raw, target...)
+	return slice
+}
+
+// ContainsKey checks if the given target is contained in this slice
+func (slice *strMapSliceNub) ContainsKey(key string) bool {
+	for i := range slice.Raw {
+		if _, exists := slice.Raw[i][key]; exists {
+			return true
+		}
+	}
+	return false
+}
+
+// ContainsAnyKey checks if any of the targets are contained in this slice
+func (slice *strMapSliceNub) ContainsAnyKey(keys []string) bool {
+	if keys != nil && len(keys) > 0 {
+		for i := range keys {
+			for j := range slice.Raw {
+				if _, exists := slice.Raw[j][keys[i]]; exists {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+// Len is a pass through to the underlying slice
+func (slice *strMapSliceNub) Len() int {
+	return len(slice.Raw)
+}
+
+// TakeFirst updates the underlying slice and returns the item and status
+func (slice *strMapSliceNub) TakeFirst() (*strMapNub, bool) {
+	if len(slice.Raw) > 0 {
+		item := StrMap(slice.Raw[0])
+		slice.Raw = slice.Raw[1:]
+		return item, true
+	}
+	return nil, false
+}
+
+// TakeFirstCnt updates the underlying slice and returns the items
+func (slice *strMapSliceNub) TakeFirstCnt(cnt int) (result *strMapSliceNub) {
+	if cnt > 0 {
+		if len(slice.Raw) >= cnt {
+			result = StrMapSlice(slice.Raw[:cnt])
+			slice.Raw = slice.Raw[cnt:]
+		} else {
+			result = StrMapSlice(slice.Raw)
+			slice.Raw = []map[string]interface{}{}
+		}
+	}
+	return
+}
+
+// TakeLast updates the underlying slice and returns the item and status
+func (slice *strMapSliceNub) TakeLast() (*strMapNub, bool) {
+	if len(slice.Raw) > 0 {
+		item := StrMap(slice.Raw[len(slice.Raw)-1])
+		slice.Raw = slice.Raw[:len(slice.Raw)-1]
+		return item, true
+	}
+	return nil, false
+}
+
+// TakeLastCnt updates the underlying slice and returns a new nub
+func (slice *strMapSliceNub) TakeLastCnt(cnt int) (result *strMapSliceNub) {
+	if cnt > 0 {
+		if len(slice.Raw) >= cnt {
+			i := len(slice.Raw) - cnt
+			result = StrMapSlice(slice.Raw[i:])
+			slice.Raw = slice.Raw[:i]
+		} else {
+			result = StrMapSlice(slice.Raw)
+			slice.Raw = []map[string]interface{}{}
 		}
 	}
 	return

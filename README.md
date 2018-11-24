@@ -1,6 +1,13 @@
 # nub
 Collection of missing Go helper functions reminiscent of C#'s IEnumerable methods
 
+## Implemented
+| Function | IntSlice | StrSlice | StrMapSlice |
+| -------- | -------- | -------- | ----------- |
+| New      | X        | X        | X           |
+| Append   | X        | X        | X           |
+| Any      |          |          |             |
+
 ## Thoughts
 https://golang.org/pkg/container/list/
 https://golang.org/src/container/list/list.go
