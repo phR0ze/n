@@ -7,7 +7,7 @@ import (
 )
 
 func TestStr(t *testing.T) {
-	assert.Equal(t, "test", Str("test").Ex())
+	assert.Equal(t, "test", Str("test").M())
 }
 
 func TestStrContains(t *testing.T) {
@@ -42,5 +42,5 @@ func TestStrHasSuffix(t *testing.T) {
 }
 
 func TestStrSplit(t *testing.T) {
-	assert.Equal(t, []string{"1", "2"}, Str("1.2").Split(".").Ex())
+	assert.Equal(t, []string{"1", "2"}, Str("1.2").Split(".").M())
 }

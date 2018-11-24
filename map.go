@@ -12,7 +12,7 @@ func StrMap(other map[string]interface{}) *strMapNub {
 	return &strMapNub{raw: other}
 }
 
-// Ex processes any deferred execution and returns the underlying map
-func (m *strMapNub) Ex() map[string]interface{} {
+// M materializes object invoking deferred execution
+func (m *strMapNub) M() map[string]interface{} {
 	return m.raw
 }

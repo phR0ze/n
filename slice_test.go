@@ -10,12 +10,12 @@ import (
 // IntSlice tests
 //--------------------------------------------------------------------------------------------------
 func TestNewIntSlice(t *testing.T) {
-	assert.NotNil(t, NewIntSlice().Ex())
+	assert.NotNil(t, NewIntSlice().M())
 }
 
 func TestIntSlice(t *testing.T) {
-	assert.NotNil(t, IntSlice(nil).Ex())
-	assert.NotNil(t, IntSlice([]int{}).Ex())
+	assert.NotNil(t, IntSlice(nil).M())
+	assert.NotNil(t, IntSlice([]int{}).M())
 }
 
 func TestIntSliceAny(t *testing.T) {
@@ -30,7 +30,7 @@ func TestIntSliceAppend(t *testing.T) {
 		assert.Equal(t, 0, slice.Len())
 		slice.Append(2)
 		assert.Equal(t, 1, slice.Len())
-		assert.Equal(t, []int{2}, slice.Ex())
+		assert.Equal(t, []int{2}, slice.M())
 	}
 	{
 		// Append many
@@ -38,7 +38,7 @@ func TestIntSliceAppend(t *testing.T) {
 		assert.Equal(t, 0, slice.Len())
 		slice.Append(2, 4, 6)
 		assert.Equal(t, 3, slice.Len())
-		assert.Equal(t, []int{2, 4, 6}, slice.Ex())
+		assert.Equal(t, []int{2, 4, 6}, slice.M())
 	}
 }
 
@@ -80,7 +80,7 @@ func TestIntSliceLen(t *testing.T) {
 
 func TestIntSliceJoin(t *testing.T) {
 	slice := NewIntSlice().Append(1, 2, 3)
-	assert.Equal(t, "1.2.3", slice.Join(".").Ex())
+	assert.Equal(t, "1.2.3", slice.Join(".").M())
 }
 
 func TestIntSlicePrepend(t *testing.T) {
@@ -89,7 +89,7 @@ func TestIntSlicePrepend(t *testing.T) {
 
 	slice.Prepend(2, 3)
 	assert.Equal(t, 2, slice.At(0))
-	assert.Equal(t, []int{2, 3, 1}, slice.Ex())
+	assert.Equal(t, []int{2, 3, 1}, slice.M())
 }
 
 func TestIntSliceTakeFirst(t *testing.T) {
@@ -107,42 +107,42 @@ func TestIntSliceTakeFirst(t *testing.T) {
 		item, ok := slice.TakeFirst()
 		assert.True(t, ok)
 		assert.Equal(t, 0, item)
-		assert.Equal(t, []int{1, 2}, slice.Ex())
+		assert.Equal(t, []int{1, 2}, slice.M())
 	}
 	{
 		slice := IntSlice([]int{0})
 		item, ok := slice.TakeFirst()
 		assert.True(t, ok)
 		assert.Equal(t, 0, item)
-		assert.Equal(t, []int{}, slice.Ex())
+		assert.Equal(t, []int{}, slice.M())
 	}
 	{
 		slice := IntSlice([]int{})
 		item, ok := slice.TakeFirst()
 		assert.False(t, ok)
 		assert.Equal(t, 0, item)
-		assert.Equal(t, []int{}, slice.Ex())
+		assert.Equal(t, []int{}, slice.M())
 	}
 }
 
 func TestIntSliceTakeFirstCnt(t *testing.T) {
 	{
 		slice := IntSlice([]int{0, 1, 2})
-		items := slice.TakeFirstCnt(2).Ex()
+		items := slice.TakeFirstCnt(2).M()
 		assert.Equal(t, []int{0, 1}, items)
-		assert.Equal(t, []int{2}, slice.Ex())
+		assert.Equal(t, []int{2}, slice.M())
 	}
 	{
 		slice := IntSlice([]int{0, 1, 2})
-		items := slice.TakeFirstCnt(3).Ex()
+		items := slice.TakeFirstCnt(3).M()
 		assert.Equal(t, []int{0, 1, 2}, items)
-		assert.Equal(t, []int{}, slice.Ex())
+		assert.Equal(t, []int{}, slice.M())
 	}
 	{
 		slice := IntSlice([]int{0, 1, 2})
-		items := slice.TakeFirstCnt(4).Ex()
+		items := slice.TakeFirstCnt(4).M()
 		assert.Equal(t, []int{0, 1, 2}, items)
-		assert.Equal(t, []int{}, slice.Ex())
+		assert.Equal(t, []int{}, slice.M())
 	}
 }
 
@@ -161,58 +161,58 @@ func TestIntSliceTakeLast(t *testing.T) {
 		item, ok := slice.TakeLast()
 		assert.True(t, ok)
 		assert.Equal(t, 2, item)
-		assert.Equal(t, []int{0, 1}, slice.Ex())
+		assert.Equal(t, []int{0, 1}, slice.M())
 	}
 	{
 		slice := IntSlice([]int{0})
 		item, ok := slice.TakeLast()
 		assert.True(t, ok)
 		assert.Equal(t, 0, item)
-		assert.Equal(t, []int{}, slice.Ex())
+		assert.Equal(t, []int{}, slice.M())
 	}
 	{
 		slice := IntSlice([]int{})
 		item, ok := slice.TakeLast()
 		assert.False(t, ok)
 		assert.Equal(t, 0, item)
-		assert.Equal(t, []int{}, slice.Ex())
+		assert.Equal(t, []int{}, slice.M())
 	}
 }
 
 func TestIntSliceTakeLastCnt(t *testing.T) {
 	{
 		slice := IntSlice([]int{0, 1, 2})
-		items := slice.TakeLastCnt(2).Ex()
+		items := slice.TakeLastCnt(2).M()
 		assert.Equal(t, []int{1, 2}, items)
-		assert.Equal(t, []int{0}, slice.Ex())
+		assert.Equal(t, []int{0}, slice.M())
 	}
 	{
 		slice := IntSlice([]int{0, 1, 2})
-		items := slice.TakeLastCnt(3).Ex()
+		items := slice.TakeLastCnt(3).M()
 		assert.Equal(t, []int{0, 1, 2}, items)
-		assert.Equal(t, []int{}, slice.Ex())
+		assert.Equal(t, []int{}, slice.M())
 	}
 	{
 		slice := IntSlice([]int{0, 1, 2})
-		items := slice.TakeLastCnt(4).Ex()
+		items := slice.TakeLastCnt(4).M()
 		assert.Equal(t, []int{0, 1, 2}, items)
-		assert.Equal(t, []int{}, slice.Ex())
+		assert.Equal(t, []int{}, slice.M())
 	}
 }
 
 func TestIntSliceUniq(t *testing.T) {
 	{
-		data := IntSlice([]int{}).Uniq().Ex()
+		data := IntSlice([]int{}).Uniq().M()
 		expected := []int{}
 		assert.Equal(t, expected, data)
 	}
 	{
-		data := IntSlice([]int{1, 2, 3}).Uniq().Ex()
+		data := IntSlice([]int{1, 2, 3}).Uniq().M()
 		expected := []int{1, 2, 3}
 		assert.Equal(t, expected, data)
 	}
 	{
-		data := IntSlice([]int{1, 2, 2, 3}).Uniq().Ex()
+		data := IntSlice([]int{1, 2, 2, 3}).Uniq().M()
 		expected := []int{1, 2, 3}
 		assert.Equal(t, expected, data)
 	}
@@ -222,12 +222,12 @@ func TestIntSliceUniq(t *testing.T) {
 // StrSlice tests
 //--------------------------------------------------------------------------------------------------
 func TestNewStrSlice(t *testing.T) {
-	assert.NotNil(t, NewStrSlice().Ex())
+	assert.NotNil(t, NewStrSlice().M())
 }
 
 func TestStrSlice(t *testing.T) {
-	assert.NotNil(t, StrSlice(nil).Ex())
-	assert.NotNil(t, StrSlice([]string{}).Ex())
+	assert.NotNil(t, StrSlice(nil).M())
+	assert.NotNil(t, StrSlice([]string{}).M())
 }
 
 func TestStrSliceAny(t *testing.T) {
@@ -242,7 +242,7 @@ func TestStrSliceAppend(t *testing.T) {
 		assert.Equal(t, 0, slice.Len())
 		slice.Append("2")
 		assert.Equal(t, 1, slice.Len())
-		assert.Equal(t, []string{"2"}, slice.Ex())
+		assert.Equal(t, []string{"2"}, slice.M())
 	}
 	{
 		// Append many
@@ -250,7 +250,7 @@ func TestStrSliceAppend(t *testing.T) {
 		assert.Equal(t, 0, slice.Len())
 		slice.Append("2", "4", "6")
 		assert.Equal(t, 3, slice.Len())
-		assert.Equal(t, []string{"2", "4", "6"}, slice.Ex())
+		assert.Equal(t, []string{"2", "4", "6"}, slice.M())
 	}
 }
 func TestStrSliceAt(t *testing.T) {
@@ -289,9 +289,9 @@ func TestStrSliceContainsAny(t *testing.T) {
 }
 
 func TestStrSliceJoin(t *testing.T) {
-	assert.Equal(t, "", StrSlice([]string{}).Join(".").Ex())
-	assert.Equal(t, "1", StrSlice([]string{"1"}).Join(".").Ex())
-	assert.Equal(t, "1.2", StrSlice([]string{"1", "2"}).Join(".").Ex())
+	assert.Equal(t, "", StrSlice([]string{}).Join(".").M())
+	assert.Equal(t, "1", StrSlice([]string{"1"}).Join(".").M())
+	assert.Equal(t, "1.2", StrSlice([]string{"1", "2"}).Join(".").M())
 }
 
 func TestStrSliceLen(t *testing.T) {
@@ -306,7 +306,7 @@ func TestStrSlicePrepend(t *testing.T) {
 
 	slice.Prepend("2", "3")
 	assert.Equal(t, "2", slice.At(0))
-	assert.Equal(t, []string{"2", "3", "1"}, slice.Ex())
+	assert.Equal(t, []string{"2", "3", "1"}, slice.M())
 }
 
 func TestStrSliceTakeFirst(t *testing.T) {
@@ -324,42 +324,42 @@ func TestStrSliceTakeFirst(t *testing.T) {
 		item, ok := slice.TakeFirst()
 		assert.True(t, ok)
 		assert.Equal(t, "0", item)
-		assert.Equal(t, []string{"1", "2"}, slice.Ex())
+		assert.Equal(t, []string{"1", "2"}, slice.M())
 	}
 	{
 		slice := StrSlice([]string{"0"})
 		item, ok := slice.TakeFirst()
 		assert.True(t, ok)
 		assert.Equal(t, "0", item)
-		assert.Equal(t, []string{}, slice.Ex())
+		assert.Equal(t, []string{}, slice.M())
 	}
 	{
 		slice := StrSlice([]string{})
 		item, ok := slice.TakeFirst()
 		assert.False(t, ok)
 		assert.Equal(t, "", item)
-		assert.Equal(t, []string{}, slice.Ex())
+		assert.Equal(t, []string{}, slice.M())
 	}
 }
 
 func TestStrSliceTakeFirstCnt(t *testing.T) {
 	{
 		slice := StrSlice([]string{"0", "1", "2"})
-		items := slice.TakeFirstCnt(2).Ex()
+		items := slice.TakeFirstCnt(2).M()
 		assert.Equal(t, []string{"0", "1"}, items)
-		assert.Equal(t, []string{"2"}, slice.Ex())
+		assert.Equal(t, []string{"2"}, slice.M())
 	}
 	{
 		slice := StrSlice([]string{"0", "1", "2"})
-		items := slice.TakeFirstCnt(3).Ex()
+		items := slice.TakeFirstCnt(3).M()
 		assert.Equal(t, []string{"0", "1", "2"}, items)
-		assert.Equal(t, []string{}, slice.Ex())
+		assert.Equal(t, []string{}, slice.M())
 	}
 	{
 		slice := StrSlice([]string{"0", "1", "2"})
-		items := slice.TakeFirstCnt(4).Ex()
+		items := slice.TakeFirstCnt(4).M()
 		assert.Equal(t, []string{"0", "1", "2"}, items)
-		assert.Equal(t, []string{}, slice.Ex())
+		assert.Equal(t, []string{}, slice.M())
 	}
 }
 
@@ -378,57 +378,57 @@ func TestStrSliceTakeLast(t *testing.T) {
 		item, ok := slice.TakeLast()
 		assert.True(t, ok)
 		assert.Equal(t, "2", item)
-		assert.Equal(t, []string{"0", "1"}, slice.Ex())
+		assert.Equal(t, []string{"0", "1"}, slice.M())
 	}
 	{
 		slice := StrSlice([]string{"0"})
 		item, ok := slice.TakeLast()
 		assert.True(t, ok)
 		assert.Equal(t, "0", item)
-		assert.Equal(t, []string{}, slice.Ex())
+		assert.Equal(t, []string{}, slice.M())
 	}
 	{
 		slice := StrSlice([]string{})
 		item, ok := slice.TakeLast()
 		assert.False(t, ok)
 		assert.Equal(t, "", item)
-		assert.Equal(t, []string{}, slice.Ex())
+		assert.Equal(t, []string{}, slice.M())
 	}
 }
 func TestStrSliceTakeLastCnt(t *testing.T) {
 	{
 		slice := StrSlice([]string{"0", "1", "2"})
-		items := slice.TakeLastCnt(2).Ex()
+		items := slice.TakeLastCnt(2).M()
 		assert.Equal(t, []string{"1", "2"}, items)
-		assert.Equal(t, []string{"0"}, slice.Ex())
+		assert.Equal(t, []string{"0"}, slice.M())
 	}
 	{
 		slice := StrSlice([]string{"0", "1", "2"})
-		items := slice.TakeLastCnt(3).Ex()
+		items := slice.TakeLastCnt(3).M()
 		assert.Equal(t, []string{"0", "1", "2"}, items)
-		assert.Equal(t, []string{}, slice.Ex())
+		assert.Equal(t, []string{}, slice.M())
 	}
 	{
 		slice := StrSlice([]string{"0", "1", "2"})
-		items := slice.TakeLastCnt(4).Ex()
+		items := slice.TakeLastCnt(4).M()
 		assert.Equal(t, []string{"0", "1", "2"}, items)
-		assert.Equal(t, []string{}, slice.Ex())
+		assert.Equal(t, []string{}, slice.M())
 	}
 }
 
 func TestStrSliceUniq(t *testing.T) {
 	{
-		data := StrSlice([]string{}).Uniq().Ex()
+		data := StrSlice([]string{}).Uniq().M()
 		expected := []string{}
 		assert.Equal(t, expected, data)
 	}
 	{
-		data := StrSlice([]string{"1", "2", "3"}).Uniq().Ex()
+		data := StrSlice([]string{"1", "2", "3"}).Uniq().M()
 		expected := []string{"1", "2", "3"}
 		assert.Equal(t, expected, data)
 	}
 	{
-		data := StrSlice([]string{"1", "2", "2", "3"}).Uniq().Ex()
+		data := StrSlice([]string{"1", "2", "2", "3"}).Uniq().M()
 		expected := []string{"1", "2", "3"}
 		assert.Equal(t, expected, data)
 	}
@@ -438,12 +438,12 @@ func TestStrSliceUniq(t *testing.T) {
 // StrMapSlice tests
 //--------------------------------------------------------------------------------------------------
 func TestNewStrMapSlice(t *testing.T) {
-	assert.NotNil(t, NewStrMapSlice().Ex())
+	assert.NotNil(t, NewStrMapSlice().M())
 }
 
 func TestStrMapSlice(t *testing.T) {
-	assert.NotNil(t, StrMapSlice(nil).Ex())
-	assert.NotNil(t, StrMapSlice([]map[string]interface{}{}).Ex())
+	assert.NotNil(t, StrMapSlice(nil).M())
+	assert.NotNil(t, StrMapSlice([]map[string]interface{}{}).M())
 }
 func TestStrMapSliceAny(t *testing.T) {
 	assert.False(t, NewStrMapSlice().Any())
@@ -457,7 +457,7 @@ func TestStrMapSliceAppend(t *testing.T) {
 		assert.Equal(t, 0, slice.Len())
 		slice.Append(map[string]interface{}{"2": "two"})
 		assert.Equal(t, 1, slice.Len())
-		assert.Equal(t, []map[string]interface{}{{"2": "two"}}, slice.Ex())
+		assert.Equal(t, []map[string]interface{}{{"2": "two"}}, slice.M())
 	}
 	{
 		// Append many
@@ -465,7 +465,7 @@ func TestStrMapSliceAppend(t *testing.T) {
 		assert.Equal(t, 0, slice.Len())
 		slice.Append(map[string]interface{}{"1": "one"}, map[string]interface{}{"2": "two"})
 		assert.Equal(t, 2, slice.Len())
-		assert.Equal(t, []map[string]interface{}{{"1": "one"}, {"2": "two"}}, slice.Ex())
+		assert.Equal(t, []map[string]interface{}{{"1": "one"}, {"2": "two"}}, slice.M())
 	}
 }
 
@@ -476,11 +476,11 @@ func TestStrMapSliceAt(t *testing.T) {
 	slice.Append(map[string]interface{}{"2": "two"})
 	slice.Append(map[string]interface{}{"3": "three"})
 
-	assert.Equal(t, map[string]interface{}{"3": "three"}, slice.At(-1).Ex())
-	assert.Equal(t, map[string]interface{}{"2": "two"}, slice.At(-2).Ex())
-	assert.Equal(t, map[string]interface{}{"1": "one"}, slice.At(0).Ex())
-	assert.Equal(t, map[string]interface{}{"2": "two"}, slice.At(1).Ex())
-	assert.Equal(t, map[string]interface{}{"3": "three"}, slice.At(2).Ex())
+	assert.Equal(t, map[string]interface{}{"3": "three"}, slice.At(-1).M())
+	assert.Equal(t, map[string]interface{}{"2": "two"}, slice.At(-2).M())
+	assert.Equal(t, map[string]interface{}{"1": "one"}, slice.At(0).M())
+	assert.Equal(t, map[string]interface{}{"2": "two"}, slice.At(1).M())
+	assert.Equal(t, map[string]interface{}{"3": "three"}, slice.At(2).M())
 }
 
 func TestStrMapSliceClear(t *testing.T) {
@@ -561,130 +561,193 @@ func TestStrMapSliceLen(t *testing.T) {
 func TestStrMapSlicePrepend(t *testing.T) {
 	slice := NewStrMapSlice()
 	slice.Prepend(map[string]interface{}{"1": "one"})
-	assert.Equal(t, map[string]interface{}{"1": "one"}, slice.At(0).Ex())
+	assert.Equal(t, map[string]interface{}{"1": "one"}, slice.At(0).M())
 
 	slice.Prepend(map[string]interface{}{"2": "two"}, map[string]interface{}{"3": "three"})
-	assert.Equal(t, map[string]interface{}{"2": "two"}, slice.At(0).Ex())
+	assert.Equal(t, map[string]interface{}{"2": "two"}, slice.At(0).M())
 
 	expected := []map[string]interface{}{
 		{"2": "two"},
 		{"3": "three"},
 		{"1": "one"},
 	}
-	assert.Equal(t, expected, slice.Ex())
+	assert.Equal(t, expected, slice.M())
 }
 
-// func TestStrMapSliceTakeFirst(t *testing.T) {
-// 	{
-// 		slice := StrMapSlice([]map[string]interface{}{
-// 			{"1": "one"},
-// 			{"2": "two"},
-// 			{"3": "three"},
-// 		})
-// 		results := []map[string]interface{}{}
-// 		expected := []map[string]interface{}{
-// 			{"1": "one"},
-// 			{"2": "two"},
-// 			{"3": "three"},
-// 		}
-// 		for item, ok := slice.TakeFirst(); ok; item, ok = slice.TakeFirst() {
-// 			results = append(results, item)
-// 		}
-// 		assert.Equal(t, expected, results)
-// 	}
-// 	// 	{
-// 	// 		slice := StrSlice([]string{"0", "1", "2"})
-// 	// 		item, ok := slice.TakeFirst()
-// 	// 		assert.True(t, ok)
-// 	// 		assert.Equal(t, "0", item)
-// 	// 		assert.Equal(t, []string{"1", "2"}, slice.Ex())
-// 	// 	}
-// 	// 	{
-// 	// 		slice := StrSlice([]string{"0"})
-// 	// 		item, ok := slice.TakeFirst()
-// 	// 		assert.True(t, ok)
-// 	// 		assert.Equal(t, "0", item)
-// 	// 		assert.Equal(t, []string{}, slice.Ex())
-// 	// 	}
-// 	// 	{
-// 	// 		slice := StrSlice([]string{})
-// 	// 		item, ok := slice.TakeFirst()
-// 	// 		assert.False(t, ok)
-// 	// 		assert.Equal(t, "", item)
-// 	// 		assert.Equal(t, []string{}, slice.Ex())
-// 	// 	}
-// }
+func TestStrMapSliceTakeFirst(t *testing.T) {
+	{
+		// Take interator
+		slice := StrMapSlice([]map[string]interface{}{
+			{"1": "one"},
+			{"2": "two"},
+			{"3": "three"},
+		})
+		results := []map[string]interface{}{}
+		expected := []map[string]interface{}{
+			{"1": "one"},
+			{"2": "two"},
+			{"3": "three"},
+		}
+		for item, ok := slice.TakeFirst(); ok; item, ok = slice.TakeFirst() {
+			results = append(results, item.M())
+		}
+		assert.Equal(t, expected, results)
+	}
+	{
+		// TakeFirst one
+		slice := StrMapSlice([]map[string]interface{}{
+			{"1": "one"},
+			{"2": "two"},
+			{"3": "three"},
+		})
+		expectedRemainder := []map[string]interface{}{
+			{"2": "two"},
+			{"3": "three"},
+		}
+		expectedResult := map[string]interface{}{"1": "one"}
+		result, ok := slice.TakeFirst()
+		assert.True(t, ok)
+		assert.Equal(t, expectedResult, result.M())
+		assert.Equal(t, expectedRemainder, slice.M())
+	}
+	{
+		// TakeFirst when empty
+		slice := NewStrMapSlice()
+		result, ok := slice.TakeFirst()
+		assert.False(t, ok)
+		assert.Nil(t, result)
+	}
+}
 
-// func TestStrTakeFirstCnt(t *testing.T) {
-// 	{
-// 		slice := StrSlice([]string{"0", "1", "2"})
-// 		items := slice.TakeFirstCnt(2).Ex()
-// 		assert.Equal(t, []string{"0", "1"}, items)
-// 		assert.Equal(t, []string{"2"}, slice.Ex())
-// 	}
-// 	{
-// 		slice := StrSlice([]string{"0", "1", "2"})
-// 		items := slice.TakeFirstCnt(3).Ex()
-// 		assert.Equal(t, []string{"0", "1", "2"}, items)
-// 		assert.Equal(t, []string{}, slice.Ex())
-// 	}
-// 	{
-// 		slice := StrSlice([]string{"0", "1", "2"})
-// 		items := slice.TakeFirstCnt(4).Ex()
-// 		assert.Equal(t, []string{"0", "1", "2"}, items)
-// 		assert.Equal(t, []string{}, slice.Ex())
-// 	}
-// }
+func TestStrMapSliceTakeFirstCnt(t *testing.T) {
+	{
+		// TakeFirst two
+		slice := StrMapSlice([]map[string]interface{}{
+			{"1": "one"},
+			{"2": "two"},
+			{"3": "three"},
+		})
+		expectedRemainder := []map[string]interface{}{
+			{"3": "three"},
+		}
+		expectedResult := []map[string]interface{}{
+			{"1": "one"},
+			{"2": "two"},
+		}
+		result := slice.TakeFirstCnt(2)
+		assert.Equal(t, expectedResult, result.M())
+		assert.Equal(t, expectedRemainder, slice.M())
+	}
+	{
+		// TakeFirst four
+		slice := StrMapSlice([]map[string]interface{}{
+			{"1": "one"},
+			{"2": "two"},
+			{"3": "three"},
+		})
+		expectedRemainder := []map[string]interface{}{}
+		expectedResult := []map[string]interface{}{
+			{"1": "one"},
+			{"2": "two"},
+			{"3": "three"},
+		}
+		result := slice.TakeFirstCnt(4)
+		assert.Equal(t, expectedResult, result.M())
+		assert.Equal(t, expectedRemainder, slice.M())
+	}
+	{
+		// TakeFirst when empty
+		slice := NewStrMapSlice()
+		result := slice.TakeFirstCnt(3)
+		assert.Equal(t, 0, result.Len())
+	}
+}
 
-// func TestStrTakeLast(t *testing.T) {
-// 	{
-// 		slice := StrSlice([]string{"0", "1", "2"})
-// 		results := []string{}
-// 		expected := []string{"2", "1", "0"}
-// 		for item, ok := slice.TakeLast(); ok; item, ok = slice.TakeLast() {
-// 			results = append(results, item)
-// 		}
-// 		assert.Equal(t, expected, results)
-// 	}
-// 	{
-// 		slice := StrSlice([]string{"0", "1", "2"})
-// 		item, ok := slice.TakeLast()
-// 		assert.True(t, ok)
-// 		assert.Equal(t, "2", item)
-// 		assert.Equal(t, []string{"0", "1"}, slice.Ex())
-// 	}
-// 	{
-// 		slice := StrSlice([]string{"0"})
-// 		item, ok := slice.TakeLast()
-// 		assert.True(t, ok)
-// 		assert.Equal(t, "0", item)
-// 		assert.Equal(t, []string{}, slice.Ex())
-// 	}
-// 	{
-// 		slice := StrSlice([]string{})
-// 		item, ok := slice.TakeLast()
-// 		assert.False(t, ok)
-// 		assert.Equal(t, "", item)
-// 		assert.Equal(t, []string{}, slice.Ex())
-// 	}
-// }
-// func TestStrTakeLastCnt(t *testing.T) {
-// 	{
-// 		slice := StrSlice([]string{"0", "1", "2"})
-// 		items := slice.TakeLastCnt(2).Ex()
-// 		assert.Equal(t, []string{"1", "2"}, items)
-// 		assert.Equal(t, []string{"0"}, slice.Ex())
-// 	}
-// 	{
-// 		slice := StrSlice([]string{"0", "1", "2"})
-// 		items := slice.TakeLastCnt(3).Ex()
-// 		assert.Equal(t, []string{"0", "1", "2"}, items)
-// 		assert.Equal(t, []string{}, slice.Ex())
-// 	}
-// 	{
-// 		slice := StrSlice([]string{"0", "1", "2"})
-// 		items := slice.TakeLastCnt(4).Ex()
-// 		assert.Equal(t, []string{"0", "1", "2"}, items)
-// 		assert.Equal(t, []string{}, slice.Ex())
-// 	}
-// }
+func TestStrMapSliceTakeLast(t *testing.T) {
+	{
+		// Take interator
+		slice := StrMapSlice([]map[string]interface{}{
+			{"1": "one"},
+			{"2": "two"},
+			{"3": "three"},
+		})
+		results := []map[string]interface{}{}
+		expected := []map[string]interface{}{
+			{"3": "three"},
+			{"2": "two"},
+			{"1": "one"},
+		}
+		for item, ok := slice.TakeLast(); ok; item, ok = slice.TakeLast() {
+			results = append(results, item.M())
+		}
+		assert.Equal(t, expected, results)
+	}
+	{
+		// TakeLast one
+		slice := StrMapSlice([]map[string]interface{}{
+			{"1": "one"},
+			{"2": "two"},
+			{"3": "three"},
+		})
+		expectedRemainder := []map[string]interface{}{
+			{"1": "one"},
+			{"2": "two"},
+		}
+		expectedResult := map[string]interface{}{"3": "three"}
+		result, ok := slice.TakeLast()
+		assert.True(t, ok)
+		assert.Equal(t, expectedResult, result.M())
+		assert.Equal(t, expectedRemainder, slice.M())
+	}
+	{
+		// TakeFirst when empty
+		slice := NewStrMapSlice()
+		result, ok := slice.TakeLast()
+		assert.False(t, ok)
+		assert.Nil(t, result)
+	}
+}
+
+func TestStrMapSliceTakeLastCnt(t *testing.T) {
+	{
+		// TakeLast two
+		slice := StrMapSlice([]map[string]interface{}{
+			{"1": "one"},
+			{"2": "two"},
+			{"3": "three"},
+		})
+		expectedRemainder := []map[string]interface{}{
+			{"1": "one"},
+		}
+		expectedResult := []map[string]interface{}{
+			{"2": "two"},
+			{"3": "three"},
+		}
+		result := slice.TakeLastCnt(2)
+		assert.Equal(t, expectedResult, result.M())
+		assert.Equal(t, expectedRemainder, slice.M())
+	}
+	{
+		// TakeLast four
+		slice := StrMapSlice([]map[string]interface{}{
+			{"1": "one"},
+			{"2": "two"},
+			{"3": "three"},
+		})
+		expectedRemainder := []map[string]interface{}{}
+		expectedResult := []map[string]interface{}{
+			{"1": "one"},
+			{"2": "two"},
+			{"3": "three"},
+		}
+		result := slice.TakeLastCnt(4)
+		assert.Equal(t, expectedResult, result.M())
+		assert.Equal(t, expectedRemainder, slice.M())
+	}
+	{
+		// TakeFirst when empty
+		slice := NewStrMapSlice()
+		result := slice.TakeLastCnt(3)
+		assert.Equal(t, 0, result.Len())
+	}
+}

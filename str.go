@@ -61,7 +61,7 @@ func (str *strNub) Split(delim string) *strSliceNub {
 	return StrSlice(strings.Split(str.raw, delim))
 }
 
-// Ex processes any deferred execution and returns the underying string
-func (str *strNub) Ex() string {
+// M materializes object invoking deferred execution
+func (str *strNub) M() string {
 	return str.raw
 }

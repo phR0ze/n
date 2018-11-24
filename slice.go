@@ -99,8 +99,8 @@ func (slice *intSliceNub) Prepend(items ...int) *intSliceNub {
 	return slice
 }
 
-// Ex processes deferred execution and returns the underlying slice
-func (slice *intSliceNub) Ex() []int {
+// M materializes object invoking deferred execution
+func (slice *intSliceNub) M() []int {
 	return slice.raw
 }
 
@@ -265,8 +265,8 @@ func (slice *strSliceNub) Prepend(items ...string) *strSliceNub {
 	return slice
 }
 
-// Ex processes deferred execution and returns the underlying slice
-func (slice *strSliceNub) Ex() []string {
+// M materializes object invoking deferred execution
+func (slice *strSliceNub) M() []string {
 	return slice.raw
 }
 
@@ -415,8 +415,8 @@ func (slice *strMapSliceNub) Prepend(items ...map[string]interface{}) *strMapSli
 	return slice
 }
 
-// Ex processes deferred execution and returns the underlying slice
-func (slice *strMapSliceNub) Ex() []map[string]interface{} {
+// M materializes object invoking deferred execution
+func (slice *strMapSliceNub) M() []map[string]interface{} {
 	return slice.raw
 }
 
