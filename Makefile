@@ -16,7 +16,7 @@ test: $(NAME)
 	@echo -e "\nRunning all go tests:"
 	@echo -e "------------------------------------------------------------------------"
 	go test $(PKGROOT)
-	go test $(PKGROOT)/pkg/time
+	go test $(PKGROOT)/pkg/timenub
 	go test $(PKGROOT)/pkg/trace
 
 clean:
