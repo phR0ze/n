@@ -3,6 +3,7 @@ package nub
 import (
 	"testing"
 
+	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,7 +32,61 @@ func TestStrMapMerge(t *testing.T) {
 		assert.Equal(t, expected, strMap.Merge(data...).M())
 	}
 }
+func TestStrMapStrMap(t *testing.T) {
+	{
+		// Manual: Not a valid str map should return empty
+		strMap := StrMap(map[string]interface{}{
+			"test1": "foo",
+		})
+		expected := map[string]interface{}{}
+		assert.Equal(t, expected, strMap.StrMap("test1").M())
+	}
+	{
+		// Unmarshal: Not a valid str map should return nil
+		raw := `test1: "foobar"`
+		data := map[string]interface{}{}
+		yaml.Unmarshal([]byte(raw), &data)
+		expected := map[string]interface{}{}
 
+		assert.Equal(t, expected, StrMap(data).StrMap("test1").M())
+	}
+	{
+		// Manual: valid nested str map
+		strMap := StrMap(map[string]interface{}{
+			"test1": map[string]interface{}{
+				"test2": "foobar",
+			},
+		})
+		expected := map[string]interface{}{
+			"test2": "foobar",
+		}
+		assert.Equal(t, expected, strMap.StrMap("test1").M())
+	}
+	{
+		// Unmarshal: valid nested JQ
+		raw := `test1: 
+  test2: foobar`
+		data := map[string]interface{}{}
+		yaml.Unmarshal([]byte(raw), &data)
+		expected := map[string]interface{}{
+			"test2": "foobar",
+		}
+		assert.Equal(t, expected, StrMap(data).StrMap("test1").M())
+	}
+	{
+		strMap := StrMap(map[string]interface{}{
+			"test1": map[string]interface{}{
+				"test2": map[string]interface{}{
+					"test3": "foobar",
+				},
+			},
+		})
+		expected := map[string]interface{}{
+			"test3": "foobar",
+		}
+		assert.Equal(t, expected, strMap.StrMap("test1.test2").M())
+	}
+}
 func TestMergeMap(t *testing.T) {
 	{
 		assert.Equal(t, map[string]interface{}{}, mergeMap(nil, nil))

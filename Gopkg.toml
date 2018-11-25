@@ -16,6 +16,11 @@
   name = "github.com/mitchellh/go-homedir"
   version = "~1.0.0"
 
+[[constraint]]
+  name = "github.com/ghodss/yaml"
+  version = "v1.0.0"
+
+
 # General directives
 # -----------------------------------------------------------
 [prune]

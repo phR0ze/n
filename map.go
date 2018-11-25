@@ -1,5 +1,11 @@
 package nub
 
+import (
+	"io/ioutil"
+
+	"github.com/ghodss/yaml"
+)
+
 //--------------------------------------------------------------------------------------------------
 // StrMap Nub
 //--------------------------------------------------------------------------------------------------
@@ -17,6 +23,16 @@ func StrMap(other map[string]interface{}) *strMapNub {
 	return &strMapNub{raw: other}
 }
 
+// Load a yaml/json file as a str map
+// returns nil on failure of any kind
+func Load(target string) (result *strMapNub) {
+	if yamlFile, err := ioutil.ReadFile(target); err == nil {
+		result = NewStrMap()
+		yaml.Unmarshal(yamlFile, &result.raw)
+	}
+	return result
+}
+
 // M materializes object invoking deferred execution
 func (m *strMapNub) M() map[string]interface{} {
 	return m.raw
@@ -30,6 +46,24 @@ func (m *strMapNub) Merge(other ...map[string]interface{}) *strMapNub {
 		m.raw = mergeMap(m.raw, item.raw)
 	}
 	return m
+}
+
+// StrMap returns a map of interface from the given map using the given key
+func (m *strMapNub) StrMap(key string) *strMapNub {
+	result := NewStrMap()
+
+	keys := Str(key).Split(".")
+	if key, ok := keys.TakeFirst(); ok {
+		if entry, exists := m.raw[key]; exists {
+			if v, ok := entry.(map[string]interface{}); ok {
+				result.raw = v
+				if keys.Len() != 0 {
+					result = result.StrMap(keys.Join(".").M())
+				}
+			}
+		}
+	}
+	return result
 }
 
 // Merge b into a and returns the new modified a
