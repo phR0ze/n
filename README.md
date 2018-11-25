@@ -38,6 +38,13 @@ and skipped over others that can be accomplished in a simpler way with those i d
 | Uniq         | Ensure only uniq items exist in the slice       | 1        | 1        | 0           |
 | Where        | Select the items that match the given lambda    | 0        | 0        | 0           |
 
+### Map Functions
+| Function     | Description                                     | IntMap | StrMap | ? |
+| ------------ | ----------------------------------------------- | -------- | -------- | ----------- |
+| NewTYPE      | Creates a new nub encapsulating the TYPE        | 0        | 1        | 0           |
+| M            | Materializes object invoking deferred execution | 0        | 1        | 0           |
+| Merge        | Merge other maps in, in priority order          | 0        | 1        | 0           |
+
 ## Thoughts
 https://golang.org/pkg/container/list/
 https://golang.org/src/container/list/list.go
