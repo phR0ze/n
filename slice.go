@@ -78,6 +78,24 @@ func (slice *intSliceNub) ContainsAny(targets []int) bool {
 	return false
 }
 
+// Del deletes item using neg/pos index notation with status
+func (slice *intSliceNub) Del(i int) bool {
+	result := false
+	if i < 0 {
+		i = len(slice.raw) + i
+	}
+	if i >= 0 && i < len(slice.raw) {
+		if i+1 < len(slice.raw) {
+			slice.raw = append(slice.raw[:i], slice.raw[i+1:]...)
+			result = true
+		} else {
+			slice.raw = slice.raw[:i]
+			result = true
+		}
+	}
+	return result
+}
+
 // Join the underlying slice with the given delim
 func (slice *intSliceNub) Join(delim string) *strNub {
 	result := []string{}
@@ -99,6 +117,7 @@ func (slice *intSliceNub) Prepend(items ...int) *intSliceNub {
 	return slice
 }
 
+// M processes deferred execution and returns the underlying slice
 // M materializes object invoking deferred execution
 func (slice *intSliceNub) M() []int {
 	return slice.raw
@@ -246,6 +265,24 @@ func (slice *strSliceNub) ContainsAny(targets []string) bool {
 		}
 	}
 	return false
+}
+
+// Del deletes item using neg/pos index notation with status
+func (slice *strSliceNub) Del(i int) bool {
+	result := false
+	if i < 0 {
+		i = len(slice.raw) + i
+	}
+	if i >= 0 && i < len(slice.raw) {
+		if i+1 < len(slice.raw) {
+			slice.raw = append(slice.raw[:i], slice.raw[i+1:]...)
+			result = true
+		} else {
+			slice.raw = slice.raw[:i]
+			result = true
+		}
+	}
+	return result
 }
 
 // Join the underlying slice with the given delim
@@ -401,6 +438,24 @@ func (slice *strMapSliceNub) ContainsAny(keys []string) bool {
 		}
 	}
 	return false
+}
+
+// Del deletes item using neg/pos index notation with status
+func (slice *strMapSliceNub) Del(i int) bool {
+	result := false
+	if i < 0 {
+		i = len(slice.raw) + i
+	}
+	if i >= 0 && i < len(slice.raw) {
+		if i+1 < len(slice.raw) {
+			slice.raw = append(slice.raw[:i], slice.raw[i+1:]...)
+			result = true
+		} else {
+			slice.raw = slice.raw[:i]
+			result = true
+		}
+	}
+	return result
 }
 
 // Len is a pass through to the underlying slice

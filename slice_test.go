@@ -72,6 +72,58 @@ func TestIntSliceContainsAny(t *testing.T) {
 	assert.False(t, IntSlice([]int{1, 2, 3}).ContainsAny([]int{4}))
 }
 
+func TestIntSliceDel(t *testing.T) {
+	{
+		// Pos: delete invalid
+		slice := IntSlice([]int{0, 1, 2})
+		ok := slice.Del(3)
+		assert.False(t, ok)
+		assert.Equal(t, []int{0, 1, 2}, slice.M())
+	}
+	{
+		// Pos: delete last
+		slice := IntSlice([]int{0, 1, 2})
+		ok := slice.Del(2)
+		assert.True(t, ok)
+		assert.Equal(t, []int{0, 1}, slice.M())
+	}
+	{
+		// Pos: delete middle
+		slice := IntSlice([]int{0, 1, 2})
+		ok := slice.Del(1)
+		assert.True(t, ok)
+		assert.Equal(t, []int{0, 2}, slice.M())
+	}
+	{
+		// delete first
+		slice := IntSlice([]int{0, 1, 2})
+		ok := slice.Del(0)
+		assert.True(t, ok)
+		assert.Equal(t, []int{1, 2}, slice.M())
+	}
+	{
+		// Neg: delete invalid
+		slice := IntSlice([]int{0, 1, 2})
+		ok := slice.Del(-4)
+		assert.False(t, ok)
+		assert.Equal(t, []int{0, 1, 2}, slice.M())
+	}
+	{
+		// Neg: delete last
+		slice := IntSlice([]int{0, 1, 2})
+		ok := slice.Del(-1)
+		assert.True(t, ok)
+		assert.Equal(t, []int{0, 1}, slice.M())
+	}
+	{
+		// Neg: delete middle
+		slice := IntSlice([]int{0, 1, 2})
+		ok := slice.Del(-2)
+		assert.True(t, ok)
+		assert.Equal(t, []int{0, 2}, slice.M())
+	}
+}
+
 func TestIntSliceLen(t *testing.T) {
 	assert.Equal(t, 0, IntSlice([]int{}).Len())
 	assert.Equal(t, 1, IntSlice([]int{1}).Len())
@@ -286,6 +338,58 @@ func TestStrSliceContains(t *testing.T) {
 func TestStrSliceContainsAny(t *testing.T) {
 	assert.True(t, StrSlice([]string{"1", "2", "3"}).ContainsAny([]string{"2"}))
 	assert.False(t, StrSlice([]string{"1", "2", "3"}).ContainsAny([]string{"4"}))
+}
+
+func TestStrSliceDel(t *testing.T) {
+	{
+		// Pos: delete invalid
+		slice := StrSlice([]string{"0", "1", "2"})
+		ok := slice.Del(3)
+		assert.False(t, ok)
+		assert.Equal(t, []string{"0", "1", "2"}, slice.M())
+	}
+	{
+		// Pos: delete last
+		slice := StrSlice([]string{"0", "1", "2"})
+		ok := slice.Del(2)
+		assert.True(t, ok)
+		assert.Equal(t, []string{"0", "1"}, slice.M())
+	}
+	{
+		// Pos: delete middle
+		slice := StrSlice([]string{"0", "1", "2"})
+		ok := slice.Del(1)
+		assert.True(t, ok)
+		assert.Equal(t, []string{"0", "2"}, slice.M())
+	}
+	{
+		// delete first
+		slice := StrSlice([]string{"0", "1", "2"})
+		ok := slice.Del(0)
+		assert.True(t, ok)
+		assert.Equal(t, []string{"1", "2"}, slice.M())
+	}
+	{
+		// Neg: delete invalid
+		slice := StrSlice([]string{"0", "1", "2"})
+		ok := slice.Del(-4)
+		assert.False(t, ok)
+		assert.Equal(t, []string{"0", "1", "2"}, slice.M())
+	}
+	{
+		// Neg: delete last
+		slice := StrSlice([]string{"0", "1", "2"})
+		ok := slice.Del(-1)
+		assert.True(t, ok)
+		assert.Equal(t, []string{"0", "1"}, slice.M())
+	}
+	{
+		// Neg: delete middle
+		slice := StrSlice([]string{"0", "1", "2"})
+		ok := slice.Del(-2)
+		assert.True(t, ok)
+		assert.Equal(t, []string{"0", "2"}, slice.M())
+	}
 }
 
 func TestStrSliceJoin(t *testing.T) {
@@ -531,6 +635,109 @@ func TestStrMapSliceContainsAny(t *testing.T) {
 			{"3": "three"},
 		}
 		assert.False(t, StrMapSlice(raw).ContainsAny([]string{}))
+	}
+}
+
+func TestStrMapSliceDel(t *testing.T) {
+	{
+		// Pos: delete invalid
+		slice := NewStrMapSlice()
+		slice.Append(map[string]interface{}{"1": "one"})
+		slice.Append(map[string]interface{}{"2": "two"})
+		slice.Append(map[string]interface{}{"3": "three"})
+		ok := slice.Del(3)
+		assert.False(t, ok)
+		expected := []map[string]interface{}{
+			{"1": "one"},
+			{"2": "two"},
+			{"3": "three"},
+		}
+		assert.Equal(t, expected, slice.M())
+	}
+	{
+		// Pos: delete last
+		slice := NewStrMapSlice()
+		slice.Append(map[string]interface{}{"1": "one"})
+		slice.Append(map[string]interface{}{"2": "two"})
+		slice.Append(map[string]interface{}{"3": "three"})
+		ok := slice.Del(2)
+		assert.True(t, ok)
+		expected := []map[string]interface{}{
+			{"1": "one"},
+			{"2": "two"},
+		}
+		assert.Equal(t, expected, slice.M())
+	}
+	{
+		// Pos: delete middle
+		slice := NewStrMapSlice()
+		slice.Append(map[string]interface{}{"1": "one"})
+		slice.Append(map[string]interface{}{"2": "two"})
+		slice.Append(map[string]interface{}{"3": "three"})
+		ok := slice.Del(1)
+		assert.True(t, ok)
+		expected := []map[string]interface{}{
+			{"1": "one"},
+			{"3": "three"},
+		}
+		assert.Equal(t, expected, slice.M())
+	}
+	{
+		// delete first
+		slice := NewStrMapSlice()
+		slice.Append(map[string]interface{}{"1": "one"})
+		slice.Append(map[string]interface{}{"2": "two"})
+		slice.Append(map[string]interface{}{"3": "three"})
+		ok := slice.Del(0)
+		assert.True(t, ok)
+		expected := []map[string]interface{}{
+			{"2": "two"},
+			{"3": "three"},
+		}
+		assert.Equal(t, expected, slice.M())
+	}
+	{
+		// Neg: delete invalid
+		slice := NewStrMapSlice()
+		slice.Append(map[string]interface{}{"1": "one"})
+		slice.Append(map[string]interface{}{"2": "two"})
+		slice.Append(map[string]interface{}{"3": "three"})
+		ok := slice.Del(-4)
+		assert.False(t, ok)
+		expected := []map[string]interface{}{
+			{"1": "one"},
+			{"2": "two"},
+			{"3": "three"},
+		}
+		assert.Equal(t, expected, slice.M())
+	}
+	{
+		// Neg: delete last
+		slice := NewStrMapSlice()
+		slice.Append(map[string]interface{}{"1": "one"})
+		slice.Append(map[string]interface{}{"2": "two"})
+		slice.Append(map[string]interface{}{"3": "three"})
+		ok := slice.Del(-1)
+		assert.True(t, ok)
+		expected := []map[string]interface{}{
+			{"1": "one"},
+			{"2": "two"},
+		}
+		assert.Equal(t, expected, slice.M())
+	}
+	{
+		// Neg: delete middle
+		slice := NewStrMapSlice()
+		slice.Append(map[string]interface{}{"1": "one"})
+		slice.Append(map[string]interface{}{"2": "two"})
+		slice.Append(map[string]interface{}{"3": "three"})
+		ok := slice.Del(-2)
+		assert.True(t, ok)
+		expected := []map[string]interface{}{
+			{"1": "one"},
+			{"3": "three"},
+		}
+		assert.Equal(t, expected, slice.M())
 	}
 }
 
