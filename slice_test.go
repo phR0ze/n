@@ -144,6 +144,11 @@ func TestIntSlicePrepend(t *testing.T) {
 	assert.Equal(t, []int{2, 3, 1}, slice.M())
 }
 
+func TestIntSliceSort(t *testing.T) {
+	slice := NewIntSlice().Append(3, 1, 2)
+	assert.Equal(t, []int{1, 2, 3}, slice.Sort().M())
+}
+
 func TestIntSliceTakeFirst(t *testing.T) {
 	{
 		slice := IntSlice([]int{0, 1, 2})
@@ -402,6 +407,11 @@ func TestStrSliceLen(t *testing.T) {
 	assert.Equal(t, 0, StrSlice([]string{}).Len())
 	assert.Equal(t, 1, StrSlice([]string{"1"}).Len())
 	assert.Equal(t, 2, StrSlice([]string{"1", "2"}).Len())
+}
+
+func TestStrSliceSort(t *testing.T) {
+	slice := NewStrSlice().Append("b", "d", "a")
+	assert.Equal(t, []string{"a", "b", "d"}, slice.Sort().M())
 }
 
 func TestStrSlicePrepend(t *testing.T) {

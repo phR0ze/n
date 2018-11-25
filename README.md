@@ -23,22 +23,20 @@ and skipped over others that can be accomplished in a simpler way with those i d
 | Del          | Delete item using neg/pos index notation        | 1        | 1        | 1           |
 | DelWhere     | Delete the items that match the given lambda    | 0        | 0        | 0           |
 | Each         | Execute given lambda for each item in slice     | 0        | 0        | 0           |
-| Find         |             |          |          |             |
-| FindAny      |             |          |          |             |
-| Index        |             |          |          |             |
-| Insert       |             |          |          |             |
+| Index        | Get the index of the item matchin the given     | 0        | 0        | 0           |
+| Insert       | Insert an item into the underlying slice        | 0        | 0        | 0           |
 | Join         | Join slice items as string with given delimiter | 1        | 1        | 0           |
 | Len          | Get the length of the slice                     | 1        | 1        | 1           |
 | M            | Materializes object invoking deferred execution | 1        | 1        | 1           |
 | Prepend      | Add items to the begining of the slice          | 1        | 1        | 1           |
-| Reverse      |             |          |          |             |
-| Sort         |             |          |          |             |
+| Reverse      | Reverse the items                               | 0        | 0        | 0           |
+| Sort         | Sort the items                                  | 1        | 1        | 0           |
 | TakeFirst    | Remove and return the first item from the slice | 1        | 1        | 1           |
 | TakeFirstCnt | Remove and return the first cnt items           | 1        | 1        | 1           |
 | TakeLast     | Remove and return the last item from the slice  | 1        | 1        | 1           |
 | TakeLastCnt  | Remove and return the last cnt items            | 1        | 1        | 1           |
-| Uniq         | Ensure only uniq items exist in the slice       | X        | X        |             |
-| Where        |             |          |          |             |
+| Uniq         | Ensure only uniq items exist in the slice       | 1        | 1        | 0           |
+| Where        | Select the items that match the given lambda    | 0        | 0        | 0           |
 
 ## Thoughts
 https://golang.org/pkg/container/list/

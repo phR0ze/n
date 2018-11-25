@@ -3,6 +3,7 @@ package nub
 
 import (
 	"errors"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -110,6 +111,11 @@ func (slice *intSliceNub) Len() int {
 	return len(slice.raw)
 }
 
+// M materializes object invoking deferred execution
+func (slice *intSliceNub) M() []int {
+	return slice.raw
+}
+
 // Prepend items to the begining of the slice and return new slice
 func (slice *intSliceNub) Prepend(items ...int) *intSliceNub {
 	items = append(items, slice.raw...)
@@ -117,10 +123,10 @@ func (slice *intSliceNub) Prepend(items ...int) *intSliceNub {
 	return slice
 }
 
-// M processes deferred execution and returns the underlying slice
-// M materializes object invoking deferred execution
-func (slice *intSliceNub) M() []int {
-	return slice.raw
+// Sort the underlying slice
+func (slice *intSliceNub) Sort() *intSliceNub {
+	sort.Ints(slice.raw)
+	return slice
 }
 
 // TakeFirst updates the underlying slice and returns the item and status
@@ -295,6 +301,11 @@ func (slice *strSliceNub) Len() int {
 	return len(slice.raw)
 }
 
+// M materializes object invoking deferred execution
+func (slice *strSliceNub) M() []string {
+	return slice.raw
+}
+
 // Prepend items to the begining of the slice and return new slice
 func (slice *strSliceNub) Prepend(items ...string) *strSliceNub {
 	items = append(items, slice.raw...)
@@ -302,9 +313,10 @@ func (slice *strSliceNub) Prepend(items ...string) *strSliceNub {
 	return slice
 }
 
-// M materializes object invoking deferred execution
-func (slice *strSliceNub) M() []string {
-	return slice.raw
+// Sort the underlying slice
+func (slice *strSliceNub) Sort() *strSliceNub {
+	sort.Strings(slice.raw)
+	return slice
 }
 
 // TakeFirst updates the underlying slice and returns the item and status
@@ -463,16 +475,16 @@ func (slice *strMapSliceNub) Len() int {
 	return len(slice.raw)
 }
 
+// M materializes object invoking deferred execution
+func (slice *strMapSliceNub) M() []map[string]interface{} {
+	return slice.raw
+}
+
 // Prepend items to the begining of the slice and return new slice
 func (slice *strMapSliceNub) Prepend(items ...map[string]interface{}) *strMapSliceNub {
 	items = append(items, slice.raw...)
 	slice.raw = items
 	return slice
-}
-
-// M materializes object invoking deferred execution
-func (slice *strMapSliceNub) M() []map[string]interface{} {
-	return slice.raw
 }
 
 // TakeFirst updates the underlying slice and returns the item and status
