@@ -63,10 +63,22 @@ func (m *strMapNub) M() map[string]interface{} {
 
 // Merge the other maps into this map with the first taking the lowest
 // precedence and so on until the last takes the highest
-func (m *strMapNub) Merge(other ...map[string]interface{}) *strMapNub {
-	slice := StrMapSlice(other)
-	for item, ok := slice.TakeFirst(); ok; item, ok = slice.TakeFirst() {
-		m.raw = mergeMap(m.raw, item.raw)
+func (m *strMapNub) Merge(items ...map[string]interface{}) *strMapNub {
+	for i := range items {
+		if items[i] != nil {
+			m.raw = mergeMap(m.raw, items[i])
+		}
+	}
+	return m
+}
+
+// Merge the other maps into this map with the first taking the lowest
+// precedence and so on until the last takes the highest
+func (m *strMapNub) MergeNub(items ...*strMapNub) *strMapNub {
+	for i := range items {
+		if items[i] != nil {
+			m.raw = mergeMap(m.raw, items[i].raw)
+		}
 	}
 	return m
 }

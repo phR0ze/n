@@ -33,6 +33,34 @@ func TestStrMapMerge(t *testing.T) {
 	}
 }
 
+func TestStrMapMergeNub(t *testing.T) {
+	{
+		strMap := NewStrMap()
+		assert.Equal(t, map[string]interface{}{}, strMap.MergeNub().M())
+	}
+	{
+		strMap := NewStrMap()
+		assert.Equal(t, map[string]interface{}{}, strMap.MergeNub(nil).M())
+	}
+	{
+		data := StrMap(map[string]interface{}{"1": "one"})
+		expected := map[string]interface{}{"1": "one"}
+		assert.Equal(t, expected, NewStrMap().MergeNub(data).M())
+	}
+	{
+		strMap := StrMap(map[string]interface{}{
+			"1": "one", "2": "three", "3": "four",
+		})
+		data1 := StrMap(map[string]interface{}{"2": "two"})
+		data2 := StrMap(map[string]interface{}{"3": "three"})
+		data3 := StrMap(map[string]interface{}{"4": "four"})
+		expected := map[string]interface{}{
+			"1": "one", "2": "two", "3": "three", "4": "four",
+		}
+		assert.Equal(t, expected, strMap.MergeNub(data1, data2, data3).M())
+	}
+}
+
 func TestStrMapSlice2(t *testing.T) {
 	{
 		data := map[string]interface{}{

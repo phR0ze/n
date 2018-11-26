@@ -49,6 +49,7 @@ and skipped over others that can be accomplished in a simpler way with those i d
 | Len          | Get the length of the map                       | 0        | 1        | 0           |
 | M            | Materializes object invoking deferred execution | 0        | 1        | 0           |
 | Merge        | Merge other maps in, in priority order          | 0        | 1        | 0           |
+| MergeNub     | Merge other nub maps in, in priority order      | 0        | 1        | 0           |
 | Slice        | Get the slice indicated by the multi-key        | 0        | 1        | 0           |
 | Str          | Get the str indicated by the multi-key          | 0        | 1        | 0           |
 | StrMap       | Get the str map indicated by the multi-key      | 0        | 1        | 0           |
