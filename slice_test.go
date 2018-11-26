@@ -124,6 +124,24 @@ func TestIntSliceDel(t *testing.T) {
 	}
 }
 
+func TestIntSliceEquals(t *testing.T) {
+	{
+		slice := NewIntSlice().Append(1, 2, 3)
+		target := NewIntSlice().Append(1, 2, 3)
+		assert.True(t, slice.Equals(target))
+	}
+	{
+		slice := NewIntSlice().Append(1, 2, 4)
+		target := NewIntSlice().Append(1, 2, 3)
+		assert.False(t, slice.Equals(target))
+	}
+	{
+		slice := NewIntSlice().Append(1, 2, 3, 4)
+		target := NewIntSlice().Append(1, 2, 3)
+		assert.False(t, slice.Equals(target))
+	}
+}
+
 func TestIntSliceLen(t *testing.T) {
 	assert.Equal(t, 0, IntSlice([]int{}).Len())
 	assert.Equal(t, 1, IntSlice([]int{1}).Len())
@@ -394,6 +412,24 @@ func TestStrSliceDel(t *testing.T) {
 		ok := slice.Del(-2)
 		assert.True(t, ok)
 		assert.Equal(t, []string{"0", "2"}, slice.M())
+	}
+}
+
+func TestStrSliceEquals(t *testing.T) {
+	{
+		slice := NewStrSlice().Append("1", "2", "3")
+		target := NewStrSlice().Append("1", "2", "3")
+		assert.True(t, slice.Equals(target))
+	}
+	{
+		slice := NewStrSlice().Append("1", "2", "4")
+		target := NewStrSlice().Append("1", "2", "3")
+		assert.False(t, slice.Equals(target))
+	}
+	{
+		slice := NewStrSlice().Append("1", "2", "3", "4")
+		target := NewStrSlice().Append("1", "2", "3")
+		assert.False(t, slice.Equals(target))
 	}
 }
 
@@ -748,6 +784,37 @@ func TestStrMapSliceDel(t *testing.T) {
 			{"3": "three"},
 		}
 		assert.Equal(t, expected, slice.M())
+	}
+}
+
+func TestStrMapSliceEquals(t *testing.T) {
+	{
+		slice := NewStrMapSlice()
+		slice.Append(map[string]interface{}{"1": "one"})
+		slice.Append(map[string]interface{}{"2": "two"})
+		other := NewStrMapSlice()
+		other.Append(map[string]interface{}{"1": "one"})
+		other.Append(map[string]interface{}{"2": "two"})
+		assert.True(t, slice.Equals(other))
+	}
+	{
+		slice := NewStrMapSlice()
+		slice.Append(map[string]interface{}{"1": "one"})
+		slice.Append(map[string]interface{}{"2": "two"})
+		other := NewStrMapSlice()
+		other.Append(map[string]interface{}{"1": "one"})
+		other.Append(map[string]interface{}{"2": "three"})
+		assert.False(t, slice.Equals(other))
+	}
+	{
+		slice := NewStrMapSlice()
+		slice.Append(map[string]interface{}{"1": "one"})
+		slice.Append(map[string]interface{}{"2": "two"})
+		other := NewStrMapSlice()
+		other.Append(map[string]interface{}{"1": "one"})
+		other.Append(map[string]interface{}{"2": "two"})
+		other.Append(map[string]interface{}{"3": "three"})
+		assert.False(t, slice.Equals(other))
 	}
 }
 

@@ -23,6 +23,7 @@ and skipped over others that can be accomplished in a simpler way with those i d
 | Del          | Delete item using neg/pos index notation        | 1        | 1        | 1           |
 | DelWhere     | Delete the items that match the given lambda    | 0        | 0        | 0           |
 | Each         | Execute given lambda for each item in slice     | 0        | 0        | 0           |
+| Equals       | Check if the given slice is equal to this slice | 1        | 1        | 1           |
 | Index        | Get the index of the item matchin the given     | 0        | 0        | 0           |
 | Insert       | Insert an item into the underlying slice        | 0        | 0        | 0           |
 | Join         | Join slice items as string with given delimiter | 1        | 1        | 0           |
@@ -42,8 +43,18 @@ and skipped over others that can be accomplished in a simpler way with those i d
 | Function     | Description                                     | IntMap | StrMap | ? |
 | ------------ | ----------------------------------------------- | -------- | -------- | ----------- |
 | NewTYPE      | Creates a new nub encapsulating the TYPE        | 0        | 1        | 0           |
+| Load         | Load YAML/JSON from file                        | 0        | 1        | 0           |
+| Add          | Add a new item to the underlying map            | 0        | 1        | 0           |
+| Equals       | Check if the given map is equal to this map     | 0        | 1        | 0           |
+| Len          | Get the length of the map                       | 0        | 1        | 0           |
 | M            | Materializes object invoking deferred execution | 0        | 1        | 0           |
 | Merge        | Merge other maps in, in priority order          | 0        | 1        | 0           |
+| Slice        | Get the slice indicated by the multi-key        | 0        | 1        | 0           |
+| Str          | Get the str indicated by the multi-key          | 0        | 1        | 0           |
+| StrMap       | Get the str map indicated by the multi-key      | 0        | 1        | 0           |
+| StrMapByName | Get the str map by name and multi-key           | 0        | 1        | 0           |
+| StrMapSlice  | Get the str map slice by the multi-key          | 0        | 1        | 0           |
+| StrSlice     | Get the str slice by the multi-key              | 0        | 1        | 0           |
 
 ## Thoughts
 https://golang.org/pkg/container/list/

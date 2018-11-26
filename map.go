@@ -1,7 +1,9 @@
 package nub
 
 import (
+	"fmt"
 	"io/ioutil"
+	"reflect"
 
 	"github.com/ghodss/yaml"
 )
@@ -33,6 +35,27 @@ func Load(target string) (result *strMapNub) {
 	return result
 }
 
+// Add a new key value pair to the map
+func (m *strMapNub) Add(key string, value interface{}) *strMapNub {
+	switch x := value.(type) {
+	case *strMapNub:
+		m.raw[key] = x.raw
+	default:
+		m.raw[key] = value
+	}
+	return m
+}
+
+// Equals checks if the two maps are equal
+func (m *strMapNub) Equals(other *strMapNub) bool {
+	return reflect.DeepEqual(m, other)
+}
+
+// Len is a pass through to the underlying map
+func (m *strMapNub) Len() int {
+	return len(m.raw)
+}
+
 // M materializes object invoking deferred execution
 func (m *strMapNub) M() map[string]interface{} {
 	return m.raw
@@ -48,19 +71,94 @@ func (m *strMapNub) Merge(other ...map[string]interface{}) *strMapNub {
 	return m
 }
 
+// Slice returns a slice of interface{} from the given map using the given key
+func (m *strMapNub) Slice(key string) (result []interface{}) {
+	keys := Str(key).Split(".")
+	if k, ok := keys.TakeFirst(); ok {
+		if entry, exists := m.raw[k]; exists {
+			switch x := entry.(type) {
+			case map[string]interface{}:
+				result = StrMap(x).Slice(keys.Join(".").M())
+			case []map[string]interface{}:
+				result = unCastStrMapSlice(x)
+			case []interface{}:
+				result = x
+			}
+		}
+	}
+	return
+}
+
+// Str returns a string from the given map using the given key
+func (m *strMapNub) Str(key string) *strNub {
+	result := NewStr()
+	keys := Str(key).Split(".")
+	if k, ok := keys.TakeFirst(); ok {
+		if entry, exists := m.raw[k]; exists {
+			switch v := entry.(type) {
+			case string:
+				result = Str(v)
+			case map[string]interface{}:
+				result = StrMap(v).Str(keys.Join(".").M())
+			}
+		}
+	}
+	return result
+}
+
 // StrMap returns a map of interface from the given map using the given key
 func (m *strMapNub) StrMap(key string) *strMapNub {
 	result := NewStrMap()
 
 	keys := Str(key).Split(".")
-	if key, ok := keys.TakeFirst(); ok {
-		if entry, exists := m.raw[key]; exists {
+	if k, ok := keys.TakeFirst(); ok {
+		if entry, exists := m.raw[k]; exists {
 			if v, ok := entry.(map[string]interface{}); ok {
 				result.raw = v
 				if keys.Len() != 0 {
 					result = result.StrMap(keys.Join(".").M())
 				}
 			}
+		}
+	}
+	return result
+}
+
+// StrMapByName returns a map of interface from the given map using the given key
+func (m *strMapNub) StrMapByName(key, k, v string) *strMapNub {
+	result := NewStrMap()
+	slice := m.Slice(key)
+	for i := range slice {
+		if item, ok := slice[i].(map[string]interface{}); ok {
+			if value, exists := item[k]; exists && value == v {
+				result.raw = item
+				break
+			}
+		}
+	}
+	return result
+}
+
+// StrMapSlice returns a slice of str map from the given map using the given key
+func (m *strMapNub) StrMapSlice(key string) *strMapSliceNub {
+	return castStrMapSlice(m.Slice(key))
+}
+
+// StrSlice returns a slice of strings from the given map using the given key
+func (m *strMapNub) StrSlice(key string) (result []string) {
+	items := m.Slice(key)
+	for i := range items {
+		result = append(result, fmt.Sprint(items[i]))
+	}
+	return
+}
+
+// castStrMapSlice returns a slice of str map from the given interface slice
+func castStrMapSlice(items []interface{}) *strMapSliceNub {
+	result := NewStrMapSlice()
+	for i := range items {
+		if item, ok := items[i].(map[string]interface{}); ok {
+			result.Append(item)
 		}
 	}
 	return result
@@ -93,4 +191,14 @@ func mergeMap(a, b map[string]interface{}) map[string]interface{} {
 	}
 
 	return a
+}
+
+// UnCastStrMapSlice casts the given slice to a slice of interface
+func unCastStrMapSlice(items []map[string]interface{}) []interface{} {
+	result := []interface{}{}
+	for i := range items {
+		result = append(result, items[i])
+	}
+
+	return result
 }

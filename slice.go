@@ -3,6 +3,7 @@ package nub
 
 import (
 	"errors"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -95,6 +96,11 @@ func (slice *intSliceNub) Del(i int) bool {
 		}
 	}
 	return result
+}
+
+// Equals checks if the two slices are equal
+func (slice *intSliceNub) Equals(other *intSliceNub) bool {
+	return reflect.DeepEqual(slice, other)
 }
 
 // Join the underlying slice with the given delim
@@ -291,6 +297,11 @@ func (slice *strSliceNub) Del(i int) bool {
 	return result
 }
 
+// Equals checks if the two slices are equal
+func (slice *strSliceNub) Equals(other *strSliceNub) bool {
+	return reflect.DeepEqual(slice, other)
+}
+
 // Join the underlying slice with the given delim
 func (slice *strSliceNub) Join(delim string) *strNub {
 	return Str(strings.Join(slice.raw, delim))
@@ -468,6 +479,11 @@ func (slice *strMapSliceNub) Del(i int) bool {
 		}
 	}
 	return result
+}
+
+// Equals checks if the two slices are equal
+func (slice *strMapSliceNub) Equals(other *strMapSliceNub) bool {
+	return reflect.DeepEqual(slice, other)
 }
 
 // Len is a pass through to the underlying slice

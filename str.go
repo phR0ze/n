@@ -6,6 +6,11 @@ type strNub struct {
 	raw string
 }
 
+// NewStr creates a new nub
+func NewStr() *strNub {
+	return Str("")
+}
+
 // Str creates a new nub from the given string
 func Str(slice string) *strNub {
 	return &strNub{raw: slice}
