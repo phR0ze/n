@@ -16,7 +16,7 @@ type Entry struct {
 
 // CallerTrace skips frames until skipfiles[0] is reached e.g. skipping logrus code.
 // If no target is given you'll get the full stack.
-func CallerTrace(skipfiles ...string) (result []*Entry) {
+func CallerTrace(skipframes int, skipfiles ...string) (result []*Entry) {
 	more := false
 	var frame runtime.Frame
 	callers := make([]uintptr, 20)
@@ -43,12 +43,21 @@ func CallerTrace(skipfiles ...string) (result []*Entry) {
 		}
 
 	}
+
+	if skipframes > 0 && len(result) > 0 {
+		if skipframes < len(result) {
+			result = result[skipframes:]
+		} else {
+			result = []*Entry{}
+		}
+	}
+
 	return
 }
 
 // CallerTraceOne simply returns the first entry from CallerTrace
-func CallerTraceOne(skipfiles ...string) *Entry {
-	entries := CallerTrace(skipfiles...)
+func CallerTraceOne(skipframes int, skipfiles ...string) *Entry {
+	entries := CallerTrace(skipframes, skipfiles...)
 	if entries != nil && len(entries) > 0 {
 		return entries[0]
 	}

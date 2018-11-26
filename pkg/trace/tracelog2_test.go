@@ -6,8 +6,8 @@ func LogFunc3() {
 
 func LogFunc4() {
 	if one {
-		trace = []*Entry{CallerTraceOne(skipfiles...)}
+		trace = []*Entry{CallerTraceOne(0, skipfiles...)}
 	} else {
-		trace = CallerTrace(skipfiles...)
+		trace = CallerTrace(0, skipfiles...)
 	}
 }
