@@ -46,6 +46,11 @@ func (m *strMapNub) Add(key string, value interface{}) *strMapNub {
 	return m
 }
 
+// Any checks if the map has anything in it
+func (m *strMapNub) Any() bool {
+	return len(m.raw) > 0
+}
+
 // Equals checks if the two maps are equal
 func (m *strMapNub) Equals(other *strMapNub) bool {
 	return reflect.DeepEqual(m, other)

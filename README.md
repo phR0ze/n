@@ -45,6 +45,7 @@ and skipped over others that can be accomplished in a simpler way with those i d
 | NewTYPE      | Creates a new nub encapsulating the TYPE        | 0        | 1        | 0           |
 | Load         | Load YAML/JSON from file                        | 0        | 1        | 0           |
 | Add          | Add a new item to the underlying map            | 0        | 1        | 0           |
+| Any          | Check if the map has anything in it             | 0        | 1        | 0           |
 | Equals       | Check if the given map is equal to this map     | 0        | 1        | 0           |
 | Len          | Get the length of the map                       | 0        | 1        | 0           |
 | M            | Materializes object invoking deferred execution | 0        | 1        | 0           |
