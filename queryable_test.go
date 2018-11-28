@@ -214,6 +214,20 @@ func TestJoin(t *testing.T) {
 		assert.Equal(t, 5, joined.Len())
 		assert.Equal(t, "1.2.3", q.Join(".").Str())
 	}
+	{
+		q := Q([]string{"1", "2", "3"})
+		assert.Equal(t, 3, q.Len())
+		joined := q.Join(".")
+		assert.Equal(t, 5, joined.Len())
+		assert.Equal(t, "1.2.3", q.Join(".").Str())
+	}
+	{
+		q := S().Append(1, 2, 3)
+		assert.Equal(t, 3, q.Len())
+		joined := q.Join(".")
+		assert.Equal(t, 5, joined.Len())
+		assert.Equal(t, "1.2.3", q.Join(".").Str())
+	}
 }
 
 func TestLen(t *testing.T) {

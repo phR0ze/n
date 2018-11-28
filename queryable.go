@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/ghodss/yaml"
@@ -196,8 +197,12 @@ func (q *Queryable) Join(delim string) *Queryable {
 	if !q.Singular() {
 		next := q.Iter()
 		for x, ok := next(); ok; x, ok = next() {
-			if str, ok := x.(string); ok {
-				joined.WriteString(str)
+			switch x := x.(type) {
+			case string:
+				joined.WriteString(x)
+				joined.WriteString(delim)
+			case int:
+				joined.WriteString(strconv.Itoa(x))
 				joined.WriteString(delim)
 			}
 		}
