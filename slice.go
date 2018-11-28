@@ -9,26 +9,7 @@ import (
 	"strings"
 )
 
-// S provides a new empty Queryable slice
-func S() *Queryable {
-	obj := []interface{}{}
-	ref := reflect.ValueOf(obj)
-	return &Queryable{O: obj, ref: &ref, Iter: sliceIter(ref, obj)}
-}
-
-func sliceIter(ref reflect.Value, obj interface{}) func() Iterator {
-	return func() Iterator {
-		i := 0
-		len := ref.Len()
-		return func() (item interface{}, ok bool) {
-			if ok = i < len; ok {
-				item = ref.Index(i).Interface()
-				i++
-			}
-			return
-		}
-	}
-}
+// TODO: Refactor below here
 
 //--------------------------------------------------------------------------------------------------
 // IntSlice Nub

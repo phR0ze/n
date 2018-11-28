@@ -8,48 +8,6 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-// KeyVal similar to C# for iterator over maps
-type KeyVal struct {
-	Key interface{}
-	Val interface{}
-}
-
-// M provides a new empty Queryable map
-func M() *Queryable {
-	obj := map[interface{}]interface{}{}
-	ref := reflect.ValueOf(obj)
-	return &Queryable{O: obj, ref: &ref, Iter: mapIter(ref, obj)}
-}
-
-func mapIter(ref reflect.Value, obj interface{}) func() Iterator {
-	return func() Iterator {
-		i := 0
-		len := ref.Len()
-		keys := ref.MapKeys()
-		return func() (item interface{}, ok bool) {
-			if ok = i < len; ok {
-				item = &KeyVal{
-					Key: keys[i].Interface(),
-					Val: ref.MapIndex(keys[i]).Interface(),
-				}
-				i++
-			}
-			return
-		}
-	}
-}
-
-// StrMap materializes the result into a string to interface map
-func (q *Queryable) StrMap() map[string]interface{} {
-	result := map[string]interface{}{}
-	next := q.Iter()
-	for x, ok := next(); ok; x, ok = next() {
-		pair := x.(*KeyVal)
-		result[pair.Key.(string)] = pair.Val
-	}
-	return result
-}
-
 // TODO: Need to refactor below here
 
 //--------------------------------------------------------------------------------------------------
@@ -69,9 +27,9 @@ func StrMap(other map[string]interface{}) *strMapNub {
 	return &strMapNub{raw: other}
 }
 
-// Load a yaml/json file as a str map
+// LoadOld a yaml/json file as a str map
 // returns nil on failure of any kind
-func Load(target string) (result *strMapNub) {
+func LoadOld(target string) (result *strMapNub) {
 	if yamlFile, err := ioutil.ReadFile(target); err == nil {
 		result = NewStrMap()
 		yaml.Unmarshal(yamlFile, &result.raw)

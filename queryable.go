@@ -1,8 +1,13 @@
 package nub
 
 import (
+	"bytes"
 	"errors"
+	"io/ioutil"
 	"reflect"
+	"strings"
+
+	"github.com/ghodss/yaml"
 )
 
 // Queryable provides chainable deferred execution
@@ -16,6 +21,89 @@ type Queryable struct {
 
 // Iterator provides a closure to capture the index and reset it
 type Iterator func() (item interface{}, ok bool)
+
+// KeyVal similar to C# for iterator over maps
+type KeyVal struct {
+	Key interface{}
+	Val interface{}
+}
+
+// Load YAML/JSON from file into queryable
+func Load(target string) *Queryable {
+	if yamlFile, err := ioutil.ReadFile(target); err == nil {
+		data := map[string]interface{}{}
+		yaml.Unmarshal(yamlFile, &data)
+		return Q(data)
+	}
+	return M()
+}
+
+// A provides a new empty Queryable string
+func A() *Queryable {
+	obj := string("")
+	ref := reflect.ValueOf(obj)
+	return &Queryable{O: obj, ref: &ref, Iter: strIter(ref, obj)}
+}
+
+func strIter(ref reflect.Value, obj interface{}) func() Iterator {
+	return func() Iterator {
+		i := 0
+		len := ref.Len()
+		return func() (item interface{}, ok bool) {
+			if ok = i < len; ok {
+				item = ref.Index(i).Interface()
+				i++
+			}
+			return
+		}
+	}
+}
+
+// M provides a new empty Queryable map
+func M() *Queryable {
+	obj := map[interface{}]interface{}{}
+	ref := reflect.ValueOf(obj)
+	return &Queryable{O: obj, ref: &ref, Iter: mapIter(ref, obj)}
+}
+
+func mapIter(ref reflect.Value, obj interface{}) func() Iterator {
+	return func() Iterator {
+		i := 0
+		len := ref.Len()
+		keys := ref.MapKeys()
+		return func() (item interface{}, ok bool) {
+			if ok = i < len; ok {
+				item = &KeyVal{
+					Key: keys[i].Interface(),
+					Val: ref.MapIndex(keys[i]).Interface(),
+				}
+				i++
+			}
+			return
+		}
+	}
+}
+
+// S provides a new empty Queryable slice
+func S() *Queryable {
+	obj := []interface{}{}
+	ref := reflect.ValueOf(obj)
+	return &Queryable{O: obj, ref: &ref, Iter: sliceIter(ref, obj)}
+}
+
+func sliceIter(ref reflect.Value, obj interface{}) func() Iterator {
+	return func() Iterator {
+		i := 0
+		len := ref.Len()
+		return func() (item interface{}, ok bool) {
+			if ok = i < len; ok {
+				item = ref.Index(i).Interface()
+				i++
+			}
+			return
+		}
+	}
+}
 
 // Q provides origination for the Queryable abstraction layer
 func Q(obj interface{}) *Queryable {
@@ -55,18 +143,9 @@ func Q(obj interface{}) *Queryable {
 	return result
 }
 
-// // Load YAML/JSON from file into queryable
-// func Load(target string) *Queryable {
-// 	if yamlFile, err := ioutil.ReadFile(target); err == nil {
-// 		data := map[string]interface{}{}
-// 		yaml.Unmarshal(yamlFile, &data)
-// 	}
-// 	return M()
-// }
-
 // Append items to the end of the collection and return the queryable
 // converting to a collection if necessary
-func (q *Queryable) Append(obj interface{}) *Queryable {
+func (q *Queryable) Append(obj ...interface{}) *Queryable {
 
 	// No existing type return a new queryable
 	if q.ref == nil {
@@ -82,15 +161,8 @@ func (q *Queryable) Append(obj interface{}) *Queryable {
 
 	// Append to the collection type
 	ref := reflect.ValueOf(obj)
-	switch ref.Kind() {
-	case reflect.Map:
-		panic("TODO: handle appending to map")
-	case reflect.Array, reflect.Slice:
-		for i := 0; i < ref.Len(); i++ {
-			*q.ref = reflect.Append(*q.ref, ref.Index(i))
-		}
-	default:
-		*q.ref = reflect.Append(*q.ref, ref)
+	for i := 0; i < ref.Len(); i++ {
+		*q.ref = reflect.Append(*q.ref, ref.Index(i))
 	}
 	return q
 }
@@ -125,6 +197,23 @@ func (q *Queryable) Each(action func(interface{})) {
 			action(x)
 		}
 	}
+}
+
+// Join slice items as string with given delimeter
+func (q *Queryable) Join(delim string) *Queryable {
+	var joined bytes.Buffer
+	if !q.Singular() {
+		next := q.Iter()
+		for x, ok := next(); ok; x, ok = next() {
+			if str, ok := x.(string); ok {
+				joined.WriteString(str)
+				joined.WriteString(delim)
+			}
+		}
+	} else if q.Iter != nil {
+		joined.WriteString(q.O.(string))
+	}
+	return Q(strings.TrimSuffix(joined.String(), delim))
 }
 
 // Len of the collection type including string

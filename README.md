@@ -46,20 +46,23 @@ which is why I'm creating nub objects with helper functions. I've chosen a handf
 and skipped over others that I may come back to.
 
 ### Functions <a name="functions"></a>
+Some functions only apply to particular underlying collection types as called out in the table.
+
 | Function     | Description                                     | Slice | Map | Str | Custom |
 | ------------ | ----------------------------------------------- | ----- | ----| --- | ------ |
 | M            | Creates a new empty map based queryable         | 0     | 1   | 0   | 0      |
 | S            | Creates a new empty slice based queryable       | 1     | 0   | 0   | 0      |
 | Q            | Creates a new queryable encapsulating the TYPE  | 1     | 1   | 1   | 0      |
 | O            | Access to the underlying raw type               | 1     | 1   | 1   | 0      |
-| Any          | Check if the queryable has anything in it       | 1     | 1   | 0   | 0      |
-| AnyWhere     | Check if any match the given lambda             | 1     | 0   | 0   | 0      |
+| Any          | Check if the queryable is not nil and not empty | 1     | 1   | 1   | 0      |
+| AnyWhere     | Check if any match the given lambda             | 1     | 1   | 0   | 0      |
 | Append       | Add items to the end of the collection          | 1     | 0   | 0   | 0      |
 | At           | Return item at the given neg/pos index notation | 1     | 0   | 0   | 0      |
 | Clear        | Clear out the underlying collection             | 1     | 0   | 0   | 0      |
 | Contains     | Check for the given item                        | 1     | 0   | 0   | 0      |
 | ContainsAny  | Check for any of the given items                | 1     | 0   | 0   | 0      |
 | Each         | Iterate over the queryable and execute actions  | 1     | 0   | 0   | 0      |
+| Join         | Join slice items as string with given delimiter | 0     | 0   | 0   | 0      |
 | Len          | Get the length of the collection                | 1     | 1   | 1   | 0      |
 | Load         | Load YAML/JSON from file into queryable         | 0     | 0   | 0   | 0      |
 | Set          | Set the underlying queryable object             | 1     | 0   | 0   | 0      |
