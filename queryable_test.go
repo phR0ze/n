@@ -98,16 +98,16 @@ func TestQM(t *testing.T) {
 		next := q.Iter()
 		for x, ok := next(); ok; x, ok = next() {
 			items = append(items, x)
-			item := x.(*KeyVal)
+			item := x.(KeyVal)
 			switch item.Key {
 			case "1":
-				assert.NotEqual(t, &KeyVal{Key: "2", Val: "one"}, item)
-				assert.NotEqual(t, &KeyVal{Key: "1", Val: "two"}, item)
-				assert.Equal(t, &KeyVal{Key: "1", Val: "one"}, item)
+				assert.NotEqual(t, KeyVal{Key: "2", Val: "one"}, item)
+				assert.NotEqual(t, KeyVal{Key: "1", Val: "two"}, item)
+				assert.Equal(t, KeyVal{Key: "1", Val: "one"}, item)
 			case "2":
-				assert.Equal(t, &KeyVal{Key: "2", Val: "two"}, item)
+				assert.Equal(t, KeyVal{Key: "2", Val: "two"}, item)
 			case "3":
-				assert.Equal(t, &KeyVal{Key: "3", Val: "three"}, item)
+				assert.Equal(t, KeyVal{Key: "3", Val: "three"}, item)
 			}
 		}
 		assert.Len(t, items, 3)
@@ -135,33 +135,6 @@ func TestCustomQ(t *testing.T) {
 		assert.True(t, q.Any())
 		assert.Equal(t, 1, q.Len())
 		assert.Equal(t, bob{data: "3"}, q.At(0).O())
-	}
-}
-
-func TestAppend(t *testing.T) {
-	{
-		// Append to valuetype
-		q := Q(2)
-		assert.Equal(t, 1, q.Len())
-		assert.Equal(t, 2, q.Append(1).Len())
-	}
-	{
-		// Append one
-		q := S()
-		assert.Equal(t, 0, q.Len())
-		assert.Equal(t, 1, q.Append(2).Len())
-	}
-	{
-		// Append many ints
-		q := S()
-		assert.Equal(t, 0, q.Len())
-		assert.Equal(t, 3, q.Append(1, 2, 3).Len())
-	}
-	{
-		// Append many strings
-		q := S()
-		assert.Equal(t, 0, q.Len())
-		assert.Equal(t, 3, q.Append("1", "2", "3").Len())
 	}
 }
 
@@ -285,16 +258,16 @@ func TestEach(t *testing.T) {
 		q := Q(map[string]string{"1": "one", "2": "two", "3": "three"})
 		q.Each(func(x interface{}) {
 			items = append(items, x)
-			item := x.(*KeyVal)
+			item := x.(KeyVal)
 			switch item.Key {
 			case "1":
-				assert.NotEqual(t, &KeyVal{Key: "2", Val: "one"}, item)
-				assert.NotEqual(t, &KeyVal{Key: "1", Val: "two"}, item)
-				assert.Equal(t, &KeyVal{Key: "1", Val: "one"}, item)
+				assert.NotEqual(t, KeyVal{Key: "2", Val: "one"}, item)
+				assert.NotEqual(t, KeyVal{Key: "1", Val: "two"}, item)
+				assert.Equal(t, KeyVal{Key: "1", Val: "one"}, item)
 			case "2":
-				assert.Equal(t, &KeyVal{Key: "2", Val: "two"}, item)
+				assert.Equal(t, KeyVal{Key: "2", Val: "two"}, item)
 			case "3":
-				assert.Equal(t, &KeyVal{Key: "3", Val: "three"}, item)
+				assert.Equal(t, KeyVal{Key: "3", Val: "three"}, item)
 			}
 		})
 		assert.Len(t, items, 3)

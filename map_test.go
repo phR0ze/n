@@ -7,6 +7,33 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestMap(t *testing.T) {
+	{
+		// Get map keys
+		q := Q(map[string]interface{}{"1": "one", "2": "two", "3": "three"})
+		keys := q.Map(func(x interface{}) interface{} {
+			return (x.(KeyVal)).Key
+		})
+		expected := Q([]string{"1", "2", "3"})
+		assert.Equal(t, 3, keys.Len())
+		assert.True(t, expected.Contains(keys.At(0).A()))
+		assert.True(t, expected.Contains(keys.At(1).A()))
+		assert.True(t, expected.Contains(keys.At(2).A()))
+	}
+	{
+		// Get map values
+		q := Q(map[string]interface{}{"1": "one", "2": "two", "3": "three"})
+		vals := q.Map(func(x interface{}) interface{} {
+			return (x.(KeyVal)).Val
+		})
+		expected := Q([]string{"one", "two", "three"})
+		assert.Equal(t, 3, vals.Len())
+		assert.True(t, expected.Contains(vals.At(0).A()))
+		assert.True(t, expected.Contains(vals.At(1).A()))
+		assert.True(t, expected.Contains(vals.At(2).A()))
+	}
+}
+
 // TODO: Need to refactor below here
 
 func TestStrMapMerge(t *testing.T) {

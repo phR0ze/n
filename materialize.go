@@ -17,7 +17,7 @@ func (q *Queryable) M() map[string]interface{} {
 	result := map[string]interface{}{}
 	next := q.Iter()
 	for x, ok := next(); ok; x, ok = next() {
-		pair := x.(*KeyVal)
+		pair := x.(KeyVal)
 		result[pair.Key.(string)] = pair.Val
 	}
 	return result

@@ -71,7 +71,7 @@ func mapIter(ref reflect.Value) func() Iterator {
 		keys := ref.MapKeys()
 		return func() (item interface{}, ok bool) {
 			if ok = i < len; ok {
-				item = &KeyVal{
+				item = KeyVal{
 					Key: keys[i].Interface(),
 					Val: ref.MapIndex(keys[i]).Interface(),
 				}
@@ -130,25 +130,6 @@ func Q(obj interface{}) *Queryable {
 	}
 
 	return result
-}
-
-// Append items to the end of the collection and return the queryable
-// converting to a collection if necessary
-func (q *Queryable) Append(obj ...interface{}) *Queryable {
-
-	// Not a collection type create a new queryable
-	kind := q.ref.Kind()
-	if kind != reflect.Array && kind != reflect.Slice && kind != reflect.Map {
-		*q = *S().Append(q.ref.Interface())
-	}
-
-	// Append to the collection type
-	ref := reflect.ValueOf(obj)
-	for i := 0; i < ref.Len(); i++ {
-		*q.ref = reflect.Append(*q.ref, ref.Index(i))
-	}
-	q.Iter = strIter(*q.ref)
-	return q
 }
 
 // At returns the item at the given index location. Allows for negative notation

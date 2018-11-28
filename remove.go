@@ -1,13 +1,32 @@
 package nub
 
-// TakeFirst updates the underlying slice and returns the item and status
-func (q *Queryable) TakeFirst() (int, bool) {
-	// if len(slice.raw) > 0 {
-	// 	item := slice.raw[0]
-	// 	slice.raw = slice.raw[1:]
-	// 	return item, true
-	// }
-	return 0, false
+import "reflect"
+
+// TakeFirst remove an return the first item
+func (q *Queryable) TakeFirst() (item interface{}, ok bool) {
+	switch q.ref.Kind() {
+
+	// Append to slice type
+	case reflect.Array, reflect.Slice:
+		if q.ref.Len() > 0 {
+			// ref := reflect.MakeSlice(q.ref.Type(), 0, q.ref.Cap())
+			// for i := 0; i < q.ref.Len(); i++ {
+
+			// }
+			// //*q.ref = reflect.Append(*q.ref, ref.Index(i))
+			// //}
+			// q.Iter = sliceIter(*q.ref)
+		}
+
+	// Append to map type
+	case reflect.Map:
+		panic("TODO: implement append for TakeFirst")
+
+	// Not a collection type create a new queryable
+	default:
+		//*q = *S().Append(q.ref.Interface())
+	}
+	return nil, false
 }
 
 // // TakeFirstCnt updates the underlying slice and returns the items

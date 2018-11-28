@@ -72,10 +72,10 @@ func TestAnyWhere(t *testing.T) {
 		q := Q(map[string]interface{}{"1": "one", "2": "two", "3": "three"})
 		assert.False(t, q.AnyWhere(func(x interface{}) bool { return x == 3 }))
 		assert.True(t, q.AnyWhere(func(x interface{}) bool {
-			return (x.(*KeyVal)).Key == "3"
+			return (x.(KeyVal)).Key == "3"
 		}))
 		assert.True(t, q.AnyWhere(func(x interface{}) bool {
-			return (x.(*KeyVal)).Val == "two"
+			return (x.(KeyVal)).Val == "two"
 		}))
 	}
 	{
