@@ -4,7 +4,7 @@ package nub
 
 // Int materializes the result into an int
 func (q *Queryable) Int() int {
-	return q.O.(int)
+	return q.ref.Interface().(int)
 }
 
 // Ints materializes the results into a int slice
@@ -17,7 +17,7 @@ func (q *Queryable) Ints() (result []int) {
 
 // Str materializes the result into a string
 func (q *Queryable) Str() string {
-	return q.O.(string)
+	return q.ref.Interface().(string)
 }
 
 // StrMap materializes the result from the specific string to interface map

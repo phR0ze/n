@@ -13,7 +13,6 @@ import (
 // Queryable provides chainable deferred execution
 // and is the heart of the algorithm abstraction layer
 type Queryable struct {
-	O    interface{}
 	Iter func() Iterator
 
 	ref *reflect.Value
@@ -40,12 +39,11 @@ func Load(target string) *Queryable {
 
 // A provides a new empty Queryable string
 func A() *Queryable {
-	obj := string("")
-	ref := reflect.ValueOf(obj)
-	return &Queryable{O: obj, ref: &ref, Iter: strIter(ref, obj)}
+	ref := reflect.ValueOf(string(""))
+	return &Queryable{ref: &ref, Iter: strIter(ref)}
 }
 
-func strIter(ref reflect.Value, obj interface{}) func() Iterator {
+func strIter(ref reflect.Value) func() Iterator {
 	return func() Iterator {
 		i := 0
 		len := ref.Len()
@@ -61,12 +59,11 @@ func strIter(ref reflect.Value, obj interface{}) func() Iterator {
 
 // M provides a new empty Queryable map
 func M() *Queryable {
-	obj := map[interface{}]interface{}{}
-	ref := reflect.ValueOf(obj)
-	return &Queryable{O: obj, ref: &ref, Iter: mapIter(ref, obj)}
+	ref := reflect.ValueOf(map[interface{}]interface{}{})
+	return &Queryable{ref: &ref, Iter: mapIter(ref)}
 }
 
-func mapIter(ref reflect.Value, obj interface{}) func() Iterator {
+func mapIter(ref reflect.Value) func() Iterator {
 	return func() Iterator {
 		i := 0
 		len := ref.Len()
@@ -86,12 +83,11 @@ func mapIter(ref reflect.Value, obj interface{}) func() Iterator {
 
 // S provides a new empty Queryable slice
 func S() *Queryable {
-	obj := []interface{}{}
-	ref := reflect.ValueOf(obj)
-	return &Queryable{O: obj, ref: &ref, Iter: sliceIter(ref, obj)}
+	ref := reflect.ValueOf([]interface{}{})
+	return &Queryable{ref: &ref, Iter: sliceIter(ref)}
 }
 
-func sliceIter(ref reflect.Value, obj interface{}) func() Iterator {
+func sliceIter(ref reflect.Value) func() Iterator {
 	return func() Iterator {
 		i := 0
 		len := ref.Len()
@@ -112,20 +108,20 @@ func Q(obj interface{}) *Queryable {
 	}
 
 	ref := reflect.ValueOf(obj)
-	result := &Queryable{O: obj, ref: &ref}
+	result := &Queryable{ref: &ref}
 	switch ref.Kind() {
 
 	// Slice types
 	case reflect.Array, reflect.Slice:
-		result.Iter = sliceIter(ref, obj)
+		result.Iter = sliceIter(ref)
 
 	// Handle map types
 	case reflect.Map:
-		result.Iter = mapIter(ref, obj)
+		result.Iter = mapIter(ref)
 
 	// Handle string types
 	case reflect.String:
-		result.Iter = strIter(ref, obj)
+		result.Iter = strIter(ref)
 
 	// Chan types
 	case reflect.Chan:
@@ -156,7 +152,7 @@ func (q *Queryable) Append(obj ...interface{}) *Queryable {
 	// Not a collection type create a new queryable
 	kind := q.ref.Kind()
 	if kind != reflect.Array && kind != reflect.Slice && kind != reflect.Map {
-		*q = *S().Append(q.O)
+		*q = *S().Append(q.ref.Interface())
 	}
 
 	// Append to the collection type
@@ -174,7 +170,7 @@ func (q *Queryable) At(i int) *Queryable {
 			i = q.ref.Len() + i
 		}
 		if i >= 0 && i < q.ref.Len() {
-			if str, ok := q.O.(string); ok {
+			if str, ok := q.ref.Interface().(string); ok {
 				return Q(string(str[i]))
 			}
 			return Q(q.ref.Index(i).Interface())
@@ -211,7 +207,7 @@ func (q *Queryable) Join(delim string) *Queryable {
 			}
 		}
 	} else if q.Iter != nil {
-		joined.WriteString(q.O.(string))
+		joined.WriteString(q.ref.Interface().(string))
 	}
 	return Q(strings.TrimSuffix(joined.String(), delim))
 }
@@ -227,7 +223,6 @@ func (q *Queryable) Len() int {
 // Set provides a way to set underlying object Queryable is operating on
 func (q *Queryable) Set(obj interface{}) *Queryable {
 	other := Q(obj)
-	q.O = other.O
 	q.Iter = other.Iter
 	q.ref = other.ref
 	return q
@@ -235,7 +230,7 @@ func (q *Queryable) Set(obj interface{}) *Queryable {
 
 // Singular is queryable encapsulating a non-collection
 func (q *Queryable) Singular() bool {
-	_, strType := q.O.(string)
+	_, strType := q.ref.Interface().(string)
 	if q.Iter == nil || strType {
 		return true
 	}

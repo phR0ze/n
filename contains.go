@@ -18,12 +18,12 @@ func (q *Queryable) Contains(obj interface{}) bool {
 			}
 		case reflect.String:
 			if reflect.ValueOf(obj).Kind() == reflect.String {
-				return strings.Contains(q.O.(string), obj.(string))
+				return strings.Contains(q.ref.Interface().(string), obj.(string))
 			}
 		default:
 			panic("TODO: implement Contains")
 		}
-	} else if q.O == obj {
+	} else if q.ref.Interface() == obj {
 		return true
 	}
 	return false
@@ -42,7 +42,7 @@ func (q *Queryable) ContainsAny(obj interface{}) bool {
 	if q.Singular() {
 		next := other.Iter()
 		for target, ok := next(); ok; target, ok = next() {
-			if q.O == target {
+			if q.ref.Interface() == target {
 				return true
 			}
 		}

@@ -177,7 +177,7 @@ func TestAt(t *testing.T) {
 	assert.Equal(t, 2, q.At(-3).Int())
 	assert.Equal(t, 1, q.At(0).Int())
 	assert.Equal(t, 2, q.At(1).Int())
-	assert.Equal(t, 3, q.At(2).O.(int))
+	assert.Equal(t, 3, q.At(2).Int())
 	assert.Equal(t, 4, q.At(3).Int())
 }
 

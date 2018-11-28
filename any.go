@@ -5,7 +5,7 @@ func (q *Queryable) Any() bool {
 	if q.Iter != nil {
 		return q.ref.Len() > 0
 	}
-	return q.O != nil
+	return q.ref != nil
 }
 
 // AnyWhere checka if any match the given lambda
