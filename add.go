@@ -12,9 +12,9 @@ func (q *Queryable) Append(obj ...interface{}) *Queryable {
 	}
 
 	// Append to slice type
-	ref := reflect.ValueOf(obj)
-	for i := 0; i < ref.Len(); i++ {
-		*q.v = reflect.Append(*q.v, ref.Index(i))
+	for i := 0; i < len(obj); i++ {
+		item := reflect.ValueOf(obj[i])
+		*q.v = reflect.Append(*q.v, item)
 	}
 	q.Iter = sliceIter(*q.v)
 

@@ -27,6 +27,8 @@ func TestTakeFirst(t *testing.T) {
 		assert.NotNil(t, x)
 		assert.Equal(t, 1, x.(int))
 		assert.Equal(t, []int{2, 3}, q.O())
+		//q.Append(4)
+		//assert.Equal(t, []int{2, 3, 4}, q.O())
 	}
 	{
 		// strings
@@ -54,5 +56,16 @@ func TestTakeFirst(t *testing.T) {
 		assert.NotNil(t, x)
 		assert.Equal(t, bob{data: "3"}, x.(bob))
 		assert.False(t, q.Any())
+	}
+}
+
+func TestTakeFirstCnt(t *testing.T) {
+	{
+		q := Q([]int{1, 2, 3})
+		assert.Equal(t, []int{1, 2, 3}, q.O())
+		assert.Equal(t, 3, q.Len())
+		items := q.TakeFirstCnt(4)
+		assert.Equal(t, []int{1, 2, 3}, items)
+		assert.Equal(t, 0, q.Len())
 	}
 }

@@ -48,3 +48,9 @@ func TestStrs(t *testing.T) {
 		assert.Equal(t, []string{"1", "2", "3"}, Q([]interface{}{"1", "2", "3"}).Strs())
 	}
 }
+
+func TestCastToTypeOf(t *testing.T) {
+	//typof := []int{1, 2, 3}
+	//obj := []interface{}{4}[0]
+	//CastToTypeOf(typof, obj)
+}

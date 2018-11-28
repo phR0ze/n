@@ -1,5 +1,10 @@
 package nub
 
+import (
+	"fmt"
+	"reflect"
+)
+
 // Collecting functions that return external Go types here
 
 // A materializes queryable into a string
@@ -46,4 +51,20 @@ func (q *Queryable) Strs() []string {
 		result = append(result, x.(string))
 	}
 	return result
+}
+
+// CastToTypeOf casts the obj to the type of the typof
+func CastToTypeOf(typof interface{}, obj interface{}) *reflect.Value {
+	panic("TODO: experimenting with reflection")
+	typ := reflect.TypeOf(typof)
+	switch typ.Kind() {
+	case reflect.Array, reflect.Slice, reflect.Map:
+		targetType := typ.Elem()
+		originType := reflect.TypeOf(obj)
+		fmt.Println(targetType)
+		fmt.Println(originType)
+	default:
+	}
+
+	return nil
 }

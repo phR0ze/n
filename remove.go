@@ -4,14 +4,11 @@ import "reflect"
 
 // TakeFirst remove an return the first item.
 func (q *Queryable) TakeFirst() (item interface{}, ok bool) {
-	switch q.v.Kind() {
+	if !q.TypeSingle() && q.v.Len() > 0 {
+		if q.v.Kind() == reflect.Array || q.v.Kind() == reflect.Slice {
 
-	// Append to slice type
-	case reflect.Array, reflect.Slice:
-		if q.v.Len() > 0 {
-
-			// Create new slice minus first
-			n := reflect.MakeSlice(q.v.Type(), 0, q.v.Cap())
+			// Make a new slice minus the first one
+			n := reflect.MakeSlice(q.v.Type(), 0, q.v.Len()-1)
 			for i := 1; i < q.v.Len(); i++ {
 				n = reflect.Append(n, q.v.Index(i))
 			}
@@ -20,6 +17,41 @@ func (q *Queryable) TakeFirst() (item interface{}, ok bool) {
 			item = q.v.Index(0).Interface()
 			ok = true
 			*q.v = n
+			q.Iter = sliceIter(*q.v)
+		}
+	}
+	return
+}
+
+// TakeFirstCnt remove cnt items and return them
+func (q *Queryable) TakeFirstCnt(cnt int) (result interface{}) {
+	result = []interface{}{}
+	if !q.TypeSingle() && q.v.Len() > 0 && cnt > 0 {
+		if q.v.Kind() == reflect.Array || q.v.Kind() == reflect.Slice {
+
+			// This slice is larger that asked for
+			if q.Len() >= cnt {
+
+				// Copy out the first cnt
+				// items := reflect.MakeSlice(q.v.Type(), 0, cnt)
+				// for i := 0; i < cnt; i++ {
+
+				// }
+
+				// // Make a new slice minus the first cnt
+				// n := reflect.MakeSlice(q.v.Type(), 0, q.v.Cap())
+				// for i := 1; i < q.v.Len(); i++ {
+				// 	n = reflect.Append(n, q.v.Index(i))
+				// }
+
+				// // Capture item, status and update queryable
+				// item = q.v.Index(0).Interface()
+				// ok = true
+				// *q.v = n
+			} else {
+				result = q.O()
+				*q.v = reflect.MakeSlice(q.v.Type(), 0, q.v.Cap())
+			}
 			q.Iter = sliceIter(*q.v)
 		}
 	}
