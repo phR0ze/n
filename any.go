@@ -10,7 +10,7 @@ func (q *Queryable) Any() bool {
 
 // AnyWhere checka if any match the given lambda
 func (q *Queryable) AnyWhere(lambda func(interface{}) bool) bool {
-	if !q.Singular() {
+	if !q.TypeSingle() {
 		next := q.Iter()
 		for x, ok := next(); ok; x, ok = next() {
 			if lambda(x) {

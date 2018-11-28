@@ -34,12 +34,12 @@ func (q *Queryable) ContainsAny(obj interface{}) bool {
 	other := Q(obj)
 
 	// Other is singular so defer to Contains
-	if other.Singular() {
+	if other.TypeSingle() {
 		return q.Contains(obj)
 	}
 
 	// This is singular
-	if q.Singular() {
+	if q.TypeSingle() {
 		next := other.Iter()
 		for target, ok := next(); ok; target, ok = next() {
 			if q.ref.Interface() == target {

@@ -161,7 +161,7 @@ func (q *Queryable) Append(obj ...interface{}) *Queryable {
 
 // At returns the item at the given index location. Allows for negative notation
 func (q *Queryable) At(i int) *Queryable {
-	if q.Iter != nil {
+	if q.TypeIter() {
 		if i < 0 {
 			i = q.ref.Len() + i
 		}
@@ -183,7 +183,7 @@ func (q *Queryable) Clear() *Queryable {
 
 // Each iterates over the queryable and executes the given action
 func (q *Queryable) Each(action func(interface{})) {
-	if q.Iter != nil {
+	if q.TypeIter() {
 		next := q.Iter()
 		for x, ok := next(); ok; x, ok = next() {
 			action(x)
@@ -194,7 +194,9 @@ func (q *Queryable) Each(action func(interface{})) {
 // Join slice items as string with given delimeter
 func (q *Queryable) Join(delim string) *Queryable {
 	var joined bytes.Buffer
-	if !q.Singular() {
+	if q.TypeStr() {
+		joined.WriteString(q.ref.Interface().(string))
+	} else if q.TypeIter() {
 		next := q.Iter()
 		for x, ok := next(); ok; x, ok = next() {
 			switch x := x.(type) {
@@ -206,15 +208,13 @@ func (q *Queryable) Join(delim string) *Queryable {
 				joined.WriteString(delim)
 			}
 		}
-	} else if q.Iter != nil {
-		joined.WriteString(q.ref.Interface().(string))
 	}
 	return Q(strings.TrimSuffix(joined.String(), delim))
 }
 
 // Len of the collection type including string
 func (q *Queryable) Len() int {
-	if q.Iter != nil {
+	if q.TypeIter() {
 		return q.ref.Len()
 	}
 	return 1
@@ -228,10 +228,33 @@ func (q *Queryable) Set(obj interface{}) *Queryable {
 	return q
 }
 
-// Singular is queryable encapsulating a non-collection
-func (q *Queryable) Singular() bool {
-	_, strType := q.ref.Interface().(string)
-	if q.Iter == nil || strType {
+// Split the string into a slice on delimiter
+func (q *Queryable) Split(delim string) *Queryable {
+	if q.TypeStr() {
+		return Q(strings.Split(q.ref.Interface().(string), delim))
+	}
+	return A()
+}
+
+// TypeIter checks if the queryable is iterable
+func (q *Queryable) TypeIter() bool {
+	if q.Iter != nil {
+		return true
+	}
+	return false
+}
+
+// TypeStr checks if the queryable is encapsulating a string
+func (q *Queryable) TypeStr() bool {
+	if _, ok := q.ref.Interface().(string); ok {
+		return true
+	}
+	return false
+}
+
+// TypeSingle checks if the queryable is ecapuslating a string or is not iterable
+func (q *Queryable) TypeSingle() bool {
+	if !q.TypeIter() || q.TypeStr() {
 		return true
 	}
 	return false
