@@ -143,12 +143,6 @@ func Q(obj interface{}) *Queryable {
 // converting to a collection if necessary
 func (q *Queryable) Append(obj ...interface{}) *Queryable {
 
-	// No existing type return a new queryable
-	if q.ref == nil {
-		*q = *Q(obj)
-		return q
-	}
-
 	// Not a collection type create a new queryable
 	kind := q.ref.Kind()
 	if kind != reflect.Array && kind != reflect.Slice && kind != reflect.Map {
@@ -160,6 +154,7 @@ func (q *Queryable) Append(obj ...interface{}) *Queryable {
 	for i := 0; i < ref.Len(); i++ {
 		*q.ref = reflect.Append(*q.ref, ref.Index(i))
 	}
+	q.Iter = strIter(*q.ref)
 	return q
 }
 

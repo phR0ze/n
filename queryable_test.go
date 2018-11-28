@@ -210,9 +210,9 @@ func TestJoin(t *testing.T) {
 	{
 		q := S().Append("1", "2", "3")
 		assert.Equal(t, 3, q.Len())
-		//joined := q.Join(".")
-		//assert.Equal(t, 5, joined.Len())
-		//assert.Equal(t, "1.2.3", q.Join(".").Str())
+		joined := q.Join(".")
+		assert.Equal(t, 5, joined.Len())
+		assert.Equal(t, "1.2.3", q.Join(".").Str())
 	}
 }
 
