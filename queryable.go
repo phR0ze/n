@@ -29,8 +29,8 @@ type KeyVal struct {
 }
 
 // Load YAML/JSON from file into queryable
-func Load(target string) *Queryable {
-	if yamlFile, err := ioutil.ReadFile(target); err == nil {
+func Load(filepath string) *Queryable {
+	if yamlFile, err := ioutil.ReadFile(filepath); err == nil {
 		data := map[string]interface{}{}
 		yaml.Unmarshal(yamlFile, &data)
 		return Q(data)

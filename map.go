@@ -8,6 +8,16 @@ import (
 	"github.com/ghodss/yaml"
 )
 
+// Map manipulates the queryable data into a new form
+func (q *Queryable) Map(sel func(interface{}) interface{}) *Queryable {
+	result := S()
+	next := q.Iter()
+	for x, ok := next(); ok; x, ok = next() {
+		result.Append(sel(x))
+	}
+	return result
+}
+
 // TODO: Need to refactor below here
 
 //--------------------------------------------------------------------------------------------------
