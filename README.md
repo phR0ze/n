@@ -1,5 +1,5 @@
 # nub
-Collection of missing Go helper functions reminiscent Ruby/C#. I love the
+Collection of missing Go helper functions reminiscent of Ruby/C#. I love the
 elegance of Ruby's short named plethera of chainable methods while C# has
 some awesome deferred execution. I'm attempting to marry the two :)
 
@@ -12,13 +12,12 @@ some awesome deferred execution. I'm attempting to marry the two :)
 
 ### Iterator Pattern <a name="iterator-pattern"></a>
 I implemented the iterator pattern based off of the iterator closure pattern disscussed
-by blog https://ewencp.org/blog/golang-iterators/index.htm mainly for syntactic style
-
-Other [sources](https://stackoverflow.com/questions/14000534/what-is-most-idiomatic-way-to-create-an-iterator-in-go)
+by blog https://ewencp.org/blog/golang-iterators/index.htm mainly for syntactic style;
+other [sources](https://stackoverflow.com/questions/14000534/what-is-most-idiomatic-way-to-create-an-iterator-in-go)
 indicates that the closure style iterator is about 3x slower than normal. However my own benchmarking was much closer:
 
 Changing the order in which my benchmarks run seems to affect the time (caching?)  
-At any rate averaging I'm seeing only about a 33.33% performance hit. 33% in nested large
+At any rate on average I'm seeing only about a 33.33% performance hit. 33% in nested large
 data sets may impact performance in some cases but I'm betting in most cases performance
 will be dominated by actual work and not looping overhead.
 
