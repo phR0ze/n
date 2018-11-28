@@ -118,27 +118,6 @@ func TestStrInput(t *testing.T) {
 	assert.Equal(t, "four", q.At(1).Str())
 }
 
-func TestSet(t *testing.T) {
-	{
-		cnt := []bool{}
-		q := S()
-		q.Set([]int{1, 2, 3})
-		next := q.Iter()
-		for item, ok := next(); ok; item, ok = next() {
-			cnt = append(cnt, true)
-			switch len(cnt) {
-			case 1:
-				assert.Equal(t, 1, item)
-			case 2:
-				assert.Equal(t, 2, item)
-			case 3:
-				assert.Equal(t, 3, item)
-			}
-		}
-		assert.Len(t, cnt, 3)
-	}
-}
-
 func TestEach(t *testing.T) {
 	{
 		cnt := []bool{}
@@ -225,18 +204,104 @@ func TestAt(t *testing.T) {
 	assert.Equal(t, 4, q.At(3).Int())
 }
 
-func TestInt(t *testing.T) {
-	assert.Equal(t, 1, Q(1).Int())
+func TestClear(t *testing.T) {
+	q := Q([]int{1, 2, 3})
+	assert.True(t, q.Any())
+	assert.Equal(t, 3, q.Len())
+	q.Clear()
+	assert.False(t, q.Any())
+	assert.Equal(t, 0, q.Len())
 }
 
-func TestInts(t *testing.T) {
-	assert.Equal(t, []int{1, 2, 3}, Q([]int{1, 2, 3}).Ints())
+func TestContains(t *testing.T) {
+	{
+		q := S()
+		assert.False(t, q.Contains(1))
+	}
+	{
+		q := Q([]int{})
+		assert.False(t, q.Contains(1))
+	}
+	{
+		q := Q([]int{1, 2, 3})
+		assert.False(t, q.Contains(0))
+		assert.True(t, q.Contains(2))
+	}
+	{
+		q := Q(2)
+		assert.True(t, q.Contains(2))
+	}
+	{
+		q := Q([]string{})
+		assert.False(t, q.Contains(""))
+	}
+	{
+		q := Q("testing")
+		assert.False(t, q.Contains("bob"))
+		assert.True(t, q.Contains("test"))
+	}
+	{
+		q := Q([]string{"1", "2", "3"})
+		assert.False(t, q.Contains(""))
+		assert.True(t, q.Contains("3"))
+	}
+	{
+		type bob struct {
+			data string
+		}
+		q := Q([]bob{{data: "3"}})
+		assert.False(t, q.Contains(""))
+		assert.False(t, q.Contains(bob{data: "2"}))
+		assert.True(t, q.Contains(bob{data: "3"}))
+	}
 }
 
-func TestStr(t *testing.T) {
-	assert.Equal(t, "1", Q("1").Str())
+func TestContainsAny(t *testing.T) {
+	{
+		q := S()
+		assert.False(t, q.ContainsAny(nil))
+	}
+	{
+		q := S()
+		assert.False(t, q.ContainsAny([]int{}))
+	}
+	{
+		q := S()
+		assert.False(t, q.ContainsAny([]string{}))
+	}
+	{
+		q := Q([]int{1, 2, 3})
+		assert.False(t, q.ContainsAny([]string{}))
+		assert.True(t, q.ContainsAny(2))
+		assert.True(t, q.ContainsAny([]int{0, 3}))
+		assert.False(t, q.ContainsAny("2"))
+	}
+	{
+		q := Q([]string{"1", "2", "3"})
+		assert.False(t, q.ContainsAny([]int{}))
+		assert.False(t, q.ContainsAny(2))
+		assert.True(t, q.ContainsAny([]string{"0", "3"}))
+		assert.True(t, q.ContainsAny("2"))
+	}
 }
 
-func TestStrs(t *testing.T) {
-	assert.Equal(t, []string{"1", "2", "3"}, Q([]interface{}{"1", "2", "3"}).Strs())
+func TestSet(t *testing.T) {
+	{
+		cnt := []bool{}
+		q := S()
+		q.Set([]int{1, 2, 3})
+		next := q.Iter()
+		for item, ok := next(); ok; item, ok = next() {
+			cnt = append(cnt, true)
+			switch len(cnt) {
+			case 1:
+				assert.Equal(t, 1, item)
+			case 2:
+				assert.Equal(t, 2, item)
+			case 3:
+				assert.Equal(t, 3, item)
+			}
+		}
+		assert.Len(t, cnt, 3)
+	}
 }

@@ -45,7 +45,7 @@ verbose to use.  I find it extremely tedious to continually re-implement simple 
 which is why I'm creating nub objects with helper functions. I've chosen a handful to implement
 and skipped over others that I may come back to.
 
-### Functions
+### Functions <a name="functions"></a>
 | Function     | Description                                     | Slice | Map | Str | Custom |
 | ------------ | ----------------------------------------------- | ----- | ----| --- | ------ |
 | S            | Creates a new empty slice based queryable       | 1     | 0   | 0   | 0      |
@@ -54,8 +54,18 @@ and skipped over others that I may come back to.
 | Any          | Check if the queryable has anything in it       | 1     | 0   | 0   | 0      |
 | Append       | Add items to the end of the collection          | 1     | 0   | 0   | 0      |
 | At           | Return item at the given neg/pos index notation | 1     | 0   | 0   | 0      |
+| Clear        | Clear out the underlying collection             | 1     | 0   | 0   | 0      |
+| Contains     | Check for the given item                        | 1     | 0   | 0   | 0      |
+| ContainsAny  | Check for any of the given items                | 1     | 0   | 0   | 0      |
 | Each         | Iterate over the queryable and execute actions  | 1     | 0   | 0   | 0      |
 | Set          | Set the underlying queryable object             | 1     | 0   | 0   | 0      |
+| Singular     | Is queryable encapsualting a non-collection     | 1     | 0   | 0   | 0      |
+
+### Materialization <a name="materialization"></a>
+Materialization or processing deferred execution and converting to a usable type
+
+| Function     | Description                                     | Slice | Map | Str | Custom |
+| ------------ | ----------------------------------------------- | ----- | ----| --- | ------ |
 | Int          | Materialize the results into a single int       | 1     | 0   | 0   | 0      |
 | Ints         | Materialize the results into an int slice       | 1     | 0   | 0   | 0      |
 | Str          | Materialize the results into a single string    | 1     | 0   | 0   | 0      |
