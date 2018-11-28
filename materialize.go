@@ -4,12 +4,12 @@ package nub
 
 // A materializes queryable into a string
 func (q *Queryable) A() string {
-	return q.ref.Interface().(string)
+	return q.v.Interface().(string)
 }
 
 // I materializes queryable into an int
 func (q *Queryable) I() int {
-	return q.ref.Interface().(int)
+	return q.v.Interface().(int)
 }
 
 // M materializes queryable into a map
@@ -25,7 +25,7 @@ func (q *Queryable) M() map[string]interface{} {
 
 // O materializes queryable into a interface{}
 func (q *Queryable) O() interface{} {
-	return q.ref.Interface()
+	return q.v.Interface()
 }
 
 // Ints materializes queryable into an int slice

@@ -14,9 +14,8 @@ import (
 // Queryable provides chainable deferred execution
 // and is the heart of the algorithm abstraction layer
 type Queryable struct {
+	v    *reflect.Value
 	Iter func() Iterator
-
-	ref *reflect.Value
 }
 
 // Iterator provides a closure to capture the index and reset it
@@ -41,7 +40,7 @@ func Load(filepath string) *Queryable {
 // A provides a new empty Queryable string
 func A() *Queryable {
 	ref := reflect.ValueOf(string(""))
-	return &Queryable{ref: &ref, Iter: strIter(ref)}
+	return &Queryable{v: &ref, Iter: strIter(ref)}
 }
 
 func strIter(ref reflect.Value) func() Iterator {
@@ -61,7 +60,7 @@ func strIter(ref reflect.Value) func() Iterator {
 // M provides a new empty Queryable map
 func M() *Queryable {
 	ref := reflect.ValueOf(map[interface{}]interface{}{})
-	return &Queryable{ref: &ref, Iter: mapIter(ref)}
+	return &Queryable{v: &ref, Iter: mapIter(ref)}
 }
 
 func mapIter(ref reflect.Value) func() Iterator {
@@ -85,7 +84,7 @@ func mapIter(ref reflect.Value) func() Iterator {
 // S provides a new empty Queryable slice
 func S() *Queryable {
 	ref := reflect.ValueOf([]interface{}{})
-	return &Queryable{ref: &ref, Iter: sliceIter(ref)}
+	return &Queryable{v: &ref, Iter: sliceIter(ref)}
 }
 
 func sliceIter(ref reflect.Value) func() Iterator {
@@ -109,7 +108,7 @@ func Q(obj interface{}) *Queryable {
 	}
 
 	ref := reflect.ValueOf(obj)
-	result := &Queryable{ref: &ref}
+	result := &Queryable{v: &ref}
 	switch ref.Kind() {
 
 	// Slice types
@@ -136,13 +135,13 @@ func Q(obj interface{}) *Queryable {
 func (q *Queryable) At(i int) *Queryable {
 	if q.TypeIter() {
 		if i < 0 {
-			i = q.ref.Len() + i
+			i = q.v.Len() + i
 		}
-		if i >= 0 && i < q.ref.Len() {
-			if str, ok := q.ref.Interface().(string); ok {
+		if i >= 0 && i < q.v.Len() {
+			if str, ok := q.v.Interface().(string); ok {
 				return Q(string(str[i]))
 			}
-			return Q(q.ref.Index(i).Interface())
+			return Q(q.v.Index(i).Interface())
 		}
 	}
 	panic(errors.New("Index out of slice bounds"))
@@ -186,7 +185,7 @@ func (q *Queryable) Get(key string) *Queryable {
 func (q *Queryable) Join(delim string) *Queryable {
 	var joined bytes.Buffer
 	if q.TypeStr() {
-		joined.WriteString(q.ref.Interface().(string))
+		joined.WriteString(q.v.Interface().(string))
 	} else if q.TypeIter() {
 		next := q.Iter()
 		for x, ok := next(); ok; x, ok = next() {
@@ -206,7 +205,7 @@ func (q *Queryable) Join(delim string) *Queryable {
 // Len of the collection type including string
 func (q *Queryable) Len() int {
 	if q.TypeIter() {
-		return q.ref.Len()
+		return q.v.Len()
 	}
 	return 1
 }
@@ -215,14 +214,14 @@ func (q *Queryable) Len() int {
 func (q *Queryable) Set(obj interface{}) *Queryable {
 	other := Q(obj)
 	q.Iter = other.Iter
-	q.ref = other.ref
+	q.v = other.v
 	return q
 }
 
 // Split the string into a slice on delimiter
 func (q *Queryable) Split(delim string) *Queryable {
 	if q.TypeStr() {
-		return Q(strings.Split(q.ref.Interface().(string), delim))
+		return Q(strings.Split(q.v.Interface().(string), delim))
 	}
 	return A()
 }
@@ -237,7 +236,7 @@ func (q *Queryable) TypeIter() bool {
 
 // TypeStr checks if the queryable is encapsulating a string
 func (q *Queryable) TypeStr() bool {
-	if _, ok := q.ref.Interface().(string); ok {
+	if _, ok := q.v.Interface().(string); ok {
 		return true
 	}
 	return false

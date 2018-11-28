@@ -2,31 +2,28 @@ package nub
 
 import "reflect"
 
-// TakeFirst remove an return the first item
+// TakeFirst remove an return the first item.
 func (q *Queryable) TakeFirst() (item interface{}, ok bool) {
-	switch q.ref.Kind() {
+	switch q.v.Kind() {
 
 	// Append to slice type
 	case reflect.Array, reflect.Slice:
-		if q.ref.Len() > 0 {
-			// ref := reflect.MakeSlice(q.ref.Type(), 0, q.ref.Cap())
-			// for i := 0; i < q.ref.Len(); i++ {
+		if q.v.Len() > 0 {
 
-			// }
-			// //*q.ref = reflect.Append(*q.ref, ref.Index(i))
-			// //}
-			// q.Iter = sliceIter(*q.ref)
+			// Create new slice minus first
+			n := reflect.MakeSlice(q.v.Type(), 0, q.v.Cap())
+			for i := 1; i < q.v.Len(); i++ {
+				n = reflect.Append(n, q.v.Index(i))
+			}
+
+			// Capture item, status and update queryable
+			item = q.v.Index(0).Interface()
+			ok = true
+			*q.v = n
+			q.Iter = sliceIter(*q.v)
 		}
-
-	// Append to map type
-	case reflect.Map:
-		panic("TODO: implement append for TakeFirst")
-
-	// Not a collection type create a new queryable
-	default:
-		//*q = *S().Append(q.ref.Interface())
 	}
-	return nil, false
+	return
 }
 
 // // TakeFirstCnt updates the underlying slice and returns the items

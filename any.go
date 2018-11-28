@@ -3,9 +3,9 @@ package nub
 // Any checks if the queryable has anything in it
 func (q *Queryable) Any() bool {
 	if q.Iter != nil {
-		return q.ref.Len() > 0
+		return q.v.Len() > 0
 	}
-	return q.ref.Interface() != nil
+	return q.v.Interface() != nil
 }
 
 // AnyWhere checka if any match the given lambda
@@ -17,7 +17,7 @@ func (q *Queryable) AnyWhere(lambda func(interface{}) bool) bool {
 				return true
 			}
 		}
-	} else if lambda(q.ref.Interface()) {
+	} else if lambda(q.v.Interface()) {
 		return true
 	}
 	return false

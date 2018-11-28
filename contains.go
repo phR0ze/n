@@ -24,7 +24,7 @@ func (q *Queryable) Contains(obj interface{}) bool {
 
 		// Both strings - pass through to stings.Contains
 		if q.TypeStr() && other.TypeStr() {
-			return strings.Contains(q.ref.Interface().(string), obj.(string))
+			return strings.Contains(q.v.Interface().(string), obj.(string))
 		}
 
 		// Other is non iterable, convert to iterable
@@ -34,17 +34,17 @@ func (q *Queryable) Contains(obj interface{}) bool {
 		next := other.Iter()
 		for x, ok := next(); ok; x, ok = next() {
 			if str, ok := x.(string); ok {
-				if !strings.Contains(q.ref.Interface().(string), str) {
+				if !strings.Contains(q.v.Interface().(string), str) {
 					return false
 				}
 			} else {
-				if q.ref.Interface() != x {
+				if q.v.Interface() != x {
 					return false
 				}
 			}
 		}
 	} else {
-		switch q.ref.Kind() {
+		switch q.v.Kind() {
 		case reflect.Array, reflect.Slice:
 			if !other.TypeSingle() {
 				next := other.Iter()
@@ -63,7 +63,7 @@ func (q *Queryable) Contains(obj interface{}) bool {
 				return false
 			}
 		case reflect.Map:
-			keys := Q(q.ref.MapKeys()).Map(func(x interface{}) interface{} {
+			keys := Q(q.v.MapKeys()).Map(func(x interface{}) interface{} {
 				return x.(reflect.Value).Interface()
 			})
 			if !other.TypeSingle() {
@@ -95,7 +95,7 @@ func (q *Queryable) ContainsAny(obj interface{}) bool {
 
 		// Both strings - pass through to stings.Contains
 		if q.TypeStr() && other.TypeStr() {
-			return strings.Contains(q.ref.Interface().(string), obj.(string))
+			return strings.Contains(q.v.Interface().(string), obj.(string))
 		}
 
 		// Other is non iterable, convert to iterable
@@ -104,12 +104,12 @@ func (q *Queryable) ContainsAny(obj interface{}) bool {
 		}
 		next := other.Iter()
 		for x, ok := next(); ok; x, ok = next() {
-			if q.ref.Interface() == x {
+			if q.v.Interface() == x {
 				return true
 			}
 		}
 	} else {
-		switch q.ref.Kind() {
+		switch q.v.Kind() {
 		case reflect.Array, reflect.Slice:
 			if !other.TypeSingle() {
 				next := q.Iter()
@@ -131,7 +131,7 @@ func (q *Queryable) ContainsAny(obj interface{}) bool {
 			}
 		case reflect.Map:
 			if !other.TypeSingle() {
-				for _, key := range q.ref.MapKeys() {
+				for _, key := range q.v.MapKeys() {
 					next := other.Iter()
 					for x, ok := next(); ok; x, ok = next() {
 						if key.Interface() == x {
@@ -140,7 +140,7 @@ func (q *Queryable) ContainsAny(obj interface{}) bool {
 					}
 				}
 			} else {
-				for _, key := range q.ref.MapKeys() {
+				for _, key := range q.v.MapKeys() {
 					if key.Interface() == obj {
 						return true
 					}
