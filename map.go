@@ -8,10 +8,10 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-// KeyValuePair similar to C# for iterator over maps
-type KeyValuePair struct {
-	Key   interface{}
-	Value interface{}
+// KeyVal similar to C# for iterator over maps
+type KeyVal struct {
+	Key interface{}
+	Val interface{}
 }
 
 // M provides a new empty Queryable map
@@ -28,9 +28,9 @@ func mapIter(ref reflect.Value, obj interface{}) func() Iterator {
 		keys := ref.MapKeys()
 		return func() (item interface{}, ok bool) {
 			if ok = i < len; ok {
-				item = &KeyValuePair{
-					Key:   keys[i].Interface(),
-					Value: ref.MapIndex(keys[i]).Interface(),
+				item = &KeyVal{
+					Key: keys[i].Interface(),
+					Val: ref.MapIndex(keys[i]).Interface(),
 				}
 				i++
 			}
@@ -44,8 +44,8 @@ func (q *Queryable) StrMap() map[string]interface{} {
 	result := map[string]interface{}{}
 	next := q.Iter()
 	for x, ok := next(); ok; x, ok = next() {
-		pair := x.(*KeyValuePair)
-		result[pair.Key.(string)] = pair.Value
+		pair := x.(*KeyVal)
+		result[pair.Key.(string)] = pair.Val
 	}
 	return result
 }

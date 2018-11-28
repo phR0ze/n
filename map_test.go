@@ -25,16 +25,16 @@ func TestMQ(t *testing.T) {
 		next := q.Iter()
 		for x, ok := next(); ok; x, ok = next() {
 			items = append(items, x)
-			item := x.(*KeyValuePair)
+			item := x.(*KeyVal)
 			switch item.Key {
 			case "1":
-				assert.NotEqual(t, &KeyValuePair{Key: "2", Value: "one"}, item)
-				assert.NotEqual(t, &KeyValuePair{Key: "1", Value: "two"}, item)
-				assert.Equal(t, &KeyValuePair{Key: "1", Value: "one"}, item)
+				assert.NotEqual(t, &KeyVal{Key: "2", Val: "one"}, item)
+				assert.NotEqual(t, &KeyVal{Key: "1", Val: "two"}, item)
+				assert.Equal(t, &KeyVal{Key: "1", Val: "one"}, item)
 			case "2":
-				assert.Equal(t, &KeyValuePair{Key: "2", Value: "two"}, item)
+				assert.Equal(t, &KeyVal{Key: "2", Val: "two"}, item)
 			case "3":
-				assert.Equal(t, &KeyValuePair{Key: "3", Value: "three"}, item)
+				assert.Equal(t, &KeyVal{Key: "3", Val: "three"}, item)
 			}
 		}
 		assert.Len(t, items, 3)
@@ -45,6 +45,31 @@ func TestMStrMap(t *testing.T) {
 	{
 		q := Q(map[string]interface{}{"1": "one", "2": "two", "3": "three"})
 		assert.Equal(t, 3, q.Len())
+	}
+}
+
+func TestMAny(t *testing.T) {
+	assert.False(t, M().Any())
+	assert.False(t, Q(map[int]interface{}{}).Any())
+	assert.True(t, Q(map[int]interface{}{1: "one"}).Any())
+}
+
+func TestMAnyWhere(t *testing.T) {
+	{
+		q := M()
+		assert.False(t, q.AnyWhere(func(x interface{}) bool {
+			return x == 3
+		}))
+	}
+	{
+		q := Q(map[string]interface{}{"1": "one", "2": "two", "3": "three"})
+		assert.False(t, q.AnyWhere(func(x interface{}) bool { return x == 3 }))
+		assert.True(t, q.AnyWhere(func(x interface{}) bool {
+			return (x.(*KeyVal)).Key == "3"
+		}))
+		assert.True(t, q.AnyWhere(func(x interface{}) bool {
+			return (x.(*KeyVal)).Val == "two"
+		}))
 	}
 }
 

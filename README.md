@@ -52,7 +52,7 @@ and skipped over others that I may come back to.
 | S            | Creates a new empty slice based queryable       | 1     | 0   | 0   | 0      |
 | Q            | Creates a new queryable encapsulating the TYPE  | 1     | 1   | 1   | 0      |
 | O            | Access to the underlying raw type               | 1     | 1   | 1   | 0      |
-| Any          | Check if the queryable has anything in it       | 1     | 0   | 0   | 0      |
+| Any          | Check if the queryable has anything in it       | 1     | 1   | 0   | 0      |
 | AnyWhere     | Check if any match the given lambda             | 1     | 0   | 0   | 0      |
 | Append       | Add items to the end of the collection          | 1     | 0   | 0   | 0      |
 | At           | Return item at the given neg/pos index notation | 1     | 0   | 0   | 0      |

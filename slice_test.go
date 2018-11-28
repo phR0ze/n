@@ -60,7 +60,25 @@ func TestSQ(t *testing.T) {
 	}
 }
 
-func TestSSlice(t *testing.T) {
+func TestSAny(t *testing.T) {
+	assert.False(t, S().Any())
+	assert.True(t, S().Append(1).Any())
+	assert.False(t, Q([]int{}).Any())
+	assert.True(t, Q([]int{1}).Any())
+}
+
+func TestSAnyWhere(t *testing.T) {
+	{
+		q := S()
+		assert.False(t, q.AnyWhere(func(x interface{}) bool {
+			return x == 3
+		}))
+	}
+	{
+		q := Q([]string{"1", "2", "3"})
+		assert.False(t, q.AnyWhere(func(x interface{}) bool { return x == 3 }))
+		assert.True(t, q.AnyWhere(func(x interface{}) bool { return x == "3" }))
+	}
 }
 
 func TestSLen(t *testing.T) {

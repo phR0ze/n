@@ -54,6 +54,11 @@ func TestAStrs(t *testing.T) {
 	}
 }
 
+func TestAAny(t *testing.T) {
+	assert.False(t, A().Any())
+	assert.True(t, Q("test").Any())
+}
+
 func TestALen(t *testing.T) {
 	{
 		q := Q("test")
