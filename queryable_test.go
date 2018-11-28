@@ -9,6 +9,10 @@ import (
 
 const benchMarkSize = 9999999
 
+type bob struct {
+	data string
+}
+
 func BenchmarkClosureIterator(t *testing.B) {
 	ints := make([]int, benchMarkSize)
 	for i := range ints {
@@ -41,26 +45,27 @@ func BenchmarkEach(t *testing.B) {
 	})
 }
 
-func TestA(t *testing.T) {
-	q := A()
-	assert.NotNil(t, q)
-	assert.NotNil(t, q.Iter)
-	iter := q.Iter()
-	assert.NotNil(t, iter)
-	x, ok := iter()
-	assert.Nil(t, x)
-	assert.False(t, ok)
-}
-
-func TestAQ(t *testing.T) {
-	q := Q("one")
-	assert.True(t, q.Any())
-	assert.Equal(t, 3, q.Len())
-	assert.Equal(t, "o", q.At(0).Str())
-	assert.Equal(t, 2, q.Append("four").Len())
-	assert.Equal(t, 2, q.Len())
-	assert.Equal(t, "one", q.At(0).Str())
-	assert.Equal(t, "four", q.At(1).Str())
+func TestQA(t *testing.T) {
+	{
+		q := A()
+		assert.NotNil(t, q)
+		assert.NotNil(t, q.Iter)
+		iter := q.Iter()
+		assert.NotNil(t, iter)
+		x, ok := iter()
+		assert.Nil(t, x)
+		assert.False(t, ok)
+	}
+	{
+		q := Q("one")
+		assert.True(t, q.Any())
+		assert.Equal(t, 3, q.Len())
+		assert.Equal(t, "o", q.At(0).A())
+		assert.Equal(t, 2, q.Append("four").Len())
+		assert.Equal(t, 2, q.Len())
+		assert.Equal(t, "one", q.At(0).A())
+		assert.Equal(t, "four", q.At(1).A())
+	}
 }
 
 func TestIQ(t *testing.T) {
@@ -72,22 +77,21 @@ func TestIQ(t *testing.T) {
 	assert.Equal(t, q, q2)
 	assert.Equal(t, 2, q.Len())
 	assert.Equal(t, 2, q2.Len())
-	assert.Equal(t, 5, q.At(0).Int())
-	assert.Equal(t, 2, q.At(1).Int())
+	assert.Equal(t, 5, q.At(0).I())
+	assert.Equal(t, 2, q.At(1).I())
 }
 
-func TestM(t *testing.T) {
-	q := M()
-	assert.NotNil(t, q)
-	assert.NotNil(t, q.Iter)
-	iter := q.Iter()
-	assert.NotNil(t, iter)
-	x, ok := iter()
-	assert.Nil(t, x)
-	assert.False(t, ok)
-}
-
-func TestMQ(t *testing.T) {
+func TestQM(t *testing.T) {
+	{
+		q := M()
+		assert.NotNil(t, q)
+		assert.NotNil(t, q.Iter)
+		iter := q.Iter()
+		assert.NotNil(t, iter)
+		x, ok := iter()
+		assert.Nil(t, x)
+		assert.False(t, ok)
+	}
 	{
 		items := []interface{}{}
 		q := Q(map[string]string{"1": "one", "2": "two", "3": "three"})
@@ -107,6 +111,30 @@ func TestMQ(t *testing.T) {
 			}
 		}
 		assert.Len(t, items, 3)
+	}
+}
+
+func TestCustomQ(t *testing.T) {
+	{
+		// []bob
+		q := Q([]bob{})
+		assert.False(t, q.Any())
+	}
+	{
+		// []bob
+		q := Q([]bob{{data: "3"}})
+		assert.True(t, q.Any())
+		assert.Equal(t, bob{data: "3"}, q.At(0).O())
+	}
+	{
+		// []bob
+		q := S()
+		assert.False(t, q.Any())
+		assert.Equal(t, 0, q.Len())
+		q.Append(bob{data: "3"})
+		assert.True(t, q.Any())
+		assert.Equal(t, 1, q.Len())
+		assert.Equal(t, bob{data: "3"}, q.At(0).O())
 	}
 }
 
@@ -171,69 +199,112 @@ func TestAppend(t *testing.T) {
 }
 
 func TestAt(t *testing.T) {
-	q := Q([]int{1, 2, 3, 4})
-	assert.Equal(t, 4, q.At(-1).Int())
-	assert.Equal(t, 3, q.At(-2).Int())
-	assert.Equal(t, 2, q.At(-3).Int())
-	assert.Equal(t, 1, q.At(0).Int())
-	assert.Equal(t, 2, q.At(1).Int())
-	assert.Equal(t, 3, q.At(2).Int())
-	assert.Equal(t, 4, q.At(3).Int())
+	{
+		// String
+		q := Q("test")
+		assert.Equal(t, "t", q.At(0).A())
+		assert.Equal(t, "e", q.At(1).A())
+		assert.Equal(t, "s", q.At(2).A())
+		assert.Equal(t, "t", q.At(3).A())
+		assert.Equal(t, "t", q.At(-1).A())
+		assert.Equal(t, "s", q.At(-2).A())
+		assert.Equal(t, "e", q.At(-3).A())
+		assert.Equal(t, "t", q.At(-4).A())
+	}
+	{
+		// []int
+		q := Q([]int{1, 2, 3, 4})
+		assert.Equal(t, 4, q.At(-1).I())
+		assert.Equal(t, 3, q.At(-2).I())
+		assert.Equal(t, 2, q.At(-3).I())
+		assert.Equal(t, 1, q.At(0).I())
+		assert.Equal(t, 2, q.At(1).I())
+		assert.Equal(t, 3, q.At(2).I())
+		assert.Equal(t, 4, q.At(3).I())
+	}
 }
 
 func TestClear(t *testing.T) {
-	q := Q([]int{1, 2, 3})
-	assert.True(t, q.Any())
-	assert.Equal(t, 3, q.Len())
-	q.Clear()
-	assert.False(t, q.Any())
-	assert.Equal(t, 0, q.Len())
+	{
+		// Empty
+		q := A()
+		assert.False(t, q.Any())
+		assert.Equal(t, 0, q.Clear().Len())
+		assert.False(t, q.Any())
+	}
+	{
+		// String
+		q := Q("test")
+		assert.True(t, q.Any())
+		assert.Equal(t, "test", q.A())
+		assert.Equal(t, 4, q.Len())
+		assert.Equal(t, 0, q.Clear().Len())
+		assert.False(t, q.Any())
+	}
+	{
+		// []int
+		q := Q([]int{1, 2, 3})
+		assert.True(t, q.Any())
+		assert.Equal(t, 3, q.Len())
+		q.Clear()
+		assert.False(t, q.Any())
+		assert.Equal(t, 0, q.Len())
+	}
+	{
+		// map[string]interface
+		q := Q(map[string]interface{}{"1": "one", "2": "two", "3": "three"})
+		assert.True(t, q.Any())
+		assert.Equal(t, 3, q.Len())
+		q.Clear()
+		assert.False(t, q.Any())
+		assert.Equal(t, 0, q.Len())
+	}
 }
 
 func TestJoin(t *testing.T) {
 	{
 		q := A()
-		assert.Equal(t, "", q.Join(".").Str())
+		assert.Equal(t, "", q.Join(".").A())
 	}
 	{
 		q := S()
-		assert.Equal(t, "", q.Join(".").Str())
+		assert.Equal(t, "", q.Join(".").A())
 	}
 	{
 		q := M()
-		assert.Equal(t, "", q.Join(".").Str())
+		assert.Equal(t, "", q.Join(".").A())
 	}
 	{
 		q := Q("test")
-		assert.Equal(t, "test", q.Join(".").Str())
+		assert.Equal(t, "test", q.Join(".").A())
 	}
 	{
 		q := S().Append("1", "2", "3")
 		assert.Equal(t, 3, q.Len())
 		joined := q.Join(".")
 		assert.Equal(t, 5, joined.Len())
-		assert.Equal(t, "1.2.3", q.Join(".").Str())
+		assert.Equal(t, "1.2.3", q.Join(".").A())
 	}
 	{
 		q := Q([]string{"1", "2", "3"})
 		assert.Equal(t, 3, q.Len())
 		joined := q.Join(".")
 		assert.Equal(t, 5, joined.Len())
-		assert.Equal(t, "1.2.3", q.Join(".").Str())
+		assert.Equal(t, "1.2.3", q.Join(".").A())
 	}
 	{
 		q := S().Append(1, 2, 3)
 		assert.Equal(t, 3, q.Len())
 		joined := q.Join(".")
 		assert.Equal(t, 5, joined.Len())
-		assert.Equal(t, "1.2.3", q.Join(".").Str())
+		assert.Equal(t, "1.2.3", q.Join(".").A())
 	}
 	{
 		q := Q([]int{1, 2, 3})
 		assert.Equal(t, 3, q.Len())
 		joined := q.Join(".")
 		assert.Equal(t, 5, joined.Len())
-		assert.Equal(t, "1.2.3", q.Join(".").Str())
+		assert.Equal(t, "1.2.3", q.Join(".").A())
 	}
 }
 

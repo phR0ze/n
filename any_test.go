@@ -7,56 +7,68 @@ import (
 )
 
 func TestAny(t *testing.T) {
-
-	// Test empty queryable
-	assert.False(t, S().Any())
-
-	// Test empty collection object
-	assert.False(t, Q([]int{}).Any())
-
-	// Test value object
-	assert.True(t, Q(1).Any())
-
-	// Test string object
-	assert.True(t, Q("2").Any())
-}
-
-func TestAAny(t *testing.T) {
-	assert.False(t, A().Any())
-	assert.True(t, Q("test").Any())
-}
-
-func TestMAny(t *testing.T) {
-	assert.False(t, M().Any())
-	assert.False(t, Q(map[int]interface{}{}).Any())
-	assert.True(t, Q(map[int]interface{}{1: "one"}).Any())
-}
-
-func TestIAnyWhere(t *testing.T) {
 	{
+		// empty []int
+		assert.False(t, Q([]int{}).Any())
+
+		// empty []interface{}
+		assert.False(t, S().Any())
+	}
+	{
+		// int
+		assert.True(t, Q(1).Any())
+	}
+	{
+		// string
+		assert.False(t, A().Any())
+		assert.True(t, Q("test").Any())
+	}
+	{
+		// map
+		assert.False(t, M().Any())
+		assert.False(t, Q(map[int]interface{}{}).Any())
+		assert.True(t, Q(map[int]interface{}{1: "one"}).Any())
+	}
+	{
+		// empty []bob
+		q := Q([]bob{})
+		assert.False(t, q.Any())
+	}
+	{
+		// []bob
+		q := Q([]bob{{data: "3"}})
+		assert.True(t, q.Any())
+	}
+}
+
+func TestAnyWhere(t *testing.T) {
+	{
+		// string
+		assert.True(t, Q("test").AnyWhere(func(x interface{}) bool {
+			return x == "test"
+		}))
+	}
+	{
+		// int slice
 		q := Q([]int{1, 2, 3})
 		exists := q.AnyWhere(func(item interface{}) bool {
 			return item.(int) == 5
 		})
 		assert.False(t, exists)
-	}
-	{
-		q := Q([]int{1, 2, 3})
-		exists := q.AnyWhere(func(item interface{}) bool {
+		exists = q.AnyWhere(func(item interface{}) bool {
 			return item.(int) == 2
 		})
 		assert.True(t, exists)
 	}
-}
-
-func TestMAnyWhere(t *testing.T) {
 	{
+		// empty map
 		q := M()
 		assert.False(t, q.AnyWhere(func(x interface{}) bool {
 			return x == 3
 		}))
 	}
 	{
+		// str map
 		q := Q(map[string]interface{}{"1": "one", "2": "two", "3": "three"})
 		assert.False(t, q.AnyWhere(func(x interface{}) bool { return x == 3 }))
 		assert.True(t, q.AnyWhere(func(x interface{}) bool {
@@ -66,4 +78,15 @@ func TestMAnyWhere(t *testing.T) {
 			return (x.(*KeyVal)).Val == "two"
 		}))
 	}
+	{
+		// []bob
+		q := Q([]bob{{data: "3"}, {data: "4"}})
+		assert.True(t, q.AnyWhere(func(x interface{}) bool {
+			return (x.(bob)).data == "3"
+		}))
+		assert.False(t, q.AnyWhere(func(x interface{}) bool {
+			return (x.(bob)).data == "5"
+		}))
+	}
+
 }

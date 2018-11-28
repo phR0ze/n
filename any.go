@@ -17,6 +17,8 @@ func (q *Queryable) AnyWhere(lambda func(interface{}) bool) bool {
 				return true
 			}
 		}
+	} else if lambda(q.ref.Interface()) {
+		return true
 	}
 	return false
 }

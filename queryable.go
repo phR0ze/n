@@ -127,14 +127,6 @@ func Q(obj interface{}) *Queryable {
 	// Chan types
 	case reflect.Chan:
 		panic("TODO: handle reflect.Chan")
-
-	// Handle int types
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		// No iterator should exist
-
-	// Handle unknown types
-	default:
-		panic("TODO: handle custom types")
 	}
 
 	return result
@@ -189,6 +181,24 @@ func (q *Queryable) Each(action func(interface{})) {
 			action(x)
 		}
 	}
+}
+
+// Get an item by key which can be dot delimited
+func (q *Queryable) Get(key string) *Queryable {
+	//keys := Q(key).Split(".")
+	// 	if k, ok := keys.TakeFirst(); ok {
+	// 		if entry, exists := m.raw[k]; exists {
+	// 			if v, ok := entry.(map[string]interface{}); ok {
+	// 				result.raw = v
+	// 				if keys.Len() != 0 {
+	// 					result = result.StrMap(keys.Join(".").M())
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// 	return result
+	// }
+	return nil
 }
 
 // Join slice items as string with given delimeter
@@ -259,3 +269,8 @@ func (q *Queryable) TypeSingle() bool {
 	}
 	return false
 }
+
+// // Where acts as a filter narrowing in on specific items
+// func (q *Queryable) Where() *Queryable {
+// 	return nil
+// }

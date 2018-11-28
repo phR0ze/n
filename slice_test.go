@@ -26,7 +26,7 @@ func TestS(t *testing.T) {
 		assert.Equal(t, 1, q2.Len())
 		assert.True(t, q2.Any())
 		assert.Equal(t, q, q2)
-		assert.Equal(t, 2, q.At(0).Int())
+		assert.Equal(t, 2, q.At(0).I())
 	}
 }
 

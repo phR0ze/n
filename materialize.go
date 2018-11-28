@@ -2,31 +2,18 @@ package nub
 
 // Collecting functions that return external Go types here
 
-// Int materializes the result into an int
-func (q *Queryable) Int() int {
-	return q.ref.Interface().(int)
-}
-
-// Ints materializes the results into a int slice
-func (q *Queryable) Ints() []int {
-	result := []int{}
-	next := q.Iter()
-	for x, ok := next(); ok; x, ok = next() {
-		result = append(result, x.(int))
-	}
-	return result
-}
-
-// Str materializes the result into a string
-func (q *Queryable) Str() string {
+// A materializes queryable into a string
+func (q *Queryable) A() string {
 	return q.ref.Interface().(string)
 }
 
-// StrMap materializes the result from the specific string to interface map
-// called out by the given dot notation key.
-func (q *Queryable) StrMap(target ...string) map[string]interface{} {
-	//keys := Q(target).Join(".").Split(".")
+// I materializes queryable into an int
+func (q *Queryable) I() int {
+	return q.ref.Interface().(int)
+}
 
+// M materializes queryable into a map
+func (q *Queryable) M() map[string]interface{} {
 	result := map[string]interface{}{}
 	next := q.Iter()
 	for x, ok := next(); ok; x, ok = next() {
@@ -36,25 +23,22 @@ func (q *Queryable) StrMap(target ...string) map[string]interface{} {
 	return result
 }
 
-// StrMap returns a map of interface from the given map using the given key
-// func (q *Queryable) StrMap(key string) *Queryable {
-// 	result := NewStrMap()
+// O materializes queryable into a interface{}
+func (q *Queryable) O() interface{} {
+	return q.ref.Interface()
+}
 
-// 	keys := Str(key).Split(".")
-// 	if k, ok := keys.TakeFirst(); ok {
-// 		if entry, exists := m.raw[k]; exists {
-// 			if v, ok := entry.(map[string]interface{}); ok {
-// 				result.raw = v
-// 				if keys.Len() != 0 {
-// 					result = result.StrMap(keys.Join(".").M())
-// 				}
-// 			}
-// 		}
-// 	}
-// 	return result
-// }
+// Ints materializes queryable into an int slice
+func (q *Queryable) Ints() []int {
+	result := []int{}
+	next := q.Iter()
+	for x, ok := next(); ok; x, ok = next() {
+		result = append(result, x.(int))
+	}
+	return result
+}
 
-// Strs materializes the results into a string slice
+// Strs materializes queryable into an string slice
 func (q *Queryable) Strs() []string {
 	result := []string{}
 	next := q.Iter()

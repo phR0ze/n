@@ -10,6 +10,9 @@ some awesome deferred execution. I'm attempting to marry the two :)
 
 ## References <a name="references"></a>
 
+### Deferred Execution <a name="deferred-execution"></a>
+TBD
+
 ### Iterator Pattern <a name="iterator-pattern"></a>
 I implemented the iterator pattern based off of the iterator closure pattern disscussed
 by blog https://ewencp.org/blog/golang-iterators/index.htm mainly for syntactic style;
@@ -48,39 +51,45 @@ and skipped over others that I may come back to.
 ### Functions <a name="functions"></a>
 Some functions only apply to particular underlying collection types as called out in the table.
 
-| Function     | Description                                       | Slice | Map | Str |  ?  |
-| ------------ | ------------------------------------------------- | ----- | ----| --- | --- |
-| M            | Creates a new queryable encapsulating empty map   | 0     | 1   | 0   | 0   |
-| S            | Creates a new queryable encapsulating empty slice | 1     | 0   | 0   | 0   |
-| Q            | Creates a new queryable encapsulating the TYPE    | 1     | 1   | 1   | 0   |
-| O            | Access to the underlying raw type                 | 1     | 1   | 1   | 0   |
-| Any          | Check if the queryable is not nil and not empty   | 1     | 1   | 1   | 0   |
-| AnyWhere     | Check if any match the given lambda               | 1     | 1   | 0   | 0   |
-| Append       | Add items to the end of the collection            | 1     | 0   | 0   | 0   |
-| At           | Return item at the given neg/pos index notation   | 1     | 0   | 0   | 0   |
-| Clear        | Clear out the underlying collection               | 1     | 0   | 0   | 0   |
-| Contains     | Check for the given item                          | 1     | 0   | 0   | 0   |
-| ContainsAny  | Check for any of the given items                  | 1     | 0   | 0   | 0   |
-| Each         | Iterate over the queryable and execute actions    | 1     | 0   | 0   | 0   |
-| Join         | Join slice items as string with given delimiter   | 1     | 0   | 0   | 0   |
-| Len          | Get the length of the collection                  | 1     | 1   | 1   | 0   |
-| Load         | Load YAML/JSON from file into queryable           | 0     | 0   | 0   | 0   |
-| Set          | Set the queryable's encapsulated object           | 1     | 0   | 0   | 0   |
-| Split        | Split the string into a slice on delimiter        | 0     | 0   | 1   | 0   |
-| TypeIter     | Is queryable iterable                             | 1     | 0   | 0   | 0   |
-| TypeStr      | Is queryable encapsualting a string               | 1     | 0   | 0   | 0   |
-| TypeSingle   | Is queryable encapsualting a non-collection       | 1     | 0   | 0   | 0   |
+**Key: 1 = Implemented, 0 = Not Implemented, - = N/A, ? = Custom**
+| Function     | Description                                     | Slice | Map | Str |  ?  |
+| ------------ | ----------------------------------------------- | ----- | ----| --- | --- |
+| A            | Creates queryable encapsulating empty string    | -     | -   | 1   | -   |
+| M            | Creates queryable encapsulating empty map       | -     | 1   | -   | -   |
+| S            | Creates queryable encapsulating empty slice     | 1     | -   | -   | -   |
+| Q            | Creates queryable encapsulating the given TYPE  | 1     | 1   | 1   | 1   |
+| Any          | Check if the queryable is not nil and not empty | 1     | 1   | 1   | 1   |
+| AnyWhere     | Check if any match the given lambda             | 1     | 1   | 1   | 1   |
+| Append       | Add items to the end of the collection          | 1     | 0   | 1   | 0   |
+| At           | Return item at the given neg/pos index notation | 1     | 0   | 1   | 0   |
+| Clear        | Clear out the underlying collection             | 1     | 1   | 1   | 0   |
+| Contains     | Check for the given item                        | 1     | 0   | 1   | 1   |
+| ContainsAny  | Check for any of the given items                | 1     | 0   | 0   | 0   |
+| Each         | Iterate over the queryable and execute actions  | 1     | 0   | 0   | 0   |
+| Join         | Join slice items as string with given delimiter | 1     | 0   | 0   | 0   |
+| Len          | Get the length of the collection                | 1     | 1   | 1   | 0   |
+| Load         | Load YAML/JSON from file into queryable         | 0     | 1   | 0   | 0   |
+| Set          | Set the queryable's encapsulated object         | 1     | 1   | 1   | 0   |
+| Split        | Split the string into a slice on delimiter      | 0     | 0   | 1   | 0   |
+| TakeFirst    | Remove and return the first item from the slice | 0     | 0   | 0   | 0   |
+| TakeFirstCnt | Remove and return the first cnt items           | 0     | 0   | 0   | 0   |
+| TakeLast     | Remove and return the last item from the slice  | 0     | 0   | 0   | 0   |
+| TakeLastCnt  | Remove and return the last cnt items            | 0     | 0   | 0   | 0   |
+| TypeIter     | Is queryable iterable                           | 1     | 1   | 1   | 1   |
+| TypeStr      | Is queryable encapsualting a string             | 1     | 1   | 1   | 1   |
+| TypeSingle   | Is queryable encapsualting a non-collection     | 1     | 1   | 1   | 1   |
 
 ### Materialization <a name="materialization"></a>
 Materialization or processing deferred execution and converting to a usable type
 
-| Function     | Description                                     | Return Type              |
-| ------------ | ----------------------------------------------- | ------------------------ |
-| Int          | Materialize the results into a single int       | `int`                    |
-| Ints         | Materialize the results into an int slice       | `[]int`                  |
-| Str          | Materialize the results into a single string    | `string`                 |
-| StrMap       | Materialize to string to interface{} map        | `map[string]interface{}` |
-| Strs         | Materialize the results into a string slice     | `[]string`               |
+| Function     | Description                                    | Return Type              |
+| ------------ | ---------------------------------------------- | ------------------------ |
+| A            | Materialize queryable into a string            | `string`                 |
+| I            | Materialize queryable into an int              | `int`                    |
+| M            | Materialize queryable to map                   | `map[string]interface{}` |
+| O            | Materialize queryable to interface{}           | `interface{}`            |
+| Ints         | Materialize queryable into an int slice        | `[]int`                  |
+| Strs         | Materialize queryable into a string slice      | `[]string`               |
 
 ### Slice Functions
 | Function     | Description                                     | Slice | IntSlice | StrSlice | StrMapSlice |
@@ -106,10 +115,6 @@ Materialization or processing deferred execution and converting to a usable type
 | Prepend      | Add items to the begining of the slice          | 0     | 1        | 1        | 1           |
 | Reverse      | Reverse the items                               | 0     | 0        | 0        | 0           |
 | Sort         | Sort the items                                  | 0     | 1        | 1        | 0           |
-| TakeFirst    | Remove and return the first item from the slice | 0     | 1        | 1        | 1           |
-| TakeFirstCnt | Remove and return the first cnt items           | 0     | 1        | 1        | 1           |
-| TakeLast     | Remove and return the last item from the slice  | 0     | 1        | 1        | 1           |
-| TakeLastCnt  | Remove and return the last cnt items            | 0     | 1        | 1        | 1           |
 | Uniq         | Ensure only uniq items exist in the slice       | 0     | 1        | 1        | 0           |
 | Where        | Select the items that match the given lambda    | 0     | 0        | 0        | 0           |
 
