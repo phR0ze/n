@@ -61,7 +61,6 @@ and skipped over others that I may come back to.
 | Each         | Iterate over the queryable and execute actions  | 1     | 0   | 0   | 0      |
 | Set          | Set the underlying queryable object             | 1     | 0   | 0   | 0      |
 | Singular     | Is queryable encapsualting a non-collection     | 1     | 0   | 0   | 0      |
-// ContainsWhere checks if any match the given lambda
 
 ### Materialization <a name="materialization"></a>
 Materialization or processing deferred execution and converting to a usable type

@@ -22,5 +22,18 @@ func TestAny(t *testing.T) {
 }
 
 func TestAnyWhere(t *testing.T) {
-
+	{
+		q := Q([]int{1, 2, 3})
+		exists := q.AnyWhere(func(item interface{}) bool {
+			return item.(int) == 5
+		})
+		assert.False(t, exists)
+	}
+	{
+		q := Q([]int{1, 2, 3})
+		exists := q.AnyWhere(func(item interface{}) bool {
+			return item.(int) == 2
+		})
+		assert.True(t, exists)
+	}
 }
