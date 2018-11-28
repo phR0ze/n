@@ -151,21 +151,6 @@ func TestEach(t *testing.T) {
 	}
 }
 
-func TestAny(t *testing.T) {
-
-	// Test empty queryable
-	assert.False(t, S().Any())
-
-	// Test empty collection object
-	assert.False(t, Q([]int{}).Any())
-
-	// Test value object
-	assert.True(t, Q(1).Any())
-
-	// Test string object
-	assert.True(t, Q("2").Any())
-}
-
 func TestAppend(t *testing.T) {
 	{
 		// Append to valuetype
@@ -211,78 +196,6 @@ func TestClear(t *testing.T) {
 	q.Clear()
 	assert.False(t, q.Any())
 	assert.Equal(t, 0, q.Len())
-}
-
-func TestContains(t *testing.T) {
-	{
-		q := S()
-		assert.False(t, q.Contains(1))
-	}
-	{
-		q := Q([]int{})
-		assert.False(t, q.Contains(1))
-	}
-	{
-		q := Q([]int{1, 2, 3})
-		assert.False(t, q.Contains(0))
-		assert.True(t, q.Contains(2))
-	}
-	{
-		q := Q(2)
-		assert.True(t, q.Contains(2))
-	}
-	{
-		q := Q([]string{})
-		assert.False(t, q.Contains(""))
-	}
-	{
-		q := Q("testing")
-		assert.False(t, q.Contains("bob"))
-		assert.True(t, q.Contains("test"))
-	}
-	{
-		q := Q([]string{"1", "2", "3"})
-		assert.False(t, q.Contains(""))
-		assert.True(t, q.Contains("3"))
-	}
-	{
-		type bob struct {
-			data string
-		}
-		q := Q([]bob{{data: "3"}})
-		assert.False(t, q.Contains(""))
-		assert.False(t, q.Contains(bob{data: "2"}))
-		assert.True(t, q.Contains(bob{data: "3"}))
-	}
-}
-
-func TestContainsAny(t *testing.T) {
-	{
-		q := S()
-		assert.False(t, q.ContainsAny(nil))
-	}
-	{
-		q := S()
-		assert.False(t, q.ContainsAny([]int{}))
-	}
-	{
-		q := S()
-		assert.False(t, q.ContainsAny([]string{}))
-	}
-	{
-		q := Q([]int{1, 2, 3})
-		assert.False(t, q.ContainsAny([]string{}))
-		assert.True(t, q.ContainsAny(2))
-		assert.True(t, q.ContainsAny([]int{0, 3}))
-		assert.False(t, q.ContainsAny("2"))
-	}
-	{
-		q := Q([]string{"1", "2", "3"})
-		assert.False(t, q.ContainsAny([]int{}))
-		assert.False(t, q.ContainsAny(2))
-		assert.True(t, q.ContainsAny([]string{"0", "3"}))
-		assert.True(t, q.ContainsAny("2"))
-	}
 }
 
 func TestSet(t *testing.T) {

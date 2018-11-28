@@ -3,7 +3,6 @@ package nub
 import (
 	"errors"
 	"reflect"
-	"strings"
 )
 
 // Queryable provides chainable deferred execution
@@ -94,14 +93,6 @@ func Q(obj interface{}) (result *Queryable) {
 	return
 }
 
-// Any checks if the queryable has anything in it
-func (q *Queryable) Any() bool {
-	if q.Iter != nil {
-		return q.ref.Len() > 0
-	}
-	return q.O != nil
-}
-
 // Append items to the end of the collection and return the queryable
 // converting to a collection if necessary
 func (q *Queryable) Append(obj interface{}) *Queryable {
@@ -140,8 +131,8 @@ func (q *Queryable) At(i int) *Queryable {
 			i = q.ref.Len() + i
 		}
 		if i >= 0 && i < q.ref.Len() {
-			if q.ref.Kind() == reflect.String {
-				return Q(string(q.O.(string)[i]))
+			if str, ok := q.O.(string); ok {
+				return Q(string(str[i]))
 			}
 			return Q(q.ref.Index(i).Interface())
 		}
@@ -153,67 +144,6 @@ func (q *Queryable) At(i int) *Queryable {
 func (q *Queryable) Clear() *Queryable {
 	*q = *S()
 	return q
-}
-
-// Contains checks if the given target is found
-func (q *Queryable) Contains(obj interface{}) bool {
-	if q.Iter != nil {
-		switch q.ref.Kind() {
-		case reflect.Array, reflect.Slice:
-			next := q.Iter()
-			for item, ok := next(); ok; item, ok = next() {
-				if item == obj {
-					return true
-				}
-			}
-		case reflect.String:
-			if reflect.ValueOf(obj).Kind() == reflect.String {
-				return strings.Contains(q.O.(string), obj.(string))
-			}
-		default:
-			panic("TODO: implement Contains")
-		}
-	} else if q.O == obj {
-		return true
-	}
-	return false
-}
-
-// ContainsAny checks if any of the given targets are found
-func (q *Queryable) ContainsAny(obj interface{}) bool {
-	other := Q(obj)
-
-	// Other is singular so defer to Contains
-	if other.Singular() {
-		return q.Contains(obj)
-	}
-
-	// This is singular
-	if q.Singular() {
-		next := other.Iter()
-		for target, ok := next(); ok; target, ok = next() {
-			if q.O == target {
-				return true
-			}
-		}
-	}
-
-	// Neither is singular
-	switch q.ref.Kind() {
-	case reflect.Array, reflect.Slice:
-		next := q.Iter()
-		for item, ok := next(); ok; item, ok = next() {
-			oNext := other.Iter()
-			for oItem, oOk := oNext(); oOk; oItem, oOk = oNext() {
-				if item == oItem {
-					return true
-				}
-			}
-		}
-	default:
-		panic("TODO: implement ContainsAny")
-	}
-	return false
 }
 
 // Each iterates over the queryable and executes the given action

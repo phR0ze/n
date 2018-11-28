@@ -52,6 +52,7 @@ and skipped over others that I may come back to.
 | Q            | Creates a new queryable encapsulating the TYPE  | 1     | 0   | 0   | 0      |
 | O            | Access to the underlying raw type               | 1     | 0   | 0   | 0      |
 | Any          | Check if the queryable has anything in it       | 1     | 0   | 0   | 0      |
+| AnyWhere     | Check if any match the given lambda             | 1     | 0   | 0   | 0      |
 | Append       | Add items to the end of the collection          | 1     | 0   | 0   | 0      |
 | At           | Return item at the given neg/pos index notation | 1     | 0   | 0   | 0      |
 | Clear        | Clear out the underlying collection             | 1     | 0   | 0   | 0      |
@@ -60,6 +61,7 @@ and skipped over others that I may come back to.
 | Each         | Iterate over the queryable and execute actions  | 1     | 0   | 0   | 0      |
 | Set          | Set the underlying queryable object             | 1     | 0   | 0   | 0      |
 | Singular     | Is queryable encapsualting a non-collection     | 1     | 0   | 0   | 0      |
+// ContainsWhere checks if any match the given lambda
 
 ### Materialization <a name="materialization"></a>
 Materialization or processing deferred execution and converting to a usable type
