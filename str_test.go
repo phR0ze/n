@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestStr(t *testing.T) {
+func TestStrStr(t *testing.T) {
 	assert.Equal(t, "test", Str("test").M())
 }
 

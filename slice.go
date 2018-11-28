@@ -1,4 +1,4 @@
-// Package nub provides helper interfaces and functions reminiscent ruby
+// Package nub provides helper interfaces and functions reminiscent ruby/C#
 package nub
 
 import (
@@ -34,7 +34,7 @@ func (slice *intSliceNub) Any() bool {
 	return len(slice.raw) > 0
 }
 
-// Append items to the end of the slice and return new slice
+// Append items to the end of the slice and return slice
 func (slice *intSliceNub) Append(items ...int) *intSliceNub {
 	slice.raw = append(slice.raw, items...)
 	return slice
@@ -122,7 +122,7 @@ func (slice *intSliceNub) M() []int {
 	return slice.raw
 }
 
-// Prepend items to the begining of the slice and return new slice
+// Prepend items to the begining of the slice and return slice
 func (slice *intSliceNub) Prepend(items ...int) *intSliceNub {
 	items = append(items, slice.raw...)
 	slice.raw = items
@@ -233,7 +233,7 @@ func (slice *strSliceNub) Any() bool {
 	return len(slice.raw) > 0
 }
 
-// Append items to the end of the slice and return new slice
+// Append items to the end of the slice and return slice
 func (slice *strSliceNub) Append(items ...string) *strSliceNub {
 	slice.raw = append(slice.raw, items...)
 	return slice
@@ -317,7 +317,7 @@ func (slice *strSliceNub) M() []string {
 	return slice.raw
 }
 
-// Prepend items to the begining of the slice and return new slice
+// Prepend items to the begining of the slice and return slice
 func (slice *strSliceNub) Prepend(items ...string) *strSliceNub {
 	items = append(items, slice.raw...)
 	slice.raw = items
@@ -417,7 +417,7 @@ func (slice *strMapSliceNub) Any() bool {
 	return len(slice.raw) > 0
 }
 
-// Append items to the end of the slice and return new slice
+// Append items to the end of the slice and return slice
 func (slice *strMapSliceNub) Append(items ...map[string]interface{}) *strMapSliceNub {
 	slice.raw = append(slice.raw, items...)
 	return slice
@@ -496,7 +496,7 @@ func (slice *strMapSliceNub) M() []map[string]interface{} {
 	return slice.raw
 }
 
-// Prepend items to the begining of the slice and return new slice
+// Prepend items to the begining of the slice and return slice
 func (slice *strMapSliceNub) Prepend(items ...map[string]interface{}) *strMapSliceNub {
 	items = append(items, slice.raw...)
 	slice.raw = items

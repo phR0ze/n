@@ -19,6 +19,11 @@ test: $(NAME)
 	go test $(PKGROOT)/pkg/timenub
 	go test $(PKGROOT)/pkg/trace
 
+bench: $(NAME)
+	@echo -e "\nRunning all go benchmarks:"
+	@echo -e "------------------------------------------------------------------------"
+	go test -bench=.
+
 clean:
 	rm -rf ./vendor
 	rm -f ./bin/$(NAME)
