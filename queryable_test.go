@@ -16,8 +16,8 @@ func BenchmarkClosureIterator(t *testing.B) {
 	}
 	q := Q(ints)
 	next := q.Iter()
-	for item, ok := next(); ok; item, ok = next() {
-		fmt.Sprintln(item.(int) + 2)
+	for x, ok := next(); ok; x, ok = next() {
+		fmt.Sprintln(x.(int) + 2)
 	}
 }
 
@@ -39,83 +39,6 @@ func BenchmarkEach(t *testing.B) {
 	Q(ints).Each(func(item interface{}) {
 		fmt.Sprintln(item.(int) + 3)
 	})
-}
-
-func TestN(t *testing.T) {
-	q := S()
-	assert.NotNil(t, q)
-	assert.NotNil(t, q.Iter)
-	iter := q.Iter()
-	assert.NotNil(t, iter)
-	item, ok := iter()
-	assert.Nil(t, item)
-	assert.False(t, ok)
-}
-
-func TestQ(t *testing.T) {
-	{
-		q := Q(nil)
-		assert.NotNil(t, q)
-		assert.NotNil(t, q.Iter)
-		iter := q.Iter()
-		assert.NotNil(t, iter)
-		item, ok := iter()
-		assert.Nil(t, item)
-		assert.False(t, ok)
-	}
-	{
-		cnt := []bool{}
-		q := Q([]int{1, 2, 3})
-		next := q.Iter()
-		for item, ok := next(); ok; item, ok = next() {
-			cnt = append(cnt, true)
-			switch len(cnt) {
-			case 1:
-				assert.Equal(t, 1, item)
-			case 2:
-				assert.Equal(t, 2, item)
-			case 3:
-				assert.Equal(t, 3, item)
-			}
-		}
-		assert.Len(t, cnt, 3)
-	}
-}
-
-func TestSliceInput(t *testing.T) {
-	q := S()
-	assert.False(t, q.Any())
-	assert.Equal(t, 0, q.Len())
-	q2 := q.Append(2)
-	assert.Equal(t, 1, q.Len())
-	assert.Equal(t, 1, q2.Len())
-	assert.True(t, q2.Any())
-	assert.Equal(t, q, q2)
-	assert.Equal(t, 2, q.At(0).Int())
-}
-
-func TestIntInput(t *testing.T) {
-	q := Q(5)
-	assert.True(t, q.Any())
-	assert.Equal(t, 1, q.Len())
-	q2 := q.Append(2)
-	assert.True(t, q2.Any())
-	assert.Equal(t, q, q2)
-	assert.Equal(t, 2, q.Len())
-	assert.Equal(t, 2, q2.Len())
-	assert.Equal(t, 5, q.At(0).Int())
-	assert.Equal(t, 2, q.At(1).Int())
-}
-
-func TestStrInput(t *testing.T) {
-	q := Q("one")
-	assert.True(t, q.Any())
-	assert.Equal(t, 3, q.Len())
-	assert.Equal(t, "o", q.At(0).Str())
-	assert.Equal(t, 2, q.Append("four").Len())
-	assert.Equal(t, 2, q.Len())
-	assert.Equal(t, "one", q.At(0).Str())
-	assert.Equal(t, "four", q.At(1).Str())
 }
 
 func TestEach(t *testing.T) {
@@ -204,15 +127,15 @@ func TestSet(t *testing.T) {
 		q := S()
 		q.Set([]int{1, 2, 3})
 		next := q.Iter()
-		for item, ok := next(); ok; item, ok = next() {
+		for x, ok := next(); ok; x, ok = next() {
 			cnt = append(cnt, true)
 			switch len(cnt) {
 			case 1:
-				assert.Equal(t, 1, item)
+				assert.Equal(t, 1, x)
 			case 2:
-				assert.Equal(t, 2, item)
+				assert.Equal(t, 2, x)
 			case 3:
-				assert.Equal(t, 3, item)
+				assert.Equal(t, 3, x)
 			}
 		}
 		assert.Len(t, cnt, 3)

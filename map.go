@@ -8,6 +8,50 @@ import (
 	"github.com/ghodss/yaml"
 )
 
+// KeyValuePair similar to C# for iterator over maps
+type KeyValuePair struct {
+	Key   interface{}
+	Value interface{}
+}
+
+// M provides a new empty Queryable map
+func M() *Queryable {
+	obj := map[interface{}]interface{}{}
+	ref := reflect.ValueOf(obj)
+	return &Queryable{O: obj, ref: &ref, Iter: mapIter(ref, obj)}
+}
+
+func mapIter(ref reflect.Value, obj interface{}) func() Iterator {
+	return func() Iterator {
+		i := 0
+		len := ref.Len()
+		keys := ref.MapKeys()
+		return func() (item interface{}, ok bool) {
+			if ok = i < len; ok {
+				item = &KeyValuePair{
+					Key:   keys[i].Interface(),
+					Value: ref.MapIndex(keys[i]).Interface(),
+				}
+				i++
+			}
+			return
+		}
+	}
+}
+
+// StrMap materializes the result into a string to interface map
+func (q *Queryable) StrMap() map[string]interface{} {
+	result := map[string]interface{}{}
+	next := q.Iter()
+	for x, ok := next(); ok; x, ok = next() {
+		pair := x.(*KeyValuePair)
+		result[pair.Key.(string)] = pair.Value
+	}
+	return result
+}
+
+// TODO: Need to refactor below here
+
 //--------------------------------------------------------------------------------------------------
 // StrMap Nub
 //--------------------------------------------------------------------------------------------------
@@ -146,9 +190,9 @@ func (m *strMapNub) StrMapByName(key, k, v string) *strMapNub {
 	result := NewStrMap()
 	slice := m.Slice(key)
 	for i := range slice {
-		if item, ok := slice[i].(map[string]interface{}); ok {
-			if value, exists := item[k]; exists && value == v {
-				result.raw = item
+		if x, ok := slice[i].(map[string]interface{}); ok {
+			if value, exists := x[k]; exists && value == v {
+				result.raw = x
 				break
 			}
 		}
@@ -174,8 +218,8 @@ func (m *strMapNub) StrSlice(key string) (result []string) {
 func castStrMapSlice(items []interface{}) *strMapSliceNub {
 	result := NewStrMapSlice()
 	for i := range items {
-		if item, ok := items[i].(map[string]interface{}); ok {
-			result.Append(item)
+		if x, ok := items[i].(map[string]interface{}); ok {
+			result.Append(x)
 		}
 	}
 	return result

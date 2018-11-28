@@ -1,7 +1,45 @@
 package nub
 
-import "strings"
+import (
+	"reflect"
+	"strings"
+)
 
+// A provides a new empty Queryable string
+func A() *Queryable {
+	obj := string("")
+	ref := reflect.ValueOf(obj)
+	return &Queryable{O: obj, ref: &ref, Iter: strIter(ref, obj)}
+}
+
+func strIter(ref reflect.Value, obj interface{}) func() Iterator {
+	return func() Iterator {
+		i := 0
+		len := ref.Len()
+		return func() (item interface{}, ok bool) {
+			if ok = i < len; ok {
+				item = ref.Index(i).Interface()
+				i++
+			}
+			return
+		}
+	}
+}
+
+// Str materializes the result into a string
+func (q *Queryable) Str() string {
+	return q.O.(string)
+}
+
+// Strs materializes the results into a string slice
+func (q *Queryable) Strs() (result []string) {
+	q.Each(func(item interface{}) {
+		result = append(result, item.(string))
+	})
+	return
+}
+
+// TODO: Need to refactor below here
 type strNub struct {
 	raw string
 }

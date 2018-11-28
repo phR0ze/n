@@ -48,9 +48,10 @@ and skipped over others that I may come back to.
 ### Functions <a name="functions"></a>
 | Function     | Description                                     | Slice | Map | Str | Custom |
 | ------------ | ----------------------------------------------- | ----- | ----| --- | ------ |
+| M            | Creates a new empty map based queryable         | 0     | 1   | 0   | 0      |
 | S            | Creates a new empty slice based queryable       | 1     | 0   | 0   | 0      |
-| Q            | Creates a new queryable encapsulating the TYPE  | 1     | 0   | 0   | 0      |
-| O            | Access to the underlying raw type               | 1     | 0   | 0   | 0      |
+| Q            | Creates a new queryable encapsulating the TYPE  | 1     | 1   | 1   | 0      |
+| O            | Access to the underlying raw type               | 1     | 1   | 1   | 0      |
 | Any          | Check if the queryable has anything in it       | 1     | 0   | 0   | 0      |
 | AnyWhere     | Check if any match the given lambda             | 1     | 0   | 0   | 0      |
 | Append       | Add items to the end of the collection          | 1     | 0   | 0   | 0      |
@@ -59,18 +60,21 @@ and skipped over others that I may come back to.
 | Contains     | Check for the given item                        | 1     | 0   | 0   | 0      |
 | ContainsAny  | Check for any of the given items                | 1     | 0   | 0   | 0      |
 | Each         | Iterate over the queryable and execute actions  | 1     | 0   | 0   | 0      |
+| Len          | Get the length of the collection                | 1     | 1   | 1   | 0      |
+| Load         | Load YAML/JSON from file into queryable         | 0     | 0   | 0   | 0      |
 | Set          | Set the underlying queryable object             | 1     | 0   | 0   | 0      |
 | Singular     | Is queryable encapsualting a non-collection     | 1     | 0   | 0   | 0      |
 
 ### Materialization <a name="materialization"></a>
 Materialization or processing deferred execution and converting to a usable type
 
-| Function     | Description                                     | Slice | Map | Str | Custom |
-| ------------ | ----------------------------------------------- | ----- | ----| --- | ------ |
-| Int          | Materialize the results into a single int       | 1     | 0   | 0   | 0      |
-| Ints         | Materialize the results into an int slice       | 1     | 0   | 0   | 0      |
-| Str          | Materialize the results into a single string    | 1     | 0   | 0   | 0      |
-| Strs         | Materialize the results into a string slice     | 1     | 0   | 0   | 0      |
+| Function     | Description                                     | Return Type              |
+| ------------ | ----------------------------------------------- | ------------------------ |
+| Int          | Materialize the results into a single int       | `int`                    |
+| Ints         | Materialize the results into an int slice       | `[]int`                  |
+| Str          | Materialize the results into a single string    | `string`                 |
+| StrMap       | Materialize to string to interface{} map        | `map[string]interface{}` |
+| Strs         | Materialize the results into a string slice     | `[]string`               |
 
 ### Slice Functions
 | Function     | Description                                     | Slice | IntSlice | StrSlice | StrMapSlice |

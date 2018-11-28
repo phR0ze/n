@@ -11,8 +11,8 @@ func (q *Queryable) Contains(obj interface{}) bool {
 		switch q.ref.Kind() {
 		case reflect.Array, reflect.Slice:
 			next := q.Iter()
-			for item, ok := next(); ok; item, ok = next() {
-				if item == obj {
+			for x, ok := next(); ok; x, ok = next() {
+				if x == obj {
 					return true
 				}
 			}
@@ -52,10 +52,10 @@ func (q *Queryable) ContainsAny(obj interface{}) bool {
 	switch q.ref.Kind() {
 	case reflect.Array, reflect.Slice:
 		next := q.Iter()
-		for item, ok := next(); ok; item, ok = next() {
+		for x, ok := next(); ok; x, ok = next() {
 			oNext := other.Iter()
-			for oItem, oOk := oNext(); oOk; oItem, oOk = oNext() {
-				if item == oItem {
+			for y, oOk := oNext(); oOk; y, oOk = oNext() {
+				if x == y {
 					return true
 				}
 			}

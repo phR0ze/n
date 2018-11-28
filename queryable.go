@@ -17,81 +17,52 @@ type Queryable struct {
 // Iterator provides a closure to capture the index and reset it
 type Iterator func() (item interface{}, ok bool)
 
-// S provides a new empty Queryable slice
-func S() *Queryable {
-	raw := []interface{}{}
-	ref := reflect.ValueOf(raw)
-	return &Queryable{
-		ref: &ref,
-		O:   raw,
-		Iter: func() Iterator {
-			i := 0
-			return func() (item interface{}, ok bool) {
-				if ok = i < ref.Len(); ok {
-					item = ref.Index(i).Interface()
-					i++
-				}
-				return
-			}
-
-		}}
-}
-
 // Q provides origination for the Queryable abstraction layer
-func Q(obj interface{}) (result *Queryable) {
-	if obj != nil {
-		ref := reflect.ValueOf(obj)
-		result = &Queryable{O: obj, ref: &ref}
-		kind := ref.Kind()
-		switch kind {
-
-		// Handle slice types
-		case reflect.Array, reflect.Slice:
-			result.Iter = func() Iterator {
-				i := 0
-				return func() (item interface{}, ok bool) {
-					if ok = i < ref.Len(); ok {
-						item = ref.Index(i).Interface()
-						i++
-					}
-					return
-				}
-			}
-
-		// Handle chan types
-		case reflect.Chan:
-			panic("TODO: handle reflect.Chan")
-
-		// Handle map types
-		case reflect.Map:
-			panic("TODO: handle reflect.Map")
-
-		// Handle int types
-		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			// No iterator should exist
-
-		// Handle string types
-		case reflect.String:
-			result.Iter = func() Iterator {
-				i := 0
-				return func() (item interface{}, ok bool) {
-					if ok = i < ref.Len(); ok {
-						item = ref.Index(i).Interface()
-						i++
-					}
-					return
-				}
-			}
-
-		// Handle unknown types
-		default:
-			panic("TODO: handle custom types")
-		}
-	} else {
-		result = S()
+func Q(obj interface{}) *Queryable {
+	if obj == nil {
+		return S()
 	}
-	return
+
+	ref := reflect.ValueOf(obj)
+	result := &Queryable{O: obj, ref: &ref}
+	switch ref.Kind() {
+
+	// Slice types
+	case reflect.Array, reflect.Slice:
+		result.Iter = sliceIter(ref, obj)
+
+	// Handle map types
+	case reflect.Map:
+		result.Iter = mapIter(ref, obj)
+
+	// Handle string types
+	case reflect.String:
+		result.Iter = strIter(ref, obj)
+
+	// Chan types
+	case reflect.Chan:
+		panic("TODO: handle reflect.Chan")
+
+	// Handle int types
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		// No iterator should exist
+
+	// Handle unknown types
+	default:
+		panic("TODO: handle custom types")
+	}
+
+	return result
 }
+
+// // Load YAML/JSON from file into queryable
+// func Load(target string) *Queryable {
+// 	if yamlFile, err := ioutil.ReadFile(target); err == nil {
+// 		data := map[string]interface{}{}
+// 		yaml.Unmarshal(yamlFile, &data)
+// 	}
+// 	return M()
+// }
 
 // Append items to the end of the collection and return the queryable
 // converting to a collection if necessary
@@ -150,8 +121,8 @@ func (q *Queryable) Clear() *Queryable {
 func (q *Queryable) Each(action func(interface{})) {
 	if q.Iter != nil {
 		next := q.Iter()
-		for item, ok := next(); ok; item, ok = next() {
-			action(item)
+		for x, ok := next(); ok; x, ok = next() {
+			action(x)
 		}
 	}
 }

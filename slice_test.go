@@ -6,6 +6,76 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestS(t *testing.T) {
+	{
+		q := S()
+		assert.NotNil(t, q)
+		assert.NotNil(t, q.Iter)
+		iter := q.Iter()
+		assert.NotNil(t, iter)
+		x, ok := iter()
+		assert.Nil(t, x)
+		assert.False(t, ok)
+	}
+	{
+		q := S()
+		assert.False(t, q.Any())
+		assert.Equal(t, 0, q.Len())
+		q2 := q.Append(2)
+		assert.Equal(t, 1, q.Len())
+		assert.Equal(t, 1, q2.Len())
+		assert.True(t, q2.Any())
+		assert.Equal(t, q, q2)
+		assert.Equal(t, 2, q.At(0).Int())
+	}
+}
+
+func TestSQ(t *testing.T) {
+	{
+		q := Q(nil)
+		assert.NotNil(t, q)
+		assert.NotNil(t, q.Iter)
+		iter := q.Iter()
+		assert.NotNil(t, iter)
+		x, ok := iter()
+		assert.Nil(t, x)
+		assert.False(t, ok)
+	}
+	{
+		cnt := []bool{}
+		q := Q([]int{1, 2, 3})
+		next := q.Iter()
+		for x, ok := next(); ok; x, ok = next() {
+			cnt = append(cnt, true)
+			switch len(cnt) {
+			case 1:
+				assert.Equal(t, 1, x)
+			case 2:
+				assert.Equal(t, 2, x)
+			case 3:
+				assert.Equal(t, 3, x)
+			}
+		}
+		assert.Len(t, cnt, 3)
+	}
+}
+
+func TestSSlice(t *testing.T) {
+}
+
+func TestSLen(t *testing.T) {
+	{
+		q := S()
+		assert.Equal(t, 0, q.Len())
+	}
+	{
+		q := Q([]string{"1", "2", "3"})
+		assert.Equal(t, 3, q.Len())
+	}
+}
+
+// TODO: Need to refactor below here
+
 //--------------------------------------------------------------------------------------------------
 // IntSlice tests
 //--------------------------------------------------------------------------------------------------

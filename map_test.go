@@ -7,6 +7,60 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestM(t *testing.T) {
+	q := M()
+	assert.NotNil(t, q)
+	assert.NotNil(t, q.Iter)
+	iter := q.Iter()
+	assert.NotNil(t, iter)
+	x, ok := iter()
+	assert.Nil(t, x)
+	assert.False(t, ok)
+}
+
+func TestMQ(t *testing.T) {
+	{
+		items := []interface{}{}
+		q := Q(map[string]string{"1": "one", "2": "two", "3": "three"})
+		next := q.Iter()
+		for x, ok := next(); ok; x, ok = next() {
+			items = append(items, x)
+			item := x.(*KeyValuePair)
+			switch item.Key {
+			case "1":
+				assert.NotEqual(t, &KeyValuePair{Key: "2", Value: "one"}, item)
+				assert.NotEqual(t, &KeyValuePair{Key: "1", Value: "two"}, item)
+				assert.Equal(t, &KeyValuePair{Key: "1", Value: "one"}, item)
+			case "2":
+				assert.Equal(t, &KeyValuePair{Key: "2", Value: "two"}, item)
+			case "3":
+				assert.Equal(t, &KeyValuePair{Key: "3", Value: "three"}, item)
+			}
+		}
+		assert.Len(t, items, 3)
+	}
+}
+
+func TestMStrMap(t *testing.T) {
+	{
+		q := Q(map[string]interface{}{"1": "one", "2": "two", "3": "three"})
+		assert.Equal(t, 3, q.Len())
+	}
+}
+
+func TestMLen(t *testing.T) {
+	{
+		q := M()
+		assert.Equal(t, 0, q.Len())
+	}
+	{
+		q := Q(map[string]interface{}{"1": "one", "2": "two", "3": "three"})
+		assert.Equal(t, 3, q.Len())
+	}
+}
+
+// TODO: Need to refactor below here
+
 func TestStrMapMerge(t *testing.T) {
 	{
 		strMap := NewStrMap()
