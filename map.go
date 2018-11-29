@@ -25,14 +25,15 @@ func M(other map[string]interface{}) *strMapNub {
 	return &strMapNub{v: other}
 }
 
-// LoadYAML a yaml/json file as a str map
+// Load a yaml/json file as a str map
 // returns nil on failure of any kind
-func LoadYAML(filepath string) (result *strMapNub) {
-	result = NewStrMap()
+func Load(filepath string) *strMapNub {
 	if yamlFile, err := ioutil.ReadFile(filepath); err == nil {
+		result := NewStrMap()
 		yaml.Unmarshal(yamlFile, &result.v)
+		return result
 	}
-	return
+	return nil
 }
 
 // Q creates a new queryable from the given string map

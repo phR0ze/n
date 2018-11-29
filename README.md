@@ -51,7 +51,7 @@ and skipped over others that I may come back to.
 ### Functions <a name="functions"></a>
 Some functions only apply to particular underlying collection types as called out in the table.
 
-**Key: '1' = Implemented, '0' = Not Implemented**
+**Key: '1' = Implemented, '0' = Not Implemented, 'blank' = NA**
 
 | Function     | Description                                     | Slice | Map | Str |  Cust |
 | ------------ | ----------------------------------------------- | ----- | ----| --- | ----- |
