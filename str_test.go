@@ -46,7 +46,7 @@ func TestStrHasSuffix(t *testing.T) {
 }
 
 func TestStrSplit(t *testing.T) {
-	assert.Equal(t, []string{"1", "2"}, A("1.2").Split(".").M())
+	assert.Equal(t, []string{"1", "2"}, A("1.2").Split(".").S())
 }
 func TestStrTrimPrefix(t *testing.T) {
 	assert.Equal(t, "test]", A("[test]").TrimPrefix("[").A())

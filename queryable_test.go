@@ -630,79 +630,79 @@ func TestEach(t *testing.T) {
 	}
 }
 
-func TestGet(t *testing.T) {
+func TestYAML(t *testing.T) {
 	{
 		// Get string from map
-		rawYAMl := `1:
+		rawYAML := `1:
   2: two`
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAMl), &data)
+		yaml.Unmarshal([]byte(rawYAML), &data)
 		q := Q(data)
 		assert.True(t, q.Any())
-		assert.Equal(t, "two", q.Get("1.2").A())
+		assert.Equal(t, "two", q.YAML("1.2").A())
 	}
 	{
 		// Get string from nested map
-		rawYAMl := `1:
+		rawYAML := `1:
   2:
     3: three`
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAMl), &data)
+		yaml.Unmarshal([]byte(rawYAML), &data)
 		q := Q(data)
 		assert.True(t, q.Any())
-		assert.Equal(t, "three", q.Get("1.2.3").A())
+		assert.Equal(t, "three", q.YAML("1.2.3").A())
 	}
 	{
 		// Get map from map
-		rawYAMl := `1:
+		rawYAML := `1:
   2: two`
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAMl), &data)
+		yaml.Unmarshal([]byte(rawYAML), &data)
 		expected := map[string]interface{}{"2": "two"}
 
 		q := Q(data)
 		assert.True(t, q.Any())
-		assert.Equal(t, expected, q.Get("1").M())
+		assert.Equal(t, expected, q.YAML("1").M())
 	}
 	{
 		// Get map from map from map
-		rawYAMl := `1:
+		rawYAML := `1:
   2:
     3: three`
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAMl), &data)
+		yaml.Unmarshal([]byte(rawYAML), &data)
 		expected := map[string]interface{}{"3": "three"}
 
 		q := Q(data)
 		assert.True(t, q.Any())
-		assert.Equal(t, expected, q.Get("1.2").M())
+		assert.Equal(t, expected, q.YAML("1.2").M())
 	}
 	{
 		// Get slice from map
-		rawYAMl := `foo:
+		rawYAML := `foo:
   - 1
   - 2
   - 3`
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAMl), &data)
+		yaml.Unmarshal([]byte(rawYAML), &data)
 
 		q := Q(data)
 		assert.True(t, q.Any())
-		assert.Equal(t, []string{"1", "2", "3"}, q.Get("foo").Strs())
+		assert.Equal(t, []string{"1", "2", "3"}, q.YAML("foo").Strs())
 	}
 	{
 		// Select map from slice from map
-		rawYAMl := `foo:
+		rawYAML := `foo:
   - name: 1
   - name: 2
   - name: 3`
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAMl), &data)
+		yaml.Unmarshal([]byte(rawYAML), &data)
 		//expected := map[string]interface{}{"name": "2"}
 
 		q := Q(data)
 		assert.True(t, q.Any())
-		//assert.Equal(t, expected, q.Get("foo.[name:2]").M())
+		//assert.Equal(t, expected, q.YAML("foo.[name:2]").M())
 	}
 }
 
@@ -798,6 +798,33 @@ func TestLen(t *testing.T) {
 	}
 }
 
+func TestMap(t *testing.T) {
+	{
+		// Get map keys
+		q := Q(map[string]interface{}{"1": "one", "2": "two", "3": "three"})
+		keys := q.Map(func(x interface{}) interface{} {
+			return (x.(KeyVal)).Key
+		})
+		expected := Q([]string{"1", "2", "3"})
+		assert.Equal(t, 3, keys.Len())
+		assert.True(t, expected.Contains(keys.At(0).A()))
+		assert.True(t, expected.Contains(keys.At(1).A()))
+		assert.True(t, expected.Contains(keys.At(2).A()))
+	}
+	{
+		// Get map values
+		q := Q(map[string]interface{}{"1": "one", "2": "two", "3": "three"})
+		vals := q.Map(func(x interface{}) interface{} {
+			return (x.(KeyVal)).Val
+		})
+		expected := Q([]string{"one", "two", "three"})
+		assert.Equal(t, 3, vals.Len())
+		assert.True(t, expected.Contains(vals.At(0).A()))
+		assert.True(t, expected.Contains(vals.At(1).A()))
+		assert.True(t, expected.Contains(vals.At(2).A()))
+	}
+}
+
 func TestSet(t *testing.T) {
 	{
 		// Strings
@@ -865,38 +892,38 @@ func TestSet(t *testing.T) {
 func TestSplit(t *testing.T) {
 	{
 		q := S()
-		assert.Equal(t, []string{}, q.Split(".").Strs())
+		assert.Equal(t, []string{}, q.Split(".").S())
 	}
 	{
 		q := Q([]int{1, 2, 3})
-		assert.Equal(t, []string{}, q.Split(".").Strs())
+		assert.Equal(t, []string{}, q.Split(".").S())
 	}
 	{
 		q := Q([]string{"1", "2", "3"})
-		assert.Equal(t, []string{}, q.Split(".").Strs())
+		assert.Equal(t, []string{}, q.Split(".").S())
 	}
 	{
 		q := Q(1)
-		assert.Equal(t, []string{}, q.Split(".").Strs())
+		assert.Equal(t, []string{}, q.Split(".").S())
 	}
 	{
 		q := M()
-		assert.Equal(t, []string{}, q.Split(".").Strs())
+		assert.Equal(t, []string{}, q.Split(".").S())
 	}
 	{
 		q := Q(map[string]interface{}{"1": "one"})
-		assert.Equal(t, []string{}, q.Split(".").Strs())
+		assert.Equal(t, []string{}, q.Split(".").S())
 	}
 	{
 		q := Q([]bob{{data: "2"}})
-		assert.Equal(t, []string{}, q.Split(".").Strs())
+		assert.Equal(t, []string{}, q.Split(".").S())
 	}
 	{
 		q := Q("1.2.3")
-		assert.Equal(t, []string{"1", "2", "3"}, q.Split(".").Strs())
+		assert.Equal(t, []string{"1", "2", "3"}, q.Split(".").S())
 	}
 	{
 		q := Q("test1,test2")
-		assert.Equal(t, []string{"test1", "test2"}, q.Split(",").Strs())
+		assert.Equal(t, []string{"test1", "test2"}, q.Split(",").S())
 	}
 }

@@ -346,28 +346,31 @@ func (q *Queryable) Each(action func(interface{})) {
 	}
 }
 
-// Get an item by key which can be dot delimited
-// Assumes maps of type map[string]interface{}
-func (q *Queryable) Get(key string) (result *Queryable) {
-	keys := Q(key).Split(".")
+// YAML gets data by key which can be dot delimited
+func (q *Queryable) YAML(key string) (result *Queryable) {
+	keys := A(key).Split(".")
 	if key, ok := keys.TakeFirst(); ok {
 		switch x := q.v.Interface().(type) {
 		case map[string]interface{}:
-			k := key.(string)
-			if !Q(k).ContainsAny([]string{":", "[", "]"}) {
-				if v, ok := x[k]; ok {
+			if !A(key).ContainsAny(":", "[", "]") {
+				if v, ok := x[key]; ok {
 					result = Q(v)
 				}
 			}
 		case []interface{}:
-			// k := strings.TrimSuffix(key, "[")
-			// k := Q(key).Split(":")
-			// for i := range x {
-			// 	fmt.Println(x[i])
-			// }
+			k, v := A(key).TrimPrefix("[").TrimSuffix("]").Split(":").Pair()
+			for i := range x {
+				if m, ok := x[i].(map[string]interface{}); ok {
+					if entry, ok := m[k]; ok {
+						if v == entry.(string) {
+							return Q(m)
+						}
+					}
+				}
+			}
 		}
 		if keys.Len() != 0 && result.Any() {
-			result = result.Get(keys.Join(".").A())
+			result = result.YAML(keys.Join(".").A())
 		}
 	}
 	if result == nil {
@@ -405,6 +408,16 @@ func (q *Queryable) Len() int {
 	return 1
 }
 
+// Map manipulates the queryable data into a new form
+func (q *Queryable) Map(sel func(interface{}) interface{}) *Queryable {
+	result := S()
+	next := q.Iter()
+	for x, ok := next(); ok; x, ok = next() {
+		result.Append(sel(x))
+	}
+	return result
+}
+
 // Set provides a way to set underlying object Queryable is operating on
 func (q *Queryable) Set(obj interface{}) *Queryable {
 	other := Q(obj)
@@ -415,11 +428,11 @@ func (q *Queryable) Set(obj interface{}) *Queryable {
 }
 
 // Split the string into a slice on delimiter
-func (q *Queryable) Split(delim string) *Queryable {
+func (q *Queryable) Split(delim string) *strSliceNub {
 	if q.TypeStr() {
-		return Q(strings.Split(q.v.Interface().(string), delim))
+		return A(q.v.Interface().(string)).Split(delim)
 	}
-	return S()
+	return NewStrSlice()
 }
 
 // TypeIter checks if the queryable is iterable

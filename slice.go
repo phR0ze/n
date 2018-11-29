@@ -13,53 +13,58 @@ import (
 // IntSlice Nub
 //--------------------------------------------------------------------------------------------------
 type intSliceNub struct {
-	raw []int
+	v []int
 }
 
 // NewIntSlice creates a new nub
 func NewIntSlice() *intSliceNub {
-	return &intSliceNub{raw: []int{}}
+	return &intSliceNub{v: []int{}}
 }
 
 // IntSlice creates a new nub from the given int slice
 func IntSlice(slice []int) *intSliceNub {
 	if slice != nil {
-		return &intSliceNub{raw: slice}
+		return &intSliceNub{v: slice}
 	}
-	return &intSliceNub{raw: []int{}}
+	return &intSliceNub{v: []int{}}
+}
+
+// S convert the slice into an int slice
+func (slice *intSliceNub) S() []int {
+	return slice.v
 }
 
 // Any checks if the slice has anything in it
 func (slice *intSliceNub) Any() bool {
-	return len(slice.raw) > 0
+	return len(slice.v) > 0
 }
 
 // Append items to the end of the slice and return slice
 func (slice *intSliceNub) Append(items ...int) *intSliceNub {
-	slice.raw = append(slice.raw, items...)
+	slice.v = append(slice.v, items...)
 	return slice
 }
 
 // At returns the item at the given index location. Allows for negative notation
 func (slice *intSliceNub) At(i int) int {
-	if i >= 0 && i < len(slice.raw) {
-		return slice.raw[i]
-	} else if i < 0 && i*-1 < len(slice.raw) {
-		return slice.raw[len(slice.raw)+i]
+	if i >= 0 && i < len(slice.v) {
+		return slice.v[i]
+	} else if i < 0 && i*-1 < len(slice.v) {
+		return slice.v[len(slice.v)+i]
 	}
 	panic(errors.New("Index out of slice bounds"))
 }
 
 // Clear the underlying slice
 func (slice *intSliceNub) Clear() *intSliceNub {
-	slice.raw = []int{}
+	slice.v = []int{}
 	return slice
 }
 
 // Contains checks if the given target is contained in this slice
 func (slice *intSliceNub) Contains(target int) bool {
-	for i := range slice.raw {
-		if slice.raw[i] == target {
+	for i := range slice.v {
+		if slice.v[i] == target {
 			return true
 		}
 	}
@@ -70,8 +75,8 @@ func (slice *intSliceNub) Contains(target int) bool {
 func (slice *intSliceNub) ContainsAny(targets []int) bool {
 	if targets != nil && len(targets) > 0 {
 		for i := range targets {
-			for j := range slice.raw {
-				if slice.raw[j] == targets[i] {
+			for j := range slice.v {
+				if slice.v[j] == targets[i] {
 					return true
 				}
 			}
@@ -84,14 +89,14 @@ func (slice *intSliceNub) ContainsAny(targets []int) bool {
 func (slice *intSliceNub) Del(i int) bool {
 	result := false
 	if i < 0 {
-		i = len(slice.raw) + i
+		i = len(slice.v) + i
 	}
-	if i >= 0 && i < len(slice.raw) {
-		if i+1 < len(slice.raw) {
-			slice.raw = append(slice.raw[:i], slice.raw[i+1:]...)
+	if i >= 0 && i < len(slice.v) {
+		if i+1 < len(slice.v) {
+			slice.v = append(slice.v[:i], slice.v[i+1:]...)
 			result = true
 		} else {
-			slice.raw = slice.raw[:i]
+			slice.v = slice.v[:i]
 			result = true
 		}
 	}
@@ -106,40 +111,35 @@ func (slice *intSliceNub) Equals(other *intSliceNub) bool {
 // Join the underlying slice with the given delim
 func (slice *intSliceNub) Join(delim string) *strNub {
 	result := []string{}
-	for i := range slice.raw {
-		result = append(result, strconv.Itoa(slice.raw[i]))
+	for i := range slice.v {
+		result = append(result, strconv.Itoa(slice.v[i]))
 	}
 	return A(strings.Join(result, delim))
 }
 
 // Len is a pass through to the underlying slice
 func (slice *intSliceNub) Len() int {
-	return len(slice.raw)
-}
-
-// M materializes object invoking deferred execution
-func (slice *intSliceNub) M() []int {
-	return slice.raw
+	return len(slice.v)
 }
 
 // Prepend items to the begining of the slice and return slice
 func (slice *intSliceNub) Prepend(items ...int) *intSliceNub {
-	items = append(items, slice.raw...)
-	slice.raw = items
+	items = append(items, slice.v...)
+	slice.v = items
 	return slice
 }
 
 // Sort the underlying slice
 func (slice *intSliceNub) Sort() *intSliceNub {
-	sort.Ints(slice.raw)
+	sort.Ints(slice.v)
 	return slice
 }
 
 // TakeFirst updates the underlying slice and returns the item and status
 func (slice *intSliceNub) TakeFirst() (int, bool) {
-	if len(slice.raw) > 0 {
-		item := slice.raw[0]
-		slice.raw = slice.raw[1:]
+	if len(slice.v) > 0 {
+		item := slice.v[0]
+		slice.v = slice.v[1:]
 		return item, true
 	}
 	return 0, false
@@ -148,12 +148,12 @@ func (slice *intSliceNub) TakeFirst() (int, bool) {
 // TakeFirstCnt updates the underlying slice and returns the items
 func (slice *intSliceNub) TakeFirstCnt(cnt int) (result *intSliceNub) {
 	if cnt > 0 {
-		if len(slice.raw) >= cnt {
-			result = IntSlice(slice.raw[:cnt])
-			slice.raw = slice.raw[cnt:]
+		if len(slice.v) >= cnt {
+			result = IntSlice(slice.v[:cnt])
+			slice.v = slice.v[cnt:]
 		} else {
-			result = IntSlice(slice.raw)
-			slice.raw = []int{}
+			result = IntSlice(slice.v)
+			slice.v = []int{}
 		}
 	}
 	return
@@ -161,9 +161,9 @@ func (slice *intSliceNub) TakeFirstCnt(cnt int) (result *intSliceNub) {
 
 // TakeLast updates the underlying slice and returns the item and status
 func (slice *intSliceNub) TakeLast() (int, bool) {
-	if len(slice.raw) > 0 {
-		item := slice.raw[len(slice.raw)-1]
-		slice.raw = slice.raw[:len(slice.raw)-1]
+	if len(slice.v) > 0 {
+		item := slice.v[len(slice.v)-1]
+		slice.v = slice.v[:len(slice.v)-1]
 		return item, true
 	}
 	return 0, false
@@ -172,13 +172,13 @@ func (slice *intSliceNub) TakeLast() (int, bool) {
 // TakeLastCnt updates the underlying slice and returns the items
 func (slice *intSliceNub) TakeLastCnt(cnt int) (result *intSliceNub) {
 	if cnt > 0 {
-		if len(slice.raw) >= cnt {
-			i := len(slice.raw) - cnt
-			result = IntSlice(slice.raw[i:])
-			slice.raw = slice.raw[:i]
+		if len(slice.v) >= cnt {
+			i := len(slice.v) - cnt
+			result = IntSlice(slice.v[i:])
+			slice.v = slice.v[:i]
 		} else {
-			result = IntSlice(slice.raw)
-			slice.raw = []int{}
+			result = IntSlice(slice.v)
+			slice.v = []int{}
 		}
 	}
 	return
@@ -188,11 +188,11 @@ func (slice *intSliceNub) TakeLastCnt(cnt int) (result *intSliceNub) {
 // Uniq removes all duplicates from the underlying slice
 func (slice *intSliceNub) Uniq() *intSliceNub {
 	hits := map[int]bool{}
-	for i := len(slice.raw) - 1; i >= 0; i-- {
-		if _, exists := hits[slice.raw[i]]; !exists {
-			hits[slice.raw[i]] = true
+	for i := len(slice.v) - 1; i >= 0; i-- {
+		if _, exists := hits[slice.v[i]]; !exists {
+			hits[slice.v[i]] = true
 		} else {
-			slice.raw = append(slice.raw[:i], slice.raw[i+1:]...)
+			slice.v = append(slice.v[:i], slice.v[i+1:]...)
 		}
 	}
 	return slice
@@ -202,63 +202,68 @@ func (slice *intSliceNub) Uniq() *intSliceNub {
 // StrSlice Nub
 //--------------------------------------------------------------------------------------------------
 type strSliceNub struct {
-	raw []string
+	v []string
 }
 
 // NewStrSlice creates a new nub
 func NewStrSlice() *strSliceNub {
-	return &strSliceNub{raw: []string{}}
+	return &strSliceNub{v: []string{}}
 }
 
 // StrSlice creates a new nub from the given string slice
 func StrSlice(slice []string) *strSliceNub {
 	if slice != nil {
-		return &strSliceNub{raw: slice}
+		return &strSliceNub{v: slice}
 	}
-	return &strSliceNub{raw: []string{}}
+	return &strSliceNub{v: []string{}}
+}
+
+// S convert the slice into an string slice
+func (slice *strSliceNub) S() []string {
+	return slice.v
+}
+
+// Any checks if the slice has anything in it
+func (slice *strSliceNub) Any() bool {
+	return len(slice.v) > 0
 }
 
 // AnyContain checks if any items in this slice contain the target
 func (slice *strSliceNub) AnyContain(target string) bool {
-	for i := range slice.raw {
-		if strings.Contains(slice.raw[i], target) {
+	for i := range slice.v {
+		if strings.Contains(slice.v[i], target) {
 			return true
 		}
 	}
 	return false
 }
 
-// Any checks if the slice has anything in it
-func (slice *strSliceNub) Any() bool {
-	return len(slice.raw) > 0
-}
-
 // Append items to the end of the slice and return slice
 func (slice *strSliceNub) Append(items ...string) *strSliceNub {
-	slice.raw = append(slice.raw, items...)
+	slice.v = append(slice.v, items...)
 	return slice
 }
 
 // At returns the item at the given index location. Allows for negative notation
 func (slice *strSliceNub) At(i int) string {
-	if i >= 0 && i < len(slice.raw) {
-		return slice.raw[i]
-	} else if i < 0 && i*-1 < len(slice.raw) {
-		return slice.raw[len(slice.raw)+i]
+	if i >= 0 && i < len(slice.v) {
+		return slice.v[i]
+	} else if i < 0 && i*-1 < len(slice.v) {
+		return slice.v[len(slice.v)+i]
 	}
 	panic(errors.New("Index out of slice bounds"))
 }
 
 // Clear the underlying slice
 func (slice *strSliceNub) Clear() *strSliceNub {
-	slice.raw = []string{}
+	slice.v = []string{}
 	return slice
 }
 
 // Contains checks if the given target is contained in this slice
 func (slice *strSliceNub) Contains(target string) bool {
-	for i := range slice.raw {
-		if slice.raw[i] == target {
+	for i := range slice.v {
+		if slice.v[i] == target {
 			return true
 		}
 	}
@@ -269,8 +274,8 @@ func (slice *strSliceNub) Contains(target string) bool {
 func (slice *strSliceNub) ContainsAny(targets []string) bool {
 	if targets != nil && len(targets) > 0 {
 		for i := range targets {
-			for j := range slice.raw {
-				if slice.raw[j] == targets[i] {
+			for j := range slice.v {
+				if slice.v[j] == targets[i] {
 					return true
 				}
 			}
@@ -283,14 +288,14 @@ func (slice *strSliceNub) ContainsAny(targets []string) bool {
 func (slice *strSliceNub) Del(i int) bool {
 	result := false
 	if i < 0 {
-		i = len(slice.raw) + i
+		i = len(slice.v) + i
 	}
-	if i >= 0 && i < len(slice.raw) {
-		if i+1 < len(slice.raw) {
-			slice.raw = append(slice.raw[:i], slice.raw[i+1:]...)
+	if i >= 0 && i < len(slice.v) {
+		if i+1 < len(slice.v) {
+			slice.v = append(slice.v[:i], slice.v[i+1:]...)
 			result = true
 		} else {
-			slice.raw = slice.raw[:i]
+			slice.v = slice.v[:i]
 			result = true
 		}
 	}
@@ -304,37 +309,43 @@ func (slice *strSliceNub) Equals(other *strSliceNub) bool {
 
 // Join the underlying slice with the given delim
 func (slice *strSliceNub) Join(delim string) *strNub {
-	return A(strings.Join(slice.raw, delim))
+	return A(strings.Join(slice.v, delim))
 }
 
 // Len is a pass through to the underlying slice
 func (slice *strSliceNub) Len() int {
-	return len(slice.raw)
+	return len(slice.v)
 }
 
-// M materializes object invoking deferred execution
-func (slice *strSliceNub) M() []string {
-	return slice.raw
+// Pair simply returns the first and second slice items
+func (slice *strSliceNub) Pair() (first string, second string) {
+	if slice.Len() > 0 {
+		first = slice.v[0]
+	}
+	if slice.Len() > 1 {
+		second = slice.v[1]
+	}
+	return
 }
 
 // Prepend items to the begining of the slice and return slice
 func (slice *strSliceNub) Prepend(items ...string) *strSliceNub {
-	items = append(items, slice.raw...)
-	slice.raw = items
+	items = append(items, slice.v...)
+	slice.v = items
 	return slice
 }
 
 // Sort the underlying slice
 func (slice *strSliceNub) Sort() *strSliceNub {
-	sort.Strings(slice.raw)
+	sort.Strings(slice.v)
 	return slice
 }
 
 // TakeFirst updates the underlying slice and returns the item and status
 func (slice *strSliceNub) TakeFirst() (string, bool) {
-	if len(slice.raw) > 0 {
-		item := slice.raw[0]
-		slice.raw = slice.raw[1:]
+	if len(slice.v) > 0 {
+		item := slice.v[0]
+		slice.v = slice.v[1:]
 		return item, true
 	}
 	return "", false
@@ -343,12 +354,12 @@ func (slice *strSliceNub) TakeFirst() (string, bool) {
 // TakeFirstCnt updates the underlying slice and returns the items
 func (slice *strSliceNub) TakeFirstCnt(cnt int) (result *strSliceNub) {
 	if cnt > 0 {
-		if len(slice.raw) >= cnt {
-			result = StrSlice(slice.raw[:cnt])
-			slice.raw = slice.raw[cnt:]
+		if len(slice.v) >= cnt {
+			result = StrSlice(slice.v[:cnt])
+			slice.v = slice.v[cnt:]
 		} else {
-			result = StrSlice(slice.raw)
-			slice.raw = []string{}
+			result = StrSlice(slice.v)
+			slice.v = []string{}
 		}
 	}
 	return
@@ -356,9 +367,9 @@ func (slice *strSliceNub) TakeFirstCnt(cnt int) (result *strSliceNub) {
 
 // TakeLast updates the underlying slice and returns the item and status
 func (slice *strSliceNub) TakeLast() (string, bool) {
-	if len(slice.raw) > 0 {
-		item := slice.raw[len(slice.raw)-1]
-		slice.raw = slice.raw[:len(slice.raw)-1]
+	if len(slice.v) > 0 {
+		item := slice.v[len(slice.v)-1]
+		slice.v = slice.v[:len(slice.v)-1]
 		return item, true
 	}
 	return "", false
@@ -367,13 +378,13 @@ func (slice *strSliceNub) TakeLast() (string, bool) {
 // TakeLastCnt updates the underlying slice and returns a new nub
 func (slice *strSliceNub) TakeLastCnt(cnt int) (result *strSliceNub) {
 	if cnt > 0 {
-		if len(slice.raw) >= cnt {
-			i := len(slice.raw) - cnt
-			result = StrSlice(slice.raw[i:])
-			slice.raw = slice.raw[:i]
+		if len(slice.v) >= cnt {
+			i := len(slice.v) - cnt
+			result = StrSlice(slice.v[i:])
+			slice.v = slice.v[:i]
 		} else {
-			result = StrSlice(slice.raw)
-			slice.raw = []string{}
+			result = StrSlice(slice.v)
+			slice.v = []string{}
 		}
 	}
 	return
@@ -382,11 +393,11 @@ func (slice *strSliceNub) TakeLastCnt(cnt int) (result *strSliceNub) {
 // Uniq removes all duplicates from the underlying slice
 func (slice *strSliceNub) Uniq() *strSliceNub {
 	hits := map[string]bool{}
-	for i := len(slice.raw) - 1; i >= 0; i-- {
-		if _, exists := hits[slice.raw[i]]; !exists {
-			hits[slice.raw[i]] = true
+	for i := len(slice.v) - 1; i >= 0; i-- {
+		if _, exists := hits[slice.v[i]]; !exists {
+			hits[slice.v[i]] = true
 		} else {
-			slice.raw = append(slice.raw[:i], slice.raw[i+1:]...)
+			slice.v = append(slice.v[:i], slice.v[i+1:]...)
 		}
 	}
 	return slice
@@ -396,53 +407,58 @@ func (slice *strSliceNub) Uniq() *strSliceNub {
 // StrMapSlice Nub
 //--------------------------------------------------------------------------------------------------
 type strMapSliceNub struct {
-	raw []map[string]interface{}
+	v []map[string]interface{}
 }
 
 // NewStrMapSlice creates a new nub
 func NewStrMapSlice() *strMapSliceNub {
-	return &strMapSliceNub{raw: []map[string]interface{}{}}
+	return &strMapSliceNub{v: []map[string]interface{}{}}
 }
 
 // StrMapSlice creates a new nub from the given string map slice
 func StrMapSlice(slice []map[string]interface{}) *strMapSliceNub {
 	if slice != nil {
-		return &strMapSliceNub{raw: slice}
+		return &strMapSliceNub{v: slice}
 	}
-	return &strMapSliceNub{raw: []map[string]interface{}{}}
+	return &strMapSliceNub{v: []map[string]interface{}{}}
+}
+
+// S convert the slice into an string slice
+func (slice *strMapSliceNub) S() []map[string]interface{} {
+	return slice.v
 }
 
 // Any checks if the slice has anything in it
 func (slice *strMapSliceNub) Any() bool {
-	return len(slice.raw) > 0
+	return len(slice.v) > 0
 }
 
 // Append items to the end of the slice and return slice
 func (slice *strMapSliceNub) Append(items ...map[string]interface{}) *strMapSliceNub {
-	slice.raw = append(slice.raw, items...)
+	slice.v = append(slice.v, items...)
 	return slice
 }
 
 // At returns the item at the given index location. Allows for negative notation
 func (slice *strMapSliceNub) At(i int) *strMapNub {
-	if i >= 0 && i < len(slice.raw) {
-		return StrMap(slice.raw[i])
-	} else if i < 0 && i*-1 < len(slice.raw) {
-		return StrMap(slice.raw[len(slice.raw)+i])
+	if i >= 0 && i < len(slice.v) {
+		return StrMap(slice.v[i])
+	} else if i < 0 && i*-1 < len(slice.v) {
+		return StrMap(slice.v[len(slice.v)+i])
 	}
 	panic(errors.New("Index out of slice bounds"))
 }
 
 // Clear the underlying slice
 func (slice *strMapSliceNub) Clear() *strMapSliceNub {
-	slice.raw = []map[string]interface{}{}
+	slice.v = []map[string]interface{}{}
 	return slice
 }
 
 // Contains checks if the given target is contained in this slice
 func (slice *strMapSliceNub) Contains(key string) bool {
-	for i := range slice.raw {
-		if _, exists := slice.raw[i][key]; exists {
+	for i := range slice.v {
+		if _, exists := slice.v[i][key]; exists {
 			return true
 		}
 	}
@@ -453,8 +469,8 @@ func (slice *strMapSliceNub) Contains(key string) bool {
 func (slice *strMapSliceNub) ContainsAny(keys []string) bool {
 	if keys != nil && len(keys) > 0 {
 		for i := range keys {
-			for j := range slice.raw {
-				if _, exists := slice.raw[j][keys[i]]; exists {
+			for j := range slice.v {
+				if _, exists := slice.v[j][keys[i]]; exists {
 					return true
 				}
 			}
@@ -467,14 +483,14 @@ func (slice *strMapSliceNub) ContainsAny(keys []string) bool {
 func (slice *strMapSliceNub) Del(i int) bool {
 	result := false
 	if i < 0 {
-		i = len(slice.raw) + i
+		i = len(slice.v) + i
 	}
-	if i >= 0 && i < len(slice.raw) {
-		if i+1 < len(slice.raw) {
-			slice.raw = append(slice.raw[:i], slice.raw[i+1:]...)
+	if i >= 0 && i < len(slice.v) {
+		if i+1 < len(slice.v) {
+			slice.v = append(slice.v[:i], slice.v[i+1:]...)
 			result = true
 		} else {
-			slice.raw = slice.raw[:i]
+			slice.v = slice.v[:i]
 			result = true
 		}
 	}
@@ -488,26 +504,21 @@ func (slice *strMapSliceNub) Equals(other *strMapSliceNub) bool {
 
 // Len is a pass through to the underlying slice
 func (slice *strMapSliceNub) Len() int {
-	return len(slice.raw)
-}
-
-// M materializes object invoking deferred execution
-func (slice *strMapSliceNub) M() []map[string]interface{} {
-	return slice.raw
+	return len(slice.v)
 }
 
 // Prepend items to the begining of the slice and return slice
 func (slice *strMapSliceNub) Prepend(items ...map[string]interface{}) *strMapSliceNub {
-	items = append(items, slice.raw...)
-	slice.raw = items
+	items = append(items, slice.v...)
+	slice.v = items
 	return slice
 }
 
 // TakeFirst updates the underlying slice and returns the item and status
 func (slice *strMapSliceNub) TakeFirst() (*strMapNub, bool) {
-	if len(slice.raw) > 0 {
-		item := StrMap(slice.raw[0])
-		slice.raw = slice.raw[1:]
+	if len(slice.v) > 0 {
+		item := StrMap(slice.v[0])
+		slice.v = slice.v[1:]
 		return item, true
 	}
 	return nil, false
@@ -516,12 +527,12 @@ func (slice *strMapSliceNub) TakeFirst() (*strMapNub, bool) {
 // TakeFirstCnt updates the underlying slice and returns the items
 func (slice *strMapSliceNub) TakeFirstCnt(cnt int) (result *strMapSliceNub) {
 	if cnt > 0 {
-		if len(slice.raw) >= cnt {
-			result = StrMapSlice(slice.raw[:cnt])
-			slice.raw = slice.raw[cnt:]
+		if len(slice.v) >= cnt {
+			result = StrMapSlice(slice.v[:cnt])
+			slice.v = slice.v[cnt:]
 		} else {
-			result = StrMapSlice(slice.raw)
-			slice.raw = []map[string]interface{}{}
+			result = StrMapSlice(slice.v)
+			slice.v = []map[string]interface{}{}
 		}
 	}
 	return
@@ -529,9 +540,9 @@ func (slice *strMapSliceNub) TakeFirstCnt(cnt int) (result *strMapSliceNub) {
 
 // TakeLast updates the underlying slice and returns the item and status
 func (slice *strMapSliceNub) TakeLast() (*strMapNub, bool) {
-	if len(slice.raw) > 0 {
-		item := StrMap(slice.raw[len(slice.raw)-1])
-		slice.raw = slice.raw[:len(slice.raw)-1]
+	if len(slice.v) > 0 {
+		item := StrMap(slice.v[len(slice.v)-1])
+		slice.v = slice.v[:len(slice.v)-1]
 		return item, true
 	}
 	return nil, false
@@ -540,13 +551,13 @@ func (slice *strMapSliceNub) TakeLast() (*strMapNub, bool) {
 // TakeLastCnt updates the underlying slice and returns a new nub
 func (slice *strMapSliceNub) TakeLastCnt(cnt int) (result *strMapSliceNub) {
 	if cnt > 0 {
-		if len(slice.raw) >= cnt {
-			i := len(slice.raw) - cnt
-			result = StrMapSlice(slice.raw[i:])
-			slice.raw = slice.raw[:i]
+		if len(slice.v) >= cnt {
+			i := len(slice.v) - cnt
+			result = StrMapSlice(slice.v[i:])
+			slice.v = slice.v[:i]
 		} else {
-			result = StrMapSlice(slice.raw)
-			slice.raw = []map[string]interface{}{}
+			result = StrMapSlice(slice.v)
+			slice.v = []map[string]interface{}{}
 		}
 	}
 	return

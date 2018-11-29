@@ -14,24 +14,24 @@ func A(str string) *strNub {
 }
 
 // A materializes object invoking deferred execution
-func (str *strNub) A() string {
-	return str.v
+func (q *strNub) A() string {
+	return q.v
 }
 
 // Q creates a queryable from the string
-func (str *strNub) Q() *Queryable {
-	return Q(str.v)
+func (q *strNub) Q() *Queryable {
+	return Q(q.v)
 }
 
 // Contains checks if the given target is contained in this string
-func (str *strNub) Contains(target string) bool {
-	return strings.Contains(str.v, target)
+func (q *strNub) Contains(target string) bool {
+	return strings.Contains(q.v, target)
 }
 
 // ContainsAny checks if any of the targets are contained in this string
-func (str *strNub) ContainsAny(targets ...string) bool {
+func (q *strNub) ContainsAny(targets ...string) bool {
 	for i := range targets {
-		if strings.Contains(str.v, targets[i]) {
+		if strings.Contains(q.v, targets[i]) {
 			return true
 		}
 	}
@@ -39,9 +39,9 @@ func (str *strNub) ContainsAny(targets ...string) bool {
 }
 
 // HasAnyPrefix checks if the string has any of the given prefixes
-func (str *strNub) HasAnyPrefix(prefixes ...string) bool {
+func (q *strNub) HasAnyPrefix(prefixes ...string) bool {
 	for i := range prefixes {
-		if strings.HasPrefix(str.v, prefixes[i]) {
+		if strings.HasPrefix(q.v, prefixes[i]) {
 			return true
 		}
 	}
@@ -49,9 +49,9 @@ func (str *strNub) HasAnyPrefix(prefixes ...string) bool {
 }
 
 // HasAnySuffix checks if the string has any of the given suffixes
-func (str *strNub) HasAnySuffix(suffixes ...string) bool {
+func (q *strNub) HasAnySuffix(suffixes ...string) bool {
 	for i := range suffixes {
-		if strings.HasSuffix(str.v, suffixes[i]) {
+		if strings.HasSuffix(q.v, suffixes[i]) {
 			return true
 		}
 	}
@@ -59,26 +59,35 @@ func (str *strNub) HasAnySuffix(suffixes ...string) bool {
 }
 
 // HasPrefix checks if the string has the given prefix
-func (str *strNub) HasPrefix(prefix string) bool {
-	return strings.HasPrefix(str.v, prefix)
+func (q *strNub) HasPrefix(prefix string) bool {
+	return strings.HasPrefix(q.v, prefix)
 }
 
 // HasSuffix checks if the string has the given suffix
-func (str *strNub) HasSuffix(suffix string) bool {
-	return strings.HasSuffix(str.v, suffix)
+func (q *strNub) HasSuffix(suffix string) bool {
+	return strings.HasSuffix(q.v, suffix)
 }
 
 // Split creates a new nub from the split string
-func (str *strNub) Split(delim string) *strSliceNub {
-	return StrSlice(strings.Split(str.v, delim))
+func (q *strNub) Split(delim string) *strSliceNub {
+	return StrSlice(strings.Split(q.v, delim))
 }
 
 // TrimPrefix trims the given prefix off the string
-func (str *strNub) TrimPrefix(prefix string) *strNub {
-	return A(strings.TrimPrefix(str.v, prefix))
+func (q *strNub) TrimPrefix(prefix string) *strNub {
+	return A(strings.TrimPrefix(q.v, prefix))
 }
 
 // TrimSuffix trims the given suffix off the string
-func (str *strNub) TrimSuffix(suffix string) *strNub {
-	return A(strings.TrimSuffix(str.v, suffix))
+func (q *strNub) TrimSuffix(suffix string) *strNub {
+	return A(strings.TrimSuffix(q.v, suffix))
+}
+
+// YAMLType converts the given string into a type expected in YAML.
+// Quotes signifies a string.
+// No quotes signifies an int.
+// true or false signifies a bool.
+func (q *strNub) YAMLType(t string) interface{} {
+	//if A(str)
+	return nil
 }

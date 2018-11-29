@@ -8,33 +8,21 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-// Map manipulates the queryable data into a new form
-func (q *Queryable) Map(sel func(interface{}) interface{}) *Queryable {
-	result := S()
-	next := q.Iter()
-	for x, ok := next(); ok; x, ok = next() {
-		result.Append(sel(x))
-	}
-	return result
-}
-
-// TODO: Need to refactor below here
-
 //--------------------------------------------------------------------------------------------------
 // StrMap Nub
 //--------------------------------------------------------------------------------------------------
 type strMapNub struct {
-	raw map[string]interface{}
+	v map[string]interface{}
 }
 
 // NewStrMap creates a new nub
 func NewStrMap() *strMapNub {
-	return &strMapNub{raw: map[string]interface{}{}}
+	return &strMapNub{v: map[string]interface{}{}}
 }
 
 // StrMap creates a new nub from the given string map
 func StrMap(other map[string]interface{}) *strMapNub {
-	return &strMapNub{raw: other}
+	return &strMapNub{v: other}
 }
 
 // LoadOld a yaml/json file as a str map
@@ -42,7 +30,7 @@ func StrMap(other map[string]interface{}) *strMapNub {
 func LoadOld(target string) (result *strMapNub) {
 	if yamlFile, err := ioutil.ReadFile(target); err == nil {
 		result = NewStrMap()
-		yaml.Unmarshal(yamlFile, &result.raw)
+		yaml.Unmarshal(yamlFile, &result.v)
 	}
 	return result
 }
@@ -51,16 +39,16 @@ func LoadOld(target string) (result *strMapNub) {
 func (m *strMapNub) Add(key string, value interface{}) *strMapNub {
 	switch x := value.(type) {
 	case *strMapNub:
-		m.raw[key] = x.raw
+		m.v[key] = x.v
 	default:
-		m.raw[key] = value
+		m.v[key] = value
 	}
 	return m
 }
 
 // Any checks if the map has anything in it
 func (m *strMapNub) Any() bool {
-	return len(m.raw) > 0
+	return len(m.v) > 0
 }
 
 // Equals checks if the two maps are equal
@@ -70,12 +58,12 @@ func (m *strMapNub) Equals(other *strMapNub) bool {
 
 // Len is a pass through to the underlying map
 func (m *strMapNub) Len() int {
-	return len(m.raw)
+	return len(m.v)
 }
 
 // M materializes object invoking deferred execution
 func (m *strMapNub) M() map[string]interface{} {
-	return m.raw
+	return m.v
 }
 
 // Merge the other maps into this map with the first taking the lowest
@@ -83,7 +71,7 @@ func (m *strMapNub) M() map[string]interface{} {
 func (m *strMapNub) Merge(items ...map[string]interface{}) *strMapNub {
 	for i := range items {
 		if items[i] != nil {
-			m.raw = mergeMap(m.raw, items[i])
+			m.v = mergeMap(m.v, items[i])
 		}
 	}
 	return m
@@ -94,7 +82,7 @@ func (m *strMapNub) Merge(items ...map[string]interface{}) *strMapNub {
 func (m *strMapNub) MergeNub(items ...*strMapNub) *strMapNub {
 	for i := range items {
 		if items[i] != nil {
-			m.raw = mergeMap(m.raw, items[i].raw)
+			m.v = mergeMap(m.v, items[i].v)
 		}
 	}
 	return m
@@ -104,7 +92,7 @@ func (m *strMapNub) MergeNub(items ...*strMapNub) *strMapNub {
 func (m *strMapNub) Slice(key string) (result []interface{}) {
 	keys := A(key).Split(".")
 	if k, ok := keys.TakeFirst(); ok {
-		if entry, exists := m.raw[k]; exists {
+		if entry, exists := m.v[k]; exists {
 			switch x := entry.(type) {
 			case map[string]interface{}:
 				result = StrMap(x).Slice(keys.Join(".").A())
@@ -123,7 +111,7 @@ func (m *strMapNub) Str(key string) *strNub {
 	result := A("")
 	keys := A(key).Split(".")
 	if k, ok := keys.TakeFirst(); ok {
-		if entry, exists := m.raw[k]; exists {
+		if entry, exists := m.v[k]; exists {
 			switch v := entry.(type) {
 			case string:
 				result = A(v)
@@ -141,9 +129,9 @@ func (m *strMapNub) StrMap(key string) *strMapNub {
 
 	keys := A(key).Split(".")
 	if k, ok := keys.TakeFirst(); ok {
-		if entry, exists := m.raw[k]; exists {
+		if entry, exists := m.v[k]; exists {
 			if v, ok := entry.(map[string]interface{}); ok {
-				result.raw = v
+				result.v = v
 				if keys.Len() != 0 {
 					result = result.StrMap(keys.Join(".").A())
 				}
@@ -160,7 +148,7 @@ func (m *strMapNub) StrMapByName(key, k, v string) *strMapNub {
 	for i := range slice {
 		if x, ok := slice[i].(map[string]interface{}); ok {
 			if value, exists := x[k]; exists && value == v {
-				result.raw = x
+				result.v = x
 				break
 			}
 		}

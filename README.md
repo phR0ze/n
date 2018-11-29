@@ -102,7 +102,6 @@ Materialization or processing deferred execution and converting to a usable type
 
 
 
-
 ### Slice Functions
 | Function     | Description                                     | Slice | IntSlice | StrSlice | StrMapSlice |
 | ------------ | ----------------------------------------------- | ----- | -------- | -------- | ----------- |
