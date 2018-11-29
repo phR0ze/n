@@ -152,7 +152,7 @@ func TestIntSliceLen(t *testing.T) {
 
 func TestIntSliceJoin(t *testing.T) {
 	slice := NewIntSlice().Append(1, 2, 3)
-	assert.Equal(t, "1.2.3", slice.Join(".").M())
+	assert.Equal(t, "1.2.3", slice.Join(".").A())
 }
 
 func TestIntSlicePrepend(t *testing.T) {
@@ -436,9 +436,9 @@ func TestStrSliceEquals(t *testing.T) {
 }
 
 func TestStrSliceJoin(t *testing.T) {
-	assert.Equal(t, "", StrSlice([]string{}).Join(".").M())
-	assert.Equal(t, "1", StrSlice([]string{"1"}).Join(".").M())
-	assert.Equal(t, "1.2", StrSlice([]string{"1", "2"}).Join(".").M())
+	assert.Equal(t, "", StrSlice([]string{}).Join(".").A())
+	assert.Equal(t, "1", StrSlice([]string{"1"}).Join(".").A())
+	assert.Equal(t, "1.2", StrSlice([]string{"1", "2"}).Join(".").A())
 }
 
 func TestStrSliceLen(t *testing.T) {

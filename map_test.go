@@ -119,15 +119,15 @@ func TestStrMapSlice2(t *testing.T) {
 func TestStrMapStr(t *testing.T) {
 	{
 		target := NewStrMap().Add("test1", "foobar")
-		assert.Equal(t, "foobar", target.Str("test1").M())
+		assert.Equal(t, "foobar", target.Str("test1").A())
 	}
 	{
 		target := NewStrMap().Add("test1", NewStrMap().Add("test2", "foo2"))
-		assert.Equal(t, "foo2", target.Str("test1.test2").M())
+		assert.Equal(t, "foo2", target.Str("test1.test2").A())
 	}
 	{
 		target := NewStrMap().Add("test1", NewStrMap().Add("tes2", "foo2"))
-		assert.Equal(t, "", target.Str("test1.test2").M())
+		assert.Equal(t, "", target.Str("test1.test2").A())
 	}
 }
 

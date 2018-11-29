@@ -38,12 +38,6 @@ func Load(filepath string) *Queryable {
 	return M()
 }
 
-// A provides a new empty Queryable string
-func A() *Queryable {
-	v := reflect.ValueOf(string(""))
-	return &Queryable{v: &v, Kind: v.Kind(), Iter: strIter(v)}
-}
-
 func strIter(ref reflect.Value) func() Iterator {
 	return func() Iterator {
 		i := 0
@@ -167,21 +161,29 @@ func (q *Queryable) Each(action func(interface{})) {
 // Get an item by key which can be dot delimited
 // Assumes maps of type map[string]interface{}
 func (q *Queryable) Get(key string) (result *Queryable) {
-	result = M()
 	keys := Q(key).Split(".")
 	if key, ok := keys.TakeFirst(); ok {
-		if x, ok := q.v.Interface().(map[string]interface{}); ok {
+		switch x := q.v.Interface().(type) {
+		case map[string]interface{}:
 			k := key.(string)
-			if v, ok := x[k]; ok {
-				result = Q(v)
-				if keys.Len() != 0 {
-					result = result.Get(keys.Join(".").A())
+			if !Q(k).ContainsAny([]string{":", "[", "]"}) {
+				if v, ok := x[k]; ok {
+					result = Q(v)
 				}
 			}
-		} else if q.Kind == reflect.Slice {
-			//case []string:
-			//	panic("TODO: implement slice of string")
+		case []interface{}:
+			// k := strings.TrimSuffix(key, "[")
+			// k := Q(key).Split(":")
+			// for i := range x {
+			// 	fmt.Println(x[i])
+			// }
 		}
+		if keys.Len() != 0 && result.Any() {
+			result = result.Get(keys.Join(".").A())
+		}
+	}
+	if result == nil {
+		result = M()
 	}
 	return
 }
@@ -229,7 +231,7 @@ func (q *Queryable) Split(delim string) *Queryable {
 	if q.TypeStr() {
 		return Q(strings.Split(q.v.Interface().(string), delim))
 	}
-	return A()
+	return S()
 }
 
 // TypeIter checks if the queryable is iterable

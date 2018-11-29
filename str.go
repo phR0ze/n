@@ -4,30 +4,29 @@ import (
 	"strings"
 )
 
-// TODO: Need to refactor below here
 type strNub struct {
-	raw string
+	v string
 }
 
-// NewStr creates a new nub
-func NewStr() *strNub {
-	return Str("")
+// A provides a new empty string nub
+func A(str string) *strNub {
+	return &strNub{v: str}
 }
 
-// Str creates a new nub from the given string
-func Str(slice string) *strNub {
-	return &strNub{raw: slice}
+// A materializes object invoking deferred execution
+func (str *strNub) A() string {
+	return str.v
 }
 
 // Contains checks if the given target is contained in this string
 func (str *strNub) Contains(target string) bool {
-	return strings.Contains(str.raw, target)
+	return strings.Contains(str.v, target)
 }
 
 // ContainsAny checks if any of the targets are contained in this string
-func (str *strNub) ContainsAny(targets []string) bool {
+func (str *strNub) ContainsAny(targets ...string) bool {
 	for i := range targets {
-		if strings.Contains(str.raw, targets[i]) {
+		if strings.Contains(str.v, targets[i]) {
 			return true
 		}
 	}
@@ -35,9 +34,9 @@ func (str *strNub) ContainsAny(targets []string) bool {
 }
 
 // HasAnyPrefix checks if the string has any of the given prefixes
-func (str *strNub) HasAnyPrefix(prefixes []string) bool {
+func (str *strNub) HasAnyPrefix(prefixes ...string) bool {
 	for i := range prefixes {
-		if strings.HasPrefix(str.raw, prefixes[i]) {
+		if strings.HasPrefix(str.v, prefixes[i]) {
 			return true
 		}
 	}
@@ -45,9 +44,9 @@ func (str *strNub) HasAnyPrefix(prefixes []string) bool {
 }
 
 // HasAnySuffix checks if the string has any of the given suffixes
-func (str *strNub) HasAnySuffix(suffixes []string) bool {
+func (str *strNub) HasAnySuffix(suffixes ...string) bool {
 	for i := range suffixes {
-		if strings.HasSuffix(str.raw, suffixes[i]) {
+		if strings.HasSuffix(str.v, suffixes[i]) {
 			return true
 		}
 	}
@@ -56,20 +55,25 @@ func (str *strNub) HasAnySuffix(suffixes []string) bool {
 
 // HasPrefix checks if the string has the given prefix
 func (str *strNub) HasPrefix(prefix string) bool {
-	return strings.HasPrefix(str.raw, prefix)
+	return strings.HasPrefix(str.v, prefix)
 }
 
 // HasSuffix checks if the string has the given suffix
-func (str *strNub) HasSuffix(prefix string) bool {
-	return strings.HasSuffix(str.raw, prefix)
+func (str *strNub) HasSuffix(suffix string) bool {
+	return strings.HasSuffix(str.v, suffix)
 }
 
 // Split creates a new nub from the split string
 func (str *strNub) Split(delim string) *strSliceNub {
-	return StrSlice(strings.Split(str.raw, delim))
+	return StrSlice(strings.Split(str.v, delim))
 }
 
-// M materializes object invoking deferred execution
-func (str *strNub) M() string {
-	return str.raw
+// TrimPrefix trims the given prefix off the string
+func (str *strNub) TrimPrefix(prefix string) *strNub {
+	return A(strings.TrimPrefix(str.v, prefix))
+}
+
+// TrimSuffix trims the given suffix off the string
+func (str *strNub) TrimSuffix(suffix string) *strNub {
+	return A(strings.TrimSuffix(str.v, suffix))
 }

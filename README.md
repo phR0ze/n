@@ -73,7 +73,6 @@ Some functions only apply to particular underlying collection types as called ou
 | Map          | Manipulate the queryable data into a new form   | 1     | 1   | 1   | 1     |
 | Merge        | Merge other queryables in priority order        | 0     | 0   | 0   | 0     |
 | Set          | Set the queryable's encapsulated object         | 1     | 1   | 1   | 1     |
-| Split        | Split the string into a slice on delimiter      | -     | -   | 1   | -     |
 | TakeFirst    | Remove and return the first item                | 1     | -   | 1   | 1     |
 | TakeFirstCnt | Remove and return the first cnt items           | 0     | 0   | 0   | 0     |
 | TakeLast     | Remove and return the last item                 | 0     | 0   | 0   | 0     |
@@ -87,14 +86,22 @@ Some functions only apply to particular underlying collection types as called ou
 ### Materialization <a name="materialization"></a>
 Materialization or processing deferred execution and converting to a usable type
 
-| Function     | Description                                    | Return Type                |
-| ------------ | ---------------------------------------------- | -------------------------- |
-| A            | Materialize queryable into a string            | `string`                   |
-| I            | Materialize queryable into an int              | `int`                      |
-| M            | Materialize queryable to map                   | `map[string]interface{}`   |
-| O            | Materialize queryable to interface{}           | `interface{}`              |
-| Ints         | Materialize queryable into an int slice        | `[]int`                    |
-| Strs         | Materialize queryable into a string slice      | `[]string`                 |
+| Function     | Description                                     | Return Type               |
+| ------------ | ----------------------------------------------- | ------------------------- |
+| A            | Materialize queryable into a string             | `string`                  |
+| I            | Materialize queryable into an int               | `int`                     |
+| M            | Materialize queryable to map                    | `map[string]interface{}`  |
+| O            | Materialize queryable to interface{}            | `interface{}`             |
+| Ints         | Materialize queryable into an int slice         | `[]int`                   |
+| Strs         | Materialize queryable into a string slice       | `[]string`                |
+
+### String Functions <a name="string-functions"></a>
+| Function     | Description                                     | Done  |
+| ------------ | ----------------------------------------------- | ----- |
+| Split        | Split the string into a slice on delimiter      |       |
+
+
+
 
 ### Slice Functions
 | Function     | Description                                     | Slice | IntSlice | StrSlice | StrMapSlice |

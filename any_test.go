@@ -20,7 +20,6 @@ func TestAny(t *testing.T) {
 	}
 	{
 		// string
-		assert.False(t, A().Any())
 		assert.True(t, Q("test").Any())
 	}
 	{

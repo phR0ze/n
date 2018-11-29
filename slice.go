@@ -111,7 +111,7 @@ func (slice *intSliceNub) Join(delim string) *strNub {
 	for i := range slice.raw {
 		result = append(result, strconv.Itoa(slice.raw[i]))
 	}
-	return Str(strings.Join(result, delim))
+	return A(strings.Join(result, delim))
 }
 
 // Len is a pass through to the underlying slice
@@ -306,7 +306,7 @@ func (slice *strSliceNub) Equals(other *strSliceNub) bool {
 
 // Join the underlying slice with the given delim
 func (slice *strSliceNub) Join(delim string) *strNub {
-	return Str(strings.Join(slice.raw, delim))
+	return A(strings.Join(slice.raw, delim))
 }
 
 // Len is a pass through to the underlying slice

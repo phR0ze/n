@@ -29,13 +29,13 @@ func CallerTrace(skipframes int, skipfiles ...string) (result []*Entry) {
 
 		// Move up the stack skipping files or methods called out
 		if more && (methods.Contains(path.Base(frame.Function)) ||
-			skipfiles != nil && nub.Str(frame.File).ContainsAny(skipfiles)) {
+			skipfiles != nil && nub.A(frame.File).ContainsAny(skipfiles...)) {
 			continue
 		}
 
 		if frame.Function != "" {
 			f := path.Base(frame.Function)
-			file := nub.Str(frame.File).Split("/").TakeLastCnt(3).Join("/").M()
+			file := nub.A(frame.File).Split("/").TakeLastCnt(3).Join("/").A()
 			result = append(result, &Entry{Func: f, Line: frame.Line, File: file})
 		}
 		if !more {

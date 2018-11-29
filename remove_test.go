@@ -15,7 +15,7 @@ func TestTakeFirst(t *testing.T) {
 	}
 	{
 		// empty string
-		x, ok := A().TakeFirst()
+		x, ok := Q("").TakeFirst()
 		assert.False(t, ok)
 		assert.Nil(t, x)
 	}

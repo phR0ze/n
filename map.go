@@ -102,12 +102,12 @@ func (m *strMapNub) MergeNub(items ...*strMapNub) *strMapNub {
 
 // Slice returns a slice of interface{} from the given map using the given key
 func (m *strMapNub) Slice(key string) (result []interface{}) {
-	keys := Str(key).Split(".")
+	keys := A(key).Split(".")
 	if k, ok := keys.TakeFirst(); ok {
 		if entry, exists := m.raw[k]; exists {
 			switch x := entry.(type) {
 			case map[string]interface{}:
-				result = StrMap(x).Slice(keys.Join(".").M())
+				result = StrMap(x).Slice(keys.Join(".").A())
 			case []map[string]interface{}:
 				result = unCastStrMapSlice(x)
 			case []interface{}:
@@ -120,15 +120,15 @@ func (m *strMapNub) Slice(key string) (result []interface{}) {
 
 // Str returns a string from the given map using the given key
 func (m *strMapNub) Str(key string) *strNub {
-	result := NewStr()
-	keys := Str(key).Split(".")
+	result := A("")
+	keys := A(key).Split(".")
 	if k, ok := keys.TakeFirst(); ok {
 		if entry, exists := m.raw[k]; exists {
 			switch v := entry.(type) {
 			case string:
-				result = Str(v)
+				result = A(v)
 			case map[string]interface{}:
-				result = StrMap(v).Str(keys.Join(".").M())
+				result = StrMap(v).Str(keys.Join(".").A())
 			}
 		}
 	}
@@ -139,13 +139,13 @@ func (m *strMapNub) Str(key string) *strNub {
 func (m *strMapNub) StrMap(key string) *strMapNub {
 	result := NewStrMap()
 
-	keys := Str(key).Split(".")
+	keys := A(key).Split(".")
 	if k, ok := keys.TakeFirst(); ok {
 		if entry, exists := m.raw[k]; exists {
 			if v, ok := entry.(map[string]interface{}); ok {
 				result.raw = v
 				if keys.Len() != 0 {
-					result = result.StrMap(keys.Join(".").M())
+					result = result.StrMap(keys.Join(".").A())
 				}
 			}
 		}
