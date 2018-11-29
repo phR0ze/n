@@ -344,6 +344,14 @@ func (q *Queryable) Each(action func(I)) {
 	}
 }
 
+// Flatten returns a new slice that is one-dimensional flattening.
+// That is, for every item that is a slice, extract its items into the new slice.
+func (q *Queryable) Flatten() *Queryable {
+	//next := q.Iter()
+	//for x, ok := next(); ok;
+	return nil
+}
+
 // Join slice items as string with given delimeter
 func (q *Queryable) Join(delim string) *Queryable {
 	var joined bytes.Buffer
@@ -374,11 +382,17 @@ func (q *Queryable) Len() int {
 }
 
 // Map manipulates the queryable data into a new form
-func (q *Queryable) Map(sel func(I) I) *Queryable {
-	result := N()
+func (q *Queryable) Map(sel func(I) I) (result *Queryable) {
 	next := q.Iter()
 	for x, ok := next(); ok; x, ok = next() {
-		result.Append(sel(x))
+		s := sel(x)
+
+		// Create new slice of the return type of sel
+		if result == nil {
+			typ := reflect.TypeOf(s)
+			result = Q(reflect.MakeSlice(reflect.SliceOf(typ), 0, 10).Interface())
+		}
+		result.Append(s)
 	}
 	return result
 }

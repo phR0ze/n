@@ -5,9 +5,15 @@ some awesome deferred execution. This package was created to reduce the verbosit
 required when coding in Go.
 
 ## Table of Contents
+* [Backlog](#backlog)
 * [References](#references)
   * [Iterator Pattern](#iterator-pattern)
 * [Implemented](#implemented)
+
+## Backlog <a name="backlog"></a>
+* Implement chainable slice functions
+* Implement deferred execution
+* Handle performance issues with reflection
 
 ## References <a name="references"></a>
 
