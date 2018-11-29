@@ -57,7 +57,8 @@ Some functions only apply to particular underlying collection types as called ou
 | ------------ | ----------------------------------------------- | ----- | ----| --- | ----- |
 | A            | Creates queryable encapsulating empty string    | -     | -   | 1   | -     |
 | M            | Creates queryable encapsulating empty map       | -     | 1   | -   | -     |
-| S            | Creates queryable encapsulating empty slice     | 1     | -   | -   | -     |
+| S            | Creates queryable encapsulating empty map       | 1     | -   | -   | -     |
+| N            | Creates queryable encapsulating empty slice     | 1     | -   | -   | -     |
 | Q            | Creates queryable encapsulating the given TYPE  | 1     | 1   | 1   | 1     |
 | Any          | Check if the queryable is not nil and not empty | 1     | 1   | 1   | 1     |
 | AnyWhere     | Check if any match the given lambda             | 1     | 1   | 1   | 1     |

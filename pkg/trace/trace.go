@@ -22,7 +22,7 @@ func CallerTrace(skipframes int, skipfiles ...string) (result []*Entry) {
 	callers := make([]uintptr, 20)
 	runtime.Callers(2, callers)
 	frames := runtime.CallersFrames(callers)
-	methods := nub.StrSlice([]string{"trace.CallerTrace", "trace.CallerTraceOne"})
+	methods := nub.S("trace.CallerTrace", "trace.CallerTraceOne")
 
 	for {
 		frame, more = frames.Next()

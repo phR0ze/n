@@ -299,23 +299,23 @@ func TestIntSliceUniq(t *testing.T) {
 // StrSlice tests
 //--------------------------------------------------------------------------------------------------
 func TestNewStrSlice(t *testing.T) {
-	assert.NotNil(t, NewStrSlice().S())
+	assert.NotNil(t, S().S())
 }
 
 func TestStrSlice(t *testing.T) {
-	assert.NotNil(t, StrSlice(nil).S())
-	assert.NotNil(t, StrSlice([]string{}).S())
+	assert.NotNil(t, S().S())
+	assert.NotNil(t, S([]string{}...).S())
 }
 
 func TestStrSliceAny(t *testing.T) {
-	assert.False(t, NewStrSlice().Any())
-	assert.True(t, NewStrSlice().Append("2").Any())
+	assert.False(t, S().Any())
+	assert.True(t, S().Append("2").Any())
 }
 
 func TestStrSliceAppend(t *testing.T) {
 	{
 		// Append one
-		slice := NewStrSlice()
+		slice := S()
 		assert.Equal(t, 0, slice.Len())
 		slice.Append("2")
 		assert.Equal(t, 1, slice.Len())
@@ -323,7 +323,7 @@ func TestStrSliceAppend(t *testing.T) {
 	}
 	{
 		// Append many
-		slice := NewStrSlice()
+		slice := S()
 		assert.Equal(t, 0, slice.Len())
 		slice.Append("2", "4", "6")
 		assert.Equal(t, 3, slice.Len())
@@ -331,7 +331,7 @@ func TestStrSliceAppend(t *testing.T) {
 	}
 }
 func TestStrSliceAt(t *testing.T) {
-	slice := NewStrSlice().Append("1", "2", "3", "4")
+	slice := S().Append("1", "2", "3", "4")
 	assert.Equal(t, "4", slice.At(-1))
 	assert.Equal(t, "3", slice.At(-2))
 	assert.Equal(t, "2", slice.At(-3))
@@ -342,7 +342,7 @@ func TestStrSliceAt(t *testing.T) {
 }
 
 func TestStrSliceClear(t *testing.T) {
-	slice := NewStrSlice().Append("1", "2", "3", "4")
+	slice := S().Append("1", "2", "3", "4")
 	assert.Equal(t, 4, slice.Len())
 	slice.Clear()
 	assert.Equal(t, 0, slice.Len())
@@ -351,66 +351,66 @@ func TestStrSliceClear(t *testing.T) {
 }
 
 func TestStrSliceAnyContain(t *testing.T) {
-	assert.True(t, StrSlice([]string{"one", "two", "three"}).AnyContain("thr"))
-	assert.False(t, StrSlice([]string{"one", "two", "three"}).AnyContain("2"))
+	assert.True(t, S("one", "two", "three").AnyContain("thr"))
+	assert.False(t, S("one", "two", "three").AnyContain("2"))
 }
 
 func TestStrSliceContains(t *testing.T) {
-	assert.True(t, StrSlice([]string{"1", "2", "3"}).Contains("2"))
-	assert.False(t, StrSlice([]string{"1", "2", "3"}).Contains("4"))
+	assert.True(t, S("1", "2", "3").Contains("2"))
+	assert.False(t, S("1", "2", "3").Contains("4"))
 }
 
 func TestStrSliceContainsAny(t *testing.T) {
-	assert.True(t, StrSlice([]string{"1", "2", "3"}).ContainsAny([]string{"2"}))
-	assert.False(t, StrSlice([]string{"1", "2", "3"}).ContainsAny([]string{"4"}))
+	assert.True(t, S("1", "2", "3").ContainsAny([]string{"2"}))
+	assert.False(t, S("1", "2", "3").ContainsAny([]string{"4"}))
 }
 
 func TestStrSliceDel(t *testing.T) {
 	{
 		// Pos: delete invalid
-		slice := StrSlice([]string{"0", "1", "2"})
+		slice := S("0", "1", "2")
 		ok := slice.Del(3)
 		assert.False(t, ok)
 		assert.Equal(t, []string{"0", "1", "2"}, slice.S())
 	}
 	{
 		// Pos: delete last
-		slice := StrSlice([]string{"0", "1", "2"})
+		slice := S("0", "1", "2")
 		ok := slice.Del(2)
 		assert.True(t, ok)
 		assert.Equal(t, []string{"0", "1"}, slice.S())
 	}
 	{
 		// Pos: delete middle
-		slice := StrSlice([]string{"0", "1", "2"})
+		slice := S("0", "1", "2")
 		ok := slice.Del(1)
 		assert.True(t, ok)
 		assert.Equal(t, []string{"0", "2"}, slice.S())
 	}
 	{
 		// delete first
-		slice := StrSlice([]string{"0", "1", "2"})
+		slice := S("0", "1", "2")
 		ok := slice.Del(0)
 		assert.True(t, ok)
 		assert.Equal(t, []string{"1", "2"}, slice.S())
 	}
 	{
 		// Neg: delete invalid
-		slice := StrSlice([]string{"0", "1", "2"})
+		slice := S("0", "1", "2")
 		ok := slice.Del(-4)
 		assert.False(t, ok)
 		assert.Equal(t, []string{"0", "1", "2"}, slice.S())
 	}
 	{
 		// Neg: delete last
-		slice := StrSlice([]string{"0", "1", "2"})
+		slice := S("0", "1", "2")
 		ok := slice.Del(-1)
 		assert.True(t, ok)
 		assert.Equal(t, []string{"0", "1"}, slice.S())
 	}
 	{
 		// Neg: delete middle
-		slice := StrSlice([]string{"0", "1", "2"})
+		slice := S("0", "1", "2")
 		ok := slice.Del(-2)
 		assert.True(t, ok)
 		assert.Equal(t, []string{"0", "2"}, slice.S())
@@ -419,41 +419,41 @@ func TestStrSliceDel(t *testing.T) {
 
 func TestStrSliceEquals(t *testing.T) {
 	{
-		slice := NewStrSlice().Append("1", "2", "3")
-		target := NewStrSlice().Append("1", "2", "3")
+		slice := S().Append("1", "2", "3")
+		target := S().Append("1", "2", "3")
 		assert.True(t, slice.Equals(target))
 	}
 	{
-		slice := NewStrSlice().Append("1", "2", "4")
-		target := NewStrSlice().Append("1", "2", "3")
+		slice := S().Append("1", "2", "4")
+		target := S().Append("1", "2", "3")
 		assert.False(t, slice.Equals(target))
 	}
 	{
-		slice := NewStrSlice().Append("1", "2", "3", "4")
-		target := NewStrSlice().Append("1", "2", "3")
+		slice := S().Append("1", "2", "3", "4")
+		target := S().Append("1", "2", "3")
 		assert.False(t, slice.Equals(target))
 	}
 }
 
 func TestStrSliceJoin(t *testing.T) {
-	assert.Equal(t, "", StrSlice([]string{}).Join(".").A())
-	assert.Equal(t, "1", StrSlice([]string{"1"}).Join(".").A())
-	assert.Equal(t, "1.2", StrSlice([]string{"1", "2"}).Join(".").A())
+	assert.Equal(t, "", S().Join(".").A())
+	assert.Equal(t, "1", S("1").Join(".").A())
+	assert.Equal(t, "1.2", S("1", "2").Join(".").A())
 }
 
 func TestStrSliceLen(t *testing.T) {
-	assert.Equal(t, 0, StrSlice([]string{}).Len())
-	assert.Equal(t, 1, StrSlice([]string{"1"}).Len())
-	assert.Equal(t, 2, StrSlice([]string{"1", "2"}).Len())
+	assert.Equal(t, 0, S().Len())
+	assert.Equal(t, 1, S("1").Len())
+	assert.Equal(t, 2, S("1", "2").Len())
 }
 
 func TestStrSliceSort(t *testing.T) {
-	slice := NewStrSlice().Append("b", "d", "a")
+	slice := S().Append("b", "d", "a")
 	assert.Equal(t, []string{"a", "b", "d"}, slice.Sort().S())
 }
 
 func TestStrSlicePrepend(t *testing.T) {
-	slice := NewStrSlice().Prepend("1")
+	slice := S().Prepend("1")
 	assert.Equal(t, "1", slice.At(0))
 
 	slice.Prepend("2", "3")
@@ -463,7 +463,7 @@ func TestStrSlicePrepend(t *testing.T) {
 
 func TestStrSliceTakeFirst(t *testing.T) {
 	{
-		slice := StrSlice([]string{"0", "1", "2"})
+		slice := S("0", "1", "2")
 		results := []string{}
 		expected := []string{"0", "1", "2"}
 		for item, ok := slice.TakeFirst(); ok; item, ok = slice.TakeFirst() {
@@ -472,21 +472,21 @@ func TestStrSliceTakeFirst(t *testing.T) {
 		assert.Equal(t, expected, results)
 	}
 	{
-		slice := StrSlice([]string{"0", "1", "2"})
+		slice := S("0", "1", "2")
 		item, ok := slice.TakeFirst()
 		assert.True(t, ok)
 		assert.Equal(t, "0", item)
 		assert.Equal(t, []string{"1", "2"}, slice.S())
 	}
 	{
-		slice := StrSlice([]string{"0"})
+		slice := S("0")
 		item, ok := slice.TakeFirst()
 		assert.True(t, ok)
 		assert.Equal(t, "0", item)
 		assert.Equal(t, []string{}, slice.S())
 	}
 	{
-		slice := StrSlice([]string{})
+		slice := S()
 		item, ok := slice.TakeFirst()
 		assert.False(t, ok)
 		assert.Equal(t, "", item)
@@ -496,19 +496,19 @@ func TestStrSliceTakeFirst(t *testing.T) {
 
 func TestStrSliceTakeFirstCnt(t *testing.T) {
 	{
-		slice := StrSlice([]string{"0", "1", "2"})
+		slice := S("0", "1", "2")
 		items := slice.TakeFirstCnt(2).S()
 		assert.Equal(t, []string{"0", "1"}, items)
 		assert.Equal(t, []string{"2"}, slice.S())
 	}
 	{
-		slice := StrSlice([]string{"0", "1", "2"})
+		slice := S("0", "1", "2")
 		items := slice.TakeFirstCnt(3).S()
 		assert.Equal(t, []string{"0", "1", "2"}, items)
 		assert.Equal(t, []string{}, slice.S())
 	}
 	{
-		slice := StrSlice([]string{"0", "1", "2"})
+		slice := S("0", "1", "2")
 		items := slice.TakeFirstCnt(4).S()
 		assert.Equal(t, []string{"0", "1", "2"}, items)
 		assert.Equal(t, []string{}, slice.S())
@@ -517,7 +517,7 @@ func TestStrSliceTakeFirstCnt(t *testing.T) {
 
 func TestStrSliceTakeLast(t *testing.T) {
 	{
-		slice := StrSlice([]string{"0", "1", "2"})
+		slice := S("0", "1", "2")
 		results := []string{}
 		expected := []string{"2", "1", "0"}
 		for item, ok := slice.TakeLast(); ok; item, ok = slice.TakeLast() {
@@ -526,21 +526,21 @@ func TestStrSliceTakeLast(t *testing.T) {
 		assert.Equal(t, expected, results)
 	}
 	{
-		slice := StrSlice([]string{"0", "1", "2"})
+		slice := S("0", "1", "2")
 		item, ok := slice.TakeLast()
 		assert.True(t, ok)
 		assert.Equal(t, "2", item)
 		assert.Equal(t, []string{"0", "1"}, slice.S())
 	}
 	{
-		slice := StrSlice([]string{"0"})
+		slice := S("0")
 		item, ok := slice.TakeLast()
 		assert.True(t, ok)
 		assert.Equal(t, "0", item)
 		assert.Equal(t, []string{}, slice.S())
 	}
 	{
-		slice := StrSlice([]string{})
+		slice := S()
 		item, ok := slice.TakeLast()
 		assert.False(t, ok)
 		assert.Equal(t, "", item)
@@ -549,19 +549,19 @@ func TestStrSliceTakeLast(t *testing.T) {
 }
 func TestStrSliceTakeLastCnt(t *testing.T) {
 	{
-		slice := StrSlice([]string{"0", "1", "2"})
+		slice := S("0", "1", "2")
 		items := slice.TakeLastCnt(2).S()
 		assert.Equal(t, []string{"1", "2"}, items)
 		assert.Equal(t, []string{"0"}, slice.S())
 	}
 	{
-		slice := StrSlice([]string{"0", "1", "2"})
+		slice := S("0", "1", "2")
 		items := slice.TakeLastCnt(3).S()
 		assert.Equal(t, []string{"0", "1", "2"}, items)
 		assert.Equal(t, []string{}, slice.S())
 	}
 	{
-		slice := StrSlice([]string{"0", "1", "2"})
+		slice := S("0", "1", "2")
 		items := slice.TakeLastCnt(4).S()
 		assert.Equal(t, []string{"0", "1", "2"}, items)
 		assert.Equal(t, []string{}, slice.S())
@@ -570,17 +570,17 @@ func TestStrSliceTakeLastCnt(t *testing.T) {
 
 func TestStrSliceUniq(t *testing.T) {
 	{
-		data := StrSlice([]string{}).Uniq().S()
+		data := S().Uniq().S()
 		expected := []string{}
 		assert.Equal(t, expected, data)
 	}
 	{
-		data := StrSlice([]string{"1", "2", "3"}).Uniq().S()
+		data := S("1", "2", "3").Uniq().S()
 		expected := []string{"1", "2", "3"}
 		assert.Equal(t, expected, data)
 	}
 	{
-		data := StrSlice([]string{"1", "2", "2", "3"}).Uniq().S()
+		data := S("1", "2", "2", "3").Uniq().S()
 		expected := []string{"1", "2", "3"}
 		assert.Equal(t, expected, data)
 	}

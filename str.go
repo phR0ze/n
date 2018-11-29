@@ -71,7 +71,7 @@ func (q *strNub) HasSuffix(suffix string) bool {
 
 // Split creates a new nub from the split string
 func (q *strNub) Split(delim string) *strSliceNub {
-	return StrSlice(strings.Split(q.v, delim))
+	return S(strings.Split(q.v, delim)...)
 }
 
 // TrimPrefix trims the given prefix off the string

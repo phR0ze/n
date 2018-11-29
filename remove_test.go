@@ -9,7 +9,7 @@ import (
 func TestTakeFirst(t *testing.T) {
 	{
 		// empty
-		x, ok := S().TakeFirst()
+		x, ok := N().TakeFirst()
 		assert.False(t, ok)
 		assert.Nil(t, x)
 	}
@@ -38,7 +38,7 @@ func TestTakeFirst(t *testing.T) {
 	}
 	{
 		// strings
-		q := S().Append("1", "2", "3")
+		q := N().Append("1", "2", "3")
 		x, ok := q.TakeFirst()
 		assert.True(t, ok)
 		assert.NotNil(t, x)
@@ -55,7 +55,7 @@ func TestTakeFirst(t *testing.T) {
 	}
 	{
 		// bobs
-		q := S().Append(bob{data: "3"})
+		q := N().Append(bob{data: "3"})
 		assert.True(t, q.Any())
 		x, ok := q.TakeFirst()
 		assert.True(t, ok)

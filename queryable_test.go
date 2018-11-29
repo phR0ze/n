@@ -84,7 +84,7 @@ func TestQI(t *testing.T) {
 
 func TestQM(t *testing.T) {
 	{
-		q := M()
+		q := N()
 		assert.NotNil(t, q)
 		assert.NotNil(t, q.Iter)
 		iter := q.Iter()
@@ -116,7 +116,7 @@ func TestQM(t *testing.T) {
 }
 func TestQS(t *testing.T) {
 	{
-		q := Q(nil)
+		q := N()
 		assert.NotNil(t, q)
 		assert.NotNil(t, q.Iter)
 		iter := q.Iter()
@@ -126,7 +126,7 @@ func TestQS(t *testing.T) {
 		assert.False(t, ok)
 	}
 	{
-		q := Q(nil)
+		q := N()
 		assert.False(t, q.Any())
 		assert.Equal(t, 0, q.Len())
 		q2 := q.Append(2)
@@ -137,7 +137,7 @@ func TestQS(t *testing.T) {
 		assert.Equal(t, 2, q.At(0).I())
 	}
 	{
-		q := Q(nil)
+		q := N()
 		assert.NotNil(t, q)
 		assert.NotNil(t, q.Iter)
 		iter := q.Iter()
@@ -179,7 +179,7 @@ func TestCustomQ(t *testing.T) {
 	}
 	{
 		// []bob
-		q := S()
+		q := N()
 		assert.False(t, q.Any())
 		assert.Equal(t, 0, q.Len())
 		q.Append(bob{data: "3"})
@@ -195,7 +195,7 @@ func TestAny(t *testing.T) {
 		assert.False(t, Q([]int{}).Any())
 
 		// empty []interface{}
-		assert.False(t, S().Any())
+		assert.False(t, N().Any())
 	}
 	{
 		// int
@@ -207,7 +207,7 @@ func TestAny(t *testing.T) {
 	}
 	{
 		// map
-		assert.False(t, M().Any())
+		assert.False(t, N().Any())
 		assert.False(t, Q(map[int]interface{}{}).Any())
 		assert.True(t, Q(map[int]interface{}{1: "one"}).Any())
 	}
@@ -222,8 +222,8 @@ func TestAny(t *testing.T) {
 		assert.True(t, q.Any())
 	}
 	{
-		assert.False(t, S().Any())
-		assert.True(t, S().Append(1).Any())
+		assert.False(t, N().Any())
+		assert.True(t, N().Append(1).Any())
 		assert.False(t, Q([]int{}).Any())
 		assert.True(t, Q([]int{1}).Any())
 	}
@@ -250,7 +250,7 @@ func TestAnyWhere(t *testing.T) {
 	}
 	{
 		// empty map
-		q := M()
+		q := N()
 		assert.False(t, q.AnyWhere(func(x interface{}) bool {
 			return x == 3
 		}))
@@ -277,7 +277,7 @@ func TestAnyWhere(t *testing.T) {
 		}))
 	}
 	{
-		q := S()
+		q := N()
 		assert.False(t, q.AnyWhere(func(x interface{}) bool {
 			return x == 3
 		}))
@@ -298,7 +298,7 @@ func TestAppend(t *testing.T) {
 	}
 	{
 		// Append one
-		q := S()
+		q := N()
 		assert.Equal(t, 0, q.Len())
 		assert.Equal(t, 1, q.Append(2).Len())
 		assert.Equal(t, 2, q.Append(3).Len())
@@ -313,7 +313,7 @@ func TestAppend(t *testing.T) {
 	{
 		// Append many strings
 		{
-			q := S()
+			q := N()
 			assert.Equal(t, 0, q.Len())
 			assert.Equal(t, 3, q.Append("1", "2", "3").Len())
 		}
@@ -391,7 +391,7 @@ func TestClear(t *testing.T) {
 func TestContains(t *testing.T) {
 	{
 		// Empty slice
-		q := S()
+		q := N()
 		assert.False(t, q.Contains(1))
 	}
 	{
@@ -479,7 +479,7 @@ func TestContains(t *testing.T) {
 func TestContainsAny(t *testing.T) {
 	{
 		// Empty slice
-		q := S()
+		q := N()
 		assert.False(t, q.ContainsAny(1))
 	}
 	{
@@ -712,11 +712,11 @@ func TestJoin(t *testing.T) {
 		assert.Equal(t, "", q.Join(".").A())
 	}
 	{
-		q := S()
+		q := N()
 		assert.Equal(t, "", q.Join(".").A())
 	}
 	{
-		q := M()
+		q := N()
 		assert.Equal(t, "", q.Join(".").A())
 	}
 	{
@@ -728,7 +728,7 @@ func TestJoin(t *testing.T) {
 		assert.Equal(t, "", q.Join(".").A())
 	}
 	{
-		q := S().Append("1", "2", "3")
+		q := N().Append("1", "2", "3")
 		assert.Equal(t, 3, q.Len())
 		joined := q.Join(".")
 		assert.Equal(t, 5, joined.Len())
@@ -742,7 +742,7 @@ func TestJoin(t *testing.T) {
 		assert.Equal(t, "1.2.3", q.Join(".").A())
 	}
 	{
-		q := S().Append(1, 2, 3)
+		q := N().Append(1, 2, 3)
 		assert.Equal(t, 3, q.Len())
 		joined := q.Join(".")
 		assert.Equal(t, 5, joined.Len())
@@ -766,7 +766,7 @@ func TestLen(t *testing.T) {
 	{
 		// Maps
 		{
-			q := M()
+			q := N()
 			assert.Equal(t, 0, q.Len())
 		}
 		{
@@ -777,7 +777,7 @@ func TestLen(t *testing.T) {
 	{
 		// Slices
 		{
-			q := S()
+			q := N()
 			assert.Equal(t, 0, q.Len())
 		}
 		{
@@ -844,7 +844,7 @@ func TestSet(t *testing.T) {
 	{
 		// Maps
 		{
-			q := M()
+			q := N()
 			assert.False(t, q.Any())
 			data := map[string]interface{}{"1": "one"}
 			assert.True(t, q.Set(data).Any())
@@ -862,7 +862,7 @@ func TestSet(t *testing.T) {
 	}
 	{
 		// custom type
-		q := S()
+		q := N()
 		assert.False(t, q.Any())
 		data := []bob{{data: "3"}}
 		assert.True(t, q.Set(data).Any())
@@ -871,7 +871,7 @@ func TestSet(t *testing.T) {
 	{
 		// []int
 		cnt := []bool{}
-		q := S()
+		q := N()
 		q.Set([]int{1, 2, 3})
 		next := q.Iter()
 		for x, ok := next(); ok; x, ok = next() {
@@ -891,7 +891,7 @@ func TestSet(t *testing.T) {
 
 func TestSplit(t *testing.T) {
 	{
-		q := S()
+		q := N()
 		assert.Equal(t, []string{}, q.Split(".").S())
 	}
 	{
@@ -907,7 +907,7 @@ func TestSplit(t *testing.T) {
 		assert.Equal(t, []string{}, q.Split(".").S())
 	}
 	{
-		q := M()
+		q := N()
 		assert.Equal(t, []string{}, q.Split(".").S())
 	}
 	{

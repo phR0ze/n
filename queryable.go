@@ -35,7 +35,7 @@ func Load(filepath string) *Queryable {
 		yaml.Unmarshal(yamlFile, &data)
 		return Q(data)
 	}
-	return M()
+	return N()
 }
 
 func strIter(ref reflect.Value) func() Iterator {
@@ -50,12 +50,6 @@ func strIter(ref reflect.Value) func() Iterator {
 			return
 		}
 	}
-}
-
-// M provides a new empty Queryable map
-func M() *Queryable {
-	v := reflect.ValueOf(map[interface{}]interface{}{})
-	return &Queryable{v: &v, Kind: v.Kind(), Iter: mapIter(v)}
 }
 
 func mapIter(ref reflect.Value) func() Iterator {
@@ -90,10 +84,16 @@ func sliceIter(ref reflect.Value) func() Iterator {
 	}
 }
 
+// N provides a new empty Queryable slice
+func N() *Queryable {
+	v := reflect.ValueOf([]interface{}{})
+	return &Queryable{v: &v, Kind: v.Kind(), Iter: sliceIter(v)}
+}
+
 // Q provides origination for the Queryable abstraction layer
 func Q(obj interface{}) *Queryable {
 	if obj == nil {
-		obj = []interface{}{}
+		return N()
 	}
 
 	v := reflect.ValueOf(obj)
@@ -147,7 +147,7 @@ func (q *Queryable) AnyWhere(lambda func(interface{}) bool) bool {
 // converting to a collection if necessary
 func (q *Queryable) Append(obj ...interface{}) *Queryable {
 	if q.TypeSingle() {
-		*q = *Q(nil).Append(q.v.Interface())
+		*q = *N().Append(q.v.Interface())
 	}
 
 	// Append to slice type
@@ -178,7 +178,7 @@ func (q *Queryable) At(i int) *Queryable {
 
 // Clear the queryable collection
 func (q *Queryable) Clear() *Queryable {
-	*q = *Q(nil)
+	*q = *N()
 	return q
 }
 
@@ -368,7 +368,7 @@ func (q *Queryable) YAML(key string) (result *Queryable) {
 		}
 	}
 	if result == nil {
-		result = M()
+		result = N()
 	}
 	return
 }
@@ -404,7 +404,7 @@ func (q *Queryable) Len() int {
 
 // Map manipulates the queryable data into a new form
 func (q *Queryable) Map(sel func(interface{}) interface{}) *Queryable {
-	result := Q(nil)
+	result := N()
 	next := q.Iter()
 	for x, ok := next(); ok; x, ok = next() {
 		result.Append(sel(x))
@@ -426,7 +426,7 @@ func (q *Queryable) Split(delim string) *strSliceNub {
 	if q.TypeStr() {
 		return A(q.v.Interface().(string)).Split(delim)
 	}
-	return NewStrSlice()
+	return S()
 }
 
 // TypeIter checks if the queryable is iterable
