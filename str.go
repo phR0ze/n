@@ -18,6 +18,11 @@ func (str *strNub) A() string {
 	return str.v
 }
 
+// Q creates a queryable from the string
+func (str *strNub) Q() *Queryable {
+	return Q(str.v)
+}
+
 // Contains checks if the given target is contained in this string
 func (str *strNub) Contains(target string) bool {
 	return strings.Contains(str.v, target)

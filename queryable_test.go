@@ -189,6 +189,142 @@ func TestCustomQ(t *testing.T) {
 	}
 }
 
+func TestAny(t *testing.T) {
+	{
+		// empty []int
+		assert.False(t, Q([]int{}).Any())
+
+		// empty []interface{}
+		assert.False(t, S().Any())
+	}
+	{
+		// int
+		assert.True(t, Q(1).Any())
+	}
+	{
+		// string
+		assert.True(t, Q("test").Any())
+	}
+	{
+		// map
+		assert.False(t, M().Any())
+		assert.False(t, Q(map[int]interface{}{}).Any())
+		assert.True(t, Q(map[int]interface{}{1: "one"}).Any())
+	}
+	{
+		// empty []bob
+		q := Q([]bob{})
+		assert.False(t, q.Any())
+	}
+	{
+		// []bob
+		q := Q([]bob{{data: "3"}})
+		assert.True(t, q.Any())
+	}
+	{
+		assert.False(t, S().Any())
+		assert.True(t, S().Append(1).Any())
+		assert.False(t, Q([]int{}).Any())
+		assert.True(t, Q([]int{1}).Any())
+	}
+}
+
+func TestAnyWhere(t *testing.T) {
+	{
+		// string
+		assert.True(t, Q("test").AnyWhere(func(x interface{}) bool {
+			return x == "test"
+		}))
+	}
+	{
+		// int slice
+		q := Q([]int{1, 2, 3})
+		exists := q.AnyWhere(func(item interface{}) bool {
+			return item.(int) == 5
+		})
+		assert.False(t, exists)
+		exists = q.AnyWhere(func(item interface{}) bool {
+			return item.(int) == 2
+		})
+		assert.True(t, exists)
+	}
+	{
+		// empty map
+		q := M()
+		assert.False(t, q.AnyWhere(func(x interface{}) bool {
+			return x == 3
+		}))
+	}
+	{
+		// str map
+		q := Q(map[string]interface{}{"1": "one", "2": "two", "3": "three"})
+		assert.False(t, q.AnyWhere(func(x interface{}) bool { return x == 3 }))
+		assert.True(t, q.AnyWhere(func(x interface{}) bool {
+			return (x.(KeyVal)).Key == "3"
+		}))
+		assert.True(t, q.AnyWhere(func(x interface{}) bool {
+			return (x.(KeyVal)).Val == "two"
+		}))
+	}
+	{
+		// []bob
+		q := Q([]bob{{data: "3"}, {data: "4"}})
+		assert.True(t, q.AnyWhere(func(x interface{}) bool {
+			return (x.(bob)).data == "3"
+		}))
+		assert.False(t, q.AnyWhere(func(x interface{}) bool {
+			return (x.(bob)).data == "5"
+		}))
+	}
+	{
+		q := S()
+		assert.False(t, q.AnyWhere(func(x interface{}) bool {
+			return x == 3
+		}))
+	}
+	{
+		q := Q([]string{"1", "2", "3"})
+		assert.False(t, q.AnyWhere(func(x interface{}) bool { return x == 3 }))
+		assert.True(t, q.AnyWhere(func(x interface{}) bool { return x == "3" }))
+	}
+}
+
+func TestAppend(t *testing.T) {
+	{
+		// Append to valuetype
+		q := Q(2)
+		assert.Equal(t, 1, q.Len())
+		assert.Equal(t, 2, q.Append(1).Len())
+	}
+	{
+		// Append one
+		q := S()
+		assert.Equal(t, 0, q.Len())
+		assert.Equal(t, 1, q.Append(2).Len())
+		assert.Equal(t, 2, q.Append(3).Len())
+	}
+	{
+		// Append many ints
+		q := Q([]int{1})
+		assert.Equal(t, 1, q.Len())
+		assert.Equal(t, 3, q.Append(2, 3).Len())
+		assert.Equal(t, []int{1, 2, 3}, q.O())
+	}
+	{
+		// Append many strings
+		{
+			q := S()
+			assert.Equal(t, 0, q.Len())
+			assert.Equal(t, 3, q.Append("1", "2", "3").Len())
+		}
+		{
+			q := Q([]string{"1", "2"})
+			assert.Equal(t, 2, q.Len())
+			assert.Equal(t, 4, q.Append("3", "4").Len())
+		}
+	}
+}
+
 func TestAt(t *testing.T) {
 	{
 		// String
@@ -249,6 +385,175 @@ func TestClear(t *testing.T) {
 		q.Clear()
 		assert.False(t, q.Any())
 		assert.Equal(t, 0, q.Len())
+	}
+}
+
+func TestContains(t *testing.T) {
+	{
+		// Empty slice
+		q := S()
+		assert.False(t, q.Contains(1))
+	}
+	{
+		// []int
+		q := Q([]int{})
+		assert.False(t, q.Contains(1))
+	}
+	{
+		// []int
+		q := Q([]int{1, 2, 3})
+		assert.False(t, q.Contains(0))
+		assert.True(t, q.Contains(2))
+	}
+	{
+		// int
+		q := Q(2)
+		assert.True(t, q.Contains(2))
+	}
+	{
+		// empty []string
+		q := Q([]string{})
+		assert.False(t, q.Contains(""))
+	}
+	{
+		// string
+		q := Q("testing")
+		assert.False(t, q.Contains("bob"))
+		assert.True(t, q.Contains("test"))
+	}
+	{
+		// full []string
+		q := Q([]string{"1", "2", "3"})
+		assert.False(t, q.Contains(""))
+		assert.True(t, q.Contains("3"))
+	}
+	{
+		// map
+		data := map[string]interface{}{"1": "one", "2": "two", "3": "three"}
+		q := Q(data)
+		assert.True(t, q.Contains("1"))
+	}
+	{
+		// Custom type
+		q := Q([]bob{{data: "3"}})
+		assert.False(t, q.Contains(""))
+		assert.False(t, q.Contains(bob{data: "2"}))
+		assert.True(t, q.Contains(bob{data: "3"}))
+	}
+	{
+		q := Q([]int{1, 2, 3})
+		assert.False(t, q.Contains([]string{}))
+		assert.True(t, q.Contains(2))
+		assert.False(t, q.Contains([]int{0, 3}))
+		assert.True(t, q.Contains([]int{1, 3}))
+		assert.True(t, q.Contains([]int{2, 3}))
+		assert.False(t, q.Contains([]int{4, 5}))
+		assert.False(t, q.Contains("2"))
+	}
+	{
+		q := Q([]string{"1", "2", "3"})
+		assert.False(t, q.Contains([]int{}))
+		assert.False(t, q.Contains(2))
+		assert.False(t, q.Contains([]string{"0", "3"}))
+		assert.True(t, q.Contains([]string{"1", "3"}))
+		assert.True(t, q.Contains([]string{"2", "3"}))
+		assert.True(t, q.Contains("2"))
+	}
+	{
+		assert.True(t, Q("test").Contains("tes"))
+		assert.False(t, Q("test").Contains([]string{"foo", "test"}))
+		assert.True(t, Q("test").Contains([]string{"tes", "test"}))
+		assert.True(t, Q([]string{"foo", "test"}).Contains("test"))
+	}
+	{
+		// map
+		data := map[string]interface{}{"1": "one", "2": "two", "3": "three"}
+		q := Q(data)
+		assert.True(t, q.Contains("1"))
+		assert.False(t, q.Contains("4"))
+		assert.False(t, q.Contains([]string{"4", "2"}))
+		assert.True(t, q.Contains([]string{"3", "2"}))
+	}
+}
+
+func TestContainsAny(t *testing.T) {
+	{
+		// Empty slice
+		q := S()
+		assert.False(t, q.ContainsAny(1))
+	}
+	{
+		// []int
+		q := Q([]int{})
+		assert.False(t, q.ContainsAny(1))
+	}
+	{
+		// []int
+		q := Q([]int{1, 2, 3})
+		assert.False(t, q.ContainsAny(0))
+		assert.True(t, q.ContainsAny(2))
+	}
+	{
+		// int
+		q := Q(2)
+		assert.True(t, q.ContainsAny(2))
+	}
+	{
+		// empty []string
+		q := Q([]string{})
+		assert.False(t, q.ContainsAny(""))
+	}
+	{
+		// string
+		q := Q("testing")
+		assert.False(t, q.ContainsAny("bob"))
+		assert.True(t, q.ContainsAny("test"))
+	}
+	{
+		// full []string
+		q := Q([]string{"1", "2", "3"})
+		assert.False(t, q.ContainsAny(""))
+		assert.True(t, q.ContainsAny("3"))
+	}
+	{
+		// map
+		data := map[string]interface{}{"1": "one", "2": "two", "3": "three"}
+		q := Q(data)
+		assert.True(t, q.ContainsAny("1"))
+	}
+	{
+		// Custom type
+		q := Q([]bob{{data: "3"}})
+		assert.False(t, q.ContainsAny(""))
+		assert.False(t, q.ContainsAny(bob{data: "2"}))
+		assert.True(t, q.ContainsAny(bob{data: "3"}))
+	}
+	{
+		q := Q([]int{1, 2, 3})
+		assert.False(t, q.ContainsAny([]string{}))
+		assert.True(t, q.ContainsAny(2))
+		assert.True(t, q.ContainsAny([]int{0, 3}))
+		assert.False(t, q.ContainsAny("2"))
+	}
+	{
+		q := Q([]string{"1", "2", "3"})
+		assert.False(t, q.ContainsAny([]int{}))
+		assert.False(t, q.ContainsAny(2))
+		assert.True(t, q.ContainsAny([]string{"0", "3"}))
+		assert.True(t, q.ContainsAny("2"))
+	}
+	{
+		assert.True(t, Q("test").ContainsAny("tes"))
+		assert.True(t, Q("test").ContainsAny([]string{"foo", "test"}))
+		assert.True(t, Q([]string{"foo", "test"}).ContainsAny("test"))
+	}
+	{
+		// map
+		data := map[string]interface{}{"1": "one", "2": "two", "3": "three"}
+		q := Q(data)
+		assert.True(t, q.ContainsAny("1"))
+		assert.False(t, q.ContainsAny("4"))
+		assert.True(t, q.ContainsAny([]string{"4", "2"}))
 	}
 }
 

@@ -10,6 +10,10 @@ func TestStrA(t *testing.T) {
 	assert.Equal(t, "test", A("test").A())
 }
 
+func TestStrQ(t *testing.T) {
+	assert.Equal(t, "test", A("test").Q().A())
+}
+
 func TestStrContains(t *testing.T) {
 	assert.True(t, A("test").Contains("tes"))
 	assert.False(t, A("test").Contains("bob"))

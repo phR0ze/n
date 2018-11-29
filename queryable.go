@@ -126,6 +126,46 @@ func Q(obj interface{}) *Queryable {
 	return q
 }
 
+// Any checks if the queryable has anything in it
+func (q *Queryable) Any() bool {
+	if q.Iter != nil {
+		return q.v.Len() > 0
+	}
+	return q.v.Interface() != nil
+}
+
+// AnyWhere checka if any match the given lambda
+func (q *Queryable) AnyWhere(lambda func(interface{}) bool) bool {
+	if !q.TypeSingle() {
+		next := q.Iter()
+		for x, ok := next(); ok; x, ok = next() {
+			if lambda(x) {
+				return true
+			}
+		}
+	} else if lambda(q.v.Interface()) {
+		return true
+	}
+	return false
+}
+
+// Append items to the end of the collection and return the queryable
+// converting to a collection if necessary
+func (q *Queryable) Append(obj ...interface{}) *Queryable {
+	if q.TypeSingle() {
+		*q = *S().Append(q.v.Interface())
+	}
+
+	// Append to slice type
+	for i := 0; i < len(obj); i++ {
+		item := reflect.ValueOf(obj[i])
+		*q.v = reflect.Append(*q.v, item)
+	}
+	q.Iter = sliceIter(*q.v)
+
+	return q
+}
+
 // At returns the item at the given index location. Allows for negative notation
 func (q *Queryable) At(i int) *Queryable {
 	if q.TypeIter() {
@@ -146,6 +186,154 @@ func (q *Queryable) At(i int) *Queryable {
 func (q *Queryable) Clear() *Queryable {
 	*q = *S()
 	return q
+}
+
+// Contains checks if all of the given obj are found.
+// When obj is a string and this is a string check will fall back on strings.Contains.
+// When obj is a string and this is a string slice, slice will be checked for obj.
+// When obj is a non-interable and this is non-iterable a direct check is made.
+// When obj is a non-interable and this is slice, slice will be checked for obj.
+// When obj is a slice of string and this is a string each string check using strings.Contains.
+// When obj is a slice and this is a slice each item will be checked in the slice.
+// When obj is a slice and this is a map each item will be checked in the map as a key.
+func (q *Queryable) Contains(obj interface{}) bool {
+	other := Q(obj)
+	if !q.Any() || !other.Any() {
+		return false
+	}
+
+	// Non iterable type
+	if q.TypeSingle() {
+
+		// Both strings - pass through to stings.Contains
+		if q.TypeStr() && other.TypeStr() {
+			return strings.Contains(q.v.Interface().(string), obj.(string))
+		}
+
+		// Other is non iterable, convert to iterable
+		if other.TypeSingle() {
+			other.Set([]interface{}{obj})
+		}
+		next := other.Iter()
+		for x, ok := next(); ok; x, ok = next() {
+			if str, ok := x.(string); ok {
+				if !strings.Contains(q.v.Interface().(string), str) {
+					return false
+				}
+			} else {
+				if q.v.Interface() != x {
+					return false
+				}
+			}
+		}
+	} else {
+		switch q.Kind {
+		case reflect.Array, reflect.Slice:
+			if !other.TypeSingle() {
+				next := other.Iter()
+				for x, ok := next(); ok; x, ok = next() {
+					if !q.Contains(x) {
+						return false
+					}
+				}
+			} else {
+				next := q.Iter()
+				for x, ok := next(); ok; x, ok = next() {
+					if x == obj {
+						return true
+					}
+				}
+				return false
+			}
+		case reflect.Map:
+			keys := Q(q.v.MapKeys()).Map(func(x interface{}) interface{} {
+				return x.(reflect.Value).Interface()
+			})
+			if !other.TypeSingle() {
+				next := other.Iter()
+				for x, ok := next(); ok; x, ok = next() {
+					if !keys.Contains(x) {
+						return false
+					}
+				}
+			} else {
+				if !keys.Contains(obj) {
+					return false
+				}
+			}
+		default:
+			panic("TODO: implement Contains")
+		}
+	}
+	return true
+}
+
+// ContainsAny checks if any of the given obj is found.
+// ContainsAny behaves much like Contains only it allows for matching any not all.
+func (q *Queryable) ContainsAny(obj interface{}) bool {
+	other := Q(obj)
+
+	// Non iterable type
+	if q.TypeSingle() {
+
+		// Both strings - pass through to stings.Contains
+		if q.TypeStr() && other.TypeStr() {
+			return strings.Contains(q.v.Interface().(string), obj.(string))
+		}
+
+		// Other is non iterable, convert to iterable
+		if other.TypeSingle() {
+			other.Set([]interface{}{obj})
+		}
+		next := other.Iter()
+		for x, ok := next(); ok; x, ok = next() {
+			if q.v.Interface() == x {
+				return true
+			}
+		}
+	} else {
+		switch q.Kind {
+		case reflect.Array, reflect.Slice:
+			if !other.TypeSingle() {
+				next := q.Iter()
+				for x, ok := next(); ok; x, ok = next() {
+					nexty := other.Iter()
+					for y, oky := nexty(); oky; y, oky = nexty() {
+						if x == y {
+							return true
+						}
+					}
+				}
+			} else {
+				next := q.Iter()
+				for x, ok := next(); ok; x, ok = next() {
+					if x == obj {
+						return true
+					}
+				}
+			}
+		case reflect.Map:
+			if !other.TypeSingle() {
+				for _, key := range q.v.MapKeys() {
+					next := other.Iter()
+					for x, ok := next(); ok; x, ok = next() {
+						if key.Interface() == x {
+							return true
+						}
+					}
+				}
+			} else {
+				for _, key := range q.v.MapKeys() {
+					if key.Interface() == obj {
+						return true
+					}
+				}
+			}
+		default:
+			panic("TODO: implement Contains")
+		}
+	}
+	return false
 }
 
 // Each iterates over the queryable and executes the given action
