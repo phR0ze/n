@@ -1,4 +1,4 @@
-package trace
+package tracen
 
 func LogFunc1() {
 	LogFunc2()

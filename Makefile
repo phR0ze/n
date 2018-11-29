@@ -1,6 +1,6 @@
-NAME := nub
+NAME := n
 DEPDIR := vendor
-PKGROOT := github.com/phR0ze/nub
+PKGROOT := github.com/phR0ze/n
 
 default: $(NAME)
 $(NAME): $(DEPDIR)
@@ -16,8 +16,9 @@ test: $(NAME)
 	@echo -e "\nRunning all go tests:"
 	@echo -e "------------------------------------------------------------------------"
 	go test $(PKGROOT)
-	go test $(PKGROOT)/pkg/timenub
-	go test $(PKGROOT)/pkg/trace
+	go test $(PKGROOT)/pkg/tarn
+	go test $(PKGROOT)/pkg/timen
+	go test $(PKGROOT)/pkg/tracen
 
 bench: $(NAME)
 	@echo -e "\nRunning all go benchmarks:"

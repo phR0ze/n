@@ -1,4 +1,4 @@
-package nub
+package n
 
 import (
 	"testing"
@@ -33,19 +33,19 @@ func TestStrMapMerge(t *testing.T) {
 	}
 }
 
-func TestStrMapMergeNub(t *testing.T) {
+func TestStrMapMergeN(t *testing.T) {
 	{
 		strMap := NewStrMap()
-		assert.Equal(t, map[string]interface{}{}, strMap.MergeNub().M())
+		assert.Equal(t, map[string]interface{}{}, strMap.MergeN().M())
 	}
 	{
 		strMap := NewStrMap()
-		assert.Equal(t, map[string]interface{}{}, strMap.MergeNub(nil).M())
+		assert.Equal(t, map[string]interface{}{}, strMap.MergeN(nil).M())
 	}
 	{
 		data := M(map[string]interface{}{"1": "one"})
 		expected := map[string]interface{}{"1": "one"}
-		assert.Equal(t, expected, NewStrMap().MergeNub(data).M())
+		assert.Equal(t, expected, NewStrMap().MergeN(data).M())
 	}
 	{
 		strMap := M(map[string]interface{}{
@@ -57,7 +57,7 @@ func TestStrMapMergeNub(t *testing.T) {
 		expected := map[string]interface{}{
 			"1": "one", "2": "two", "3": "three", "4": "four",
 		}
-		assert.Equal(t, expected, strMap.MergeNub(data1, data2, data3).M())
+		assert.Equal(t, expected, strMap.MergeN(data1, data2, data3).M())
 	}
 }
 

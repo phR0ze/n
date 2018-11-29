@@ -1,4 +1,4 @@
-package nub
+package n
 
 import (
 	"bytes"
@@ -10,6 +10,9 @@ import (
 
 	"github.com/ghodss/yaml"
 )
+
+// I is an alias for interface{} to reduce verbosity
+type I interface{}
 
 // Queryable provides chainable deferred execution
 // and is the heart of the algorithm abstraction layer
@@ -332,7 +335,7 @@ func (q *Queryable) ContainsAny(obj interface{}) bool {
 }
 
 // Each iterates over the queryable and executes the given action
-func (q *Queryable) Each(action func(interface{})) {
+func (q *Queryable) Each(action func(I)) {
 	if q.TypeIter() {
 		next := q.Iter()
 		for x, ok := next(); ok; x, ok = next() {
@@ -390,7 +393,7 @@ func (q *Queryable) Set(obj interface{}) *Queryable {
 }
 
 // Split the string into a slice on delimiter
-func (q *Queryable) Split(delim string) *strSliceNub {
+func (q *Queryable) Split(delim string) *strSliceN {
 	if q.TypeStr() {
 		return A(q.v.Interface().(string)).Split(delim)
 	}

@@ -1,4 +1,4 @@
-package nub
+package n
 
 import (
 	"fmt"
@@ -41,7 +41,7 @@ func BenchmarkEach(t *testing.B) {
 	for i := range ints {
 		ints[i] = i
 	}
-	Q(ints).Each(func(item interface{}) {
+	Q(ints).Each(func(item I) {
 		fmt.Sprintln(item.(int) + 3)
 	})
 }
@@ -562,7 +562,7 @@ func TestEach(t *testing.T) {
 		// []int
 		cnt := []bool{}
 		q := Q([]int{1, 2, 3})
-		q.Each(func(item interface{}) {
+		q.Each(func(item I) {
 			cnt = append(cnt, true)
 			switch len(cnt) {
 			case 1:
@@ -577,7 +577,7 @@ func TestEach(t *testing.T) {
 
 		// Check iterator again making sure it reset
 		cnt = []bool{}
-		q.Each(func(item interface{}) {
+		q.Each(func(item I) {
 			cnt = append(cnt, true)
 			switch len(cnt) {
 			case 1:
@@ -593,7 +593,7 @@ func TestEach(t *testing.T) {
 		// String
 		q := Q("test")
 		cnt := []bool{}
-		q.Each(func(x interface{}) {
+		q.Each(func(x I) {
 			cnt = append(cnt, true)
 			item := string(x.(uint8))
 			switch len(cnt) {
@@ -612,7 +612,7 @@ func TestEach(t *testing.T) {
 		// maps
 		items := []interface{}{}
 		q := Q(map[string]string{"1": "one", "2": "two", "3": "three"})
-		q.Each(func(x interface{}) {
+		q.Each(func(x I) {
 			items = append(items, x)
 			item := x.(KeyVal)
 			switch item.Key {

@@ -1,7 +1,8 @@
-# nub
+# n or nub
 Collection of missing Go helper functions reminiscent of Ruby/C#. I love the
 elegance of Ruby's short named plethera of chainable methods while C# has
-some awesome deferred execution. I'm attempting to marry the two :)
+some awesome deferred execution. This package was created to reduce the verbosity
+required when coding in Go.
 
 ## Table of Contents
 * [References](#references)
@@ -42,11 +43,6 @@ BenchmarkEach-16               	       1	1686159938 ns/op
 ```
 
 ## Implemented <a name="implemented"></a>
-Ruby and C# both have excellent helper methods for collections which Go either lacks entirely
-or has tucked away in various packages that are difficult for newbies to find and extermely
-verbose to use.  I find it extremely tedious to continually re-implement simple basic functions
-which is why I'm creating nub objects with helper functions. I've chosen a handful to implement
-and skipped over others that I may come back to.
 
 ### Functions <a name="functions"></a>
 Some functions only apply to particular underlying collection types as called out in the table.

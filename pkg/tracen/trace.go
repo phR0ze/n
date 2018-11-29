@@ -1,10 +1,10 @@
-package trace
+package tracen
 
 import (
 	"path"
 	"runtime"
 
-	"github.com/phR0ze/nub"
+	"github.com/phR0ze/n"
 )
 
 // Entry provides a simple struct for trace data
@@ -22,20 +22,20 @@ func CallerTrace(skipframes int, skipfiles ...string) (result []*Entry) {
 	callers := make([]uintptr, 20)
 	runtime.Callers(2, callers)
 	frames := runtime.CallersFrames(callers)
-	methods := nub.S("trace.CallerTrace", "trace.CallerTraceOne")
+	methods := n.S("tracen.CallerTrace", "tracen.CallerTraceOne")
 
 	for {
 		frame, more = frames.Next()
 
 		// Move up the stack skipping files or methods called out
 		if more && (methods.Contains(path.Base(frame.Function)) ||
-			skipfiles != nil && nub.A(frame.File).ContainsAny(skipfiles...)) {
+			skipfiles != nil && n.A(frame.File).ContainsAny(skipfiles...)) {
 			continue
 		}
 
 		if frame.Function != "" {
 			f := path.Base(frame.Function)
-			file := nub.A(frame.File).Split("/").TakeLastCnt(3).Join("/").A()
+			file := n.A(frame.File).Split("/").TakeLastCnt(3).Join("/").A()
 			result = append(result, &Entry{Func: f, Line: frame.Line, File: file})
 		}
 		if !more {

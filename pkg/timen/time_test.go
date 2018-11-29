@@ -1,4 +1,4 @@
-package timenub
+package timen
 
 import (
 	"testing"

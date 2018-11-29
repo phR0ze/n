@@ -1,4 +1,4 @@
-package nub
+package n
 
 import (
 	"fmt"
@@ -11,23 +11,23 @@ import (
 //--------------------------------------------------------------------------------------------------
 // StrMap Nub
 //--------------------------------------------------------------------------------------------------
-type strMapNub struct {
+type strMapN struct {
 	v map[string]interface{}
 }
 
 // NewStrMap creates a new nub
-func NewStrMap() *strMapNub {
-	return &strMapNub{v: map[string]interface{}{}}
+func NewStrMap() *strMapN {
+	return &strMapN{v: map[string]interface{}{}}
 }
 
 // M creates a new nub from the given string map
-func M(other map[string]interface{}) *strMapNub {
-	return &strMapNub{v: other}
+func M(other map[string]interface{}) *strMapN {
+	return &strMapN{v: other}
 }
 
 // Load a yaml/json file as a str map
 // returns nil on failure of any kind
-func Load(filepath string) *strMapNub {
+func Load(filepath string) *strMapN {
 	if yamlFile, err := ioutil.ReadFile(filepath); err == nil {
 		result := NewStrMap()
 		yaml.Unmarshal(yamlFile, &result.v)
@@ -37,14 +37,14 @@ func Load(filepath string) *strMapNub {
 }
 
 // Q creates a new queryable from the given string map
-func (m *strMapNub) Q() *Queryable {
+func (m *strMapN) Q() *Queryable {
 	return Q(m.v)
 }
 
 // Add a new key value pair to the map
-func (m *strMapNub) Add(key string, value interface{}) *strMapNub {
+func (m *strMapN) Add(key string, value interface{}) *strMapN {
 	switch x := value.(type) {
-	case *strMapNub:
+	case *strMapN:
 		m.v[key] = x.v
 	default:
 		m.v[key] = value
@@ -53,28 +53,28 @@ func (m *strMapNub) Add(key string, value interface{}) *strMapNub {
 }
 
 // Any checks if the map has anything in it
-func (m *strMapNub) Any() bool {
+func (m *strMapN) Any() bool {
 	return len(m.v) > 0
 }
 
 // Equals checks if the two maps are equal
-func (m *strMapNub) Equals(other *strMapNub) bool {
+func (m *strMapN) Equals(other *strMapN) bool {
 	return reflect.DeepEqual(m, other)
 }
 
 // Len is a pass through to the underlying map
-func (m *strMapNub) Len() int {
+func (m *strMapN) Len() int {
 	return len(m.v)
 }
 
 // M materializes object invoking deferred execution
-func (m *strMapNub) M() map[string]interface{} {
+func (m *strMapN) M() map[string]interface{} {
 	return m.v
 }
 
 // Merge the other maps into this map with the first taking the lowest
 // precedence and so on until the last takes the highest
-func (m *strMapNub) Merge(items ...map[string]interface{}) *strMapNub {
+func (m *strMapN) Merge(items ...map[string]interface{}) *strMapN {
 	for i := range items {
 		if items[i] != nil {
 			m.v = mergeMap(m.v, items[i])
@@ -85,7 +85,7 @@ func (m *strMapNub) Merge(items ...map[string]interface{}) *strMapNub {
 
 // Merge the other maps into this map with the first taking the lowest
 // precedence and so on until the last takes the highest
-func (m *strMapNub) MergeNub(items ...*strMapNub) *strMapNub {
+func (m *strMapN) MergeN(items ...*strMapN) *strMapN {
 	for i := range items {
 		if items[i] != nil {
 			m.v = mergeMap(m.v, items[i].v)
@@ -95,7 +95,7 @@ func (m *strMapNub) MergeNub(items ...*strMapNub) *strMapNub {
 }
 
 // Slice returns a slice of interface{} from the given map using the given key
-func (m *strMapNub) Slice(key string) (result []interface{}) {
+func (m *strMapN) Slice(key string) (result []interface{}) {
 	keys := A(key).Split(".")
 	if k, ok := keys.TakeFirst(); ok {
 		if entry, exists := m.v[k]; exists {
@@ -113,7 +113,7 @@ func (m *strMapNub) Slice(key string) (result []interface{}) {
 }
 
 // Str returns a string from the given map using the given key
-func (m *strMapNub) Str(key string) *strNub {
+func (m *strMapN) Str(key string) *strN {
 	result := A("")
 	keys := A(key).Split(".")
 	if k, ok := keys.TakeFirst(); ok {
@@ -130,7 +130,7 @@ func (m *strMapNub) Str(key string) *strNub {
 }
 
 // StrMap returns a map of interface from the given map using the given key
-func (m *strMapNub) StrMap(key string) *strMapNub {
+func (m *strMapN) StrMap(key string) *strMapN {
 	result := NewStrMap()
 
 	keys := A(key).Split(".")
@@ -148,7 +148,7 @@ func (m *strMapNub) StrMap(key string) *strMapNub {
 }
 
 // StrMapByName returns a map of interface from the given map using the given key
-func (m *strMapNub) StrMapByName(key, k, v string) *strMapNub {
+func (m *strMapN) StrMapByName(key, k, v string) *strMapN {
 	result := NewStrMap()
 	slice := m.Slice(key)
 	for i := range slice {
@@ -163,12 +163,12 @@ func (m *strMapNub) StrMapByName(key, k, v string) *strMapNub {
 }
 
 // StrMapSlice returns a slice of str map from the given map using the given key
-func (m *strMapNub) StrMapSlice(key string) *strMapSliceNub {
+func (m *strMapN) StrMapSlice(key string) *strMapSliceN {
 	return castStrMapSlice(m.Slice(key))
 }
 
 // StrSlice returns a slice of strings from the given map using the given key
-func (m *strMapNub) StrSlice(key string) (result []string) {
+func (m *strMapN) StrSlice(key string) (result []string) {
 	items := m.Slice(key)
 	for i := range items {
 		result = append(result, fmt.Sprint(items[i]))
@@ -177,7 +177,7 @@ func (m *strMapNub) StrSlice(key string) (result []string) {
 }
 
 // castStrMapSlice returns a slice of str map from the given interface slice
-func castStrMapSlice(items []interface{}) *strMapSliceNub {
+func castStrMapSlice(items []interface{}) *strMapSliceN {
 	result := NewStrMapSlice()
 	for i := range items {
 		if x, ok := items[i].(map[string]interface{}); ok {

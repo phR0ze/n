@@ -1,5 +1,5 @@
-// Package nub provides helper interfaces and functions reminiscent ruby/C#
-package nub
+// package n provides helper interfaces and functions reminiscent ruby/C#
+package n
 
 import (
 	"errors"
@@ -12,30 +12,30 @@ import (
 //--------------------------------------------------------------------------------------------------
 // StrSlice Nub
 //--------------------------------------------------------------------------------------------------
-type strSliceNub struct {
+type strSliceN struct {
 	v []string
 }
 
 // S provides a new empty Queryable slice
-func S(v ...string) *strSliceNub {
+func S(v ...string) *strSliceN {
 	if v == nil {
 		v = []string{}
 	}
-	return &strSliceNub{v: v}
+	return &strSliceN{v: v}
 }
 
 // S convert the slice into an string slice
-func (slice *strSliceNub) S() []string {
+func (slice *strSliceN) S() []string {
 	return slice.v
 }
 
 // Any checks if the slice has anything in it
-func (slice *strSliceNub) Any() bool {
+func (slice *strSliceN) Any() bool {
 	return len(slice.v) > 0
 }
 
 // AnyContain checks if any items in this slice contain the target
-func (slice *strSliceNub) AnyContain(target string) bool {
+func (slice *strSliceN) AnyContain(target string) bool {
 	for i := range slice.v {
 		if strings.Contains(slice.v[i], target) {
 			return true
@@ -45,13 +45,13 @@ func (slice *strSliceNub) AnyContain(target string) bool {
 }
 
 // Append items to the end of the slice and return slice
-func (slice *strSliceNub) Append(items ...string) *strSliceNub {
+func (slice *strSliceN) Append(items ...string) *strSliceN {
 	slice.v = append(slice.v, items...)
 	return slice
 }
 
 // At returns the item at the given index location. Allows for negative notation
-func (slice *strSliceNub) At(i int) string {
+func (slice *strSliceN) At(i int) string {
 	if i >= 0 && i < len(slice.v) {
 		return slice.v[i]
 	} else if i < 0 && i*-1 < len(slice.v) {
@@ -61,13 +61,13 @@ func (slice *strSliceNub) At(i int) string {
 }
 
 // Clear the underlying slice
-func (slice *strSliceNub) Clear() *strSliceNub {
+func (slice *strSliceN) Clear() *strSliceN {
 	slice.v = []string{}
 	return slice
 }
 
 // Contains checks if the given target is contained in this slice
-func (slice *strSliceNub) Contains(target string) bool {
+func (slice *strSliceN) Contains(target string) bool {
 	for i := range slice.v {
 		if slice.v[i] == target {
 			return true
@@ -77,7 +77,7 @@ func (slice *strSliceNub) Contains(target string) bool {
 }
 
 // ContainsAny checks if any of the targets are contained in this slice
-func (slice *strSliceNub) ContainsAny(targets []string) bool {
+func (slice *strSliceN) ContainsAny(targets []string) bool {
 	if targets != nil && len(targets) > 0 {
 		for i := range targets {
 			for j := range slice.v {
@@ -91,7 +91,7 @@ func (slice *strSliceNub) ContainsAny(targets []string) bool {
 }
 
 // Del deletes item using neg/pos index notation with status
-func (slice *strSliceNub) Del(i int) bool {
+func (slice *strSliceN) Del(i int) bool {
 	result := false
 	if i < 0 {
 		i = len(slice.v) + i
@@ -109,22 +109,22 @@ func (slice *strSliceNub) Del(i int) bool {
 }
 
 // Equals checks if the two slices are equal
-func (slice *strSliceNub) Equals(other *strSliceNub) bool {
+func (slice *strSliceN) Equals(other *strSliceN) bool {
 	return reflect.DeepEqual(slice, other)
 }
 
 // Join the underlying slice with the given delim
-func (slice *strSliceNub) Join(delim string) *strNub {
+func (slice *strSliceN) Join(delim string) *strN {
 	return A(strings.Join(slice.v, delim))
 }
 
 // Len is a pass through to the underlying slice
-func (slice *strSliceNub) Len() int {
+func (slice *strSliceN) Len() int {
 	return len(slice.v)
 }
 
 // Pair simply returns the first and second slice items
-func (slice *strSliceNub) Pair() (first string, second string) {
+func (slice *strSliceN) Pair() (first string, second string) {
 	if slice.Len() > 0 {
 		first = slice.v[0]
 	}
@@ -135,20 +135,20 @@ func (slice *strSliceNub) Pair() (first string, second string) {
 }
 
 // Prepend items to the begining of the slice and return slice
-func (slice *strSliceNub) Prepend(items ...string) *strSliceNub {
+func (slice *strSliceN) Prepend(items ...string) *strSliceN {
 	items = append(items, slice.v...)
 	slice.v = items
 	return slice
 }
 
 // Sort the underlying slice
-func (slice *strSliceNub) Sort() *strSliceNub {
+func (slice *strSliceN) Sort() *strSliceN {
 	sort.Strings(slice.v)
 	return slice
 }
 
 // TakeFirst updates the underlying slice and returns the item and status
-func (slice *strSliceNub) TakeFirst() (string, bool) {
+func (slice *strSliceN) TakeFirst() (string, bool) {
 	if len(slice.v) > 0 {
 		item := slice.v[0]
 		slice.v = slice.v[1:]
@@ -158,7 +158,7 @@ func (slice *strSliceNub) TakeFirst() (string, bool) {
 }
 
 // TakeFirstCnt updates the underlying slice and returns the items
-func (slice *strSliceNub) TakeFirstCnt(cnt int) (result *strSliceNub) {
+func (slice *strSliceN) TakeFirstCnt(cnt int) (result *strSliceN) {
 	if cnt > 0 {
 		if len(slice.v) >= cnt {
 			result = S(slice.v[:cnt]...)
@@ -172,7 +172,7 @@ func (slice *strSliceNub) TakeFirstCnt(cnt int) (result *strSliceNub) {
 }
 
 // TakeLast updates the underlying slice and returns the item and status
-func (slice *strSliceNub) TakeLast() (string, bool) {
+func (slice *strSliceN) TakeLast() (string, bool) {
 	if len(slice.v) > 0 {
 		item := slice.v[len(slice.v)-1]
 		slice.v = slice.v[:len(slice.v)-1]
@@ -182,7 +182,7 @@ func (slice *strSliceNub) TakeLast() (string, bool) {
 }
 
 // TakeLastCnt updates the underlying slice and returns a new nub
-func (slice *strSliceNub) TakeLastCnt(cnt int) (result *strSliceNub) {
+func (slice *strSliceN) TakeLastCnt(cnt int) (result *strSliceN) {
 	if cnt > 0 {
 		if len(slice.v) >= cnt {
 			i := len(slice.v) - cnt
@@ -197,7 +197,7 @@ func (slice *strSliceNub) TakeLastCnt(cnt int) (result *strSliceNub) {
 }
 
 // Uniq removes all duplicates from the underlying slice
-func (slice *strSliceNub) Uniq() *strSliceNub {
+func (slice *strSliceN) Uniq() *strSliceN {
 	hits := map[string]bool{}
 	for i := len(slice.v) - 1; i >= 0; i-- {
 		if _, exists := hits[slice.v[i]]; !exists {
@@ -212,41 +212,41 @@ func (slice *strSliceNub) Uniq() *strSliceNub {
 //--------------------------------------------------------------------------------------------------
 // IntSlice Nub
 //--------------------------------------------------------------------------------------------------
-type intSliceNub struct {
+type intSliceN struct {
 	v []int
 }
 
 // NewIntSlice creates a new nub
-func NewIntSlice() *intSliceNub {
-	return &intSliceNub{v: []int{}}
+func NewIntSlice() *intSliceN {
+	return &intSliceN{v: []int{}}
 }
 
 // IntSlice creates a new nub from the given int slice
-func IntSlice(slice []int) *intSliceNub {
+func IntSlice(slice []int) *intSliceN {
 	if slice != nil {
-		return &intSliceNub{v: slice}
+		return &intSliceN{v: slice}
 	}
-	return &intSliceNub{v: []int{}}
+	return &intSliceN{v: []int{}}
 }
 
 // S convert the slice into an int slice
-func (slice *intSliceNub) S() []int {
+func (slice *intSliceN) S() []int {
 	return slice.v
 }
 
 // Any checks if the slice has anything in it
-func (slice *intSliceNub) Any() bool {
+func (slice *intSliceN) Any() bool {
 	return len(slice.v) > 0
 }
 
 // Append items to the end of the slice and return slice
-func (slice *intSliceNub) Append(items ...int) *intSliceNub {
+func (slice *intSliceN) Append(items ...int) *intSliceN {
 	slice.v = append(slice.v, items...)
 	return slice
 }
 
 // At returns the item at the given index location. Allows for negative notation
-func (slice *intSliceNub) At(i int) int {
+func (slice *intSliceN) At(i int) int {
 	if i >= 0 && i < len(slice.v) {
 		return slice.v[i]
 	} else if i < 0 && i*-1 < len(slice.v) {
@@ -256,13 +256,13 @@ func (slice *intSliceNub) At(i int) int {
 }
 
 // Clear the underlying slice
-func (slice *intSliceNub) Clear() *intSliceNub {
+func (slice *intSliceN) Clear() *intSliceN {
 	slice.v = []int{}
 	return slice
 }
 
 // Contains checks if the given target is contained in this slice
-func (slice *intSliceNub) Contains(target int) bool {
+func (slice *intSliceN) Contains(target int) bool {
 	for i := range slice.v {
 		if slice.v[i] == target {
 			return true
@@ -272,7 +272,7 @@ func (slice *intSliceNub) Contains(target int) bool {
 }
 
 // ContainsAny checks if any of the targets are contained in this slice
-func (slice *intSliceNub) ContainsAny(targets []int) bool {
+func (slice *intSliceN) ContainsAny(targets []int) bool {
 	if targets != nil && len(targets) > 0 {
 		for i := range targets {
 			for j := range slice.v {
@@ -286,7 +286,7 @@ func (slice *intSliceNub) ContainsAny(targets []int) bool {
 }
 
 // Del deletes item using neg/pos index notation with status
-func (slice *intSliceNub) Del(i int) bool {
+func (slice *intSliceN) Del(i int) bool {
 	result := false
 	if i < 0 {
 		i = len(slice.v) + i
@@ -304,12 +304,12 @@ func (slice *intSliceNub) Del(i int) bool {
 }
 
 // Equals checks if the two slices are equal
-func (slice *intSliceNub) Equals(other *intSliceNub) bool {
+func (slice *intSliceN) Equals(other *intSliceN) bool {
 	return reflect.DeepEqual(slice, other)
 }
 
 // Join the underlying slice with the given delim
-func (slice *intSliceNub) Join(delim string) *strNub {
+func (slice *intSliceN) Join(delim string) *strN {
 	result := []string{}
 	for i := range slice.v {
 		result = append(result, strconv.Itoa(slice.v[i]))
@@ -318,25 +318,25 @@ func (slice *intSliceNub) Join(delim string) *strNub {
 }
 
 // Len is a pass through to the underlying slice
-func (slice *intSliceNub) Len() int {
+func (slice *intSliceN) Len() int {
 	return len(slice.v)
 }
 
 // Prepend items to the begining of the slice and return slice
-func (slice *intSliceNub) Prepend(items ...int) *intSliceNub {
+func (slice *intSliceN) Prepend(items ...int) *intSliceN {
 	items = append(items, slice.v...)
 	slice.v = items
 	return slice
 }
 
 // Sort the underlying slice
-func (slice *intSliceNub) Sort() *intSliceNub {
+func (slice *intSliceN) Sort() *intSliceN {
 	sort.Ints(slice.v)
 	return slice
 }
 
 // TakeFirst updates the underlying slice and returns the item and status
-func (slice *intSliceNub) TakeFirst() (int, bool) {
+func (slice *intSliceN) TakeFirst() (int, bool) {
 	if len(slice.v) > 0 {
 		item := slice.v[0]
 		slice.v = slice.v[1:]
@@ -346,7 +346,7 @@ func (slice *intSliceNub) TakeFirst() (int, bool) {
 }
 
 // TakeFirstCnt updates the underlying slice and returns the items
-func (slice *intSliceNub) TakeFirstCnt(cnt int) (result *intSliceNub) {
+func (slice *intSliceN) TakeFirstCnt(cnt int) (result *intSliceN) {
 	if cnt > 0 {
 		if len(slice.v) >= cnt {
 			result = IntSlice(slice.v[:cnt])
@@ -360,7 +360,7 @@ func (slice *intSliceNub) TakeFirstCnt(cnt int) (result *intSliceNub) {
 }
 
 // TakeLast updates the underlying slice and returns the item and status
-func (slice *intSliceNub) TakeLast() (int, bool) {
+func (slice *intSliceN) TakeLast() (int, bool) {
 	if len(slice.v) > 0 {
 		item := slice.v[len(slice.v)-1]
 		slice.v = slice.v[:len(slice.v)-1]
@@ -370,7 +370,7 @@ func (slice *intSliceNub) TakeLast() (int, bool) {
 }
 
 // TakeLastCnt updates the underlying slice and returns the items
-func (slice *intSliceNub) TakeLastCnt(cnt int) (result *intSliceNub) {
+func (slice *intSliceN) TakeLastCnt(cnt int) (result *intSliceN) {
 	if cnt > 0 {
 		if len(slice.v) >= cnt {
 			i := len(slice.v) - cnt
@@ -386,7 +386,7 @@ func (slice *intSliceNub) TakeLastCnt(cnt int) (result *intSliceNub) {
 }
 
 // Uniq removes all duplicates from the underlying slice
-func (slice *intSliceNub) Uniq() *intSliceNub {
+func (slice *intSliceN) Uniq() *intSliceN {
 	hits := map[int]bool{}
 	for i := len(slice.v) - 1; i >= 0; i-- {
 		if _, exists := hits[slice.v[i]]; !exists {
@@ -401,41 +401,41 @@ func (slice *intSliceNub) Uniq() *intSliceNub {
 //--------------------------------------------------------------------------------------------------
 // StrMapSlice Nub
 //--------------------------------------------------------------------------------------------------
-type strMapSliceNub struct {
+type strMapSliceN struct {
 	v []map[string]interface{}
 }
 
 // NewStrMapSlice creates a new nub
-func NewStrMapSlice() *strMapSliceNub {
-	return &strMapSliceNub{v: []map[string]interface{}{}}
+func NewStrMapSlice() *strMapSliceN {
+	return &strMapSliceN{v: []map[string]interface{}{}}
 }
 
 // StrMapSlice creates a new nub from the given string map slice
-func StrMapSlice(slice []map[string]interface{}) *strMapSliceNub {
+func StrMapSlice(slice []map[string]interface{}) *strMapSliceN {
 	if slice != nil {
-		return &strMapSliceNub{v: slice}
+		return &strMapSliceN{v: slice}
 	}
-	return &strMapSliceNub{v: []map[string]interface{}{}}
+	return &strMapSliceN{v: []map[string]interface{}{}}
 }
 
 // S convert the slice into an string slice
-func (slice *strMapSliceNub) S() []map[string]interface{} {
+func (slice *strMapSliceN) S() []map[string]interface{} {
 	return slice.v
 }
 
 // Any checks if the slice has anything in it
-func (slice *strMapSliceNub) Any() bool {
+func (slice *strMapSliceN) Any() bool {
 	return len(slice.v) > 0
 }
 
 // Append items to the end of the slice and return slice
-func (slice *strMapSliceNub) Append(items ...map[string]interface{}) *strMapSliceNub {
+func (slice *strMapSliceN) Append(items ...map[string]interface{}) *strMapSliceN {
 	slice.v = append(slice.v, items...)
 	return slice
 }
 
 // At returns the item at the given index location. Allows for negative notation
-func (slice *strMapSliceNub) At(i int) *strMapNub {
+func (slice *strMapSliceN) At(i int) *strMapN {
 	if i >= 0 && i < len(slice.v) {
 		return M(slice.v[i])
 	} else if i < 0 && i*-1 < len(slice.v) {
@@ -445,13 +445,13 @@ func (slice *strMapSliceNub) At(i int) *strMapNub {
 }
 
 // Clear the underlying slice
-func (slice *strMapSliceNub) Clear() *strMapSliceNub {
+func (slice *strMapSliceN) Clear() *strMapSliceN {
 	slice.v = []map[string]interface{}{}
 	return slice
 }
 
 // Contains checks if the given target is contained in this slice
-func (slice *strMapSliceNub) Contains(key string) bool {
+func (slice *strMapSliceN) Contains(key string) bool {
 	for i := range slice.v {
 		if _, exists := slice.v[i][key]; exists {
 			return true
@@ -461,7 +461,7 @@ func (slice *strMapSliceNub) Contains(key string) bool {
 }
 
 // ContainsAny checks if any of the targets are contained in this slice
-func (slice *strMapSliceNub) ContainsAny(keys []string) bool {
+func (slice *strMapSliceN) ContainsAny(keys []string) bool {
 	if keys != nil && len(keys) > 0 {
 		for i := range keys {
 			for j := range slice.v {
@@ -475,7 +475,7 @@ func (slice *strMapSliceNub) ContainsAny(keys []string) bool {
 }
 
 // Del deletes item using neg/pos index notation with status
-func (slice *strMapSliceNub) Del(i int) bool {
+func (slice *strMapSliceN) Del(i int) bool {
 	result := false
 	if i < 0 {
 		i = len(slice.v) + i
@@ -493,24 +493,24 @@ func (slice *strMapSliceNub) Del(i int) bool {
 }
 
 // Equals checks if the two slices are equal
-func (slice *strMapSliceNub) Equals(other *strMapSliceNub) bool {
+func (slice *strMapSliceN) Equals(other *strMapSliceN) bool {
 	return reflect.DeepEqual(slice, other)
 }
 
 // Len is a pass through to the underlying slice
-func (slice *strMapSliceNub) Len() int {
+func (slice *strMapSliceN) Len() int {
 	return len(slice.v)
 }
 
 // Prepend items to the begining of the slice and return slice
-func (slice *strMapSliceNub) Prepend(items ...map[string]interface{}) *strMapSliceNub {
+func (slice *strMapSliceN) Prepend(items ...map[string]interface{}) *strMapSliceN {
 	items = append(items, slice.v...)
 	slice.v = items
 	return slice
 }
 
 // TakeFirst updates the underlying slice and returns the item and status
-func (slice *strMapSliceNub) TakeFirst() (*strMapNub, bool) {
+func (slice *strMapSliceN) TakeFirst() (*strMapN, bool) {
 	if len(slice.v) > 0 {
 		item := M(slice.v[0])
 		slice.v = slice.v[1:]
@@ -520,7 +520,7 @@ func (slice *strMapSliceNub) TakeFirst() (*strMapNub, bool) {
 }
 
 // TakeFirstCnt updates the underlying slice and returns the items
-func (slice *strMapSliceNub) TakeFirstCnt(cnt int) (result *strMapSliceNub) {
+func (slice *strMapSliceN) TakeFirstCnt(cnt int) (result *strMapSliceN) {
 	if cnt > 0 {
 		if len(slice.v) >= cnt {
 			result = StrMapSlice(slice.v[:cnt])
@@ -534,7 +534,7 @@ func (slice *strMapSliceNub) TakeFirstCnt(cnt int) (result *strMapSliceNub) {
 }
 
 // TakeLast updates the underlying slice and returns the item and status
-func (slice *strMapSliceNub) TakeLast() (*strMapNub, bool) {
+func (slice *strMapSliceN) TakeLast() (*strMapN, bool) {
 	if len(slice.v) > 0 {
 		item := M(slice.v[len(slice.v)-1])
 		slice.v = slice.v[:len(slice.v)-1]
@@ -544,7 +544,7 @@ func (slice *strMapSliceNub) TakeLast() (*strMapNub, bool) {
 }
 
 // TakeLastCnt updates the underlying slice and returns a new nub
-func (slice *strMapSliceNub) TakeLastCnt(cnt int) (result *strMapSliceNub) {
+func (slice *strMapSliceN) TakeLastCnt(cnt int) (result *strMapSliceN) {
 	if cnt > 0 {
 		if len(slice.v) >= cnt {
 			i := len(slice.v) - cnt
@@ -559,7 +559,7 @@ func (slice *strMapSliceNub) TakeLastCnt(cnt int) (result *strMapSliceNub) {
 }
 
 // YAMLPair return the first and second entries as yaml types
-func (slice *strSliceNub) YAMLPair() (first string, second interface{}) {
+func (slice *strSliceN) YAMLPair() (first string, second interface{}) {
 	if slice.Len() > 0 {
 		first = slice.v[0]
 	}
