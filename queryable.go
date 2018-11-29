@@ -23,7 +23,7 @@ type Queryable struct {
 }
 
 // Iterator provides a closure to capture the index and reset it
-type Iterator func() (item interface{}, ok bool)
+type Iterator func() (item I, ok bool)
 
 // KeyVal similar to C# for iterator over maps
 type KeyVal struct {
@@ -35,7 +35,7 @@ func strIter(ref reflect.Value) func() Iterator {
 	return func() Iterator {
 		i := 0
 		len := ref.Len()
-		return func() (item interface{}, ok bool) {
+		return func() (item I, ok bool) {
 			if ok = i < len; ok {
 				item = ref.Index(i).Interface()
 				i++
@@ -50,7 +50,7 @@ func mapIter(ref reflect.Value) func() Iterator {
 		i := 0
 		len := ref.Len()
 		keys := ref.MapKeys()
-		return func() (item interface{}, ok bool) {
+		return func() (item I, ok bool) {
 			if ok = i < len; ok {
 				item = KeyVal{
 					Key: keys[i].Interface(),
@@ -67,7 +67,7 @@ func sliceIter(ref reflect.Value) func() Iterator {
 	return func() Iterator {
 		i := 0
 		len := ref.Len()
-		return func() (item interface{}, ok bool) {
+		return func() (item I, ok bool) {
 			if ok = i < len; ok {
 				item = ref.Index(i).Interface()
 				i++
@@ -133,7 +133,7 @@ func (q *Queryable) Any() bool {
 }
 
 // AnyWhere checka if any match the given lambda
-func (q *Queryable) AnyWhere(lambda func(interface{}) bool) bool {
+func (q *Queryable) AnyWhere(lambda func(I) bool) bool {
 	if !q.TypeSingle() {
 		next := q.Iter()
 		for x, ok := next(); ok; x, ok = next() {
@@ -244,7 +244,7 @@ func (q *Queryable) Contains(obj interface{}) bool {
 				return false
 			}
 		case reflect.Map:
-			keys := Q(q.v.MapKeys()).Map(func(x interface{}) interface{} {
+			keys := Q(q.v.MapKeys()).Map(func(x I) I {
 				return x.(reflect.Value).Interface()
 			})
 			if !other.TypeSingle() {
@@ -374,7 +374,7 @@ func (q *Queryable) Len() int {
 }
 
 // Map manipulates the queryable data into a new form
-func (q *Queryable) Map(sel func(interface{}) interface{}) *Queryable {
+func (q *Queryable) Map(sel func(I) I) *Queryable {
 	result := N()
 	next := q.Iter()
 	for x, ok := next(); ok; x, ok = next() {
