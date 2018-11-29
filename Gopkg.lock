@@ -25,14 +25,6 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:73b6fd546309d33845d702b63bd4c31f7c26facd2db2d584ce8a86b4e413f948"
-  name = "github.com/phR0ze/nub"
-  packages = ["."]
-  pruneopts = "NT"
-  revision = "265b2049b5456d31d2e6f5f4dbbdb291962bc48e"
-  version = "v1.0.18"
-
-[[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
@@ -62,7 +54,6 @@
   input-imports = [
     "github.com/bouk/monkey",
     "github.com/ghodss/yaml",
-    "github.com/phR0ze/nub",
     "github.com/stretchr/testify/assert",
   ]
   solver-name = "gps-cdcl"
