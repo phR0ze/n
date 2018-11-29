@@ -774,16 +774,6 @@ func TestMap(t *testing.T) {
 			},
 		})
 		{
-			// // Get addrs and ports as new []string
-			// addrs := q.Map(func(x I) I {
-			// 	s := x.(sub)
-			// 	a := s.addrs.
-			// }).O()
-			// expected := []string{"1:1", "1:2", "2:3", "3:2", "4:4", "4:5", "5:4", "5:5"}
-			// }
-			// assert.Equal(t, expected, addrs)
-		}
-		{
 			// Get all addrs as [][]addr
 			addrs := q.Map(func(x I) I {
 				return (x.(sub)).addrs
@@ -806,6 +796,47 @@ func TestMap(t *testing.T) {
 				{{port: 4}, {port: 5}},
 			}
 			assert.Equal(t, expected, ports)
+		}
+	}
+}
+
+func TestMapMany(t *testing.T) {
+	{
+		type addr struct {
+			ip string
+		}
+		type port struct {
+			port int
+		}
+		type sub struct {
+			addrs []addr
+			ports []port
+		}
+		q := Q([]sub{
+			{
+				addrs: []addr{{ip: "1"}},
+				ports: []port{{port: 1}, {port: 2}},
+			},
+			{
+				addrs: []addr{{ip: "2"}, {ip: "3"}},
+				ports: []port{{port: 3}},
+			},
+			{
+				addrs: []addr{{ip: "4"}, {ip: "5"}},
+				ports: []port{{port: 4}, {port: 5}},
+			},
+		})
+		{
+			// Get all addrs as [][]addr
+			addrs := q.Map(func(x I) I {
+				return (x.(sub)).addrs
+			}).O()
+			expected := [][]addr{
+				{{ip: "1"}},
+				{{ip: "2"}, {ip: "3"}},
+				{{ip: "4"}, {ip: "5"}},
+			}
+			assert.Equal(t, expected, addrs)
 		}
 	}
 }

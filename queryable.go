@@ -397,6 +397,22 @@ func (q *Queryable) Map(sel func(I) I) (result *Queryable) {
 	return result
 }
 
+// MapMany manipulates the queryable data from two sources in a cross join type way
+func (q *Queryable) MapMany(sel func(I) I) (result *Queryable) {
+	next := q.Iter()
+	for x, ok := next(); ok; x, ok = next() {
+		s := sel(x)
+
+		// Create new slice of the return type of sel
+		if result == nil {
+			typ := reflect.TypeOf(s)
+			result = Q(reflect.MakeSlice(reflect.SliceOf(typ), 0, 10).Interface())
+		}
+		result.Append(s)
+	}
+	return result
+}
+
 // Set provides a way to set underlying object Queryable is operating on
 func (q *Queryable) Set(obj interface{}) *Queryable {
 	other := Q(obj)
