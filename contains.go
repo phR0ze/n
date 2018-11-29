@@ -44,7 +44,7 @@ func (q *Queryable) Contains(obj interface{}) bool {
 			}
 		}
 	} else {
-		switch q.v.Kind() {
+		switch q.Kind {
 		case reflect.Array, reflect.Slice:
 			if !other.TypeSingle() {
 				next := other.Iter()
@@ -109,7 +109,7 @@ func (q *Queryable) ContainsAny(obj interface{}) bool {
 			}
 		}
 	} else {
-		switch q.v.Kind() {
+		switch q.Kind {
 		case reflect.Array, reflect.Slice:
 			if !other.TypeSingle() {
 				next := q.Iter()

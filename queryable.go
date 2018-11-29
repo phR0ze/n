@@ -3,6 +3,7 @@ package nub
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"reflect"
 	"strconv"
@@ -15,6 +16,7 @@ import (
 // and is the heart of the algorithm abstraction layer
 type Queryable struct {
 	v    *reflect.Value
+	Kind reflect.Kind
 	Iter func() Iterator
 }
 
@@ -39,8 +41,8 @@ func Load(filepath string) *Queryable {
 
 // A provides a new empty Queryable string
 func A() *Queryable {
-	ref := reflect.ValueOf(string(""))
-	return &Queryable{v: &ref, Iter: strIter(ref)}
+	v := reflect.ValueOf(string(""))
+	return &Queryable{v: &v, Kind: v.Kind(), Iter: strIter(v)}
 }
 
 func strIter(ref reflect.Value) func() Iterator {
@@ -59,8 +61,8 @@ func strIter(ref reflect.Value) func() Iterator {
 
 // M provides a new empty Queryable map
 func M() *Queryable {
-	ref := reflect.ValueOf(map[interface{}]interface{}{})
-	return &Queryable{v: &ref, Iter: mapIter(ref)}
+	v := reflect.ValueOf(map[interface{}]interface{}{})
+	return &Queryable{v: &v, Kind: v.Kind(), Iter: mapIter(v)}
 }
 
 func mapIter(ref reflect.Value) func() Iterator {
@@ -83,8 +85,8 @@ func mapIter(ref reflect.Value) func() Iterator {
 
 // S provides a new empty Queryable slice
 func S() *Queryable {
-	ref := reflect.ValueOf([]interface{}{})
-	return &Queryable{v: &ref, Iter: sliceIter(ref)}
+	v := reflect.ValueOf([]interface{}{})
+	return &Queryable{v: &v, Kind: v.Kind(), Iter: sliceIter(v)}
 }
 
 func sliceIter(ref reflect.Value) func() Iterator {
@@ -107,28 +109,28 @@ func Q(obj interface{}) *Queryable {
 		return S()
 	}
 
-	ref := reflect.ValueOf(obj)
-	result := &Queryable{v: &ref}
-	switch ref.Kind() {
+	v := reflect.ValueOf(obj)
+	q := &Queryable{v: &v, Kind: v.Kind()}
+	switch q.Kind {
 
 	// Slice types
 	case reflect.Array, reflect.Slice:
-		result.Iter = sliceIter(ref)
+		q.Iter = sliceIter(v)
 
 	// Handle map types
 	case reflect.Map:
-		result.Iter = mapIter(ref)
+		q.Iter = mapIter(v)
 
 	// Handle string types
 	case reflect.String:
-		result.Iter = strIter(ref)
+		q.Iter = strIter(v)
 
 	// Chan types
 	case reflect.Chan:
 		panic("TODO: handle reflect.Chan")
 	}
 
-	return result
+	return q
 }
 
 // At returns the item at the given index location. Allows for negative notation
@@ -164,20 +166,27 @@ func (q *Queryable) Each(action func(interface{})) {
 }
 
 // Get an item by key which can be dot delimited
+// Assumes maps of type map[string]interface{}
 func (q *Queryable) Get(key string) *Queryable {
-	//keys := Q(key).Split(".")
-	// 	if k, ok := keys.TakeFirst(); ok {
-	// 		if entry, exists := m.raw[k]; exists {
-	// 			if v, ok := entry.(map[string]interface{}); ok {
-	// 				result.raw = v
-	// 				if keys.Len() != 0 {
-	// 					result = result.StrMap(keys.Join(".").M())
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// 	return result
-	// }
+	keys := Q(key).Split(".")
+	if k, ok := keys.TakeFirst(); ok {
+		if m, ok := q.v.Interface().(map[string]interface{}); ok {
+			fmt.Println(k)
+			if keys.Len() != 0 {
+				return Q(m).Get(keys.Join(".").A())
+			}
+		}
+		//typ := q.v
+		//if entry, exists := m.raw[k]; exists {
+		// 			if v, ok := entry.(map[string]interface{}); ok {
+		// 				result.raw = v
+		// 				if keys.Len() != 0 {
+		// 					result = result.StrMap(keys.Join(".").M())
+		// 				}
+		// 			}
+		// 		}
+		//}
+	}
 	return nil
 }
 
@@ -232,6 +241,16 @@ func (q *Queryable) TypeIter() bool {
 		return true
 	}
 	return false
+}
+
+// TypeMap checks if the queryable is reflect.Map
+func (q *Queryable) TypeMap() bool {
+	return q.Kind == reflect.Map
+}
+
+// TypeSlice checks if the queryable is reflect.Array or reflect.Slice
+func (q *Queryable) TypeSlice() bool {
+	return q.Kind == reflect.Array || q.Kind == reflect.Slice
 }
 
 // TypeStr checks if the queryable is encapsulating a string

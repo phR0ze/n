@@ -39,6 +39,12 @@ func TestAny(t *testing.T) {
 		q := Q([]bob{{data: "3"}})
 		assert.True(t, q.Any())
 	}
+	{
+		assert.False(t, S().Any())
+		assert.True(t, S().Append(1).Any())
+		assert.False(t, Q([]int{}).Any())
+		assert.True(t, Q([]int{1}).Any())
+	}
 }
 
 func TestAnyWhere(t *testing.T) {
@@ -88,5 +94,15 @@ func TestAnyWhere(t *testing.T) {
 			return (x.(bob)).data == "5"
 		}))
 	}
-
+	{
+		q := S()
+		assert.False(t, q.AnyWhere(func(x interface{}) bool {
+			return x == 3
+		}))
+	}
+	{
+		q := Q([]string{"1", "2", "3"})
+		assert.False(t, q.AnyWhere(func(x interface{}) bool { return x == 3 }))
+		assert.True(t, q.AnyWhere(func(x interface{}) bool { return x == "3" }))
+	}
 }

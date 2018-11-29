@@ -203,20 +203,20 @@ func TestStrMapStrMapByName(t *testing.T) {
 	}
 	{
 		rawYAMl := `releases:
-- name: common
-  chart: recurly/common:latest
-- name: environment-services
-  chart: recurly/environment-services:latest
+- name: bar1
+  chart: foo/bar1:latest
+- name: bar2
+  chart: foo/bar2:latest
   import-values: [tld]`
 
 		data := map[string]interface{}{}
 		yaml.Unmarshal([]byte(rawYAMl), &data)
 		expected := map[string]interface{}{
-			"name":          "environment-services",
-			"chart":         "recurly/environment-services:latest",
+			"name":          "bar2",
+			"chart":         "foo/bar2:latest",
 			"import-values": []interface{}{"tld"},
 		}
-		target := StrMap(data).StrMapByName("releases", "name", "environment-services").M()
+		target := StrMap(data).StrMapByName("releases", "name", "bar2").M()
 		assert.Equal(t, expected, target)
 	}
 }

@@ -79,7 +79,9 @@ Some functions only apply to particular underlying collection types as called ou
 | TakeLast     | Remove and return the last item                 | 0     | 0   | 0   | 0     |
 | TakeLastCnt  | Remove and return the last cnt items            | 0     | 0   | 0   | 0     |
 | TypeIter     | Is queryable iterable                           | 1     | 1   | 1   | 1     |
+| TypeMap      | Is queryable reflect.Map                        | 1     | 1   | 1   | 1     |
 | TypeStr      | Is queryable encapsualting a string             | 1     | 1   | 1   | 1     |
+| TypeSlice    | Is queryable reflect.Array or reflect.Map       | 1     | 1   | 1   | 1     |
 | TypeSingle   | Is queryable encapsualting a non-collection     | 1     | 1   | 1   | 1     |
 
 ### Materialization <a name="materialization"></a>

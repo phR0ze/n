@@ -5,7 +5,7 @@ import "reflect"
 // TakeFirst remove an return the first item.
 func (q *Queryable) TakeFirst() (item interface{}, ok bool) {
 	if !q.TypeSingle() && q.v.Len() > 0 {
-		if q.v.Kind() == reflect.Array || q.v.Kind() == reflect.Slice {
+		if q.Kind == reflect.Array || q.Kind == reflect.Slice {
 
 			// Make a new slice minus the first one
 			n := reflect.MakeSlice(q.v.Type(), 0, q.v.Len()-1)
@@ -27,7 +27,7 @@ func (q *Queryable) TakeFirst() (item interface{}, ok bool) {
 func (q *Queryable) TakeFirstCnt(cnt int) (result interface{}) {
 	result = []interface{}{}
 	if !q.TypeSingle() && q.v.Len() > 0 && cnt > 0 {
-		if q.v.Kind() == reflect.Array || q.v.Kind() == reflect.Slice {
+		if q.Kind == reflect.Array || q.Kind == reflect.Slice {
 
 			// This slice is larger that asked for
 			if q.Len() >= cnt {

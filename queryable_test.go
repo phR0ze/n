@@ -68,7 +68,7 @@ func TestQA(t *testing.T) {
 	}
 }
 
-func TestIQ(t *testing.T) {
+func TestQI(t *testing.T) {
 	q := Q(5)
 	assert.True(t, q.Any())
 	assert.Equal(t, 1, q.Len())
@@ -111,6 +111,56 @@ func TestQM(t *testing.T) {
 			}
 		}
 		assert.Len(t, items, 3)
+	}
+}
+func TestQS(t *testing.T) {
+	{
+		q := S()
+		assert.NotNil(t, q)
+		assert.NotNil(t, q.Iter)
+		iter := q.Iter()
+		assert.NotNil(t, iter)
+		x, ok := iter()
+		assert.Nil(t, x)
+		assert.False(t, ok)
+	}
+	{
+		q := S()
+		assert.False(t, q.Any())
+		assert.Equal(t, 0, q.Len())
+		q2 := q.Append(2)
+		assert.Equal(t, 1, q.Len())
+		assert.Equal(t, 1, q2.Len())
+		assert.True(t, q2.Any())
+		assert.Equal(t, q, q2)
+		assert.Equal(t, 2, q.At(0).I())
+	}
+	{
+		q := Q(nil)
+		assert.NotNil(t, q)
+		assert.NotNil(t, q.Iter)
+		iter := q.Iter()
+		assert.NotNil(t, iter)
+		x, ok := iter()
+		assert.Nil(t, x)
+		assert.False(t, ok)
+	}
+	{
+		cnt := []bool{}
+		q := Q([]int{1, 2, 3})
+		next := q.Iter()
+		for x, ok := next(); ok; x, ok = next() {
+			cnt = append(cnt, true)
+			switch len(cnt) {
+			case 1:
+				assert.Equal(t, 1, x)
+			case 2:
+				assert.Equal(t, 2, x)
+			case 3:
+				assert.Equal(t, 3, x)
+			}
+		}
+		assert.Len(t, cnt, 3)
 	}
 }
 
@@ -274,6 +324,27 @@ func TestEach(t *testing.T) {
 	}
 }
 
+func TestGet(t *testing.T) {
+	// {
+	// 	// Unmarshal
+	// 	q := Q(map[string]interface{}{
+	// 		map[string]
+	// 		"1": "one", "2": "two", "3": "three",
+	// 	})
+	// 	assert.True(t, q.Any())
+	// 	assert.Equal(t, mapq.Get("1"))
+	// }
+	// {
+	// 	// Unmarshal: Not a valid str map should return nil
+	// 	raw := `test1: "foobar"`
+	// 	data := map[string]interface{}{}
+	// 	yaml.Unmarshal([]byte(raw), &data)
+	// 	expected := map[string]interface{}{}
+
+	// 	assert.Equal(t, expected, StrMap(data).StrMap("test1").M())
+	// }
+}
+
 func TestJoin(t *testing.T) {
 	{
 		q := A()
@@ -350,6 +421,10 @@ func TestLen(t *testing.T) {
 		}
 		{
 			q := Q([]int{1, 2, 3})
+			assert.Equal(t, 3, q.Len())
+		}
+		{
+			q := Q([]string{"1", "2", "3"})
 			assert.Equal(t, 3, q.Len())
 		}
 	}
