@@ -55,3 +55,28 @@ func TestStrTrimPrefix(t *testing.T) {
 func TestStrTrimSuffix(t *testing.T) {
 	assert.Equal(t, "[test", A("[test]").TrimSuffix("]").A())
 }
+
+func TestYAMLType(t *testing.T) {
+	{
+		// string
+		assert.Equal(t, "test", A("\"test\"").YAMLType())
+		assert.Equal(t, "test", A("'test'").YAMLType())
+		assert.Equal(t, "1", A("\"1\"").YAMLType())
+		assert.Equal(t, "1", A("'1'").YAMLType())
+	}
+	{
+		// int
+		assert.Equal(t, 1, A("1").YAMLType())
+		assert.Equal(t, 0, A("0").YAMLType())
+		assert.Equal(t, 25, A("25").YAMLType())
+	}
+	{
+		// bool
+		assert.Equal(t, true, A("true").YAMLType())
+		assert.Equal(t, false, A("false").YAMLType())
+	}
+	{
+		// default
+		assert.Equal(t, "True", A("True").YAMLType())
+	}
+}

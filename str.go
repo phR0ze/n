@@ -1,6 +1,7 @@
 package nub
 
 import (
+	"strconv"
 	"strings"
 )
 
@@ -87,7 +88,15 @@ func (q *strNub) TrimSuffix(suffix string) *strNub {
 // Quotes signifies a string.
 // No quotes signifies an int.
 // true or false signifies a bool.
-func (q *strNub) YAMLType(t string) interface{} {
-	//if A(str)
-	return nil
+func (q *strNub) YAMLType() interface{} {
+	if q.HasAnyPrefix("\"", "'") && q.HasAnySuffix("\"", "'") {
+		return q.v[1 : len(q.v)-1]
+	} else if q.v == "true" || q.v == "false" {
+		if b, err := strconv.ParseBool(q.v); err == nil {
+			return b
+		}
+	} else if i, err := strconv.Atoi(q.v); err == nil {
+		return i
+	}
+	return q.v
 }

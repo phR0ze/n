@@ -1037,3 +1037,8 @@ func TestStrMapSliceTakeLastCnt(t *testing.T) {
 		assert.Equal(t, 0, result.Len())
 	}
 }
+
+func TestYAMLPair(t *testing.T) {
+	{
+	}
+}

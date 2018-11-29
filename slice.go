@@ -205,6 +205,11 @@ type strSliceNub struct {
 	v []string
 }
 
+// S provides a new empty Queryable slice
+func S() *Queryable {
+	return Q(nil)
+}
+
 // NewStrSlice creates a new nub
 func NewStrSlice() *strSliceNub {
 	return &strSliceNub{v: []string{}}
@@ -559,6 +564,17 @@ func (slice *strMapSliceNub) TakeLastCnt(cnt int) (result *strMapSliceNub) {
 			result = StrMapSlice(slice.v)
 			slice.v = []map[string]interface{}{}
 		}
+	}
+	return
+}
+
+// YAMLPair return the first and second entries as yaml types
+func (slice *strSliceNub) YAMLPair() (first interface{}, second interface{}) {
+	if slice.Len() > 0 {
+		first = A(slice.v[0]).YAMLType()
+	}
+	if slice.Len() > 1 {
+		second = A(slice.v[1]).YAMLType()
 	}
 	return
 }

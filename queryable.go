@@ -76,12 +76,6 @@ func mapIter(ref reflect.Value) func() Iterator {
 	}
 }
 
-// S provides a new empty Queryable slice
-func S() *Queryable {
-	v := reflect.ValueOf([]interface{}{})
-	return &Queryable{v: &v, Kind: v.Kind(), Iter: sliceIter(v)}
-}
-
 func sliceIter(ref reflect.Value) func() Iterator {
 	return func() Iterator {
 		i := 0
@@ -99,7 +93,7 @@ func sliceIter(ref reflect.Value) func() Iterator {
 // Q provides origination for the Queryable abstraction layer
 func Q(obj interface{}) *Queryable {
 	if obj == nil {
-		return S()
+		obj = []interface{}{}
 	}
 
 	v := reflect.ValueOf(obj)
@@ -153,7 +147,7 @@ func (q *Queryable) AnyWhere(lambda func(interface{}) bool) bool {
 // converting to a collection if necessary
 func (q *Queryable) Append(obj ...interface{}) *Queryable {
 	if q.TypeSingle() {
-		*q = *S().Append(q.v.Interface())
+		*q = *Q(nil).Append(q.v.Interface())
 	}
 
 	// Append to slice type
@@ -184,7 +178,7 @@ func (q *Queryable) At(i int) *Queryable {
 
 // Clear the queryable collection
 func (q *Queryable) Clear() *Queryable {
-	*q = *S()
+	*q = *Q(nil)
 	return q
 }
 
@@ -362,7 +356,7 @@ func (q *Queryable) YAML(key string) (result *Queryable) {
 			for i := range x {
 				if m, ok := x[i].(map[string]interface{}); ok {
 					if entry, ok := m[k]; ok {
-						if v == entry.(string) {
+						if v == entry {
 							return Q(m)
 						}
 					}
@@ -410,7 +404,7 @@ func (q *Queryable) Len() int {
 
 // Map manipulates the queryable data into a new form
 func (q *Queryable) Map(sel func(interface{}) interface{}) *Queryable {
-	result := S()
+	result := Q(nil)
 	next := q.Iter()
 	for x, ok := next(); ok; x, ok = next() {
 		result.Append(sel(x))

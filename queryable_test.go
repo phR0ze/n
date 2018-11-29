@@ -116,7 +116,7 @@ func TestQM(t *testing.T) {
 }
 func TestQS(t *testing.T) {
 	{
-		q := S()
+		q := Q(nil)
 		assert.NotNil(t, q)
 		assert.NotNil(t, q.Iter)
 		iter := q.Iter()
@@ -126,7 +126,7 @@ func TestQS(t *testing.T) {
 		assert.False(t, ok)
 	}
 	{
-		q := S()
+		q := Q(nil)
 		assert.False(t, q.Any())
 		assert.Equal(t, 0, q.Len())
 		q2 := q.Append(2)
