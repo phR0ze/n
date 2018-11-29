@@ -698,11 +698,11 @@ func TestYAML(t *testing.T) {
   - name: 3`
 		data := map[string]interface{}{}
 		yaml.Unmarshal([]byte(rawYAML), &data)
-		//expected := map[string]interface{}{"name": "2"}
+		expected := map[string]interface{}{"name": 2.0}
 
 		q := Q(data)
 		assert.True(t, q.Any())
-		//assert.Equal(t, expected, q.YAML("foo.[name:2]").M())
+		assert.Equal(t, expected, q.YAML("foo.[name:2]").M())
 	}
 }
 

@@ -352,7 +352,7 @@ func (q *Queryable) YAML(key string) (result *Queryable) {
 				}
 			}
 		case []interface{}:
-			k, v := A(key).TrimPrefix("[").TrimSuffix("]").Split(":").Pair()
+			k, v := A(key).TrimPrefix("[").TrimSuffix("]").Split(":").YAMLPair()
 			for i := range x {
 				if m, ok := x[i].(map[string]interface{}); ok {
 					if entry, ok := m[k]; ok {

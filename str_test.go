@@ -66,9 +66,9 @@ func TestYAMLType(t *testing.T) {
 	}
 	{
 		// int
-		assert.Equal(t, 1, A("1").YAMLType())
-		assert.Equal(t, 0, A("0").YAMLType())
-		assert.Equal(t, 25, A("25").YAMLType())
+		assert.Equal(t, 1.0, A("1").YAMLType())
+		assert.Equal(t, 0.0, A("0").YAMLType())
+		assert.Equal(t, 25.0, A("25").YAMLType())
 	}
 	{
 		// bool

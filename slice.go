@@ -559,9 +559,9 @@ func (slice *strMapSliceNub) TakeLastCnt(cnt int) (result *strMapSliceNub) {
 }
 
 // YAMLPair return the first and second entries as yaml types
-func (slice *strSliceNub) YAMLPair() (first interface{}, second interface{}) {
+func (slice *strSliceNub) YAMLPair() (first string, second interface{}) {
 	if slice.Len() > 0 {
-		first = A(slice.v[0]).YAMLType()
+		first = slice.v[0]
 	}
 	if slice.Len() > 1 {
 		second = A(slice.v[1]).YAMLType()

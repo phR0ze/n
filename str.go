@@ -95,8 +95,8 @@ func (q *strNub) YAMLType() interface{} {
 		if b, err := strconv.ParseBool(q.v); err == nil {
 			return b
 		}
-	} else if i, err := strconv.Atoi(q.v); err == nil {
-		return i
+	} else if f, err := strconv.ParseFloat(q.v, 32); err == nil {
+		return f
 	}
 	return q.v
 }
