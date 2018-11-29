@@ -20,19 +20,24 @@ func NewStrMap() *strMapNub {
 	return &strMapNub{v: map[string]interface{}{}}
 }
 
-// StrMap creates a new nub from the given string map
-func StrMap(other map[string]interface{}) *strMapNub {
+// M creates a new nub from the given string map
+func M(other map[string]interface{}) *strMapNub {
 	return &strMapNub{v: other}
 }
 
-// LoadOld a yaml/json file as a str map
+// LoadYAML a yaml/json file as a str map
 // returns nil on failure of any kind
-func LoadOld(target string) (result *strMapNub) {
-	if yamlFile, err := ioutil.ReadFile(target); err == nil {
-		result = NewStrMap()
+func LoadYAML(filepath string) (result *strMapNub) {
+	result = NewStrMap()
+	if yamlFile, err := ioutil.ReadFile(filepath); err == nil {
 		yaml.Unmarshal(yamlFile, &result.v)
 	}
-	return result
+	return
+}
+
+// Q creates a new queryable from the given string map
+func (m *strMapNub) Q() *Queryable {
+	return Q(m.v)
 }
 
 // Add a new key value pair to the map
@@ -95,7 +100,7 @@ func (m *strMapNub) Slice(key string) (result []interface{}) {
 		if entry, exists := m.v[k]; exists {
 			switch x := entry.(type) {
 			case map[string]interface{}:
-				result = StrMap(x).Slice(keys.Join(".").A())
+				result = M(x).Slice(keys.Join(".").A())
 			case []map[string]interface{}:
 				result = unCastStrMapSlice(x)
 			case []interface{}:
@@ -116,7 +121,7 @@ func (m *strMapNub) Str(key string) *strNub {
 			case string:
 				result = A(v)
 			case map[string]interface{}:
-				result = StrMap(v).Str(keys.Join(".").A())
+				result = M(v).Str(keys.Join(".").A())
 			}
 		}
 	}

@@ -437,9 +437,9 @@ func (slice *strMapSliceNub) Append(items ...map[string]interface{}) *strMapSlic
 // At returns the item at the given index location. Allows for negative notation
 func (slice *strMapSliceNub) At(i int) *strMapNub {
 	if i >= 0 && i < len(slice.v) {
-		return StrMap(slice.v[i])
+		return M(slice.v[i])
 	} else if i < 0 && i*-1 < len(slice.v) {
-		return StrMap(slice.v[len(slice.v)+i])
+		return M(slice.v[len(slice.v)+i])
 	}
 	panic(errors.New("Index out of slice bounds"))
 }
@@ -512,7 +512,7 @@ func (slice *strMapSliceNub) Prepend(items ...map[string]interface{}) *strMapSli
 // TakeFirst updates the underlying slice and returns the item and status
 func (slice *strMapSliceNub) TakeFirst() (*strMapNub, bool) {
 	if len(slice.v) > 0 {
-		item := StrMap(slice.v[0])
+		item := M(slice.v[0])
 		slice.v = slice.v[1:]
 		return item, true
 	}
@@ -536,7 +536,7 @@ func (slice *strMapSliceNub) TakeFirstCnt(cnt int) (result *strMapSliceNub) {
 // TakeLast updates the underlying slice and returns the item and status
 func (slice *strMapSliceNub) TakeLast() (*strMapNub, bool) {
 	if len(slice.v) > 0 {
-		item := StrMap(slice.v[len(slice.v)-1])
+		item := M(slice.v[len(slice.v)-1])
 		slice.v = slice.v[:len(slice.v)-1]
 		return item, true
 	}

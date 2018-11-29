@@ -18,7 +18,7 @@ func TestStrMapMerge(t *testing.T) {
 		assert.Equal(t, expected, NewStrMap().Merge(data).M())
 	}
 	{
-		strMap := StrMap(map[string]interface{}{
+		strMap := M(map[string]interface{}{
 			"1": "one", "2": "three", "3": "four",
 		})
 		data := []map[string]interface{}{
@@ -43,17 +43,17 @@ func TestStrMapMergeNub(t *testing.T) {
 		assert.Equal(t, map[string]interface{}{}, strMap.MergeNub(nil).M())
 	}
 	{
-		data := StrMap(map[string]interface{}{"1": "one"})
+		data := M(map[string]interface{}{"1": "one"})
 		expected := map[string]interface{}{"1": "one"}
 		assert.Equal(t, expected, NewStrMap().MergeNub(data).M())
 	}
 	{
-		strMap := StrMap(map[string]interface{}{
+		strMap := M(map[string]interface{}{
 			"1": "one", "2": "three", "3": "four",
 		})
-		data1 := StrMap(map[string]interface{}{"2": "two"})
-		data2 := StrMap(map[string]interface{}{"3": "three"})
-		data3 := StrMap(map[string]interface{}{"4": "four"})
+		data1 := M(map[string]interface{}{"2": "two"})
+		data2 := M(map[string]interface{}{"3": "three"})
+		data3 := M(map[string]interface{}{"4": "four"})
 		expected := map[string]interface{}{
 			"1": "one", "2": "two", "3": "three", "4": "four",
 		}
@@ -67,14 +67,14 @@ func TestStrMapSlice2(t *testing.T) {
 			"test1": "foobar",
 		}
 		var expected []interface{}
-		assert.Equal(t, expected, StrMap(data).Slice("test1"))
+		assert.Equal(t, expected, M(data).Slice("test1"))
 	}
 	{
 		data := map[string]interface{}{
 			"test1": []interface{}{"foobar"},
 		}
 		expected := []interface{}{"foobar"}
-		assert.Equal(t, expected, StrMap(data).Slice("test1"))
+		assert.Equal(t, expected, M(data).Slice("test1"))
 	}
 	{
 		data := map[string]interface{}{
@@ -83,7 +83,7 @@ func TestStrMapSlice2(t *testing.T) {
 			},
 		}
 		expected := []interface{}{"foobar"}
-		assert.Equal(t, expected, StrMap(data).Slice("test1.test2"))
+		assert.Equal(t, expected, M(data).Slice("test1.test2"))
 	}
 }
 
@@ -105,7 +105,7 @@ func TestStrMapStr(t *testing.T) {
 func TestStrMapStrMap(t *testing.T) {
 	{
 		// Manual: Not a valid str map should return empty
-		strMap := StrMap(map[string]interface{}{
+		strMap := M(map[string]interface{}{
 			"test1": "foo",
 		})
 		expected := map[string]interface{}{}
@@ -118,11 +118,11 @@ func TestStrMapStrMap(t *testing.T) {
 		yaml.Unmarshal([]byte(raw), &data)
 		expected := map[string]interface{}{}
 
-		assert.Equal(t, expected, StrMap(data).StrMap("test1").M())
+		assert.Equal(t, expected, M(data).StrMap("test1").M())
 	}
 	{
 		// Manual: valid nested str map
-		strMap := StrMap(map[string]interface{}{
+		strMap := M(map[string]interface{}{
 			"test1": map[string]interface{}{
 				"test2": "foobar",
 			},
@@ -141,10 +141,10 @@ func TestStrMapStrMap(t *testing.T) {
 		expected := map[string]interface{}{
 			"test2": "foobar",
 		}
-		assert.Equal(t, expected, StrMap(data).StrMap("test1").M())
+		assert.Equal(t, expected, M(data).StrMap("test1").M())
 	}
 	{
-		strMap := StrMap(map[string]interface{}{
+		strMap := M(map[string]interface{}{
 			"test1": map[string]interface{}{
 				"test2": map[string]interface{}{
 					"test3": "foobar",
@@ -169,7 +169,7 @@ func TestStrMapStrMapByName(t *testing.T) {
 			},
 		}
 		expected := map[string]interface{}{"name": "foo2"}
-		result := StrMap(data).StrMapByName("releases", "name", "foo2")
+		result := M(data).StrMapByName("releases", "name", "foo2")
 		assert.Equal(t, expected, result.M())
 	}
 	{
@@ -187,14 +187,14 @@ func TestStrMapStrMapByName(t *testing.T) {
 			"chart":         "foo/bar2:latest",
 			"import-values": []interface{}{"tld"},
 		}
-		target := StrMap(data).StrMapByName("releases", "name", "bar2").M()
+		target := M(data).StrMapByName("releases", "name", "bar2").M()
 		assert.Equal(t, expected, target)
 	}
 }
 
 func TestStrMapStrMapSlice(t *testing.T) {
 	{
-		slice := StrMap(map[string]interface{}{
+		slice := M(map[string]interface{}{
 			"test1": []map[string]interface{}{
 				{"1": interface{}("one")},
 				{"2": interface{}("two")},
@@ -214,10 +214,10 @@ func TestStrMapStrMapSlice(t *testing.T) {
 			{"1": "one"},
 			{"2": "two"},
 		})
-		assert.Equal(t, expected, StrMap(data).StrMapSlice("test1"))
+		assert.Equal(t, expected, M(data).StrMapSlice("test1"))
 	}
 	{
-		slice := StrMap(map[string]interface{}{
+		slice := M(map[string]interface{}{
 			"test1": []map[string]interface{}{
 				{"1": interface{}("one")},
 				{"2": interface{}("two")},
@@ -241,7 +241,7 @@ func TestStrMapStrMapSlice(t *testing.T) {
 			{"1": "one"},
 			{"2": "two"},
 		})
-		assert.Equal(t, expected, StrMap(data).StrMapSlice("test1.test2"))
+		assert.Equal(t, expected, M(data).StrMapSlice("test1.test2"))
 	}
 }
 
@@ -251,14 +251,14 @@ func TestStrSlice2(t *testing.T) {
 			"test1": "foobar",
 		}
 		var expected []string
-		assert.Equal(t, expected, StrMap(data).StrSlice("test1"))
+		assert.Equal(t, expected, M(data).StrSlice("test1"))
 	}
 	{
 		data := map[string]interface{}{
 			"test1": []interface{}{"foobar"},
 		}
 		expected := []string{"foobar"}
-		assert.Equal(t, expected, StrMap(data).StrSlice("test1"))
+		assert.Equal(t, expected, M(data).StrSlice("test1"))
 	}
 	{
 		data := map[string]interface{}{
@@ -267,7 +267,7 @@ func TestStrSlice2(t *testing.T) {
 			},
 		}
 		expected := []string{"foobar"}
-		assert.Equal(t, expected, StrMap(data).StrSlice("test1.test2"))
+		assert.Equal(t, expected, M(data).StrSlice("test1.test2"))
 	}
 }
 

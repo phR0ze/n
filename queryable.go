@@ -3,12 +3,9 @@ package nub
 import (
 	"bytes"
 	"errors"
-	"io/ioutil"
 	"reflect"
 	"strconv"
 	"strings"
-
-	"github.com/ghodss/yaml"
 )
 
 // Queryable provides chainable deferred execution
@@ -26,16 +23,6 @@ type Iterator func() (item interface{}, ok bool)
 type KeyVal struct {
 	Key interface{}
 	Val interface{}
-}
-
-// Load YAML/JSON from file into queryable
-func Load(filepath string) *Queryable {
-	if yamlFile, err := ioutil.ReadFile(filepath); err == nil {
-		data := map[string]interface{}{}
-		yaml.Unmarshal(yamlFile, &data)
-		return Q(data)
-	}
-	return N()
 }
 
 func strIter(ref reflect.Value) func() Iterator {
