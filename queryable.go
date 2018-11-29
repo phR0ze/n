@@ -3,7 +3,6 @@ package nub
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"reflect"
 	"strconv"
@@ -167,27 +166,24 @@ func (q *Queryable) Each(action func(interface{})) {
 
 // Get an item by key which can be dot delimited
 // Assumes maps of type map[string]interface{}
-func (q *Queryable) Get(key string) *Queryable {
+func (q *Queryable) Get(key string) (result *Queryable) {
+	result = M()
 	keys := Q(key).Split(".")
-	if k, ok := keys.TakeFirst(); ok {
-		if m, ok := q.v.Interface().(map[string]interface{}); ok {
-			fmt.Println(k)
-			if keys.Len() != 0 {
-				return Q(m).Get(keys.Join(".").A())
+	if key, ok := keys.TakeFirst(); ok {
+		if x, ok := q.v.Interface().(map[string]interface{}); ok {
+			k := key.(string)
+			if v, ok := x[k]; ok {
+				result = Q(v)
+				if keys.Len() != 0 {
+					result = result.Get(keys.Join(".").A())
+				}
 			}
+		} else if q.Kind == reflect.Slice {
+			//case []string:
+			//	panic("TODO: implement slice of string")
 		}
-		//typ := q.v
-		//if entry, exists := m.raw[k]; exists {
-		// 			if v, ok := entry.(map[string]interface{}); ok {
-		// 				result.raw = v
-		// 				if keys.Len() != 0 {
-		// 					result = result.StrMap(keys.Join(".").M())
-		// 				}
-		// 			}
-		// 		}
-		//}
 	}
-	return nil
+	return
 }
 
 // Join slice items as string with given delimeter
@@ -222,6 +218,7 @@ func (q *Queryable) Len() int {
 // Set provides a way to set underlying object Queryable is operating on
 func (q *Queryable) Set(obj interface{}) *Queryable {
 	other := Q(obj)
+	q.Kind = other.Kind
 	q.Iter = other.Iter
 	q.v = other.v
 	return q

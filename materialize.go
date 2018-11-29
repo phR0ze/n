@@ -17,22 +17,6 @@ func (q *Queryable) I() int {
 	return q.v.Interface().(int)
 }
 
-// M materializes queryable into a map
-func (q *Queryable) M() map[string]interface{} {
-	result := map[string]interface{}{}
-	next := q.Iter()
-	for x, ok := next(); ok; x, ok = next() {
-		pair := x.(KeyVal)
-		result[pair.Key.(string)] = pair.Val
-	}
-	return result
-}
-
-// O materializes queryable into a interface{}
-func (q *Queryable) O() interface{} {
-	return q.v.Interface()
-}
-
 // Ints materializes queryable into an int slice
 func (q *Queryable) Ints() []int {
 	result := []int{}
@@ -43,12 +27,32 @@ func (q *Queryable) Ints() []int {
 	return result
 }
 
+// M materializes queryable into a map
+func (q *Queryable) M() (result map[string]interface{}) {
+	if v, ok := q.O().(map[string]interface{}); ok {
+		result = v
+	} else {
+		result = map[string]interface{}{}
+		next := q.Iter()
+		for x, ok := next(); ok; x, ok = next() {
+			pair := x.(KeyVal)
+			result[pair.Key.(string)] = pair.Val
+		}
+	}
+	return result
+}
+
+// O materializes queryable into a interface{}
+func (q *Queryable) O() interface{} {
+	return q.v.Interface()
+}
+
 // Strs materializes queryable into an string slice
 func (q *Queryable) Strs() []string {
 	result := []string{}
 	next := q.Iter()
 	for x, ok := next(); ok; x, ok = next() {
-		result = append(result, x.(string))
+		result = append(result, fmt.Sprint(x))
 	}
 	return result
 }

@@ -14,6 +14,12 @@ func TestTakeFirst(t *testing.T) {
 		assert.Nil(t, x)
 	}
 	{
+		// empty string
+		x, ok := A().TakeFirst()
+		assert.False(t, ok)
+		assert.Nil(t, x)
+	}
+	{
 		// non-iterable
 		x, ok := Q(1).TakeFirst()
 		assert.False(t, ok)

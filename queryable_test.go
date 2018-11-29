@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -325,24 +326,79 @@ func TestEach(t *testing.T) {
 }
 
 func TestGet(t *testing.T) {
-	// {
-	// 	// Unmarshal
-	// 	q := Q(map[string]interface{}{
-	// 		map[string]
-	// 		"1": "one", "2": "two", "3": "three",
-	// 	})
-	// 	assert.True(t, q.Any())
-	// 	assert.Equal(t, mapq.Get("1"))
-	// }
-	// {
-	// 	// Unmarshal: Not a valid str map should return nil
-	// 	raw := `test1: "foobar"`
-	// 	data := map[string]interface{}{}
-	// 	yaml.Unmarshal([]byte(raw), &data)
-	// 	expected := map[string]interface{}{}
+	{
+		// Get string from map
+		rawYAMl := `1:
+  2: two`
+		data := map[string]interface{}{}
+		yaml.Unmarshal([]byte(rawYAMl), &data)
+		q := Q(data)
+		assert.True(t, q.Any())
+		assert.Equal(t, "two", q.Get("1.2").A())
+	}
+	{
+		// Get string from nested map
+		rawYAMl := `1:
+  2:
+    3: three`
+		data := map[string]interface{}{}
+		yaml.Unmarshal([]byte(rawYAMl), &data)
+		q := Q(data)
+		assert.True(t, q.Any())
+		assert.Equal(t, "three", q.Get("1.2.3").A())
+	}
+	{
+		// Get map from map
+		rawYAMl := `1:
+  2: two`
+		data := map[string]interface{}{}
+		yaml.Unmarshal([]byte(rawYAMl), &data)
+		expected := map[string]interface{}{"2": "two"}
 
-	// 	assert.Equal(t, expected, StrMap(data).StrMap("test1").M())
-	// }
+		q := Q(data)
+		assert.True(t, q.Any())
+		assert.Equal(t, expected, q.Get("1").M())
+	}
+	{
+		// Get map from map from map
+		rawYAMl := `1:
+  2:
+    3: three`
+		data := map[string]interface{}{}
+		yaml.Unmarshal([]byte(rawYAMl), &data)
+		expected := map[string]interface{}{"3": "three"}
+
+		q := Q(data)
+		assert.True(t, q.Any())
+		assert.Equal(t, expected, q.Get("1.2").M())
+	}
+	{
+		// Get slice from map
+		rawYAMl := `foo:
+  - 1
+  - 2
+  - 3`
+		data := map[string]interface{}{}
+		yaml.Unmarshal([]byte(rawYAMl), &data)
+
+		q := Q(data)
+		assert.True(t, q.Any())
+		assert.Equal(t, []string{"1", "2", "3"}, q.Get("foo").Strs())
+	}
+	{
+		// Select map from slice from map
+		rawYAMl := `foo:
+  - name: 1
+  - name: 2
+  - name: 3`
+		data := map[string]interface{}{}
+		yaml.Unmarshal([]byte(rawYAMl), &data)
+		expected := map[string]interface{}{"name": "2"}
+
+		q := Q(data)
+		assert.True(t, q.Any())
+		assert.Equal(t, expected, q.Get("foo.[name:2].").M())
+	}
 }
 
 func TestJoin(t *testing.T) {
