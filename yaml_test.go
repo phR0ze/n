@@ -7,10 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTemplate(t *testing.T) {
-	Template([]byte(""))
-}
-
 func TestYAML(t *testing.T) {
 	{
 		// Get string from map

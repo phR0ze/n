@@ -8,33 +8,12 @@ import (
 
 // LoadYAML a yaml/json file as a str map
 // returns nil on failure of any kind
-// func LoadYAML(filepath string) *Queryable {
-// 	if yamlFile, err := ioutil.ReadFile(filepath); err == nil {
-// 		data := map[string]interface{}{}
-// 		yaml.Unmarshal(yamlFile, &data)
-// 		return Q(data)
-// 	}
-// 	return nil
-// }
-
-// LoadYAML a yaml/json file as a str map
-// returns nil on failure of any kind
 func LoadYAML(filepath string) *Queryable {
 	if yamlFile, err := ioutil.ReadFile(filepath); err == nil {
 		data := map[string]interface{}{}
 		yaml.Unmarshal(yamlFile, &data)
 		return Q(data)
 	}
-	return nil
-}
-
-// Template processes the yaml template with the given variables
-// to produce a Queryable.
-func Template(yaml []byte) *Queryable {
-	// data := "name: {{ns}}-foo"
-	// t, _ := tmpl.New(data, "{{", "}}")
-	// s := t.ExecuteString(map[string]interface{}{"ns": "p1"})
-	// fmt.Println(s)
 	return nil
 }
 
