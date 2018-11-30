@@ -18,6 +18,7 @@ test: $(NAME)
 	go test $(PKGROOT)
 	go test $(PKGROOT)/pkg/tarn
 	go test $(PKGROOT)/pkg/timen
+	go test $(PKGROOT)/pkg/tmpl
 	go test $(PKGROOT)/pkg/tracen
 
 bench: $(NAME)
