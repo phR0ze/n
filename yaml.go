@@ -7,27 +7,52 @@ import (
 	"github.com/phR0ze/n/pkg/tmpl"
 )
 
-// LoadYAML a yaml/json file as a str map
+// FromYAMLFile a yaml/json file as a str map
 // returns nil on failure of any kind
-func LoadYAML(filepath string) *Queryable {
+func FromYAMLFile(filepath string) *Queryable {
 	if yamlFile, err := ioutil.ReadFile(filepath); err == nil {
 		data := map[string]interface{}{}
-		yaml.Unmarshal(yamlFile, &data)
+		if err := yaml.Unmarshal(yamlFile, &data); err == nil {
+			return Q(data)
+		}
+	}
+	return nil
+}
+
+// FromYAML return a queryable from the given YAML
+func FromYAML(yml string) *Queryable {
+	data := map[string]interface{}{}
+	if err := yaml.Unmarshal([]byte(yml), &data); err == nil {
 		return Q(data)
 	}
 	return nil
 }
 
-// LoadYAMLTmpl loads a yaml file from disk and processes any templating
-func LoadYAMLTmpl(filepath string, vars map[string]string) *Queryable {
+// FromYAMLTmplFile loads a yaml file from disk and processes any templating
+func FromYAMLTmplFile(filepath string, vars map[string]string) *Queryable {
 	if data, err := ioutil.ReadFile(filepath); err == nil {
 		if tpl, err := tmpl.New(string(data), "{{", "}}"); err == nil {
 			if result, err := tpl.Process(vars); err == nil {
-				return Q(result)
+				m := map[string]interface{}{}
+				if err := yaml.Unmarshal([]byte(result), &m); err == nil {
+					return Q(m)
+				}
 			}
 		}
 	}
-	return N()
+	return nil
+}
+
+// LoadTmplFile loads a yaml file from disk and processes any templating
+func LoadTmplFile(filepath string, vars map[string]string) string {
+	if data, err := ioutil.ReadFile(filepath); err == nil {
+		if tpl, err := tmpl.New(string(data), "{{", "}}"); err == nil {
+			if result, err := tpl.Process(vars); err == nil {
+				return result
+			}
+		}
+	}
+	return ""
 }
 
 // YAML gets data by key which can be dot delimited
