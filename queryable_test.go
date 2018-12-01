@@ -890,7 +890,7 @@ func TestMapFlatten(t *testing.T) {
 		s := q.MapF(func(x O) O {
 			return A(x.(string)).Split(",").MapF(func(y string) O {
 				return A(y).Split("=").S()
-			}).Strs()
+			})
 		}).Strs()
 		assert.Equal(t, []string{"k1", "v1", "k2", "v2"}, s)
 	}

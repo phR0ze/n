@@ -133,14 +133,19 @@ func (slice *strSliceN) Len() int {
 // Map manipulates the slice into a new form
 func (slice *strSliceN) Map(sel func(string) O) (result *Queryable) {
 	for i := range slice.v {
-		s := sel(slice.v[i])
+		obj := sel(slice.v[i])
+
+		// Drill into queryables
+		if s, ok := obj.(*Queryable); ok {
+			obj = s.v.Interface()
+		}
 
 		// Create new slice of the return type of sel
 		if result == nil {
-			typ := reflect.TypeOf(s)
+			typ := reflect.TypeOf(obj)
 			result = Q(reflect.MakeSlice(reflect.SliceOf(typ), 0, 10).Interface())
 		}
-		result.Append(s)
+		result.Append(obj)
 	}
 	return
 }
