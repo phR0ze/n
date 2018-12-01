@@ -333,10 +333,25 @@ func (q *Queryable) Each(action func(O)) {
 
 // Flatten returns a new slice that is one-dimensional flattening.
 // That is, for every item that is a slice, extract its items into the new slice.
-func (q *Queryable) Flatten() *Queryable {
-	//next := q.Iter()
-	//for x, ok := next(); ok;
-	return nil
+func (q *Queryable) Flatten() (result *Queryable) {
+	if q.TypeSlice() {
+		next := q.Iter()
+		for x, ok := next(); ok; x, ok = next() {
+
+			// Create new slice of the inner type
+			if result == nil {
+				result = Q(reflect.MakeSlice(reflect.TypeOf(x), 0, 10).Interface())
+			}
+
+			// Add sub slice's elements to new slice
+			Q(x).Each(func(y O) {
+				result.Append(y)
+			})
+		}
+	} else {
+		panic("TODO: implement Flatten() for maps")
+	}
+	return
 }
 
 // Join slice items as string with given delimeter
@@ -372,32 +387,44 @@ func (q *Queryable) Len() int {
 func (q *Queryable) Map(sel func(O) O) (result *Queryable) {
 	next := q.Iter()
 	for x, ok := next(); ok; x, ok = next() {
-		s := sel(x)
+		obj := sel(x)
+
+		// Drill into queryables
+		if s, ok := obj.(*Queryable); ok {
+			obj = s.v.Interface()
+		}
 
 		// Create new slice of the return type of sel
 		if result == nil {
-			typ := reflect.TypeOf(s)
+			typ := reflect.TypeOf(obj)
 			result = Q(reflect.MakeSlice(reflect.SliceOf(typ), 0, 10).Interface())
 		}
-		result.Append(s)
+		result.Append(obj)
 	}
-	return result
+	return
 }
 
-// MapMany manipulates the queryable data from two sources in a cross join type way
-func (q *Queryable) MapMany(sel func(O) O) (result *Queryable) {
-	next := q.Iter()
-	for x, ok := next(); ok; x, ok = next() {
-		s := sel(x)
+// MapF manipulates the queryable data into a new form then flattens
+func (q *Queryable) MapF(sel func(O) O) (result *Queryable) {
+	result = q.Map(sel).Flatten()
+	return
+}
 
-		// Create new slice of the return type of sel
-		if result == nil {
-			typ := reflect.TypeOf(s)
-			result = Q(reflect.MakeSlice(reflect.SliceOf(typ), 0, 10).Interface())
-		}
-		result.Append(s)
-	}
-	return result
+// MapMany manipulates the queryable data from two sources in a cross join
+func (q *Queryable) MapMany(sel func(O) O) (result *Queryable) {
+	// next := q.Iter()
+	// for x, ok := next(); ok; x, ok = next() {
+	// 	s := sel(x)
+
+	// 	// Create new slice of the return type of sel
+	// 	if result == nil {
+	// 		typ := reflect.TypeOf(s)
+	// 		result = Q(reflect.MakeSlice(reflect.SliceOf(typ), 0, 10).Interface())
+	// 	}
+	// 	result.Append(s)
+	// }
+	// return result
+	return
 }
 
 // Set provides a way to set underlying object Queryable is operating on

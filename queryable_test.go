@@ -629,6 +629,36 @@ func TestEach(t *testing.T) {
 	}
 }
 
+func TestFlatten(t *testing.T) {
+	{
+		// Ints
+		q := Q([][]int{{1, 2}, {3}})
+		assert.Equal(t, [][]int{{1, 2}, {3}}, q.O())
+
+		flat := q.Flatten()
+		assert.Equal(t, []int{1, 2, 3}, flat.O())
+		assert.Equal(t, [][]int{{1, 2}, {3}}, q.O())
+	}
+	{
+		// Strings
+		q := Q([][]string{{"1", "2"}, {"3"}})
+		assert.Equal(t, [][]string{{"1", "2"}, {"3"}}, q.O())
+
+		flat := q.Flatten()
+		assert.Equal(t, []string{"1", "2", "3"}, flat.O())
+		assert.Equal(t, [][]string{{"1", "2"}, {"3"}}, q.O())
+	}
+	{
+		// Interface
+		q := Q([][]interface{}{{"1", "2"}, {"3"}})
+		assert.Equal(t, [][]interface{}{{"1", "2"}, {"3"}}, q.O())
+
+		flat := q.Flatten()
+		assert.Equal(t, []interface{}{"1", "2", "3"}, flat.O())
+		assert.Equal(t, [][]interface{}{{"1", "2"}, {"3"}}, q.O())
+	}
+}
+
 func TestJoin(t *testing.T) {
 	{
 		q := Q("")
@@ -829,6 +859,53 @@ func TestMap(t *testing.T) {
 			}
 			assert.Equal(t, expected, ports)
 		}
+	}
+}
+
+func TestMapFlatten(t *testing.T) {
+	{
+		// Split on delim for nested type
+		q := Q([]string{"k1=v1,k2=v2"})
+		s := q.Map(func(x O) O {
+			return A(x.(string)).Split(",").S()
+		}).O()
+		assert.Equal(t, [][]string{{"k1=v1", "k2=v2"}}, s)
+	}
+	{
+		// Split on delim for nested type then split again
+		// Since we started with slice and mapped splits twice we have [][][]type slice
+		// thus to get back to a single [] we need to Flatten twice
+		q := Q([]string{"k1=v1,k2=v2"})
+		s := q.Map(func(x O) O {
+			return A(x.(string)).Split(",").Map(func(y string) O {
+				return A(y).Split("=").S()
+			}).Flatten().Strs()
+		}).Flatten().Strs()
+		assert.Equal(t, []string{"k1", "v1", "k2", "v2"}, s)
+	}
+	{
+		// Split on delim for nested type then split again
+		// Using MapF we can avoid the manual Flatten calls
+		q := Q([]string{"k1=v1,k2=v2"})
+		s := q.MapF(func(x O) O {
+			return A(x.(string)).Split(",").MapF(func(y string) O {
+				return A(y).Split("=").S()
+			}).Strs()
+		}).Strs()
+		assert.Equal(t, []string{"k1", "v1", "k2", "v2"}, s)
+	}
+}
+
+func TestMapSliceToMap(t *testing.T) {
+	{
+		// Building on the preceding tests now we will turn this into a map
+		q := Q([]string{"k1=v1,k2=v2"})
+		result := q.MapF(func(x O) O {
+			return A(x.(string)).Split(",").Map(func(y string) O {
+				return A(y).Split("=").YAMLKeyVal()
+			})
+		}).M()
+		assert.Equal(t, map[string]interface{}{"k1": "v1", "k2": "v2"}, result)
 	}
 }
 

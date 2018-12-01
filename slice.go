@@ -108,6 +108,13 @@ func (slice *strSliceN) Del(i int) bool {
 	return result
 }
 
+// Each iterates over the queryable and executes the given action
+func (slice *strSliceN) Each(action func(O)) {
+	for i := range slice.v {
+		action(slice.v[i])
+	}
+}
+
 // Equals checks if the two slices are equal
 func (slice *strSliceN) Equals(other *strSliceN) bool {
 	return reflect.DeepEqual(slice, other)
@@ -121,6 +128,27 @@ func (slice *strSliceN) Join(delim string) *strN {
 // Len is a pass through to the underlying slice
 func (slice *strSliceN) Len() int {
 	return len(slice.v)
+}
+
+// Map manipulates the slice into a new form
+func (slice *strSliceN) Map(sel func(string) O) (result *Queryable) {
+	for i := range slice.v {
+		s := sel(slice.v[i])
+
+		// Create new slice of the return type of sel
+		if result == nil {
+			typ := reflect.TypeOf(s)
+			result = Q(reflect.MakeSlice(reflect.SliceOf(typ), 0, 10).Interface())
+		}
+		result.Append(s)
+	}
+	return
+}
+
+// MapF manipulates the queryable data into a new form then flattens
+func (slice *strSliceN) MapF(sel func(string) O) (result *Queryable) {
+	result = slice.Map(sel).Flatten()
+	return
 }
 
 // Pair simply returns the first and second slice items
@@ -301,6 +329,13 @@ func (slice *intSliceN) Del(i int) bool {
 		}
 	}
 	return result
+}
+
+// Each iterates over the queryable and executes the given action
+func (slice *intSliceN) Each(action func(O)) {
+	for i := range slice.v {
+		action(slice.v[i])
+	}
 }
 
 // Equals checks if the two slices are equal
@@ -490,6 +525,13 @@ func (slice *strMapSliceN) Del(i int) bool {
 		}
 	}
 	return result
+}
+
+// Each iterates over the queryable and executes the given action
+func (slice *strMapSliceN) Each(action func(O)) {
+	for i := range slice.v {
+		action(slice.v[i])
+	}
 }
 
 // Equals checks if the two slices are equal
