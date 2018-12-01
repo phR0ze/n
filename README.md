@@ -86,17 +86,19 @@ Some functions only apply to particular underlying collection types as called ou
 | TypeSlice    | Is queryable reflect.Array or reflect.Map       | 1     | 1   | 1   | 1     |
 | TypeSingle   | Is queryable encapsualting a non-collection     | 1     | 1   | 1   | 1     |
 
-### Materialization <a name="materialization"></a>
-Materialization or processing deferred execution and converting to a usable type
+### Exports <a name="exports"></a>
+Exports process deferred execution and convert the result to a usable external type
 
 | Function     | Description                                     | Return Type               |
 | ------------ | ----------------------------------------------- | ------------------------- |
-| A            | Materialize queryable into a string             | `string`                  |
-| I            | Materialize queryable into an int               | `int`                     |
-| M            | Materialize queryable to map                    | `map[string]interface{}`  |
-| O            | Materialize queryable to interface{}            | `interface{}`             |
-| Ints         | Materialize queryable into an int slice         | `[]int`                   |
-| Strs         | Materialize queryable into a string slice       | `[]string`                |
+| A            | Export queryable into a string                  | `string`                  |
+| I            | Export queryable into an int                    | `int`                     |
+| M            | Export queryable to map                         | `map[string]interface{}`  |
+| O            | Export queryable to interface{}                 | `interface{}`             |
+| S            | Export queryable to a slice of interface{}      | `[]interface{}`           |
+| AAMap        | Export queryable to string to string map        | `map[string]string`       |
+| Ints         | Export queryable into an int slice              | `[]int`                   |
+| Strs         | Export queryable into a string slice            | `[]string`                |
 
 ### String Functions <a name="string-functions"></a>
 | Function     | Description                                     | Done  |

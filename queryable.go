@@ -8,8 +8,9 @@ import (
 	"strings"
 )
 
-// I is an alias for interface{} to reduce verbosity
-type I interface{}
+// O is an alias for interface{} to reduce verbosity
+// i'm using O for Object as I is already taken for Int types
+type O interface{}
 
 // Queryable provides chainable deferred execution
 // and is the heart of the algorithm abstraction layer
@@ -20,7 +21,7 @@ type Queryable struct {
 }
 
 // Iterator provides a closure to capture the index and reset it
-type Iterator func() (item I, ok bool)
+type Iterator func() (item O, ok bool)
 
 // KeyVal similar to C# for iterator over maps
 type KeyVal struct {
@@ -32,7 +33,7 @@ func strIter(ref reflect.Value) func() Iterator {
 	return func() Iterator {
 		i := 0
 		len := ref.Len()
-		return func() (item I, ok bool) {
+		return func() (item O, ok bool) {
 			if ok = i < len; ok {
 				item = ref.Index(i).Interface()
 				i++
@@ -47,7 +48,7 @@ func mapIter(ref reflect.Value) func() Iterator {
 		i := 0
 		len := ref.Len()
 		keys := ref.MapKeys()
-		return func() (item I, ok bool) {
+		return func() (item O, ok bool) {
 			if ok = i < len; ok {
 				item = KeyVal{
 					Key: keys[i].Interface(),
@@ -64,7 +65,7 @@ func sliceIter(ref reflect.Value) func() Iterator {
 	return func() Iterator {
 		i := 0
 		len := ref.Len()
-		return func() (item I, ok bool) {
+		return func() (item O, ok bool) {
 			if ok = i < len; ok {
 				item = ref.Index(i).Interface()
 				i++
@@ -119,7 +120,7 @@ func (q *Queryable) Any() bool {
 }
 
 // AnyWhere checka if any match the given lambda
-func (q *Queryable) AnyWhere(lambda func(I) bool) bool {
+func (q *Queryable) AnyWhere(lambda func(O) bool) bool {
 	if !q.TypeSingle() {
 		next := q.Iter()
 		for x, ok := next(); ok; x, ok = next() {
@@ -230,7 +231,7 @@ func (q *Queryable) Contains(obj interface{}) bool {
 				return false
 			}
 		case reflect.Map:
-			keys := Q(q.v.MapKeys()).Map(func(x I) I {
+			keys := Q(q.v.MapKeys()).Map(func(x O) O {
 				return x.(reflect.Value).Interface()
 			})
 			if !other.TypeSingle() {
@@ -321,7 +322,7 @@ func (q *Queryable) ContainsAny(obj interface{}) bool {
 }
 
 // Each iterates over the queryable and executes the given action
-func (q *Queryable) Each(action func(I)) {
+func (q *Queryable) Each(action func(O)) {
 	if q.TypeIter() {
 		next := q.Iter()
 		for x, ok := next(); ok; x, ok = next() {
@@ -368,7 +369,7 @@ func (q *Queryable) Len() int {
 }
 
 // Map manipulates the queryable data into a new form
-func (q *Queryable) Map(sel func(I) I) (result *Queryable) {
+func (q *Queryable) Map(sel func(O) O) (result *Queryable) {
 	next := q.Iter()
 	for x, ok := next(); ok; x, ok = next() {
 		s := sel(x)
@@ -384,7 +385,7 @@ func (q *Queryable) Map(sel func(I) I) (result *Queryable) {
 }
 
 // MapMany manipulates the queryable data from two sources in a cross join type way
-func (q *Queryable) MapMany(sel func(I) I) (result *Queryable) {
+func (q *Queryable) MapMany(sel func(O) O) (result *Queryable) {
 	next := q.Iter()
 	for x, ok := next(); ok; x, ok = next() {
 		s := sel(x)

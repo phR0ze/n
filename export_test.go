@@ -49,7 +49,7 @@ func TestStrs(t *testing.T) {
 	}
 }
 
-func TestStrMap(t *testing.T) {
+func TestAAMap(t *testing.T) {
 	{
 		// Get map of string to string
 		q := FromYAML(`foobar:
@@ -59,7 +59,7 @@ func TestStrMap(t *testing.T) {
     data: three`)
 		assert.True(t, q.Any())
 		expected := map[string]string{"name": "one", "meta": "two", "data": "three"}
-		assert.Equal(t, expected, q.YAML("foobar.labels").StrMap())
+		assert.Equal(t, expected, q.YAML("foobar.labels").AAMap())
 	}
 	{
 		// Ints as keys
@@ -70,7 +70,39 @@ func TestStrMap(t *testing.T) {
     3: 3`)
 		assert.True(t, q.Any())
 		expected := map[string]string{"1": "one", "2": "two", "3": "3"}
-		assert.Equal(t, expected, q.YAML("foobar.labels").StrMap())
+		assert.Equal(t, expected, q.YAML("foobar.labels").AAMap())
+	}
+}
+
+func TestS(t *testing.T) {
+	{
+		q := FromYAML(`items:
+  - name: one
+  - name: two
+  - name: three`)
+		assert.True(t, q.Any())
+		expected := []interface{}{
+			map[string]interface{}{"name": "one"},
+			map[string]interface{}{"name": "two"},
+			map[string]interface{}{"name": "three"},
+		}
+		assert.Equal(t, expected, q.YAML("items").S())
+	}
+}
+
+func TestSAAMap(t *testing.T) {
+	{
+		q := FromYAML(`items:
+  - name: one
+  - name: two
+  - name: three`)
+		assert.True(t, q.Any())
+		expected := []map[string]string{
+			{"name": "one"},
+			{"name": "two"},
+			{"name": "three"},
+		}
+		assert.Equal(t, expected, q.YAML("items").SAAMap())
 	}
 }
 

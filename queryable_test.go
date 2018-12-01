@@ -40,7 +40,7 @@ func BenchmarkEach(t *testing.B) {
 	for i := range ints {
 		ints[i] = i
 	}
-	Q(ints).Each(func(item I) {
+	Q(ints).Each(func(item O) {
 		fmt.Sprintln(item.(int) + 3)
 	})
 }
@@ -231,18 +231,18 @@ func TestAny(t *testing.T) {
 func TestAnyWhere(t *testing.T) {
 	{
 		// string
-		assert.True(t, Q("test").AnyWhere(func(x I) bool {
+		assert.True(t, Q("test").AnyWhere(func(x O) bool {
 			return x == "test"
 		}))
 	}
 	{
 		// int slice
 		q := Q([]int{1, 2, 3})
-		exists := q.AnyWhere(func(x I) bool {
+		exists := q.AnyWhere(func(x O) bool {
 			return x.(int) == 5
 		})
 		assert.False(t, exists)
-		exists = q.AnyWhere(func(x I) bool {
+		exists = q.AnyWhere(func(x O) bool {
 			return x.(int) == 2
 		})
 		assert.True(t, exists)
@@ -250,41 +250,41 @@ func TestAnyWhere(t *testing.T) {
 	{
 		// empty map
 		q := N()
-		assert.False(t, q.AnyWhere(func(x I) bool {
+		assert.False(t, q.AnyWhere(func(x O) bool {
 			return x == 3
 		}))
 	}
 	{
 		// str map
 		q := Q(map[string]interface{}{"1": "one", "2": "two", "3": "three"})
-		assert.False(t, q.AnyWhere(func(x I) bool { return x == 3 }))
-		assert.True(t, q.AnyWhere(func(x I) bool {
+		assert.False(t, q.AnyWhere(func(x O) bool { return x == 3 }))
+		assert.True(t, q.AnyWhere(func(x O) bool {
 			return (x.(KeyVal)).Key == "3"
 		}))
-		assert.True(t, q.AnyWhere(func(x I) bool {
+		assert.True(t, q.AnyWhere(func(x O) bool {
 			return (x.(KeyVal)).Val == "two"
 		}))
 	}
 	{
 		// []bob
 		q := Q([]bob{{data: "3"}, {data: "4"}})
-		assert.True(t, q.AnyWhere(func(x I) bool {
+		assert.True(t, q.AnyWhere(func(x O) bool {
 			return (x.(bob)).data == "3"
 		}))
-		assert.False(t, q.AnyWhere(func(x I) bool {
+		assert.False(t, q.AnyWhere(func(x O) bool {
 			return (x.(bob)).data == "5"
 		}))
 	}
 	{
 		q := N()
-		assert.False(t, q.AnyWhere(func(x I) bool {
+		assert.False(t, q.AnyWhere(func(x O) bool {
 			return x == 3
 		}))
 	}
 	{
 		q := Q([]string{"1", "2", "3"})
-		assert.False(t, q.AnyWhere(func(x I) bool { return x == 3 }))
-		assert.True(t, q.AnyWhere(func(x I) bool { return x == "3" }))
+		assert.False(t, q.AnyWhere(func(x O) bool { return x == 3 }))
+		assert.True(t, q.AnyWhere(func(x O) bool { return x == "3" }))
 	}
 }
 
@@ -561,7 +561,7 @@ func TestEach(t *testing.T) {
 		// []int
 		cnt := []bool{}
 		q := Q([]int{1, 2, 3})
-		q.Each(func(item I) {
+		q.Each(func(item O) {
 			cnt = append(cnt, true)
 			switch len(cnt) {
 			case 1:
@@ -576,7 +576,7 @@ func TestEach(t *testing.T) {
 
 		// Check iterator again making sure it reset
 		cnt = []bool{}
-		q.Each(func(item I) {
+		q.Each(func(item O) {
 			cnt = append(cnt, true)
 			switch len(cnt) {
 			case 1:
@@ -592,7 +592,7 @@ func TestEach(t *testing.T) {
 		// String
 		q := Q("test")
 		cnt := []bool{}
-		q.Each(func(x I) {
+		q.Each(func(x O) {
 			cnt = append(cnt, true)
 			item := string(x.(uint8))
 			switch len(cnt) {
@@ -611,7 +611,7 @@ func TestEach(t *testing.T) {
 		// maps
 		items := []interface{}{}
 		q := Q(map[string]string{"1": "one", "2": "two", "3": "three"})
-		q.Each(func(x I) {
+		q.Each(func(x O) {
 			items = append(items, x)
 			item := x.(KeyVal)
 			switch item.Key {
@@ -725,7 +725,7 @@ func TestMap(t *testing.T) {
 	{
 		// Get map keys
 		q := Q(map[string]interface{}{"1": "one", "2": "two", "3": "three"})
-		keys := q.Map(func(x I) I {
+		keys := q.Map(func(x O) O {
 			return (x.(KeyVal)).Key
 		})
 		expected := Q([]string{"1", "2", "3"})
@@ -737,7 +737,7 @@ func TestMap(t *testing.T) {
 	{
 		// Get map values
 		q := Q(map[string]interface{}{"1": "one", "2": "two", "3": "three"})
-		vals := q.Map(func(x I) I {
+		vals := q.Map(func(x O) O {
 			return (x.(KeyVal)).Val
 		})
 		expected := Q([]string{"one", "two", "three"})
@@ -774,7 +774,7 @@ func TestMap(t *testing.T) {
 		})
 		{
 			// Get all addrs as [][]addr
-			addrs := q.Map(func(x I) I {
+			addrs := q.Map(func(x O) O {
 				return (x.(sub)).addrs
 			}).O()
 			expected := [][]addr{
@@ -786,7 +786,7 @@ func TestMap(t *testing.T) {
 		}
 		{
 			// Get all port as [][]port
-			ports := q.Map(func(x I) I {
+			ports := q.Map(func(x O) O {
 				return (x.(sub)).ports
 			}).O()
 			expected := [][]port{
@@ -827,7 +827,7 @@ func TestMapMany(t *testing.T) {
 		})
 		{
 			// Get all addrs as [][]addr
-			addrs := q.Map(func(x I) I {
+			addrs := q.Map(func(x O) O {
 				return (x.(sub)).addrs
 			}).O()
 			expected := [][]addr{
