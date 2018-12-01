@@ -49,6 +49,31 @@ func TestStrs(t *testing.T) {
 	}
 }
 
+func TestStrMap(t *testing.T) {
+	{
+		// Get map of string to string
+		q := FromYAML(`foobar:
+  labels:
+    name: one
+    meta: two
+    data: three`)
+		assert.True(t, q.Any())
+		expected := map[string]string{"name": "one", "meta": "two", "data": "three"}
+		assert.Equal(t, expected, q.YAML("foobar.labels").StrMap())
+	}
+	{
+		// Ints as keys
+		q := FromYAML(`foobar:
+  labels:
+    1: one
+    2: two
+    3: 3`)
+		assert.True(t, q.Any())
+		expected := map[string]string{"1": "one", "2": "two", "3": "3"}
+		assert.Equal(t, expected, q.YAML("foobar.labels").StrMap())
+	}
+}
+
 func TestCastToTypeOf(t *testing.T) {
 	//typof := []int{1, 2, 3}
 	//obj := []interface{}{4}[0]

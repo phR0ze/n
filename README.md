@@ -125,7 +125,7 @@ Materialization or processing deferred execution and converting to a usable type
 | Insert       | Insert an item into the underlying slice        | 0     | 0        | 0        | 0           |
 | Join         | Join slice items as string with given delimiter | 0     | 1        | 1        | 0           |
 | Len          | Get the length of the slice                     | 0     | 1        | 1        | 1           |
-| M            | Materializes object invoking deferred execution | 0     | 1        | 1        | 1           |
+| E            | Exports object invoking deferred execution      | 0     | 1        | 1        | 1           |
 | Prepend      | Add items to the begining of the slice          | 0     | 1        | 1        | 1           |
 | Reverse      | Reverse the items                               | 0     | 0        | 0        | 0           |
 | Sort         | Sort the items                                  | 0     | 1        | 1        | 0           |
@@ -141,7 +141,7 @@ Materialization or processing deferred execution and converting to a usable type
 | Any          | Check if the map has anything in it             | 0        | 1        | 0           |
 | Equals       | Check if the given map is equal to this map     | 0        | 1        | 0           |
 | Len          | Get the length of the map                       | 0        | 1        | 0           |
-| M            | Materializes object invoking deferred execution | 0        | 1        | 0           |
+| M            | Exports object invoking deferred execution | 0        | 1        | 0           |
 | Merge        | Merge other maps in, in priority order          | 0        | 1        | 0           |
 | MergeNub     | Merge other nub maps in, in priority order      | 0        | 1        | 0           |
 | Slice        | Get the slice indicated by the multi-key        | 0        | 1        | 0           |

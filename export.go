@@ -7,17 +7,17 @@ import (
 
 // Collecting functions that return external Go types here
 
-// A materializes queryable into a string
+// A exports queryable into a string
 func (q *Queryable) A() string {
 	return q.v.Interface().(string)
 }
 
-// I materializes queryable into an int
+// I exports queryable into an int
 func (q *Queryable) I() int {
 	return q.v.Interface().(int)
 }
 
-// Ints materializes queryable into an int slice
+// Ints exports queryable into an int slice
 func (q *Queryable) Ints() []int {
 	result := []int{}
 	next := q.Iter()
@@ -27,32 +27,53 @@ func (q *Queryable) Ints() []int {
 	return result
 }
 
-// M materializes queryable into a map
+// M exports queryable into a map
 func (q *Queryable) M() (result map[string]interface{}) {
 	if v, ok := q.O().(map[string]interface{}); ok {
 		result = v
 	} else {
 		result = map[string]interface{}{}
-		next := q.Iter()
-		for x, ok := next(); ok; x, ok = next() {
-			pair := x.(KeyVal)
-			result[pair.Key.(string)] = pair.Val
+		if q.TypeMap() {
+			next := q.Iter()
+			for x, ok := next(); ok; x, ok = next() {
+				pair := x.(KeyVal)
+				result[fmt.Sprint(pair.Key)] = pair.Val
+			}
 		}
 	}
 	return result
 }
 
-// O materializes queryable into a interface{}
+// O exports queryable into a interface{}
 func (q *Queryable) O() interface{} {
 	return q.v.Interface()
 }
 
-// Strs materializes queryable into an string slice
+// Strs exports queryable into an string slice
 func (q *Queryable) Strs() []string {
 	result := []string{}
-	next := q.Iter()
-	for x, ok := next(); ok; x, ok = next() {
-		result = append(result, fmt.Sprint(x))
+	if q.TypeSlice() {
+		next := q.Iter()
+		for x, ok := next(); ok; x, ok = next() {
+			result = append(result, fmt.Sprint(x))
+		}
+	}
+	return result
+}
+
+// StrMap exports queryable into an string to string map
+func (q *Queryable) StrMap() (result map[string]string) {
+	if v, ok := q.O().(map[string]string); ok {
+		result = v
+	} else {
+		result = map[string]string{}
+		if q.TypeMap() {
+			next := q.Iter()
+			for x, ok := next(); ok; x, ok = next() {
+				pair := x.(KeyVal)
+				result[fmt.Sprint(pair.Key)] = fmt.Sprint(pair.Val)
+			}
+		}
 	}
 	return result
 }

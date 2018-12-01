@@ -14,7 +14,7 @@ func A(str string) *strN {
 	return &strN{v: str}
 }
 
-// A materializes object invoking deferred execution
+// A exports object invoking deferred execution
 func (q *strN) A() string {
 	return q.v
 }

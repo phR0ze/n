@@ -67,7 +67,7 @@ func (m *strMapN) Len() int {
 	return len(m.v)
 }
 
-// M materializes object invoking deferred execution
+// M exports object invoking deferred execution
 func (m *strMapN) M() map[string]interface{} {
 	return m.v
 }
