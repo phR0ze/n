@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 
 	"github.com/ghodss/yaml"
+	"github.com/phR0ze/n/pkg/tmpl"
 )
 
 // LoadYAML a yaml/json file as a str map
@@ -15,6 +16,18 @@ func LoadYAML(filepath string) *Queryable {
 		return Q(data)
 	}
 	return nil
+}
+
+// LoadYAMLTmpl loads a yaml file from disk and processes any templating
+func LoadYAMLTmpl(filepath string, vars map[string]string) *Queryable {
+	if data, err := ioutil.ReadFile(filepath); err == nil {
+		if tpl, err := tmpl.New(string(data), "{{", "}}"); err == nil {
+			if result, err := tpl.Process(vars); err == nil {
+				return Q(result)
+			}
+		}
+	}
+	return N()
 }
 
 // YAML gets data by key which can be dot delimited
