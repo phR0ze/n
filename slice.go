@@ -565,6 +565,22 @@ func (slice *strSliceN) YAMLPair() (first string, second interface{}) {
 	}
 	if slice.Len() > 1 {
 		second = A(slice.v[1]).YAMLType()
+	} else {
+		second = ""
 	}
 	return
+}
+
+// YAMLKeyVal return the first and second entries as KeyVal of yaml types
+func (slice *strSliceN) YAMLKeyVal() KeyVal {
+	result := KeyVal{}
+	if slice.Len() > 0 {
+		result.Key = A(slice.v[0]).YAMLType()
+	}
+	if slice.Len() > 1 {
+		result.Val = A(slice.v[1]).YAMLType()
+	} else {
+		result.Val = ""
+	}
+	return result
 }

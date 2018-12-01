@@ -35,10 +35,9 @@ func (q *Queryable) M() (result map[string]interface{}) {
 		result = v
 	} else {
 		result = map[string]interface{}{}
-		if q.TypeMap() {
-			next := q.Iter()
-			for x, ok := next(); ok; x, ok = next() {
-				pair := x.(KeyVal)
+		next := q.Iter()
+		for x, ok := next(); ok; x, ok = next() {
+			if pair, ok := x.(KeyVal); ok {
 				result[fmt.Sprint(pair.Key)] = pair.Val
 			}
 		}
@@ -69,10 +68,9 @@ func (q *Queryable) AAMap() (result map[string]string) {
 		result = v
 	} else {
 		result = map[string]string{}
-		if q.TypeMap() {
-			next := q.Iter()
-			for x, ok := next(); ok; x, ok = next() {
-				pair := x.(KeyVal)
+		next := q.Iter()
+		for x, ok := next(); ok; x, ok = next() {
+			if pair, ok := x.(KeyVal); ok {
 				result[fmt.Sprint(pair.Key)] = fmt.Sprint(pair.Val)
 			}
 		}
@@ -83,11 +81,9 @@ func (q *Queryable) AAMap() (result map[string]string) {
 // S exports queryable into an interface{} slice
 func (q *Queryable) S() []interface{} {
 	result := []interface{}{}
-	if q.TypeSlice() {
-		next := q.Iter()
-		for x, ok := next(); ok; x, ok = next() {
-			result = append(result, x)
-		}
+	next := q.Iter()
+	for x, ok := next(); ok; x, ok = next() {
+		result = append(result, x)
 	}
 	return result
 }

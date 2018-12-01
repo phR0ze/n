@@ -747,6 +747,39 @@ func TestMap(t *testing.T) {
 		assert.True(t, expected.Contains(vals.At(2).A()))
 	}
 	{
+		// Export as slice of KeyVal
+		q := Q([]string{"foo=bar"})
+		pairs := q.Map(func(x O) O {
+			k, v := A(x.(string)).Split("=").YAMLPair()
+			return KeyVal{k, v}
+		}).O().([]KeyVal)
+		assert.Equal(t, []KeyVal{{"foo", "bar"}}, pairs)
+	}
+	{
+		// Export as slice of KeyVal
+		q := Q([]string{"foo=bar"})
+		pairs := q.Map(func(x O) O {
+			return A(x.(string)).Split("=").YAMLKeyVal()
+		}).O().([]KeyVal)
+		assert.Equal(t, []KeyVal{{"foo", "bar"}}, pairs)
+	}
+	{
+		// Export as map
+		q := Q([]string{"foo=bar"})
+		pairs := q.Map(func(x O) O {
+			return A(x.(string)).Split("=").YAMLKeyVal()
+		}).O().([]KeyVal)
+		assert.Equal(t, []KeyVal{{"foo", "bar"}}, pairs)
+	}
+	{
+		// Get YAML values from slice of key=value strings
+		q := Q([]string{"foo=bar"})
+		m := q.Map(func(x O) O {
+			return A(x.(string)).Split("=").YAMLKeyVal()
+		}).M()
+		assert.Equal(t, map[string]interface{}{"foo": "bar"}, m)
+	}
+	{
 		// Project with map
 		type addr struct {
 			ip string

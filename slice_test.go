@@ -1040,5 +1040,45 @@ func TestStrMapSliceTakeLastCnt(t *testing.T) {
 
 func TestYAMLPair(t *testing.T) {
 	{
+		k, v := A("foo=bar").Split("=").YAMLPair()
+		assert.Equal(t, "foo", k)
+		assert.Equal(t, "bar", v)
+	}
+	{
+		k, v := A("=bar").Split("=").YAMLPair()
+		assert.Equal(t, "", k)
+		assert.Equal(t, "bar", v)
+	}
+	{
+		k, v := A("bar=").Split("=").YAMLPair()
+		assert.Equal(t, "bar", k)
+		assert.Equal(t, "", v)
+	}
+	{
+		k, v := A("").Split("=").YAMLPair()
+		assert.Equal(t, "", k)
+		assert.Equal(t, "", v)
+	}
+}
+func TestYAMLKeyVal(t *testing.T) {
+	{
+		pair := A("foo=bar").Split("=").YAMLKeyVal()
+		assert.Equal(t, "foo", pair.Key)
+		assert.Equal(t, "bar", pair.Val)
+	}
+	{
+		pair := A("=bar").Split("=").YAMLKeyVal()
+		assert.Equal(t, "", pair.Key)
+		assert.Equal(t, "bar", pair.Val)
+	}
+	{
+		pair := A("bar=").Split("=").YAMLKeyVal()
+		assert.Equal(t, "bar", pair.Key)
+		assert.Equal(t, "", pair.Val)
+	}
+	{
+		pair := A("").Split("=").YAMLKeyVal()
+		assert.Equal(t, "", pair.Key)
+		assert.Equal(t, "", pair.Val)
 	}
 }

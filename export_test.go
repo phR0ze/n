@@ -27,10 +27,19 @@ func TestI(t *testing.T) {
 
 func TestM(t *testing.T) {
 	{
+		// Convert with simple cast
 		data := map[string]interface{}{"1": "one", "2": "two", "3": "three"}
 		q := Q(data)
 		assert.Equal(t, 3, q.Len())
 		assert.Equal(t, data, q.M())
+	}
+	{
+		// Convert list of KeyVal into a map
+		q := Q([]string{"foo=bar"})
+		m := q.Map(func(x O) O {
+			return A(x.(string)).Split("=").YAMLKeyVal()
+		}).M()
+		assert.Equal(t, map[string]interface{}{"foo": "bar"}, m)
 	}
 }
 
@@ -92,6 +101,7 @@ func TestS(t *testing.T) {
 
 func TestSAAMap(t *testing.T) {
 	{
+		// slice of string to string map
 		q := FromYAML(`items:
   - name: one
   - name: two
@@ -100,6 +110,20 @@ func TestSAAMap(t *testing.T) {
 		expected := []map[string]string{
 			{"name": "one"},
 			{"name": "two"},
+			{"name": "three"},
+		}
+		assert.Equal(t, expected, q.YAML("items").SAAMap())
+	}
+	{
+		// slice of string to int map
+		q := FromYAML(`items:
+  - name: 1
+  - name: 2
+  - name: three`)
+		assert.True(t, q.Any())
+		expected := []map[string]string{
+			{"name": "1"},
+			{"name": "2"},
 			{"name": "three"},
 		}
 		assert.Equal(t, expected, q.YAML("items").SAAMap())
