@@ -351,6 +351,9 @@ func (q *Queryable) Flatten() (result *Queryable) {
 	} else {
 		panic("TODO: implement Flatten() for maps")
 	}
+	if result == nil {
+		result = q
+	}
 	return
 }
 
@@ -400,6 +403,9 @@ func (q *Queryable) Map(sel func(O) O) (result *Queryable) {
 			result = Q(reflect.MakeSlice(reflect.SliceOf(typ), 0, 10).Interface())
 		}
 		result.Append(obj)
+	}
+	if result == nil {
+		result = N()
 	}
 	return
 }

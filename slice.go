@@ -147,6 +147,9 @@ func (slice *strSliceN) Map(sel func(string) O) (result *Queryable) {
 		}
 		result.Append(obj)
 	}
+	if result == nil {
+		result = N()
+	}
 	return
 }
 

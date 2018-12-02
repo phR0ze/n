@@ -8,6 +8,11 @@ import (
 
 func TestParseCliOpts(t *testing.T) {
 	{
+		data := []string{}
+		expected := map[string]interface{}{}
+		assert.Equal(t, expected, ParseCliOpts(data))
+	}
+	{
 		data := []string{"foo=bar"}
 		expected := map[string]interface{}{"foo": "bar"}
 		assert.Equal(t, expected, ParseCliOpts(data))
