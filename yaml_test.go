@@ -9,6 +9,26 @@ import (
 
 func TestYAML(t *testing.T) {
 	{
+		// Get non existing string
+		rawYAML := `1:
+  2: two`
+		data := map[string]interface{}{}
+		yaml.Unmarshal([]byte(rawYAML), &data)
+		q := Q(data)
+		assert.True(t, q.Any())
+		assert.False(t, q.YAML("foo").Any())
+	}
+	{
+		// Get non existing nested string
+		rawYAML := `1:
+  2: two`
+		data := map[string]interface{}{}
+		yaml.Unmarshal([]byte(rawYAML), &data)
+		q := Q(data)
+		assert.True(t, q.Any())
+		assert.False(t, q.YAML("foo.foo").Any())
+	}
+	{
 		// Get string from map
 		rawYAML := `1:
   2: two`

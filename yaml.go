@@ -78,7 +78,7 @@ func (q *Queryable) YAML(key string) (result *Queryable) {
 				}
 			}
 		}
-		if keys.Len() != 0 && result.Any() {
+		if keys.Len() != 0 && result != nil && result.Any() {
 			result = result.YAML(keys.Join(".").A())
 		}
 	}
