@@ -101,4 +101,43 @@ func TestYAML(t *testing.T) {
 		assert.True(t, q.Any())
 		assert.Equal(t, expected, q.YAML("foo.[name:2]").M())
 	}
+	{
+		// Bad key
+		rawYAML := `foo:
+  - name: 1
+  - name: 2
+  - name: 3`
+		data := map[string]interface{}{}
+		yaml.Unmarshal([]byte(rawYAML), &data)
+
+		q := Q(data)
+		assert.True(t, q.Any())
+		assert.False(t, q.YAML("fee.[name:2]").Any())
+	}
+	{
+		// Bad sub key
+		rawYAML := `foo:
+  - name: 1
+  - name: 2
+  - name: 3`
+		data := map[string]interface{}{}
+		yaml.Unmarshal([]byte(rawYAML), &data)
+
+		q := Q(data)
+		assert.True(t, q.Any())
+		assert.False(t, q.YAML("foo.[fee:2]").Any())
+	}
+	{
+		// Missing target
+		rawYAML := `foo:
+  - name: 1
+  - name: 2
+  - name: 3`
+		data := map[string]interface{}{}
+		yaml.Unmarshal([]byte(rawYAML), &data)
+
+		q := Q(data)
+		assert.True(t, q.Any())
+		assert.False(t, q.YAML("foo.[name:5]").Any())
+	}
 }
