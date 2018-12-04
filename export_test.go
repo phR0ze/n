@@ -99,6 +99,22 @@ func TestS(t *testing.T) {
 	}
 }
 
+func TestSAMap(t *testing.T) {
+	{
+		q := FromYAML(`items:
+  - name: one
+  - name: two
+  - name: three`)
+		assert.True(t, q.Any())
+		expected := []map[string]interface{}{
+			{"name": "one"},
+			{"name": "two"},
+			{"name": "three"},
+		}
+		assert.Equal(t, expected, q.YAML("items").SAMap())
+	}
+}
+
 func TestSAAMap(t *testing.T) {
 	{
 		// slice of string to string map

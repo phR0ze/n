@@ -88,6 +88,20 @@ func (q *Queryable) S() []interface{} {
 	return result
 }
 
+// SAMap exports queryable into an slice of string to interface{} map
+func (q *Queryable) SAMap() []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if q.TypeSlice() {
+		next := q.Iter()
+		for x, ok := next(); ok; x, ok = next() {
+			if m, ok := x.(map[string]interface{}); ok {
+				result = append(result, m)
+			}
+		}
+	}
+	return result
+}
+
 // SAAMap exports queryable into an slice of string to string map
 func (q *Queryable) SAAMap() []map[string]string {
 	result := []map[string]string{}
