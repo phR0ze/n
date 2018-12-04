@@ -97,6 +97,15 @@ func TestS(t *testing.T) {
 		}
 		assert.Equal(t, expected, q.YAML("items").S())
 	}
+	{
+		q := FromYAML(`items:
+  - name: one
+  - name: two
+  - name: three`)
+		assert.True(t, q.Any())
+		expected := []interface{}{}
+		assert.Equal(t, expected, q.YAML("").S())
+	}
 }
 
 func TestSAMap(t *testing.T) {
@@ -112,6 +121,15 @@ func TestSAMap(t *testing.T) {
 			{"name": "three"},
 		}
 		assert.Equal(t, expected, q.YAML("items").SAMap())
+	}
+	{
+		q := FromYAML(`items:
+  - name: one
+  - name: two
+  - name: three`)
+		assert.True(t, q.Any())
+		expected := []map[string]interface{}{}
+		assert.Equal(t, expected, q.YAML("foo").SAMap())
 	}
 }
 
