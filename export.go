@@ -88,7 +88,7 @@ func (q *Queryable) S() []interface{} {
 	return result
 }
 
-// SAAMap exports queryable into an interface{} slice
+// SAAMap exports queryable into an slice of string to string map
 func (q *Queryable) SAAMap() []map[string]string {
 	result := []map[string]string{}
 	if q.TypeSlice() {
