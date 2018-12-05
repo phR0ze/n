@@ -47,17 +47,6 @@ func TestInts(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3}, Q([]int{1, 2, 3}).Ints())
 }
 
-func TestStrs(t *testing.T) {
-	{
-		q := Q([]string{"one"})
-		assert.Equal(t, "one", q.At(0).A())
-		assert.Equal(t, []string{"one"}, q.Strs())
-	}
-	{
-		assert.Equal(t, []string{"1", "2", "3"}, Q([]interface{}{"1", "2", "3"}).Strs())
-	}
-}
-
 func TestAAMap(t *testing.T) {
 	{
 		// Get map of string to string
@@ -161,6 +150,27 @@ func TestSAAMap(t *testing.T) {
 			{"name": "three"},
 		}
 		assert.Equal(t, expected, q.YAML("items").SAAMap())
+	}
+}
+
+func TestStrs(t *testing.T) {
+	{
+		// slice of string to int map
+		q := FromYAML(`items:
+  - name: 1
+  - name: 2
+  - name: three`)
+		assert.True(t, q.Any())
+		expected := []string{}
+		assert.Equal(t, expected, q.YAML("frodo.baggins").Strs())
+	}
+	{
+		q := Q([]string{"one"})
+		assert.Equal(t, "one", q.At(0).A())
+		assert.Equal(t, []string{"one"}, q.Strs())
+	}
+	{
+		assert.Equal(t, []string{"1", "2", "3"}, Q([]interface{}{"1", "2", "3"}).Strs())
 	}
 }
 
