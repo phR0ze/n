@@ -44,9 +44,9 @@ func FromYAMLTmplFile(filepath string, vars map[string]string) *Queryable {
 }
 
 // LoadTmplFile loads a yaml file from disk and processes any templating
-func LoadTmplFile(filepath string, vars map[string]string) string {
+func LoadTmplFile(filepath string, startTag, endTag string, vars map[string]string) string {
 	if data, err := ioutil.ReadFile(filepath); err == nil {
-		if tpl, err := tmpl.New(string(data), "{{", "}}"); err == nil {
+		if tpl, err := tmpl.New(string(data), startTag, endTag); err == nil {
 			if result, err := tpl.Process(vars); err == nil {
 				return result
 			}
