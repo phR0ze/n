@@ -113,7 +113,6 @@ func YAMLReplace(data interface{}, values map[string]string) (result interface{}
 			resultSlice = append(resultSlice, v.(map[string]interface{}))
 		}
 		result = resultSlice
-
 	case []interface{}:
 		resultSlice := []interface{}{}
 		for i := range x {

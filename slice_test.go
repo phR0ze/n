@@ -490,6 +490,7 @@ func TestStrSliceLast(t *testing.T) {
 	assert.Equal(t, A(""), S().Last())
 	assert.Equal(t, A("1"), S("1").Last())
 	assert.Equal(t, A("2"), S("1", "2").Last())
+	assert.Equal(t, "foo", A("::foo").Split("::").Last().A())
 }
 
 func TestStrSliceSort(t *testing.T) {
