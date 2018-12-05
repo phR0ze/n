@@ -45,14 +45,20 @@ func TestIntSliceAppend(t *testing.T) {
 }
 
 func TestIntSliceAt(t *testing.T) {
-	slice := NewIntSlice().Append(1, 2, 3, 4)
-	assert.Equal(t, 4, slice.At(-1))
-	assert.Equal(t, 3, slice.At(-2))
-	assert.Equal(t, 2, slice.At(-3))
-	assert.Equal(t, 1, slice.At(0))
-	assert.Equal(t, 2, slice.At(1))
-	assert.Equal(t, 3, slice.At(2))
-	assert.Equal(t, 4, slice.At(3))
+	{
+		slice := NewIntSlice().Append(1, 2, 3, 4)
+		assert.Equal(t, 4, slice.At(-1))
+		assert.Equal(t, 3, slice.At(-2))
+		assert.Equal(t, 2, slice.At(-3))
+		assert.Equal(t, 1, slice.At(0))
+		assert.Equal(t, 2, slice.At(1))
+		assert.Equal(t, 3, slice.At(2))
+		assert.Equal(t, 4, slice.At(3))
+	}
+	{
+		slice := NewIntSlice().Append(1)
+		assert.Equal(t, 1, slice.At(-1))
+	}
 }
 
 func TestIntSliceClear(t *testing.T) {
@@ -331,14 +337,20 @@ func TestStrSliceAppend(t *testing.T) {
 	}
 }
 func TestStrSliceAt(t *testing.T) {
-	slice := S().Append("1", "2", "3", "4")
-	assert.Equal(t, "4", slice.At(-1))
-	assert.Equal(t, "3", slice.At(-2))
-	assert.Equal(t, "2", slice.At(-3))
-	assert.Equal(t, "1", slice.At(0))
-	assert.Equal(t, "2", slice.At(1))
-	assert.Equal(t, "3", slice.At(2))
-	assert.Equal(t, "4", slice.At(3))
+	{
+		slice := S().Append("1", "2", "3", "4")
+		assert.Equal(t, "4", slice.At(-1))
+		assert.Equal(t, "3", slice.At(-2))
+		assert.Equal(t, "2", slice.At(-3))
+		assert.Equal(t, "1", slice.At(0))
+		assert.Equal(t, "2", slice.At(1))
+		assert.Equal(t, "3", slice.At(2))
+		assert.Equal(t, "4", slice.At(3))
+	}
+	{
+		slice := S().Append("1")
+		assert.Equal(t, "1", slice.At(-1))
+	}
 }
 
 func TestStrSliceClear(t *testing.T) {
@@ -472,6 +484,12 @@ func TestStrSliceLen(t *testing.T) {
 	assert.Equal(t, 0, S().Len())
 	assert.Equal(t, 1, S("1").Len())
 	assert.Equal(t, 2, S("1", "2").Len())
+}
+
+func TestStrSliceLast(t *testing.T) {
+	assert.Equal(t, A(""), S().Last())
+	assert.Equal(t, A("1"), S("1").Last())
+	assert.Equal(t, A("2"), S("1", "2").Last())
 }
 
 func TestStrSliceSort(t *testing.T) {
@@ -649,17 +667,24 @@ func TestStrMapSliceAppend(t *testing.T) {
 }
 
 func TestStrMapSliceAt(t *testing.T) {
-	slice := NewStrMapSlice()
-	assert.Equal(t, 0, slice.Len())
-	slice.Append(map[string]interface{}{"1": "one"})
-	slice.Append(map[string]interface{}{"2": "two"})
-	slice.Append(map[string]interface{}{"3": "three"})
+	{
+		slice := NewStrMapSlice()
+		assert.Equal(t, 0, slice.Len())
+		slice.Append(map[string]interface{}{"1": "one"})
+		slice.Append(map[string]interface{}{"2": "two"})
+		slice.Append(map[string]interface{}{"3": "three"})
 
-	assert.Equal(t, map[string]interface{}{"3": "three"}, slice.At(-1).M())
-	assert.Equal(t, map[string]interface{}{"2": "two"}, slice.At(-2).M())
-	assert.Equal(t, map[string]interface{}{"1": "one"}, slice.At(0).M())
-	assert.Equal(t, map[string]interface{}{"2": "two"}, slice.At(1).M())
-	assert.Equal(t, map[string]interface{}{"3": "three"}, slice.At(2).M())
+		assert.Equal(t, map[string]interface{}{"3": "three"}, slice.At(-1).M())
+		assert.Equal(t, map[string]interface{}{"2": "two"}, slice.At(-2).M())
+		assert.Equal(t, map[string]interface{}{"1": "one"}, slice.At(0).M())
+		assert.Equal(t, map[string]interface{}{"2": "two"}, slice.At(1).M())
+		assert.Equal(t, map[string]interface{}{"3": "three"}, slice.At(2).M())
+	}
+	{
+		slice := NewStrMapSlice()
+		slice.Append(map[string]interface{}{"1": "one"})
+		assert.Equal(t, map[string]interface{}{"1": "one"}, slice.At(-1).M())
+	}
 }
 
 func TestStrMapSliceClear(t *testing.T) {

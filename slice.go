@@ -54,7 +54,10 @@ func (slice *strSliceN) Append(items ...string) *strSliceN {
 func (slice *strSliceN) At(i int) string {
 	if i >= 0 && i < len(slice.v) {
 		return slice.v[i]
-	} else if i < 0 && i*-1 < len(slice.v) {
+	} else if i < 0 && i*-1 <= len(slice.v) {
+		if len(slice.v) == 1 {
+			return slice.v[0]
+		}
 		return slice.v[len(slice.v)+i]
 	}
 	panic(errors.New("Index out of slice bounds"))
@@ -135,6 +138,16 @@ func (slice *strSliceN) Equals(other *strSliceN) bool {
 // Join the underlying slice with the given delim
 func (slice *strSliceN) Join(delim string) *strN {
 	return A(strings.Join(slice.v, delim))
+}
+
+// Last returns the last item as a nub type
+func (slice *strSliceN) Last() (result *strN) {
+	if len(slice.v) > 0 {
+		result = A(slice.At(-1))
+	} else {
+		result = A("")
+	}
+	return
 }
 
 // Len is a pass through to the underlying slice
@@ -297,7 +310,10 @@ func (slice *intSliceN) Append(items ...int) *intSliceN {
 func (slice *intSliceN) At(i int) int {
 	if i >= 0 && i < len(slice.v) {
 		return slice.v[i]
-	} else if i < 0 && i*-1 < len(slice.v) {
+	} else if i < 0 && i*-1 <= len(slice.v) {
+		if len(slice.v) == 1 {
+			return slice.v[0]
+		}
 		return slice.v[len(slice.v)+i]
 	}
 	panic(errors.New("Index out of slice bounds"))
@@ -493,7 +509,10 @@ func (slice *strMapSliceN) Append(items ...map[string]interface{}) *strMapSliceN
 func (slice *strMapSliceN) At(i int) *strMapN {
 	if i >= 0 && i < len(slice.v) {
 		return M(slice.v[i])
-	} else if i < 0 && i*-1 < len(slice.v) {
+	} else if i < 0 && i*-1 <= len(slice.v) {
+		if len(slice.v) == 1 {
+			return M(slice.v[0])
+		}
 		return M(slice.v[len(slice.v)+i])
 	}
 	panic(errors.New("Index out of slice bounds"))
