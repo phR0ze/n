@@ -108,6 +108,18 @@ func (slice *strSliceN) Del(i int) bool {
 	return result
 }
 
+// Drop deletes first n elements and returns the modified slice
+func (slice *strSliceN) Drop(cnt int) *strSliceN {
+	if cnt > 0 {
+		if len(slice.v) >= cnt {
+			slice.v = slice.v[cnt:]
+		} else {
+			slice.v = []string{}
+		}
+	}
+	return slice
+}
+
 // Each iterates over the queryable and executes the given action
 func (slice *strSliceN) Each(action func(O)) {
 	for i := range slice.v {

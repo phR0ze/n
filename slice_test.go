@@ -417,6 +417,33 @@ func TestStrSliceDel(t *testing.T) {
 	}
 }
 
+func TestStrSliceDrop(t *testing.T) {
+	{
+		slice := S().Append("1", "2", "3").Drop(3)
+		assert.Equal(t, []string{}, slice.S())
+	}
+	{
+		slice := S().Append("1", "2", "3").Drop(5)
+		assert.Equal(t, []string{}, slice.S())
+	}
+	{
+		slice := S().Drop(3)
+		assert.Equal(t, []string{}, slice.S())
+	}
+	{
+		slice := S().Append("1", "2", "3").Drop(1)
+		assert.Equal(t, []string{"2", "3"}, slice.S())
+	}
+	{
+		slice := S().Append("1", "2", "3").Drop(2)
+		assert.Equal(t, []string{"3"}, slice.S())
+	}
+	{
+		slice := S().Append("1", "2", "3").Drop(0)
+		assert.Equal(t, []string{"1", "2", "3"}, slice.S())
+	}
+}
+
 func TestStrSliceEquals(t *testing.T) {
 	{
 		slice := S().Append("1", "2", "3")
