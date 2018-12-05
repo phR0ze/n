@@ -10,23 +10,24 @@ import (
 
 // FromYAMLFile a yaml/json file as a str map
 // returns nil on failure of any kind
-func FromYAMLFile(filepath string) *Queryable {
-	if yamlFile, err := ioutil.ReadFile(filepath); err == nil {
+func FromYAMLFile(filepath string) (result *Queryable, err error) {
+	var yamlBytes []byte
+	if yamlBytes, err = ioutil.ReadFile(filepath); err == nil {
 		data := map[string]interface{}{}
-		if err := yaml.Unmarshal(yamlFile, &data); err == nil {
-			return Q(data)
+		if err = yaml.Unmarshal(yamlBytes, &data); err == nil {
+			result = Q(data)
 		}
 	}
-	return nil
+	return
 }
 
 // FromYAML return a queryable from the given YAML
-func FromYAML(yml string) *Queryable {
+func FromYAML(yml string) (result *Queryable, err error) {
 	data := map[string]interface{}{}
-	if err := yaml.Unmarshal([]byte(yml), &data); err == nil {
-		return Q(data)
+	if err = yaml.Unmarshal([]byte(yml), &data); err == nil {
+		result = Q(data)
 	}
-	return nil
+	return
 }
 
 // FromYAMLTmplFile loads a yaml file from disk and processes any templating
@@ -105,6 +106,14 @@ func YAMLReplace(data interface{}, values map[string]string) (result interface{}
 			}
 		}
 		result = data
+	case []map[string]interface{}:
+		resultSlice := []map[string]interface{}{}
+		for i := range x {
+			v := YAMLReplace(x[i], values)
+			resultSlice = append(resultSlice, v.(map[string]interface{}))
+		}
+		result = resultSlice
+
 	case []interface{}:
 		resultSlice := []interface{}{}
 		for i := range x {

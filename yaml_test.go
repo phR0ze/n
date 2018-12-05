@@ -163,4 +163,47 @@ func TestYAMLReplace(t *testing.T) {
 		values := map[string]string{"<%": "{{", "%>": "}}"}
 		assert.Equal(t, expected, YAMLReplace(data, values))
 	}
+	{
+		rawYAML := `deployment:
+  initContainers:
+    - name: init-mysql
+      env:
+        - name: MYSQL
+          valueFrom:
+            secretKeyRef:
+              name: <% template "foo" . %>
+              key: password`
+		q, err := FromYAML(rawYAML)
+		assert.Nil(t, err)
+		{
+			data := q.YAML("deployment.initContainers").S()
+			values := map[string]string{"<%": "{{", "%>": "}}"}
+			expected := []interface{}{
+				map[string]interface{}{
+					"name": "init-mysql",
+					"env": []interface{}{
+						map[string]interface{}{
+							"name": "MYSQL", "valueFrom": map[string]interface{}{
+								"secretKeyRef": map[string]interface{}{"key": "password", "name": "{{ template \"foo\" . }}"},
+							}},
+					}},
+			}
+			assert.Equal(t, expected, YAMLReplace(data, values))
+		}
+		{
+			data := q.YAML("deployment.initContainers").SAMap()
+			values := map[string]string{"<%": "{{", "%>": "}}"}
+			expected := []map[string]interface{}{
+				map[string]interface{}{
+					"name": "init-mysql",
+					"env": []interface{}{
+						map[string]interface{}{
+							"name": "MYSQL", "valueFrom": map[string]interface{}{
+								"secretKeyRef": map[string]interface{}{"key": "password", "name": "{{ template \"foo\" . }}"},
+							}},
+					}},
+			}
+			assert.Equal(t, expected, YAMLReplace(data, values))
+		}
+	}
 }

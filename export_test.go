@@ -50,7 +50,7 @@ func TestInts(t *testing.T) {
 func TestAAMap(t *testing.T) {
 	{
 		// Get map of string to string
-		q := FromYAML(`foobar:
+		q, _ := FromYAML(`foobar:
   labels:
     name: one
     meta: two
@@ -61,7 +61,7 @@ func TestAAMap(t *testing.T) {
 	}
 	{
 		// Ints as keys
-		q := FromYAML(`foobar:
+		q, _ := FromYAML(`foobar:
   labels:
     1: one
     2: two
@@ -74,7 +74,7 @@ func TestAAMap(t *testing.T) {
 
 func TestS(t *testing.T) {
 	{
-		q := FromYAML(`items:
+		q, _ := FromYAML(`items:
   - name: one
   - name: two
   - name: three`)
@@ -87,7 +87,7 @@ func TestS(t *testing.T) {
 		assert.Equal(t, expected, q.YAML("items").S())
 	}
 	{
-		q := FromYAML(`items:
+		q, _ := FromYAML(`items:
   - name: one
   - name: two
   - name: three`)
@@ -99,7 +99,7 @@ func TestS(t *testing.T) {
 
 func TestSAMap(t *testing.T) {
 	{
-		q := FromYAML(`items:
+		q, _ := FromYAML(`items:
   - name: one
   - name: two
   - name: three`)
@@ -112,7 +112,7 @@ func TestSAMap(t *testing.T) {
 		assert.Equal(t, expected, q.YAML("items").SAMap())
 	}
 	{
-		q := FromYAML(`items:
+		q, _ := FromYAML(`items:
   - name: one
   - name: two
   - name: three`)
@@ -125,7 +125,7 @@ func TestSAMap(t *testing.T) {
 func TestSAAMap(t *testing.T) {
 	{
 		// slice of string to string map
-		q := FromYAML(`items:
+		q, _ := FromYAML(`items:
   - name: one
   - name: two
   - name: three`)
@@ -139,7 +139,7 @@ func TestSAAMap(t *testing.T) {
 	}
 	{
 		// slice of string to int map
-		q := FromYAML(`items:
+		q, _ := FromYAML(`items:
   - name: 1
   - name: 2
   - name: three`)
@@ -156,7 +156,7 @@ func TestSAAMap(t *testing.T) {
 func TestStrs(t *testing.T) {
 	{
 		// slice of string to int map
-		q := FromYAML(`items:
+		q, _ := FromYAML(`items:
   - name: 1
   - name: 2
   - name: three`)
