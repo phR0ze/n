@@ -141,3 +141,26 @@ func TestYAML(t *testing.T) {
 		assert.False(t, q.YAML("foo.[name:5]").Any())
 	}
 }
+
+func TestYAMLReplace(t *testing.T) {
+	{
+		rawYAML := `foo:
+  - name: bar
+    valueFrom:
+      secretKeyRef:
+        name: <% template "foo" . %>
+        key: keybar`
+		data := map[string]interface{}{}
+		err := yaml.Unmarshal([]byte(rawYAML), &data)
+		assert.Nil(t, err)
+		expected := map[string]interface{}{
+			"foo": []interface{}{
+				map[string]interface{}{
+					"name": "bar", "valueFrom": map[string]interface{}{
+						"secretKeyRef": map[string]interface{}{"name": "{{ template \"foo\" . }}", "key": "keybar"},
+					}}}}
+
+		values := map[string]string{"<%": "{{", "%>": "}}"}
+		assert.Equal(t, expected, YAMLReplace(data, values))
+	}
+}

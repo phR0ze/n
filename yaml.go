@@ -2,6 +2,7 @@ package n
 
 import (
 	"io/ioutil"
+	"strings"
 
 	"github.com/ghodss/yaml"
 	"github.com/phR0ze/n/pkg/tmpl"
@@ -84,6 +85,46 @@ func (q *Queryable) YAML(key string) (result *Queryable) {
 	}
 	if result == nil {
 		result = N()
+	}
+	return
+}
+
+// YAMLReplace recursively makes string substitutions
+func YAMLReplace(data interface{}, values map[string]string) (result interface{}) {
+	switch x := data.(type) {
+	case map[string]interface{}:
+		for k, v := range x {
+			switch y := v.(type) {
+			case string:
+				for o, n := range values {
+					y = strings.Replace(y, o, n, -1)
+				}
+				x[k] = y
+			case []interface{}, map[string]interface{}:
+				x[k] = YAMLReplace(v, values)
+			}
+		}
+		result = data
+	case []interface{}:
+		resultSlice := []interface{}{}
+		for i := range x {
+			var value interface{}
+			switch y := x[i].(type) {
+			case string:
+				for o, n := range values {
+					y = strings.Replace(y, o, n, -1)
+				}
+				value = y
+			case []interface{}, map[string]interface{}:
+				value = YAMLReplace(y, values)
+			default:
+				value = y
+			}
+			resultSlice = append(resultSlice, value)
+		}
+		result = resultSlice
+	default:
+		result = data
 	}
 	return
 }
