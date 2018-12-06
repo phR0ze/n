@@ -143,6 +143,33 @@ func TestYAMLWithKeyIndexing(t *testing.T) {
 		assert.True(t, q.Any())
 		assert.False(t, q.YAML("foo.[name:5]").Any())
 	}
+	{
+		// Continue keying in after slice: one
+		rawYAML := `foo:
+  - name: one
+  - name: two
+  - name: three`
+		data := map[string]interface{}{}
+		yaml.Unmarshal([]byte(rawYAML), &data)
+		q := Q(data)
+		assert.True(t, q.Any())
+		assert.Equal(t, "one", q.YAML("foo.[name:one].name").O())
+	}
+	// 	{
+	// TODO: implement this ???
+	// 		// Continue keying in after slice: two
+	// 		rawYAML := `foo:
+	//   - name:
+	//       bar: frodo
+	//       foo: blah
+	//   - name: two
+	//   - name: three`
+	// 		data := map[string]interface{}{}
+	// 		yaml.Unmarshal([]byte(rawYAML), &data)
+	// 		q := Q(data)
+	// 		assert.True(t, q.Any())
+	// 		assert.Equal(t, "frodo", q.YAML("foo.[name.bar:frodo].name.bar").O())
+	// 	}
 }
 
 func TestYAMLWithSliceIndexing(t *testing.T) {
@@ -191,6 +218,31 @@ func TestYAMLWithSliceIndexing(t *testing.T) {
 		expected := map[string]interface{}{"name": 3.0}
 		assert.Equal(t, expected, q.YAML("foo.[0]").M())
 		assert.Equal(t, expected, q.YAML("foo.[-1]").M())
+	}
+	{
+		// Continue keying in after slice: one
+		rawYAML := `foo:
+  - name: one
+  - name: two
+  - name: three`
+		data := map[string]interface{}{}
+		yaml.Unmarshal([]byte(rawYAML), &data)
+		q := Q(data)
+		assert.True(t, q.Any())
+		assert.Equal(t, "one", q.YAML("foo.[0].name").O())
+	}
+	{
+		// Continue keying in after slice: two
+		rawYAML := `foo:
+  - name:
+      bar: frodo
+  - name: two
+  - name: three`
+		data := map[string]interface{}{}
+		yaml.Unmarshal([]byte(rawYAML), &data)
+		q := Q(data)
+		assert.True(t, q.Any())
+		assert.Equal(t, "frodo", q.YAML("foo.[0].name.bar").O())
 	}
 }
 

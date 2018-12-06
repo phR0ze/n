@@ -74,15 +74,17 @@ func (q *Queryable) YAML(key string) (result *Queryable) {
 			k, v := A(key).TrimPrefix("[").TrimSuffix("]").Split(":").YAMLPair()
 			if v == nil {
 				if i, err := strconv.Atoi(k); err == nil {
-					return q.At(i)
+					result = q.At(i)
+				} else {
+					panic(errors.New("Failed to convert index to an int"))
 				}
-				panic(errors.New("Failed to convert index to an int"))
 			} else {
 				for i := range x {
 					if m, ok := x[i].(map[string]interface{}); ok {
 						if entry, ok := m[k]; ok {
 							if v == entry {
-								return Q(m)
+								result = Q(m)
+								break
 							}
 						}
 					}
