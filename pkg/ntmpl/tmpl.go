@@ -3,8 +3,6 @@ package ntmpl
 
 import (
 	"bytes"
-	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/phR0ze/n/pkg/nerr"
@@ -43,7 +41,7 @@ func New(data, startTag, endTag string) (*tplEngine, error) {
 	// Check that there is at least one tag
 	tagsCount := bytes.Count(s, a)
 	if tagsCount == 0 {
-		return nil, errors.New("no template variables were found")
+		return nil, nerr.NewTmplVarsNotFound()
 	}
 
 	if tagsCount+1 > cap(tpl.texts) {
@@ -65,8 +63,7 @@ func New(data, startTag, endTag string) (*tplEngine, error) {
 		s = s[n+len(a):]
 		n = bytes.Index(s, b)
 		if n < 0 {
-			msg := fmt.Sprintf("Cannot find end tag=%q in the template=%q starting from %q", endTag, data, s)
-			return nil, errors.New(msg)
+			return nil, nerr.NewTmplEndTagNotFound(endTag, s)
 		}
 
 		// Fix bug in original code to remove wrapping spaces
