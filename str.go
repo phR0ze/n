@@ -1,6 +1,8 @@
 package n
 
 import (
+	"bufio"
+	"bytes"
 	"strconv"
 	"strings"
 	"unicode"
@@ -75,6 +77,19 @@ func (q *strN) Len() int {
 	return len(q.v)
 }
 
+// SpaceLeft returns leading whitespace
+func (q *strN) SpaceLeft() string {
+	spaces := []rune{}
+	for _, r := range q.v {
+		if unicode.IsSpace(r) {
+			spaces = append(spaces, r)
+		} else {
+			break
+		}
+	}
+	return string(spaces)
+}
+
 // Split creates a new nub from the split string
 func (q *strN) Split(delim string) *strSliceN {
 	return S(strings.Split(q.v, delim)...)
@@ -83,6 +98,11 @@ func (q *strN) Split(delim string) *strSliceN {
 // TrimPrefix trims the given prefix off the string
 func (q *strN) TrimPrefix(prefix string) *strN {
 	return A(strings.TrimPrefix(q.v, prefix))
+}
+
+// TrimSpace pass through to strings.TrimSpace
+func (q *strN) TrimSpace() *strN {
+	return A(strings.TrimSpace(q.v))
 }
 
 // TrimSpaceLeft trims leading whitespace
@@ -98,6 +118,71 @@ func (q *strN) TrimSpaceRight() *strN {
 // TrimSuffix trims the given suffix off the string
 func (q *strN) TrimSuffix(suffix string) *strN {
 	return A(strings.TrimSuffix(q.v, suffix))
+}
+
+// YAMLIndent detects the indent string being used and returns it
+func (q *strN) YAMLIndent() string {
+	scanner := bufio.NewScanner(bytes.NewReader([]byte(q.v)))
+	for scanner.Scan() {
+		line := scanner.Text()
+		space := A(line).SpaceLeft()
+		if space != "" {
+			return space
+		}
+	}
+	return "  "
+}
+
+// YAMLInsert inserts the block of text at the specified yaml location.
+// This operation is done on raw text to avoid YAML syntax errors when working
+// with Helm/Go templating syntax that hasn't been processed yet.
+// Supports a primitive dot delimited keying notation.
+// e.g. spec.template.spec.initContainers
+func (q *strN) YAMLInsert(block, key string) (data bytes.Buffer, err error) {
+	depth := ""
+	indent := q.YAMLIndent()
+
+	// Primitive dot notation keying
+	ok := false
+	keys := A(key).Split(".")
+	if key, ok = keys.TakeFirst(); !ok {
+		return
+	}
+
+	// Scan through data line by line writing to data
+	writeBlock := false
+	writer := bufio.NewWriter(&data)
+	scanner := bufio.NewScanner(bytes.NewReader([]byte(q.v)))
+	for scanner.Scan() {
+		line := scanner.Text()
+		a := A(string(line)).TrimSpaceLeft()
+		curDepth := A(string(line)).SpaceLeft()
+
+		// Write out the block now so we can see depth of next entry
+		if writeBlock {
+			writeBlock = false
+			blockScanner := bufio.NewScanner(bytes.NewReader([]byte(block)))
+			for blockScanner.Scan() {
+				writer.WriteString(curDepth + blockScanner.Text())
+				writer.WriteString("\n")
+			}
+		}
+
+		// Hit - flag write block for next loop
+		if ok && depth == curDepth && a.HasPrefix(key+":") {
+			depth += indent
+			if key, ok = keys.TakeFirst(); !ok {
+				writeBlock = true
+			}
+		}
+
+		// Write out the current line
+		writer.WriteString(line)
+		writer.WriteString("\n")
+	}
+
+	writer.Flush()
+	return
 }
 
 // YAMLType converts the given string into a type expected in YAML.

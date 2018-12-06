@@ -1,8 +1,10 @@
 package n
 
 import (
+	"fmt"
 	"testing"
 
+	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -48,6 +50,16 @@ func TestStrHasSuffix(t *testing.T) {
 func TestStrSplit(t *testing.T) {
 	assert.Equal(t, []string{"1", "2"}, A("1.2").Split(".").S())
 }
+
+func TestStrSpaceLeft(t *testing.T) {
+	assert.Equal(t, "", A("").SpaceLeft())
+	assert.Equal(t, "", A("bob").SpaceLeft())
+	assert.Equal(t, "  ", A("  bob").SpaceLeft())
+	assert.Equal(t, "    ", A("    bob").SpaceLeft())
+	assert.Equal(t, "\n", A("\nbob").SpaceLeft())
+	assert.Equal(t, "\t", A("\tbob").SpaceLeft())
+}
+
 func TestStrTrimPrefix(t *testing.T) {
 	assert.Equal(t, "test]", A("[test]").TrimPrefix("[").A())
 }
@@ -71,6 +83,86 @@ func TestStrTrimSpace(t *testing.T) {
 
 func TestStrTrimSuffix(t *testing.T) {
 	assert.Equal(t, "[test", A("[test]").TrimSuffix("]").A())
+}
+
+func TestYAMLIndent(t *testing.T) {
+	{
+		// Two spaces
+		raw := `spec:
+  template:
+    spec: initContainers`
+		data := map[string]interface{}{}
+		err := yaml.Unmarshal([]byte(raw), &data)
+		assert.Nil(t, err)
+		assert.Equal(t, "  ", A(raw).YAMLIndent())
+	}
+	{
+		// Four spaces
+		raw := `spec:
+    template:
+        spec:
+            initContainers:
+            - foo
+`
+		data := map[string]interface{}{}
+		err := yaml.Unmarshal([]byte(raw), &data)
+		assert.Nil(t, err)
+		assert.Equal(t, "    ", A(raw).YAMLIndent())
+	}
+}
+
+func TestYAMLInsert(t *testing.T) {
+	{
+		// No match nothing done
+		raw := `spec:
+  template:
+    spec: initContainers
+`
+		data := map[string]interface{}{}
+		err := yaml.Unmarshal([]byte(raw), &data)
+		assert.Nil(t, err)
+
+		inserted, err := A(raw).YAMLInsert("foo", "line1.line2")
+		assert.Nil(t, err)
+		assert.Equal(t, raw, inserted.String())
+	}
+	{
+		// Match insert payload
+		rawData := `spec:
+  template:
+    spec:
+      initContainers:
+      - name: foo
+`
+		// Test that the raw data is unmarshalable
+		yamlData := map[string]interface{}{}
+		err := yaml.Unmarshal([]byte(rawData), &yamlData)
+		assert.Nil(t, err)
+
+		rawPayload := `- name: bar
+  image: "busybox:1.25.0"
+  imagePullPolicy: foobar
+`
+		// Test that the raw payload is unmarshalable
+		yamlPayload := []map[string]interface{}{}
+		err = yaml.Unmarshal([]byte(rawPayload), &yamlPayload)
+		assert.Nil(t, err)
+
+		// Marshal to get proper formatting
+		bytesPayload, err := yaml.Marshal(yamlPayload)
+		assert.Nil(t, err)
+
+		// Test inserted data + payload
+		inserted, err := A(rawData).YAMLInsert(string(bytesPayload), "spec.template.spec.initContainers")
+		fmt.Println(inserted.String())
+		assert.Nil(t, err)
+		//assert.Equal(t, rawData, inserted.String())
+
+		// Test if the new inserted data can be Unmarshaled
+		backToYaml := map[string]interface{}{}
+		err = yaml.Unmarshal([]byte(inserted.Bytes()), &backToYaml)
+		assert.Nil(t, err)
+	}
 }
 
 func TestYAMLType(t *testing.T) {

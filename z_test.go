@@ -1,13 +1,15 @@
 package n
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-// Not a test more of an experiment that I'll frequently change as I validate sanity
+// Not a test
+// Using this to experiment with
 func TestTest(t *testing.T) {
-	assert.True(t, strings.HasPrefix("spec:", "spec:"))
+	assert.Equal(t, 0, 0/2)
+	assert.Equal(t, 1, 2/2)
+	assert.Equal(t, 1, 3/2)
 }
