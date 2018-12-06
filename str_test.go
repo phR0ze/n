@@ -156,7 +156,16 @@ func TestYAMLInsert(t *testing.T) {
 		inserted, err := A(rawData).YAMLInsert(string(bytesPayload), "spec.template.spec.initContainers")
 		fmt.Println(inserted.String())
 		assert.Nil(t, err)
-		//assert.Equal(t, rawData, inserted.String())
+		expected := `spec:
+  template:
+    spec:
+      initContainers:
+      - image: busybox:1.25.0
+        imagePullPolicy: foobar
+        name: bar
+      - name: foo
+`
+		assert.Equal(t, expected, inserted.String())
 
 		// Test if the new inserted data can be Unmarshaled
 		backToYaml := map[string]interface{}{}
