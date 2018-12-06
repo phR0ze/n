@@ -338,6 +338,11 @@ func TestAt(t *testing.T) {
 		assert.Equal(t, "t", q.At(-4).A())
 	}
 	{
+		// Single item case
+		assert.Equal(t, "t", Q("t").At(-1).A())
+		assert.Equal(t, 3, Q([]int{3}).At(-1).I())
+	}
+	{
 		// []int
 		q := Q([]int{1, 2, 3, 4})
 		assert.Equal(t, 4, q.At(-1).I())

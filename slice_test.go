@@ -1110,7 +1110,7 @@ func TestYAMLPair(t *testing.T) {
 	{
 		k, v := A("").Split("=").YAMLPair()
 		assert.Equal(t, "", k)
-		assert.Equal(t, "", v)
+		assert.Equal(t, nil, v)
 	}
 }
 func TestYAMLKeyVal(t *testing.T) {

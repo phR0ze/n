@@ -87,6 +87,9 @@ func TestYAML(t *testing.T) {
 		assert.True(t, q.Any())
 		assert.Equal(t, []string{"1", "2", "3"}, q.YAML("foo").Strs())
 	}
+}
+
+func TestYAMLWithKeyIndexing(t *testing.T) {
 	{
 		// Select map from slice from map
 		rawYAML := `foo:
@@ -139,6 +142,55 @@ func TestYAML(t *testing.T) {
 		q := Q(data)
 		assert.True(t, q.Any())
 		assert.False(t, q.YAML("foo.[name:5]").Any())
+	}
+}
+
+func TestYAMLWithSliceIndexing(t *testing.T) {
+	{
+		rawYAML := `foo:
+  - name: 1
+  - name: 2
+  - name: 3`
+		data := map[string]interface{}{}
+		yaml.Unmarshal([]byte(rawYAML), &data)
+		q := Q(data)
+		assert.True(t, q.Any())
+		{
+			expected := map[string]interface{}{"name": 1.0}
+			assert.Equal(t, expected, q.YAML("foo.[0]").M())
+		}
+		{
+			expected := map[string]interface{}{"name": 2.0}
+			assert.Equal(t, expected, q.YAML("foo.[1]").M())
+		}
+		{
+			expected := map[string]interface{}{"name": 3.0}
+			assert.Equal(t, expected, q.YAML("foo.[2]").M())
+		}
+		{
+			expected := map[string]interface{}{"name": 3.0}
+			assert.Equal(t, expected, q.YAML("foo.[-1]").M())
+		}
+		{
+			expected := map[string]interface{}{"name": 2.0}
+			assert.Equal(t, expected, q.YAML("foo.[-2]").M())
+		}
+		{
+			expected := map[string]interface{}{"name": 1.0}
+			assert.Equal(t, expected, q.YAML("foo.[-3]").M())
+		}
+	}
+	{
+		// Select first element when only one
+		rawYAML := `foo:
+  - name: 3`
+		data := map[string]interface{}{}
+		yaml.Unmarshal([]byte(rawYAML), &data)
+		q := Q(data)
+		assert.True(t, q.Any())
+		expected := map[string]interface{}{"name": 3.0}
+		assert.Equal(t, expected, q.YAML("foo.[0]").M())
+		assert.Equal(t, expected, q.YAML("foo.[-1]").M())
 	}
 }
 

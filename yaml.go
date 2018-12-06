@@ -1,7 +1,9 @@
 package n
 
 import (
+	"errors"
 	"io/ioutil"
+	"strconv"
 	"strings"
 
 	"github.com/ghodss/yaml"
@@ -70,11 +72,18 @@ func (q *Queryable) YAML(key string) (result *Queryable) {
 			}
 		case []interface{}:
 			k, v := A(key).TrimPrefix("[").TrimSuffix("]").Split(":").YAMLPair()
-			for i := range x {
-				if m, ok := x[i].(map[string]interface{}); ok {
-					if entry, ok := m[k]; ok {
-						if v == entry {
-							return Q(m)
+			if v == nil {
+				if i, err := strconv.Atoi(k); err == nil {
+					return q.At(i)
+				}
+				panic(errors.New("Failed to convert index to an int"))
+			} else {
+				for i := range x {
+					if m, ok := x[i].(map[string]interface{}); ok {
+						if entry, ok := m[k]; ok {
+							if v == entry {
+								return Q(m)
+							}
 						}
 					}
 				}

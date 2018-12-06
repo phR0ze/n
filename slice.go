@@ -52,13 +52,11 @@ func (slice *strSliceN) Append(items ...string) *strSliceN {
 
 // At returns the item at the given index location. Allows for negative notation
 func (slice *strSliceN) At(i int) string {
+	if i < 0 {
+		i = len(slice.v) + i
+	}
 	if i >= 0 && i < len(slice.v) {
 		return slice.v[i]
-	} else if i < 0 && i*-1 <= len(slice.v) {
-		if len(slice.v) == 1 {
-			return slice.v[0]
-		}
-		return slice.v[len(slice.v)+i]
 	}
 	panic(errors.New("Index out of slice bounds"))
 }
@@ -308,13 +306,11 @@ func (slice *intSliceN) Append(items ...int) *intSliceN {
 
 // At returns the item at the given index location. Allows for negative notation
 func (slice *intSliceN) At(i int) int {
+	if i < 0 {
+		i = len(slice.v) + i
+	}
 	if i >= 0 && i < len(slice.v) {
 		return slice.v[i]
-	} else if i < 0 && i*-1 <= len(slice.v) {
-		if len(slice.v) == 1 {
-			return slice.v[0]
-		}
-		return slice.v[len(slice.v)+i]
 	}
 	panic(errors.New("Index out of slice bounds"))
 }
@@ -507,13 +503,11 @@ func (slice *strMapSliceN) Append(items ...map[string]interface{}) *strMapSliceN
 
 // At returns the item at the given index location. Allows for negative notation
 func (slice *strMapSliceN) At(i int) *strMapN {
+	if i < 0 {
+		i = len(slice.v) + i
+	}
 	if i >= 0 && i < len(slice.v) {
 		return M(slice.v[i])
-	} else if i < 0 && i*-1 <= len(slice.v) {
-		if len(slice.v) == 1 {
-			return M(slice.v[0])
-		}
-		return M(slice.v[len(slice.v)+i])
 	}
 	panic(errors.New("Index out of slice bounds"))
 }
@@ -647,7 +641,7 @@ func (slice *strSliceN) YAMLPair() (first string, second interface{}) {
 	if slice.Len() > 1 {
 		second = A(slice.v[1]).YAMLType()
 	} else {
-		second = ""
+		second = nil
 	}
 	return
 }
