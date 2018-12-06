@@ -1,6 +1,7 @@
 package n
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -8,7 +9,5 @@ import (
 
 // Not a test more of an experiment that I'll frequently change as I validate sanity
 func TestTest(t *testing.T) {
-	result := A("2").Split(":").S()
-	assert.Equal(t, 1, len(result))
-	assert.Equal(t, "2", A("2").Split(":").Last().A())
+	assert.True(t, strings.HasPrefix("spec:", "spec:"))
 }

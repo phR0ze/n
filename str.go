@@ -3,6 +3,7 @@ package n
 import (
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 type strN struct {
@@ -69,6 +70,11 @@ func (q *strN) HasSuffix(suffix string) bool {
 	return strings.HasSuffix(q.v, suffix)
 }
 
+// Len returns the length of the string
+func (q *strN) Len() int {
+	return len(q.v)
+}
+
 // Split creates a new nub from the split string
 func (q *strN) Split(delim string) *strSliceN {
 	return S(strings.Split(q.v, delim)...)
@@ -77,6 +83,16 @@ func (q *strN) Split(delim string) *strSliceN {
 // TrimPrefix trims the given prefix off the string
 func (q *strN) TrimPrefix(prefix string) *strN {
 	return A(strings.TrimPrefix(q.v, prefix))
+}
+
+// TrimSpaceLeft trims leading whitespace
+func (q *strN) TrimSpaceLeft() *strN {
+	return A(strings.TrimLeftFunc(q.v, unicode.IsSpace))
+}
+
+// TrimSpaceRight trims trailing whitespace
+func (q *strN) TrimSpaceRight() *strN {
+	return A(strings.TrimRightFunc(q.v, unicode.IsSpace))
 }
 
 // TrimSuffix trims the given suffix off the string

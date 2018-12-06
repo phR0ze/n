@@ -52,6 +52,23 @@ func TestStrTrimPrefix(t *testing.T) {
 	assert.Equal(t, "test]", A("[test]").TrimPrefix("[").A())
 }
 
+func TestStrTrimSpace(t *testing.T) {
+	{
+		//Left
+		assert.Equal(t, "bob", A("bob").TrimSpaceLeft().A())
+		assert.Equal(t, "bob", A("  bob").TrimSpaceLeft().A())
+		assert.Equal(t, "bob  ", A("  bob  ").TrimSpaceLeft().A())
+		assert.Equal(t, 3, A("  bob").TrimSpaceLeft().Len())
+	}
+	{
+		// Right
+		assert.Equal(t, "bob", A("bob").TrimSpaceRight().A())
+		assert.Equal(t, "bob", A("bob  ").TrimSpaceRight().A())
+		assert.Equal(t, "  bob", A("  bob  ").TrimSpaceRight().A())
+		assert.Equal(t, 3, A("bob  ").TrimSpaceRight().Len())
+	}
+}
+
 func TestStrTrimSuffix(t *testing.T) {
 	assert.Equal(t, "[test", A("[test]").TrimSuffix("]").A())
 }
