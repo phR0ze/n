@@ -2,7 +2,6 @@ package n
 
 import (
 	"bytes"
-	"errors"
 	"reflect"
 	"strconv"
 	"strings"
@@ -175,7 +174,7 @@ func (q *Queryable) At(i int) *Queryable {
 			return Q(q.v.Index(i).Interface())
 		}
 	}
-	panic(errors.New("Index out of slice bounds"))
+	return N()
 }
 
 // Clear the queryable collection
