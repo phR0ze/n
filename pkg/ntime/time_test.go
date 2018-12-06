@@ -1,4 +1,4 @@
-package timen
+package ntime
 
 import (
 	"testing"

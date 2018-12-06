@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
-	"github.com/phR0ze/n/pkg/tmpl"
+	"github.com/phR0ze/n/pkg/ntmpl"
 )
 
 // FromYAMLFile a yaml/json file as a str map
@@ -35,7 +35,7 @@ func FromYAML(yml string) (result *Queryable, err error) {
 // FromYAMLTmplFile loads a yaml file from disk and processes any templating
 func FromYAMLTmplFile(filepath string, vars map[string]string) *Queryable {
 	if data, err := ioutil.ReadFile(filepath); err == nil {
-		if tpl, err := tmpl.New(string(data), "{{", "}}"); err == nil {
+		if tpl, err := ntmpl.New(string(data), "{{", "}}"); err == nil {
 			if result, err := tpl.Process(vars); err == nil {
 				m := map[string]interface{}{}
 				if err := yaml.Unmarshal([]byte(result), &m); err == nil {
@@ -50,7 +50,7 @@ func FromYAMLTmplFile(filepath string, vars map[string]string) *Queryable {
 // LoadTmplFile loads a yaml file from disk and processes any templating
 func LoadTmplFile(filepath string, startTag, endTag string, vars map[string]string) string {
 	if data, err := ioutil.ReadFile(filepath); err == nil {
-		if tpl, err := tmpl.New(string(data), startTag, endTag); err == nil {
+		if tpl, err := ntmpl.New(string(data), startTag, endTag); err == nil {
 			if result, err := tpl.Process(vars); err == nil {
 				return result
 			}

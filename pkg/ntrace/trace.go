@@ -1,4 +1,4 @@
-package tracen
+package ntrace
 
 import (
 	"path"
@@ -22,7 +22,7 @@ func CallerTrace(skipframes int, skipfiles ...string) (result []*Entry) {
 	callers := make([]uintptr, 20)
 	runtime.Callers(2, callers)
 	frames := runtime.CallersFrames(callers)
-	methods := n.S("tracen.CallerTrace", "tracen.CallerTraceOne")
+	methods := n.S("ntrace.CallerTrace", "ntrace.CallerTraceOne")
 
 	for {
 		frame, more = frames.Next()

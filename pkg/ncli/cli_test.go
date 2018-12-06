@@ -1,4 +1,4 @@
-package clin
+package ncli
 
 import (
 	"testing"

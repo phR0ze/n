@@ -16,11 +16,12 @@ test: $(NAME)
 	@echo -e "\nRunning all go tests:"
 	@echo -e "------------------------------------------------------------------------"
 	go test $(PKGROOT)
-	go test $(PKGROOT)/pkg/clin
-	go test $(PKGROOT)/pkg/tarn
-	go test $(PKGROOT)/pkg/timen
-	go test $(PKGROOT)/pkg/tmpl
-	go test $(PKGROOT)/pkg/tracen
+	go test $(PKGROOT)/pkg/ncli
+	go test $(PKGROOT)/pkg/nerr
+	go test $(PKGROOT)/pkg/ntar
+	go test $(PKGROOT)/pkg/ntime
+	go test $(PKGROOT)/pkg/ntmpl
+	go test $(PKGROOT)/pkg/ntrace
 
 bench: $(NAME)
 	@echo -e "\nRunning all go benchmarks:"

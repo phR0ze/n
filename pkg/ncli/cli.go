@@ -1,5 +1,5 @@
-// Package clin provides some utility functions for command line interfaces
-package clin
+// Package ncli provides some utility functions for command line interfaces
+package ncli
 
 import "github.com/phR0ze/n"
 

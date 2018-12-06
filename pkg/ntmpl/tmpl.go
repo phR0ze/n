@@ -1,5 +1,5 @@
-// Package tmpl does simple template substitutions fast
-package tmpl
+// Package ntmpl does simple template substitutions fast
+package ntmpl
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/phR0ze/n/pkg/nerr"
 	"github.com/valyala/bytebufferpool"
 )
 
@@ -32,7 +33,7 @@ func New(data, startTag, endTag string) (*tplEngine, error) {
 
 	// Check that we have valid tags
 	if startTag == "" || endTag == "" {
-		return nil, errors.New("either start or end tags are not set")
+		return nil, nerr.NewTmplTagsInvalid()
 	}
 
 	s := []byte(data)
