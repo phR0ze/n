@@ -220,6 +220,18 @@ func TestYAMLWithSliceIndexing(t *testing.T) {
 		assert.Equal(t, expected, q.YAML("foo.[-1]").M())
 	}
 	{
+		// Select first element when only one
+		rawYAML := `foo:
+  - name: 3`
+		data := map[string]interface{}{}
+		yaml.Unmarshal([]byte(rawYAML), &data)
+		q := Q(data)
+		assert.True(t, q.Any())
+		expected := map[string]interface{}{"name": 3.0}
+		assert.Equal(t, expected, q.YAML("foo.[0]").M())
+		assert.Equal(t, expected, q.YAML("foo.[-1]").M())
+	}
+	{
 		// Continue keying in after slice: one
 		rawYAML := `foo:
   - name: one

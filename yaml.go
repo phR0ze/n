@@ -60,6 +60,7 @@ func LoadTmplFile(filepath string, startTag, endTag string, vars map[string]stri
 }
 
 // YAML gets data by key which can be dot delimited
+// returns nil queryable on errors or keys not found
 func (q *Queryable) YAML(key string) (result *Queryable) {
 	keys := A(key).Split(".")
 	if key, ok := keys.TakeFirst(); ok {

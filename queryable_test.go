@@ -83,16 +83,6 @@ func TestQI(t *testing.T) {
 
 func TestQM(t *testing.T) {
 	{
-		q := N()
-		assert.NotNil(t, q)
-		assert.NotNil(t, q.Iter)
-		iter := q.Iter()
-		assert.NotNil(t, iter)
-		x, ok := iter()
-		assert.Nil(t, x)
-		assert.False(t, ok)
-	}
-	{
 		items := []interface{}{}
 		q := Q(map[string]string{"1": "one", "2": "two", "3": "three"})
 		next := q.Iter()
@@ -113,19 +103,21 @@ func TestQM(t *testing.T) {
 		assert.Len(t, items, 3)
 	}
 }
-func TestQS(t *testing.T) {
+
+func TestQN(t *testing.T) {
 	{
+		// Test nil queryable indicates not found or invalid
 		q := N()
 		assert.NotNil(t, q)
-		assert.NotNil(t, q.Iter)
-		iter := q.Iter()
-		assert.NotNil(t, iter)
-		x, ok := iter()
-		assert.Nil(t, x)
-		assert.False(t, ok)
+		assert.Nil(t, q.Iter)
+		assert.True(t, q.Nil())
+		assert.False(t, q.Any())
 	}
+}
+
+func TestQS(t *testing.T) {
 	{
-		q := N()
+		q := Q([]interface{}{})
 		assert.False(t, q.Any())
 		assert.Equal(t, 0, q.Len())
 		q2 := q.Append(2)
@@ -136,7 +128,7 @@ func TestQS(t *testing.T) {
 		assert.Equal(t, 2, q.At(0).I())
 	}
 	{
-		q := N()
+		q := Q([]interface{}{})
 		assert.NotNil(t, q)
 		assert.NotNil(t, q.Iter)
 		iter := q.Iter()
@@ -178,7 +170,7 @@ func TestCustomQ(t *testing.T) {
 	}
 	{
 		// []bob
-		q := N()
+		q := Q([]bob{})
 		assert.False(t, q.Any())
 		assert.Equal(t, 0, q.Len())
 		q.Append(bob{data: "3"})
@@ -634,6 +626,12 @@ func TestEach(t *testing.T) {
 	}
 }
 
+func TestFirst(t *testing.T) {
+	assert.Equal(t, 1, Q([]int{1, 2, 3}).First().I())
+	assert.Equal(t, "1", Q([]string{"1", "2", "3"}).First().A())
+	assert.Equal(t, N(), Q([]string{}).First())
+}
+
 func TestFlatten(t *testing.T) {
 	{
 		// Ints
@@ -713,6 +711,12 @@ func TestJoin(t *testing.T) {
 		assert.Equal(t, 5, joined.Len())
 		assert.Equal(t, "1.2.3", q.Join(".").A())
 	}
+}
+
+func TestLast(t *testing.T) {
+	assert.Equal(t, 3, Q([]int{1, 2, 3}).Last().I())
+	assert.Equal(t, "3", Q([]string{"1", "2", "3"}).Last().A())
+	assert.Equal(t, N(), Q([]string{}).Last())
 }
 
 func TestLen(t *testing.T) {

@@ -87,13 +87,13 @@ func TestS(t *testing.T) {
 		assert.Equal(t, expected, q.YAML("items").S())
 	}
 	{
+		// Not found
 		q, _ := FromYAML(`items:
   - name: one
   - name: two
   - name: three`)
 		assert.True(t, q.Any())
-		expected := []interface{}{}
-		assert.Equal(t, expected, q.YAML("").S())
+		assert.Equal(t, N(), q.YAML(""))
 	}
 }
 

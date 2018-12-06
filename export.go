@@ -47,6 +47,9 @@ func (q *Queryable) M() (result map[string]interface{}) {
 
 // O exports queryable into a interface{}
 func (q *Queryable) O() interface{} {
+	if q.Nil() {
+		return nil
+	}
 	return q.v.Interface()
 }
 

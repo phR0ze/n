@@ -75,10 +75,9 @@ func sliceIter(ref reflect.Value) func() Iterator {
 	}
 }
 
-// N provides a new empty Queryable slice
+// N provides a new nil Queryable
 func N() *Queryable {
-	v := reflect.ValueOf([]interface{}{})
-	return &Queryable{v: &v, Kind: v.Kind(), Iter: sliceIter(v)}
+	return &Queryable{v: nil, Kind: reflect.Invalid}
 }
 
 // Q provides origination for the Queryable abstraction layer
@@ -113,13 +112,16 @@ func Q(obj interface{}) *Queryable {
 
 // Any checks if the queryable has anything in it
 func (q *Queryable) Any() bool {
+	if q.v == nil {
+		return false
+	}
 	if q.Iter != nil {
 		return q.v.Len() > 0
 	}
 	return q.v.Interface() != nil
 }
 
-// AnyWhere checka if any match the given lambda
+// AnyWhere check if any match the given lambda
 func (q *Queryable) AnyWhere(lambda func(O) bool) bool {
 	if !q.TypeSingle() {
 		next := q.Iter()
@@ -128,6 +130,8 @@ func (q *Queryable) AnyWhere(lambda func(O) bool) bool {
 				return true
 			}
 		}
+	} else if q.Nil() {
+		return false
 	} else if lambda(q.v.Interface()) {
 		return true
 	}
@@ -137,8 +141,15 @@ func (q *Queryable) AnyWhere(lambda func(O) bool) bool {
 // Append items to the end of the collection and return the queryable
 // converting to a collection if necessary
 func (q *Queryable) Append(obj ...interface{}) *Queryable {
-	if q.TypeSingle() {
-		*q = *N().Append(q.v.Interface())
+
+	// Create new slice of the append type
+	if q.TypeSingle() && len(obj) > 0 {
+		typ := reflect.TypeOf(obj[0])
+		qSlice := Q(reflect.MakeSlice(reflect.SliceOf(typ), 0, 10).Interface())
+		if !q.Nil() {
+			qSlice.Append(q.v.Interface())
+		}
+		*q = *qSlice
 	}
 
 	// Append to slice type
@@ -257,6 +268,9 @@ func (q *Queryable) Contains(obj interface{}) bool {
 // ContainsAny behaves much like Contains only it allows for matching any not all.
 func (q *Queryable) ContainsAny(obj interface{}) bool {
 	other := Q(obj)
+	if q.Nil() {
+		return false
+	}
 
 	// Non iterable type
 	if q.TypeSingle() {
@@ -331,6 +345,15 @@ func (q *Queryable) Each(action func(O)) {
 	}
 }
 
+// First returns the first item as queryable
+// returns a nil queryable when index out of bounds
+func (q *Queryable) First() (result *Queryable) {
+	if q.Len() > 0 {
+		return q.At(0)
+	}
+	return N()
+}
+
 // Flatten returns a new slice that is one-dimensional flattening.
 // That is, for every item that is a slice, extract its items into the new slice.
 func (q *Queryable) Flatten() (result *Queryable) {
@@ -378,10 +401,21 @@ func (q *Queryable) Join(delim string) *Queryable {
 	return Q(strings.TrimSuffix(joined.String(), delim))
 }
 
+// Last returns the last item as queryable
+// returns a nil queryable when index out of bounds
+func (q *Queryable) Last() (result *Queryable) {
+	if q.Len() > 0 {
+		return q.At(-1)
+	}
+	return N()
+}
+
 // Len of the collection type including string
 func (q *Queryable) Len() int {
 	if q.TypeIter() {
 		return q.v.Len()
+	} else if q.Nil() {
+		return 0
 	}
 	return 1
 }
@@ -405,7 +439,7 @@ func (q *Queryable) Map(sel func(O) O) (result *Queryable) {
 		result.Append(obj)
 	}
 	if result == nil {
-		result = N()
+		result = Q([]interface{}{})
 	}
 	return
 }
@@ -431,6 +465,14 @@ func (q *Queryable) MapMany(sel func(O) O) (result *Queryable) {
 	// }
 	// return result
 	return
+}
+
+// Nil tests if the queryable is a nil queryable
+func (q *Queryable) Nil() bool {
+	if q.v == nil {
+		return true
+	}
+	return false
 }
 
 // Set provides a way to set underlying object Queryable is operating on
@@ -470,15 +512,12 @@ func (q *Queryable) TypeSlice() bool {
 
 // TypeStr checks if the queryable is encapsulating a string
 func (q *Queryable) TypeStr() bool {
-	if _, ok := q.v.Interface().(string); ok {
-		return true
-	}
-	return false
+	return q.Kind == reflect.String
 }
 
 // TypeSingle checks if the queryable is ecapuslating a string or is not iterable
 func (q *Queryable) TypeSingle() bool {
-	if !q.TypeIter() || q.TypeStr() {
+	if !q.TypeIter() || q.TypeStr() || q.Nil() {
 		return true
 	}
 	return false

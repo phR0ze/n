@@ -57,6 +57,7 @@ func TestTakeFirst(t *testing.T) {
 		// bobs
 		q := N().Append(bob{data: "3"})
 		assert.True(t, q.Any())
+		assert.Equal(t, bob{data: "3"}, q.First().O())
 		x, ok := q.TakeFirst()
 		assert.True(t, ok)
 		assert.NotNil(t, x)
