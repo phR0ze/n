@@ -8,26 +8,45 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 // Copy copies the src to the dst.
 // If the src is a file the dst must be a target directory.
 // If the src is a dir the dst will be created as a clone of src
 func Copy(src, dst string) error {
+	var e error
+	var dstAbs string
+	if dstAbs, e = filepath.Abs(dst); e != nil {
+		return e
+	}
+
+	// Walk over file structure
 	return filepath.Walk(src, func(srcPath string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		if info.IsDir() {
-			var dstPath string
-			dstPath, err = destPath(src, dst)
-			fmt.Println(src)
-			fmt.Println(dstPath)
-			//if err = os.MkdirAll(dst, info.Mode()); err != nil {
-			//	return err
-			//}
+
+		// Determine correct destination path
+		var dstPath string
+		if srcPath, err = filepath.Abs(srcPath); err != nil {
+			return err
+		}
+		if shared := SharedDir(srcPath, dstAbs); shared != "" {
+			dstPath = path.Join(dstAbs, strings.TrimPrefix(srcPath, shared))
 		} else {
-			//CopyFile(srcPath, dst)
+			dstPath = path.Join(dstAbs, srcPath)
+		}
+		fmt.Println(srcPath)
+		fmt.Println(dstPath)
+
+		// Copy to destination
+		if info.IsDir() {
+			if err = os.MkdirAll(dstPath, info.Mode()); err != nil {
+				return err
+			}
+		} else {
+			CopyFile(srcPath, dstPath)
 		}
 		return nil
 	})
@@ -51,7 +70,29 @@ func CopyFile(src, dst string) (err error) {
 	}
 
 	// Get correct destination path
-	if dstPath, err = destPath(srcPath, dst); err != nil {
+	_, e := os.Stat(dst)
+	switch {
+
+	// Doesn't exist but maybe the parent does and this is the new dst name
+	case os.IsNotExist(e):
+		if _, err = os.Stat(path.Dir(dst)); err != nil {
+			return
+		}
+		if dstPath, err = filepath.Abs(path.Dir(dst)); err != nil {
+			return
+		}
+		dstPath = path.Join(dstPath, path.Base(dst))
+
+	// dst is a valid directory so copy to it using src name
+	case e == nil:
+		if dstPath, err = filepath.Abs(dst); err != nil {
+			return
+		}
+		dstPath = path.Join(dstPath, path.Base(srcPath))
+
+	// unknown error case
+	default:
+		err = e
 		return
 	}
 
@@ -137,35 +178,22 @@ func MkdirP(target string, mode ...os.FileMode) error {
 	return os.MkdirAll(target, mode[0])
 }
 
-// Get correct destination path.
-// If it exists then it is the destination + src base
-// If it doesn't exist and parent does then it is the new destination
-func destPath(src, dst string) (result string, err error) {
-	_, e := os.Stat(dst)
-	switch {
+// SharedDir returns the dir portion that two paths share
+func SharedDir(first, second string) (result string) {
+	sharedParts := []string{}
 
-	// Doesn't exist but maybe the parent does and this is the new dst name
-	case os.IsNotExist(e):
-		if _, err = os.Stat(path.Dir(dst)); err != nil {
-			return
+	firstParts := strings.Split(first, "/")
+	secondParts := strings.Split(second, "/")
+	secondLen := len(secondParts)
+	for i := range firstParts {
+		if i < secondLen {
+			if firstParts[i] == secondParts[i] {
+				sharedParts = append(sharedParts, firstParts[i])
+			}
+		} else {
+			break
 		}
-		if result, err = filepath.Abs(path.Dir(dst)); err != nil {
-			return
-		}
-		result = path.Join(result, path.Base(dst))
-
-	// dst is a valid directory so copy to it using src name
-	case e == nil:
-		if result, err = filepath.Abs(dst); err != nil {
-			return
-		}
-		result = path.Join(result, path.Base(src))
-
-	// unknown error case
-	default:
-		err = e
-		return
 	}
 
-	return
+	return strings.Join(sharedParts, "/")
 }

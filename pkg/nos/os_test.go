@@ -69,6 +69,33 @@ func TestMkdirP(t *testing.T) {
 	MkdirP(tmpDir)
 	assert.True(t, Exists(tmpDir))
 }
+func TestSharedDir(t *testing.T) {
+	{
+		first := ""
+		second := ""
+		assert.Equal(t, "", SharedDir(first, second))
+	}
+	{
+		first := "/bob"
+		second := "/foo"
+		assert.Equal(t, "", SharedDir(first, second))
+	}
+	{
+		first := "/foo/bar1"
+		second := "/foo/bar2"
+		assert.Equal(t, "/foo", SharedDir(first, second))
+	}
+	{
+		first := "foo/bar1"
+		second := "foo/bar2"
+		assert.Equal(t, "foo", SharedDir(first, second))
+	}
+	{
+		first := "/foo/bar/1"
+		second := "/foo/bar/2"
+		assert.Equal(t, "/foo/bar", SharedDir(first, second))
+	}
+}
 
 func cleanTmpDir() {
 	if Exists(tmpDir) {
