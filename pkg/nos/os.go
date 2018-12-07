@@ -121,6 +121,11 @@ func CopyFile(src, dst string) (err error) {
 	return
 }
 
+// DiffPath compares two paths and lists the files and directories that are different
+func DiffPath(first, second string) (result []string) {
+	return
+}
+
 // Exists checks if the given path exists
 func Exists(src string) bool {
 	if _, err := os.Stat(src); err == nil {
@@ -178,6 +183,18 @@ func MkdirP(target string, mode ...os.FileMode) error {
 	return os.MkdirAll(target, mode[0])
 }
 
+// Paths returs a list of paths for the given root path in a deterministic order
+func Paths(root string) (result []string) {
+	filepath.Walk(root, func(p string, i os.FileInfo, e error) error {
+		if e != nil {
+			return e
+		}
+		result = append(result, p)
+		return nil
+	})
+	return
+}
+
 // SharedDir returns the dir portion that two paths share
 func SharedDir(first, second string) (result string) {
 	sharedParts := []string{}
@@ -196,4 +213,16 @@ func SharedDir(first, second string) (result string) {
 	}
 
 	return strings.Join(sharedParts, "/")
+}
+
+// Touch simply creates an empty text file similar to the linux touch command
+func Touch(target string) (err error) {
+	var f *os.File
+	if f, err = os.Create(target); !os.IsExist(err) {
+		return
+	}
+	if err == nil {
+		defer f.Close()
+	}
+	return
 }

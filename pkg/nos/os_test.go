@@ -1,6 +1,7 @@
 package nos
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"testing"
@@ -69,6 +70,15 @@ func TestMkdirP(t *testing.T) {
 	MkdirP(tmpDir)
 	assert.True(t, Exists(tmpDir))
 }
+
+func TestPaths(t *testing.T) {
+	cleanTmpDir()
+	for i := 0; i < 10; i++ {
+		Touch(path.Join(tmpDir, "first", fmt.Sprintf("%d", i)))
+		Touch(path.Join(tmpDir, "second", fmt.Sprintf("%d", i)))
+	}
+}
+
 func TestSharedDir(t *testing.T) {
 	{
 		first := ""
@@ -95,6 +105,14 @@ func TestSharedDir(t *testing.T) {
 		second := "/foo/bar/2"
 		assert.Equal(t, "/foo/bar", SharedDir(first, second))
 	}
+}
+
+func TestTouch(t *testing.T) {
+	cleanTmpDir()
+	assert.False(t, Exists(tmpFile))
+	assert.Nil(t, Touch(tmpFile))
+	assert.True(t, Exists(tmpFile))
+	assert.Nil(t, Touch(tmpFile))
 }
 
 func cleanTmpDir() {
