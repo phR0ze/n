@@ -18,6 +18,7 @@ test: $(NAME)
 	go test $(PKGROOT)
 	go test $(PKGROOT)/pkg/ncli
 	go test $(PKGROOT)/pkg/nerr
+	go test $(PKGROOT)/pkg/nos
 	go test $(PKGROOT)/pkg/ntar
 	go test $(PKGROOT)/pkg/ntime
 	go test $(PKGROOT)/pkg/ntmpl
