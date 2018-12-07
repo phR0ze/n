@@ -1,6 +1,8 @@
 package nos
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"os"
@@ -16,10 +18,16 @@ func Copy(src, dst string) error {
 		if err != nil {
 			return err
 		}
-		if !info.IsDir() {
-			CopyFile(srcPath, dst)
+		if info.IsDir() {
+			var dstPath string
+			dstPath, err = destPath(src, dst)
+			fmt.Println(src)
+			fmt.Println(dstPath)
+			//if err = os.MkdirAll(dst, info.Mode()); err != nil {
+			//	return err
+			//}
 		} else {
-			fmt.Println("Dir: ", srcPath)
+			//CopyFile(srcPath, dst)
 		}
 		return nil
 	})
@@ -43,29 +51,7 @@ func CopyFile(src, dst string) (err error) {
 	}
 
 	// Get correct destination path
-	_, e := os.Stat(dst)
-	switch {
-
-	// Doesn't exist but maybe the parent does and this is the new file name
-	case os.IsNotExist(e):
-		if _, err = os.Stat(path.Dir(dst)); err != nil {
-			return
-		}
-		if dstPath, err = filepath.Abs(path.Dir(dst)); err != nil {
-			return
-		}
-		dstPath = path.Join(dstPath, path.Base(dst))
-
-	// dst is a valid directory so copy to it using src name
-	case e == nil:
-		if dstPath, err = filepath.Abs(dst); err != nil {
-			return
-		}
-		dstPath = path.Join(dstPath, path.Base(srcPath))
-
-	// unknown error case
-	default:
-		err = e
+	if dstPath, err = destPath(srcPath, dst); err != nil {
 		return
 	}
 
@@ -90,6 +76,96 @@ func CopyFile(src, dst string) (err error) {
 
 	// Set permissions of dstPath same as srcPath
 	err = os.Chmod(dstPath, srcInfo.Mode())
+
+	return
+}
+
+// Exists checks if the given path exists
+func Exists(src string) bool {
+	if _, err := os.Stat(src); err == nil {
+		return true
+	}
+	return false
+}
+
+// IsDir checks if the given path is a directory
+func IsDir(src string) bool {
+	if info, err := os.Stat(src); err == nil {
+		return info.IsDir()
+	}
+	return false
+}
+
+// IsFile checks if the given path is a file
+func IsFile(src string) bool {
+	if info, err := os.Stat(src); err == nil {
+		return !info.IsDir()
+	}
+	return false
+}
+
+// MD5 computes the md5 has of the given file
+func MD5(target string) (result string, err error) {
+	if !Exists(target) {
+		return "", os.ErrNotExist
+	}
+
+	// Open target file for reading
+	var f *os.File
+	if f, err = os.Open(target); err != nil {
+		return
+	}
+	defer f.Close()
+
+	// Create a new md5 hash and copy in file bits
+	hash := md5.New()
+	if _, err = io.Copy(hash, f); err != nil {
+		return
+	}
+
+	// Compute 32 byte hash
+	result = hex.EncodeToString(hash.Sum(nil))
+
+	return
+}
+
+// MkdirP create the target directory and any parent directories needed
+func MkdirP(target string, mode ...os.FileMode) error {
+	if mode == nil || len(mode) == 0 {
+		return os.MkdirAll(target, 0755)
+	}
+	return os.MkdirAll(target, mode[0])
+}
+
+// Get correct destination path.
+// If it exists then it is the destination + src base
+// If it doesn't exist and parent does then it is the new destination
+func destPath(src, dst string) (result string, err error) {
+	_, e := os.Stat(dst)
+	switch {
+
+	// Doesn't exist but maybe the parent does and this is the new dst name
+	case os.IsNotExist(e):
+		if _, err = os.Stat(path.Dir(dst)); err != nil {
+			return
+		}
+		if result, err = filepath.Abs(path.Dir(dst)); err != nil {
+			return
+		}
+		result = path.Join(result, path.Base(dst))
+
+	// dst is a valid directory so copy to it using src name
+	case e == nil:
+		if result, err = filepath.Abs(dst); err != nil {
+			return
+		}
+		result = path.Join(result, path.Base(src))
+
+	// unknown error case
+	default:
+		err = e
+		return
+	}
 
 	return
 }
