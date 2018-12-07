@@ -200,6 +200,11 @@ func (slice *strSliceN) Prepend(items ...string) *strSliceN {
 	return slice
 }
 
+// Single simple report true if there is only one item
+func (slice *strSliceN) Single() (result bool) {
+	return slice.Len() == 1
+}
+
 // Sort the underlying slice
 func (slice *strSliceN) Sort() *strSliceN {
 	sort.Strings(slice.v)

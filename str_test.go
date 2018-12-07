@@ -111,7 +111,7 @@ func TestYAMLIndent(t *testing.T) {
 	}
 }
 
-func TestYAMLInsert(t *testing.T) {
+func TestYAMLInsertEmpty(t *testing.T) {
 	{
 		// No match nothing done
 		raw := `spec:
@@ -126,6 +126,9 @@ func TestYAMLInsert(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, raw, inserted.String())
 	}
+}
+
+func TestYAMLInsert(t *testing.T) {
 	{
 		// Match insert payload
 		rawData := `spec:
@@ -154,7 +157,6 @@ func TestYAMLInsert(t *testing.T) {
 
 		// Test inserted data + payload
 		inserted, err := A(rawData).YAMLInsert(string(bytesPayload), "spec.template.spec.initContainers")
-		fmt.Println(inserted.String())
 		assert.Nil(t, err)
 		expected := `spec:
   template:
@@ -172,6 +174,54 @@ func TestYAMLInsert(t *testing.T) {
 		err = yaml.Unmarshal([]byte(inserted.Bytes()), &backToYaml)
 		assert.Nil(t, err)
 	}
+}
+
+func TestYAMLInsertCreate(t *testing.T) {
+	// Match insert payload
+	rawData := `spec:
+  template:
+    spec:
+      imagePullSecrets:
+      - name: foo
+`
+	// Test that the raw data is unmarshalable
+	yamlData := map[string]interface{}{}
+	err := yaml.Unmarshal([]byte(rawData), &yamlData)
+	assert.Nil(t, err)
+
+	rawPayload := `- name: bar
+  image: "busybox:1.25.0"
+  imagePullPolicy: foobar
+`
+	// Test that the raw payload is unmarshalable
+	yamlPayload := []map[string]interface{}{}
+	err = yaml.Unmarshal([]byte(rawPayload), &yamlPayload)
+	assert.Nil(t, err)
+
+	// Marshal to get proper formatting
+	bytesPayload, err := yaml.Marshal(yamlPayload)
+	assert.Nil(t, err)
+
+	// Test inserted data + payload
+	inserted, err := A(rawData).YAMLInsert(string(bytesPayload), "spec.template.spec.initContainers")
+	fmt.Println(inserted.String())
+	assert.Nil(t, err)
+	expected := `spec:
+  template:
+    spec:
+      initContainers:
+      - image: busybox:1.25.0
+        imagePullPolicy: foobar
+        name: bar
+      imagePullSecrets:
+      - name: foo
+`
+	assert.Equal(t, expected, inserted.String())
+
+	// Test if the new inserted data can be Unmarshaled
+	backToYaml := map[string]interface{}{}
+	err = yaml.Unmarshal([]byte(inserted.Bytes()), &backToYaml)
+	assert.Nil(t, err)
 }
 
 func TestYAMLType(t *testing.T) {

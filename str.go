@@ -148,6 +148,10 @@ func (q *strN) YAMLInsert(block, key string) (data bytes.Buffer, err error) {
 	if key, ok = keys.TakeFirst(); !ok {
 		return
 	}
+	keyNotFound := false
+	if !q.Contains(keys.Last().A()) {
+		keyNotFound = true
+	}
 
 	// Scan through data line by line writing to data
 	writeBlock := false
@@ -158,9 +162,12 @@ func (q *strN) YAMLInsert(block, key string) (data bytes.Buffer, err error) {
 		a := A(string(line)).TrimSpaceLeft()
 		curDepth := A(string(line)).SpaceLeft()
 
-		// Write out the block now so we can see depth of next entry
+		// Write out the block now so we can use curDepth
 		if writeBlock {
 			writeBlock = false
+			if !keys.Any() && keyNotFound {
+				writer.WriteString(curDepth + key + ":\n")
+			}
 			blockScanner := bufio.NewScanner(bytes.NewReader([]byte(block)))
 			for blockScanner.Scan() {
 				writer.WriteString(curDepth + blockScanner.Text())
@@ -171,7 +178,7 @@ func (q *strN) YAMLInsert(block, key string) (data bytes.Buffer, err error) {
 		// Hit - flag write block for next loop
 		if ok && depth == curDepth && a.HasPrefix(key+":") {
 			depth += indent
-			if key, ok = keys.TakeFirst(); !ok {
+			if key, ok = keys.TakeFirst(); !ok || (!keys.Any() && keyNotFound) {
 				writeBlock = true
 			}
 		}
