@@ -73,9 +73,27 @@ func TestMkdirP(t *testing.T) {
 
 func TestPaths(t *testing.T) {
 	cleanTmpDir()
-	for i := 0; i < 10; i++ {
-		Touch(path.Join(tmpDir, "first", fmt.Sprintf("%d", i)))
-		Touch(path.Join(tmpDir, "second", fmt.Sprintf("%d", i)))
+	{
+		targetDir := path.Join(tmpDir, "first")
+		expected := []string{targetDir}
+		MkdirP(targetDir)
+		for i := 0; i < 10; i++ {
+			target := path.Join(targetDir, fmt.Sprintf("%d", i))
+			Touch(target)
+			expected = append(expected, target)
+		}
+		assert.Equal(t, expected, Paths(targetDir))
+	}
+	{
+		targetDir := path.Join(tmpDir, "second")
+		expected := []string{targetDir}
+		MkdirP(targetDir)
+		for i := 0; i < 5; i++ {
+			target := path.Join(targetDir, fmt.Sprintf("%d", i))
+			Touch(target)
+			expected = append(expected, target)
+		}
+		assert.Equal(t, expected, Paths(targetDir))
 	}
 }
 
