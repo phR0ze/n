@@ -121,11 +121,6 @@ func CopyFile(src, dst string) (err error) {
 	return
 }
 
-// DiffPath compares two paths and lists the files and directories that are different
-func DiffPath(first, second string) (result []string) {
-	return
-}
-
 // Exists checks if the given path exists
 func Exists(src string) bool {
 	if _, err := os.Stat(src); err == nil {
