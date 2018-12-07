@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,9 +15,19 @@ var tmpFile = "../../test/temp/.tmp"
 var readme = "../../README.md"
 
 func TestCopy(t *testing.T) {
-	{
-		cleanTmpDir()
-		Copy("../../pkg", tmpDir)
+	cleanTmpDir()
+	src := "../../pkg"
+	dst := path.Join(tmpDir, "pkg")
+
+	assert.False(t, Exists(dst))
+	Copy(src, tmpDir)
+	assert.True(t, Exists(dst))
+
+	srcPaths := Paths(src)
+	dstPaths := Paths(dst)
+	assert.Equal(t, len(srcPaths), len(dstPaths))
+	for i := range srcPaths {
+		assert.Equal(t, srcPaths[i], strings.Replace(dstPaths[i], "/test/temp", "", -1))
 	}
 }
 
