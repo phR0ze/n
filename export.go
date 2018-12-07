@@ -55,8 +55,8 @@ func (q *Queryable) I() (result int) {
 }
 
 // Ints exports queryable into an int slice
-func (q *Queryable) Ints() []int {
-	result := []int{}
+func (q *Queryable) Ints() (result []int) {
+	result = []int{}
 	if q.TypeSlice() {
 		next := q.Iter()
 		for x, ok := next(); ok; x, ok = next() {
@@ -68,14 +68,16 @@ func (q *Queryable) Ints() []int {
 
 // M exports queryable into a map
 func (q *Queryable) M() (result map[string]interface{}) {
-	if v, ok := q.O().(map[string]interface{}); ok {
-		result = v
-	} else {
-		result = map[string]interface{}{}
-		next := q.Iter()
-		for x, ok := next(); ok; x, ok = next() {
-			if pair, ok := x.(KeyVal); ok {
-				result[fmt.Sprint(pair.Key)] = pair.Val
+	result = map[string]interface{}{}
+	if !q.Nil() {
+		if v, ok := q.O().(map[string]interface{}); ok {
+			result = v
+		} else {
+			next := q.Iter()
+			for x, ok := next(); ok; x, ok = next() {
+				if pair, ok := x.(KeyVal); ok {
+					result[fmt.Sprint(pair.Key)] = pair.Val
+				}
 			}
 		}
 	}
@@ -104,14 +106,16 @@ func (q *Queryable) Strs() []string {
 
 // AAMap exports queryable into an string to string map
 func (q *Queryable) AAMap() (result map[string]string) {
-	if v, ok := q.O().(map[string]string); ok {
-		result = v
-	} else {
-		result = map[string]string{}
-		next := q.Iter()
-		for x, ok := next(); ok; x, ok = next() {
-			if pair, ok := x.(KeyVal); ok {
-				result[fmt.Sprint(pair.Key)] = fmt.Sprint(pair.Val)
+	result = map[string]string{}
+	if !q.Nil() {
+		if v, ok := q.O().(map[string]string); ok {
+			result = v
+		} else {
+			next := q.Iter()
+			for x, ok := next(); ok; x, ok = next() {
+				if pair, ok := x.(KeyVal); ok {
+					result[fmt.Sprint(pair.Key)] = fmt.Sprint(pair.Val)
+				}
 			}
 		}
 	}
@@ -121,16 +125,18 @@ func (q *Queryable) AAMap() (result map[string]string) {
 // S exports queryable into an interface{} slice
 func (q *Queryable) S() []interface{} {
 	result := []interface{}{}
-	next := q.Iter()
-	for x, ok := next(); ok; x, ok = next() {
-		result = append(result, x)
+	if q.TypeSlice() {
+		next := q.Iter()
+		for x, ok := next(); ok; x, ok = next() {
+			result = append(result, x)
+		}
 	}
 	return result
 }
 
 // SAMap exports queryable into an slice of string to interface{} map
-func (q *Queryable) SAMap() []map[string]interface{} {
-	result := []map[string]interface{}{}
+func (q *Queryable) SAMap() (result []map[string]interface{}) {
+	result = []map[string]interface{}{}
 	if q.TypeSlice() {
 		next := q.Iter()
 		for x, ok := next(); ok; x, ok = next() {
@@ -139,12 +145,12 @@ func (q *Queryable) SAMap() []map[string]interface{} {
 			}
 		}
 	}
-	return result
+	return
 }
 
 // SAAMap exports queryable into an slice of string to string map
-func (q *Queryable) SAAMap() []map[string]string {
-	result := []map[string]string{}
+func (q *Queryable) SAAMap() (result []map[string]string) {
+	result = []map[string]string{}
 	if q.TypeSlice() {
 		next := q.Iter()
 		for x, ok := next(); ok; x, ok = next() {
@@ -159,7 +165,7 @@ func (q *Queryable) SAAMap() []map[string]string {
 			result = append(result, m)
 		}
 	}
-	return result
+	return
 }
 
 // CastToTypeOf casts the obj to the type of the typof

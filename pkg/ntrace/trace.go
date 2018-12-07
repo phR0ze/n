@@ -18,6 +18,7 @@ type Entry struct {
 // If no target is given you'll get the full stack.
 func CallerTrace(skipframes int, skipfiles ...string) (result []*Entry) {
 	more := false
+	result = []*Entry{}
 	var frame runtime.Frame
 	callers := make([]uintptr, 20)
 	runtime.Callers(2, callers)

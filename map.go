@@ -169,6 +169,7 @@ func (m *strMapN) StrMapSlice(key string) *strMapSliceN {
 
 // StrSlice returns a slice of strings from the given map using the given key
 func (m *strMapN) StrSlice(key string) (result []string) {
+	result = []string{}
 	items := m.Slice(key)
 	for i := range items {
 		result = append(result, fmt.Sprint(items[i]))

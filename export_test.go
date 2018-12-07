@@ -49,6 +49,19 @@ func TestB(t *testing.T) {
 		assert.Equal(t, false, Q("False").B())
 		assert.Equal(t, false, Q("FALSE").B())
 	}
+	{
+		q, _ := FromYAML(`foo:
+  bar: true`)
+		assert.True(t, q.Any())
+
+		// Exists
+		assert.Equal(t, true, q.YAML("foo.bar").O())
+		assert.Equal(t, true, q.YAML("foo.bar").B())
+
+		// Doesn't exist
+		assert.Equal(t, nil, q.YAML("foo.foo").O())
+		assert.Equal(t, false, q.YAML("foo.foo").B())
+	}
 }
 
 func TestI(t *testing.T) {
@@ -62,6 +75,17 @@ func TestI(t *testing.T) {
 }
 
 func TestM(t *testing.T) {
+	{
+		q, _ := FromYAML(`foo:
+  bar: true`)
+		assert.True(t, q.Any())
+
+		// Key exists
+		assert.Equal(t, map[string]interface{}{"bar": true}, q.YAML("foo").M())
+
+		// Key doesn't exist
+		assert.Equal(t, map[string]interface{}{}, q.YAML("bar").M())
+	}
 	{
 		// Convert with simple cast
 		data := map[string]interface{}{"1": "one", "2": "two", "3": "three"}
@@ -84,6 +108,17 @@ func TestInts(t *testing.T) {
 }
 
 func TestAAMap(t *testing.T) {
+	{
+		q, _ := FromYAML(`foo:
+  bar: frodo`)
+		assert.True(t, q.Any())
+
+		// Key exists
+		assert.Equal(t, map[string]string{"bar": "frodo"}, q.YAML("foo").AAMap())
+
+		// Key doesn't exist
+		assert.Equal(t, map[string]string{}, q.YAML("bar").AAMap())
+	}
 	{
 		// Get map of string to string
 		q, _ := FromYAML(`foobar:

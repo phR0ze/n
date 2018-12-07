@@ -250,7 +250,7 @@ func TestStrSlice2(t *testing.T) {
 		data := map[string]interface{}{
 			"test1": "foobar",
 		}
-		var expected []string
+		expected := []string{}
 		assert.Equal(t, expected, M(data).StrSlice("test1"))
 	}
 	{
