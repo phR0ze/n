@@ -3,18 +3,55 @@ package n
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 )
 
 // Collecting functions that return external Go types here
 
 // A exports queryable into a string
-func (q *Queryable) A() string {
-	return q.v.Interface().(string)
+func (q *Queryable) A() (result string) {
+	if !q.Nil() {
+		switch v := q.v.Interface().(type) {
+		case string:
+			result = v
+		default:
+			result = fmt.Sprintf("%v", v)
+		}
+	}
+	return
+}
+
+// B exports queryable into a bool
+func (q *Queryable) B() (result bool) {
+	if !q.Nil() {
+		switch v := q.v.Interface().(type) {
+		case bool:
+			result = v
+		case int:
+			result = v != 0
+		case string:
+			result, _ = strconv.ParseBool(v)
+		}
+	}
+	return
 }
 
 // I exports queryable into an int
-func (q *Queryable) I() int {
-	return q.v.Interface().(int)
+func (q *Queryable) I() (result int) {
+	if !q.Nil() {
+		switch v := q.v.Interface().(type) {
+		case int:
+			result = v
+		case bool:
+			if v {
+				result = 1
+			}
+		case string:
+			result, _ = strconv.Atoi(v)
+		}
+	}
+	return
+
 }
 
 // Ints exports queryable into an int slice

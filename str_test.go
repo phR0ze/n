@@ -1,7 +1,6 @@
 package n
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/ghodss/yaml"
@@ -204,7 +203,6 @@ func TestYAMLInsertCreate(t *testing.T) {
 
 	// Test inserted data + payload
 	inserted, err := A(rawData).YAMLInsert(string(bytesPayload), "spec.template.spec.initContainers")
-	fmt.Println(inserted.String())
 	assert.Nil(t, err)
 	expected := `spec:
   template:

@@ -18,11 +18,47 @@ func TestA(t *testing.T) {
 	}
 	{
 		assert.Equal(t, "1", Q("1").A())
+		assert.Equal(t, "1", Q(1).A())
+		assert.Equal(t, "true", Q(true).A())
+		assert.Equal(t, "false", Q(false).A())
+	}
+}
+
+func TestB(t *testing.T) {
+	{
+		assert.Equal(t, true, Q(true).B())
+		assert.Equal(t, false, Q(false).B())
+	}
+	{
+		q := Q([]bool{true})
+		assert.Equal(t, true, q.At(0).B())
+	}
+	{
+		assert.Equal(t, true, Q(4).B())
+		assert.Equal(t, false, Q(0).B())
+	}
+	{
+		assert.Equal(t, true, Q("1").B())
+		assert.Equal(t, true, Q("T").B())
+		assert.Equal(t, true, Q("true").B())
+		assert.Equal(t, true, Q("True").B())
+		assert.Equal(t, true, Q("TRUE").B())
+		assert.Equal(t, false, Q("0").B())
+		assert.Equal(t, false, Q("F").B())
+		assert.Equal(t, false, Q("false").B())
+		assert.Equal(t, false, Q("False").B())
+		assert.Equal(t, false, Q("FALSE").B())
 	}
 }
 
 func TestI(t *testing.T) {
-	assert.Equal(t, 1, Q(1).I())
+	assert.Equal(t, 2, Q(2).I())
+	assert.Equal(t, 2, Q("2").I())
+	assert.Equal(t, 3, Q([]int{2, 3}).At(1).O())
+	assert.Equal(t, 3, Q([]int{2, 3}).At(1).I())
+	assert.Equal(t, 3, Q([]string{"2", "3"}).At(1).I())
+	assert.Equal(t, 1, Q(true).I())
+	assert.Equal(t, 0, Q(false).I())
 }
 
 func TestM(t *testing.T) {
