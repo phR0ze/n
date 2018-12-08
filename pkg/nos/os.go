@@ -178,7 +178,7 @@ func MkdirP(target string, mode ...os.FileMode) error {
 	return os.MkdirAll(target, mode[0])
 }
 
-// Paths returs a list of paths for the given root path in a deterministic order
+// Paths returns a list of paths for the given root path in a deterministic order
 func Paths(root string) (result []string) {
 	result = []string{}
 	filepath.Walk(root, func(p string, i os.FileInfo, e error) error {
