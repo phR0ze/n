@@ -108,6 +108,12 @@ func TestPaths(t *testing.T) {
 	}
 }
 
+func TestPathLast(t *testing.T) {
+	assert.Equal(t, "bar/one", PathLast("/foo/bar/one", 2))
+	assert.Equal(t, "foo/bar/one", PathLast("/foo/bar/one", 3))
+	assert.Equal(t, "/foo/bar/one", PathLast("/foo/bar/one", 5))
+}
+
 func TestSharedDir(t *testing.T) {
 	{
 		first := ""

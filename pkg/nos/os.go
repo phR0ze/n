@@ -9,11 +9,13 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/phR0ze/n"
 )
 
-// Copy copies the src to the dst.
-// If the src is a file the dst must be a target directory.
-// If the src is a dir the dst will be created as a clone of src
+// Copy copies src to dst recursively.
+// The dst will be copied to if it is an existing directory.
+// The dst will be a clone of the src if it doesn't exist, but it's parent directory does.
 func Copy(src, dst string) error {
 	var e error
 	var dstAbs string
@@ -52,9 +54,9 @@ func Copy(src, dst string) error {
 	})
 }
 
-// CopyFile a single file from src to dst.
-// if dst doesn't exist treat this as a move/rename.
-// if dst exists and is a dir copy to the dir
+// CopyFile copies a single file from src to dst.
+// The dst will be copied to if it is an existing directory.
+// The dst will be a clone of the src if it doesn't exist, but it's parent directory does.
 func CopyFile(src, dst string) (err error) {
 	var srcInfo os.FileInfo
 	var srcPath, dstPath string
@@ -121,7 +123,7 @@ func CopyFile(src, dst string) (err error) {
 	return
 }
 
-// Exists checks if the given path exists
+// Exists return true if the given path exists
 func Exists(src string) bool {
 	if _, err := os.Stat(src); err == nil {
 		return true
@@ -129,7 +131,7 @@ func Exists(src string) bool {
 	return false
 }
 
-// IsDir checks if the given path is a directory
+// IsDir returns true if the given path is a directory
 func IsDir(src string) bool {
 	if info, err := os.Stat(src); err == nil {
 		return info.IsDir()
@@ -137,7 +139,7 @@ func IsDir(src string) bool {
 	return false
 }
 
-// IsFile checks if the given path is a file
+// IsFile returns true if the given path is a file
 func IsFile(src string) bool {
 	if info, err := os.Stat(src); err == nil {
 		return !info.IsDir()
@@ -145,7 +147,7 @@ func IsFile(src string) bool {
 	return false
 }
 
-// MD5 computes the md5 has of the given file
+// MD5 returns the md5 of the given file
 func MD5(target string) (result string, err error) {
 	if !Exists(target) {
 		return "", os.ErrNotExist
@@ -170,7 +172,7 @@ func MD5(target string) (result string, err error) {
 	return
 }
 
-// MkdirP create the target directory and any parent directories needed
+// MkdirP creates the target directory and any parent directories needed
 func MkdirP(target string, mode ...os.FileMode) error {
 	if mode == nil || len(mode) == 0 {
 		return os.MkdirAll(target, 0755)
@@ -189,6 +191,12 @@ func Paths(root string) (result []string) {
 		return nil
 	})
 	return
+}
+
+// PathLast returns the last cnt pieces of the path
+// or as many as possible if there are not enough.
+func PathLast(path string, cnt int) string {
+	return n.A(path).Split("/").LastCnt(cnt).Join("/").A()
 }
 
 // SharedDir returns the dir portion that two paths share
@@ -211,7 +219,7 @@ func SharedDir(first, second string) (result string) {
 	return strings.Join(sharedParts, "/")
 }
 
-// Touch simply creates an empty text file similar to the linux touch command
+// Touch creates an empty text file similar to the linux touch command
 func Touch(target string) (err error) {
 	var f *os.File
 	if f, err = os.Create(target); !os.IsExist(err) {
