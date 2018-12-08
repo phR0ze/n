@@ -133,6 +133,28 @@ func (slice *strSliceN) Equals(other *strSliceN) bool {
 	return reflect.DeepEqual(slice, other)
 }
 
+// First returns the first time as a nub type
+func (slice *strSliceN) First() (result *strN) {
+	if len(slice.v) > 0 {
+		result = A(slice.v[0])
+	} else {
+		result = A("")
+	}
+	return
+}
+
+// FirstCnt returns the first cnt items as a new slice without updating the original
+func (slice *strSliceN) FirstCnt(cnt int) (result *strSliceN) {
+	if cnt > 0 {
+		if len(slice.v) >= cnt {
+			result = S(slice.v[:cnt]...)
+		} else {
+			result = S(slice.v...)
+		}
+	}
+	return
+}
+
 // Join the underlying slice with the given delim
 func (slice *strSliceN) Join(delim string) *strN {
 	return A(strings.Join(slice.v, delim))
@@ -144,6 +166,19 @@ func (slice *strSliceN) Last() (result *strN) {
 		result = A(slice.At(-1))
 	} else {
 		result = A("")
+	}
+	return
+}
+
+// LastCnt returns the last cnt items as a new slice without updating original
+func (slice *strSliceN) LastCnt(cnt int) (result *strSliceN) {
+	if cnt > 0 {
+		if len(slice.v) >= cnt {
+			i := len(slice.v) - cnt
+			result = S(slice.v[i:]...)
+		} else {
+			result = S(slice.v...)
+		}
 	}
 	return
 }
