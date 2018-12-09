@@ -13,6 +13,66 @@ import (
 	"github.com/phR0ze/n"
 )
 
+type pathN struct {
+	v string
+}
+
+// Path creats a new path nub from the given string
+func Path(path string) *pathN {
+	return &pathN{v: strings.TrimSpace(path)}
+}
+
+// First returns the first part of the path or cnt pieces of the path
+// or as many as possible if there are not enough. Negative notation means
+// that all path pieces up until the negative index is reached will be returned
+// If the path is rooted i.e. starts with / the first element will include the root
+func (p *pathN) First(cntVar ...int) (result string) {
+	if p.v == "/" {
+		return "/"
+	}
+
+	// Compute cnt
+	cnt := 1
+	if cntVar != nil && len(cntVar) > 0 {
+		cnt = cntVar[0]
+	}
+
+	// Get path items
+	if len(p.v) > 0 && cnt > 0 {
+		s := n.A(p.v).Split("/")
+		if s.At(0) == "" {
+			cnt++
+		}
+		result = s.FirstCnt(cnt).Join("/").A()
+	}
+	return
+}
+
+// Last returns the last part of the path or cnt pieces of the path
+// or as many as possible if there are not enough.
+// If the path is rooted i.e. starts with / the first element will include the root
+func (p *pathN) Last(cntVar ...int) (result string) {
+	if p.v == "/" {
+		return "/"
+	}
+
+	// Compute cnt
+	cnt := 1
+	if cntVar != nil && len(cntVar) > 0 {
+		cnt = cntVar[0]
+	}
+
+	// Get path items
+	if len(p.v) > 0 && cnt > 0 {
+		s := n.A(p.v).Split("/")
+		if s.At(0) == "" && cnt >= s.Len()-1 {
+			cnt++
+		}
+		result = s.LastCnt(cnt).Join("/").A()
+	}
+	return
+}
+
 // Copy copies src to dst recursively.
 // The dst will be copied to if it is an existing directory.
 // The dst will be a clone of the src if it doesn't exist, but it's parent directory does.
@@ -191,12 +251,6 @@ func Paths(root string) (result []string) {
 		return nil
 	})
 	return
-}
-
-// PathLast returns the last cnt pieces of the path
-// or as many as possible if there are not enough.
-func PathLast(path string, cnt int) string {
-	return n.A(path).Split("/").LastCnt(cnt).Join("/").A()
 }
 
 // SharedDir returns the dir portion that two paths share

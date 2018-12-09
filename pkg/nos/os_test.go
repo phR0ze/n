@@ -14,6 +14,32 @@ var tmpDir = "../../test/temp"
 var tmpFile = "../../test/temp/.tmp"
 var readme = "../../README.md"
 
+func TestFirstLast(t *testing.T) {
+	assert.Equal(t, "", Path("").First())
+	assert.Equal(t, "/", Path("/").First())
+	assert.Equal(t, "foo", Path("foo").First())
+	assert.Equal(t, "/foo", Path("/foo").First())
+	assert.Equal(t, "", Path("/foo/bar/one").First(0))
+	assert.Equal(t, "/foo", Path("/foo/bar/one").First())
+	assert.Equal(t, "/foo", Path("/foo/bar/one").First(1))
+	assert.Equal(t, "/foo/bar", Path("/foo/bar/one").First(2))
+	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").First(3))
+	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").First(5))
+}
+
+func TestPathLast(t *testing.T) {
+	assert.Equal(t, "", Path("").Last())
+	assert.Equal(t, "/", Path("/").Last())
+	assert.Equal(t, "foo", Path("foo").Last())
+	assert.Equal(t, "/foo", Path("/foo").Last())
+	assert.Equal(t, "", Path("/foo/bar/one").Last(0))
+	assert.Equal(t, "one", Path("/foo/bar/one").Last())
+	assert.Equal(t, "one", Path("/foo/bar/one").Last(1))
+	assert.Equal(t, "bar/one", Path("/foo/bar/one").Last(2))
+	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Last(3))
+	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Last(5))
+}
+
 func TestCopy(t *testing.T) {
 	cleanTmpDir()
 	src := "../../pkg"
@@ -106,12 +132,6 @@ func TestPaths(t *testing.T) {
 		}
 		assert.Equal(t, expected, Paths(targetDir))
 	}
-}
-
-func TestPathLast(t *testing.T) {
-	assert.Equal(t, "bar/one", PathLast("/foo/bar/one", 2))
-	assert.Equal(t, "foo/bar/one", PathLast("/foo/bar/one", 3))
-	assert.Equal(t, "/foo/bar/one", PathLast("/foo/bar/one", 5))
 }
 
 func TestSharedDir(t *testing.T) {
