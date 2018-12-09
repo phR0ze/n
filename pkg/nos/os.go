@@ -30,20 +30,25 @@ func (p *pathN) First(cntVar ...int) (result string) {
 	if p.v == "/" {
 		return "/"
 	}
+	s := n.A(p.v).Split("/")
 
 	// Compute cnt
 	cnt := 1
 	if cntVar != nil && len(cntVar) > 0 {
 		cnt = cntVar[0]
+		if cnt < 0 {
+			cnt = s.Len() + cnt
+		}
 	}
 
 	// Get path items
-	if len(p.v) > 0 && cnt > 0 {
-		s := n.A(p.v).Split("/")
+	if len(p.v) > 0 {
 		if s.At(0) == "" {
 			cnt++
 		}
-		result = s.FirstCnt(cnt).Join("/").A()
+		if cnt > 0 {
+			result = s.FirstCnt(cnt).Join("/").A()
+		}
 	}
 	return
 }

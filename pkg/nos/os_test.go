@@ -14,17 +14,24 @@ var tmpDir = "../../test/temp"
 var tmpFile = "../../test/temp/.tmp"
 var readme = "../../README.md"
 
-func TestFirstLast(t *testing.T) {
+func TestPathFirst(t *testing.T) {
 	assert.Equal(t, "", Path("").First())
 	assert.Equal(t, "/", Path("/").First())
 	assert.Equal(t, "foo", Path("foo").First())
 	assert.Equal(t, "/foo", Path("/foo").First())
-	assert.Equal(t, "", Path("/foo/bar/one").First(0))
 	assert.Equal(t, "/foo", Path("/foo/bar/one").First())
+
+	assert.Equal(t, "", Path("/foo/bar/one").First(0))
 	assert.Equal(t, "/foo", Path("/foo/bar/one").First(1))
 	assert.Equal(t, "/foo/bar", Path("/foo/bar/one").First(2))
 	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").First(3))
 	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").First(5))
+
+	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").First(-1))
+	assert.Equal(t, "/foo/bar", Path("/foo/bar/one").First(-2))
+	assert.Equal(t, "/foo", Path("/foo/bar/one").First(-3))
+	assert.Equal(t, "", Path("/foo/bar/one").First(-4))
+	assert.Equal(t, "", Path("/foo/bar/one").First(-10))
 }
 
 func TestPathLast(t *testing.T) {
