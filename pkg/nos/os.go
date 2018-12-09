@@ -22,6 +22,29 @@ func Path(path string) *pathN {
 	return &pathN{v: strings.TrimSpace(path)}
 }
 
+// Slice provides a ruby slice like function for paths
+func (p *pathN) Slice(i, j int) (result string) {
+	root := ""
+	if p.v != "" && rune(p.v[0]) == rune('/') {
+		root = "/"
+	}
+	s := n.A(p.v).Split("/")
+
+	// Get positive notation
+	if i < 0 {
+		i = s.Len() + i
+	}
+	if j < 0 {
+		j = s.Len() + j
+	}
+
+	// Operate only if indexes are inbound
+	//if i > 0 && j > 0 && i < s.Len() &&
+
+	result = root + result
+	return
+}
+
 // First returns the first part of the path or cnt pieces of the path
 // or as many as possible if there are not enough. Negative notation means
 // that all path pieces up until the negative index is reached will be returned

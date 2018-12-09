@@ -25,19 +25,19 @@ func S(v ...string) *strSliceN {
 }
 
 // S convert the slice into an string slice
-func (slice *strSliceN) S() []string {
-	return slice.v
+func (s *strSliceN) S() []string {
+	return s.v
 }
 
 // Any checks if the slice has anything in it
-func (slice *strSliceN) Any() bool {
-	return len(slice.v) > 0
+func (s *strSliceN) Any() bool {
+	return len(s.v) > 0
 }
 
 // AnyContain checks if any items in this slice contain the target
-func (slice *strSliceN) AnyContain(target string) bool {
-	for i := range slice.v {
-		if strings.Contains(slice.v[i], target) {
+func (s *strSliceN) AnyContain(target string) bool {
+	for i := range s.v {
+		if strings.Contains(s.v[i], target) {
 			return true
 		}
 	}
@@ -45,32 +45,32 @@ func (slice *strSliceN) AnyContain(target string) bool {
 }
 
 // Append items to the end of the slice and return slice
-func (slice *strSliceN) Append(items ...string) *strSliceN {
-	slice.v = append(slice.v, items...)
-	return slice
+func (s *strSliceN) Append(items ...string) *strSliceN {
+	s.v = append(s.v, items...)
+	return s
 }
 
 // At returns the item at the given index location. Allows for negative notation
-func (slice *strSliceN) At(i int) string {
+func (s *strSliceN) At(i int) string {
 	if i < 0 {
-		i = len(slice.v) + i
+		i = len(s.v) + i
 	}
-	if i >= 0 && i < len(slice.v) {
-		return slice.v[i]
+	if i >= 0 && i < len(s.v) {
+		return s.v[i]
 	}
 	panic(errors.New("Index out of slice bounds"))
 }
 
 // Clear the underlying slice
-func (slice *strSliceN) Clear() *strSliceN {
-	slice.v = []string{}
-	return slice
+func (s *strSliceN) Clear() *strSliceN {
+	s.v = []string{}
+	return s
 }
 
 // Contains checks if the given target is contained in this slice
-func (slice *strSliceN) Contains(target string) bool {
-	for i := range slice.v {
-		if slice.v[i] == target {
+func (s *strSliceN) Contains(target string) bool {
+	for i := range s.v {
+		if s.v[i] == target {
 			return true
 		}
 	}
@@ -78,11 +78,11 @@ func (slice *strSliceN) Contains(target string) bool {
 }
 
 // ContainsAny checks if any of the targets are contained in this slice
-func (slice *strSliceN) ContainsAny(targets []string) bool {
+func (s *strSliceN) ContainsAny(targets []string) bool {
 	if targets != nil && len(targets) > 0 {
 		for i := range targets {
-			for j := range slice.v {
-				if slice.v[j] == targets[i] {
+			for j := range s.v {
+				if s.v[j] == targets[i] {
 					return true
 				}
 			}
@@ -92,17 +92,17 @@ func (slice *strSliceN) ContainsAny(targets []string) bool {
 }
 
 // Del deletes item using neg/pos index notation with status
-func (slice *strSliceN) Del(i int) bool {
+func (s *strSliceN) Del(i int) bool {
 	result := false
 	if i < 0 {
-		i = len(slice.v) + i
+		i = len(s.v) + i
 	}
-	if i >= 0 && i < len(slice.v) {
-		if i+1 < len(slice.v) {
-			slice.v = append(slice.v[:i], slice.v[i+1:]...)
+	if i >= 0 && i < len(s.v) {
+		if i+1 < len(s.v) {
+			s.v = append(s.v[:i], s.v[i+1:]...)
 			result = true
 		} else {
-			slice.v = slice.v[:i]
+			s.v = s.v[:i]
 			result = true
 		}
 	}
@@ -110,33 +110,52 @@ func (slice *strSliceN) Del(i int) bool {
 }
 
 // Drop deletes first n elements and returns the modified slice
-func (slice *strSliceN) Drop(cnt int) *strSliceN {
+func (s *strSliceN) Drop(cnt int) *strSliceN {
 	if cnt > 0 {
-		if len(slice.v) >= cnt {
-			slice.v = slice.v[cnt:]
+		if len(s.v) >= cnt {
+			s.v = s.v[cnt:]
 		} else {
-			slice.v = []string{}
+			s.v = []string{}
 		}
 	}
-	return slice
+	return s
 }
 
 // Each iterates over the queryable and executes the given action
-func (slice *strSliceN) Each(action func(O)) {
-	for i := range slice.v {
-		action(slice.v[i])
+func (s *strSliceN) Each(action func(O)) {
+	for i := range s.v {
+		action(s.v[i])
 	}
 }
 
 // Equals checks if the two slices are equal
-func (slice *strSliceN) Equals(other *strSliceN) bool {
-	return reflect.DeepEqual(slice, other)
+func (s *strSliceN) Equals(other *strSliceN) bool {
+	return reflect.DeepEqual(s, other)
+}
+
+// Slice provides a ruby slice like function for paths
+func (s *strSliceN) Slice(i, j int) (result *strSliceN) {
+	// if i < 0 {
+	// 	i = s.Len() + i
+	// }
+	// if j < 0 {
+	// 	j = s.Len() + j
+	// }
+
+	// if i > 0 {
+	// 	if len(slice.v) >= cnt {
+	// 		result = S(slice.v[:cnt]...)
+	// 	} else {
+	// 		result = S(slice.v...)
+	// 	}
+	// }
+	return
 }
 
 // First returns the first time as a nub type
-func (slice *strSliceN) First() (result *strN) {
-	if len(slice.v) > 0 {
-		result = A(slice.v[0])
+func (s *strSliceN) First() (result *strN) {
+	if len(s.v) > 0 {
+		result = A(s.v[0])
 	} else {
 		result = A("")
 	}
@@ -144,26 +163,26 @@ func (slice *strSliceN) First() (result *strN) {
 }
 
 // FirstCnt returns the first cnt items as a new slice without updating the original
-func (slice *strSliceN) FirstCnt(cnt int) (result *strSliceN) {
+func (s *strSliceN) FirstCnt(cnt int) (result *strSliceN) {
 	if cnt > 0 {
-		if len(slice.v) >= cnt {
-			result = S(slice.v[:cnt]...)
+		if len(s.v) >= cnt {
+			result = S(s.v[:cnt]...)
 		} else {
-			result = S(slice.v...)
+			result = S(s.v...)
 		}
 	}
 	return
 }
 
 // Join the underlying slice with the given delim
-func (slice *strSliceN) Join(delim string) *strN {
-	return A(strings.Join(slice.v, delim))
+func (s *strSliceN) Join(delim string) *strN {
+	return A(strings.Join(s.v, delim))
 }
 
 // Last returns the last item as a nub type
-func (slice *strSliceN) Last() (result *strN) {
-	if len(slice.v) > 0 {
-		result = A(slice.At(-1))
+func (s *strSliceN) Last() (result *strN) {
+	if len(s.v) > 0 {
+		result = A(s.At(-1))
 	} else {
 		result = A("")
 	}
@@ -171,27 +190,27 @@ func (slice *strSliceN) Last() (result *strN) {
 }
 
 // LastCnt returns the last cnt items as a new slice without updating original
-func (slice *strSliceN) LastCnt(cnt int) (result *strSliceN) {
+func (s *strSliceN) LastCnt(cnt int) (result *strSliceN) {
 	if cnt > 0 {
-		if len(slice.v) >= cnt {
-			i := len(slice.v) - cnt
-			result = S(slice.v[i:]...)
+		if len(s.v) >= cnt {
+			i := len(s.v) - cnt
+			result = S(s.v[i:]...)
 		} else {
-			result = S(slice.v...)
+			result = S(s.v...)
 		}
 	}
 	return
 }
 
 // Len is a pass through to the underlying slice
-func (slice *strSliceN) Len() int {
-	return len(slice.v)
+func (s *strSliceN) Len() int {
+	return len(s.v)
 }
 
 // Map manipulates the slice into a new form
-func (slice *strSliceN) Map(sel func(string) O) (result *Queryable) {
-	for i := range slice.v {
-		obj := sel(slice.v[i])
+func (s *strSliceN) Map(sel func(string) O) (result *Queryable) {
+	for i := range s.v {
+		obj := sel(s.v[i])
 
 		// Drill into queryables
 		if s, ok := obj.(*Queryable); ok {
@@ -212,100 +231,100 @@ func (slice *strSliceN) Map(sel func(string) O) (result *Queryable) {
 }
 
 // MapF manipulates the queryable data into a new form then flattens
-func (slice *strSliceN) MapF(sel func(string) O) (result *Queryable) {
-	result = slice.Map(sel).Flatten()
+func (s *strSliceN) MapF(sel func(string) O) (result *Queryable) {
+	result = s.Map(sel).Flatten()
 	return
 }
 
 // Pair simply returns the first and second slice items
-func (slice *strSliceN) Pair() (first string, second string) {
-	if slice.Len() > 0 {
-		first = slice.v[0]
+func (s *strSliceN) Pair() (first string, second string) {
+	if s.Len() > 0 {
+		first = s.v[0]
 	}
-	if slice.Len() > 1 {
-		second = slice.v[1]
+	if s.Len() > 1 {
+		second = s.v[1]
 	}
 	return
 }
 
 // Prepend items to the begining of the slice and return slice
-func (slice *strSliceN) Prepend(items ...string) *strSliceN {
-	items = append(items, slice.v...)
-	slice.v = items
-	return slice
+func (s *strSliceN) Prepend(items ...string) *strSliceN {
+	items = append(items, s.v...)
+	s.v = items
+	return s
 }
 
 // Single simple report true if there is only one item
-func (slice *strSliceN) Single() (result bool) {
-	return slice.Len() == 1
+func (s *strSliceN) Single() (result bool) {
+	return s.Len() == 1
 }
 
 // Sort the underlying slice
-func (slice *strSliceN) Sort() *strSliceN {
-	sort.Strings(slice.v)
-	return slice
+func (s *strSliceN) Sort() *strSliceN {
+	sort.Strings(s.v)
+	return s
 }
 
 // TakeFirst updates the underlying slice and returns the item and status
-func (slice *strSliceN) TakeFirst() (string, bool) {
-	if len(slice.v) > 0 {
-		item := slice.v[0]
-		slice.v = slice.v[1:]
+func (s *strSliceN) TakeFirst() (string, bool) {
+	if len(s.v) > 0 {
+		item := s.v[0]
+		s.v = s.v[1:]
 		return item, true
 	}
 	return "", false
 }
 
 // TakeFirstCnt updates the underlying slice and returns the items
-func (slice *strSliceN) TakeFirstCnt(cnt int) (result *strSliceN) {
+func (s *strSliceN) TakeFirstCnt(cnt int) (result *strSliceN) {
 	if cnt > 0 {
-		if len(slice.v) >= cnt {
-			result = S(slice.v[:cnt]...)
-			slice.v = slice.v[cnt:]
+		if len(s.v) >= cnt {
+			result = S(s.v[:cnt]...)
+			s.v = s.v[cnt:]
 		} else {
-			result = S(slice.v...)
-			slice.v = []string{}
+			result = S(s.v...)
+			s.v = []string{}
 		}
 	}
 	return
 }
 
 // TakeLast updates the underlying slice and returns the item and status
-func (slice *strSliceN) TakeLast() (string, bool) {
-	if len(slice.v) > 0 {
-		item := slice.v[len(slice.v)-1]
-		slice.v = slice.v[:len(slice.v)-1]
+func (s *strSliceN) TakeLast() (string, bool) {
+	if len(s.v) > 0 {
+		item := s.v[len(s.v)-1]
+		s.v = s.v[:len(s.v)-1]
 		return item, true
 	}
 	return "", false
 }
 
 // TakeLastCnt updates the underlying slice and returns a new nub
-func (slice *strSliceN) TakeLastCnt(cnt int) (result *strSliceN) {
+func (s *strSliceN) TakeLastCnt(cnt int) (result *strSliceN) {
 	if cnt > 0 {
-		if len(slice.v) >= cnt {
-			i := len(slice.v) - cnt
-			result = S(slice.v[i:]...)
-			slice.v = slice.v[:i]
+		if len(s.v) >= cnt {
+			i := len(s.v) - cnt
+			result = S(s.v[i:]...)
+			s.v = s.v[:i]
 		} else {
-			result = S(slice.v...)
-			slice.v = []string{}
+			result = S(s.v...)
+			s.v = []string{}
 		}
 	}
 	return
 }
 
 // Uniq removes all duplicates from the underlying slice
-func (slice *strSliceN) Uniq() *strSliceN {
+func (s *strSliceN) Uniq() *strSliceN {
 	hits := map[string]bool{}
-	for i := len(slice.v) - 1; i >= 0; i-- {
-		if _, exists := hits[slice.v[i]]; !exists {
-			hits[slice.v[i]] = true
+	for i := len(s.v) - 1; i >= 0; i-- {
+		if _, exists := hits[s.v[i]]; !exists {
+			hits[s.v[i]] = true
 		} else {
-			slice.v = append(slice.v[:i], slice.v[i+1:]...)
+			s.v = append(s.v[:i], s.v[i+1:]...)
 		}
 	}
-	return slice
+	return s
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -329,42 +348,42 @@ func IntSlice(slice []int) *intSliceN {
 }
 
 // S convert the slice into an int slice
-func (slice *intSliceN) S() []int {
-	return slice.v
+func (s *intSliceN) S() []int {
+	return s.v
 }
 
 // Any checks if the slice has anything in it
-func (slice *intSliceN) Any() bool {
-	return len(slice.v) > 0
+func (s *intSliceN) Any() bool {
+	return len(s.v) > 0
 }
 
 // Append items to the end of the slice and return slice
-func (slice *intSliceN) Append(items ...int) *intSliceN {
-	slice.v = append(slice.v, items...)
-	return slice
+func (s *intSliceN) Append(items ...int) *intSliceN {
+	s.v = append(s.v, items...)
+	return s
 }
 
 // At returns the item at the given index location. Allows for negative notation
-func (slice *intSliceN) At(i int) int {
+func (s *intSliceN) At(i int) int {
 	if i < 0 {
-		i = len(slice.v) + i
+		i = len(s.v) + i
 	}
-	if i >= 0 && i < len(slice.v) {
-		return slice.v[i]
+	if i >= 0 && i < len(s.v) {
+		return s.v[i]
 	}
 	panic(errors.New("Index out of slice bounds"))
 }
 
 // Clear the underlying slice
-func (slice *intSliceN) Clear() *intSliceN {
-	slice.v = []int{}
-	return slice
+func (s *intSliceN) Clear() *intSliceN {
+	s.v = []int{}
+	return s
 }
 
 // Contains checks if the given target is contained in this slice
-func (slice *intSliceN) Contains(target int) bool {
-	for i := range slice.v {
-		if slice.v[i] == target {
+func (s *intSliceN) Contains(target int) bool {
+	for i := range s.v {
+		if s.v[i] == target {
 			return true
 		}
 	}
@@ -372,11 +391,11 @@ func (slice *intSliceN) Contains(target int) bool {
 }
 
 // ContainsAny checks if any of the targets are contained in this slice
-func (slice *intSliceN) ContainsAny(targets []int) bool {
+func (s *intSliceN) ContainsAny(targets []int) bool {
 	if targets != nil && len(targets) > 0 {
 		for i := range targets {
-			for j := range slice.v {
-				if slice.v[j] == targets[i] {
+			for j := range s.v {
+				if s.v[j] == targets[i] {
 					return true
 				}
 			}
@@ -386,17 +405,17 @@ func (slice *intSliceN) ContainsAny(targets []int) bool {
 }
 
 // Del deletes item using neg/pos index notation with status
-func (slice *intSliceN) Del(i int) bool {
+func (s *intSliceN) Del(i int) bool {
 	result := false
 	if i < 0 {
-		i = len(slice.v) + i
+		i = len(s.v) + i
 	}
-	if i >= 0 && i < len(slice.v) {
-		if i+1 < len(slice.v) {
-			slice.v = append(slice.v[:i], slice.v[i+1:]...)
+	if i >= 0 && i < len(s.v) {
+		if i+1 < len(s.v) {
+			s.v = append(s.v[:i], s.v[i+1:]...)
 			result = true
 		} else {
-			slice.v = slice.v[:i]
+			s.v = s.v[:i]
 			result = true
 		}
 	}
@@ -404,88 +423,88 @@ func (slice *intSliceN) Del(i int) bool {
 }
 
 // Each iterates over the queryable and executes the given action
-func (slice *intSliceN) Each(action func(O)) {
-	for i := range slice.v {
-		action(slice.v[i])
+func (s *intSliceN) Each(action func(O)) {
+	for i := range s.v {
+		action(s.v[i])
 	}
 }
 
 // Equals checks if the two slices are equal
-func (slice *intSliceN) Equals(other *intSliceN) bool {
-	return reflect.DeepEqual(slice, other)
+func (s *intSliceN) Equals(other *intSliceN) bool {
+	return reflect.DeepEqual(s, other)
 }
 
 // Join the underlying slice with the given delim
-func (slice *intSliceN) Join(delim string) *strN {
+func (s *intSliceN) Join(delim string) *strN {
 	result := []string{}
-	for i := range slice.v {
-		result = append(result, strconv.Itoa(slice.v[i]))
+	for i := range s.v {
+		result = append(result, strconv.Itoa(s.v[i]))
 	}
 	return A(strings.Join(result, delim))
 }
 
 // Len is a pass through to the underlying slice
-func (slice *intSliceN) Len() int {
-	return len(slice.v)
+func (s *intSliceN) Len() int {
+	return len(s.v)
 }
 
 // Prepend items to the begining of the slice and return slice
-func (slice *intSliceN) Prepend(items ...int) *intSliceN {
-	items = append(items, slice.v...)
-	slice.v = items
-	return slice
+func (s *intSliceN) Prepend(items ...int) *intSliceN {
+	items = append(items, s.v...)
+	s.v = items
+	return s
 }
 
 // Sort the underlying slice
-func (slice *intSliceN) Sort() *intSliceN {
-	sort.Ints(slice.v)
-	return slice
+func (s *intSliceN) Sort() *intSliceN {
+	sort.Ints(s.v)
+	return s
 }
 
 // TakeFirst updates the underlying slice and returns the item and status
-func (slice *intSliceN) TakeFirst() (int, bool) {
-	if len(slice.v) > 0 {
-		item := slice.v[0]
-		slice.v = slice.v[1:]
+func (s *intSliceN) TakeFirst() (int, bool) {
+	if len(s.v) > 0 {
+		item := s.v[0]
+		s.v = s.v[1:]
 		return item, true
 	}
 	return 0, false
 }
 
 // TakeFirstCnt updates the underlying slice and returns the items
-func (slice *intSliceN) TakeFirstCnt(cnt int) (result *intSliceN) {
+func (s *intSliceN) TakeFirstCnt(cnt int) (result *intSliceN) {
 	if cnt > 0 {
-		if len(slice.v) >= cnt {
-			result = IntSlice(slice.v[:cnt])
-			slice.v = slice.v[cnt:]
+		if len(s.v) >= cnt {
+			result = IntSlice(s.v[:cnt])
+			s.v = s.v[cnt:]
 		} else {
-			result = IntSlice(slice.v)
-			slice.v = []int{}
+			result = IntSlice(s.v)
+			s.v = []int{}
 		}
 	}
 	return
 }
 
 // TakeLast updates the underlying slice and returns the item and status
-func (slice *intSliceN) TakeLast() (int, bool) {
-	if len(slice.v) > 0 {
-		item := slice.v[len(slice.v)-1]
-		slice.v = slice.v[:len(slice.v)-1]
+func (s *intSliceN) TakeLast() (int, bool) {
+	if len(s.v) > 0 {
+		item := s.v[len(s.v)-1]
+		s.v = s.v[:len(s.v)-1]
 		return item, true
 	}
 	return 0, false
 }
 
 // TakeLastCnt updates the underlying slice and returns the items
-func (slice *intSliceN) TakeLastCnt(cnt int) (result *intSliceN) {
+func (s *intSliceN) TakeLastCnt(cnt int) (result *intSliceN) {
 	if cnt > 0 {
-		if len(slice.v) >= cnt {
-			i := len(slice.v) - cnt
-			result = IntSlice(slice.v[i:])
-			slice.v = slice.v[:i]
+		if len(s.v) >= cnt {
+			i := len(s.v) - cnt
+			result = IntSlice(s.v[i:])
+			s.v = s.v[:i]
 		} else {
-			result = IntSlice(slice.v)
-			slice.v = []int{}
+			result = IntSlice(s.v)
+			s.v = []int{}
 		}
 	}
 	return
@@ -493,16 +512,16 @@ func (slice *intSliceN) TakeLastCnt(cnt int) (result *intSliceN) {
 }
 
 // Uniq removes all duplicates from the underlying slice
-func (slice *intSliceN) Uniq() *intSliceN {
+func (s *intSliceN) Uniq() *intSliceN {
 	hits := map[int]bool{}
-	for i := len(slice.v) - 1; i >= 0; i-- {
-		if _, exists := hits[slice.v[i]]; !exists {
-			hits[slice.v[i]] = true
+	for i := len(s.v) - 1; i >= 0; i-- {
+		if _, exists := hits[s.v[i]]; !exists {
+			hits[s.v[i]] = true
 		} else {
-			slice.v = append(slice.v[:i], slice.v[i+1:]...)
+			s.v = append(s.v[:i], s.v[i+1:]...)
 		}
 	}
-	return slice
+	return s
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -526,42 +545,42 @@ func StrMapSlice(slice []map[string]interface{}) *strMapSliceN {
 }
 
 // S convert the slice into an string slice
-func (slice *strMapSliceN) S() []map[string]interface{} {
-	return slice.v
+func (s *strMapSliceN) S() []map[string]interface{} {
+	return s.v
 }
 
 // Any checks if the slice has anything in it
-func (slice *strMapSliceN) Any() bool {
-	return len(slice.v) > 0
+func (s *strMapSliceN) Any() bool {
+	return len(s.v) > 0
 }
 
 // Append items to the end of the slice and return slice
-func (slice *strMapSliceN) Append(items ...map[string]interface{}) *strMapSliceN {
-	slice.v = append(slice.v, items...)
-	return slice
+func (s *strMapSliceN) Append(items ...map[string]interface{}) *strMapSliceN {
+	s.v = append(s.v, items...)
+	return s
 }
 
 // At returns the item at the given index location. Allows for negative notation
-func (slice *strMapSliceN) At(i int) *strMapN {
+func (s *strMapSliceN) At(i int) *strMapN {
 	if i < 0 {
-		i = len(slice.v) + i
+		i = len(s.v) + i
 	}
-	if i >= 0 && i < len(slice.v) {
-		return M(slice.v[i])
+	if i >= 0 && i < len(s.v) {
+		return M(s.v[i])
 	}
 	panic(errors.New("Index out of slice bounds"))
 }
 
 // Clear the underlying slice
-func (slice *strMapSliceN) Clear() *strMapSliceN {
-	slice.v = []map[string]interface{}{}
-	return slice
+func (s *strMapSliceN) Clear() *strMapSliceN {
+	s.v = []map[string]interface{}{}
+	return s
 }
 
 // Contains checks if the given target is contained in this slice
-func (slice *strMapSliceN) Contains(key string) bool {
-	for i := range slice.v {
-		if _, exists := slice.v[i][key]; exists {
+func (s *strMapSliceN) Contains(key string) bool {
+	for i := range s.v {
+		if _, exists := s.v[i][key]; exists {
 			return true
 		}
 	}
@@ -569,11 +588,11 @@ func (slice *strMapSliceN) Contains(key string) bool {
 }
 
 // ContainsAny checks if any of the targets are contained in this slice
-func (slice *strMapSliceN) ContainsAny(keys []string) bool {
+func (s *strMapSliceN) ContainsAny(keys []string) bool {
 	if keys != nil && len(keys) > 0 {
 		for i := range keys {
-			for j := range slice.v {
-				if _, exists := slice.v[j][keys[i]]; exists {
+			for j := range s.v {
+				if _, exists := s.v[j][keys[i]]; exists {
 					return true
 				}
 			}
@@ -583,17 +602,17 @@ func (slice *strMapSliceN) ContainsAny(keys []string) bool {
 }
 
 // Del deletes item using neg/pos index notation with status
-func (slice *strMapSliceN) Del(i int) bool {
+func (s *strMapSliceN) Del(i int) bool {
 	result := false
 	if i < 0 {
-		i = len(slice.v) + i
+		i = len(s.v) + i
 	}
-	if i >= 0 && i < len(slice.v) {
-		if i+1 < len(slice.v) {
-			slice.v = append(slice.v[:i], slice.v[i+1:]...)
+	if i >= 0 && i < len(s.v) {
+		if i+1 < len(s.v) {
+			s.v = append(s.v[:i], s.v[i+1:]...)
 			result = true
 		} else {
-			slice.v = slice.v[:i]
+			s.v = s.v[:i]
 			result = true
 		}
 	}
@@ -601,85 +620,85 @@ func (slice *strMapSliceN) Del(i int) bool {
 }
 
 // Each iterates over the queryable and executes the given action
-func (slice *strMapSliceN) Each(action func(O)) {
-	for i := range slice.v {
-		action(slice.v[i])
+func (s *strMapSliceN) Each(action func(O)) {
+	for i := range s.v {
+		action(s.v[i])
 	}
 }
 
 // Equals checks if the two slices are equal
-func (slice *strMapSliceN) Equals(other *strMapSliceN) bool {
-	return reflect.DeepEqual(slice, other)
+func (s *strMapSliceN) Equals(other *strMapSliceN) bool {
+	return reflect.DeepEqual(s, other)
 }
 
 // Len is a pass through to the underlying slice
-func (slice *strMapSliceN) Len() int {
-	return len(slice.v)
+func (s *strMapSliceN) Len() int {
+	return len(s.v)
 }
 
 // Prepend items to the begining of the slice and return slice
-func (slice *strMapSliceN) Prepend(items ...map[string]interface{}) *strMapSliceN {
-	items = append(items, slice.v...)
-	slice.v = items
-	return slice
+func (s *strMapSliceN) Prepend(items ...map[string]interface{}) *strMapSliceN {
+	items = append(items, s.v...)
+	s.v = items
+	return s
 }
 
 // TakeFirst updates the underlying slice and returns the item and status
-func (slice *strMapSliceN) TakeFirst() (*strMapN, bool) {
-	if len(slice.v) > 0 {
-		item := M(slice.v[0])
-		slice.v = slice.v[1:]
+func (s *strMapSliceN) TakeFirst() (*strMapN, bool) {
+	if len(s.v) > 0 {
+		item := M(s.v[0])
+		s.v = s.v[1:]
 		return item, true
 	}
 	return nil, false
 }
 
 // TakeFirstCnt updates the underlying slice and returns the items
-func (slice *strMapSliceN) TakeFirstCnt(cnt int) (result *strMapSliceN) {
+func (s *strMapSliceN) TakeFirstCnt(cnt int) (result *strMapSliceN) {
 	if cnt > 0 {
-		if len(slice.v) >= cnt {
-			result = StrMapSlice(slice.v[:cnt])
-			slice.v = slice.v[cnt:]
+		if len(s.v) >= cnt {
+			result = StrMapSlice(s.v[:cnt])
+			s.v = s.v[cnt:]
 		} else {
-			result = StrMapSlice(slice.v)
-			slice.v = []map[string]interface{}{}
+			result = StrMapSlice(s.v)
+			s.v = []map[string]interface{}{}
 		}
 	}
 	return
 }
 
 // TakeLast updates the underlying slice and returns the item and status
-func (slice *strMapSliceN) TakeLast() (*strMapN, bool) {
-	if len(slice.v) > 0 {
-		item := M(slice.v[len(slice.v)-1])
-		slice.v = slice.v[:len(slice.v)-1]
+func (s *strMapSliceN) TakeLast() (*strMapN, bool) {
+	if len(s.v) > 0 {
+		item := M(s.v[len(s.v)-1])
+		s.v = s.v[:len(s.v)-1]
 		return item, true
 	}
 	return nil, false
 }
 
 // TakeLastCnt updates the underlying slice and returns a new nub
-func (slice *strMapSliceN) TakeLastCnt(cnt int) (result *strMapSliceN) {
+func (s *strMapSliceN) TakeLastCnt(cnt int) (result *strMapSliceN) {
 	if cnt > 0 {
-		if len(slice.v) >= cnt {
-			i := len(slice.v) - cnt
-			result = StrMapSlice(slice.v[i:])
-			slice.v = slice.v[:i]
+		if len(s.v) >= cnt {
+			i := len(s.v) - cnt
+			result = StrMapSlice(s.v[i:])
+			s.v = s.v[:i]
 		} else {
-			result = StrMapSlice(slice.v)
-			slice.v = []map[string]interface{}{}
+			result = StrMapSlice(s.v)
+			s.v = []map[string]interface{}{}
 		}
 	}
 	return
 }
 
 // YAMLPair return the first and second entries as yaml types
-func (slice *strSliceN) YAMLPair() (first string, second interface{}) {
-	if slice.Len() > 0 {
-		first = slice.v[0]
+func (s *strSliceN) YAMLPair() (first string, second interface{}) {
+	if s.Len() > 0 {
+		first = s.v[0]
 	}
-	if slice.Len() > 1 {
-		second = A(slice.v[1]).YAMLType()
+	if s.Len() > 1 {
+		second = A(s.v[1]).YAMLType()
 	} else {
 		second = nil
 	}
@@ -687,13 +706,13 @@ func (slice *strSliceN) YAMLPair() (first string, second interface{}) {
 }
 
 // YAMLKeyVal return the first and second entries as KeyVal of yaml types
-func (slice *strSliceN) YAMLKeyVal() KeyVal {
+func (s *strSliceN) YAMLKeyVal() KeyVal {
 	result := KeyVal{}
-	if slice.Len() > 0 {
-		result.Key = A(slice.v[0]).YAMLType()
+	if s.Len() > 0 {
+		result.Key = A(s.v[0]).YAMLType()
 	}
-	if slice.Len() > 1 {
-		result.Val = A(slice.v[1]).YAMLType()
+	if s.Len() > 1 {
+		result.Val = A(s.v[1]).YAMLType()
 	} else {
 		result.Val = ""
 	}

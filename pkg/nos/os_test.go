@@ -14,6 +14,12 @@ var tmpDir = "../../test/temp"
 var tmpFile = "../../test/temp/.tmp"
 var readme = "../../README.md"
 
+func TestPathSlice(t *testing.T) {
+	assert.Equal(t, "", Path("").Slice(0, -1))
+	assert.Equal(t, "/", Path("/").Slice(0, -1))
+	//assert.Equal(t, "/foo", Path("/foo").Slice(0, -1))
+}
+
 func TestPathFirst(t *testing.T) {
 	assert.Equal(t, "", Path("").First())
 	assert.Equal(t, "/", Path("/").First())
