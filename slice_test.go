@@ -193,22 +193,6 @@ func TestStrSliceFirst(t *testing.T) {
 	}
 }
 
-func TestStrSliceFirstCnt(t *testing.T) {
-	assert.Equal(t, S(), S().FirstCnt(2))
-	assert.Equal(t, S("1"), S("1").FirstCnt(2))
-	assert.Equal(t, S("1", "2"), S("1", "2").FirstCnt(2))
-	assert.Equal(t, S("1", "2"), S("1", "2", "3").FirstCnt(2))
-	assert.Equal(t, S("", "foo"), A("/foo/bar/one").Split("/").FirstCnt(2))
-	assert.Equal(t, A("/foo"), A("/foo/bar/one").Split("/").FirstCnt(2).Join("/"))
-	{
-		// Test that the original slice wasn't modified
-		q := S("1")
-		assert.Equal(t, []string{"1"}, q.S())
-		assert.Equal(t, S("1"), q.FirstCnt(1))
-		assert.Equal(t, []string{"1"}, q.S())
-	}
-}
-
 func TestStrSliceJoin(t *testing.T) {
 	assert.Equal(t, "", S().Join(".").A())
 	assert.Equal(t, "1", S("1").Join(".").A())
@@ -230,30 +214,9 @@ func TestStrSliceLast(t *testing.T) {
 		// Test that the original slice wasn't modified
 		q := S("1")
 		assert.Equal(t, []string{"1"}, q.S())
-		assert.Equal(t, S("1"), q.LastCnt(1))
-		assert.Equal(t, []string{"1"}, q.S())
-	}
-}
-
-func TestStrSliceLastCnt(t *testing.T) {
-	assert.Equal(t, S(), S().LastCnt(2))
-	assert.Equal(t, S("1"), S("1").LastCnt(2))
-	assert.Equal(t, S("1", "2"), S("1", "2").LastCnt(2))
-	assert.Equal(t, S("2", "3"), S("1", "2", "3").LastCnt(2))
-	assert.Equal(t, S("bar", "one"), A("/foo/bar/one").Split("/").LastCnt(2))
-	assert.Equal(t, A("bar/one"), A("/foo/bar/one").Split("/").LastCnt(2).Join("/"))
-	{
-		// Test that the original slice wasn't modified
-		q := S("1")
-		assert.Equal(t, []string{"1"}, q.S())
 		assert.Equal(t, A("1"), q.Last())
 		assert.Equal(t, []string{"1"}, q.S())
 	}
-}
-
-func TestStrSliceSort(t *testing.T) {
-	slice := S().Append("b", "d", "a")
-	assert.Equal(t, []string{"a", "b", "d"}, slice.Sort().S())
 }
 
 func TestStrSlicePrepend(t *testing.T) {
@@ -263,6 +226,58 @@ func TestStrSlicePrepend(t *testing.T) {
 	slice.Prepend("2", "3")
 	assert.Equal(t, "2", slice.At(0))
 	assert.Equal(t, []string{"2", "3", "1"}, slice.S())
+}
+
+func TestStrSliceSort(t *testing.T) {
+	slice := S().Append("b", "d", "a")
+	assert.Equal(t, []string{"a", "b", "d"}, slice.Sort().S())
+}
+
+func TestStrSliceSlice(t *testing.T) {
+	assert.Equal(t, S(), S().Slice(0, -1))
+	assert.Equal(t, S(""), S("").Slice(0, -1))
+	assert.Equal(t, S("1", "2", "3"), S("1", "2", "3").Slice(0, -1))
+	assert.Equal(t, S("1", "2"), S("1", "2", "3").Slice(0, -2))
+	assert.Equal(t, S("1"), S("1", "2", "3").Slice(0, -3))
+	assert.Equal(t, S(), S("1", "2", "3").Slice(0, -4))
+	assert.Equal(t, S("2", "3"), S("1", "2", "3").Slice(1, -1))
+	assert.Equal(t, S("3"), S("1", "2", "3").Slice(2, -1))
+	assert.Equal(t, S(), S("1", "2", "3").Slice(3, -1))
+	assert.Equal(t, S(), S("1", "2", "3").Slice(5, -1))
+	assert.Equal(t, S("2", "3"), S("1", "2", "3").Slice(1, 2))
+	assert.Equal(t, S(), S("1", "2", "3").Slice(3, 2))
+	{
+		// old FirstCnt ops
+		assert.Equal(t, S(), S().Slice(0, 2))
+		assert.Equal(t, S("1"), S("1").Slice(0, 2))
+		assert.Equal(t, S("1", "2"), S("1", "2").Slice(0, 2))
+		assert.Equal(t, S("1", "2", "3"), S("1", "2", "3").Slice(0, 2))
+		assert.Equal(t, S("", "foo", "bar"), A("/foo/bar/one").Split("/").Slice(0, 2))
+		assert.Equal(t, A("/foo/bar"), A("/foo/bar/one").Split("/").Slice(0, 2).Join("/"))
+		{
+			// Test that the original slice wasn't modified
+			q := S("1")
+			assert.Equal(t, []string{"1"}, q.S())
+			assert.Equal(t, S("1"), q.Slice(0, 1))
+			assert.Equal(t, []string{"1"}, q.S())
+		}
+	}
+	{
+		// old LastCnt(2) tests
+		assert.Equal(t, S(), S().Slice(-3, -1))
+		assert.Equal(t, S("1"), S("1").Slice(-2, -1))
+		assert.Equal(t, S("1", "2"), S("1", "2").Slice(-2, -1))
+		assert.Equal(t, S("2", "3"), S("1", "2", "3").Slice(-2, -1))
+		assert.Equal(t, S("bar", "one"), A("/foo/bar/one").Split("/").Slice(-2, -1))
+		assert.Equal(t, A("bar/one"), A("/foo/bar/one").Split("/").Slice(-2, -1).Join("/"))
+		{
+			// Test that the original slice wasn't modified
+			q := S("1")
+			assert.Equal(t, []string{"1"}, q.S())
+			assert.Equal(t, S("1"), q.Slice(-2, -1))
+			assert.Equal(t, []string{"1"}, q.S())
+		}
+	}
 }
 
 func TestStrSliceTakeFirst(t *testing.T) {

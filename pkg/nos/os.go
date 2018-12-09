@@ -22,86 +22,33 @@ func Path(path string) *pathN {
 	return &pathN{v: strings.TrimSpace(path)}
 }
 
-// Slice provides a ruby slice like function for paths
+// Slice provides a ruby like slice function for path nubs
 func (p *pathN) Slice(i, j int) (result string) {
-	root := ""
-	if p.v != "" && rune(p.v[0]) == rune('/') {
-		root = "/"
-	}
-	s := n.A(p.v).Split("/")
+	x := n.A(p.v).Split("/")
 
-	// Get positive notation
+	// Convert to positive notation to simplify logic
 	if i < 0 {
-		i = s.Len() + i
-	}
-	if j < 0 {
-		j = s.Len() + j
+		i = x.Len() + i
 	}
 
-	// Operate only if indexes are inbound
-	//if i > 0 && j > 0 && i < s.Len() &&
+	// Offset indices to include root
+	// "", "foo", "bar", "one" .Slice(0, -2))
+	if p.v != "" && rune(p.v[0]) == rune('/') {
+		if i == 1 {
+			i--
+		} else if i == 0 && j >= 0 {
+			j++
+		} else if j > 0 {
+			i, j = i+1, j+1
+		}
+	}
 
-	result = root + result
+	result = x.Slice(i, j).Join("/").A()
+
 	return
 }
 
-// First returns the first part of the path or cnt pieces of the path
-// or as many as possible if there are not enough. Negative notation means
-// that all path pieces up until the negative index is reached will be returned
-// If the path is rooted i.e. starts with / the first element will include the root
-func (p *pathN) First(cntVar ...int) (result string) {
-	if p.v == "/" {
-		return "/"
-	}
-	s := n.A(p.v).Split("/")
-
-	// Compute cnt
-	cnt := 1
-	if cntVar != nil && len(cntVar) > 0 {
-		cnt = cntVar[0]
-		if cnt < 0 {
-			cnt = s.Len() + cnt
-		}
-	}
-
-	// Get path items
-	if len(p.v) > 0 {
-		if s.At(0) == "" {
-			cnt++
-		}
-		if cnt > 0 {
-			result = s.FirstCnt(cnt).Join("/").A()
-		}
-	}
-	return
-}
-
-// Last returns the last part of the path or cnt pieces of the path
-// or as many as possible if there are not enough.
-// If the path is rooted i.e. starts with / the first element will include the root
-func (p *pathN) Last(cntVar ...int) (result string) {
-	if p.v == "/" {
-		return "/"
-	}
-
-	// Compute cnt
-	cnt := 1
-	if cntVar != nil && len(cntVar) > 0 {
-		cnt = cntVar[0]
-	}
-
-	// Get path items
-	if len(p.v) > 0 && cnt > 0 {
-		s := n.A(p.v).Split("/")
-		if s.At(0) == "" && cnt >= s.Len()-1 {
-			cnt++
-		}
-		result = s.LastCnt(cnt).Join("/").A()
-	}
-	return
-}
-
-// Copy copies src to dst recursively.
+/*  */ // Copy copies src to dst recursively.
 // The dst will be copied to if it is an existing directory.
 // The dst will be a clone of the src if it doesn't exist, but it's parent directory does.
 func Copy(src, dst string) error {

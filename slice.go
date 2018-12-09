@@ -1,4 +1,4 @@
-// package n provides helper interfaces and functions reminiscent ruby/C#
+// Package n provides helper interfaces and functions reminiscent ruby/C#
 package n
 
 import (
@@ -133,43 +133,12 @@ func (s *strSliceN) Equals(other *strSliceN) bool {
 	return reflect.DeepEqual(s, other)
 }
 
-// Slice provides a ruby slice like function for paths
-func (s *strSliceN) Slice(i, j int) (result *strSliceN) {
-	// if i < 0 {
-	// 	i = s.Len() + i
-	// }
-	// if j < 0 {
-	// 	j = s.Len() + j
-	// }
-
-	// if i > 0 {
-	// 	if len(slice.v) >= cnt {
-	// 		result = S(slice.v[:cnt]...)
-	// 	} else {
-	// 		result = S(slice.v...)
-	// 	}
-	// }
-	return
-}
-
 // First returns the first time as a nub type
 func (s *strSliceN) First() (result *strN) {
 	if len(s.v) > 0 {
 		result = A(s.v[0])
 	} else {
 		result = A("")
-	}
-	return
-}
-
-// FirstCnt returns the first cnt items as a new slice without updating the original
-func (s *strSliceN) FirstCnt(cnt int) (result *strSliceN) {
-	if cnt > 0 {
-		if len(s.v) >= cnt {
-			result = S(s.v[:cnt]...)
-		} else {
-			result = S(s.v...)
-		}
 	}
 	return
 }
@@ -185,19 +154,6 @@ func (s *strSliceN) Last() (result *strN) {
 		result = A(s.At(-1))
 	} else {
 		result = A("")
-	}
-	return
-}
-
-// LastCnt returns the last cnt items as a new slice without updating original
-func (s *strSliceN) LastCnt(cnt int) (result *strSliceN) {
-	if cnt > 0 {
-		if len(s.v) >= cnt {
-			i := len(s.v) - cnt
-			result = S(s.v[i:]...)
-		} else {
-			result = S(s.v...)
-		}
 	}
 	return
 }
@@ -257,6 +213,41 @@ func (s *strSliceN) Prepend(items ...string) *strSliceN {
 // Single simple report true if there is only one item
 func (s *strSliceN) Single() (result bool) {
 	return s.Len() == 1
+}
+
+// Slice provides a python like slice function for slice nubs.
+// Has an inclusive behavior such that Slice(0, -1) includes index -1
+// e.g. [1,2,3][0:-1] eq [1,2,3] and [1,2,3][1:2] eq [2,3]
+// returns entire slice if indices are out of bounds
+func (s *strSliceN) Slice(i, j int) (result *strSliceN) {
+
+	// Convert to postive notation
+	if i < 0 {
+		i = s.Len() + i
+	}
+	if j < 0 {
+		j = s.Len() + j
+	}
+
+	// Move start/end within bounds
+	if i < 0 {
+		i = 0
+	}
+	if j >= s.Len() {
+		j = s.Len() - 1
+	}
+
+	// Specifically offsetting j to get an inclusive behavior out of Go
+	j++
+
+	// Only operate when indexes are within bounds
+	// allow j to be len of s as that is how we include last item
+	if i >= 0 && i < s.Len() && j >= 0 && j <= s.Len() {
+		result = S(s.v[i:j]...)
+	} else {
+		result = S()
+	}
+	return
 }
 
 // Sort the underlying slice

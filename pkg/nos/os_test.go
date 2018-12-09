@@ -17,40 +17,37 @@ var readme = "../../README.md"
 func TestPathSlice(t *testing.T) {
 	assert.Equal(t, "", Path("").Slice(0, -1))
 	assert.Equal(t, "/", Path("/").Slice(0, -1))
-	//assert.Equal(t, "/foo", Path("/foo").Slice(0, -1))
-}
+	assert.Equal(t, "/foo", Path("/foo").Slice(0, -1))
 
-func TestPathFirst(t *testing.T) {
-	assert.Equal(t, "", Path("").First())
-	assert.Equal(t, "/", Path("/").First())
-	assert.Equal(t, "foo", Path("foo").First())
-	assert.Equal(t, "/foo", Path("/foo").First())
-	assert.Equal(t, "/foo", Path("/foo/bar/one").First())
+	// Slice first count
+	assert.Equal(t, "", Path("").Slice(0, 1))
+	assert.Equal(t, "/", Path("/").Slice(0, 1))
+	assert.Equal(t, "foo", Path("foo").Slice(0, 1))
+	assert.Equal(t, "/foo", Path("/foo").Slice(0, 1))
+	assert.Equal(t, "/foo/bar", Path("/foo/bar/one").Slice(0, 1))
 
-	assert.Equal(t, "", Path("/foo/bar/one").First(0))
-	assert.Equal(t, "/foo", Path("/foo/bar/one").First(1))
-	assert.Equal(t, "/foo/bar", Path("/foo/bar/one").First(2))
-	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").First(3))
-	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").First(5))
+	assert.Equal(t, "/foo", Path("/foo/bar/one").Slice(0, 0))
+	assert.Equal(t, "/foo/bar", Path("/foo/bar/one").Slice(0, 1))
+	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Slice(0, 2))
+	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Slice(0, 3))
+	assert.Equal(t, "foo/bar/one", Path("foo/bar/one").Slice(0, 3))
 
-	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").First(-1))
-	assert.Equal(t, "/foo/bar", Path("/foo/bar/one").First(-2))
-	assert.Equal(t, "/foo", Path("/foo/bar/one").First(-3))
-	assert.Equal(t, "", Path("/foo/bar/one").First(-4))
-	assert.Equal(t, "", Path("/foo/bar/one").First(-10))
-}
+	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Slice(0, -1))
+	assert.Equal(t, "/foo/bar", Path("/foo/bar/one").Slice(0, -2))
+	assert.Equal(t, "/foo", Path("/foo/bar/one").Slice(0, -3))
+	assert.Equal(t, "", Path("/foo/bar/one").Slice(0, -4))
 
-func TestPathLast(t *testing.T) {
-	assert.Equal(t, "", Path("").Last())
-	assert.Equal(t, "/", Path("/").Last())
-	assert.Equal(t, "foo", Path("foo").Last())
-	assert.Equal(t, "/foo", Path("/foo").Last())
-	assert.Equal(t, "", Path("/foo/bar/one").Last(0))
-	assert.Equal(t, "one", Path("/foo/bar/one").Last())
-	assert.Equal(t, "one", Path("/foo/bar/one").Last(1))
-	assert.Equal(t, "bar/one", Path("/foo/bar/one").Last(2))
-	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Last(3))
-	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Last(5))
+	// Slice last cnt
+	assert.Equal(t, "", Path("").Slice(-2, -1))
+	assert.Equal(t, "/", Path("/").Slice(-2, -1))
+	assert.Equal(t, "foo", Path("foo").Slice(-2, -1))
+	assert.Equal(t, "/foo", Path("/foo").Slice(-2, -1))
+	assert.Equal(t, "one", Path("/foo/bar/one").Slice(-1, -1))
+	assert.Equal(t, "one", Path("foo/bar/one").Slice(-1, -1))
+	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Slice(-3, -1))
+	assert.Equal(t, "bar/one", Path("/foo/bar/one").Slice(-2, -1))
+	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Slice(-3, -1))
+	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Slice(-5, 2))
 }
 
 func TestCopy(t *testing.T) {
