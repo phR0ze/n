@@ -60,6 +60,11 @@ func (q *strN) ContainsAny(targets ...string) bool {
 	return false
 }
 
+// Empty return true if the string is nothing or just whitespace
+func (q *strN) Empty() bool {
+	return q.TrimSpace().v == ""
+}
+
 // HasAnyPrefix checks if the string has any of the given prefixes
 func (q *strN) HasAnyPrefix(prefixes ...string) bool {
 	for i := range prefixes {
