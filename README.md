@@ -72,7 +72,7 @@ Some functions only apply to particular underlying collection types as called ou
 | Each         | Iterate over the queryable and execute actions  | 1     | 1   | 1   | 1     |
 | Join         | Join slice items as string with given delimiter | 1     |     |     |       |
 | Len          | Get the length of the collection                | 1     | 1   | 1   | 1     |
-| Load         | Load YAML/JSON from file into queryable         |       | 1   |     |       |
+| Load         | Load Yaml/JSON from file into queryable         |       | 1   |     |       |
 | Map          | Manipulate the queryable data into a new form   | 1     | 1   | 1   | 1     |
 | Merge        | Merge other queryables in priority order        | 0     | 0   | 0   | 0     |
 | Set          | Set the queryable's encapsulated object         | 1     | 1   | 1   | 1     |
@@ -138,7 +138,7 @@ Exports process deferred execution and convert the result to a usable external t
 | Function     | Description                                     | IntMap | StrMap | ? |
 | ------------ | ----------------------------------------------- | -------- | -------- | ----------- |
 | NewTYPE      | Creates a new nub encapsulating the TYPE        | 0        | 1        | 0           |
-| Load         | Load YAML/JSON from file                        | 0        | 1        | 0           |
+| Load         | Load Yaml/JSON from file                        | 0        | 1        | 0           |
 | Add          | Add a new item to the underlying map            | 0        | 1        | 0           |
 | Any          | Check if the map has anything in it             | 0        | 1        | 0           |
 | Equals       | Check if the given map is equal to this map     | 0        | 1        | 0           |

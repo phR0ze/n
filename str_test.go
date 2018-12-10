@@ -84,7 +84,7 @@ func TestStrTrimSuffix(t *testing.T) {
 	assert.Equal(t, "[test", A("[test]").TrimSuffix("]").A())
 }
 
-func TestYAMLIndent(t *testing.T) {
+func TestYamlIndent(t *testing.T) {
 	{
 		// Two spaces
 		raw := `spec:
@@ -93,7 +93,7 @@ func TestYAMLIndent(t *testing.T) {
 		data := map[string]interface{}{}
 		err := yaml.Unmarshal([]byte(raw), &data)
 		assert.Nil(t, err)
-		assert.Equal(t, "  ", A(raw).YAMLIndent())
+		assert.Equal(t, "  ", A(raw).YamlIndent())
 	}
 	{
 		// Four spaces
@@ -106,11 +106,11 @@ func TestYAMLIndent(t *testing.T) {
 		data := map[string]interface{}{}
 		err := yaml.Unmarshal([]byte(raw), &data)
 		assert.Nil(t, err)
-		assert.Equal(t, "    ", A(raw).YAMLIndent())
+		assert.Equal(t, "    ", A(raw).YamlIndent())
 	}
 }
 
-func TestYAMLInsertEmpty(t *testing.T) {
+func TestYamlInsertEmpty(t *testing.T) {
 	{
 		// No match nothing done
 		raw := `spec:
@@ -121,13 +121,13 @@ func TestYAMLInsertEmpty(t *testing.T) {
 		err := yaml.Unmarshal([]byte(raw), &data)
 		assert.Nil(t, err)
 
-		inserted, err := A(raw).YAMLInsert("foo", "line1.line2")
+		inserted, err := A(raw).YamlSet("line1.line2", "foo")
 		assert.Nil(t, err)
 		assert.Equal(t, raw, inserted.String())
 	}
 }
 
-func TestYAMLInsert(t *testing.T) {
+func TestYamlInsert(t *testing.T) {
 	{
 		// Match insert payload
 		rawData := `spec:
@@ -155,7 +155,7 @@ func TestYAMLInsert(t *testing.T) {
 		assert.Nil(t, err)
 
 		// Test inserted data + payload
-		inserted, err := A(rawData).YAMLInsert(string(bytesPayload), "spec.template.spec.initContainers")
+		inserted, err := A(rawData).YamlSet("spec.template.spec.initContainers", string(bytesPayload))
 		assert.Nil(t, err)
 		expected := `spec:
   template:
@@ -175,7 +175,7 @@ func TestYAMLInsert(t *testing.T) {
 	}
 }
 
-func TestYAMLInsertCreate(t *testing.T) {
+func TestYamlInsertCreate(t *testing.T) {
 	// Match insert payload
 	rawData := `spec:
   template:
@@ -202,7 +202,7 @@ func TestYAMLInsertCreate(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Test inserted data + payload
-	inserted, err := A(rawData).YAMLInsert(string(bytesPayload), "spec.template.spec.initContainers")
+	inserted, err := A(rawData).YamlSet("spec.template.spec.initContainers", string(bytesPayload))
 	assert.Nil(t, err)
 	expected := `spec:
   template:
@@ -222,27 +222,52 @@ func TestYAMLInsertCreate(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestYAMLType(t *testing.T) {
+func TestYamlInsertReplace(t *testing.T) {
+	{
+		rawData := `spec:
+  template:
+    spec:
+      containers:
+        name: foo
+`
+		// Test that the raw data is unmarshalable
+		yamlData := map[string]interface{}{}
+		assert.Nil(t, yaml.Unmarshal([]byte(rawData), &yamlData))
+
+		// Test that the name was replaced
+		updated, err := A(rawData).YamlSet("spec.template.spec.containers.name", "bar")
+		assert.Nil(t, err)
+		expected := `spec:
+  template:
+    spec:
+      containers:
+        name: foo
+`
+		assert.Equal(t, expected, updated.String())
+	}
+}
+
+func TestYamlType(t *testing.T) {
 	{
 		// string
-		assert.Equal(t, "test", A("\"test\"").YAMLType())
-		assert.Equal(t, "test", A("'test'").YAMLType())
-		assert.Equal(t, "1", A("\"1\"").YAMLType())
-		assert.Equal(t, "1", A("'1'").YAMLType())
+		assert.Equal(t, "test", A("\"test\"").YamlType())
+		assert.Equal(t, "test", A("'test'").YamlType())
+		assert.Equal(t, "1", A("\"1\"").YamlType())
+		assert.Equal(t, "1", A("'1'").YamlType())
 	}
 	{
 		// int
-		assert.Equal(t, 1.0, A("1").YAMLType())
-		assert.Equal(t, 0.0, A("0").YAMLType())
-		assert.Equal(t, 25.0, A("25").YAMLType())
+		assert.Equal(t, 1.0, A("1").YamlType())
+		assert.Equal(t, 0.0, A("0").YamlType())
+		assert.Equal(t, 25.0, A("25").YamlType())
 	}
 	{
 		// bool
-		assert.Equal(t, true, A("true").YAMLType())
-		assert.Equal(t, false, A("false").YAMLType())
+		assert.Equal(t, true, A("true").YamlType())
+		assert.Equal(t, false, A("false").YamlType())
 	}
 	{
 		// default
-		assert.Equal(t, "True", A("True").YAMLType())
+		assert.Equal(t, "True", A("True").YamlType())
 	}
 }

@@ -3,6 +3,7 @@ package n
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"strconv"
 	"strings"
 	"unicode"
@@ -13,8 +14,25 @@ type strN struct {
 }
 
 // A provides a new empty string nub
-func A(str string) *strN {
-	return &strN{v: str}
+// handling both string and []byte
+func A(str interface{}) (result *strN) {
+	result = &strN{v: ""}
+	switch x := str.(type) {
+	case string:
+		result.v = x
+	case []byte:
+		result.v = string(x)
+	case int:
+		strconv.Itoa(x)
+	default:
+		result.v = fmt.Sprintf("%v", x)
+	}
+	return
+}
+
+// B exports object as []byte
+func (q *strN) B() []byte {
+	return []byte(q.v)
 }
 
 // A exports object invoking deferred execution
@@ -77,6 +95,15 @@ func (q *strN) Len() int {
 	return len(q.v)
 }
 
+// Replace allows for chaining and default to all instances
+func (q *strN) Replace(new, old string, ns ...int) *strN {
+	n := -1
+	if len(ns) > 0 {
+		n = ns[0]
+	}
+	return A(strings.Replace(q.v, new, old, n))
+}
+
 // SpaceLeft returns leading whitespace
 func (q *strN) SpaceLeft() string {
 	spaces := []rune{}
@@ -120,8 +147,8 @@ func (q *strN) TrimSuffix(suffix string) *strN {
 	return A(strings.TrimSuffix(q.v, suffix))
 }
 
-// YAMLIndent detects the indent string being used and returns it
-func (q *strN) YAMLIndent() string {
+// YamlIndent detects the indent string being used and returns it
+func (q *strN) YamlIndent() string {
 	scanner := bufio.NewScanner(bytes.NewReader([]byte(q.v)))
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -133,14 +160,14 @@ func (q *strN) YAMLIndent() string {
 	return "  "
 }
 
-// YAMLInsert inserts the block of text at the specified yaml location.
-// This operation is done on raw text to avoid YAML syntax errors when working
+// YamlSet inserts the block of text at the specified yaml location.
+// This operation is done on raw text to avoid Yaml syntax errors when working
 // with Helm/Go templating syntax that hasn't been processed yet.
 // Supports a primitive dot delimited keying notation.
 // e.g. spec.template.spec.initContainers
-func (q *strN) YAMLInsert(block, key string) (data bytes.Buffer, err error) {
+func (q *strN) YamlSet(key, block string) (data bytes.Buffer, err error) {
 	depth := ""
-	indent := q.YAMLIndent()
+	indent := q.YamlIndent()
 
 	// Primitive dot notation keying
 	ok := false
@@ -179,6 +206,8 @@ func (q *strN) YAMLInsert(block, key string) (data bytes.Buffer, err error) {
 		if ok && depth == curDepth && a.HasPrefix(key+":") {
 			depth += indent
 			if key, ok = keys.TakeFirst(); !ok || (!keys.Any() && keyNotFound) {
+
+				// Inserts
 				writeBlock = true
 			}
 		}
@@ -192,11 +221,11 @@ func (q *strN) YAMLInsert(block, key string) (data bytes.Buffer, err error) {
 	return
 }
 
-// YAMLType converts the given string into a type expected in YAML.
+// YamlType converts the given string into a type expected in Yaml.
 // Quotes signifies a string.
 // No quotes signifies an int.
 // true or false signifies a bool.
-func (q *strN) YAMLType() interface{} {
+func (q *strN) YamlType() interface{} {
 	if q.HasAnyPrefix("\"", "'") && q.HasAnySuffix("\"", "'") {
 		return q.v[1 : len(q.v)-1]
 	} else if q.v == "true" || q.v == "false" {

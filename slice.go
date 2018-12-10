@@ -683,27 +683,27 @@ func (s *strMapSliceN) TakeLastCnt(cnt int) (result *strMapSliceN) {
 	return
 }
 
-// YAMLPair return the first and second entries as yaml types
-func (s *strSliceN) YAMLPair() (first string, second interface{}) {
+// YamlPair return the first and second entries as yaml types
+func (s *strSliceN) YamlPair() (first string, second interface{}) {
 	if s.Len() > 0 {
 		first = s.v[0]
 	}
 	if s.Len() > 1 {
-		second = A(s.v[1]).YAMLType()
+		second = A(s.v[1]).YamlType()
 	} else {
 		second = nil
 	}
 	return
 }
 
-// YAMLKeyVal return the first and second entries as KeyVal of yaml types
-func (s *strSliceN) YAMLKeyVal() KeyVal {
+// YamlKeyVal return the first and second entries as KeyVal of yaml types
+func (s *strSliceN) YamlKeyVal() KeyVal {
 	result := KeyVal{}
 	if s.Len() > 0 {
-		result.Key = A(s.v[0]).YAMLType()
+		result.Key = A(s.v[0]).YamlType()
 	}
 	if s.Len() > 1 {
-		result.Val = A(s.v[1]).YAMLType()
+		result.Val = A(s.v[1]).YamlType()
 	} else {
 		result.Val = ""
 	}

@@ -789,7 +789,7 @@ func TestMap(t *testing.T) {
 		// Export as slice of KeyVal
 		q := Q([]string{"foo=bar"})
 		pairs := q.Map(func(x O) O {
-			k, v := A(x.(string)).Split("=").YAMLPair()
+			k, v := A(x.(string)).Split("=").YamlPair()
 			return KeyVal{k, v}
 		}).O().([]KeyVal)
 		assert.Equal(t, []KeyVal{{"foo", "bar"}}, pairs)
@@ -798,7 +798,7 @@ func TestMap(t *testing.T) {
 		// Export as slice of KeyVal
 		q := Q([]string{"foo=bar"})
 		pairs := q.Map(func(x O) O {
-			return A(x.(string)).Split("=").YAMLKeyVal()
+			return A(x.(string)).Split("=").YamlKeyVal()
 		}).O().([]KeyVal)
 		assert.Equal(t, []KeyVal{{"foo", "bar"}}, pairs)
 	}
@@ -806,15 +806,15 @@ func TestMap(t *testing.T) {
 		// Export as map
 		q := Q([]string{"foo=bar"})
 		pairs := q.Map(func(x O) O {
-			return A(x.(string)).Split("=").YAMLKeyVal()
+			return A(x.(string)).Split("=").YamlKeyVal()
 		}).O().([]KeyVal)
 		assert.Equal(t, []KeyVal{{"foo", "bar"}}, pairs)
 	}
 	{
-		// Get YAML values from slice of key=value strings
+		// Get Yaml values from slice of key=value strings
 		q := Q([]string{"foo=bar"})
 		m := q.Map(func(x O) O {
-			return A(x.(string)).Split("=").YAMLKeyVal()
+			return A(x.(string)).Split("=").YamlKeyVal()
 		}).M()
 		assert.Equal(t, map[string]interface{}{"foo": "bar"}, m)
 	}
@@ -911,7 +911,7 @@ func TestMapSliceToMap(t *testing.T) {
 		q := Q([]string{"k1=v1,k2=v2"})
 		result := q.MapF(func(x O) O {
 			return A(x.(string)).Split(",").Map(func(y string) O {
-				return A(y).Split("=").YAMLKeyVal()
+				return A(y).Split("=").YamlKeyVal()
 			})
 		}).M()
 		assert.Equal(t, map[string]interface{}{"k1": "v1", "k2": "v2"}, result)

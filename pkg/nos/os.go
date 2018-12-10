@@ -5,12 +5,11 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
-
-	"github.com/phR0ze/n"
 )
 
 type pathN struct {
@@ -24,15 +23,14 @@ func Path(path string) *pathN {
 
 // Slice provides a ruby like slice function for path nubs
 func (p *pathN) Slice(i, j int) (result string) {
-	x := n.A(p.v).Split("/")
+	x := strings.Split(p.v, "/")
 
 	// Convert to positive notation to simplify logic
 	if i < 0 {
-		i = x.Len() + i
+		i = len(x) + i
 	}
 
 	// Offset indices to include root
-	// "", "foo", "bar", "one" .Slice(0, -2))
 	if p.v != "" && rune(p.v[0]) == rune('/') {
 		if i == 1 {
 			i--
@@ -43,12 +41,12 @@ func (p *pathN) Slice(i, j int) (result string) {
 		}
 	}
 
-	result = x.Slice(i, j).Join("/").A()
+	result = strings.Join(slice(x, i, j), "/")
 
 	return
 }
 
-/*  */ // Copy copies src to dst recursively.
+// Copy copies src to dst recursively.
 // The dst will be copied to if it is an existing directory.
 // The dst will be a clone of the src if it doesn't exist, but it's parent directory does.
 func Copy(src, dst string) error {
@@ -256,6 +254,47 @@ func Touch(target string) (err error) {
 	}
 	if err == nil {
 		defer f.Close()
+	}
+	return
+}
+
+// WriteFile is a pass through to ioutil.WriteFile with default permissions
+func WriteFile(target string, data []byte, perms ...uint32) (err error) {
+	perm := uint32(0644)
+	if len(perms) > 0 {
+		perm = perms[0]
+	}
+	err = ioutil.WriteFile(target, data, os.FileMode(perm))
+	return
+}
+
+func slice(x []string, i, j int) (result []string) {
+
+	// Convert to postive notation
+	if i < 0 {
+		i = len(x) + i
+	}
+	if j < 0 {
+		j = len(x) + j
+	}
+
+	// Move start/end within bounds
+	if i < 0 {
+		i = 0
+	}
+	if j >= len(x) {
+		j = len(x) - 1
+	}
+
+	// Specifically offsetting j to get an inclusive behavior out of Go
+	j++
+
+	// Only operate when indexes are within bounds
+	// allow j to be len of s as that is how we include last item
+	if i >= 0 && i < len(x) && j >= 0 && j <= len(x) {
+		result = x[i:j]
+	} else {
+		result = []string{}
 	}
 	return
 }

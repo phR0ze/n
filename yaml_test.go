@@ -7,267 +7,274 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestYAML(t *testing.T) {
+var deploymentFile = "test/helm/deployment.yaml"
+
+func TestFromHelmFile(t *testing.T) {
+	_, err := FromHelmFile(deploymentFile)
+	assert.Nil(t, err)
+}
+
+func TestYaml(t *testing.T) {
 	{
 		// Get non existing string
-		rawYAML := `1:
+		rawYaml := `1:
   2: two`
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAML), &data)
+		yaml.Unmarshal([]byte(rawYaml), &data)
 		q := Q(data)
 		assert.True(t, q.Any())
-		assert.False(t, q.YAML("foo").Any())
+		assert.False(t, q.Yaml("foo").Any())
 	}
 	{
 		// Get non existing nested string
-		rawYAML := `1:
+		rawYaml := `1:
   2: two`
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAML), &data)
+		yaml.Unmarshal([]byte(rawYaml), &data)
 		q := Q(data)
 		assert.True(t, q.Any())
-		assert.False(t, q.YAML("foo.foo").Any())
+		assert.False(t, q.Yaml("foo.foo").Any())
 	}
 	{
 		// Get string from map
-		rawYAML := `1:
+		rawYaml := `1:
   2: two`
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAML), &data)
+		yaml.Unmarshal([]byte(rawYaml), &data)
 		q := Q(data)
 		assert.True(t, q.Any())
-		assert.Equal(t, "two", q.YAML("1.2").A())
+		assert.Equal(t, "two", q.Yaml("1.2").A())
 	}
 	{
 		// Get string from nested map
-		rawYAML := `1:
+		rawYaml := `1:
   2:
     3: three`
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAML), &data)
+		yaml.Unmarshal([]byte(rawYaml), &data)
 		q := Q(data)
 		assert.True(t, q.Any())
-		assert.Equal(t, "three", q.YAML("1.2.3").A())
+		assert.Equal(t, "three", q.Yaml("1.2.3").A())
 	}
 	{
 		// Get map from map
-		rawYAML := `1:
+		rawYaml := `1:
   2: two`
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAML), &data)
+		yaml.Unmarshal([]byte(rawYaml), &data)
 		expected := map[string]interface{}{"2": "two"}
 
 		q := Q(data)
 		assert.True(t, q.Any())
-		assert.Equal(t, expected, q.YAML("1").M())
+		assert.Equal(t, expected, q.Yaml("1").M())
 	}
 	{
 		// Get map from map from map
-		rawYAML := `1:
+		rawYaml := `1:
   2:
     3: three`
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAML), &data)
+		yaml.Unmarshal([]byte(rawYaml), &data)
 		expected := map[string]interface{}{"3": "three"}
 
 		q := Q(data)
 		assert.True(t, q.Any())
-		assert.Equal(t, expected, q.YAML("1.2").M())
+		assert.Equal(t, expected, q.Yaml("1.2").M())
 	}
 	{
 		// Get slice from map
-		rawYAML := `foo:
+		rawYaml := `foo:
   - 1
   - 2
   - 3`
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAML), &data)
+		yaml.Unmarshal([]byte(rawYaml), &data)
 
 		q := Q(data)
 		assert.True(t, q.Any())
-		assert.Equal(t, []string{"1", "2", "3"}, q.YAML("foo").Strs())
+		assert.Equal(t, []string{"1", "2", "3"}, q.Yaml("foo").Strs())
 	}
 }
 
-func TestYAMLWithKeyIndexing(t *testing.T) {
+func TestYamlWithKeyIndexing(t *testing.T) {
 	{
 		// Select map from slice from map
-		rawYAML := `foo:
+		rawYaml := `foo:
   - name: 1
   - name: 2
   - name: 3`
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAML), &data)
+		yaml.Unmarshal([]byte(rawYaml), &data)
 		expected := map[string]interface{}{"name": 2.0}
 
 		q := Q(data)
 		assert.True(t, q.Any())
-		assert.Equal(t, expected, q.YAML("foo.[name:2]").M())
+		assert.Equal(t, expected, q.Yaml("foo.[name:2]").M())
 	}
 	{
 		// Bad key
-		rawYAML := `foo:
+		rawYaml := `foo:
   - name: 1
   - name: 2
   - name: 3`
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAML), &data)
+		yaml.Unmarshal([]byte(rawYaml), &data)
 
 		q := Q(data)
 		assert.True(t, q.Any())
-		assert.False(t, q.YAML("fee.[name:2]").Any())
+		assert.False(t, q.Yaml("fee.[name:2]").Any())
 	}
 	{
 		// Bad sub key
-		rawYAML := `foo:
+		rawYaml := `foo:
   - name: 1
   - name: 2
   - name: 3`
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAML), &data)
+		yaml.Unmarshal([]byte(rawYaml), &data)
 
 		q := Q(data)
 		assert.True(t, q.Any())
-		assert.False(t, q.YAML("foo.[fee:2]").Any())
+		assert.False(t, q.Yaml("foo.[fee:2]").Any())
 	}
 	{
 		// Missing target
-		rawYAML := `foo:
+		rawYaml := `foo:
   - name: 1
   - name: 2
   - name: 3`
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAML), &data)
+		yaml.Unmarshal([]byte(rawYaml), &data)
 
 		q := Q(data)
 		assert.True(t, q.Any())
-		assert.False(t, q.YAML("foo.[name:5]").Any())
+		assert.False(t, q.Yaml("foo.[name:5]").Any())
 	}
 	{
 		// Continue keying in after slice: one
-		rawYAML := `foo:
+		rawYaml := `foo:
   - name: one
   - name: two
   - name: three`
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAML), &data)
+		yaml.Unmarshal([]byte(rawYaml), &data)
 		q := Q(data)
 		assert.True(t, q.Any())
-		assert.Equal(t, "one", q.YAML("foo.[name:one].name").O())
+		assert.Equal(t, "one", q.Yaml("foo.[name:one].name").O())
 	}
 	// 	{
 	// TODO: implement this ???
 	// 		// Continue keying in after slice: two
-	// 		rawYAML := `foo:
+	// 		rawYaml := `foo:
 	//   - name:
 	//       bar: frodo
 	//       foo: blah
 	//   - name: two
 	//   - name: three`
 	// 		data := map[string]interface{}{}
-	// 		yaml.Unmarshal([]byte(rawYAML), &data)
+	// 		yaml.Unmarshal([]byte(rawYaml), &data)
 	// 		q := Q(data)
 	// 		assert.True(t, q.Any())
-	// 		assert.Equal(t, "frodo", q.YAML("foo.[name.bar:frodo].name.bar").O())
+	// 		assert.Equal(t, "frodo", q.Yaml("foo.[name.bar:frodo].name.bar").O())
 	// 	}
 }
 
-func TestYAMLWithSliceIndexing(t *testing.T) {
+func TestYamlWithSliceIndexing(t *testing.T) {
 	{
-		rawYAML := `foo:
+		rawYaml := `foo:
   - name: 1
   - name: 2
   - name: 3`
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAML), &data)
+		yaml.Unmarshal([]byte(rawYaml), &data)
 		q := Q(data)
 		assert.True(t, q.Any())
 		{
 			expected := map[string]interface{}{"name": 1.0}
-			assert.Equal(t, expected, q.YAML("foo.[0]").M())
+			assert.Equal(t, expected, q.Yaml("foo.[0]").M())
 		}
 		{
 			expected := map[string]interface{}{"name": 2.0}
-			assert.Equal(t, expected, q.YAML("foo.[1]").M())
+			assert.Equal(t, expected, q.Yaml("foo.[1]").M())
 		}
 		{
 			expected := map[string]interface{}{"name": 3.0}
-			assert.Equal(t, expected, q.YAML("foo.[2]").M())
+			assert.Equal(t, expected, q.Yaml("foo.[2]").M())
 		}
 		{
 			expected := map[string]interface{}{"name": 3.0}
-			assert.Equal(t, expected, q.YAML("foo.[-1]").M())
+			assert.Equal(t, expected, q.Yaml("foo.[-1]").M())
 		}
 		{
 			expected := map[string]interface{}{"name": 2.0}
-			assert.Equal(t, expected, q.YAML("foo.[-2]").M())
+			assert.Equal(t, expected, q.Yaml("foo.[-2]").M())
 		}
 		{
 			expected := map[string]interface{}{"name": 1.0}
-			assert.Equal(t, expected, q.YAML("foo.[-3]").M())
+			assert.Equal(t, expected, q.Yaml("foo.[-3]").M())
 		}
 	}
 	{
 		// Select first element when only one
-		rawYAML := `foo:
+		rawYaml := `foo:
   - name: 3`
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAML), &data)
+		yaml.Unmarshal([]byte(rawYaml), &data)
 		q := Q(data)
 		assert.True(t, q.Any())
 		expected := map[string]interface{}{"name": 3.0}
-		assert.Equal(t, expected, q.YAML("foo.[0]").M())
-		assert.Equal(t, expected, q.YAML("foo.[-1]").M())
+		assert.Equal(t, expected, q.Yaml("foo.[0]").M())
+		assert.Equal(t, expected, q.Yaml("foo.[-1]").M())
 	}
 	{
 		// Select first element when only one
-		rawYAML := `foo:
+		rawYaml := `foo:
   - name: 3`
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAML), &data)
+		yaml.Unmarshal([]byte(rawYaml), &data)
 		q := Q(data)
 		assert.True(t, q.Any())
 		expected := map[string]interface{}{"name": 3.0}
-		assert.Equal(t, expected, q.YAML("foo.[0]").M())
-		assert.Equal(t, expected, q.YAML("foo.[-1]").M())
+		assert.Equal(t, expected, q.Yaml("foo.[0]").M())
+		assert.Equal(t, expected, q.Yaml("foo.[-1]").M())
 	}
 	{
 		// Continue keying in after slice: one
-		rawYAML := `foo:
+		rawYaml := `foo:
   - name: one
   - name: two
   - name: three`
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAML), &data)
+		yaml.Unmarshal([]byte(rawYaml), &data)
 		q := Q(data)
 		assert.True(t, q.Any())
-		assert.Equal(t, "one", q.YAML("foo.[0].name").O())
+		assert.Equal(t, "one", q.Yaml("foo.[0].name").O())
 	}
 	{
 		// Continue keying in after slice: two
-		rawYAML := `foo:
+		rawYaml := `foo:
   - name:
       bar: frodo
   - name: two
   - name: three`
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAML), &data)
+		yaml.Unmarshal([]byte(rawYaml), &data)
 		q := Q(data)
 		assert.True(t, q.Any())
-		assert.Equal(t, "frodo", q.YAML("foo.[0].name.bar").O())
+		assert.Equal(t, "frodo", q.Yaml("foo.[0].name.bar").O())
 	}
 }
 
-func TestYAMLReplace(t *testing.T) {
+func TestYamlReplace(t *testing.T) {
 	{
-		rawYAML := `foo:
+		rawYaml := `foo:
   - name: bar
     valueFrom:
       secretKeyRef:
         name: <% template "foo" . %>
         key: keybar`
 		data := map[string]interface{}{}
-		err := yaml.Unmarshal([]byte(rawYAML), &data)
+		err := yaml.Unmarshal([]byte(rawYaml), &data)
 		assert.Nil(t, err)
 		expected := map[string]interface{}{
 			"foo": []interface{}{
@@ -277,10 +284,10 @@ func TestYAMLReplace(t *testing.T) {
 					}}}}
 
 		values := map[string]string{"<%": "{{", "%>": "}}"}
-		assert.Equal(t, expected, YAMLReplace(data, values))
+		assert.Equal(t, expected, YamlReplace(data, values))
 	}
 	{
-		rawYAML := `deployment:
+		rawYaml := `deployment:
   initContainers:
     - name: init-mysql
       env:
@@ -289,10 +296,10 @@ func TestYAMLReplace(t *testing.T) {
             secretKeyRef:
               name: <% template "foo" . %>
               key: password`
-		q, err := FromYAML(rawYAML)
+		q, err := FromYaml(rawYaml)
 		assert.Nil(t, err)
 		{
-			data := q.YAML("deployment.initContainers").S()
+			data := q.Yaml("deployment.initContainers").S()
 			values := map[string]string{"<%": "{{", "%>": "}}"}
 			expected := []interface{}{
 				map[string]interface{}{
@@ -304,10 +311,10 @@ func TestYAMLReplace(t *testing.T) {
 							}},
 					}},
 			}
-			assert.Equal(t, expected, YAMLReplace(data, values))
+			assert.Equal(t, expected, YamlReplace(data, values))
 		}
 		{
-			data := q.YAML("deployment.initContainers").SAMap()
+			data := q.Yaml("deployment.initContainers").SAMap()
 			values := map[string]string{"<%": "{{", "%>": "}}"}
 			expected := []map[string]interface{}{
 				map[string]interface{}{
@@ -319,7 +326,7 @@ func TestYAMLReplace(t *testing.T) {
 							}},
 					}},
 			}
-			assert.Equal(t, expected, YAMLReplace(data, values))
+			assert.Equal(t, expected, YamlReplace(data, values))
 		}
 	}
 }

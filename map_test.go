@@ -204,12 +204,12 @@ func TestStrMapStrMapSlice(t *testing.T) {
 		assert.Equal(t, expected, slice.StrMapSlice("1"))
 	}
 	{
-		rawYAML := `test1:
+		rawYaml := `test1:
   - 1: one
   - 2: two
 `
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAML), &data)
+		yaml.Unmarshal([]byte(rawYaml), &data)
 		expected := StrMapSlice([]map[string]interface{}{
 			{"1": "one"},
 			{"2": "two"},
@@ -230,13 +230,13 @@ func TestStrMapStrMapSlice(t *testing.T) {
 		assert.Equal(t, expected, slice.StrMapSlice("test1"))
 	}
 	{
-		rawYAML := `test1:
+		rawYaml := `test1:
   test2:
     - 1: one
     - 2: two
 `
 		data := map[string]interface{}{}
-		yaml.Unmarshal([]byte(rawYAML), &data)
+		yaml.Unmarshal([]byte(rawYaml), &data)
 		expected := StrMapSlice([]map[string]interface{}{
 			{"1": "one"},
 			{"2": "two"},

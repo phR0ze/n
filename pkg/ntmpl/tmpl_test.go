@@ -3,8 +3,33 @@ package ntmpl
 import (
 	"testing"
 
+	"github.com/phR0ze/n/pkg/nos"
 	"github.com/stretchr/testify/assert"
 )
+
+var tmpFile = "../../test/temp/.tmp"
+
+func TestLoad(t *testing.T) {
+	data := `labels:
+  chart: {{ name }}:{{ version }}
+  release: {{ Release.Name }}
+  heritage: {{ Release.Service }}`
+	nos.WriteFile(tmpFile, []byte(data))
+
+	expected := `labels:
+  chart: foo:1.0.2
+  release: babble
+  heritage: fish`
+
+	result, err := Load(tmpFile, "{{ ", " }}", map[string]string{
+		"name":            "foo",
+		"version":         "1.0.2",
+		"Release.Name":    "babble",
+		"Release.Service": "fish",
+	})
+	assert.Nil(t, err)
+	assert.Equal(t, expected, result)
+}
 
 func TestTagSpaces(t *testing.T) {
 	{

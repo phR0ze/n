@@ -7,7 +7,7 @@ import "github.com/phR0ze/n"
 func ParseCliOpts(opts []string) map[string]interface{} {
 	return n.Q(opts).MapF(func(x n.O) n.O {
 		return n.A(x.(string)).Split(",").Map(func(y string) n.O {
-			return n.A(y).Split("=").YAMLKeyVal()
+			return n.A(y).Split("=").YamlKeyVal()
 		})
 	}).M()
 }

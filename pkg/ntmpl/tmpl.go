@@ -3,13 +3,15 @@ package ntmpl
 
 import (
 	"bytes"
+	"io/ioutil"
 	"strings"
 
 	"github.com/phR0ze/n/pkg/nerr"
 	"github.com/valyala/bytebufferpool"
 )
 
-type tplEngine struct {
+// Engine provides encapsulation and class methods for templating
+type Engine struct {
 	data     string
 	startTag string
 	endTag   string
@@ -19,10 +21,24 @@ type tplEngine struct {
 	byteBufferPool bytebufferpool.Pool
 }
 
+// Load a yaml file from disk and processes any templating returning a string
+func Load(filepath string, startTag, endTag string, vars map[string]string) (result string, err error) {
+	var data []byte
+	if data, err = ioutil.ReadFile(filepath); err == nil {
+		var tpl *Engine
+		if tpl, err = New(string(data), startTag, endTag); err == nil {
+			if result, err = tpl.Process(vars); err == nil {
+				return
+			}
+		}
+	}
+	return
+}
+
 // New parses the given data using the given startTag and endTag
 // into components that can then be easily worked with
-func New(data, startTag, endTag string) (*tplEngine, error) {
-	var tpl tplEngine
+func New(data, startTag, endTag string) (*Engine, error) {
+	var tpl Engine
 	tpl.data = data
 	tpl.startTag = startTag
 	tpl.endTag = endTag
@@ -77,7 +93,7 @@ func New(data, startTag, endTag string) (*tplEngine, error) {
 
 // Process substitutes template tags (placeholders) with the corresponding
 // values from the map m and returns the result.
-func (tpl *tplEngine) Process(m map[string]string) (result string, err error) {
+func (tpl *Engine) Process(m map[string]string) (result string, err error) {
 	w := tpl.byteBufferPool.Get()
 	n := len(tpl.texts) - 1
 	if n == -1 {

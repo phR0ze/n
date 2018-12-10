@@ -14,9 +14,9 @@ type O interface{}
 // Queryable provides chainable deferred execution
 // and is the heart of the algorithm abstraction layer
 type Queryable struct {
-	v    *reflect.Value
-	Kind reflect.Kind
-	Iter func() Iterator
+	v    *reflect.Value  // underlying value
+	Kind reflect.Kind    // kind of hte underlying value
+	Iter func() Iterator // iterator for the underlying value
 }
 
 // Iterator provides a closure to capture the index and reset it
