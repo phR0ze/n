@@ -193,7 +193,7 @@ func (s *strSliceN) MapF(sel func(string) O) (result *Queryable) {
 }
 
 // Pair simply returns the first and second slice items
-func (s *strSliceN) Pair() (first string, second string) {
+func (s *strSliceN) Pair() (first, second string) {
 	if s.Len() > 0 {
 		first = s.v[0]
 	}

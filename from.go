@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 
 	"github.com/ghodss/yaml"
 	"github.com/phR0ze/n/pkg/ntmpl"
@@ -38,35 +39,10 @@ func FromHelmFile(filepath string) (result *Queryable, err error) {
 	result = N()
 	var fileBytes []byte
 	if fileBytes, err = ioutil.ReadFile(filepath); err == nil {
-		var buff bytes.Buffer
-
-		// First convert named variables to something that unmarshals
-		tmpBytes := A(fileBytes).Replace("{{", "<<").Replace("}}", ">>").B()
-
-		// Now convert unnamed variables to something that unmarshals
-		i := 0
-		prevDepth := ""
-		validYamlModifier := "validYamlModifier"
-		scanner := bufio.NewScanner(bytes.NewReader(tmpBytes))
-		for scanner.Scan() {
-			line := scanner.Text()
-			a := A(line)
-			if a.TrimSpaceLeft().HasPrefix("<<") {
-				newline := fmt.Sprintf("%s%s-%d: %s\n", prevDepth, validYamlModifier, i, line)
-				buff.WriteString(newline)
-				fmt.Printf(newline)
-				i++
-			} else {
-				buff.WriteString(line)
-				buff.WriteString("\n")
-				if !a.Empty() && !a.TrimSpaceLeft().HasPrefix("#") {
-					prevDepth = A(line).SpaceLeft()
-				}
-				fmt.Println(line)
-			}
-		}
+		buff := convHelmTplToYaml(fileBytes)
+		data := map[string]interface{}{}
+		err = yaml.Unmarshal(buff, &data)
 	}
-
 	return
 }
 
@@ -84,4 +60,36 @@ func FromYamlTmplFile(filepath string, vars map[string]string) *Queryable {
 		}
 	}
 	return N()
+}
+
+// convHelmTplToYaml converts the given helm templat to a valid yaml file.
+// It does this by replacing templating with placeholders.
+func convHelmTplToYaml(fileBytes []byte) []byte {
+	i := 0
+	prevDepth := ""
+	var buff bytes.Buffer
+	validYamlModifier := "validYamlModifier"
+
+	scanner := bufio.NewScanner(bytes.NewReader(fileBytes))
+	for scanner.Scan() {
+		line := scanner.Text()
+		a := A(line)
+		if a.TrimSpaceLeft().HasPrefix("{{") {
+			line = fmt.Sprintf("%s%s-%d: %s", prevDepth, validYamlModifier, i, url.QueryEscape(line))
+			i++
+		} else if a.Contains("{{") {
+			//if pieces.Len() > 1 {
+			//	line = fmt.Sprintf("%s:%s", pieces.First().A(), url.QueryEscape(pieces.Slice(1, -1).Join(":").A()))
+			//}
+		} else {
+			if !a.Empty() && !a.TrimSpaceLeft().HasPrefix("#") {
+				prevDepth = A(line).SpaceLeft()
+			}
+		}
+		buff.WriteString(line)
+		buff.WriteString("\n")
+		fmt.Println(line)
+	}
+
+	return buff.Bytes()
 }

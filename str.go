@@ -127,6 +127,24 @@ func (q *strN) Split(delim string) *strSliceN {
 	return S(strings.Split(q.v, delim)...)
 }
 
+// SplitOn splits the string on the first occurance of the delim.
+// The delim is included in the first component.
+func (q *strN) SplitOn(delim string) (first, second string) {
+	if q.v != "" {
+		s := q.Split(delim)
+		if s.Len() > 0 {
+			first = s.First().A()
+			if strings.Contains(q.v, delim) {
+				first += delim
+			}
+		}
+		if s.Len() > 1 {
+			second = s.Slice(1, -1).Join(delim).A()
+		}
+	}
+	return
+}
+
 // TrimPrefix trims the given prefix off the string
 func (q *strN) TrimPrefix(prefix string) *strN {
 	return A(strings.TrimPrefix(q.v, prefix))
