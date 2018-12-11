@@ -117,7 +117,9 @@ func (q *Queryable) YamlSet(key string, data interface{}) (result *Queryable, er
 						x[key] = map[string]interface{}{}
 						v = x[key]
 					}
-					result, err = Q(v).YamlSet(keys.Join(".").A(), data)
+					if result, err = Q(v).YamlSet(keys.Join(".").A(), data); err == nil {
+						x[key] = result.O()
+					}
 				}
 			}
 		case []interface{}:

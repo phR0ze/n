@@ -405,7 +405,7 @@ func TestYamlSetUpdateListByIndex(t *testing.T) {
 	assert.Equal(t, expected, inserted.M())
 }
 
-func YamlSetInsertByIndex(t *testing.T) {
+func TestYamlSetInsertByIndex(t *testing.T) {
 	// Match insert payload
 	rawData := `spec:
   template:
