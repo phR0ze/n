@@ -491,10 +491,7 @@ func (q *Queryable) Set(i int, item interface{}) *Queryable {
 		}
 		if i >= 0 && i < q.v.Len() {
 			v := reflect.ValueOf(item)
-			qv := q.v.Index(i)
-			if v.Type() == qv.Type() {
-				qv.Set(v)
-			}
+			q.v.Index(i).Set(v)
 		}
 	}
 	return q

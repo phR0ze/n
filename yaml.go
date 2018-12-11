@@ -132,7 +132,7 @@ func (q *Queryable) YamlSet(key string, data interface{}) (result *Queryable, er
 					if !keys.Any() {
 						if q.Len() > i {
 							// Override
-							//recurse = q.At(i)
+							q.Set(i, data)
 						} else {
 							// Insert new item
 							q.Append(data)
@@ -154,7 +154,7 @@ func (q *Queryable) YamlSet(key string, data interface{}) (result *Queryable, er
 						if entry, ok := m[k]; ok {
 							if v == entry {
 								if !keys.Any() {
-									//Q(m)
+									q.Set(i, data)
 								} else {
 									result, err = q.At(i).YamlSet(keys.Join(".").A(), data)
 								}

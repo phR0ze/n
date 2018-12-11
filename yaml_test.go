@@ -379,32 +379,6 @@ func TestYamlSetInsertNested(t *testing.T) {
 	assert.Equal(t, expected, inserted.M())
 }
 
-func TestYamlSetUpdateListByIndex(t *testing.T) {
-	// Match insert payload
-	rawData := `spec:
-  template:
-    spec:
-      containers:
-      - name: foo
-        image: fobar:latest
-`
-	// Test that the raw data is unmarshalable
-	yamlData := map[string]interface{}{}
-	err := yaml.Unmarshal([]byte(rawData), &yamlData)
-	assert.Nil(t, err)
-
-	// Test inserted data + payload
-	inserted, err := Q(yamlData).YamlSet("spec.template.spec.containers.[0].image", "foobar:1.2.3")
-	assert.Nil(t, err)
-	expected := map[string]interface{}{
-		"spec": map[string]interface{}{"template": map[string]interface{}{"spec": map[string]interface{}{
-			"containers": []interface{}{
-				map[string]interface{}{"name": "foo", "image": "foobar:1.2.3"},
-			},
-		}}}}
-	assert.Equal(t, expected, inserted.M())
-}
-
 func TestYamlSetInsertByIndex(t *testing.T) {
 	// Match insert payload
 	rawData := `spec:
@@ -428,6 +402,86 @@ func TestYamlSetInsertByIndex(t *testing.T) {
 			"containers": []interface{}{
 				map[string]interface{}{"name": "foo", "image": "foo:latest"},
 				map[string]interface{}{"name": "bar", "image": "bar:1.2.3"},
+			},
+		}}}}
+	assert.Equal(t, expected, inserted.M())
+}
+
+func TestYamlSetOverrideByIndex(t *testing.T) {
+	// Match insert payload
+	rawData := `spec:
+  template:
+     spec:
+       containers:
+       - name: foo
+         image: foo:latest
+`
+	// Test that the raw data is unmarshalable
+	yamlData := map[string]interface{}{}
+	err := yaml.Unmarshal([]byte(rawData), &yamlData)
+	assert.Nil(t, err)
+
+	// Test inserted data + payload
+	data := map[string]interface{}{"name": "bar", "image": "bar:1.2.3"}
+	inserted, err := Q(yamlData).YamlSet("spec.template.spec.containers.[0]", data)
+	assert.Nil(t, err)
+	expected := map[string]interface{}{
+		"spec": map[string]interface{}{"template": map[string]interface{}{"spec": map[string]interface{}{
+			"containers": []interface{}{
+				map[string]interface{}{"name": "bar", "image": "bar:1.2.3"},
+			},
+		}}}}
+	assert.Equal(t, expected, inserted.M())
+}
+
+func TestYamlSetOverrideByName(t *testing.T) {
+	// Match insert payload
+	rawData := `spec:
+  template:
+     spec:
+       containers:
+       - name: foo
+         image: foo:latest
+`
+	// Test that the raw data is unmarshalable
+	yamlData := map[string]interface{}{}
+	err := yaml.Unmarshal([]byte(rawData), &yamlData)
+	assert.Nil(t, err)
+
+	// Test inserted data + payload
+	data := map[string]interface{}{"name": "bar", "image": "bar:1.2.3"}
+	inserted, err := Q(yamlData).YamlSet("spec.template.spec.containers.[name:foo]", data)
+
+	expected := map[string]interface{}{
+		"spec": map[string]interface{}{"template": map[string]interface{}{"spec": map[string]interface{}{
+			"containers": []interface{}{
+				map[string]interface{}{"name": "bar", "image": "bar:1.2.3"},
+			},
+		}}}}
+	assert.Equal(t, expected, inserted.M())
+}
+
+func TestYamlSetUpdateListByIndex(t *testing.T) {
+	// Match insert payload
+	rawData := `spec:
+  template:
+    spec:
+      containers:
+      - name: foo
+        image: fobar:latest
+`
+	// Test that the raw data is unmarshalable
+	yamlData := map[string]interface{}{}
+	err := yaml.Unmarshal([]byte(rawData), &yamlData)
+	assert.Nil(t, err)
+
+	// Test inserted data + payload
+	inserted, err := Q(yamlData).YamlSet("spec.template.spec.containers.[0].image", "foobar:1.2.3")
+	assert.Nil(t, err)
+	expected := map[string]interface{}{
+		"spec": map[string]interface{}{"template": map[string]interface{}{"spec": map[string]interface{}{
+			"containers": []interface{}{
+				map[string]interface{}{"name": "foo", "image": "foobar:1.2.3"},
 			},
 		}}}}
 	assert.Equal(t, expected, inserted.M())
