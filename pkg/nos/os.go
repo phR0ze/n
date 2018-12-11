@@ -288,12 +288,20 @@ func WriteLines(target string, lines []string, perms ...uint32) (err error) {
 	if len(perms) > 0 {
 		perm = perms[0]
 	}
+
 	var f *os.File
 	flags := os.O_CREATE | os.O_TRUNC | os.O_WRONLY
-	if f, err = os.OpenFile(target, flags, os.FileMode(perm)); err == nil {
-		for i := range lines {
-			f.WriteString(lines[i])
-			f.WriteString("\n")
+	if f, err = os.OpenFile(target, flags, os.FileMode(perm)); err != nil {
+		return
+	}
+	defer f.Close()
+
+	for i := range lines {
+		if _, err = f.WriteString(lines[i]); err != nil {
+			return
+		}
+		if _, err = f.WriteString("\n"); err != nil {
+			return
 		}
 	}
 	return
