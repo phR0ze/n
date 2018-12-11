@@ -187,6 +187,20 @@ func TestTouch(t *testing.T) {
 	assert.Nil(t, Touch(tmpfile))
 }
 
+func TestWriteLines(t *testing.T) {
+	cleanTmpDir()
+	lines, err := ReadLines(testfile)
+	assert.Nil(t, err)
+	assert.Equal(t, 18, len(lines))
+	err = WriteLines(tmpfile, lines)
+	assert.Nil(t, err)
+	{
+		lines2, err := ReadLines(tmpfile)
+		assert.Nil(t, err)
+		assert.Equal(t, lines, lines2)
+	}
+}
+
 func cleanTmpDir() {
 	if Exists(tmpDir) {
 		os.RemoveAll(tmpDir)

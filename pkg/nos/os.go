@@ -283,12 +283,19 @@ func WriteFile(target string, data []byte, perms ...uint32) (err error) {
 }
 
 // WriteLines is a pass through to ioutil.WriteFile with default permissions
-func WriteLines(target string, data []byte, perms ...uint32) (err error) {
+func WriteLines(target string, lines []string, perms ...uint32) (err error) {
 	perm := uint32(0644)
 	if len(perms) > 0 {
 		perm = perms[0]
 	}
-	err = ioutil.WriteFile(target, data, os.FileMode(perm))
+	var f *os.File
+	flags := os.O_CREATE | os.O_TRUNC | os.O_WRONLY
+	if f, err = os.OpenFile(target, flags, os.FileMode(perm)); err == nil {
+		for i := range lines {
+			f.WriteString(lines[i])
+			f.WriteString("\n")
+		}
+	}
 	return
 }
 
