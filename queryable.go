@@ -139,25 +139,13 @@ func (q *Queryable) AnyWhere(lambda func(O) bool) bool {
 
 // Append items to the end of the collection and return the queryable
 // converting to a collection if necessary
-func (q *Queryable) Append(obj ...interface{}) *Queryable {
-
-	// Create new slice of the append type
-	if q.TypeSingle() && len(obj) > 0 {
-		typ := reflect.TypeOf(obj[0])
-		qSlice := Q(reflect.MakeSlice(reflect.SliceOf(typ), 0, 10).Interface())
-		if !q.Nil() {
-			qSlice.Append(q.v.Interface())
-		}
-		*q = *qSlice
-	}
-
-	// Append to slice type
-	for i := 0; i < len(obj); i++ {
-		item := reflect.ValueOf(obj[i])
+func (q *Queryable) Append(items ...interface{}) *Queryable {
+	q.toSlice(items...)
+	for i := 0; i < len(items); i++ {
+		item := reflect.ValueOf(items[i])
 		*q.v = reflect.Append(*q.v, item)
 	}
 	q.Iter = sliceIter(*q.v)
-
 	return q
 }
 
@@ -388,6 +376,41 @@ func (q *Queryable) Flatten() (result *Queryable) {
 	return
 }
 
+// Insert the item at the given index, negative notation supported
+func (q *Queryable) Insert(i int, items ...interface{}) *Queryable {
+	q.toSlice(items...)
+	if i < 0 {
+		i = q.v.Len() + i
+	}
+	if i >= 0 && i < q.v.Len() && len(items) > 0 {
+
+		// Create a new slice
+		typ := reflect.TypeOf(items[0])
+		slice := reflect.MakeSlice(reflect.SliceOf(typ), 0, 10)
+
+		// Append those before i
+		for _, j := range Range(0, i-1) {
+			slice = reflect.Append(slice, q.v.Index(j))
+		}
+
+		// Append new items
+		for j := 0; j < len(items); j++ {
+			slice = reflect.Append(slice, reflect.ValueOf(items[j]))
+		}
+
+		// Append those after
+		for _, j := range Range(i, q.Len()-1) {
+			slice = reflect.Append(slice, q.v.Index(j))
+		}
+
+		*q = *Q(slice.Interface())
+		q.Iter = sliceIter(*q.v)
+	} else {
+		q.Append(items...)
+	}
+	return q
+}
+
 // Join slice items as string with given delimeter
 func (q *Queryable) Join(delim string) *Queryable {
 	var joined bytes.Buffer
@@ -534,4 +557,16 @@ func (q *Queryable) TypeSingle() bool {
 		return true
 	}
 	return false
+}
+
+// Convert the single type into a slice type
+func (q *Queryable) toSlice(items ...interface{}) {
+	if q.TypeSingle() && len(items) > 0 {
+		typ := reflect.TypeOf(items[0])
+		qSlice := Q(reflect.MakeSlice(reflect.SliceOf(typ), 0, 10).Interface())
+		if !q.Nil() {
+			qSlice.Append(q.v.Interface())
+		}
+		*q = *qSlice
+	}
 }

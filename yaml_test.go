@@ -512,3 +512,65 @@ func TestYamlSetUpdateListItemByName(t *testing.T) {
 		}}}}
 	assert.Equal(t, expected, inserted.M())
 }
+
+func TestYamlSetDeepNesting(t *testing.T) {
+	rawData := `spec:
+  template:
+    spec:
+      containers:
+      - name: foo
+        env:
+        - name: var1
+          value: foobar1
+        - name: var2
+          value: foobar2
+        - name: var3
+          value: foobar3
+`
+	yamlData := map[string]interface{}{}
+	err := yaml.Unmarshal([]byte(rawData), &yamlData)
+	assert.Nil(t, err)
+
+	inserted, err := Q(yamlData).YamlSet("spec.template.spec.containers.[0].env.[name:var2].value", "foofoo")
+	assert.Nil(t, err)
+	expected := map[string]interface{}{
+		"spec": map[string]interface{}{"template": map[string]interface{}{"spec": map[string]interface{}{
+			"containers": []interface{}{
+				map[string]interface{}{"name": "foo", "env": []interface{}{
+					map[string]interface{}{"name": "var1", "value": "foobar1"},
+					map[string]interface{}{"name": "var2", "value": "foofoo"},
+					map[string]interface{}{"name": "var3", "value": "foobar3"},
+				}},
+			},
+		}}}}
+	assert.Equal(t, expected, inserted.M())
+}
+
+func YamlSetInsertIndex(t *testing.T) {
+	rawData := `spec:
+  template:
+    spec:
+      containers:
+      - name: foo
+        env:
+        - name: var1
+          value: foobar1
+`
+	yamlData := map[string]interface{}{}
+	err := yaml.Unmarshal([]byte(rawData), &yamlData)
+	assert.Nil(t, err)
+
+	data := map[string]interface{}{"name": "var5", "value": "foobar5"}
+	inserted, err := Q(yamlData).YamlSet("spec.template.spec.containers.[0].env.[[0]]", data)
+	assert.Nil(t, err)
+	expected := map[string]interface{}{
+		"spec": map[string]interface{}{"template": map[string]interface{}{"spec": map[string]interface{}{
+			"containers": []interface{}{
+				map[string]interface{}{"name": "foo", "env": []interface{}{
+					map[string]interface{}{"name": "var5", "value": "foobar5"},
+					map[string]interface{}{"name": "var1", "value": "foobar1"},
+				}},
+			},
+		}}}}
+	assert.Equal(t, expected, inserted.M())
+}

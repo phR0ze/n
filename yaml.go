@@ -123,18 +123,25 @@ func (q *Queryable) YamlSet(key string, data interface{}) (result *Queryable, er
 				}
 			}
 		case []interface{}:
-			k, v := A(key).TrimPrefix("[").TrimSuffix("]").Split(":").YamlPair()
+			insert := false
+			var k string
+			var v interface{}
+			if A(key).Contains("[[") {
+				insert = true
+				k, v = A(key).TrimPrefix("[[").TrimSuffix("]]").Split(":").YamlPair()
+			} else {
+				k, v = A(key).TrimPrefix("[").TrimSuffix("]").Split(":").YamlPair()
+			}
 			if v == nil {
 				var i int
 				if i, err = strconv.Atoi(k); err == nil {
 
 					// No more keys so we've reached our destination
 					if !keys.Any() {
-						if q.Len() > i {
-							// Override
+						if i < q.Len() && !insert {
 							q.Set(i, data)
 						} else {
-							// Insert new item
+							//q.Insert(i, data)
 							q.Append(data)
 						}
 					} else {

@@ -725,6 +725,34 @@ func TestFlatten(t *testing.T) {
 	}
 }
 
+func TestInsert(t *testing.T) {
+	{
+		q := Q([]int{1, 2})
+		q.Insert(0, 3)
+		assert.Equal(t, []int{3, 1, 2}, q.Ints())
+	}
+	{
+		q := Q([]int{1, 2})
+		q.Insert(1, 3)
+		assert.Equal(t, []int{1, 3, 2}, q.Ints())
+	}
+	{
+		q := Q([]int{1, 2})
+		q.Insert(0, 4, 3)
+		assert.Equal(t, []int{4, 3, 1, 2}, q.Ints())
+	}
+	{
+		q := Q([]int{1, 2})
+		q.Insert(-1, 4, 3)
+		assert.Equal(t, []int{1, 4, 3, 2}, q.Ints())
+	}
+	{
+		q := Q([]int{1, 2})
+		q.Insert(2, 4, 3)
+		assert.Equal(t, []int{1, 2, 4, 3}, q.Ints())
+	}
+}
+
 func TestJoin(t *testing.T) {
 	{
 		q := Q("")
