@@ -1,8 +1,6 @@
 package n
 
 import (
-	"bufio"
-	"bytes"
 	"fmt"
 	"strconv"
 	"strings"
@@ -168,80 +166,6 @@ func (q *strN) TrimSpaceRight() *strN {
 // TrimSuffix trims the given suffix off the string
 func (q *strN) TrimSuffix(suffix string) *strN {
 	return A(strings.TrimSuffix(q.v, suffix))
-}
-
-// YamlIndent detects the indent string being used and returns it
-func (q *strN) YamlIndent() string {
-	scanner := bufio.NewScanner(bytes.NewReader([]byte(q.v)))
-	for scanner.Scan() {
-		line := scanner.Text()
-		space := A(line).SpaceLeft()
-		if space != "" {
-			return space
-		}
-	}
-	return "  "
-}
-
-// YamlSet inserts the block of text at the specified yaml location.
-// This operation is done on raw text to avoid Yaml syntax errors when working
-// with Helm/Go templating syntax that hasn't been processed yet.
-// Supports a primitive dot delimited keying notation.
-// e.g. spec.template.spec.initContainers
-func (q *strN) YamlSet(key, block string) (data bytes.Buffer, err error) {
-	depth := ""
-	indent := q.YamlIndent()
-
-	// Primitive dot notation keying
-	ok := false
-	keys := A(key).Split(".")
-	if key, ok = keys.TakeFirst(); !ok {
-		return
-	}
-	keyNotFound := false
-	if !q.Contains(keys.Last().A()) {
-		keyNotFound = true
-	}
-
-	// Scan through data line by line writing to data
-	writeBlock := false
-	writer := bufio.NewWriter(&data)
-	scanner := bufio.NewScanner(bytes.NewReader([]byte(q.v)))
-	for scanner.Scan() {
-		line := scanner.Text()
-		a := A(string(line)).TrimSpaceLeft()
-		curDepth := A(string(line)).SpaceLeft()
-
-		// Write out the block now so we can use curDepth
-		if writeBlock {
-			writeBlock = false
-			if !keys.Any() && keyNotFound {
-				writer.WriteString(curDepth + key + ":\n")
-			}
-			blockScanner := bufio.NewScanner(bytes.NewReader([]byte(block)))
-			for blockScanner.Scan() {
-				writer.WriteString(curDepth + blockScanner.Text())
-				writer.WriteString("\n")
-			}
-		}
-
-		// Hit - flag write block for next loop
-		if ok && depth == curDepth && a.HasPrefix(key+":") {
-			depth += indent
-			if key, ok = keys.TakeFirst(); !ok || (!keys.Any() && keyNotFound) {
-
-				// Inserts
-				writeBlock = true
-			}
-		}
-
-		// Write out the current line
-		writer.WriteString(line)
-		writer.WriteString("\n")
-	}
-
-	writer.Flush()
-	return
 }
 
 // YamlType converts the given string into a type expected in Yaml.

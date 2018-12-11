@@ -2,6 +2,7 @@ package n
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -93,5 +94,81 @@ func YamlReplace(data interface{}, values map[string]string) (result interface{}
 	default:
 		result = data
 	}
+	return
+}
+
+// YamlSet sets data by key which can be dot delimited
+func (q *Queryable) YamlSet(key string, data interface{}) (result *Queryable, err error) {
+	var recurse *Queryable
+	keys := A(key).Split(".")
+	if key, ok := keys.TakeFirst(); ok {
+		switch x := q.v.Interface().(type) {
+		case map[string]interface{}:
+
+			// Current target is a map key
+			if !A(key).ContainsAny(":", "[", "]") {
+
+				// No more keys so we've reached our destination
+				if !keys.Any() {
+					x[key] = data
+				} else {
+					var v interface{}
+					if v, ok = x[key]; !ok {
+						// Doesn't exist so create
+						x[key] = map[string]interface{}{}
+						v = x[key]
+					}
+					recurse = Q(v)
+				}
+			}
+		case []interface{}:
+			k, v := A(key).TrimPrefix("[").TrimSuffix("]").Split(":").YamlPair()
+			if v == nil {
+				var i int
+				if i, err = strconv.Atoi(k); err == nil {
+
+					// No more keys so we've reached our destination
+					if !keys.Any() {
+						if q.Len() > i {
+							// Override
+							recurse = q.At(i)
+						} else {
+							// Insert new item
+							q.Append()
+						}
+					} else {
+						if i < q.Len() {
+							recurse = q.At(i)
+						} else {
+							err = fmt.Errorf("Indexing out of bounds")
+							return
+						}
+					}
+				} else {
+					return
+				}
+			} else {
+				for i := range x {
+					if m, ok := x[i].(map[string]interface{}); ok {
+						if entry, ok := m[k]; ok {
+							if v == entry {
+								recurse = Q(m)
+								break
+							}
+						}
+					}
+				}
+			}
+		}
+		if keys.Len() != 0 && recurse != nil {
+			recurse, err = recurse.YamlSet(keys.Join(".").A(), data)
+		}
+	}
+	result = q
+	return
+}
+
+// Insert/set data in the unmarshalled yaml
+func (q *Queryable) yamlSet() (err error) {
 	return
 }

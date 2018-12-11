@@ -553,6 +553,69 @@ func TestContainsAny(t *testing.T) {
 	}
 }
 
+func TestCopy(t *testing.T) {
+	{
+		// Strings
+		{
+			q := Q("")
+			assert.False(t, q.Any())
+			assert.True(t, q.Copy("test").Any())
+			assert.Equal(t, "test", q.A())
+		}
+		{
+			q := Q("test")
+			assert.Equal(t, "test", q.A())
+			assert.Equal(t, "foo", q.Copy("foo").A())
+			assert.Equal(t, "foo", q.A())
+		}
+	}
+	{
+		// Maps
+		{
+			q := N()
+			assert.False(t, q.Any())
+			data := map[string]interface{}{"1": "one"}
+			assert.True(t, q.Copy(data).Any())
+			assert.Equal(t, data, q.M())
+		}
+		{
+			data1 := map[string]interface{}{"1": "one"}
+			data2 := map[string]interface{}{"1": "two"}
+			q := Q(data1)
+			assert.True(t, q.Any())
+			assert.Equal(t, data1, q.M())
+			assert.True(t, q.Copy(data2).Any())
+			assert.Equal(t, data2, q.M())
+		}
+	}
+	{
+		// custom type
+		q := N()
+		assert.False(t, q.Any())
+		data := []bob{{data: "3"}}
+		assert.True(t, q.Copy(data).Any())
+		assert.Equal(t, data[0], q.At(0).O())
+	}
+	{
+		// []int
+		cnt := []bool{}
+		q := N()
+		q.Copy([]int{1, 2, 3})
+		next := q.Iter()
+		for x, ok := next(); ok; x, ok = next() {
+			cnt = append(cnt, true)
+			switch len(cnt) {
+			case 1:
+				assert.Equal(t, 1, x)
+			case 2:
+				assert.Equal(t, 2, x)
+			case 3:
+				assert.Equal(t, 3, x)
+			}
+		}
+		assert.Len(t, cnt, 3)
+	}
+}
 func TestEach(t *testing.T) {
 	{
 		// []int
@@ -961,65 +1024,19 @@ func TestMapMany(t *testing.T) {
 
 func TestSet(t *testing.T) {
 	{
-		// Strings
-		{
-			q := Q("")
-			assert.False(t, q.Any())
-			assert.True(t, q.Set("test").Any())
-			assert.Equal(t, "test", q.A())
-		}
-		{
-			q := Q("test")
-			assert.Equal(t, "test", q.A())
-			assert.Equal(t, "foo", q.Set("foo").A())
-			assert.Equal(t, "foo", q.A())
-		}
+		q := Q([]int{1, 2, 3})
+		assert.Equal(t, []int{1, 2, 3}, q.Ints())
+		q.Set(1, 5)
+		assert.Equal(t, []int{1, 5, 3}, q.Ints())
 	}
 	{
-		// Maps
-		{
-			q := N()
-			assert.False(t, q.Any())
-			data := map[string]interface{}{"1": "one"}
-			assert.True(t, q.Set(data).Any())
-			assert.Equal(t, data, q.M())
+		type bob struct {
+			k, v string
 		}
-		{
-			data1 := map[string]interface{}{"1": "one"}
-			data2 := map[string]interface{}{"1": "two"}
-			q := Q(data1)
-			assert.True(t, q.Any())
-			assert.Equal(t, data1, q.M())
-			assert.True(t, q.Set(data2).Any())
-			assert.Equal(t, data2, q.M())
-		}
-	}
-	{
-		// custom type
-		q := N()
-		assert.False(t, q.Any())
-		data := []bob{{data: "3"}}
-		assert.True(t, q.Set(data).Any())
-		assert.Equal(t, data[0], q.At(0).O())
-	}
-	{
-		// []int
-		cnt := []bool{}
-		q := N()
-		q.Set([]int{1, 2, 3})
-		next := q.Iter()
-		for x, ok := next(); ok; x, ok = next() {
-			cnt = append(cnt, true)
-			switch len(cnt) {
-			case 1:
-				assert.Equal(t, 1, x)
-			case 2:
-				assert.Equal(t, 2, x)
-			case 3:
-				assert.Equal(t, 3, x)
-			}
-		}
-		assert.Len(t, cnt, 3)
+		q := Q([]bob{{"1", "2"}, {"3", "4"}, {"5", "6"}})
+		assert.Equal(t, []bob{{"1", "2"}, {"3", "4"}, {"5", "6"}}, q.O())
+		q.Set(1, bob{"7", "8"})
+		assert.Equal(t, []bob{{"1", "2"}, {"7", "8"}, {"5", "6"}}, q.O())
 	}
 }
 

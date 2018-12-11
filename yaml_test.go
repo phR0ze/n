@@ -323,3 +323,138 @@ func TestYamlReplace(t *testing.T) {
 		}
 	}
 }
+
+func TestYamlSetInsertRoot(t *testing.T) {
+	{
+		// key path doesn't exist so it gets created
+		raw := `spec:
+  template:
+    spec: initContainers
+`
+		data := map[string]interface{}{}
+		err := yaml.Unmarshal([]byte(raw), &data)
+		assert.Nil(t, err)
+
+		inserted, err := Q(data).YamlSet("line1.line2", "foo")
+		assert.Nil(t, err)
+
+		expected := map[string]interface{}{
+			"line1": map[string]interface{}{"line2": "foo"},
+			"spec":  map[string]interface{}{"template": map[string]interface{}{"spec": "initContainers"}},
+		}
+		assert.Equal(t, expected, inserted.M())
+	}
+}
+
+func TestYamlSetInsertNested(t *testing.T) {
+	// Match insert payload
+	rawData := `spec:
+  template:
+    spec:
+      initContainers:
+      - name: foo
+`
+	// Test that the raw data is unmarshalable
+	yamlData := map[string]interface{}{}
+	err := yaml.Unmarshal([]byte(rawData), &yamlData)
+	assert.Nil(t, err)
+
+	rawPayload := `- name: bar
+  image: "busybox:1.25.0"
+  imagePullPolicy: Always
+`
+	yamlPayload := []map[string]interface{}{}
+	err = yaml.Unmarshal([]byte(rawPayload), &yamlPayload)
+	assert.Nil(t, err)
+
+	// Test inserted data + payload
+	inserted, err := Q(yamlData).YamlSet("spec.template.spec.initContainers", yamlPayload)
+	assert.Nil(t, err)
+	expected := map[string]interface{}{
+		"spec": map[string]interface{}{"template": map[string]interface{}{"spec": map[string]interface{}{
+			"initContainers": []map[string]interface{}{
+				map[string]interface{}{"name": "bar", "image": "busybox:1.25.0", "imagePullPolicy": "Always"},
+			},
+		}}}}
+	assert.Equal(t, expected, inserted.M())
+}
+
+func TestYamlSetUpdateListByIndex(t *testing.T) {
+	// Match insert payload
+	rawData := `spec:
+  template:
+    spec:
+      containers:
+      - name: foo
+        image: fobar:latest
+`
+	// Test that the raw data is unmarshalable
+	yamlData := map[string]interface{}{}
+	err := yaml.Unmarshal([]byte(rawData), &yamlData)
+	assert.Nil(t, err)
+
+	// Test inserted data + payload
+	inserted, err := Q(yamlData).YamlSet("spec.template.spec.containers.[0].image", "foobar:1.2.3")
+	assert.Nil(t, err)
+	expected := map[string]interface{}{
+		"spec": map[string]interface{}{"template": map[string]interface{}{"spec": map[string]interface{}{
+			"containers": []interface{}{
+				map[string]interface{}{"name": "foo", "image": "foobar:1.2.3"},
+			},
+		}}}}
+	assert.Equal(t, expected, inserted.M())
+}
+
+func TestYamlSetInsertByIndex(t *testing.T) {
+	// 	// Match insert payload
+	// 	rawData := `spec:
+	//   template:
+	//     spec:
+	//       containers:
+	//       - name: foo
+	//         image: foo:latest
+	// `
+	// 	// Test that the raw data is unmarshalable
+	// 	yamlData := map[string]interface{}{}
+	// 	err := yaml.Unmarshal([]byte(rawData), &yamlData)
+	// 	assert.Nil(t, err)
+
+	// 	// Test inserted data + payload
+	// 	data := map[string]interface{}{"name": "bar", "image": "bar:1.2.3"}
+	// 	inserted, err := Q(yamlData).YamlSet("spec.template.spec.containers.[1]", data)
+	// 	assert.Nil(t, err)
+	// 	expected := map[string]interface{}{
+	// 		"spec": map[string]interface{}{"template": map[string]interface{}{"spec": map[string]interface{}{
+	// 			"containers": []interface{}{
+	// 				map[string]interface{}{"name": "foo", "image": "foo:latest"},
+	// 				map[string]interface{}{"name": "bar", "image": "bar:1.2.3"},
+	// 			},
+	// 		}}}}
+	// 	assert.Equal(t, expected, inserted.M())
+}
+
+func TestYamlSetUpdateListItemByName(t *testing.T) {
+	// Match insert payload
+	rawData := `spec:
+  template:
+    spec:
+      containers:
+      - name: foo
+        image: fobar:latest
+`
+	// Test that the raw data is unmarshalable
+	yamlData := map[string]interface{}{}
+	err := yaml.Unmarshal([]byte(rawData), &yamlData)
+	assert.Nil(t, err)
+
+	// Test inserted data + payload
+	inserted, err := Q(yamlData).YamlSet("spec.template.spec.containers.[name:foo].image", "foobar:1.2.3")
+	assert.Nil(t, err)
+	expected := map[string]interface{}{
+		"spec": map[string]interface{}{"template": map[string]interface{}{"spec": map[string]interface{}{
+			"containers": []interface{}{
+				map[string]interface{}{"name": "foo", "image": "foobar:1.2.3"},
+			},
+		}}}}
+	assert.Equal(t, expected, inserted.M())
+}

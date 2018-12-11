@@ -207,7 +207,7 @@ func (q *Queryable) Contains(obj interface{}) bool {
 
 		// Other is non iterable, convert to iterable
 		if other.TypeSingle() {
-			other.Set([]interface{}{obj})
+			other.Copy([]interface{}{obj})
 		}
 		next := other.Iter()
 		for x, ok := next(); ok; x, ok = next() {
@@ -281,7 +281,7 @@ func (q *Queryable) ContainsAny(obj interface{}) bool {
 
 		// Other is non iterable, convert to iterable
 		if other.TypeSingle() {
-			other.Set([]interface{}{obj})
+			other.Copy([]interface{}{obj})
 		}
 		next := other.Iter()
 		for x, ok := next(); ok; x, ok = next() {
@@ -332,6 +332,15 @@ func (q *Queryable) ContainsAny(obj interface{}) bool {
 		}
 	}
 	return false
+}
+
+// Copy given obj into this one and reset types
+func (q *Queryable) Copy(obj interface{}) *Queryable {
+	other := Q(obj)
+	q.Kind = other.Kind
+	q.Iter = other.Iter
+	q.v = other.v
+	return q
 }
 
 // Each iterates over the queryable and executes the given action
@@ -474,12 +483,20 @@ func (q *Queryable) Nil() bool {
 	return false
 }
 
-// Set provides a way to set underlying object Queryable is operating on
-func (q *Queryable) Set(obj interface{}) *Queryable {
-	other := Q(obj)
-	q.Kind = other.Kind
-	q.Iter = other.Iter
-	q.v = other.v
+// Set the item at the given index to the given item
+func (q *Queryable) Set(i int, item interface{}) *Queryable {
+	if q.TypeIter() && !q.TypeStr() {
+		if i < 0 {
+			i = q.v.Len() + i
+		}
+		if i >= 0 && i < q.v.Len() {
+			v := reflect.ValueOf(item)
+			qv := q.v.Index(i)
+			if v.Type() == qv.Type() {
+				qv.Set(v)
+			}
+		}
+	}
 	return q
 }
 
