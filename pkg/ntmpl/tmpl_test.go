@@ -1,15 +1,19 @@
 package ntmpl
 
 import (
+	"os"
 	"testing"
 
 	"github.com/phR0ze/n/pkg/nos"
 	"github.com/stretchr/testify/assert"
 )
 
+var tmpDir = "../../test/temp"
 var tmpFile = "../../test/temp/.tmp"
 
 func TestLoad(t *testing.T) {
+	cleanTmpDir()
+
 	data := `labels:
   chart: {{ name }}:{{ version }}
   release: {{ Release.Name }}
@@ -300,4 +304,11 @@ func testProcess(t *testing.T, template, expected string, shouldErr bool) {
 		assert.Nil(t, err)
 		assert.Equal(t, expected, result)
 	}
+}
+
+func cleanTmpDir() {
+	if nos.Exists(tmpDir) {
+		os.RemoveAll(tmpDir)
+	}
+	nos.MkdirP(tmpDir)
 }

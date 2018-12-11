@@ -1,13 +1,13 @@
 package n
 
 import (
-	"bufio"
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"net/url"
+	"strings"
 
 	"github.com/ghodss/yaml"
+	"github.com/phR0ze/n/pkg/nos"
 	"github.com/phR0ze/n/pkg/ntmpl"
 )
 
@@ -37,9 +37,9 @@ func FromYaml(yml string) (result *Queryable, err error) {
 // before working with it.
 func FromHelmFile(filepath string) (result *Queryable, err error) {
 	result = N()
-	var fileBytes []byte
-	if fileBytes, err = ioutil.ReadFile(filepath); err == nil {
-		buff := convHelmTplToYaml(fileBytes)
+	var lines []string
+	if lines, err = nos.ReadLines(filepath); err == nil {
+		buff := convHelmTplToYaml(lines)
 		data := map[string]interface{}{}
 		err = yaml.Unmarshal(buff, &data)
 	}
@@ -64,26 +64,82 @@ func FromYamlTmplFile(filepath string, vars map[string]string) *Queryable {
 
 // convHelmTplToYaml converts the given helm templat to a valid yaml file.
 // It does this by replacing templating with placeholders.
-func convHelmTplToYaml(fileBytes []byte) []byte {
-	i := 0
+func convHelmTplToYaml(lines []string) []byte {
+	cnt := 0
 	prevDepth := ""
 	var buff bytes.Buffer
-	validYamlModifier := "validYamlModifier"
 
-	scanner := bufio.NewScanner(bytes.NewReader(fileBytes))
-	for scanner.Scan() {
-		line := scanner.Text()
+	type yamlType int
+	type yamlItem struct {
+		typ yamlType
+		val string
+	}
+	const (
+		typeMap yamlType = iota
+		typeList
+		typeEmpty
+		typeTplLine
+		typeMapItem
+		typeListItem
+	)
+
+	// Tokenize yaml
+	prevType := typeEmpty
+	items := []yamlItem{}
+	for i := range lines {
+		a := A(lines[i])
+		if !a.Empty() && !a.TrimSpaceLeft().HasPrefix("#") {
+			typ := typeEmpty
+			if a.TrimSpaceLeft().HasPrefix("{{") {
+				typ = typeTplLine
+			} else {
+				dash, colon := strings.Index(lines[i], "-"), strings.Index(lines[i], ":")
+				if (colon > -1 && dash == -1) || (colon > -1 && colon < dash) {
+					_, s := a.SplitOn(":")
+					if A(s).Empty() {
+						// map
+						// list
+						typ = typeMap
+					} else {
+						// inline map
+						// inline list
+						// map item
+						typ = typeMapItem
+					}
+				} else if (dash > -1 && colon == -1) || (dash > -1 && dash < colon) {
+					typ = typeListItem
+					if items[i-1].typ == typeMap {
+						items[i-1].typ = typeList
+					}
+				}
+			}
+			items = append(items, yamlItem{typ, lines[i]})
+		}
+	}
+
+	validYamlModifier := "validYamlModifier"
+	for i := range lines {
+		line := lines[i]
+
 		a := A(line)
-		if a.TrimSpaceLeft().HasPrefix("{{") {
-			line = fmt.Sprintf("%s%s-%d: %s", prevDepth, validYamlModifier, i, url.QueryEscape(line))
-			i++
-		} else if a.Contains("{{") {
-			//if pieces.Len() > 1 {
-			//	line = fmt.Sprintf("%s:%s", pieces.First().A(), url.QueryEscape(pieces.Slice(1, -1).Join(":").A()))
-			//}
-		} else {
-			if !a.Empty() && !a.TrimSpaceLeft().HasPrefix("#") {
-				prevDepth = A(line).SpaceLeft()
+		mapType := false
+		if !a.Empty() && !a.TrimSpaceLeft().HasPrefix("#") {
+			if a.TrimSpaceLeft().HasPrefix("{{") {
+				// Escape template line
+				line = fmt.Sprintf("%s%s-%d: %s", prevDepth, validYamlModifier, cnt, helmEscape(line))
+				cnt++
+			} else {
+
+				// Escape template value
+				if a.Contains("{{") {
+					first, second := a.SplitOn(": ")
+					if second == "" {
+						first, second = a.SplitOn("- ")
+					}
+					line = fmt.Sprintf("%s%s", first, helmEscape(second))
+				} else {
+					prevDepth = A(line).SpaceLeft()
+				}
 			}
 		}
 		buff.WriteString(line)
@@ -92,4 +148,15 @@ func convHelmTplToYaml(fileBytes []byte) []byte {
 	}
 
 	return buff.Bytes()
+}
+
+// Escape helm templating
+func helmEscape(in string) (out string) {
+	return fmt.Sprintf("\"%s\"", A(in).
+		Replace(":", "[[C]]").
+		Replace("-", "[[T]]").
+		Replace("\"", "[[DQ]]").
+		Replace("{{", "[[").
+		Replace("}}", "]]").
+		A())
 }

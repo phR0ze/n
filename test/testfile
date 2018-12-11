@@ -1,0 +1,18 @@
+# n or nub
+Collection of missing Go helper functions reminiscent of Ruby/C#. I love the
+elegance of Ruby's short named plethera of chainable methods while C# has
+some awesome deferred execution. This package was created to reduce the verbosity
+required when coding in Go.
+
+## Table of Contents
+* [Backlog](#backlog)
+* [References](#references)
+  * [Iterator Pattern](#iterator-pattern)
+* [Implemented](#implemented)
+
+## Backlog <a name="backlog"></a>
+* Implement chainable slice functions
+* Implement deferred execution
+* Handle performance issues with reflection
+
+## References <a name="references"></a>

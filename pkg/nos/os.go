@@ -1,6 +1,8 @@
 package nos
 
 import (
+	"bufio"
+	"bytes"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
@@ -226,6 +228,18 @@ func Paths(root string) (result []string) {
 	return
 }
 
+// ReadLines returns a new slice of string representing lines
+func ReadLines(target string) (result []string, err error) {
+	var fileBytes []byte
+	if fileBytes, err = ioutil.ReadFile(target); err == nil {
+		scanner := bufio.NewScanner(bytes.NewReader(fileBytes))
+		for scanner.Scan() {
+			result = append(result, scanner.Text())
+		}
+	}
+	return
+}
+
 // SharedDir returns the dir portion that two paths share
 func SharedDir(first, second string) (result string) {
 	sharedParts := []string{}
@@ -260,6 +274,16 @@ func Touch(target string) (err error) {
 
 // WriteFile is a pass through to ioutil.WriteFile with default permissions
 func WriteFile(target string, data []byte, perms ...uint32) (err error) {
+	perm := uint32(0644)
+	if len(perms) > 0 {
+		perm = perms[0]
+	}
+	err = ioutil.WriteFile(target, data, os.FileMode(perm))
+	return
+}
+
+// WriteLines is a pass through to ioutil.WriteFile with default permissions
+func WriteLines(target string, data []byte, perms ...uint32) (err error) {
 	perm := uint32(0644)
 	if len(perms) > 0 {
 		perm = perms[0]

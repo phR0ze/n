@@ -11,7 +11,8 @@ import (
 )
 
 var tmpDir = "../../test/temp"
-var tmpFile = "../../test/temp/.tmp"
+var tmpfile = "../../test/temp/.tmp"
+var testfile = "../../test/testfile"
 var readme = "../../README.md"
 
 func TestPathSlice(t *testing.T) {
@@ -98,15 +99,15 @@ func TestIsFile(t *testing.T) {
 }
 
 func TestMD5(t *testing.T) {
-	if Exists(tmpFile) {
-		os.Remove(tmpFile)
+	if Exists(tmpfile) {
+		os.Remove(tmpfile)
 	}
-	f, _ := os.Create(tmpFile)
+	f, _ := os.Create(tmpfile)
 	defer f.Close()
 	f.WriteString(`This is a test of the emergency broadcast system.`)
 
 	expected := "067a8c38325b12159844261d16e5cb13"
-	result, _ := MD5(tmpFile)
+	result, _ := MD5(tmpfile)
 	assert.Equal(t, expected, result)
 }
 
@@ -144,6 +145,12 @@ func TestPaths(t *testing.T) {
 	}
 }
 
+func TestReadLines(t *testing.T) {
+	lines, err := ReadLines(testfile)
+	assert.Nil(t, err)
+	assert.Equal(t, 18, len(lines))
+}
+
 func TestSharedDir(t *testing.T) {
 	{
 		first := ""
@@ -174,10 +181,10 @@ func TestSharedDir(t *testing.T) {
 
 func TestTouch(t *testing.T) {
 	cleanTmpDir()
-	assert.False(t, Exists(tmpFile))
-	assert.Nil(t, Touch(tmpFile))
-	assert.True(t, Exists(tmpFile))
-	assert.Nil(t, Touch(tmpFile))
+	assert.False(t, Exists(tmpfile))
+	assert.Nil(t, Touch(tmpfile))
+	assert.True(t, Exists(tmpfile))
+	assert.Nil(t, Touch(tmpfile))
 }
 
 func cleanTmpDir() {
