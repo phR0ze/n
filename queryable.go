@@ -382,10 +382,10 @@ func (q *Queryable) Insert(i int, items ...interface{}) *Queryable {
 	if i < 0 {
 		i = q.v.Len() + i
 	}
-	if i >= 0 && i < q.v.Len() && len(items) > 0 {
+	if i >= 0 && i < q.v.Len() && q.v.Len() > 0 && len(items) > 0 {
 
 		// Create a new slice
-		typ := reflect.TypeOf(items[0])
+		typ := q.v.Index(0).Type()
 		slice := reflect.MakeSlice(reflect.SliceOf(typ), 0, 10)
 
 		// Append those before i

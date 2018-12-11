@@ -546,7 +546,7 @@ func TestYamlSetDeepNesting(t *testing.T) {
 	assert.Equal(t, expected, inserted.M())
 }
 
-func YamlSetInsertIndex(t *testing.T) {
+func TestYamlSetInsertIndexAtBegining(t *testing.T) {
 	rawData := `spec:
   template:
     spec:
@@ -569,6 +569,70 @@ func YamlSetInsertIndex(t *testing.T) {
 				map[string]interface{}{"name": "foo", "env": []interface{}{
 					map[string]interface{}{"name": "var5", "value": "foobar5"},
 					map[string]interface{}{"name": "var1", "value": "foobar1"},
+				}},
+			},
+		}}}}
+	assert.Equal(t, expected, inserted.M())
+}
+
+func TestYamlSetInsertIndexMiddle(t *testing.T) {
+	rawData := `spec:
+  template:
+    spec:
+      containers:
+      - name: foo
+        env:
+        - name: var1
+          value: foobar1
+        - name: var2
+          value: foobar2
+`
+	yamlData := map[string]interface{}{}
+	err := yaml.Unmarshal([]byte(rawData), &yamlData)
+	assert.Nil(t, err)
+
+	data := map[string]interface{}{"name": "var5", "value": "foobar5"}
+	inserted, err := Q(yamlData).YamlSet("spec.template.spec.containers.[0].env.[[1]]", data)
+	assert.Nil(t, err)
+	expected := map[string]interface{}{
+		"spec": map[string]interface{}{"template": map[string]interface{}{"spec": map[string]interface{}{
+			"containers": []interface{}{
+				map[string]interface{}{"name": "foo", "env": []interface{}{
+					map[string]interface{}{"name": "var1", "value": "foobar1"},
+					map[string]interface{}{"name": "var5", "value": "foobar5"},
+					map[string]interface{}{"name": "var2", "value": "foobar2"},
+				}},
+			},
+		}}}}
+	assert.Equal(t, expected, inserted.M())
+}
+
+func TestYamlSetInsertAtName(t *testing.T) {
+	rawData := `spec:
+  template:
+    spec:
+      containers:
+      - name: foo
+        env:
+        - name: var1
+          value: foobar1
+        - name: var2
+          value: foobar2
+`
+	yamlData := map[string]interface{}{}
+	err := yaml.Unmarshal([]byte(rawData), &yamlData)
+	assert.Nil(t, err)
+
+	data := map[string]interface{}{"name": "var5", "value": "foobar5"}
+	inserted, err := Q(yamlData).YamlSet("spec.template.spec.containers.[0].env.[[name:var2]]", data)
+	assert.Nil(t, err)
+	expected := map[string]interface{}{
+		"spec": map[string]interface{}{"template": map[string]interface{}{"spec": map[string]interface{}{
+			"containers": []interface{}{
+				map[string]interface{}{"name": "foo", "env": []interface{}{
+					map[string]interface{}{"name": "var1", "value": "foobar1"},
+					map[string]interface{}{"name": "var5", "value": "foobar5"},
+					map[string]interface{}{"name": "var2", "value": "foobar2"},
 				}},
 			},
 		}}}}

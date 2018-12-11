@@ -141,8 +141,7 @@ func (q *Queryable) YamlSet(key string, data interface{}) (result *Queryable, er
 						if i < q.Len() && !insert {
 							q.Set(i, data)
 						} else {
-							//q.Insert(i, data)
-							q.Append(data)
+							q.Insert(i, data)
 						}
 					} else {
 						if i < q.Len() {
@@ -161,7 +160,11 @@ func (q *Queryable) YamlSet(key string, data interface{}) (result *Queryable, er
 						if entry, ok := m[k]; ok {
 							if v == entry {
 								if !keys.Any() {
-									q.Set(i, data)
+									if insert {
+										q.Insert(i, data)
+									} else {
+										q.Set(i, data)
+									}
 								} else {
 									result, err = q.At(i).YamlSet(keys.Join(".").A(), data)
 								}
