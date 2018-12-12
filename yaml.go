@@ -2,7 +2,6 @@ package n
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -114,7 +113,11 @@ func (q *Queryable) YamlSet(key string, data interface{}) (result *Queryable, er
 					var v interface{}
 					if v, ok = x[key]; !ok {
 						// Doesn't exist so create
-						x[key] = map[string]interface{}{}
+						if keys.First().Contains("[") {
+							x[key] = []interface{}{}
+						} else {
+							x[key] = map[string]interface{}{}
+						}
 						v = x[key]
 					}
 					if result, err = Q(v).YamlSet(keys.Join(".").A(), data); err == nil {
@@ -144,12 +147,14 @@ func (q *Queryable) YamlSet(key string, data interface{}) (result *Queryable, er
 							q.Insert(i, data)
 						}
 					} else {
-						if i < q.Len() {
-							result, err = q.At(i).YamlSet(keys.Join(".").A(), data)
-						} else {
-							err = fmt.Errorf("Indexing out of bounds")
-							return
+						if i >= q.Len() {
+							if keys.First().Contains("[") {
+								q.Append([]interface{}{})
+							} else {
+								q.Append(map[string]interface{}{})
+							}
 						}
+						result, err = q.At(i).YamlSet(keys.Join(".").A(), data)
 					}
 				} else {
 					return

@@ -81,10 +81,6 @@ func N() *Queryable {
 
 // Q provides origination for the Queryable abstraction layer
 func Q(obj interface{}) *Queryable {
-	if obj == nil {
-		return N()
-	}
-
 	v := reflect.ValueOf(obj)
 	q := &Queryable{v: &v, Kind: v.Kind()}
 	switch q.Kind {
@@ -95,6 +91,9 @@ func Q(obj interface{}) *Queryable {
 
 	// Handle map types
 	case reflect.Map:
+		//if q.v.IsNil() {
+		//	*q.v = reflect.MakeMap(q.v.Type())
+		//}
 		q.Iter = mapIter(v)
 
 	// Handle string types
@@ -104,6 +103,10 @@ func Q(obj interface{}) *Queryable {
 	// Chan types
 	case reflect.Chan:
 		panic("TODO: handle reflect.Chan")
+
+	// Ptr types not supported
+	case reflect.Ptr:
+		panic("TODO: pointers are not supported currently")
 	}
 
 	return q
