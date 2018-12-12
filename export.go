@@ -122,6 +122,33 @@ func (q *Queryable) AAMap() (result map[string]string) {
 	return result
 }
 
+// ASAMap exports queryable into an string to []string map
+func (q *Queryable) ASAMap() (result map[string][]string) {
+	result = map[string][]string{}
+	if !q.Nil() {
+		if v, ok := q.O().(map[string][]string); ok {
+			result = v
+		} else {
+			next := q.Iter()
+			for x, ok := next(); ok; x, ok = next() {
+				if pair, ok := x.(KeyVal); ok {
+					key := fmt.Sprint(pair.Key)
+					if slice, ok := pair.Val.([]string); ok {
+						result[key] = slice
+					} else {
+						result[key] = []string{}
+						nexty := Q(pair.Val).Iter()
+						for y, ok := nexty(); ok; y, ok = nexty() {
+							result[key] = append(result[key], fmt.Sprint(y))
+						}
+					}
+				}
+			}
+		}
+	}
+	return result
+}
+
 // S exports queryable into an interface{} slice
 func (q *Queryable) S() []interface{} {
 	result := []interface{}{}

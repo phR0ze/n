@@ -143,6 +143,19 @@ func TestAAMap(t *testing.T) {
 	}
 }
 
+func TestASAMap(t *testing.T) {
+	{
+		q := Q(map[string][]string{"bar": []string{"frodo"}})
+		assert.Equal(t, map[string][]string{"bar": []string{"frodo"}}, q.ASAMap())
+	}
+	{
+		q, err := FromYaml("foo:\n  bar:\n  - frodo")
+		assert.Nil(t, err)
+		assert.True(t, q.Any())
+		assert.Equal(t, map[string][]string{"bar": []string{"frodo"}}, q.Yaml("foo").ASAMap())
+	}
+}
+
 func TestS(t *testing.T) {
 	{
 		q, _ := FromYaml(`items:
