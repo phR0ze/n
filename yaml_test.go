@@ -652,16 +652,23 @@ func TestYamlSetCreatePath(t *testing.T) {
 	assert.Equal(t, expected, inserted.M())
 }
 
-// func TestYamlSetNilMap(t *testing.T) {
-// 	//var nilMap map[string]interface{}
-// 	nilMap := map[string]interface{}{}
-// 	inserted, err := Q(nilMap).YamlSet("spec.template.spec.containers.[0].name", "bar")
-// 	assert.Nil(t, err)
-// 	expected := map[string]interface{}{
-// 		"spec": map[string]interface{}{"template": map[string]interface{}{"spec": map[string]interface{}{
-// 			"containers": []interface{}{
-// 				map[string]interface{}{"name": "bar"},
-// 			},
-// 		}}}}
-// 	assert.Equal(t, expected, inserted.M())
-// }
+func TestYamlSetNilMap(t *testing.T) {
+	var nilMap map[string]interface{}
+	inserted, err := Q(nilMap).YamlSet("spec.template.spec.containers.[0].name", "bar")
+	assert.Nil(t, err)
+	expected := map[string]interface{}{
+		"spec": map[string]interface{}{"template": map[string]interface{}{"spec": map[string]interface{}{
+			"containers": []interface{}{
+				map[string]interface{}{"name": "bar"},
+			},
+		}}}}
+	assert.Equal(t, expected, inserted.M())
+}
+
+func TestYamlSetNilSlice(t *testing.T) {
+	var nilSlice []interface{}
+	inserted, err := Q(nilSlice).YamlSet("[0].spec", "bar")
+	assert.Nil(t, err)
+	expected := []interface{}{map[string]interface{}{"spec": "bar"}}
+	assert.Equal(t, expected, inserted.S())
+}

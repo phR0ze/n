@@ -87,13 +87,16 @@ func Q(obj interface{}) *Queryable {
 
 	// Slice types
 	case reflect.Array, reflect.Slice:
+		if q.v.IsNil() {
+			*q.v = reflect.MakeSlice(q.v.Type(), 0, 10)
+		}
 		q.Iter = sliceIter(v)
 
 	// Handle map types
 	case reflect.Map:
-		//if q.v.IsNil() {
-		//	*q.v = reflect.MakeMap(q.v.Type())
-		//}
+		if q.v.IsNil() {
+			*q.v = reflect.MakeMap(q.v.Type())
+		}
 		q.Iter = mapIter(v)
 
 	// Handle string types
