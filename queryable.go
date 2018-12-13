@@ -506,10 +506,22 @@ func (q *Queryable) MapMany(sel func(O) O) (result *Queryable) {
 
 // Nil tests if the queryable is a nil queryable
 func (q *Queryable) Nil() bool {
-	if q.v == nil {
+	if q.v == nil || q.Kind == reflect.Invalid {
 		return true
 	}
 	return false
+}
+
+// Select returns a new queryable containing all items which match the given lambda
+func (q *Queryable) Select(lambda func(O) bool) (result *Queryable) {
+	result = q.newSlice()
+	next := q.Iter()
+	for x, ok := next(); ok; x, ok = next() {
+		if lambda(x) {
+			*result.v = reflect.Append(*result.v, reflect.ValueOf(x))
+		}
+	}
+	return result
 }
 
 // Set the item at the given index to the given item
@@ -567,12 +579,33 @@ func (q *Queryable) TypeSingle() bool {
 
 // Convert the single type into a slice type
 func (q *Queryable) toSlice(items ...interface{}) {
-	if q.TypeSingle() && len(items) > 0 {
-		typ := reflect.TypeOf(items[0])
-		qSlice := Q(reflect.MakeSlice(reflect.SliceOf(typ), 0, 10).Interface())
+	if q.TypeSingle() {
+		nq := q.newSlice(items...)
 		if !q.Nil() {
-			qSlice.Append(q.v.Interface())
+			*nq.v = reflect.Append(*nq.v, *q.v)
 		}
-		*q = *qSlice
+		*q = *nq
 	}
+}
+
+// Create a new slice of the inner type
+func (q *Queryable) newSlice(items ...interface{}) *Queryable {
+	var typ reflect.Type
+	switch {
+	case len(items) > 0:
+		typ = reflect.SliceOf(reflect.TypeOf(items[0]))
+	case q.Nil():
+		typ = reflect.TypeOf([]interface{}{})
+	case q.TypeSingle():
+		typ = reflect.SliceOf(q.v.Type())
+	case q.TypeMap():
+		typ = reflect.SliceOf(reflect.TypeOf(KeyVal{}))
+	default:
+		if q.Any() {
+			typ = reflect.SliceOf(q.v.Index(0).Type())
+		} else {
+			typ = q.v.Type()
+		}
+	}
+	return Q(reflect.MakeSlice(typ, 0, 10).Interface())
 }

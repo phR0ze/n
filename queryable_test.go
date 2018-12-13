@@ -1050,6 +1050,17 @@ func TestMapMany(t *testing.T) {
 	}
 }
 
+func TestSelect(t *testing.T) {
+	{
+		targets := []string{"1", "2"}
+		q := Q([]string{"4", "1", "5", "2"})
+		results := q.Select(func(x O) bool {
+			return Q(targets).Contains(x.(string))
+		}).Strs()
+		assert.Equal(t, targets, results)
+	}
+}
+
 func TestSet(t *testing.T) {
 	{
 		q := Q([]int{1, 2, 3})
@@ -1104,5 +1115,46 @@ func TestSplit(t *testing.T) {
 	{
 		q := Q("test1,test2")
 		assert.Equal(t, []string{"test1", "test2"}, q.Split(",").S())
+	}
+}
+
+func TestNewSlice(t *testing.T) {
+	{
+		q := Q(nil)
+		assert.Equal(t, []interface{}{}, q.newSlice().O())
+	}
+	{
+		q := Q(1)
+		assert.Equal(t, []int{}, q.newSlice().O())
+	}
+	{
+		q := Q(1)
+		assert.Equal(t, []string{}, q.newSlice("bob").O())
+	}
+	{
+		q := Q("one")
+		assert.Equal(t, []string{}, q.newSlice().O())
+	}
+	{
+		q := Q([]int{})
+		assert.Equal(t, []int{}, q.newSlice().O())
+	}
+	{
+		q := Q([]string{})
+		assert.Equal(t, []string{}, q.newSlice().O())
+	}
+	{
+		var slice []string
+		q := Q(slice)
+		assert.Equal(t, []string{}, q.newSlice().O())
+	}
+	{
+		var mapper map[string]interface{}
+		q := Q(mapper)
+		assert.Equal(t, []KeyVal{}, q.newSlice().O())
+	}
+	{
+		q := Q(map[string]interface{}{})
+		assert.Equal(t, []KeyVal{}, q.newSlice().O())
 	}
 }
