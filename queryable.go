@@ -518,7 +518,7 @@ func (q *Queryable) Select(lambda func(O) bool) (result *Queryable) {
 	next := q.Iter()
 	for x, ok := next(); ok; x, ok = next() {
 		if lambda(x) {
-			*result.v = reflect.Append(*result.v, reflect.ValueOf(x))
+			result.Append(x)
 		}
 	}
 	return result
