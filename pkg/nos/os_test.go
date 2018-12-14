@@ -15,42 +15,6 @@ var tmpfile = "../../test/temp/.tmp"
 var testfile = "../../test/testfile"
 var readme = "../../README.md"
 
-func TestPathSlice(t *testing.T) {
-	assert.Equal(t, "", Path("").Slice(0, -1))
-	assert.Equal(t, "/", Path("/").Slice(0, -1))
-	assert.Equal(t, "/foo", Path("/foo").Slice(0, -1))
-
-	// Slice first count
-	assert.Equal(t, "", Path("").Slice(0, 1))
-	assert.Equal(t, "/", Path("/").Slice(0, 1))
-	assert.Equal(t, "foo", Path("foo").Slice(0, 1))
-	assert.Equal(t, "/foo", Path("/foo").Slice(0, 1))
-	assert.Equal(t, "/foo/bar", Path("/foo/bar/one").Slice(0, 1))
-
-	assert.Equal(t, "/foo", Path("/foo/bar/one").Slice(0, 0))
-	assert.Equal(t, "/foo/bar", Path("/foo/bar/one").Slice(0, 1))
-	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Slice(0, 2))
-	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Slice(0, 3))
-	assert.Equal(t, "foo/bar/one", Path("foo/bar/one").Slice(0, 3))
-
-	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Slice(0, -1))
-	assert.Equal(t, "/foo/bar", Path("/foo/bar/one").Slice(0, -2))
-	assert.Equal(t, "/foo", Path("/foo/bar/one").Slice(0, -3))
-	assert.Equal(t, "", Path("/foo/bar/one").Slice(0, -4))
-
-	// Slice last cnt
-	assert.Equal(t, "", Path("").Slice(-2, -1))
-	assert.Equal(t, "/", Path("/").Slice(-2, -1))
-	assert.Equal(t, "foo", Path("foo").Slice(-2, -1))
-	assert.Equal(t, "/foo", Path("/foo").Slice(-2, -1))
-	assert.Equal(t, "one", Path("/foo/bar/one").Slice(-1, -1))
-	assert.Equal(t, "one", Path("foo/bar/one").Slice(-1, -1))
-	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Slice(-3, -1))
-	assert.Equal(t, "bar/one", Path("/foo/bar/one").Slice(-2, -1))
-	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Slice(-3, -1))
-	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Slice(-5, 2))
-}
-
 func TestCopy(t *testing.T) {
 	cleanTmpDir()
 	src := "../../pkg"

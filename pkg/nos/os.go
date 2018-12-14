@@ -14,40 +14,6 @@ import (
 	"strings"
 )
 
-type pathN struct {
-	v string
-}
-
-// Path creats a new path nub from the given string
-func Path(path string) *pathN {
-	return &pathN{v: strings.TrimSpace(path)}
-}
-
-// Slice provides a ruby like slice function for path nubs
-func (p *pathN) Slice(i, j int) (result string) {
-	x := strings.Split(p.v, "/")
-
-	// Convert to positive notation to simplify logic
-	if i < 0 {
-		i = len(x) + i
-	}
-
-	// Offset indices to include root
-	if p.v != "" && rune(p.v[0]) == rune('/') {
-		if i == 1 {
-			i--
-		} else if i == 0 && j >= 0 {
-			j++
-		} else if j > 0 {
-			i, j = i+1, j+1
-		}
-	}
-
-	result = strings.Join(slice(x, i, j), "/")
-
-	return
-}
-
 // Copy copies src to dst recursively.
 // The dst will be copied to if it is an existing directory.
 // The dst will be a clone of the src if it doesn't exist, but it's parent directory does.

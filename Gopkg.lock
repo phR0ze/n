@@ -25,6 +25,14 @@
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:a4df73029d2c42fabcb6b41e327d2f87e685284ec03edf76921c267d9cfc9c23"
+  name = "github.com/mitchellh/go-homedir"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "ae18d6b8b3205b561c79e8e5f69bff09736185f4"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
@@ -62,6 +70,7 @@
   input-imports = [
     "github.com/bouk/monkey",
     "github.com/ghodss/yaml",
+    "github.com/mitchellh/go-homedir",
     "github.com/stretchr/testify/assert",
     "github.com/valyala/bytebufferpool",
   ]

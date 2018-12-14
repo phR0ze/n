@@ -3,11 +3,12 @@ package n
 import (
 	"testing"
 
-	"github.com/phR0ze/n/pkg/nnet"
+	"github.com/stretchr/testify/assert"
 )
 
 // Not a test
 // Using this to experiment with
 func TestTest(t *testing.T) {
-	nnet.DownloadFile("http://www.google.com/index.html", "foobar")
+	result, _ := go-homedir.Expand("~/")
+	assert.Equal(t, "", result)
 }
