@@ -12,7 +12,7 @@ import (
 // DownloadFile from the given URL to the given destination
 // returning the full path to the resulting downloaded file
 func DownloadFile(url, dst string, perms ...uint32) (result string, err error) {
-	if result, err = nos.Path(dst).Abs(); err != nil {
+	if result, err = nos.Abs(dst); err != nil {
 		return
 	}
 
