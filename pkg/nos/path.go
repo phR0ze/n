@@ -1,6 +1,7 @@
 package nos
 
 import (
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -48,4 +49,45 @@ func (p *pathN) Slice(i, j int) (result string) {
 	result = strings.Join(slice(x, i, j), "/")
 
 	return
+}
+
+// Home returns the absolute home directory for the current user
+func Home() (result string, err error) {
+	if result, err = homedir.Dir(); err == nil {
+		result, err = filepath.Abs(result)
+	}
+	return
+}
+
+// Paths returns a list of paths for the given root path in a deterministic order
+func Paths(root string) (result []string) {
+	result = []string{}
+	filepath.Walk(root, func(p string, i os.FileInfo, e error) error {
+		if e != nil {
+			return e
+		}
+		result = append(result, p)
+		return nil
+	})
+	return
+}
+
+// SharedDir returns the dir portion that two paths share
+func SharedDir(first, second string) (result string) {
+	sharedParts := []string{}
+
+	firstParts := strings.Split(first, "/")
+	secondParts := strings.Split(second, "/")
+	secondLen := len(secondParts)
+	for i := range firstParts {
+		if i < secondLen {
+			if firstParts[i] == secondParts[i] {
+				sharedParts = append(sharedParts, firstParts[i])
+			}
+		} else {
+			break
+		}
+	}
+
+	return strings.Join(sharedParts, "/")
 }

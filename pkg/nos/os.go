@@ -181,19 +181,6 @@ func MkdirP(target string, mode ...os.FileMode) error {
 	return os.MkdirAll(target, mode[0])
 }
 
-// Paths returns a list of paths for the given root path in a deterministic order
-func Paths(root string) (result []string) {
-	result = []string{}
-	filepath.Walk(root, func(p string, i os.FileInfo, e error) error {
-		if e != nil {
-			return e
-		}
-		result = append(result, p)
-		return nil
-	})
-	return
-}
-
 // ReadLines returns a new slice of string representing lines
 func ReadLines(target string) (result []string, err error) {
 	var fileBytes []byte
@@ -204,26 +191,6 @@ func ReadLines(target string) (result []string, err error) {
 		}
 	}
 	return
-}
-
-// SharedDir returns the dir portion that two paths share
-func SharedDir(first, second string) (result string) {
-	sharedParts := []string{}
-
-	firstParts := strings.Split(first, "/")
-	secondParts := strings.Split(second, "/")
-	secondLen := len(secondParts)
-	for i := range firstParts {
-		if i < secondLen {
-			if firstParts[i] == secondParts[i] {
-				sharedParts = append(sharedParts, firstParts[i])
-			}
-		} else {
-			break
-		}
-	}
-
-	return strings.Join(sharedParts, "/")
 }
 
 // Touch creates an empty text file similar to the linux touch command

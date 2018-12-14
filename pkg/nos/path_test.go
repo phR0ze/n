@@ -1,6 +1,8 @@
 package nos
 
 import (
+	"fmt"
+	"path"
 	"strings"
 	"testing"
 
@@ -9,11 +11,13 @@ import (
 
 func TestPathAbs(t *testing.T) {
 	{
-		result, _ := Path("~/").Abs()
+		result, err := Path("~/").Abs()
+		assert.Nil(t, err)
 		assert.True(t, strings.Contains(result, "home"))
 	}
 	{
-		result, _ := Path("test").Abs()
+		result, err := Path("test").Abs()
+		assert.Nil(t, err)
 		assert.True(t, strings.Contains(result, "home"))
 		assert.True(t, strings.HasSuffix(result, "nos/test"))
 	}
@@ -53,4 +57,64 @@ func TestPathSlice(t *testing.T) {
 	assert.Equal(t, "bar/one", Path("/foo/bar/one").Slice(-2, -1))
 	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Slice(-3, -1))
 	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Slice(-5, 2))
+}
+
+func TestHome(t *testing.T) {
+	result, err := Home()
+	assert.Nil(t, err)
+	assert.True(t, strings.Contains(result, "home"))
+}
+
+func TestPaths(t *testing.T) {
+	cleanTmpDir()
+	{
+		targetDir := path.Join(tmpDir, "first")
+		expected := []string{targetDir}
+		MkdirP(targetDir)
+		for i := 0; i < 10; i++ {
+			target := path.Join(targetDir, fmt.Sprintf("%d", i))
+			Touch(target)
+			expected = append(expected, target)
+		}
+		assert.Equal(t, expected, Paths(targetDir))
+	}
+	{
+		targetDir := path.Join(tmpDir, "second")
+		expected := []string{targetDir}
+		MkdirP(targetDir)
+		for i := 0; i < 5; i++ {
+			target := path.Join(targetDir, fmt.Sprintf("%d", i))
+			Touch(target)
+			expected = append(expected, target)
+		}
+		assert.Equal(t, expected, Paths(targetDir))
+	}
+}
+
+func TestSharedDir(t *testing.T) {
+	{
+		first := ""
+		second := ""
+		assert.Equal(t, "", SharedDir(first, second))
+	}
+	{
+		first := "/bob"
+		second := "/foo"
+		assert.Equal(t, "", SharedDir(first, second))
+	}
+	{
+		first := "/foo/bar1"
+		second := "/foo/bar2"
+		assert.Equal(t, "/foo", SharedDir(first, second))
+	}
+	{
+		first := "foo/bar1"
+		second := "foo/bar2"
+		assert.Equal(t, "foo", SharedDir(first, second))
+	}
+	{
+		first := "/foo/bar/1"
+		second := "/foo/bar/2"
+		assert.Equal(t, "/foo/bar", SharedDir(first, second))
+	}
 }

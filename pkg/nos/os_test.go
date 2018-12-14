@@ -1,7 +1,6 @@
 package nos
 
 import (
-	"fmt"
 	"os"
 	"path"
 	"strings"
@@ -83,64 +82,10 @@ func TestMkdirP(t *testing.T) {
 	assert.True(t, Exists(tmpDir))
 }
 
-func TestPaths(t *testing.T) {
-	cleanTmpDir()
-	{
-		targetDir := path.Join(tmpDir, "first")
-		expected := []string{targetDir}
-		MkdirP(targetDir)
-		for i := 0; i < 10; i++ {
-			target := path.Join(targetDir, fmt.Sprintf("%d", i))
-			Touch(target)
-			expected = append(expected, target)
-		}
-		assert.Equal(t, expected, Paths(targetDir))
-	}
-	{
-		targetDir := path.Join(tmpDir, "second")
-		expected := []string{targetDir}
-		MkdirP(targetDir)
-		for i := 0; i < 5; i++ {
-			target := path.Join(targetDir, fmt.Sprintf("%d", i))
-			Touch(target)
-			expected = append(expected, target)
-		}
-		assert.Equal(t, expected, Paths(targetDir))
-	}
-}
-
 func TestReadLines(t *testing.T) {
 	lines, err := ReadLines(testfile)
 	assert.Nil(t, err)
 	assert.Equal(t, 18, len(lines))
-}
-
-func TestSharedDir(t *testing.T) {
-	{
-		first := ""
-		second := ""
-		assert.Equal(t, "", SharedDir(first, second))
-	}
-	{
-		first := "/bob"
-		second := "/foo"
-		assert.Equal(t, "", SharedDir(first, second))
-	}
-	{
-		first := "/foo/bar1"
-		second := "/foo/bar2"
-		assert.Equal(t, "/foo", SharedDir(first, second))
-	}
-	{
-		first := "foo/bar1"
-		second := "foo/bar2"
-		assert.Equal(t, "foo", SharedDir(first, second))
-	}
-	{
-		first := "/foo/bar/1"
-		second := "/foo/bar/2"
-		assert.Equal(t, "/foo/bar", SharedDir(first, second))
-	}
 }
 
 func TestTouch(t *testing.T) {
