@@ -129,30 +129,39 @@ func CopyFile(src, dst string) (err error) {
 
 // Exists return true if the given path exists
 func Exists(src string) bool {
-	if _, err := os.Stat(src); err == nil {
-		return true
+	if target, err := Abs(src); err == nil {
+		if _, err := os.Stat(target); err == nil {
+			return true
+		}
 	}
 	return false
 }
 
 // IsDir returns true if the given path is a directory
 func IsDir(src string) bool {
-	if info, err := os.Stat(src); err == nil {
-		return info.IsDir()
+	if target, err := Abs(src); err == nil {
+		if info, err := os.Stat(target); err == nil {
+			return info.IsDir()
+		}
 	}
 	return false
 }
 
 // IsFile returns true if the given path is a file
 func IsFile(src string) bool {
-	if info, err := os.Stat(src); err == nil {
-		return !info.IsDir()
+	if target, err := Abs(src); err == nil {
+		if info, err := os.Stat(target); err == nil {
+			return !info.IsDir()
+		}
 	}
 	return false
 }
 
 // MD5 returns the md5 of the given file
 func MD5(target string) (result string, err error) {
+	if target, err = Abs(target); err != nil {
+		return
+	}
 	if !Exists(target) {
 		return "", os.ErrNotExist
 	}
@@ -177,7 +186,11 @@ func MD5(target string) (result string, err error) {
 }
 
 // MkdirP creates the target directory and any parent directories needed
-func MkdirP(target string, mode ...os.FileMode) error {
+func MkdirP(target string, mode ...os.FileMode) (err error) {
+	if target, err = Abs(target); err != nil {
+		return
+	}
+
 	if mode == nil || len(mode) == 0 {
 		return os.MkdirAll(target, 0755)
 	}
@@ -186,6 +199,10 @@ func MkdirP(target string, mode ...os.FileMode) error {
 
 // ReadLines returns a new slice of string representing lines
 func ReadLines(target string) (result []string, err error) {
+	if target, err = Abs(target); err != nil {
+		return
+	}
+
 	var fileBytes []byte
 	if fileBytes, err = ioutil.ReadFile(target); err == nil {
 		scanner := bufio.NewScanner(bytes.NewReader(fileBytes))
@@ -198,6 +215,10 @@ func ReadLines(target string) (result []string, err error) {
 
 // Touch creates an empty text file similar to the linux touch command
 func Touch(target string) (err error) {
+	if target, err = Abs(target); err != nil {
+		return
+	}
+
 	var f *os.File
 	if f, err = os.Create(target); !os.IsExist(err) {
 		return
@@ -210,6 +231,10 @@ func Touch(target string) (err error) {
 
 // WriteFile is a pass through to ioutil.WriteFile with default permissions
 func WriteFile(target string, data []byte, perms ...uint32) (err error) {
+	if target, err = Abs(target); err != nil {
+		return
+	}
+
 	perm := uint32(0644)
 	if len(perms) > 0 {
 		perm = perms[0]
@@ -220,6 +245,10 @@ func WriteFile(target string, data []byte, perms ...uint32) (err error) {
 
 // WriteLines is a pass through to ioutil.WriteFile with default permissions
 func WriteLines(target string, lines []string, perms ...uint32) (err error) {
+	if target, err = Abs(target); err != nil {
+		return
+	}
+
 	perm := uint32(0644)
 	if len(perms) > 0 {
 		perm = perms[0]
