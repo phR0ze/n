@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"path/filepath"
 
 	"github.com/phR0ze/n/pkg/nos"
 )
@@ -13,7 +12,7 @@ import (
 // DownloadFile from the given URL to the given destination
 // returning the full path to the resulting downloaded file
 func DownloadFile(url, dst string, perms ...uint32) (result string, err error) {
-	if result, err = filepath.Abs(dst); err != nil {
+	if result, err = nos.Path(dst).Abs(); err != nil {
 		return
 	}
 

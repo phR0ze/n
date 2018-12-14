@@ -20,7 +20,7 @@ import (
 func Copy(src, dst string) error {
 	var e error
 	var dstAbs string
-	if dstAbs, e = filepath.Abs(dst); e != nil {
+	if dstAbs, e = Path(dst).Abs(); e != nil {
 		return e
 	}
 
@@ -32,7 +32,7 @@ func Copy(src, dst string) error {
 
 		// Determine correct destination path
 		var dstPath string
-		if srcPath, err = filepath.Abs(srcPath); err != nil {
+		if srcPath, err = Path(srcPath).Abs(); err != nil {
 			return err
 		}
 		if shared := SharedDir(srcPath, dstAbs); shared != "" {
@@ -63,7 +63,7 @@ func CopyFile(src, dst string) (err error) {
 	var srcPath, dstPath string
 
 	// Get absolute path of source
-	if srcPath, err = filepath.Abs(src); err != nil {
+	if srcPath, err = Path(src).Abs(); err != nil {
 		return
 	}
 
@@ -81,14 +81,14 @@ func CopyFile(src, dst string) (err error) {
 		if _, err = os.Stat(path.Dir(dst)); err != nil {
 			return
 		}
-		if dstPath, err = filepath.Abs(path.Dir(dst)); err != nil {
+		if dstPath, err = Path(path.Dir(dst)).Abs(); err != nil {
 			return
 		}
 		dstPath = path.Join(dstPath, path.Base(dst))
 
 	// dst is a valid directory so copy to it using src name
 	case e == nil:
-		if dstPath, err = filepath.Abs(dst); err != nil {
+		if dstPath, err = Path(dst).Abs(); err != nil {
 			return
 		}
 		dstPath = path.Join(dstPath, path.Base(srcPath))
