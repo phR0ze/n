@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"crypto/md5"
 	"encoding/hex"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -40,8 +39,6 @@ func Copy(src, dst string) error {
 		} else {
 			dstPath = path.Join(dstAbs, srcPath)
 		}
-		fmt.Println(srcPath)
-		fmt.Println(dstPath)
 
 		// Copy to destination
 		if info.IsDir() {
