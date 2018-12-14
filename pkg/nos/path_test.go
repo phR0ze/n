@@ -9,54 +9,54 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPathAbs(t *testing.T) {
+func TestAbs(t *testing.T) {
 	{
-		result, err := Path("~/").Abs()
+		result, err := Abs("~/")
 		assert.Nil(t, err)
 		assert.True(t, strings.Contains(result, "home"))
 	}
 	{
-		result, err := Path("test").Abs()
+		result, err := Abs("test")
 		assert.Nil(t, err)
 		assert.True(t, strings.Contains(result, "home"))
 		assert.True(t, strings.HasSuffix(result, "nos/test"))
 	}
 }
 
-func TestPathSlice(t *testing.T) {
-	assert.Equal(t, "", Path("").Slice(0, -1))
-	assert.Equal(t, "/", Path("/").Slice(0, -1))
-	assert.Equal(t, "/foo", Path("/foo").Slice(0, -1))
+func TestSlicePath(t *testing.T) {
+	assert.Equal(t, "", SlicePath("", 0, -1))
+	assert.Equal(t, "/", SlicePath("/", 0, -1))
+	assert.Equal(t, "/foo", SlicePath("/foo", 0, -1))
 
 	// Slice first count
-	assert.Equal(t, "", Path("").Slice(0, 1))
-	assert.Equal(t, "/", Path("/").Slice(0, 1))
-	assert.Equal(t, "foo", Path("foo").Slice(0, 1))
-	assert.Equal(t, "/foo", Path("/foo").Slice(0, 1))
-	assert.Equal(t, "/foo/bar", Path("/foo/bar/one").Slice(0, 1))
+	assert.Equal(t, "", SlicePath("", 0, 1))
+	assert.Equal(t, "/", SlicePath("/", 0, 1))
+	assert.Equal(t, "foo", SlicePath("foo", 0, 1))
+	assert.Equal(t, "/foo", SlicePath("/foo", 0, 1))
+	assert.Equal(t, "/foo/bar", SlicePath("/foo/bar/one", 0, 1))
 
-	assert.Equal(t, "/foo", Path("/foo/bar/one").Slice(0, 0))
-	assert.Equal(t, "/foo/bar", Path("/foo/bar/one").Slice(0, 1))
-	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Slice(0, 2))
-	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Slice(0, 3))
-	assert.Equal(t, "foo/bar/one", Path("foo/bar/one").Slice(0, 3))
+	assert.Equal(t, "/foo", SlicePath("/foo/bar/one", 0, 0))
+	assert.Equal(t, "/foo/bar", SlicePath("/foo/bar/one", 0, 1))
+	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one", 0, 2))
+	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one", 0, 3))
+	assert.Equal(t, "foo/bar/one", SlicePath("foo/bar/one", 0, 3))
 
-	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Slice(0, -1))
-	assert.Equal(t, "/foo/bar", Path("/foo/bar/one").Slice(0, -2))
-	assert.Equal(t, "/foo", Path("/foo/bar/one").Slice(0, -3))
-	assert.Equal(t, "", Path("/foo/bar/one").Slice(0, -4))
+	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one", 0, -1))
+	assert.Equal(t, "/foo/bar", SlicePath("/foo/bar/one", 0, -2))
+	assert.Equal(t, "/foo", SlicePath("/foo/bar/one", 0, -3))
+	assert.Equal(t, "", SlicePath("/foo/bar/one", 0, -4))
 
 	// Slice last cnt
-	assert.Equal(t, "", Path("").Slice(-2, -1))
-	assert.Equal(t, "/", Path("/").Slice(-2, -1))
-	assert.Equal(t, "foo", Path("foo").Slice(-2, -1))
-	assert.Equal(t, "/foo", Path("/foo").Slice(-2, -1))
-	assert.Equal(t, "one", Path("/foo/bar/one").Slice(-1, -1))
-	assert.Equal(t, "one", Path("foo/bar/one").Slice(-1, -1))
-	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Slice(-3, -1))
-	assert.Equal(t, "bar/one", Path("/foo/bar/one").Slice(-2, -1))
-	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Slice(-3, -1))
-	assert.Equal(t, "/foo/bar/one", Path("/foo/bar/one").Slice(-5, 2))
+	assert.Equal(t, "", SlicePath("", -2, -1))
+	assert.Equal(t, "/", SlicePath("/", -2, -1))
+	assert.Equal(t, "foo", SlicePath("foo", -2, -1))
+	assert.Equal(t, "/foo", SlicePath("/foo", -2, -1))
+	assert.Equal(t, "one", SlicePath("/foo/bar/one", -1, -1))
+	assert.Equal(t, "one", SlicePath("foo/bar/one", -1, -1))
+	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one", -3, -1))
+	assert.Equal(t, "bar/one", SlicePath("/foo/bar/one", -2, -1))
+	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one", -3, -1))
+	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one", -5, 2))
 }
 
 func TestHome(t *testing.T) {
