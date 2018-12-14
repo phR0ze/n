@@ -23,6 +23,14 @@ func TestAbs(t *testing.T) {
 	}
 }
 
+func TestDirs(t *testing.T) {
+	dirs := Dirs("../")
+	assert.NotEmpty(t, dirs)
+	for _, dir := range dirs {
+		assert.True(t, strings.Contains(dir, "n/pkg"))
+	}
+}
+
 func TestSlicePath(t *testing.T) {
 	assert.Equal(t, "", SlicePath("", 0, -1))
 	assert.Equal(t, "/", SlicePath("/", 0, -1))

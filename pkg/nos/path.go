@@ -1,7 +1,9 @@
 package nos
 
 import (
+	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -20,6 +22,23 @@ func Abs(target string) (result string, err error) {
 func Home() (result string, err error) {
 	if result, err = homedir.Dir(); err == nil {
 		result, err = filepath.Abs(result)
+	}
+	return
+}
+
+// Dirs returns all named directories from the given target path
+func Dirs(target string) (result []string) {
+	result = []string{}
+	if IsDir(target) {
+		if target, err := Abs(target); err == nil {
+			if items, err := ioutil.ReadDir(target); err == nil {
+				for _, item := range items {
+					if item.IsDir() {
+						result = append(result, path.Join(target, item.Name()))
+					}
+				}
+			}
+		}
 	}
 	return
 }
