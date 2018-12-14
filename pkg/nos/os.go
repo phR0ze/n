@@ -18,26 +18,32 @@ import (
 // The dst will be a clone of the src if it doesn't exist, but it's parent directory does.
 func Copy(src, dst string) error {
 	var e error
-	var dstAbs string
-	if dstAbs, e = Abs(dst); e != nil {
+	var srcRoot, dstRoot string
+	if srcRoot, e = Abs(src); e != nil {
+		return e
+	}
+	if dstRoot, e = Abs(dst); e != nil {
 		return e
 	}
 
+	// Clone given src as dst vs copy into dst
+	clone := true
+	if IsDir(dstRoot) {
+		clone = false
+	}
+
 	// Walk over file structure
-	return filepath.Walk(src, func(srcPath string, info os.FileInfo, err error) error {
+	return filepath.Walk(srcRoot, func(srcPath string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
-		// Determine correct destination path
+		// Set proper dst path
 		var dstPath string
-		if srcPath, err = Abs(srcPath); err != nil {
-			return err
-		}
-		if shared := SharedDir(srcPath, dstAbs); shared != "" {
-			dstPath = path.Join(dstAbs, strings.TrimPrefix(srcPath, shared))
+		if clone {
+			dstPath = path.Join(dstRoot, strings.TrimPrefix(srcPath, srcRoot))
 		} else {
-			dstPath = path.Join(dstAbs, srcPath)
+			dstPath = path.Join(dstRoot, strings.TrimPrefix(srcPath, path.Dir(srcRoot)))
 		}
 
 		// Copy to destination

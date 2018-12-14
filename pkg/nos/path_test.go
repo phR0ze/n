@@ -24,10 +24,15 @@ func TestAbs(t *testing.T) {
 }
 
 func TestDirs(t *testing.T) {
-	dirs := Dirs("../")
-	assert.NotEmpty(t, dirs)
-	for _, dir := range dirs {
-		assert.True(t, strings.Contains(dir, "n/pkg"))
+	{
+		assert.Len(t, Dirs(""), 0)
+	}
+	{
+		dirs := Dirs("../")
+		assert.NotEmpty(t, dirs)
+		for _, dir := range dirs {
+			assert.True(t, strings.Contains(dir, "n/pkg"))
+		}
 	}
 }
 
@@ -77,7 +82,7 @@ func TestPaths(t *testing.T) {
 	cleanTmpDir()
 	{
 		targetDir := path.Join(tmpDir, "first")
-		expected := []string{targetDir}
+		expected := []string{}
 		MkdirP(targetDir)
 		for i := 0; i < 10; i++ {
 			target := path.Join(targetDir, fmt.Sprintf("%d", i))
@@ -88,7 +93,7 @@ func TestPaths(t *testing.T) {
 	}
 	{
 		targetDir := path.Join(tmpDir, "second")
-		expected := []string{targetDir}
+		expected := []string{}
 		MkdirP(targetDir)
 		for i := 0; i < 5; i++ {
 			target := path.Join(targetDir, fmt.Sprintf("%d", i))

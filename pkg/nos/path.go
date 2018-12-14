@@ -50,7 +50,9 @@ func Paths(root string) (result []string) {
 		if e != nil {
 			return e
 		}
-		result = append(result, p)
+		if p != root && p != "." && p != ".." {
+			result = append(result, p)
+		}
 		return nil
 	})
 	return

@@ -3,7 +3,6 @@ package nos
 import (
 	"os"
 	"path"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -15,19 +14,36 @@ var testfile = "../../test/testfile"
 var readme = "../../README.md"
 
 func TestCopy(t *testing.T) {
-	cleanTmpDir()
-	src := "../../pkg"
-	dst := path.Join(tmpDir, "pkg")
+	{
+		// test/temp/pkg does not exist
+		// so Copy nos to pkg will be a clone
+		cleanTmpDir()
+		src := "."
+		dst := path.Join(tmpDir, "pkg")
 
-	assert.False(t, Exists(dst))
-	Copy(src, tmpDir)
-	assert.True(t, Exists(dst))
+		Copy(src, dst)
+		srcPaths := Paths(src)
+		dstPaths := Paths(dst)
+		for i := range dstPaths {
+			dstPaths[i] = path.Base(dstPaths[i])
+		}
+		assert.Equal(t, srcPaths, dstPaths)
+	}
+	{
+		// test/temp/pkg does exist
+		// so Copy nos to pkg will be an into op
+		cleanTmpDir()
+		src := "."
+		dst := path.Join(tmpDir, "pkg")
+		MkdirP(dst)
 
-	srcPaths := Paths(src)
-	dstPaths := Paths(dst)
-	assert.Equal(t, len(srcPaths), len(dstPaths))
-	for i := range srcPaths {
-		assert.Equal(t, srcPaths[i], strings.Replace(dstPaths[i], "/test/temp", "", -1))
+		Copy(src, dst)
+		srcPaths := Paths(src)
+		dstPaths := Paths(path.Join(dst, "nos"))
+		for i := range dstPaths {
+			dstPaths[i] = path.Base(dstPaths[i])
+		}
+		assert.Equal(t, srcPaths, dstPaths)
 	}
 }
 
