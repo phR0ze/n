@@ -2,10 +2,7 @@ package n
 
 import (
 	"fmt"
-	"io/ioutil"
 	"reflect"
-
-	"github.com/ghodss/yaml"
 )
 
 //--------------------------------------------------------------------------------------------------
@@ -23,17 +20,6 @@ func NewStrMap() *strMapN {
 // M creates a new nub from the given string map
 func M(other map[string]interface{}) *strMapN {
 	return &strMapN{v: other}
-}
-
-// Load a yaml/json file as a str map
-// returns nil on failure of any kind
-func Load(filepath string) *strMapN {
-	if yamlFile, err := ioutil.ReadFile(filepath); err == nil {
-		result := NewStrMap()
-		yaml.Unmarshal(yamlFile, &result.v)
-		return result
-	}
-	return nil
 }
 
 // Q creates a new queryable from the given string map

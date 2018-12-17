@@ -7,6 +7,17 @@ import (
 	"github.com/phR0ze/n/pkg/ntmpl"
 )
 
+// Load a yaml/json file as a str map
+// returns nil on failure of any kind
+func Load(filepath string) *strMapN {
+	if yamlFile, err := ioutil.ReadFile(filepath); err == nil {
+		result := NewStrMap()
+		yaml.Unmarshal(yamlFile, &result.v)
+		return result
+	}
+	return nil
+}
+
 // FromYamlFile a yaml/json file as a str map
 // returns nil on failure of any kind
 func FromYamlFile(filepath string) (result *Queryable, err error) {
