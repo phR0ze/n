@@ -8,15 +8,15 @@ import (
 )
 
 // Load a yaml/json file as a queryable
-func Load(filepath string) (result *Queryable, err error) {
-	var yamlBytes []byte
-	if yamlBytes, err = ioutil.ReadFile(filepath); err == nil {
+// returns nil on failure of any kind
+func Load(filepath string) *Queryable {
+	if yamlBytes, err := ioutil.ReadFile(filepath); err == nil {
 		data := map[string]interface{}{}
 		if err = yaml.Unmarshal(yamlBytes, &data); err == nil {
-			result = Q(data)
+			return Q(data)
 		}
 	}
-	return
+	return nil
 }
 
 // FromYaml return a queryable from the given Yaml
