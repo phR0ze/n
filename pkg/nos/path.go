@@ -12,6 +12,14 @@ import (
 
 // Abs gets the absolute path, taking into account homedir expansion
 func Abs(target string) (result string, err error) {
+
+	// Strip protocols for urls
+	target = strings.TrimPrefix(target, "file://")
+	target = strings.TrimPrefix(target, "ftp://")
+	target = strings.TrimPrefix(target, "http://")
+	target = strings.TrimPrefix(target, "https://")
+
+	// Expand and get absolute value
 	if result, err = homedir.Expand(target); err == nil {
 		result, err = filepath.Abs(result)
 	}

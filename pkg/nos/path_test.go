@@ -21,6 +21,24 @@ func TestAbs(t *testing.T) {
 		assert.True(t, strings.Contains(result, "home"))
 		assert.True(t, strings.HasSuffix(result, "nos/test"))
 	}
+	{
+		result, err := Abs("file://../utils")
+		assert.Nil(t, err)
+		fmt.Println(result)
+		assert.True(t, strings.HasSuffix(result, "n/pkg/utils"))
+	}
+	{
+		result, err := Abs("http://../utils")
+		assert.Nil(t, err)
+		fmt.Println(result)
+		assert.True(t, strings.HasSuffix(result, "n/pkg/utils"))
+	}
+	{
+		result, err := Abs("file:///utils")
+		assert.Nil(t, err)
+		fmt.Println(result)
+		assert.Equal(t, "/utils", result)
+	}
 }
 
 func TestDirs(t *testing.T) {
