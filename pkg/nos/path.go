@@ -12,14 +12,7 @@ import (
 
 // Abs gets the absolute path, taking into account homedir expansion
 func Abs(target string) (result string, err error) {
-
-	// Strip protocols for urls
-	target = strings.TrimPrefix(target, "file://")
-	target = strings.TrimPrefix(target, "ftp://")
-	target = strings.TrimPrefix(target, "http://")
-	target = strings.TrimPrefix(target, "https://")
-
-	// Expand and get absolute value
+	target = TrimProtocol(target)
 	if result, err = homedir.Expand(target); err == nil {
 		result, err = filepath.Abs(result)
 	}
@@ -109,4 +102,13 @@ func SlicePath(target string, i, j int) (result string) {
 	result = strings.Join(slice(x, i, j), "/")
 
 	return
+}
+
+// TrimProtocol removes well known protocol prefixes
+func TrimProtocol(target string) string {
+	target = strings.TrimPrefix(target, "file://")
+	target = strings.TrimPrefix(target, "ftp://")
+	target = strings.TrimPrefix(target, "http://")
+	target = strings.TrimPrefix(target, "https://")
+	return target
 }
