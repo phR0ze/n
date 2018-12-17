@@ -2,8 +2,8 @@ package n
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
-	"strings"
 )
 
 // Yaml gets data by key which can be dot delimited
@@ -49,49 +49,32 @@ func (q *Queryable) Yaml(key string) (result *Queryable) {
 	return
 }
 
-// YamlReplace recursively makes string substitutions
-func YamlReplace(data interface{}, values map[string]string) (result interface{}) {
-	switch x := data.(type) {
+// YamlMerge merges the given yaml into the existing yaml
+// with the given yaml having a higher precedence than the existing
+func (q *Queryable) YamlMerge(data interface{}) (result *Queryable, err error) {
+	result = q
+	switch x := q.v.Interface().(type) {
 	case map[string]interface{}:
-		for k, v := range x {
-			switch y := v.(type) {
-			case string:
-				for o, n := range values {
-					y = strings.Replace(y, o, n, -1)
-				}
-				x[k] = y
-			case []interface{}, map[string]interface{}:
-				x[k] = YamlReplace(v, values)
-			}
+		switch y := data.(type) {
+		case map[string]interface{}:
+			q.Copy(MergeMap(x, y))
+		default:
+			err = fmt.Errorf("Invalid merge type")
 		}
-		result = data
-	case []map[string]interface{}:
-		resultSlice := []map[string]interface{}{}
-		for i := range x {
-			v := YamlReplace(x[i], values)
-			resultSlice = append(resultSlice, v.(map[string]interface{}))
-		}
-		result = resultSlice
 	case []interface{}:
-		resultSlice := []interface{}{}
-		for i := range x {
-			var value interface{}
-			switch y := x[i].(type) {
-			case string:
-				for o, n := range values {
-					y = strings.Replace(y, o, n, -1)
+		switch y := data.(type) {
+		case []interface{}:
+			for i := range y {
+				if i < len(x) {
+					x[i] = y[i]
+				} else {
+					x = append(x, y[i])
+					q.Copy(x)
 				}
-				value = y
-			case []interface{}, map[string]interface{}:
-				value = YamlReplace(y, values)
-			default:
-				value = y
 			}
-			resultSlice = append(resultSlice, value)
+		default:
+			err = fmt.Errorf("Invalid merge type")
 		}
-		result = resultSlice
-	default:
-		result = data
 	}
 	return
 }

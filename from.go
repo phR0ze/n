@@ -7,16 +7,16 @@ import (
 	"github.com/phR0ze/n/pkg/ntmpl"
 )
 
-// Load a yaml/json file as a queryable
-// returns nil on failure of any kind
-func Load(filepath string) *Queryable {
-	if yamlBytes, err := ioutil.ReadFile(filepath); err == nil {
+// Load a yaml file as a Queryable
+func Load(filepath string) (result *Queryable, err error) {
+	var yamlBytes []byte
+	if yamlBytes, err = ioutil.ReadFile(filepath); err == nil {
 		data := map[string]interface{}{}
 		if err = yaml.Unmarshal(yamlBytes, &data); err == nil {
-			return Q(data)
+			result = Q(data)
 		}
 	}
-	return nil
+	return
 }
 
 // FromYaml return a queryable from the given Yaml

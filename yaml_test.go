@@ -258,69 +258,72 @@ func TestYamlWithSliceIndexing(t *testing.T) {
 	}
 }
 
-func TestYamlReplace(t *testing.T) {
+func TestYamlMergeMaps(t *testing.T) {
 	{
-		rawYaml := `foo:
-  - name: bar
-    valueFrom:
-      secretKeyRef:
-        name: <% template "foo" . %>
-        key: keybar`
-		data := map[string]interface{}{}
-		err := yaml.Unmarshal([]byte(rawYaml), &data)
+		q := Q(map[string]interface{}{})
+		expected := map[string]interface{}{}
+		result, err := q.YamlMerge(map[string]interface{}{})
 		assert.Nil(t, err)
-		expected := map[string]interface{}{
-			"foo": []interface{}{
-				map[string]interface{}{
-					"name": "bar", "valueFrom": map[string]interface{}{
-						"secretKeyRef": map[string]interface{}{"name": "{{ template \"foo\" . }}", "key": "keybar"},
-					}}}}
-
-		values := map[string]string{"<%": "{{", "%>": "}}"}
-		assert.Equal(t, expected, YamlReplace(data, values))
+		assert.Equal(t, expected, result.M())
 	}
 	{
-		rawYaml := `deployment:
-  initContainers:
-    - name: init-mysql
-      env:
-        - name: MYSQL
-          valueFrom:
-            secretKeyRef:
-              name: <% template "foo" . %>
-              key: password`
-		q, err := FromYaml(rawYaml)
+		q := Q(map[string]interface{}{"1": "one"})
+		expected := map[string]interface{}{"1": "one"}
+		result, err := q.YamlMerge(map[string]interface{}{})
 		assert.Nil(t, err)
+		assert.Equal(t, expected, result.M())
+	}
+	{
+		q := Q(map[string]interface{}{
+			"1": "one", "2": "three", "3": "four",
+		})
 		{
-			data := q.Yaml("deployment.initContainers").S()
-			values := map[string]string{"<%": "{{", "%>": "}}"}
-			expected := []interface{}{
-				map[string]interface{}{
-					"name": "init-mysql",
-					"env": []interface{}{
-						map[string]interface{}{
-							"name": "MYSQL", "valueFrom": map[string]interface{}{
-								"secretKeyRef": map[string]interface{}{"key": "password", "name": "{{ template \"foo\" . }}"},
-							}},
-					}},
-			}
-			assert.Equal(t, expected, YamlReplace(data, values))
+			// Modify 2
+			result, err := q.YamlMerge(map[string]interface{}{"2": "two"})
+			assert.Nil(t, err)
+			expected := map[string]interface{}{
+				"1": "one", "2": "two", "3": "four"}
+			assert.Equal(t, expected, result.M())
 		}
 		{
-			data := q.Yaml("deployment.initContainers").SAMap()
-			values := map[string]string{"<%": "{{", "%>": "}}"}
-			expected := []map[string]interface{}{
-				map[string]interface{}{
-					"name": "init-mysql",
-					"env": []interface{}{
-						map[string]interface{}{
-							"name": "MYSQL", "valueFrom": map[string]interface{}{
-								"secretKeyRef": map[string]interface{}{"key": "password", "name": "{{ template \"foo\" . }}"},
-							}},
-					}},
-			}
-			assert.Equal(t, expected, YamlReplace(data, values))
+			// Modify 3
+			result, err := q.YamlMerge(map[string]interface{}{"3": "three"})
+			assert.Nil(t, err)
+			expected := map[string]interface{}{
+				"1": "one", "2": "two", "3": "three"}
+			assert.Equal(t, expected, result.M())
 		}
+		{
+			// Add 4
+			result, err := q.YamlMerge(map[string]interface{}{"4": "four"})
+			assert.Nil(t, err)
+			expected := map[string]interface{}{
+				"1": "one", "2": "two", "3": "three", "4": "four"}
+			assert.Equal(t, expected, result.M())
+		}
+	}
+}
+
+func TestYamlMergeSlices(t *testing.T) {
+	{
+		q := Q([]int{1, 2, 3})
+		result, err := q.YamlMerge([]int{})
+		assert.Nil(t, err)
+		assert.Equal(t, []int{1, 2, 3}, result.O())
+	}
+	{
+		// Modify
+		q := Q([]interface{}{1, 2, 3})
+		result, err := q.YamlMerge([]interface{}{0, 2, 1})
+		assert.Nil(t, err)
+		assert.Equal(t, []interface{}{0, 2, 1}, result.O())
+	}
+	{
+		// Added
+		q := Q([]interface{}{1, 2, 3})
+		result, err := q.YamlMerge([]interface{}{0, 2, 1, 4})
+		assert.Nil(t, err)
+		assert.Equal(t, []interface{}{0, 2, 1, 4}, result.O())
 	}
 }
 
