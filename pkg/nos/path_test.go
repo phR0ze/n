@@ -11,6 +11,11 @@ import (
 
 func TestAbs(t *testing.T) {
 	{
+		result, err := Abs("")
+		assert.NotNil(t, err)
+		assert.Empty(t, result)
+	}
+	{
 		result, err := Abs("~/")
 		assert.Nil(t, err)
 		assert.True(t, strings.Contains(result, "home"))

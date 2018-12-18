@@ -1,6 +1,7 @@
 package nos
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -12,6 +13,10 @@ import (
 
 // Abs gets the absolute path, taking into account homedir expansion
 func Abs(target string) (result string, err error) {
+	if target == "" {
+		err = fmt.Errorf("Empty string is an invalid path")
+		return
+	}
 	target = TrimProtocol(target)
 	if result, err = homedir.Expand(target); err == nil {
 		result, err = filepath.Abs(result)
