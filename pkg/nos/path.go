@@ -30,7 +30,7 @@ func Home() (result string, err error) {
 // Dirs returns all named directories from the given target path
 func Dirs(target string) (result []string) {
 	result = []string{}
-	if IsDir(target) {
+	if target != "" && IsDir(target) {
 		if target, err := Abs(target); err == nil {
 			if items, err := ioutil.ReadDir(target); err == nil {
 				for _, item := range items {
