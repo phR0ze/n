@@ -1,6 +1,7 @@
 package n
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -686,6 +687,27 @@ func TestEach(t *testing.T) {
 			}
 		})
 		assert.Len(t, items, 3)
+	}
+}
+func TestEachE(t *testing.T) {
+	{
+		// []int
+		cnt := []bool{}
+		q := Q([]int{1, 2, 3})
+		q.EachE(func(item O) error {
+			cnt = append(cnt, true)
+			switch len(cnt) {
+			case 1:
+				assert.Equal(t, 1, item)
+			case 2:
+				assert.Equal(t, 2, item)
+				return errors.New("foo")
+			case 3:
+				assert.Equal(t, 3, item)
+			}
+			return nil
+		})
+		assert.Len(t, cnt, 2)
 	}
 }
 

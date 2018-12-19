@@ -347,6 +347,20 @@ func (q *Queryable) Each(action func(O)) {
 	}
 }
 
+// EachE iterates over the queryable and executes the given action
+// Abort early and return error if non nil
+func (q *Queryable) EachE(action func(O) error) (err error) {
+	if q.TypeIter() {
+		next := q.Iter()
+		for x, ok := next(); ok; x, ok = next() {
+			if err = action(x); err != nil {
+				return err
+			}
+		}
+	}
+	return
+}
+
 // First returns the first item as queryable
 // returns a nil queryable when index out of bounds
 func (q *Queryable) First() (result *Queryable) {
