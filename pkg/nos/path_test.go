@@ -105,6 +105,8 @@ func TestPaths(t *testing.T) {
 	cleanTmpDir()
 	{
 		targetDir := path.Join(tmpDir, "first")
+		targetDir, err := Abs(targetDir)
+		assert.Nil(t, err)
 		expected := []string{}
 		MkdirP(targetDir)
 		for i := 0; i < 10; i++ {
@@ -112,10 +114,15 @@ func TestPaths(t *testing.T) {
 			Touch(target)
 			expected = append(expected, target)
 		}
-		assert.Equal(t, expected, Paths(targetDir))
+		expected = append([]string{targetDir}, expected...)
+		paths, err := AbsPaths(targetDir)
+		assert.Nil(t, err)
+		assert.Equal(t, expected, paths)
 	}
 	{
 		targetDir := path.Join(tmpDir, "second")
+		targetDir, err := Abs(targetDir)
+		assert.Nil(t, err)
 		expected := []string{}
 		MkdirP(targetDir)
 		for i := 0; i < 5; i++ {
@@ -123,7 +130,10 @@ func TestPaths(t *testing.T) {
 			Touch(target)
 			expected = append(expected, target)
 		}
-		assert.Equal(t, expected, Paths(targetDir))
+		expected = append([]string{targetDir}, expected...)
+		paths, err := AbsPaths(targetDir)
+		assert.Nil(t, err)
+		assert.Equal(t, expected, paths)
 	}
 }
 

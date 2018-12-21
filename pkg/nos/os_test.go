@@ -22,12 +22,17 @@ func TestCopy(t *testing.T) {
 		dst := path.Join(tmpDir, "pkg")
 
 		Copy(src, dst)
-		srcPaths := Paths(src)
-		dstPaths := Paths(dst)
+		srcPaths, err := AbsPaths(src)
+		assert.Nil(t, err)
+		dstPaths, err := AbsPaths(dst)
+		assert.Nil(t, err)
 		for i := range dstPaths {
+			srcPaths[i] = path.Base(srcPaths[i])
 			dstPaths[i] = path.Base(dstPaths[i])
 		}
-		assert.Equal(t, srcPaths, dstPaths)
+		assert.Equal(t, "nos", srcPaths[0])
+		assert.Equal(t, "pkg", dstPaths[0])
+		assert.Equal(t, srcPaths[1:], dstPaths[1:])
 	}
 	{
 		// test/temp/pkg does exist
@@ -38,9 +43,12 @@ func TestCopy(t *testing.T) {
 		MkdirP(dst)
 
 		Copy(src, dst)
-		srcPaths := Paths(src)
-		dstPaths := Paths(path.Join(dst, "nos"))
+		srcPaths, err := AbsPaths(src)
+		assert.Nil(t, err)
+		dstPaths, err := AbsPaths(path.Join(dst, "nos"))
+		assert.Nil(t, err)
 		for i := range dstPaths {
+			srcPaths[i] = path.Base(srcPaths[i])
 			dstPaths[i] = path.Base(dstPaths[i])
 		}
 		assert.Equal(t, srcPaths, dstPaths)

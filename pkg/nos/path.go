@@ -49,15 +49,23 @@ func Dirs(target string) (result []string) {
 	return
 }
 
-// Paths returns a list of paths for the given root path in a deterministic order
-func Paths(root string) (result []string) {
-	result = []string{}
-	filepath.Walk(root, func(p string, i os.FileInfo, e error) error {
+// AbsPaths returns a list of paths for the given root path in a deterministic order
+// includes root path as first entry in returned list
+func AbsPaths(root string) (result []string, err error) {
+	if root, err = Abs(root); err != nil {
+		return
+	}
+	result = []string{root}
+	err = filepath.Walk(root, func(p string, i os.FileInfo, e error) error {
 		if e != nil {
 			return e
 		}
 		if p != root && p != "." && p != ".." {
-			result = append(result, p)
+			absPath, e := Abs(p)
+			if e != nil {
+				return e
+			}
+			result = append(result, absPath)
 		}
 		return nil
 	})
