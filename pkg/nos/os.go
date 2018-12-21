@@ -14,48 +14,61 @@ import (
 )
 
 // Copy copies src to dst recursively.
+// Handles globbing e.g. Copy("./*", "../")
 // The dst will be copied to if it is an existing directory.
 // The dst will be a clone of the src if it doesn't exist, but it's parent directory does.
-func Copy(src, dst string) error {
-	var e error
-	var srcRoot, dstRoot string
-	if srcRoot, e = Abs(src); e != nil {
-		return e
+func Copy(src, dst string) (err error) {
+	var sources []string
+
+	// Get Abs src and dst roots
+	var dstAbs, srcAbs string
+	if dstAbs, err = Abs(dst); err != nil {
+		return
 	}
-	if dstRoot, e = Abs(dst); e != nil {
-		return e
+	if srcAbs, err = Abs(src); err != nil {
+		return
 	}
 
-	// Clone given src as dst vs copy into dst
-	clone := true
-	if IsDir(dstRoot) {
-		clone = false
+	// Handle globbing
+	if sources, err = filepath.Glob(srcAbs); err != nil {
+		return err
 	}
 
-	// Walk over file structure
-	return filepath.Walk(srcRoot, func(srcPath string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
+	// Copy all sources to dst
+	for _, srcRoot := range sources {
+
+		// Clone given src as dst vs copy into dst
+		clone := true
+		if IsDir(dstAbs) {
+			clone = false
 		}
 
-		// Set proper dst path
-		var dstPath string
-		if clone {
-			dstPath = path.Join(dstRoot, strings.TrimPrefix(srcPath, srcRoot))
-		} else {
-			dstPath = path.Join(dstRoot, strings.TrimPrefix(srcPath, path.Dir(srcRoot)))
-		}
-
-		// Copy to destination
-		if info.IsDir() {
-			if err = os.MkdirAll(dstPath, info.Mode()); err != nil {
-				return err
+		// Walk over file structure
+		err = filepath.Walk(srcRoot, func(srcPath string, info os.FileInfo, e error) error {
+			if e != nil {
+				return e
 			}
-		} else {
-			CopyFile(srcPath, dstPath)
-		}
-		return nil
-	})
+
+			// Set proper dst path
+			var dstPath string
+			if clone {
+				dstPath = path.Join(dstAbs, strings.TrimPrefix(srcPath, srcRoot))
+			} else {
+				dstPath = path.Join(dstAbs, strings.TrimPrefix(srcPath, path.Dir(srcRoot)))
+			}
+
+			// Copy to destination
+			if info.IsDir() {
+				if e = os.MkdirAll(dstPath, info.Mode()); e != nil {
+					return e
+				}
+			} else {
+				CopyFile(srcPath, dstPath)
+			}
+			return nil
+		})
+	}
+	return
 }
 
 // CopyFile copies a single file from src to dst.

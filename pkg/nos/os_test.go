@@ -55,6 +55,27 @@ func TestCopy(t *testing.T) {
 	}
 }
 
+func TestCopyGlob(t *testing.T) {
+	{
+		cleanTmpDir()
+		dst := path.Join(tmpDir)
+		Copy("./*", dst)
+
+		expected, err := AbsPaths(".")
+		assert.Nil(t, err)
+		results, err := AbsPaths(tmpDir)
+		assert.Nil(t, err)
+
+		for i := range results {
+			expected[i] = path.Base(expected[i])
+			results[i] = path.Base(results[i])
+		}
+		assert.Equal(t, "nos", expected[0])
+		assert.Equal(t, "temp", results[0])
+		assert.Equal(t, expected[1:], results[1:])
+	}
+}
+
 func TestCopyFile(t *testing.T) {
 	{
 		cleanTmpDir()
