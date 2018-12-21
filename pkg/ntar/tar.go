@@ -88,10 +88,8 @@ func addPath(tw *tar.Writer, root, target string) (err error) {
 
 // ExtractAll files into given destination directory
 func ExtractAll(tarball, dest string) (err error) {
-
-	// Create destination directory if it doesn't exist
-	if !nos.Exists(dest) {
-		nos.MkdirP(dest)
+	if err = nos.MkdirP(dest); err != nil {
+		return
 	}
 
 	// Open tarball for use
