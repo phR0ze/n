@@ -131,6 +131,9 @@ func ExtractAll(tarball, dest string) (err error) {
 		if header.Typeflag == tar.TypeReg {
 			filePath := path.Join(dest, header.Name)
 
+			// Create any directories with default permissions that don't exist
+			nos.MkdirP(path.Dir(filePath))
+
 			// Create file and write content to it
 			var fw *os.File
 			if fw, err = os.Create(filePath); err != nil {
