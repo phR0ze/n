@@ -22,9 +22,9 @@ func TestCopy(t *testing.T) {
 		dst := path.Join(tmpDir, "pkg")
 
 		Copy(src, dst)
-		srcPaths, err := AbsPaths(src)
+		srcPaths, err := AllPaths(src)
 		assert.Nil(t, err)
-		dstPaths, err := AbsPaths(dst)
+		dstPaths, err := AllPaths(dst)
 		assert.Nil(t, err)
 		for i := range dstPaths {
 			srcPaths[i] = path.Base(srcPaths[i])
@@ -43,9 +43,9 @@ func TestCopy(t *testing.T) {
 		MkdirP(dst)
 
 		Copy(src, dst)
-		srcPaths, err := AbsPaths(src)
+		srcPaths, err := AllPaths(src)
 		assert.Nil(t, err)
-		dstPaths, err := AbsPaths(path.Join(dst, "nos"))
+		dstPaths, err := AllPaths(path.Join(dst, "nos"))
 		assert.Nil(t, err)
 		for i := range dstPaths {
 			srcPaths[i] = path.Base(srcPaths[i])
@@ -61,9 +61,9 @@ func TestCopyGlob(t *testing.T) {
 		dst := path.Join(tmpDir)
 		Copy("./*", dst)
 
-		expected, err := AbsPaths(".")
+		expected, err := AllPaths(".")
 		assert.Nil(t, err)
-		results, err := AbsPaths(tmpDir)
+		results, err := AllPaths(tmpDir)
 		assert.Nil(t, err)
 
 		for i := range results {

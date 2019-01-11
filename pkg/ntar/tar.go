@@ -35,7 +35,7 @@ func Create(dst string, src string) (err error) {
 
 	// Walk the given root paths and add them to the tarball
 	var paths []string
-	if paths, err = nos.AbsPaths(root); err != nil {
+	if paths, err = nos.AllPaths(root); err != nil {
 		return
 	}
 	for _, x := range paths {

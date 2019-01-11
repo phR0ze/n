@@ -59,6 +59,36 @@ func TestDirs(t *testing.T) {
 	}
 }
 
+func TestPaths(t *testing.T) {
+	{
+		assert.Len(t, Paths(""), 0)
+	}
+	{
+		paths := Paths("../../")
+		assert.NotEmpty(t, paths)
+
+		// Find at least one dir
+		dirFound := false
+		for _, path := range paths {
+			if strings.HasSuffix(path, "n/pkg") {
+				dirFound = true
+				break
+			}
+		}
+		assert.True(t, dirFound)
+
+		// Find at least one file
+		fileFound := false
+		for _, path := range paths {
+			if strings.HasSuffix(path, "README.md") {
+				fileFound = true
+				break
+			}
+		}
+		assert.True(t, fileFound)
+	}
+}
+
 func TestSlicePath(t *testing.T) {
 	assert.Equal(t, "", SlicePath("", 0, -1))
 	assert.Equal(t, "/", SlicePath("/", 0, -1))
@@ -101,7 +131,7 @@ func TestHome(t *testing.T) {
 	assert.True(t, strings.Contains(result, "home"))
 }
 
-func TestPaths(t *testing.T) {
+func TestAllPaths(t *testing.T) {
 	cleanTmpDir()
 	{
 		targetDir := path.Join(tmpDir, "first")
@@ -115,7 +145,7 @@ func TestPaths(t *testing.T) {
 			expected = append(expected, target)
 		}
 		expected = append([]string{targetDir}, expected...)
-		paths, err := AbsPaths(targetDir)
+		paths, err := AllPaths(targetDir)
 		assert.Nil(t, err)
 		assert.Equal(t, expected, paths)
 	}
@@ -131,7 +161,7 @@ func TestPaths(t *testing.T) {
 			expected = append(expected, target)
 		}
 		expected = append([]string{targetDir}, expected...)
-		paths, err := AbsPaths(targetDir)
+		paths, err := AllPaths(targetDir)
 		assert.Nil(t, err)
 		assert.Equal(t, expected, paths)
 	}

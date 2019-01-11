@@ -32,7 +32,7 @@ func Home() (result string, err error) {
 	return
 }
 
-// Dirs returns all named directories from the given target path
+// Dirs returns all directories from the given target path
 func Dirs(target string) (result []string) {
 	result = []string{}
 	if target != "" && IsDir(target) {
@@ -49,9 +49,24 @@ func Dirs(target string) (result []string) {
 	return
 }
 
-// AbsPaths returns a list of paths for the given root path in a deterministic order
-// includes root path as first entry in returned list
-func AbsPaths(root string) (result []string, err error) {
+// Paths returns all directories and files from the given target path
+func Paths(target string) (result []string) {
+	result = []string{}
+	if target != "" && IsDir(target) {
+		if target, err := Abs(target); err == nil {
+			if items, err := ioutil.ReadDir(target); err == nil {
+				for _, item := range items {
+					result = append(result, path.Join(target, item.Name()))
+				}
+			}
+		}
+	}
+	return
+}
+
+// AllPaths returns a list of all paths recursively for the given root path
+// in a deterministic order including the root path as first entry
+func AllPaths(root string) (result []string, err error) {
 	if root, err = Abs(root); err != nil {
 		return
 	}
