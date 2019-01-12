@@ -1,7 +1,6 @@
 package nnet
 
 import (
-	"os"
 	"testing"
 
 	"github.com/phR0ze/n/pkg/nos"
@@ -22,7 +21,7 @@ func TestDownloadFile(t *testing.T) {
 
 func cleanTmpDir() {
 	if nos.Exists(tmpDir) {
-		os.RemoveAll(tmpDir)
+		nos.RemoveAll(tmpDir)
 	}
 	nos.MkdirP(tmpDir)
 }

@@ -108,7 +108,7 @@ func TestIsFile(t *testing.T) {
 
 func TestMD5(t *testing.T) {
 	if Exists(tmpfile) {
-		os.Remove(tmpfile)
+		Remove(tmpfile)
 	}
 	f, _ := os.Create(tmpfile)
 	defer f.Close()
@@ -121,10 +121,25 @@ func TestMD5(t *testing.T) {
 
 func TestMkdirP(t *testing.T) {
 	if Exists(tmpDir) {
-		os.RemoveAll(tmpDir)
+		RemoveAll(tmpDir)
 	}
 	MkdirP(tmpDir)
 	assert.True(t, Exists(tmpDir))
+}
+
+func TestMove(t *testing.T) {
+	cleanTmpDir()
+	Copy(testfile, tmpDir)
+	newTestFile := path.Join(tmpDir, "testfile")
+
+	srcMd5, _ := MD5(newTestFile)
+	assert.True(t, Exists(newTestFile))
+	assert.False(t, Exists(tmpfile))
+	Move(newTestFile, tmpfile)
+	assert.True(t, Exists(tmpfile))
+	dstMd5, _ := MD5(tmpfile)
+	assert.False(t, Exists(newTestFile))
+	assert.Equal(t, srcMd5, dstMd5)
 }
 
 func TestReadLines(t *testing.T) {
@@ -157,7 +172,7 @@ func TestWriteLines(t *testing.T) {
 
 func cleanTmpDir() {
 	if Exists(tmpDir) {
-		os.RemoveAll(tmpDir)
+		RemoveAll(tmpDir)
 	}
 	MkdirP(tmpDir)
 }

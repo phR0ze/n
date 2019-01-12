@@ -210,6 +210,12 @@ func MkdirP(target string, mode ...os.FileMode) (err error) {
 	return os.MkdirAll(target, mode[0])
 }
 
+// Move the src path to the dst path. If the dst already exists and is not a directory
+// src will replace it. If there is an error it will be of type *LinkError
+func Move(src, dst string) (err error) {
+	return os.Rename(src, dst)
+}
+
 // ReadLines returns a new slice of string representing lines
 func ReadLines(target string) (result []string, err error) {
 	if target, err = Abs(target); err != nil {
@@ -224,6 +230,19 @@ func ReadLines(target string) (result []string, err error) {
 		}
 	}
 	return
+}
+
+// Remove the given target file or empty directory. If there is an
+// error it will be of type *PathError
+func Remove(target string) error {
+	return os.Remove(target)
+}
+
+// RemoveAll remotes the target path and any children it contains.
+// It removes everything it can but returns the first error it encounters.
+// If the target path does not exist nil is returned
+func RemoveAll(target string) error {
+	return os.RemoveAll(target)
 }
 
 // Touch creates an empty text file similar to the linux touch command

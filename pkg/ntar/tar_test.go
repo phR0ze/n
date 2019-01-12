@@ -1,7 +1,6 @@
 package ntar
 
 import (
-	"os"
 	"path"
 	"testing"
 
@@ -22,7 +21,7 @@ func TestCreate(t *testing.T) {
 	assert.True(t, nos.Exists(tmpfile))
 
 	// Remove tarball target files
-	os.RemoveAll(src)
+	nos.RemoveAll(src)
 	assert.False(t, nos.Exists(src))
 
 	// Extract tarball
@@ -33,7 +32,7 @@ func TestCreate(t *testing.T) {
 
 func prepTmpDir() {
 	if nos.Exists(tmpDir) {
-		os.RemoveAll(tmpDir)
+		nos.RemoveAll(tmpDir)
 	}
 	nos.MkdirP(tmpDir)
 	nos.Copy("../ncli", tmpDir)

@@ -1,7 +1,6 @@
 package ntmpl
 
 import (
-	"os"
 	"testing"
 
 	"github.com/phR0ze/n/pkg/nos"
@@ -308,7 +307,7 @@ func testProcess(t *testing.T, template, expected string, shouldErr bool) {
 
 func cleanTmpDir() {
 	if nos.Exists(tmpDir) {
-		os.RemoveAll(tmpDir)
+		nos.RemoveAll(tmpDir)
 	}
 	nos.MkdirP(tmpDir)
 }
