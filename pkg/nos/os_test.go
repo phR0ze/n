@@ -128,6 +128,8 @@ func TestMkdirP(t *testing.T) {
 }
 
 func TestMove(t *testing.T) {
+
+	// Copy file in to tmpDir then rename in same location
 	cleanTmpDir()
 	Copy(testfile, tmpDir)
 	newTestFile := path.Join(tmpDir, "testfile")
@@ -135,10 +137,21 @@ func TestMove(t *testing.T) {
 	srcMd5, _ := MD5(newTestFile)
 	assert.True(t, Exists(newTestFile))
 	assert.False(t, Exists(tmpfile))
-	Move(newTestFile, tmpfile)
+	err := Move(newTestFile, tmpfile)
+	assert.Nil(t, err)
 	assert.True(t, Exists(tmpfile))
 	dstMd5, _ := MD5(tmpfile)
 	assert.False(t, Exists(newTestFile))
+	assert.Equal(t, srcMd5, dstMd5)
+
+	// Now create a sub directory and move it there
+	subDir := path.Join(tmpDir, "sub")
+	MkdirP(subDir)
+	err = Move(tmpfile, subDir)
+	assert.Nil(t, err)
+	assert.False(t, Exists(tmpfile))
+	assert.True(t, Exists(path.Join(subDir, path.Base(tmpfile))))
+	dstMd5, _ = MD5(path.Join(subDir, path.Base(tmpfile)))
 	assert.Equal(t, srcMd5, dstMd5)
 }
 

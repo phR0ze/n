@@ -211,8 +211,14 @@ func MkdirP(target string, mode ...os.FileMode) (err error) {
 }
 
 // Move the src path to the dst path. If the dst already exists and is not a directory
-// src will replace it. If there is an error it will be of type *LinkError
+// src will replace it. If there is an error it will be of type *LinkError. Wraps
+// os.Rename but fixes the issue where dst name is required
 func Move(src, dst string) (err error) {
+
+	// Add src base name to dst directory to fix golang oversight
+	if IsDir(dst) {
+		dst = path.Join(dst, path.Base(src))
+	}
 	return os.Rename(src, dst)
 }
 
