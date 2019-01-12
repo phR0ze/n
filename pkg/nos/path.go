@@ -132,6 +132,13 @@ func SlicePath(target string, i, j int) (result string) {
 	return
 }
 
+// TrimExt removes the extension from the given target path
+func TrimExt(target string) string {
+	ext := path.Ext(target)
+	target = strings.TrimSuffix(target, ext)
+	return target
+}
+
 // TrimProtocol removes well known protocol prefixes
 func TrimProtocol(target string) string {
 	target = strings.TrimPrefix(target, "file://")

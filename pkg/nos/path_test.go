@@ -194,3 +194,18 @@ func TestSharedDir(t *testing.T) {
 		assert.Equal(t, "/foo/bar", SharedDir(first, second))
 	}
 }
+
+func TestTrimExt(t *testing.T) {
+	assert.Equal(t, "", TrimExt(""))
+	assert.Equal(t, "/foo/bar", TrimExt("/foo/bar"))
+	assert.Equal(t, "/foo/bar", TrimExt("/foo/bar.mkv"))
+	assert.Equal(t, "/foo/bar.mkv", TrimExt("/foo/bar.mkv.mp4"))
+}
+
+func TestTrimProtocol(t *testing.T) {
+	assert.Equal(t, "/foo/bar", TrimProtocol("file:///foo/bar"))
+	assert.Equal(t, "foo/bar", TrimProtocol("ftp://foo/bar"))
+	assert.Equal(t, "foo/bar", TrimProtocol("http://foo/bar"))
+	assert.Equal(t, "foo/bar", TrimProtocol("https://foo/bar"))
+	assert.Equal(t, "foo://foo/bar", TrimProtocol("foo://foo/bar"))
+}
