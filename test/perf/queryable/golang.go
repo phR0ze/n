@@ -7,7 +7,7 @@ import (
 const size = 9999999
 
 func main() {
-	n.Q(n.Range(0, size)).FirstWhere(func(x n.O) bool {
+	n.Q(n.Range(0, size)).Find(func(x n.O) bool {
 		return x.(int) == size-1
 	})
 }

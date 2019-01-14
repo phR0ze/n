@@ -42,14 +42,14 @@ func BenchmarkEach(t *testing.B) {
 	})
 }
 
-// Benchmark FirstWhere - Small set
-func BenchmarkFirstWhere_SmallQueryable(t *testing.B) {
-	Q(smallStringSet).FirstWhere(func(x O) bool {
+// Benchmark Find - Small set
+func BenchmarkFind_SmallQueryable(t *testing.B) {
+	Q(smallStringSet).Find(func(x O) bool {
 		return x.(string) == "laborum"
 	})
 }
 
-func BenchmarkFirstWhere_SmallStandardLoop(t *testing.B) {
+func BenchmarkFind_SmallStandardLoop(t *testing.B) {
 	for _, x := range smallStringSet {
 		if x == "laborum" {
 			break
@@ -57,14 +57,14 @@ func BenchmarkFirstWhere_SmallStandardLoop(t *testing.B) {
 	}
 }
 
-// Benchmark FirstWhere - Large set
-func BenchmarkFirstWhere_LargeQueryable(t *testing.B) {
-	Q(Range(0, benchMarkSize)).FirstWhere(func(x O) bool {
+// Benchmark Find - Large set
+func BenchmarkFind_LargeQueryable(t *testing.B) {
+	Q(Range(0, benchMarkSize)).Find(func(x O) bool {
 		return x.(int) == benchMarkSize-1
 	})
 }
 
-func BenchmarkFirstWhere_LargeStandardLoop(t *testing.B) {
+func BenchmarkFind_LargeStandardLoop(t *testing.B) {
 	for _, x := range Range(0, benchMarkSize) {
 		if x == benchMarkSize-1 {
 			break
@@ -737,25 +737,25 @@ func TestEachE(t *testing.T) {
 	}
 }
 
-func TestFirst(t *testing.T) {
-	assert.Equal(t, 1, Q([]int{1, 2, 3}).First().I())
-	assert.Equal(t, "1", Q([]string{"1", "2", "3"}).First().A())
-	assert.Equal(t, N(), Q([]string{}).First())
-}
-
-func TestFirstWhere(t *testing.T) {
+func TestFind(t *testing.T) {
 	{
 		// Not found
 		q := Q([]string{"4", "1", "5", "2"})
-		result := q.FirstWhere(func(x O) bool { return x.(string) == "3" })
+		result := q.Find(func(x O) bool { return x.(string) == "3" })
 		assert.Nil(t, result)
 	}
 	{
 		//  Found
 		q := Q([]string{"4", "1", "5", "2"})
-		result := q.FirstWhere(func(x O) bool { return x.(string) == "5" })
+		result := q.Find(func(x O) bool { return x.(string) == "5" })
 		assert.Equal(t, "5", result.A())
 	}
+}
+
+func TestFirst(t *testing.T) {
+	assert.Equal(t, 1, Q([]int{1, 2, 3}).First().I())
+	assert.Equal(t, "1", Q([]string{"1", "2", "3"}).First().A())
+	assert.Equal(t, N(), Q([]string{}).First())
 }
 
 func TestFlatten(t *testing.T) {

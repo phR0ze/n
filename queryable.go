@@ -361,18 +361,9 @@ func (q *Queryable) EachE(action func(O) error) (err error) {
 	return
 }
 
-// First returns the first item as queryable
-// returns a nil queryable when index out of bounds
-func (q *Queryable) First() (result *Queryable) {
-	if q.Len() > 0 {
-		return q.At(0)
-	}
-	return N()
-}
-
-// FirstWhere returns a new queryable containing the first item which matches the given lambda.
+// Find returns a new queryable containing the first item which matches the given lambda.
 // Returns nil if not found.
-func (q *Queryable) FirstWhere(lambda func(O) bool) (result *Queryable) {
+func (q *Queryable) Find(lambda func(O) bool) (result *Queryable) {
 	next := q.Iter()
 	for x, ok := next(); ok; x, ok = next() {
 		if lambda(x) {
@@ -381,6 +372,15 @@ func (q *Queryable) FirstWhere(lambda func(O) bool) (result *Queryable) {
 		}
 	}
 	return
+}
+
+// First returns the first item as queryable
+// returns a nil queryable when index out of bounds
+func (q *Queryable) First() (result *Queryable) {
+	if q.Len() > 0 {
+		return q.At(0)
+	}
+	return N()
 }
 
 // Flatten returns a new slice that is one-dimensional flattening.
