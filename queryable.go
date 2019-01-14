@@ -370,6 +370,19 @@ func (q *Queryable) First() (result *Queryable) {
 	return N()
 }
 
+// FirstWhere returns a new queryable containing the first item which matches the given lambda.
+// Returns nil if not found.
+func (q *Queryable) FirstWhere(lambda func(O) bool) (result *Queryable) {
+	next := q.Iter()
+	for x, ok := next(); ok; x, ok = next() {
+		if lambda(x) {
+			result = Q(x)
+			return
+		}
+	}
+	return
+}
+
 // Flatten returns a new slice that is one-dimensional flattening.
 // That is, for every item that is a slice, extract its items into the new slice.
 func (q *Queryable) Flatten() (result *Queryable) {

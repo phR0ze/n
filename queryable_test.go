@@ -14,36 +14,62 @@ type bob struct {
 	data string
 }
 
+var smallStringSet = []string{"Lorem", "ipsum", "dolor", "sit", "amet,", "consectetur", "adipiscing", "elit,", "sed", "do",
+	"eiusmod", "tempor", "incididunt", "ut", "labore", "et", "dolore", "magna", "aliqua.", "Ut",
+	"enim", "ad", "minim", "veniam,", "quis", "nostrud", "exercitation", "ullamco", "laboris", "nisi",
+	"ut", "aliquip", "ex", "ea", "commodo", "consequat.", "Duis", "aute", "irure", "dolor", "in",
+	"reprehenderit", "in", "voluptate", "velit", "esse", "cillum", "dolore", "eu", "fugiat", "nulla",
+	"pariatur.", "Excepteur", "sint", "occaecat", "cupidatat", "non", "proident,", "sunt", "in",
+	"culpa", "qui", "officia", "deserunt", "mollit", "anim", "id", "est", "laborum"}
+
 func BenchmarkClosureIterator(t *testing.B) {
-	ints := make([]int, benchMarkSize)
-	for i := range ints {
-		ints[i] = i
-	}
-	q := Q(ints)
+	q := Q(Range(0, benchMarkSize))
 	next := q.Iter()
 	for x, ok := next(); ok; x, ok = next() {
-		fmt.Sprintln(x.(int) + 2)
+		fmt.Sprintln(x.(int) + 1)
 	}
 }
 
 func BenchmarkArrayIterator(t *testing.B) {
-	ints := make([]int, benchMarkSize)
-	for i := range ints {
-		ints[i] = i
-	}
-	for _, item := range ints {
+	for _, item := range Range(0, benchMarkSize) {
 		fmt.Sprintln(item + 1)
 	}
 }
 
 func BenchmarkEach(t *testing.B) {
-	ints := make([]int, benchMarkSize)
-	for i := range ints {
-		ints[i] = i
-	}
-	Q(ints).Each(func(item O) {
-		fmt.Sprintln(item.(int) + 3)
+	Q(Range(0, benchMarkSize)).Each(func(item O) {
+		fmt.Sprintln(item.(int) + 1)
 	})
+}
+
+// Benchmark FirstWhere - Small set
+func BenchmarkFirstWhere_SmallQueryable(t *testing.B) {
+	Q(smallStringSet).FirstWhere(func(x O) bool {
+		return x.(string) == "laborum"
+	})
+}
+
+func BenchmarkFirstWhere_SmallStandardLoop(t *testing.B) {
+	for _, x := range smallStringSet {
+		if x == "laborum" {
+			break
+		}
+	}
+}
+
+// Benchmark FirstWhere - Large set
+func BenchmarkFirstWhere_LargeQueryable(t *testing.B) {
+	Q(Range(0, benchMarkSize)).FirstWhere(func(x O) bool {
+		return x.(int) == benchMarkSize-1
+	})
+}
+
+func BenchmarkFirstWhere_LargeStandardLoop(t *testing.B) {
+	for _, x := range Range(0, benchMarkSize) {
+		if x == benchMarkSize-1 {
+			break
+		}
+	}
 }
 
 func TestQA(t *testing.T) {
@@ -715,6 +741,21 @@ func TestFirst(t *testing.T) {
 	assert.Equal(t, 1, Q([]int{1, 2, 3}).First().I())
 	assert.Equal(t, "1", Q([]string{"1", "2", "3"}).First().A())
 	assert.Equal(t, N(), Q([]string{}).First())
+}
+
+func TestFirstWhere(t *testing.T) {
+	{
+		// Not found
+		q := Q([]string{"4", "1", "5", "2"})
+		result := q.FirstWhere(func(x O) bool { return x.(string) == "3" })
+		assert.Nil(t, result)
+	}
+	{
+		//  Found
+		q := Q([]string{"4", "1", "5", "2"})
+		result := q.FirstWhere(func(x O) bool { return x.(string) == "5" })
+		assert.Equal(t, "5", result.A())
+	}
 }
 
 func TestFlatten(t *testing.T) {

@@ -192,6 +192,9 @@ func (q *strN) YamlType() interface{} {
 	return q.v
 }
 
+// String Slice
+//--------------------------------------------------------------------------------------------------
+
 // S provides a new empty Queryable slice
 func S(v ...string) *strSliceN {
 	if v == nil {
