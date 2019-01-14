@@ -1,6 +1,7 @@
 bin/n
 vendor
 test/temp/*
+test/perf/perf
 
 # Binaries for programs and plugins
 *.exe
