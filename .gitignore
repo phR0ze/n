@@ -1,8 +1,10 @@
 bin/n
 vendor
+.vendor-new
 test/temp/*
 test/perf/queryable/queryable
 test/perf/standard/standard
+pkg/term/test/test
 
 # Binaries for programs and plugins
 *.exe

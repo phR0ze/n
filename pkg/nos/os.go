@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -148,6 +149,22 @@ func Exists(src string) bool {
 		}
 	}
 	return false
+}
+
+// IsDarwin returns true if the OS is OSX
+func IsDarwin() (result bool) {
+	if runtime.GOOS == "darwin" {
+		result = true
+	}
+	return
+}
+
+// IsLinux returns true if the OS is Linux
+func IsLinux() (result bool) {
+	if runtime.GOOS == "linux" {
+		result = true
+	}
+	return
 }
 
 // IsDir returns true if the given path is a directory

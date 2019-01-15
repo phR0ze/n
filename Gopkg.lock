@@ -57,6 +57,14 @@
   version = "v1.0.0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:106f424a4eb5ae759f9649ab2cbb6785eb9dc289bb643952502a00699da6e593"
+  name = "golang.org/x/sys"
+  packages = ["unix"]
+  pruneopts = "NUT"
+  revision = "2be51725563103c17124a318f1745b66f2347acb"
+
+[[projects]]
   digest = "1:7c95b35057a0ff2e19f707173cc1a947fa43a6eb5c4d300d196ece0334046082"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
@@ -73,6 +81,7 @@
     "github.com/mitchellh/go-homedir",
     "github.com/stretchr/testify/assert",
     "github.com/valyala/bytebufferpool",
+    "golang.org/x/sys/unix",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
