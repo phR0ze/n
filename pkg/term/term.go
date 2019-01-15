@@ -2,6 +2,7 @@ package term
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"os/signal"
 	"unicode"
@@ -35,6 +36,21 @@ func AnyKey() (err error) {
 	defer tty.Close()
 
 	// Read single rune
+	tty.ReadRune()
+
+	return
+}
+
+// Prompt prints out the given message and waits for any key to be pressed before returning.
+func Prompt(msg string) (err error) {
+	var tty *TTY
+	if tty, err = Open(); err != nil {
+		return
+	}
+	defer tty.Close()
+
+	// Read single rune
+	fmt.Println(msg)
 	tty.ReadRune()
 
 	return

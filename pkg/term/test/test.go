@@ -12,10 +12,15 @@ func main() {
 	//test_WaitForKey()
 	//test_ReadRune()
 	//test_ReadLine()
-	test_ReadString()
+	//test_ReadString()
 	//test_ReadSensitive()
 	//test_ReadPassword()
 	//test_Size()
+	test_Prompt()
+}
+
+func test_Prompt() {
+	term.Prompt("Press any key to continue")
 }
 
 func test_Size() {
