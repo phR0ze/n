@@ -1,4 +1,4 @@
-package ntar
+package tar
 
 import (
 	"archive/tar"
