@@ -22,9 +22,9 @@ test: $(NAME)
 	go test $(PKGROOT)/pkg/ntar
 	go test $(PKGROOT)/pkg/ntime
 	go test $(PKGROOT)/pkg/ntmpl
-	go test $(PKGROOT)/pkg/ntrace
 	go test $(PKGROOT)/pkg/sys
 	go test $(PKGROOT)/pkg/term
+	go test $(PKGROOT)/pkg/trace
 
 bench: $(NAME)
 	@echo -e "\nRunning all go benchmarks:"

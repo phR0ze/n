@@ -1,4 +1,4 @@
-package ntrace
+package trace
 
 func LogFunc1() {
 	LogFunc2()

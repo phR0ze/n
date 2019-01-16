@@ -1,4 +1,4 @@
-package ntrace
+package trace
 
 import (
 	"testing"
@@ -25,10 +25,10 @@ func TestCallerTrace(t *testing.T) {
 	skipfiles = append(skipfiles, "tracelog1_test")
 	AppFunc1()
 	assert.Len(t, trace, 6)
-	assert.Equal(t, "ntrace.AppFunc3", trace[0].Func)
-	assert.Equal(t, "ntrace.AppFunc2", trace[1].Func)
-	assert.Equal(t, "ntrace.AppFunc1", trace[2].Func)
-	assert.Equal(t, "ntrace.TestCallerTrace", trace[3].Func)
+	assert.Equal(t, "trace.AppFunc3", trace[0].Func)
+	assert.Equal(t, "trace.AppFunc2", trace[1].Func)
+	assert.Equal(t, "trace.AppFunc1", trace[2].Func)
+	assert.Equal(t, "trace.TestCallerTrace", trace[3].Func)
 }
 
 func TestCallerTraceOne(t *testing.T) {
@@ -38,19 +38,19 @@ func TestCallerTraceOne(t *testing.T) {
 	// Test with single skip file
 	AppFunc1()
 	assert.Len(t, trace, 1)
-	assert.Equal(t, "ntrace.LogFunc4", trace[0].Func)
+	assert.Equal(t, "trace.LogFunc4", trace[0].Func)
 
 	// Test with single skip file
 	skipfiles = append(skipfiles, "tracelog2_test")
 	AppFunc1()
 	assert.Len(t, trace, 1)
-	assert.Equal(t, "ntrace.LogFunc2", trace[0].Func)
+	assert.Equal(t, "trace.LogFunc2", trace[0].Func)
 
 	// // Test with multiple skip files
 	skipfiles = append(skipfiles, "tracelog1_test")
 	AppFunc1()
 	assert.Len(t, trace, 1)
-	assert.Equal(t, "ntrace.AppFunc3", trace[0].Func)
+	assert.Equal(t, "trace.AppFunc3", trace[0].Func)
 }
 
 // Trace funcs
