@@ -20,9 +20,9 @@ test: $(NAME)
 	go test $(PKGROOT)/pkg/nerr
 	go test $(PKGROOT)/pkg/nnet
 	go test $(PKGROOT)/pkg/ntar
-	go test $(PKGROOT)/pkg/ntime
 	go test $(PKGROOT)/pkg/sys
 	go test $(PKGROOT)/pkg/term
+	go test $(PKGROOT)/pkg/time
 	go test $(PKGROOT)/pkg/tmpl
 	go test $(PKGROOT)/pkg/trace
 

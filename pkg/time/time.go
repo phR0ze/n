@@ -1,4 +1,4 @@
-package ntime
+package time
 
 import (
 	"fmt"
