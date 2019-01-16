@@ -3,7 +3,7 @@ package ntmpl
 import (
 	"testing"
 
-	"github.com/phR0ze/n/pkg/nos"
+	"github.com/phR0ze/n/pkg/sys"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,7 +17,7 @@ func TestLoad(t *testing.T) {
   chart: {{ name }}:{{ version }}
   release: {{ Release.Name }}
   heritage: {{ Release.Service }}`
-	nos.WriteFile(tmpFile, []byte(data))
+	sys.WriteFile(tmpFile, []byte(data))
 
 	expected := `labels:
   chart: foo:1.0.2
@@ -306,8 +306,8 @@ func testProcess(t *testing.T, template, expected string, shouldErr bool) {
 }
 
 func cleanTmpDir() {
-	if nos.Exists(tmpDir) {
-		nos.RemoveAll(tmpDir)
+	if sys.Exists(tmpDir) {
+		sys.RemoveAll(tmpDir)
 	}
-	nos.MkdirP(tmpDir)
+	sys.MkdirP(tmpDir)
 }

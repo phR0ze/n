@@ -1,4 +1,4 @@
-package nos
+package sys
 
 import (
 	"bufio"

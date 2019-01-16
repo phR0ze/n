@@ -4,7 +4,7 @@ import (
 	"path"
 	"testing"
 
-	"github.com/phR0ze/n/pkg/nos"
+	"github.com/phR0ze/n/pkg/sys"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -18,22 +18,22 @@ func TestCreate(t *testing.T) {
 	src := path.Join(tmpDir, "ncli")
 	err := Create(tmpfile, src)
 	assert.Nil(t, err)
-	assert.True(t, nos.Exists(tmpfile))
+	assert.True(t, sys.Exists(tmpfile))
 
 	// Remove tarball target files
-	nos.RemoveAll(src)
-	assert.False(t, nos.Exists(src))
+	sys.RemoveAll(src)
+	assert.False(t, sys.Exists(src))
 
 	// Extract tarball
 	err = ExtractAll(tmpfile, tmpDir)
-	assert.True(t, nos.Exists(path.Join(src, "cli.go")))
-	assert.True(t, nos.Exists(path.Join(src, "cli_test.go")))
+	assert.True(t, sys.Exists(path.Join(src, "cli.go")))
+	assert.True(t, sys.Exists(path.Join(src, "cli_test.go")))
 }
 
 func prepTmpDir() {
-	if nos.Exists(tmpDir) {
-		nos.RemoveAll(tmpDir)
+	if sys.Exists(tmpDir) {
+		sys.RemoveAll(tmpDir)
 	}
-	nos.MkdirP(tmpDir)
-	nos.Copy("../ncli", tmpDir)
+	sys.MkdirP(tmpDir)
+	sys.Copy("../ncli", tmpDir)
 }

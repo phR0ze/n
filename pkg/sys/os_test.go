@@ -1,4 +1,4 @@
-package nos
+package sys
 
 import (
 	"os"
@@ -16,7 +16,7 @@ var readme = "../../README.md"
 func TestCopy(t *testing.T) {
 	{
 		// test/temp/pkg does not exist
-		// so Copy nos to pkg will be a clone
+		// so Copy sys to pkg will be a clone
 		cleanTmpDir()
 		src := "."
 		dst := path.Join(tmpDir, "pkg")
@@ -30,13 +30,13 @@ func TestCopy(t *testing.T) {
 			srcPaths[i] = path.Base(srcPaths[i])
 			dstPaths[i] = path.Base(dstPaths[i])
 		}
-		assert.Equal(t, "nos", srcPaths[0])
+		assert.Equal(t, "sys", srcPaths[0])
 		assert.Equal(t, "pkg", dstPaths[0])
 		assert.Equal(t, srcPaths[1:], dstPaths[1:])
 	}
 	{
 		// test/temp/pkg does exist
-		// so Copy nos to pkg will be an into op
+		// so Copy sys to pkg will be an into op
 		cleanTmpDir()
 		src := "."
 		dst := path.Join(tmpDir, "pkg")
@@ -45,7 +45,7 @@ func TestCopy(t *testing.T) {
 		Copy(src, dst)
 		srcPaths, err := AllPaths(src)
 		assert.Nil(t, err)
-		dstPaths, err := AllPaths(path.Join(dst, "nos"))
+		dstPaths, err := AllPaths(path.Join(dst, "sys"))
 		assert.Nil(t, err)
 		for i := range dstPaths {
 			srcPaths[i] = path.Base(srcPaths[i])
@@ -70,7 +70,7 @@ func TestCopyGlob(t *testing.T) {
 			expected[i] = path.Base(expected[i])
 			results[i] = path.Base(results[i])
 		}
-		assert.Equal(t, "nos", expected[0])
+		assert.Equal(t, "sys", expected[0])
 		assert.Equal(t, "temp", results[0])
 		assert.Equal(t, expected[1:], results[1:])
 	}

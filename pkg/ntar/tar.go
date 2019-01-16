@@ -8,13 +8,13 @@ import (
 	"path"
 	"strings"
 
-	"github.com/phR0ze/n/pkg/nos"
+	"github.com/phR0ze/n/pkg/sys"
 )
 
 // Create a 'dst' tarball from the given 'src' directory
 func Create(dst string, src string) (err error) {
 	var root string
-	if root, err = nos.Abs(src); err != nil {
+	if root, err = sys.Abs(src); err != nil {
 		return
 	}
 
@@ -35,7 +35,7 @@ func Create(dst string, src string) (err error) {
 
 	// Walk the given root paths and add them to the tarball
 	var paths []string
-	if paths, err = nos.AllPaths(root); err != nil {
+	if paths, err = sys.AllPaths(root); err != nil {
 		return
 	}
 	for _, x := range paths {
@@ -88,7 +88,7 @@ func addPath(tw *tar.Writer, root, target string) (err error) {
 
 // ExtractAll files into given destination directory
 func ExtractAll(tarball, dest string) (err error) {
-	if err = nos.MkdirP(dest); err != nil {
+	if err = sys.MkdirP(dest); err != nil {
 		return
 	}
 
@@ -122,7 +122,7 @@ func ExtractAll(tarball, dest string) (err error) {
 		if header.Typeflag == tar.TypeDir {
 			dirPath := path.Join(dest, header.Name)
 			if _, exists := dirCache[dirPath]; !exists {
-				nos.MkdirP(dirPath, os.FileMode(header.Mode))
+				sys.MkdirP(dirPath, os.FileMode(header.Mode))
 				dirCache[dirPath] = true
 			}
 		}
@@ -132,7 +132,7 @@ func ExtractAll(tarball, dest string) (err error) {
 			filePath := path.Join(dest, header.Name)
 
 			// Create any directories with default permissions that don't exist
-			nos.MkdirP(path.Dir(filePath))
+			sys.MkdirP(path.Dir(filePath))
 
 			// Create file and write content to it
 			var fw *os.File

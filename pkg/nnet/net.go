@@ -6,13 +6,13 @@ import (
 	"os"
 	"path"
 
-	"github.com/phR0ze/n/pkg/nos"
+	"github.com/phR0ze/n/pkg/sys"
 )
 
 // DownloadFile from the given URL to the given destination
 // returning the full path to the resulting downloaded file
 func DownloadFile(url, dst string, perms ...uint32) (result string, err error) {
-	if result, err = nos.Abs(dst); err != nil {
+	if result, err = sys.Abs(dst); err != nil {
 		return
 	}
 
@@ -22,7 +22,7 @@ func DownloadFile(url, dst string, perms ...uint32) (result string, err error) {
 	}
 
 	// Create the destination path if it doesn't exist
-	nos.MkdirP(path.Dir(result))
+	sys.MkdirP(path.Dir(result))
 
 	// Open destination truncating if it exists
 	var f *os.File

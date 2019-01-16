@@ -1,4 +1,4 @@
-package nos
+package sys
 
 import (
 	"fmt"
@@ -24,7 +24,7 @@ func TestAbs(t *testing.T) {
 		result, err := Abs("test")
 		assert.Nil(t, err)
 		assert.True(t, strings.Contains(result, "home"))
-		assert.True(t, strings.HasSuffix(result, "nos/test"))
+		assert.True(t, strings.HasSuffix(result, "sys/test"))
 	}
 	{
 		result, err := Abs("file://../utils")

@@ -1,5 +1,5 @@
-# nos
-The `Nub OS` package is intended to provide system related helper functions for Golang commonly
+# sys
+The `sys` package is intended to provide system related helper functions for Golang commonly
 found with other languages.
 
 ## Table of Contents

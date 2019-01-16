@@ -3,7 +3,7 @@ package nnet
 import (
 	"testing"
 
-	"github.com/phR0ze/n/pkg/nos"
+	"github.com/phR0ze/n/pkg/sys"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,12 +16,12 @@ func TestDownloadFile(t *testing.T) {
 	cleanTmpDir()
 	dst, err := DownloadFile("https://www.google.com", tmpfile)
 	assert.Nil(t, err)
-	assert.True(t, nos.Exists(dst))
+	assert.True(t, sys.Exists(dst))
 }
 
 func cleanTmpDir() {
-	if nos.Exists(tmpDir) {
-		nos.RemoveAll(tmpDir)
+	if sys.Exists(tmpDir) {
+		sys.RemoveAll(tmpDir)
 	}
-	nos.MkdirP(tmpDir)
+	sys.MkdirP(tmpDir)
 }
