@@ -16,11 +16,11 @@ test: $(NAME)
 	@echo -e "\nRunning all go tests:"
 	@echo -e "------------------------------------------------------------------------"
 	go test $(PKGROOT)
-	go test $(PKGROOT)/pkg/ncli
+	go test $(PKGROOT)/pkg/cli
 	go test $(PKGROOT)/pkg/nerr
-	go test $(PKGROOT)/pkg/nnet
-	go test $(PKGROOT)/pkg/tar
+	go test $(PKGROOT)/pkg/net
 	go test $(PKGROOT)/pkg/sys
+	go test $(PKGROOT)/pkg/tar
 	go test $(PKGROOT)/pkg/term
 	go test $(PKGROOT)/pkg/time
 	go test $(PKGROOT)/pkg/tmpl

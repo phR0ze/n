@@ -1,5 +1,5 @@
-// Package ncli provides some utility functions for command line interfaces
-package ncli
+// Package cli provides some utility functions for command line interfaces
+package cli
 
 import "github.com/phR0ze/n"
 

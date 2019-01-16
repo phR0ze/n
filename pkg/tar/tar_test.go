@@ -15,7 +15,7 @@ func TestCreate(t *testing.T) {
 	prepTmpDir()
 
 	// Create the new tarball
-	src := path.Join(tmpDir, "ncli")
+	src := path.Join(tmpDir, "cli")
 	err := Create(tmpfile, src)
 	assert.Nil(t, err)
 	assert.True(t, sys.Exists(tmpfile))
@@ -35,5 +35,5 @@ func prepTmpDir() {
 		sys.RemoveAll(tmpDir)
 	}
 	sys.MkdirP(tmpDir)
-	sys.Copy("../ncli", tmpDir)
+	sys.Copy("../cli", tmpDir)
 }

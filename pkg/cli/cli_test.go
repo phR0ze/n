@@ -1,4 +1,4 @@
-package ncli
+package cli
 
 import (
 	"testing"

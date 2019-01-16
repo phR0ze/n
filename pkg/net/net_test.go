@@ -1,4 +1,4 @@
-package nnet
+package net
 
 import (
 	"testing"
