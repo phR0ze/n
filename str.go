@@ -13,7 +13,6 @@ import (
 type strN struct {
 	v string
 }
-
 type strSliceN struct {
 	v []string
 }
@@ -25,10 +24,12 @@ func A(str interface{}) (result *strN) {
 	switch x := str.(type) {
 	case string:
 		result.v = x
+	case rune:
+		result.v = string(x)
 	case []byte:
 		result.v = string(x)
 	case int:
-		strconv.Itoa(x)
+		result.v = strconv.Itoa(x)
 	default:
 		result.v = fmt.Sprintf("%v", x)
 	}
@@ -42,12 +43,23 @@ func (q *strN) B() []byte {
 
 // A exports object invoking deferred execution
 func (q *strN) A() string {
-	return q.v
+	return string(q.v)
 }
 
 // Q creates a queryable from the string
 func (q *strN) Q() *Queryable {
-	return Q(q.v)
+	return Q(string(q.v))
+}
+
+// At returns the rune at the given index location. Allows for negative notation
+func (q *strN) At(i int) rune {
+	if i < 0 {
+		i = len(q.v) + i
+	}
+	if i >= 0 && i < len(q.v) {
+		return rune(q.v[i])
+	}
+	panic(errors.New("Index out of string bounds"))
 }
 
 // Contains checks if the given target is contained in this string

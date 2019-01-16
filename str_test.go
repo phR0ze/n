@@ -14,6 +14,18 @@ func TestStrQ(t *testing.T) {
 	assert.Equal(t, "test", A("test").Q().A())
 }
 
+func TestStrAt(t *testing.T) {
+	q := A("test")
+	assert.Equal(t, 't', q.At(0))
+	assert.Equal(t, 'e', q.At(1))
+	assert.Equal(t, 's', q.At(2))
+	assert.Equal(t, 't', q.At(3))
+	assert.Equal(t, 't', q.At(-1))
+	assert.Equal(t, 's', q.At(-2))
+	assert.Equal(t, 'e', q.At(-3))
+	assert.Equal(t, 't', q.At(-4))
+}
+
 func TestStrContains(t *testing.T) {
 	assert.True(t, A("test").Contains("tes"))
 	assert.False(t, A("test").Contains("bob"))
