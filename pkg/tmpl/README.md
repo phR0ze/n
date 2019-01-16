@@ -1,5 +1,5 @@
-# ntmpl
-ntmpl does simple template substitutions fast
+# tmpl
+tmpl does simple template substitutions fast
 
 ## Usage
 ```Golang
@@ -7,7 +7,7 @@ data := `labels:
   chart: {{ name }}:{{ version }}
   release: {{ Release.Name }}
   heritage: {{ Release.Service }}`
-t, _ := ntmpl.New(data, "{{", "}}")
+t, _ := tmpl.New(data, "{{", "}}")
 result, err := t.Process(map[string]string{
 	"name":            "foo",
 	"version":         "1.0.2",

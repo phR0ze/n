@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 
 	"github.com/ghodss/yaml"
-	"github.com/phR0ze/n/pkg/ntmpl"
+	"github.com/phR0ze/n/pkg/tmpl"
 )
 
 // Load a yaml file as a Queryable
@@ -29,10 +29,10 @@ func FromYaml(yml string) (result *Queryable, err error) {
 }
 
 // FromYamlTmplFile loads a yaml file from disk and processes any templating
-// provided by the ntmpl package returning an unmarshaled yaml block queryable.
+// provided by the tmpl package returning an unmarshaled yaml block queryable.
 func FromYamlTmplFile(filepath string, vars map[string]string) *Queryable {
 	if data, err := ioutil.ReadFile(filepath); err == nil {
-		if tpl, err := ntmpl.New(string(data), "{{", "}}"); err == nil {
+		if tpl, err := tmpl.New(string(data), "{{", "}}"); err == nil {
 			if result, err := tpl.Process(vars); err == nil {
 				m := map[string]interface{}{}
 				if err := yaml.Unmarshal([]byte(result), &m); err == nil {

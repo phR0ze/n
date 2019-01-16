@@ -1,5 +1,5 @@
-// Package ntmpl does simple template substitutions fast
-package ntmpl
+// Package tmpl does simple template substitutions fast
+package tmpl
 
 import (
 	"bytes"
