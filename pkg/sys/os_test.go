@@ -155,6 +155,10 @@ func TestMove(t *testing.T) {
 	assert.Equal(t, srcMd5, dstMd5)
 }
 
+func TestPwd(t *testing.T) {
+	assert.Equal(t, "sys", path.Base(Pwd()))
+}
+
 func TestReadLines(t *testing.T) {
 	lines, err := ReadLines(testfile)
 	assert.Nil(t, err)

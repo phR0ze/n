@@ -18,12 +18,12 @@ func TestAbs(t *testing.T) {
 	{
 		result, err := Abs("~/")
 		assert.Nil(t, err)
-		assert.True(t, strings.Contains(result, "home"))
+		assert.True(t, pathContainsHome(result))
 	}
 	{
 		result, err := Abs("test")
 		assert.Nil(t, err)
-		assert.True(t, strings.Contains(result, "home"))
+		assert.True(t, pathContainsHome(result))
 		assert.True(t, strings.HasSuffix(result, "sys/test"))
 	}
 	{
@@ -128,7 +128,7 @@ func TestSlicePath(t *testing.T) {
 func TestHome(t *testing.T) {
 	result, err := Home()
 	assert.Nil(t, err)
-	assert.True(t, strings.Contains(result, "home"))
+	assert.True(t, pathContainsHome(result))
 }
 
 func TestAllPaths(t *testing.T) {
@@ -208,4 +208,14 @@ func TestTrimProtocol(t *testing.T) {
 	assert.Equal(t, "foo/bar", TrimProtocol("http://foo/bar"))
 	assert.Equal(t, "foo/bar", TrimProtocol("https://foo/bar"))
 	assert.Equal(t, "foo://foo/bar", TrimProtocol("foo://foo/bar"))
+}
+
+func pathContainsHome(path string) (result bool) {
+	for _, x := range []string{"home", "Users"} {
+		if x == strings.Split(path, "/")[1] {
+			result = true
+			return
+		}
+	}
+	return
 }

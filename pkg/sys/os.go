@@ -239,6 +239,12 @@ func Move(src, dst string) (err error) {
 	return os.Rename(src, dst)
 }
 
+// Pwd returns the current working directory
+func Pwd() (pwd string) {
+	pwd, _ = os.Getwd()
+	return
+}
+
 // ReadLines returns a new slice of string representing lines
 func ReadLines(target string) (result []string, err error) {
 	if target, err = Abs(target); err != nil {
