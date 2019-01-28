@@ -122,17 +122,18 @@ func TestQI(t *testing.T) {
 	}
 	{
 		// Pointers
-		val := 5
-		q := Q(&val)
+		val5 := 5
+		q := Q(&val5)
 		assert.True(t, q.Any())
 		assert.Equal(t, 1, q.Len())
-		q2 := q.Append(2)
+		val2 := 2
+		q2 := q.Append(&val2)
 		assert.True(t, q2.Any())
 		assert.Equal(t, q, q2)
 		assert.Equal(t, 2, q.Len())
 		assert.Equal(t, 2, q2.Len())
-		assert.Equal(t, 5, q.At(0).I())
-		assert.Equal(t, 2, q.At(1).I())
+		assert.Equal(t, 5, *(q.At(0).O().(*int)))
+		assert.Equal(t, 2, *(q.At(1).O().(*int)))
 	}
 }
 

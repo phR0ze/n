@@ -84,12 +84,7 @@ func Q(obj interface{}) *Queryable {
 	v := reflect.ValueOf(obj)
 	q := &Queryable{v: &v, Kind: v.Kind()}
 
-	// Indirect pointers
-	if q.Kind == reflect.Ptr {
-		v = reflect.Indirect(reflect.ValueOf(obj))
-		q = &Queryable{v: &v, Kind: v.Kind()}
-	}
-
+Switch:
 	switch q.Kind {
 
 	// Slice types
@@ -113,6 +108,17 @@ func Q(obj interface{}) *Queryable {
 	// Chan types
 	case reflect.Chan:
 		panic("TODO: handle reflect.Chan")
+
+	// Pointer types
+	case reflect.Ptr:
+		nv := reflect.Indirect(reflect.ValueOf(obj))
+		nq := &Queryable{v: &nv, Kind: nv.Kind()}
+		switch nq.Kind {
+		case reflect.Array, reflect.Slice, reflect.Map, reflect.String, reflect.Chan:
+			v = nv
+			q = nq
+			goto Switch
+		}
 	}
 
 	return q
