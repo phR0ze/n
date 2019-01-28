@@ -8,6 +8,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestMediaEpoch(t *testing.T) {
+
+	// Calculate 1hr since MediaEpoch
+	elapse, err := time.ParseDuration("3600s")
+	assert.Nil(t, err)
+
+	target := time.Date(1904, time.January, 1, 1, 0, 0, 0, time.UTC)
+	assert.Equal(t, target, MediaEpoch.Add(elapse))
+}
+
 func TestAge(t *testing.T) {
 	{
 		// 3 days

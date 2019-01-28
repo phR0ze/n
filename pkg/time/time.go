@@ -5,6 +5,11 @@ import (
 	"time"
 )
 
+var (
+	// MediaEpoch provides a time object for midnight, January 1, 1904
+	MediaEpoch = time.Date(1904, time.January, 1, 0, 0, 0, 0, time.UTC)
+)
+
 // Age calculates the elapse time in days from a time.Time object
 func Age(other time.Time) string {
 	days := int(time.Since(other).Hours()) / 24
