@@ -103,6 +103,10 @@ func TestStrSpaceLeft(t *testing.T) {
 	assert.Equal(t, "\t", A("\tbob").SpaceLeft())
 }
 
+func TestToASCII(t *testing.T) {
+	assert.Equal(t, "2 gspu data  gspm data", A("2�gspu�data�gspm�data").ToASCII().A())
+}
+
 func TestStrTrimPrefix(t *testing.T) {
 	assert.Equal(t, "test]", A("[test]").TrimPrefix("[").A())
 }

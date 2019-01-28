@@ -162,6 +162,19 @@ func (q *strN) SplitOn(delim string) (first, second string) {
 	return
 }
 
+// ToASCII with given string
+func (q *strN) ToASCII() *strN {
+	result := []rune{}
+	for _, r := range q.v {
+		if unicode.IsSymbol(r) || unicode.IsControl(r) {
+			result = append(result, ' ')
+		} else {
+			result = append(result, r)
+		}
+	}
+	return A(string(result))
+}
+
 // TrimPrefix trims the given prefix off the string
 func (q *strN) TrimPrefix(prefix string) *strN {
 	return A(strings.TrimPrefix(q.v, prefix))
