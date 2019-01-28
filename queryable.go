@@ -83,6 +83,13 @@ func N() *Queryable {
 func Q(obj interface{}) *Queryable {
 	v := reflect.ValueOf(obj)
 	q := &Queryable{v: &v, Kind: v.Kind()}
+
+	// Indirect pointers
+	if q.Kind == reflect.Ptr {
+		v = reflect.Indirect(reflect.ValueOf(obj))
+		q = &Queryable{v: &v, Kind: v.Kind()}
+	}
+
 	switch q.Kind {
 
 	// Slice types
@@ -106,10 +113,6 @@ func Q(obj interface{}) *Queryable {
 	// Chan types
 	case reflect.Chan:
 		panic("TODO: handle reflect.Chan")
-
-	// Ptr types not supported
-	case reflect.Ptr:
-		panic("TODO: pointers are not supported currently")
 	}
 
 	return q

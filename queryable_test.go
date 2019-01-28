@@ -93,25 +93,75 @@ func TestQA(t *testing.T) {
 		assert.Equal(t, "one", q.At(0).A())
 		assert.Equal(t, "four", q.At(1).A())
 	}
+	{
+		// Pointer
+		str := "one"
+		q := Q(&str)
+		assert.True(t, q.Any())
+		assert.Equal(t, 3, q.Len())
+		assert.Equal(t, "o", q.At(0).A())
+		assert.Equal(t, 2, q.Append("four").Len())
+		assert.Equal(t, 2, q.Len())
+		assert.Equal(t, "one", q.At(0).A())
+		assert.Equal(t, "four", q.At(1).A())
+	}
 }
 
 func TestQI(t *testing.T) {
-	q := Q(5)
-	assert.True(t, q.Any())
-	assert.Equal(t, 1, q.Len())
-	q2 := q.Append(2)
-	assert.True(t, q2.Any())
-	assert.Equal(t, q, q2)
-	assert.Equal(t, 2, q.Len())
-	assert.Equal(t, 2, q2.Len())
-	assert.Equal(t, 5, q.At(0).I())
-	assert.Equal(t, 2, q.At(1).I())
+	{
+		q := Q(5)
+		assert.True(t, q.Any())
+		assert.Equal(t, 1, q.Len())
+		q2 := q.Append(2)
+		assert.True(t, q2.Any())
+		assert.Equal(t, q, q2)
+		assert.Equal(t, 2, q.Len())
+		assert.Equal(t, 2, q2.Len())
+		assert.Equal(t, 5, q.At(0).I())
+		assert.Equal(t, 2, q.At(1).I())
+	}
+	{
+		// Pointers
+		val := 5
+		q := Q(&val)
+		assert.True(t, q.Any())
+		assert.Equal(t, 1, q.Len())
+		q2 := q.Append(2)
+		assert.True(t, q2.Any())
+		assert.Equal(t, q, q2)
+		assert.Equal(t, 2, q.Len())
+		assert.Equal(t, 2, q2.Len())
+		assert.Equal(t, 5, q.At(0).I())
+		assert.Equal(t, 2, q.At(1).I())
+	}
 }
 
 func TestQM(t *testing.T) {
 	{
 		items := []interface{}{}
 		q := Q(map[string]string{"1": "one", "2": "two", "3": "three"})
+		next := q.Iter()
+		for x, ok := next(); ok; x, ok = next() {
+			items = append(items, x)
+			item := x.(KeyVal)
+			switch item.Key {
+			case "1":
+				assert.NotEqual(t, KeyVal{Key: "2", Val: "one"}, item)
+				assert.NotEqual(t, KeyVal{Key: "1", Val: "two"}, item)
+				assert.Equal(t, KeyVal{Key: "1", Val: "one"}, item)
+			case "2":
+				assert.Equal(t, KeyVal{Key: "2", Val: "two"}, item)
+			case "3":
+				assert.Equal(t, KeyVal{Key: "3", Val: "three"}, item)
+			}
+		}
+		assert.Len(t, items, 3)
+	}
+	{
+		// Pointer
+		items := []interface{}{}
+		mapper := map[string]string{"1": "one", "2": "two", "3": "three"}
+		q := Q(&mapper)
 		next := q.Iter()
 		for x, ok := next(); ok; x, ok = next() {
 			items = append(items, x)
@@ -181,6 +231,25 @@ func TestQS(t *testing.T) {
 		}
 		assert.Len(t, cnt, 3)
 	}
+	{
+		// Pointer
+		cnt := []bool{}
+		inter := []int{1, 2, 3}
+		q := Q(&inter)
+		next := q.Iter()
+		for x, ok := next(); ok; x, ok = next() {
+			cnt = append(cnt, true)
+			switch len(cnt) {
+			case 1:
+				assert.Equal(t, 1, x)
+			case 2:
+				assert.Equal(t, 2, x)
+			case 3:
+				assert.Equal(t, 3, x)
+			}
+		}
+		assert.Len(t, cnt, 3)
+	}
 }
 
 func TestCustomQ(t *testing.T) {
@@ -192,6 +261,13 @@ func TestCustomQ(t *testing.T) {
 	{
 		// []bob
 		q := Q([]bob{{data: "3"}})
+		assert.True(t, q.Any())
+		assert.Equal(t, bob{data: "3"}, q.At(0).O())
+	}
+	{
+		// Pointer []bob
+		bober := []bob{{data: "3"}}
+		q := Q(&bober)
 		assert.True(t, q.Any())
 		assert.Equal(t, bob{data: "3"}, q.At(0).O())
 	}
@@ -347,6 +423,19 @@ func TestAt(t *testing.T) {
 	{
 		// String
 		q := Q("test")
+		assert.Equal(t, "t", q.At(0).A())
+		assert.Equal(t, "e", q.At(1).A())
+		assert.Equal(t, "s", q.At(2).A())
+		assert.Equal(t, "t", q.At(3).A())
+		assert.Equal(t, "t", q.At(-1).A())
+		assert.Equal(t, "s", q.At(-2).A())
+		assert.Equal(t, "e", q.At(-3).A())
+		assert.Equal(t, "t", q.At(-4).A())
+	}
+	{
+		// String pointer
+		str := "test"
+		q := Q(&str)
 		assert.Equal(t, "t", q.At(0).A())
 		assert.Equal(t, "e", q.At(1).A())
 		assert.Equal(t, "s", q.At(2).A())
