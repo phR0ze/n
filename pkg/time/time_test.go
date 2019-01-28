@@ -9,13 +9,21 @@ import (
 )
 
 func TestMediaEpoch(t *testing.T) {
-
 	// Calculate 1hr since MediaEpoch
 	elapse, err := time.ParseDuration("3600s")
 	assert.Nil(t, err)
 
-	target := time.Date(1904, time.January, 1, 1, 0, 0, 0, time.UTC)
-	assert.Equal(t, target, MediaEpoch.Add(elapse))
+	expected := time.Date(1904, time.January, 1, 1, 0, 0, 0, time.UTC)
+	assert.Equal(t, expected, MediaEpoch.Add(elapse))
+}
+
+func TestMediaTime(t *testing.T) {
+	elapse := uint32(3457708564)
+
+	mediaTime, err := MediaTime(elapse)
+	assert.Nil(t, err)
+	expected := time.Date(2013, time.July, 26, 18, 36, 4, 0, time.UTC)
+	assert.Equal(t, expected, mediaTime)
 }
 
 func TestAge(t *testing.T) {

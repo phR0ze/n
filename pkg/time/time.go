@@ -10,6 +10,16 @@ var (
 	MediaEpoch = time.Date(1904, time.January, 1, 0, 0, 0, 0, time.UTC)
 )
 
+// MediaTime calculates the time given the elapse in seconds since MediaEpoch
+func MediaTime(sec uint32) (result time.Time, err error) {
+	var dura time.Duration
+	if dura, err = time.ParseDuration(fmt.Sprintf("%ds", sec)); err != nil {
+		return
+	}
+	result = MediaEpoch.Add(dura)
+	return
+}
+
 // Age calculates the elapse time in days from a time.Time object
 func Age(other time.Time) string {
 	days := int(time.Since(other).Hours()) / 24
