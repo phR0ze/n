@@ -4,10 +4,15 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 	"unicode"
+)
+
+var (
+	ReGraphicalOnly = regexp.MustCompile(`[^[:graph:]]+`)
 )
 
 type strN struct {
@@ -164,15 +169,7 @@ func (q *strN) SplitOn(delim string) (first, second string) {
 
 // ToASCII with given string
 func (q *strN) ToASCII() *strN {
-	result := []rune{}
-	for _, r := range q.v {
-		if unicode.IsSymbol(r) || unicode.IsControl(r) {
-			result = append(result, ' ')
-		} else {
-			result = append(result, r)
-		}
-	}
-	return A(string(result))
+	return A(ReGraphicalOnly.ReplaceAllString(q.v, " "))
 }
 
 // TrimPrefix trims the given prefix off the string
