@@ -16,6 +16,7 @@ test: $(NAME)
 	@echo -e "\nRunning all go tests:"
 	@echo -e "------------------------------------------------------------------------"
 	go test $(PKGROOT)
+	go test $(PKGROOT)/pkg/bin
 	go test $(PKGROOT)/pkg/cli
 	go test $(PKGROOT)/pkg/nerr
 	go test $(PKGROOT)/pkg/net

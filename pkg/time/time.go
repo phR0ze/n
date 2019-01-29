@@ -11,11 +11,8 @@ var (
 )
 
 // MediaTime calculates the time given the elapse in seconds since MediaEpoch
-func MediaTime(sec uint32) (result time.Time, err error) {
-	var dura time.Duration
-	if dura, err = time.ParseDuration(fmt.Sprintf("%ds", sec)); err != nil {
-		return
-	}
+func MediaTime(sec uint64) (result time.Time, err error) {
+	dura := time.Second * time.Duration(sec)
 	result = MediaEpoch.Add(dura)
 	return
 }

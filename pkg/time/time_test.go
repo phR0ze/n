@@ -18,7 +18,7 @@ func TestMediaEpoch(t *testing.T) {
 }
 
 func TestMediaTime(t *testing.T) {
-	elapse := uint32(3457708564)
+	elapse := uint64(3457708564)
 
 	mediaTime, err := MediaTime(elapse)
 	assert.Nil(t, err)
