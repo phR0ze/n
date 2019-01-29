@@ -7,6 +7,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestPutUint32BE(t *testing.T) {
+	name := make([]byte, 4)
+	PutUint32BE(name, uint32(0x74726578))
+
+	assert.Equal(t, []byte{0x74, 0x72, 0x65, 0x78}, name)
+}
+
 func TestFixed32BE(t *testing.T) {
 
 	// Data in fixedpoint (i.e. float) BigEndian format

@@ -13,6 +13,11 @@ const (
 	Fixed16bitDiv = 65536.0
 )
 
+// PutUint32BE is just a wrapper around binary.BigEndian for convenience
+func PutUint32BE(data []byte, val uint32) {
+	binary.BigEndian.PutUint32(data, val)
+}
+
 // Uint32BE reads data as BigEndian
 func Uint32BE(data []byte) uint32 {
 	return binary.BigEndian.Uint32(data)
