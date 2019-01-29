@@ -36,6 +36,14 @@ func TestFixed32BE(t *testing.T) {
 	assert.Equal(t, float64(1280), Fixed32BE(data))
 }
 
+func TestUint16BE(t *testing.T) {
+
+	// Data in BigEndian format
+	data := []byte{0x00, 0x05}
+
+	assert.Equal(t, uint16(5), Uint16BE(data))
+}
+
 func TestUint32BE(t *testing.T) {
 
 	// Data in BigEndian format
