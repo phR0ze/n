@@ -23,14 +23,20 @@ func Uint32BE(data []byte) uint32 {
 	return binary.BigEndian.Uint32(data)
 }
 
-// MediaTime32BE reads the data as BigEndian and convert to time
+// MediaDuration32BE reads 4 bytes of data as BigEndian and converts it to
+// a duration taking into account the time scale
+func MediaDuration32BE(data []byte, timeScale uint32) time.Duration {
+	return time.Second * time.Duration(Uint32BE(data)/timeScale)
+}
+
+// MediaTime32BE reads 4 bytes of data as BigEndian and convert to time
 func MediaTime32BE(data []byte) time.Time {
 	sec := uint64(binary.BigEndian.Uint32(data))
 	result, _ := ntime.MediaTime(sec)
 	return result
 }
 
-// Fixed32BE reads data as BigEndian fixed point 16.16 and converts to float
+// Fixed32BE reads 4 bytes of data as BigEndian fixed point 16.16 and converts to float
 func Fixed32BE(data []byte) float64 {
 
 	// 2 bytes or 16 bits are used for the whole number part of the value

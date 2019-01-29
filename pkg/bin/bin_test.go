@@ -7,6 +7,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestMediaDuration(t *testing.T) {
+	scaleTime := uint32(600)
+
+	// 3600 sec duration in BigEndian format
+	data := []byte{0x00, 0x00, 0x8c, 0xca}
+
+	duration := MediaDuration32BE(data, scaleTime)
+	assert.Equal(t, 1*time.Minute, duration)
+}
+
 func TestPutUint32BE(t *testing.T) {
 	name := make([]byte, 4)
 	PutUint32BE(name, uint32(0x74726578))
