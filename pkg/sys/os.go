@@ -274,6 +274,18 @@ func RemoveAll(target string) error {
 	return os.RemoveAll(target)
 }
 
+// Size returns the size of the given path file or directory
+func Size(src string) (result int64) {
+	if target, err := Abs(src); err == nil {
+		if info, err := os.Stat(target); err == nil {
+			if !info.IsDir() {
+				result = info.Size()
+			}
+		}
+	}
+	return
+}
+
 // Touch creates an empty text file similar to the linux touch command
 func Touch(target string) (err error) {
 	if target, err = Abs(target); err != nil {

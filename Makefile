@@ -26,6 +26,7 @@ test: $(NAME)
 	go test $(PKGROOT)/pkg/time
 	go test $(PKGROOT)/pkg/tmpl
 	go test $(PKGROOT)/pkg/trace
+	go test $(PKGROOT)/pkg/unit
 
 bench: $(NAME)
 	@echo -e "\nRunning all go benchmarks:"

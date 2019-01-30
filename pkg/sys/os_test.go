@@ -165,6 +165,11 @@ func TestReadLines(t *testing.T) {
 	assert.Equal(t, 18, len(lines))
 }
 
+func TestSize(t *testing.T) {
+	assert.Equal(t, int64(604), Size(testfile))
+
+}
+
 func TestTouch(t *testing.T) {
 	cleanTmpDir()
 	assert.False(t, Exists(tmpfile))
