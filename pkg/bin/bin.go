@@ -29,9 +29,10 @@ func Uint32BE(data []byte) uint32 {
 }
 
 // MediaDuration32BE reads 4 bytes of data as BigEndian and converts it to
-// a duration taking into account the time scale
+// a duration taking into account the time scale. data is in media units
 func MediaDuration32BE(data []byte, timeScale uint32) time.Duration {
-	return time.Second * time.Duration(Uint32BE(data)/timeScale)
+	nanosec := float64(Uint32BE(data)) / float64(timeScale) * 1000000000.0
+	return time.Duration(nanosec)
 }
 
 // MediaTime32BE reads 4 bytes of data as BigEndian and convert to time

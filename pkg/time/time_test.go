@@ -8,6 +8,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestFloat64Sec(t *testing.T) {
+	assert.Equal(t, float64(60.07), Float64Sec(60070*time.Millisecond))
+}
+
 func TestMediaEpoch(t *testing.T) {
 	// Calculate 1hr since MediaEpoch
 	elapse, err := time.ParseDuration("3600s")

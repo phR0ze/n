@@ -4,17 +4,30 @@ import (
 	"testing"
 	"time"
 
+	ntime "github.com/phR0ze/n/pkg/time"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMediaDuration(t *testing.T) {
-	scaleTime := uint32(600)
+	timeScale := uint32(600)
 
 	// 3600 sec duration in BigEndian format
 	data := []byte{0x00, 0x00, 0x8c, 0xca}
+	assert.Equal(t, uint32(36042), Uint32BE(data))
 
-	duration := MediaDuration32BE(data, scaleTime)
-	assert.Equal(t, 1*time.Minute, duration)
+	// Ensure float accuracy of time scale divsor
+	assert.Equal(t, uint32(60), uint32(36042)/timeScale)
+	assert.Equal(t, float64(60.07), float64(36042)/float64(timeScale))
+
+	// Now keep the float precision with a duration
+	duration := time.Millisecond * time.Duration(float64(Uint32BE(data))/float64(timeScale)*1000.0)
+	assert.Equal(t, 60070*time.Millisecond, duration)
+	assert.Equal(t, float64(60.07), float64(duration)/float64(time.Millisecond)/1000.0)
+
+	// Now test with media duration
+	duration = MediaDuration32BE(data, timeScale)
+	assert.Equal(t, float64(60.07), ntime.Float64Sec(duration))
+	assert.Equal(t, 1*time.Minute+70*time.Millisecond, duration)
 }
 
 func TestPutUint32BE(t *testing.T) {

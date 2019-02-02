@@ -10,6 +10,11 @@ var (
 	MediaEpoch = time.Date(1904, time.January, 1, 0, 0, 0, 0, time.UTC)
 )
 
+// Float64Sec converts a duration into a float64 seconds without loosing precision
+func Float64Sec(duration time.Duration) float64 {
+	return float64(duration) / float64(time.Millisecond) / 1000.0
+}
+
 // MediaTime calculates the time given the elapse in seconds since MediaEpoch
 func MediaTime(sec uint64) (result time.Time, err error) {
 	dura := time.Second * time.Duration(sec)
