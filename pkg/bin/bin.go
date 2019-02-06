@@ -18,9 +18,19 @@ func PutUint32BE(data []byte, val uint32) {
 	binary.BigEndian.PutUint32(data, val)
 }
 
+// Int16BE reads data as BigEndian
+func Int16BE(data []byte) int {
+	return int(binary.BigEndian.Uint16(data))
+}
+
 // Uint16BE reads data as BigEndian
 func Uint16BE(data []byte) uint16 {
 	return binary.BigEndian.Uint16(data)
+}
+
+// Int32BE reads data as BigEndian
+func Int32BE(data []byte) int {
+	return int(binary.BigEndian.Uint32(data))
 }
 
 // Uint32BE reads data as BigEndian
