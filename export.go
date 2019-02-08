@@ -10,7 +10,7 @@ import (
 
 // A exports queryable into a string
 func (q *Queryable) A() (result string) {
-	if !q.Nil() {
+	if q != nil && !q.Nil() {
 		switch v := q.v.Interface().(type) {
 		case string:
 			result = v
@@ -23,7 +23,7 @@ func (q *Queryable) A() (result string) {
 
 // B exports queryable into a bool
 func (q *Queryable) B() (result bool) {
-	if !q.Nil() {
+	if q != nil && !q.Nil() {
 		switch v := q.v.Interface().(type) {
 		case bool:
 			result = v
@@ -38,7 +38,7 @@ func (q *Queryable) B() (result bool) {
 
 // I exports queryable into an int
 func (q *Queryable) I() (result int) {
-	if !q.Nil() {
+	if q != nil && !q.Nil() {
 		switch v := q.v.Interface().(type) {
 		case int:
 			result = v
@@ -57,19 +57,21 @@ func (q *Queryable) I() (result int) {
 // Ints exports queryable into an int slice
 func (q *Queryable) Ints() (result []int) {
 	result = []int{}
-	if q.TypeSlice() {
-		next := q.Iter()
-		for x, ok := next(); ok; x, ok = next() {
-			result = append(result, x.(int))
+	if q != nil && !q.Nil() {
+		if q.TypeSlice() {
+			next := q.Iter()
+			for x, ok := next(); ok; x, ok = next() {
+				result = append(result, x.(int))
+			}
 		}
 	}
-	return result
+	return
 }
 
 // M exports queryable into a map
 func (q *Queryable) M() (result map[string]interface{}) {
 	result = map[string]interface{}{}
-	if !q.Nil() {
+	if q != nil && !q.Nil() {
 		if v, ok := q.O().(map[string]interface{}); ok {
 			result = v
 		} else {
@@ -86,7 +88,7 @@ func (q *Queryable) M() (result map[string]interface{}) {
 
 // O exports queryable into a interface{}
 func (q *Queryable) O() interface{} {
-	if q.Nil() {
+	if q == nil || q.Nil() {
 		return nil
 	}
 	return q.v.Interface()
@@ -95,7 +97,7 @@ func (q *Queryable) O() interface{} {
 // Strs exports queryable into an string slice
 func (q *Queryable) Strs() []string {
 	result := []string{}
-	if q.TypeSlice() {
+	if q != nil && !q.Nil() && q.TypeSlice() {
 		next := q.Iter()
 		for x, ok := next(); ok; x, ok = next() {
 			result = append(result, fmt.Sprint(x))
@@ -107,7 +109,7 @@ func (q *Queryable) Strs() []string {
 // AAMap exports queryable into an string to string map
 func (q *Queryable) AAMap() (result map[string]string) {
 	result = map[string]string{}
-	if !q.Nil() {
+	if q != nil && !q.Nil() {
 		if v, ok := q.O().(map[string]string); ok {
 			result = v
 		} else {
@@ -125,7 +127,7 @@ func (q *Queryable) AAMap() (result map[string]string) {
 // ASAMap exports queryable into an string to []string map
 func (q *Queryable) ASAMap() (result map[string][]string) {
 	result = map[string][]string{}
-	if !q.Nil() {
+	if q != nil && !q.Nil() {
 		if v, ok := q.O().(map[string][]string); ok {
 			result = v
 		} else {
@@ -152,7 +154,7 @@ func (q *Queryable) ASAMap() (result map[string][]string) {
 // S exports queryable into an interface{} slice
 func (q *Queryable) S() []interface{} {
 	result := []interface{}{}
-	if q.TypeSlice() {
+	if q != nil && !q.Nil() && q.TypeSlice() {
 		next := q.Iter()
 		for x, ok := next(); ok; x, ok = next() {
 			result = append(result, x)
@@ -164,7 +166,7 @@ func (q *Queryable) S() []interface{} {
 // SAMap exports queryable into an slice of string to interface{} map
 func (q *Queryable) SAMap() (result []map[string]interface{}) {
 	result = []map[string]interface{}{}
-	if q.TypeSlice() {
+	if q != nil && !q.Nil() && q.TypeSlice() {
 		next := q.Iter()
 		for x, ok := next(); ok; x, ok = next() {
 			if m, ok := x.(map[string]interface{}); ok {
@@ -178,7 +180,7 @@ func (q *Queryable) SAMap() (result []map[string]interface{}) {
 // SAAMap exports queryable into an slice of string to string map
 func (q *Queryable) SAAMap() (result []map[string]string) {
 	result = []map[string]string{}
-	if q.TypeSlice() {
+	if q != nil && !q.Nil() && q.TypeSlice() {
 		next := q.Iter()
 		for x, ok := next(); ok; x, ok = next() {
 			m := map[string]string{}
