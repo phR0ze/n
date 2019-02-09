@@ -49,6 +49,23 @@ func Dirs(target string) (result []string) {
 	return
 }
 
+// Files returns all directories from the given target path
+func Files(target string) (result []string) {
+	result = []string{}
+	if target != "" && IsDir(target) {
+		if target, err := Abs(target); err == nil {
+			if items, err := ioutil.ReadDir(target); err == nil {
+				for _, item := range items {
+					if !item.IsDir() {
+						result = append(result, path.Join(target, item.Name()))
+					}
+				}
+			}
+		}
+	}
+	return
+}
+
 // Paths returns all directories and files from the given target path
 func Paths(target string) (result []string) {
 	result = []string{}

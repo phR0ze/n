@@ -59,6 +59,19 @@ func TestDirs(t *testing.T) {
 	}
 }
 
+func TestFiles(t *testing.T) {
+	{
+		assert.Len(t, Files(""), 0)
+	}
+	{
+		files := Files(".")
+		assert.NotEmpty(t, files)
+		for _, file := range files {
+			assert.True(t, strings.Contains(file, "n/pkg/sys/"))
+		}
+	}
+}
+
 func TestPaths(t *testing.T) {
 	{
 		assert.Len(t, Paths(""), 0)
