@@ -83,6 +83,31 @@ func Paths(target string) (result []string) {
 	return
 }
 
+// AllFiles returns a list of all files recursively for the given root path
+func AllFiles(root string) (result []string, err error) {
+	if root, err = Abs(root); err != nil {
+		return
+	}
+	result = []string{}
+	err = Walk(root, func(p string, i os.FileInfo, e error) error {
+		if e != nil {
+			return e
+		}
+		if p != root && p != "." && p != ".." && !i.IsDir() {
+			if i.Mode()&os.ModeSymlink != 0 && IsSymlinkDir(p) {
+				return nil
+			}
+			absPath, e := Abs(p)
+			if e != nil {
+				return e
+			}
+			result = append(result, absPath)
+		}
+		return nil
+	})
+	return
+}
+
 // AllPaths returns a list of all paths recursively for the given root path
 // in a deterministic order including the root path as first entry
 func AllPaths(root string) (result []string, err error) {

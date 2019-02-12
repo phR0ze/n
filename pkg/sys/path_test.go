@@ -145,6 +145,69 @@ func TestHome(t *testing.T) {
 	assert.True(t, pathContainsHome(result))
 }
 
+func TestAllFiles(t *testing.T) {
+	cleanTmpDir()
+	{
+		targetDir := path.Join(tmpDir, "first")
+		targetDir, err := Abs(targetDir)
+		assert.Nil(t, err)
+		expected := []string{}
+		MkdirP(targetDir)
+		for i := 0; i < 10; i++ {
+			target := path.Join(targetDir, fmt.Sprintf("%d", i))
+			Touch(target)
+			expected = append(expected, target)
+		}
+		paths, err := AllFiles(targetDir)
+		assert.Nil(t, err)
+		assert.Equal(t, expected, paths)
+	}
+	{
+		targetDir := path.Join(tmpDir, "second")
+		targetDir, err := Abs(targetDir)
+		assert.Nil(t, err)
+		expected := []string{}
+		MkdirP(targetDir)
+		for i := 0; i < 5; i++ {
+			target := path.Join(targetDir, fmt.Sprintf("%d", i))
+			Touch(target)
+			expected = append(expected, target)
+		}
+		paths, err := AllFiles(targetDir)
+		assert.Nil(t, err)
+		assert.Equal(t, expected, paths)
+	}
+	{
+		// Now create a link to a another directory in second
+		secondDir, _ := Abs(path.Join(tmpDir, "second"))
+
+		// Create third dir files
+		thirdDir := path.Join(tmpDir, "third")
+		thirdDir, err := Abs(thirdDir)
+		assert.Nil(t, err)
+		MkdirP(thirdDir)
+		expected := []string{}
+		for i := 0; i < 5; i++ {
+			target := path.Join(secondDir, fmt.Sprintf("%d", i))
+			expected = append(expected, target)
+		}
+		for i := 0; i < 5; i++ {
+			target := path.Join(thirdDir, fmt.Sprintf("third-%d", i))
+			Touch(target)
+			expected = append(expected, target)
+		}
+
+		// Create sysmlink in second dir to third dir
+		symlink := path.Join(tmpDir, "second", "third")
+		os.Symlink(thirdDir, symlink)
+
+		// Check the result
+		paths, err := AllFiles(secondDir)
+		assert.Nil(t, err)
+		assert.Equal(t, expected, paths)
+	}
+}
+
 func TestAllPaths(t *testing.T) {
 	cleanTmpDir()
 	{

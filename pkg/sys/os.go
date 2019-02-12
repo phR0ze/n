@@ -191,6 +191,30 @@ func IsSymlink(src string) bool {
 	return false
 }
 
+// IsSymlinkDir returns true if the given symlink's target is a directory
+func IsSymlinkDir(src string) bool {
+	if target, err := filepath.EvalSymlinks(src); err == nil {
+		if info, err := os.Lstat(target); err == nil {
+			if info.IsDir() {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// IsSymlinkFile returns true if the given symlink's target is a directory
+func IsSymlinkFile(src string) bool {
+	if target, err := filepath.EvalSymlinks(src); err == nil {
+		if info, err := os.Lstat(target); err == nil {
+			if !info.IsDir() {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // MD5 returns the md5 of the given file
 func MD5(target string) (result string, err error) {
 	if target, err = Abs(target); err != nil {
