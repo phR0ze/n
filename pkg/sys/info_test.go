@@ -152,6 +152,9 @@ func TestSymlinkTarget(t *testing.T) {
 		target, err := info.SymlinkTarget()
 		assert.Nil(t, err)
 		assert.Equal(t, "../../test/testfile", target)
+		target, err = SymlinkTarget(symlink)
+		assert.Nil(t, err)
+		assert.Equal(t, "../../test/testfile", target)
 	}
 
 	// Symlink to a dir
@@ -164,6 +167,9 @@ func TestSymlinkTarget(t *testing.T) {
 
 		info, _ := Lstat(symlink)
 		target, err := info.SymlinkTarget()
+		assert.Nil(t, err)
+		assert.Equal(t, "../../test/temp/dir", target)
+		target, err = SymlinkTarget(symlink)
 		assert.Nil(t, err)
 		assert.Equal(t, "../../test/temp/dir", target)
 	}

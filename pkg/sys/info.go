@@ -98,8 +98,8 @@ func (info *FileInfo) IsSymlink() bool {
 
 // IsSymlink returns true if the given path is a symlink
 func IsSymlink(src string) bool {
-	if info, err := os.Lstat(src); err == nil {
-		return info.Mode()&os.ModeSymlink != 0
+	if info, err := Lstat(src); err == nil {
+		return info.IsSymlink()
 	}
 	return false
 }
@@ -120,16 +120,8 @@ func (info *FileInfo) IsSymlinkDir() bool {
 
 // IsSymlinkDir returns true if the given symlink's target is a directory
 func IsSymlinkDir(src string) bool {
-	if info, err := os.Lstat(src); err == nil {
-		if info.Mode()&os.ModeSymlink != 0 {
-			if target, err := filepath.EvalSymlinks(src); err == nil {
-				if info, err := os.Lstat(target); err == nil {
-					if info.IsDir() {
-						return true
-					}
-				}
-			}
-		}
+	if info, err := Lstat(src); err == nil {
+		return info.IsSymlinkDir()
 	}
 	return false
 }
@@ -150,16 +142,8 @@ func (info *FileInfo) IsSymlinkFile() bool {
 
 // IsSymlinkFile returns true if the given symlink's target is a directory
 func IsSymlinkFile(src string) bool {
-	if info, err := os.Lstat(src); err == nil {
-		if info.Mode()&os.ModeSymlink != 0 {
-			if target, err := filepath.EvalSymlinks(src); err == nil {
-				if info, err := os.Lstat(target); err == nil {
-					if !info.IsDir() {
-						return true
-					}
-				}
-			}
-		}
+	if info, err := Lstat(src); err == nil {
+		return info.IsSymlinkFile()
 	}
 	return false
 }
@@ -173,6 +157,14 @@ func (info *FileInfo) SymlinkTarget() (target string, err error) {
 	if target, err = filepath.EvalSymlinks(info.path); err != nil {
 		return
 	}
-	_, err = Lstat(target)
 	return
+}
+
+// SymlinkTarget follows the symlink to get the path for the target
+func SymlinkTarget(src string) (target string, err error) {
+	var info *FileInfo
+	if info, err = Lstat(src); err != nil {
+		return
+	}
+	return info.SymlinkTarget()
 }
