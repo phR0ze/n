@@ -85,18 +85,15 @@ func Paths(target string) (result []string) {
 
 // AllFiles returns a list of all files recursively for the given root path
 func AllFiles(root string) (result []string, err error) {
+	result = []string{}
 	if root, err = Abs(root); err != nil {
 		return
 	}
-	result = []string{}
-	err = Walk(root, func(p string, i os.FileInfo, e error) error {
+	err = Walk(root, func(p string, i *FileInfo, e error) error {
 		if e != nil {
 			return e
 		}
-		if p != root && p != "." && p != ".." && !i.IsDir() {
-			if i.Mode()&os.ModeSymlink != 0 && IsSymlinkDir(p) {
-				return nil
-			}
+		if p != root && p != "." && p != ".." && !i.IsDir() && !i.IsSymlinkDir() {
 			absPath, e := Abs(p)
 			if e != nil {
 				return e
@@ -115,7 +112,7 @@ func AllPaths(root string) (result []string, err error) {
 		return
 	}
 	result = []string{root}
-	err = Walk(root, func(p string, i os.FileInfo, e error) error {
+	err = Walk(root, func(p string, i *FileInfo, e error) error {
 		if e != nil {
 			return e
 		}
@@ -192,10 +189,13 @@ func TrimProtocol(target string) string {
 	return target
 }
 
+// WalkFunc works the same as the filepath.WalkFunc
+type WalkFunc func(path string, info *FileInfo, err error) error
+
 // Walk extends the filepath.Walk to allow for it to walk symlinks
-func Walk(root string, walkFn filepath.WalkFunc) (err error) {
-	var info os.FileInfo
-	if info, err = os.Lstat(root); err != nil {
+func Walk(root string, walkFn WalkFunc) (err error) {
+	var info *FileInfo
+	if info, err = Lstat(root); err != nil {
 		err = walkFn(root, nil, err)
 	} else {
 		err = walk(root, info, walkFn)
@@ -208,7 +208,7 @@ func Walk(root string, walkFn filepath.WalkFunc) (err error) {
 
 // walk supports the public Walk function to allow for recursively walking a tree
 // and following links unlike the filepath.Walk which doesn't follow links.
-func walk(root string, info os.FileInfo, walkFn filepath.WalkFunc) (err error) {
+func walk(root string, info *FileInfo, walkFn WalkFunc) (err error) {
 	if err = symlinkRecurse(root, info, walkFn); err != nil {
 		return
 	}
@@ -227,8 +227,8 @@ func walk(root string, info os.FileInfo, walkFn filepath.WalkFunc) (err error) {
 	}
 	for _, name := range names {
 		target := filepath.Join(root, name)
-		var targetInfo os.FileInfo
-		if targetInfo, err = os.Lstat(target); err != nil {
+		var targetInfo *FileInfo
+		if targetInfo, err = Lstat(target); err != nil {
 			if err = walkFn(target, targetInfo, err); err != nil && err != filepath.SkipDir {
 				return
 			}
@@ -244,8 +244,8 @@ func walk(root string, info os.FileInfo, walkFn filepath.WalkFunc) (err error) {
 }
 
 // recurse on symlinks for walk
-func symlinkRecurse(root string, info os.FileInfo, walkFn filepath.WalkFunc) (err error) {
-	if info.Mode()&os.ModeSymlink != 0 {
+func symlinkRecurse(root string, info *FileInfo, walkFn WalkFunc) (err error) {
+	if info.IsSymlink() {
 
 		// Evaluate the symlink to get the symlink's target
 		var target string
@@ -254,7 +254,7 @@ func symlinkRecurse(root string, info os.FileInfo, walkFn filepath.WalkFunc) (er
 		}
 
 		// Ensure that the target exists
-		if info, err = os.Lstat(target); err != nil {
+		if info, err = Lstat(target); err != nil {
 			return
 		}
 
