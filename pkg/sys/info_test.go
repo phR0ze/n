@@ -139,3 +139,32 @@ func TestIsSymlinkFile(t *testing.T) {
 	assert.False(t, IsSymlinkDir(symlink))
 	assert.True(t, IsSymlinkFile(symlink))
 }
+
+func TestSymlinkTarget(t *testing.T) {
+
+	// Symlink to a file
+	cleanTmpDir()
+	{
+		symlink := path.Join(tmpDir, "symlink")
+		os.Symlink(testfile, symlink)
+
+		info, _ := Lstat(symlink)
+		target, err := info.SymlinkTarget()
+		assert.Nil(t, err)
+		assert.Equal(t, "../../test/testfile", target)
+	}
+
+	// Symlink to a dir
+	cleanTmpDir()
+	{
+		dir := path.Join(tmpDir, "dir")
+		MkdirP(dir)
+		symlink := path.Join(tmpDir, "symlink")
+		os.Symlink(dir, symlink)
+
+		info, _ := Lstat(symlink)
+		target, err := info.SymlinkTarget()
+		assert.Nil(t, err)
+		assert.Equal(t, "../../test/temp/dir", target)
+	}
+}

@@ -1,6 +1,7 @@
 package sys
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -161,4 +162,17 @@ func IsSymlinkFile(src string) bool {
 		}
 	}
 	return false
+}
+
+// SymlinkTarget follows the symlink to get the path for the target
+func (info *FileInfo) SymlinkTarget() (target string, err error) {
+	if info.v.Mode()&os.ModeSymlink == 0 {
+		err = fmt.Errorf("not a symlink")
+		return
+	}
+	if target, err = filepath.EvalSymlinks(info.path); err != nil {
+		return
+	}
+	_, err = Lstat(target)
+	return
 }
