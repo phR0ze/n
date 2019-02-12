@@ -169,20 +169,24 @@ func IsLinux() (result bool) {
 
 // IsDir returns true if the given path is a directory
 func IsDir(src string) bool {
-	if target, err := Abs(src); err == nil {
-		if info, err := os.Stat(target); err == nil {
-			return info.IsDir()
-		}
+	if info, err := os.Lstat(src); err == nil {
+		return info.IsDir()
 	}
 	return false
 }
 
 // IsFile returns true if the given path is a file
 func IsFile(src string) bool {
-	if target, err := Abs(src); err == nil {
-		if info, err := os.Stat(target); err == nil {
-			return !info.IsDir()
-		}
+	if info, err := os.Lstat(src); err == nil {
+		return !info.IsDir()
+	}
+	return false
+}
+
+// IsSymlink returns true if the given path is a file
+func IsSymlink(src string) bool {
+	if info, err := os.Lstat(src); err == nil {
+		return info.Mode()&os.ModeSymlink != 0
 	}
 	return false
 }

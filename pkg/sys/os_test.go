@@ -106,6 +106,21 @@ func TestIsFile(t *testing.T) {
 	assert.False(t, IsFile("../.."))
 }
 
+func TestIsSymlink(t *testing.T) {
+	cleanTmpDir()
+
+	// Check a regular file
+	assert.False(t, IsSymlink(testfile))
+
+	// Create sysmlink
+	symlink := path.Join(tmpDir, "symlink")
+	os.Symlink(testfile, symlink)
+	assert.True(t, IsSymlink(symlink))
+
+	// Check that IsFile works
+	assert.True(t, IsFile(symlink))
+}
+
 func TestMD5(t *testing.T) {
 	if Exists(tmpfile) {
 		Remove(tmpfile)

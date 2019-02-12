@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -46,6 +47,7 @@ func Dirs(target string) (result []string) {
 			}
 		}
 	}
+
 	return
 }
 
@@ -88,7 +90,7 @@ func AllPaths(root string) (result []string, err error) {
 		return
 	}
 	result = []string{root}
-	err = filepath.Walk(root, func(p string, i os.FileInfo, e error) error {
+	err = Walk(root, func(p string, i os.FileInfo, e error) error {
 		if e != nil {
 			return e
 		}
@@ -163,4 +165,94 @@ func TrimProtocol(target string) string {
 	target = strings.TrimPrefix(target, "http://")
 	target = strings.TrimPrefix(target, "https://")
 	return target
+}
+
+// Walk extends the filepath.Walk to allow for it to walk symlinks
+func Walk(root string, walkFn filepath.WalkFunc) (err error) {
+	var info os.FileInfo
+	if info, err = os.Lstat(root); err != nil {
+		err = walkFn(root, nil, err)
+	} else {
+		err = walk(root, info, walkFn)
+	}
+	if err == filepath.SkipDir {
+		err = nil
+	}
+	return
+}
+
+// walk supports the public Walk function to allow for recursively walking a tree
+// and following links unlike the filepath.Walk which doesn't follow links.
+func walk(root string, info os.FileInfo, walkFn filepath.WalkFunc) (err error) {
+	if err = symlinkRecurse(root, info, walkFn); err != nil {
+		return
+	}
+
+	// Call user walkFn if we have a file
+	if !info.IsDir() {
+		return walkFn(root, info, err)
+	}
+
+	// Recurse on directories
+	var names []string
+	names, err = SortedPaths(root)
+	if e := walkFn(root, info, err); e != nil || err != nil {
+		err = e
+		return
+	}
+	for _, name := range names {
+		target := filepath.Join(root, name)
+		var targetInfo os.FileInfo
+		if targetInfo, err = os.Lstat(target); err != nil {
+			if err = walkFn(target, targetInfo, err); err != nil && err != filepath.SkipDir {
+				return
+			}
+		} else {
+			if err = walk(target, targetInfo, walkFn); err != nil {
+				if !targetInfo.IsDir() && (targetInfo.Mode()&os.ModeSymlink == 0) || err != filepath.SkipDir {
+					return
+				}
+			}
+		}
+	}
+	return
+}
+
+// recurse on symlinks for walk
+func symlinkRecurse(root string, info os.FileInfo, walkFn filepath.WalkFunc) (err error) {
+	if info.Mode()&os.ModeSymlink != 0 {
+
+		// Evaluate the symlink to get the symlink's target
+		var target string
+		if target, err = filepath.EvalSymlinks(root); err != nil {
+			return
+		}
+
+		// Ensure that the target exists
+		if info, err = os.Lstat(target); err != nil {
+			return
+		}
+
+		// Recurse on links to get to their target
+		if err = walk(target, info, walkFn); err != nil && err != filepath.SkipDir {
+			return
+		}
+	}
+
+	return
+}
+
+// SortedPaths returns a list of the given directory's path names sorted
+func SortedPaths(dir string) (names []string, err error) {
+	var f *os.File
+	if f, err = os.Open(dir); err != nil {
+		return
+	}
+	names, err = f.Readdirnames(-1)
+	f.Close()
+	if err != nil {
+		return
+	}
+	sort.Strings(names)
+	return
 }

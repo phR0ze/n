@@ -2,6 +2,7 @@ package sys
 
 import (
 	"fmt"
+	"os"
 	"path"
 	"strings"
 	"testing"
@@ -175,6 +176,37 @@ func TestAllPaths(t *testing.T) {
 		}
 		expected = append([]string{targetDir}, expected...)
 		paths, err := AllPaths(targetDir)
+		assert.Nil(t, err)
+		assert.Equal(t, expected, paths)
+	}
+	{
+		// Now create a link to a another directory in second
+		secondDir, _ := Abs(path.Join(tmpDir, "second"))
+
+		// Create third dir files
+		thirdDir := path.Join(tmpDir, "third")
+		thirdDir, err := Abs(thirdDir)
+		assert.Nil(t, err)
+		MkdirP(thirdDir)
+		expected := []string{secondDir}
+		for i := 0; i < 5; i++ {
+			target := path.Join(secondDir, fmt.Sprintf("%d", i))
+			expected = append(expected, target)
+		}
+		expected = append(expected, thirdDir)
+		for i := 0; i < 5; i++ {
+			target := path.Join(thirdDir, fmt.Sprintf("third-%d", i))
+			Touch(target)
+			expected = append(expected, target)
+		}
+		expected = append(expected, path.Join(secondDir, "third"))
+
+		// Create sysmlink in second dir to third dir
+		symlink := path.Join(tmpDir, "second", "third")
+		os.Symlink(thirdDir, symlink)
+
+		// Check the result
+		paths, err := AllPaths(secondDir)
 		assert.Nil(t, err)
 		assert.Equal(t, expected, paths)
 	}
