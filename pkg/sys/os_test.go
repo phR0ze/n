@@ -1,6 +1,7 @@
 package sys
 
 import (
+	"io/ioutil"
 	"os"
 	"path"
 	"testing"
@@ -166,6 +167,59 @@ func TestTouch(t *testing.T) {
 	assert.Nil(t, Touch(tmpfile))
 	assert.True(t, Exists(tmpfile))
 	assert.Nil(t, Touch(tmpfile))
+}
+
+func TestWriteFile(t *testing.T) {
+	cleanTmpDir()
+
+	// Read and write file
+	data, err := ioutil.ReadFile(testfile)
+	assert.Nil(t, err)
+	err = WriteFile(tmpfile, data)
+	assert.Nil(t, err)
+
+	// Test the resulting file
+	data2, err := ioutil.ReadFile(tmpfile)
+	assert.Nil(t, err)
+	assert.Equal(t, data, data2)
+}
+
+func TestWriteStream(t *testing.T) {
+	var expectedData []byte
+	expectedData, err := ioutil.ReadFile(testfile)
+	assert.Nil(t, err)
+
+	// No file exists
+	{
+		cleanTmpDir()
+
+		// Read and write file
+		reader, err := os.Open(testfile)
+		assert.Nil(t, err)
+		err = WriteStream(reader, tmpfile)
+		assert.Nil(t, err)
+
+		// Test the resulting file
+		var data []byte
+		data, err = ioutil.ReadFile(tmpfile)
+		assert.Nil(t, err)
+		assert.Equal(t, expectedData, data)
+	}
+
+	// Overwrite and truncate file
+	{
+		// Read and write file
+		reader, err := os.Open(testfile)
+		assert.Nil(t, err)
+		err = WriteStream(reader, tmpfile)
+		assert.Nil(t, err)
+
+		// Test the resulting file
+		var data []byte
+		data, err = ioutil.ReadFile(testfile)
+		assert.Nil(t, err)
+		assert.Equal(t, expectedData, data)
+	}
 }
 
 func TestWriteLines(t *testing.T) {

@@ -135,6 +135,11 @@ func CopyFile(src, dst string) (err error) {
 		return
 	}
 
+	// Sync to disk
+	if err = fout.Sync(); err != nil {
+		return
+	}
+
 	// Set permissions of dstPath same as srcPath
 	err = os.Chmod(dstPath, srcInfo.Mode())
 
@@ -288,11 +293,34 @@ func WriteFile(target string, data []byte, perms ...uint32) (err error) {
 		return
 	}
 
-	perm := uint32(0644)
+	perm := os.FileMode(0644)
 	if len(perms) > 0 {
-		perm = perms[0]
+		perm = os.FileMode(perms[0])
 	}
-	err = ioutil.WriteFile(target, data, os.FileMode(perm))
+	err = ioutil.WriteFile(target, data, perm)
+	return
+}
+
+// WriteStream reads from the io.Reader and writes to the given file using io.Copy
+// thus never filling memory i.e. streaming.  dest will be overwritten if it exists.
+func WriteStream(reader io.Reader, dest string, perms ...uint32) (err error) {
+	perm := os.FileMode(0644)
+	if len(perms) > 0 {
+		perm = os.FileMode(perms[0])
+	}
+
+	var writer *os.File
+	flags := os.O_CREATE | os.O_TRUNC | os.O_WRONLY
+	if writer, err = os.OpenFile(dest, flags, perm); err != nil {
+		return
+	}
+	defer writer.Close()
+
+	if _, err = io.Copy(writer, reader); err != nil {
+		return
+	}
+	err = writer.Sync()
+
 	return
 }
 
@@ -302,26 +330,28 @@ func WriteLines(target string, lines []string, perms ...uint32) (err error) {
 		return
 	}
 
-	perm := uint32(0644)
+	perm := os.FileMode(0644)
 	if len(perms) > 0 {
-		perm = perms[0]
+		perm = os.FileMode(perms[0])
 	}
 
-	var f *os.File
+	var writer *os.File
 	flags := os.O_CREATE | os.O_TRUNC | os.O_WRONLY
-	if f, err = os.OpenFile(target, flags, os.FileMode(perm)); err != nil {
+	if writer, err = os.OpenFile(target, flags, perm); err != nil {
 		return
 	}
-	defer f.Close()
+	defer writer.Close()
 
 	for i := range lines {
-		if _, err = f.WriteString(lines[i]); err != nil {
+		if _, err = writer.WriteString(lines[i]); err != nil {
 			return
 		}
-		if _, err = f.WriteString("\n"); err != nil {
+		if _, err = writer.WriteString("\n"); err != nil {
 			return
 		}
 	}
+	err = writer.Sync()
+
 	return
 }
 
