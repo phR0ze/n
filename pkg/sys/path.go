@@ -25,6 +25,15 @@ func Abs(target string) (result string, err error) {
 	return
 }
 
+// Base wraps the filepath.Base but doesn't default to . when empty
+func Base(src string) (result string) {
+	base := filepath.Base(src)
+	if base != "." {
+		result = base
+	}
+	return
+}
+
 // Home returns the absolute home directory for the current user
 func Home() (result string, err error) {
 	if result, err = homedir.Dir(); err == nil {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -45,6 +46,13 @@ func TestAbs(t *testing.T) {
 		fmt.Println(result)
 		assert.Equal(t, "/utils", result)
 	}
+}
+
+func TestBase(t *testing.T) {
+	assert.Equal(t, ".", filepath.Base(""))
+	assert.Equal(t, "", Base(""))
+	assert.Equal(t, "/", Base("/"))
+	assert.Equal(t, "foo", Base("/foo"))
 }
 
 func TestDirs(t *testing.T) {
