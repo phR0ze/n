@@ -17,8 +17,8 @@ const (
 	TiB      = Tebibyte
 )
 
-// ToBase2Bytes converts the given value in bytes to a human readable format
-func ToBase2Bytes(val int64) (result string) {
+// HumanBase2 converts the given value in bytes to a human readable format
+func HumanBase2(val int64) (result string) {
 	unit := "bytes"
 	value := float64(val)
 
