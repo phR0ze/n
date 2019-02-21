@@ -20,6 +20,7 @@ test: $(NAME)
 	go test $(PKGROOT)/pkg/cli
 	go test $(PKGROOT)/pkg/nerr
 	go test $(PKGROOT)/pkg/net
+	go test $(PKGROOT)/pkg/opt
 	go test $(PKGROOT)/pkg/sys
 	go test $(PKGROOT)/pkg/tar
 	go test $(PKGROOT)/pkg/term
