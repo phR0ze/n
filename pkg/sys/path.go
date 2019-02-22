@@ -249,63 +249,56 @@ func Walk(root string, walkFn WalkFunc, opts ...*opt.Opt) (err error) {
 // walk supports the public Walk function to allow for recursively walking a tree
 // and following links unlike the filepath.Walk which doesn't follow links.
 func walk(root string, info *FileInfo, walkFn WalkFunc, opts []*opt.Opt) (err error) {
-	if err = symlinkRecurse(root, info, walkFn, opts); err != nil {
+	target := root
+	targetInfo := info
+	targets := []string{}
+
+	// First thing pass whatever we've got on to user walkFn
+	if err = walkFn(root, info, err); err != nil {
 		return
 	}
 
-	// Call user walkFn if we have a file
-	if !info.IsDir() {
-		return walkFn(root, info, err)
-	}
-
-	// Recurse on directories
-	var names []string
-	names, err = SortedPaths(root)
-	if e := walkFn(root, info, err); e != nil || err != nil {
-		err = e
+	// Were done if it was a regular file or link and were not following
+	if info.IsFile() || (info.IsSymlink() && !followOpt(opts)) {
 		return
 	}
-	for _, name := range names {
-		target := filepath.Join(root, name)
-		var targetInfo *FileInfo
+
+	// Links and directories are similar in that they have other paths to deal with
+	if info.IsDir() {
+		var names []string
+		if names, err = SortedPaths(root); err == nil {
+			for _, name := range names {
+				target = filepath.Join(root, name)
+				targets = append(targets, target)
+			}
+		}
+	} else {
+		if target, err = filepath.EvalSymlinks(root); err == nil {
+			targets = append(targets, target)
+		}
+	}
+
+	// Return errors to the user walkFn, return error from user means skip else continue
+	if err != nil {
+		if err = walkFn(target, targetInfo, err); err != nil {
+			return
+		}
+	}
+
+	// Recurse on target paths
+	for _, target := range targets {
 		if targetInfo, err = Lstat(target); err != nil {
 			// Return errors to the user walkFn
-			if err = walkFn(target, targetInfo, err); err != nil && err != filepath.SkipDir {
+			if err = walkFn(target, targetInfo, err); err != nil {
 				return
 			}
 		} else {
 			// No error so recurse on the path
 			if err = walk(target, targetInfo, walkFn, opts); err != nil {
-				if !targetInfo.IsDir() && (targetInfo.Mode()&os.ModeSymlink == 0) || err != filepath.SkipDir {
-					return
-				}
+				return
 			}
 		}
 	}
-	return
-}
-
-// recurse on symlinks for walk
-func symlinkRecurse(root string, info *FileInfo, walkFn WalkFunc, opts []*opt.Opt) (err error) {
-	if info.IsSymlink() && followOpt(opts) {
-
-		// Evaluate the symlink to get the symlink's target
-		var target string
-		if target, err = filepath.EvalSymlinks(root); err != nil {
-			return
-		}
-
-		// Ensure that the target exists
-		if info, err = Lstat(target); err != nil {
-			return
-		}
-
-		// Recurse on links to get to their target
-		if err = walk(target, info, walkFn, opts); err != nil && err != filepath.SkipDir {
-			return
-		}
-	}
-
 	return
 }
 

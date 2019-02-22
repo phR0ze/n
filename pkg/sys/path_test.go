@@ -339,8 +339,8 @@ func TestAllPaths(t *testing.T) {
 		for i := range paths {
 			paths[i] = SlicePath(paths[i], -2, -1)
 		}
-		// order is different here because second/t0 actually resolves to third/t0 which is added then third/t0 is dropped to ensure distinctness
-		assert.Equal(t, []string{"temp/second", "second/s0", "second/s1", "third/t0", "second/t0", "temp/third", "third/t1", "second/third"}, paths)
+		// distinctness in enforced so t0 will only show up once which changes order a bit when following links
+		assert.Equal(t, []string{"temp/second", "second/s0", "second/s1", "second/t0", "third/t0", "second/third", "temp/third", "third/t1"}, paths)
 
 		// Don't follow links now
 		paths, err = AllPaths(secondDir, newFollowOpt(false))
