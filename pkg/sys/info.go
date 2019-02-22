@@ -154,7 +154,7 @@ func (info *FileInfo) SymlinkTarget() (target string, err error) {
 		err = fmt.Errorf("not a symlink")
 		return
 	}
-	if target, err = filepath.EvalSymlinks(info.path); err != nil {
+	if target, err = os.Readlink(info.path); err != nil {
 		return
 	}
 	return

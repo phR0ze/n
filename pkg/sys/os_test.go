@@ -14,7 +14,61 @@ var tmpfile = "../../test/temp/.tmp"
 var testfile = "../../test/testfile"
 var readme = "../../README.md"
 
-func TestCopyOutsideLinks(t *testing.T) {
+func TestCopyLinksRelativeNoFollow(t *testing.T) {
+	cleanTmpDir()
+
+	// temp/first/f0,f1
+	firstDir, _ := MkdirP(path.Join(tmpDir, "first"))
+	Touch(path.Join(firstDir, "f0"))
+	Touch(path.Join(firstDir, "f1"))
+
+	// temp/second/s0,s1
+	secondDir, _ := MkdirP(path.Join(tmpDir, "second"))
+	Touch(path.Join(secondDir, "s0"))
+	Touch(path.Join(secondDir, "s1"))
+
+	// Create sysmlink in first dir to second dir
+	// temp/first/second => temp/second
+	symlink := path.Join(tmpDir, "first", "second")
+	os.Symlink("../second", symlink)
+
+	// Copy first dir to dst without following links
+	{
+		beforeInfo, err := Lstat(secondDir)
+		assert.Nil(t, err)
+
+		dstDir, _ := Abs(path.Join(tmpDir, "dst"))
+		Copy(firstDir, dstDir)
+
+		// Compute results
+		results, _ := AllPaths(dstDir)
+		for i := 0; i < len(results); i++ {
+			results[i] = SlicePath(results[i], -2, -1)
+		}
+
+		// Check that second is a link same as it was originally
+		srcInfo, err := Lstat(path.Join(firstDir, "second"))
+		assert.Nil(t, err)
+		assert.True(t, srcInfo.IsSymlink())
+		dstInfo, err := Lstat(path.Join(dstDir, "second"))
+		assert.Nil(t, err)
+		assert.True(t, dstInfo.IsSymlink())
+		assert.Equal(t, srcInfo.Mode(), dstInfo.Mode())
+		srcTarget, _ := srcInfo.SymlinkTarget()
+		dstTarget, _ := dstInfo.SymlinkTarget()
+		assert.Equal(t, srcTarget, dstTarget)
+		assert.Equal(t, "../second", dstTarget)
+
+		// Compare expected to results
+		assert.Equal(t, []string{"temp/dst", "dst/f0", "dst/f1", "dst/second", "temp/second", "second/s0", "second/s1"}, results)
+
+		afterInfo, err := Lstat(secondDir)
+		assert.Nil(t, err)
+		assert.Equal(t, beforeInfo.Mode(), afterInfo.Mode())
+	}
+}
+
+func TestCopyLinksAbsNoFollow(t *testing.T) {
 	cleanTmpDir()
 
 	// temp/first/f0,f1
@@ -46,13 +100,18 @@ func TestCopyOutsideLinks(t *testing.T) {
 			results[i] = SlicePath(results[i], -2, -1)
 		}
 
-		// // Check that second is a link same as it was originally
-		// srcInfo, err := Lstat(path.Join(firstDir, "second"))
-		// assert.Nil(t, err)
-		// assert.True(t, srcInfo.IsSymlink())
-		// dstInfo, err := Lstat(path.Join(dstDir, "second"))
-		// assert.Nil(t, err)
-		// assert.True(t, dstInfo.IsSymlink())
+		// Check that second is a link same as it was originally
+		srcInfo, err := Lstat(path.Join(firstDir, "second"))
+		assert.Nil(t, err)
+		assert.True(t, srcInfo.IsSymlink())
+		dstInfo, err := Lstat(path.Join(dstDir, "second"))
+		assert.Nil(t, err)
+		assert.True(t, dstInfo.IsSymlink())
+		assert.Equal(t, srcInfo.Mode(), dstInfo.Mode())
+		srcTarget, _ := srcInfo.SymlinkTarget()
+		dstTarget, _ := dstInfo.SymlinkTarget()
+		assert.Equal(t, srcTarget, dstTarget)
+		assert.Equal(t, "test/temp/second", SlicePath(dstTarget, -3, -1))
 
 		// Compare expected to results
 		assert.Equal(t, []string{"temp/dst", "dst/f0", "dst/f1", "dst/second", "temp/second", "second/s0", "second/s1"}, results)
@@ -61,60 +120,6 @@ func TestCopyOutsideLinks(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, beforeInfo.Mode(), afterInfo.Mode())
 	}
-}
-
-func TestCopyInsideLinks(t *testing.T) {
-	cleanTmpDir()
-
-	// temp/first/f0,f1
-	firstDir, _ := MkdirP(path.Join(tmpDir, "first"))
-	Touch(path.Join(firstDir, "f0"))
-	Touch(path.Join(firstDir, "f1"))
-
-	// temp/first/second/s0,s1
-	secondDir, _ := MkdirP(path.Join(firstDir, "second"))
-	Touch(path.Join(secondDir, "s0"))
-	Touch(path.Join(secondDir, "s1"))
-
-	// temp/first/third/t0,t1
-	thirdDir, _ := MkdirP(path.Join(firstDir, "third"))
-	Touch(path.Join(thirdDir, "t0"))
-	Touch(path.Join(thirdDir, "t1"))
-
-	// Copy first dir to dst without links
-	// {
-	// 	dstDir, _ := Abs(path.Join(tmpDir, "dst"))
-	// 	Copy(firstDir, dstDir)
-
-	// 	// Test results using base names only
-	// 	results, _ := AllPaths(dstDir)
-	// 	for i := 0; i < len(results); i++ {
-	// 		results[i] = path.Base(results[i])
-	// 	}
-	// 	assert.Equal(t, []string{"dst", "f0", "f1", "second", "s0", "s1", "third", "t0", "t1"}, results)
-
-	// 	// Clean up
-	// 	RemoveAll(dstDir)
-	// 	assert.False(t, Exists(dstDir))
-	// }
-
-	// // Copy first dir to dst with links
-	// {
-	// 	// temp/first/second/t0 => temp/first/third/t0
-	// 	symlink := path.Join(secondDir, "t0")
-	// 	os.Symlink(path.Join(thirdDir, "t0"), symlink)
-
-	// 	// Copy including recreating relative links
-	// 	dstDir, _ := Abs(path.Join(tmpDir, "dst"))
-	// 	Copy(firstDir, dstDir)
-
-	// 	// Test results using base names only
-	// 	results, _ := AllPaths(dstDir)
-	// 	for i := 0; i < len(results); i++ {
-	// 		results[i] = path.Base(results[i])
-	// 	}
-	// 	assert.Equal(t, []string{"dst", "f0", "f1", "second", "s0", "s1", "third", "t0", "t1"}, results)
-	// }
 }
 
 func TestCopy(t *testing.T) {
