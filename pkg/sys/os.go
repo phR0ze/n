@@ -65,8 +65,12 @@ func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 			} else {
 				dstPath = path.Join(dstAbs, strings.TrimPrefix(srcPath, path.Dir(srcRoot)))
 			}
+			// fmt.Println(dstPath)
 
-			// Copy to destination
+			// // Copy to destination
+			// if info.IsSymlinkDir() {
+			// 	fmt.Println("yep")
+			// }
 			if info.IsDir() {
 				if e = os.MkdirAll(dstPath, info.Mode()); e != nil {
 					return e
@@ -209,15 +213,22 @@ func MD5(target string) (result string, err error) {
 }
 
 // MkdirP creates the target directory and any parent directories needed
-func MkdirP(target string, mode ...os.FileMode) (err error) {
-	if target, err = Abs(target); err != nil {
+// and returns the ABS path of the created directory
+func MkdirP(target string, perms ...uint32) (dir string, err error) {
+	if dir, err = Abs(target); err != nil {
 		return
 	}
 
-	if mode == nil || len(mode) == 0 {
-		return os.MkdirAll(target, 0755)
+	// Get/set default permission
+	perm := os.FileMode(0755)
+	if len(perms) > 0 {
+		perm = os.FileMode(perms[0])
 	}
-	return os.MkdirAll(target, mode[0])
+
+	// Create directory
+	err = os.MkdirAll(dir, perm)
+
+	return
 }
 
 // Move the src path to the dst path. If the dst already exists and is not a directory

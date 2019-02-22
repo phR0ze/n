@@ -88,7 +88,7 @@ func addPath(tw *tar.Writer, root, target string) (err error) {
 
 // ExtractAll files into given destination directory
 func ExtractAll(tarball, dest string) (err error) {
-	if err = sys.MkdirP(dest); err != nil {
+	if _, err = sys.MkdirP(dest); err != nil {
 		return
 	}
 
@@ -122,7 +122,7 @@ func ExtractAll(tarball, dest string) (err error) {
 		if header.Typeflag == tar.TypeDir {
 			dirPath := path.Join(dest, header.Name)
 			if _, exists := dirCache[dirPath]; !exists {
-				sys.MkdirP(dirPath, os.FileMode(header.Mode))
+				sys.MkdirP(dirPath, uint32(header.Mode))
 				dirCache[dirPath] = true
 			}
 		}
