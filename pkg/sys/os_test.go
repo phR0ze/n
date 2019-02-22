@@ -16,7 +16,7 @@ var tmpfile = "../../test/temp/.tmp"
 var testfile = "../../test/testfile"
 var readme = "../../README.md"
 
-func TestCopyFollowLinks(t *testing.T) {
+func TestCopyNoFollowLinks(t *testing.T) {
 	cleanTmpDir()
 	firstDir, _ := Abs(path.Join(tmpDir, "first"))
 	secondDir, _ := Abs(path.Join(tmpDir, "second"))
@@ -55,8 +55,6 @@ func TestCopyFollowLinks(t *testing.T) {
 
 	// Compare expected to results
 	assert.Equal(t, []string{"third", "f0", "f1", "f2", "f3", "f4", "second"}, results)
-
-	// Now delete third and copy following links
 }
 
 func TestCopy(t *testing.T) {
