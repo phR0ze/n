@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -20,12 +21,12 @@ import (
 // Handles globbing e.g. Copy("./*", "../")
 // The dst will be copied to if it is an existing directory.
 // The dst will be a clone of the src if it doesn't exist, but it's parent directory does.
-// Follows links by default but can be turned off with &Opt{"follow", false}
+// Doesn't follow links by default but can be turned on with &Opt{"follow", true}
 func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 	var sources []string
 
-	// Set following links by default
-	defaultFollowOpt(&opts, true)
+	// Set following links to off by default
+	defaultFollowOpt(&opts, false)
 
 	// Get Abs src and dst roots
 	var dstAbs, srcAbs string
@@ -41,14 +42,14 @@ func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 		return err
 	}
 
+	// Clone given src as dst vs copy into dst
+	clone := true
+	if IsDir(dstAbs) {
+		clone = false
+	}
+
 	// Copy all sources to dst
 	for _, srcRoot := range sources {
-
-		// Clone given src as dst vs copy into dst
-		clone := true
-		if IsDir(dstAbs) {
-			clone = false
-		}
 
 		// Walk over file structure
 		err = Walk(srcRoot, func(srcPath string, info *FileInfo, e error) error {
@@ -63,26 +64,16 @@ func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 			} else {
 				dstPath = path.Join(dstAbs, strings.TrimPrefix(srcPath, path.Dir(srcRoot)))
 			}
-			// fmt.Println(dstPath)
 
-			// // Handle links differently
-			// if info.IsSymlink() {
-			// 	fmt.Println(info.SymlinkTarget())
-			// }
-
-			// // Copy to destination
-			// if info.IsSymlinkDir() {
-			// 	fmt.Println("yep")
-			// }
 			if info.IsDir() {
 				if e = os.MkdirAll(dstPath, info.Mode()); e != nil {
 					return e
 				}
 			} else {
-				CopyFile(srcPath, dstPath)
+				CopyFile(srcPath, dstPath, newInfoOpt(info))
 			}
 			return nil
-		}, opts...)
+		}, newFollowOpt(false))
 	}
 	return
 }
@@ -90,17 +81,29 @@ func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 // CopyFile copies a single file from src to dst.
 // The dst will be copied to if it is an existing directory.
 // The dst will be a clone of the src if it doesn't exist, but it's parent directory does.
-func CopyFile(src, dst string) (err error) {
-	var srcInfo os.FileInfo
+// Doesn't follow links by default but can be turned on with &Opt{"follow", true}
+func CopyFile(src, dst string, opts ...*opt.Opt) (err error) {
+	var srcInfo *FileInfo
 	var srcPath, dstPath string
 
-	// Get absolute path of source
-	if srcPath, err = Abs(src); err != nil {
-		return
-	}
+	// Set following links to off by default
+	defaultFollowOpt(&opts, false)
 
 	// Check the source for issues
-	if srcInfo, err = os.Stat(src); err != nil {
+	if srcInfo = infoOpt(opts); srcInfo != nil {
+		srcPath = srcInfo.path
+	} else {
+		if srcInfo, err = Lstat(src); err != nil {
+			return
+		}
+		if srcPath, err = Abs(src); err != nil {
+			return
+		}
+	}
+
+	// Error out if not a regular file or symlink
+	if srcInfo.IsDir() {
+		err = fmt.Errorf("src target is not a regular file or a symlink to a file")
 		return
 	}
 
@@ -131,28 +134,39 @@ func CopyFile(src, dst string) (err error) {
 		return
 	}
 
-	// Open srcPath for reading
-	var fin *os.File
-	if fin, err = os.Open(srcPath); err != nil {
-		return
-	}
-	defer fin.Close()
+	// Handle links a bit differently
+	if srcInfo.IsSymlink() {
+		var target string
+		if target, err = srcInfo.SymlinkTarget(); err != nil {
+			return
+		}
+		if err = os.Symlink(target, dstPath); err != nil {
+			return
+		}
+	} else {
+		// Open srcPath for reading
+		var fin *os.File
+		if fin, err = os.Open(srcPath); err != nil {
+			return
+		}
+		defer fin.Close()
 
-	// Create dstPath for writing
-	var fout *os.File
-	if fout, err = os.Create(dstPath); err != nil {
-		return
-	}
-	defer fout.Close()
+		// Create dstPath for writing
+		var fout *os.File
+		if fout, err = os.Create(dstPath); err != nil {
+			return
+		}
+		defer fout.Close()
 
-	// Copy srcPath to dstPath
-	if _, err = io.Copy(fout, fin); err != nil {
-		return
-	}
+		// Copy srcPath to dstPath
+		if _, err = io.Copy(fout, fin); err != nil {
+			return
+		}
 
-	// Sync to disk
-	if err = fout.Sync(); err != nil {
-		return
+		// Sync to disk
+		if err = fout.Sync(); err != nil {
+			return
+		}
 	}
 
 	// Set permissions of dstPath same as srcPath

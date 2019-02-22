@@ -34,17 +34,32 @@ func TestCopyOutsideLinks(t *testing.T) {
 
 	// Copy first dir to dst without following links
 	{
+		beforeInfo, err := Lstat(secondDir)
+		assert.Nil(t, err)
+
 		dstDir, _ := Abs(path.Join(tmpDir, "dst"))
-		Copy(firstDir, dstDir, newFollowOpt(false))
+		Copy(firstDir, dstDir)
 
 		// Compute results
 		results, _ := AllPaths(dstDir)
 		for i := 0; i < len(results); i++ {
-			results[i] = path.Base(results[i])
+			results[i] = SlicePath(results[i], -2, -1)
 		}
 
+		// // Check that second is a link same as it was originally
+		// srcInfo, err := Lstat(path.Join(firstDir, "second"))
+		// assert.Nil(t, err)
+		// assert.True(t, srcInfo.IsSymlink())
+		// dstInfo, err := Lstat(path.Join(dstDir, "second"))
+		// assert.Nil(t, err)
+		// assert.True(t, dstInfo.IsSymlink())
+
 		// Compare expected to results
-		assert.Equal(t, []string{"dst", "f0", "f1", "second"}, results)
+		assert.Equal(t, []string{"temp/dst", "dst/f0", "dst/f1", "dst/second", "temp/second", "second/s0", "second/s1"}, results)
+
+		afterInfo, err := Lstat(secondDir)
+		assert.Nil(t, err)
+		assert.Equal(t, beforeInfo.Mode(), afterInfo.Mode())
 	}
 }
 
