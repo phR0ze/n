@@ -1,7 +1,6 @@
 package sys
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -58,35 +57,25 @@ var readme = "../../README.md"
 // }
 
 func TestCopyInsideLinks(t *testing.T) {
-	cleanTmpDir()
+	// cleanTmpDir()
 
-	firstDir, _ := Abs(path.Join(tmpDir, "first"))
-	MkdirP(firstDir)
+	// // temp/first/f0,f1
+	// firstDir, _ := MkdirP(path.Join(tmpDir, "first"))
+	// Touch(path.Join(firstDir, "f0"))
+	// Touch(path.Join(firstDir, "f1"))
 
-	secondDir, _ := Abs(path.Join(firstDir, "second"))
-	MkdirP(secondDir)
-
-	thirdDir, _ := Abs(path.Join(firstDir, "third"))
-	MkdirP(thirdDir)
-
-	// for i := 0; i < 2; i++ {
-	// 	target := path.Join(firstDir, fmt.Sprintf("f%d", i))
-	// 	Touch(target)
-	// }
-
-	// // Create second dir files
 	// // temp/second/s0,s1
-	// MkdirP(secondDir)
-	// for i := 0; i < 2; i++ {
-	// 	target := path.Join(secondDir, fmt.Sprintf("s%d", i))
-	// 	Touch(target)
-	// }
+	// secondDir, _ := MkdirP(path.Join(tmpDir, "second"))
+	// Touch(path.Join(secondDir, "s0"))
+	// Touch(path.Join(secondDir, "s1"))
 
 	// // Create sysmlink in first dir to second dir
+	// // temp/first/second => temp/second
 	// symlink := path.Join(tmpDir, "first", "second")
 	// os.Symlink(secondDir, symlink)
 
 	// // Copy first dir to third without following links
+	// thirdDir, _ := Abs(path.Join(tmpDir, "third"))
 	// Copy(firstDir, thirdDir, &opt.Opt{Key: "links", Val: false})
 
 	// // Compute results
@@ -98,36 +87,29 @@ func TestCopyInsideLinks(t *testing.T) {
 	// }
 
 	// // Compare expected to results
-	// assert.Equal(t, []string{"third", "f0", "f1", "f2", "f3", "f4", "second"}, results)
+	// assert.Equal(t, []string{"third", "f0", "f1", "second"}, results)
 }
 
 func TestCopyDontFollowOutsideLinks(t *testing.T) {
 	cleanTmpDir()
-	firstDir, _ := Abs(path.Join(tmpDir, "first"))
-	secondDir, _ := Abs(path.Join(tmpDir, "second"))
-	thirdDir, _ := Abs(path.Join(tmpDir, "third"))
 
-	// Create first directory
-	// temp/first/f0,f1,f2,f3,f4
-	MkdirP(firstDir)
-	for i := 0; i < 5; i++ {
-		target := path.Join(firstDir, fmt.Sprintf("f%d", i))
-		Touch(target)
-	}
+	// temp/first/f0,f1
+	firstDir, _ := MkdirP(path.Join(tmpDir, "first"))
+	Touch(path.Join(firstDir, "f0"))
+	Touch(path.Join(firstDir, "f1"))
 
-	// Create second dir files
-	// temp/second/s0,s1,s2,s3,s4
-	MkdirP(secondDir)
-	for i := 0; i < 5; i++ {
-		target := path.Join(secondDir, fmt.Sprintf("s%d", i))
-		Touch(target)
-	}
+	// temp/second/s0,s1
+	secondDir, _ := MkdirP(path.Join(tmpDir, "second"))
+	Touch(path.Join(secondDir, "s0"))
+	Touch(path.Join(secondDir, "s1"))
 
 	// Create sysmlink in first dir to second dir
+	// temp/first/second => temp/second
 	symlink := path.Join(tmpDir, "first", "second")
 	os.Symlink(secondDir, symlink)
 
 	// Copy first dir to third without following links
+	thirdDir, _ := Abs(path.Join(tmpDir, "third"))
 	Copy(firstDir, thirdDir, &opt.Opt{Key: "links", Val: false})
 
 	// Compute results
@@ -139,7 +121,7 @@ func TestCopyDontFollowOutsideLinks(t *testing.T) {
 	}
 
 	// Compare expected to results
-	assert.Equal(t, []string{"third", "f0", "f1", "f2", "f3", "f4", "second"}, results)
+	assert.Equal(t, []string{"third", "f0", "f1", "second"}, results)
 }
 
 func TestCopy(t *testing.T) {
