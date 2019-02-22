@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	homedir "github.com/mitchellh/go-homedir"
+	"github.com/phR0ze/n/pkg/opt"
 )
 
 // Abs gets the absolute path, taking into account homedir expansion
@@ -93,11 +94,19 @@ func Paths(target string) (result []string) {
 }
 
 // AllFiles returns a list of all files recursively for the given root path
-func AllFiles(root string) (result []string, err error) {
+// in a deterministic order. Follows links by default, but can be stopped
+// with &Opt{"links", false}
+func AllFiles(root string, opts ...*opt.Opt) (result []string, err error) {
 	result = []string{}
 	if root, err = Abs(root); err != nil {
 		return
 	}
+
+	// Set following links by default
+	if links := opt.Find(opts, "links"); links == nil {
+		opts = append(opts, &opt.Opt{Key: "links", Val: true})
+	}
+
 	err = Walk(root, func(p string, i *FileInfo, e error) error {
 		if e != nil {
 			return e
@@ -110,16 +119,23 @@ func AllFiles(root string) (result []string, err error) {
 			result = append(result, absPath)
 		}
 		return nil
-	})
+	}, opts...)
 	return
 }
 
 // AllPaths returns a list of all paths recursively for the given root path
-// in a deterministic order including the root path as first entry
-func AllPaths(root string) (result []string, err error) {
+// in a deterministic order including the root path as first entry.
+// Follows links by default, but can be stopped with &Opt{"links", false}
+func AllPaths(root string, opts ...*opt.Opt) (result []string, err error) {
 	if root, err = Abs(root); err != nil {
 		return
 	}
+
+	// Set following links by default
+	if links := opt.Find(opts, "links"); links == nil {
+		opts = append(opts, &opt.Opt{Key: "links", Val: true})
+	}
+
 	result = []string{root}
 	err = Walk(root, func(p string, i *FileInfo, e error) error {
 		if e != nil {
@@ -133,7 +149,7 @@ func AllPaths(root string) (result []string, err error) {
 			result = append(result, absPath)
 		}
 		return nil
-	})
+	}, opts...)
 	return
 }
 
@@ -202,12 +218,19 @@ func TrimProtocol(target string) string {
 type WalkFunc func(path string, info *FileInfo, err error) error
 
 // Walk extends the filepath.Walk to allow for it to walk symlinks
-func Walk(root string, walkFn WalkFunc) (err error) {
+// by default but can be turned off with &Opt{"links", false}
+func Walk(root string, walkFn WalkFunc, opts ...*opt.Opt) (err error) {
+
+	// Set following links by default
+	if links := opt.Find(opts, "links"); links == nil {
+		opts = append(opts, &opt.Opt{Key: "links", Val: true})
+	}
+
 	var info *FileInfo
 	if info, err = Lstat(root); err != nil {
 		err = walkFn(root, nil, err)
 	} else {
-		err = walk(root, info, walkFn)
+		err = walk(root, info, walkFn, opts)
 	}
 	if err == filepath.SkipDir {
 		err = nil
@@ -217,8 +240,8 @@ func Walk(root string, walkFn WalkFunc) (err error) {
 
 // walk supports the public Walk function to allow for recursively walking a tree
 // and following links unlike the filepath.Walk which doesn't follow links.
-func walk(root string, info *FileInfo, walkFn WalkFunc) (err error) {
-	if err = symlinkRecurse(root, info, walkFn); err != nil {
+func walk(root string, info *FileInfo, walkFn WalkFunc, opts []*opt.Opt) (err error) {
+	if err = symlinkRecurse(root, info, walkFn, opts); err != nil {
 		return
 	}
 
@@ -242,7 +265,7 @@ func walk(root string, info *FileInfo, walkFn WalkFunc) (err error) {
 				return
 			}
 		} else {
-			if err = walk(target, targetInfo, walkFn); err != nil {
+			if err = walk(target, targetInfo, walkFn, opts); err != nil {
 				if !targetInfo.IsDir() && (targetInfo.Mode()&os.ModeSymlink == 0) || err != filepath.SkipDir {
 					return
 				}
@@ -253,8 +276,8 @@ func walk(root string, info *FileInfo, walkFn WalkFunc) (err error) {
 }
 
 // recurse on symlinks for walk
-func symlinkRecurse(root string, info *FileInfo, walkFn WalkFunc) (err error) {
-	if info.IsSymlink() {
+func symlinkRecurse(root string, info *FileInfo, walkFn WalkFunc, opts []*opt.Opt) (err error) {
+	if info.IsSymlink() && len(opts) > 0 && opts[0].Key == "links" && (opts[0].Val.(bool)) {
 
 		// Evaluate the symlink to get the symlink's target
 		var target string
@@ -268,7 +291,7 @@ func symlinkRecurse(root string, info *FileInfo, walkFn WalkFunc) (err error) {
 		}
 
 		// Recurse on links to get to their target
-		if err = walk(target, info, walkFn); err != nil && err != filepath.SkipDir {
+		if err = walk(target, info, walkFn, opts); err != nil && err != filepath.SkipDir {
 			return
 		}
 	}

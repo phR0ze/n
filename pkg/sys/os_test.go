@@ -1,6 +1,7 @@
 package sys
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -13,6 +14,50 @@ var tmpDir = "../../test/temp"
 var tmpfile = "../../test/temp/.tmp"
 var testfile = "../../test/testfile"
 var readme = "../../README.md"
+
+func TestCopyFollowLinks(t *testing.T) {
+	cleanTmpDir()
+
+	// Create first directory
+	// temp/first/f0,f1,f2,f3,f4
+	firstDir, _ := Abs(path.Join(tmpDir, "first"))
+	MkdirP(firstDir)
+	for i := 0; i < 5; i++ {
+		target := path.Join(firstDir, fmt.Sprintf("f%d", i))
+		Touch(target)
+	}
+
+	// Create second dir files
+	// temp/second/s0,s1,s2,s3,s4
+	secondDir, _ := Abs(path.Join(tmpDir, "second"))
+	MkdirP(secondDir)
+	for i := 0; i < 5; i++ {
+		target := path.Join(secondDir, fmt.Sprintf("s%d", i))
+		Touch(target)
+	}
+
+	// Create sysmlink in first dir to second dir
+	symlink := path.Join(tmpDir, "first", "second")
+	os.Symlink(secondDir, symlink)
+
+	// Get all the paths following symlinks
+	paths, err := AllPaths(firstDir)
+	assert.Nil(t, err)
+
+	assert.Equal(t, []string{}, paths)
+
+	// // Compute results using filepath.Walk
+	// paths2, err := filepathWalkAllPaths(secondDir)
+	// assert.Nil(t, err)
+
+	// // Compare AllFiles to filepathWalkAllFiles
+	// assert.Equal(t, paths, paths2)
+
+	// // Now ensure that links are followed
+	// paths, err = AllPaths(secondDir)
+	// assert.Nil(t, err)
+	// assert.Equal(t, expected, paths)
+}
 
 func TestCopy(t *testing.T) {
 	{

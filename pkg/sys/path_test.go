@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/phR0ze/n/pkg/opt"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -155,6 +156,9 @@ func TestHome(t *testing.T) {
 
 func TestAllFiles(t *testing.T) {
 	cleanTmpDir()
+
+	// Single dir of files - No links
+	// temp/first/0,1,2,3,4,5,6,7,8,9
 	{
 		targetDir := path.Join(tmpDir, "first")
 		targetDir, err := Abs(targetDir)
@@ -170,6 +174,9 @@ func TestAllFiles(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, expected, paths)
 	}
+
+	// Single dir of files - No links
+	// temp/second/0,1,2,3,4
 	{
 		targetDir := path.Join(tmpDir, "second")
 		targetDir, err := Abs(targetDir)
@@ -185,8 +192,10 @@ func TestAllFiles(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, expected, paths)
 	}
+
+	// Now create a link to a another directory in second
+	// temp/second/0,1,2,3,4,third/third-0,third-1,third-2,third-3,third-4
 	{
-		// Now create a link to a another directory in second
 		secondDir, _ := Abs(path.Join(tmpDir, "second"))
 
 		// Create third dir files
@@ -209,8 +218,22 @@ func TestAllFiles(t *testing.T) {
 		symlink := path.Join(tmpDir, "second", "third")
 		os.Symlink(thirdDir, symlink)
 
-		// Check the result
-		paths, err := AllFiles(secondDir)
+		// Compute results using AllFiles
+		paths, err := AllFiles(secondDir, &opt.Opt{Key: "links", Val: false})
+		assert.Nil(t, err)
+
+		// Compute results using filepath.Walk
+		paths2, err := filepathWalkAllFiles(secondDir)
+		assert.Nil(t, err)
+
+		// filepath.Walk doesn't exclude symlinks to dirs
+		paths = append(paths, paths2[len(paths2)-1])
+
+		// Compare AllFiles to filepathWalkAllFiles
+		assert.Equal(t, paths, paths2)
+
+		// Now ensure that links are followed
+		paths, err = AllFiles(secondDir)
 		assert.Nil(t, err)
 		assert.Equal(t, expected, paths)
 	}
@@ -276,8 +299,19 @@ func TestAllPaths(t *testing.T) {
 		symlink := path.Join(tmpDir, "second", "third")
 		os.Symlink(thirdDir, symlink)
 
-		// Check the result
-		paths, err := AllPaths(secondDir)
+		// Compute results using AllFiles
+		paths, err := AllPaths(secondDir, &opt.Opt{Key: "links", Val: false})
+		assert.Nil(t, err)
+
+		// Compute results using filepath.Walk
+		paths2, err := filepathWalkAllPaths(secondDir)
+		assert.Nil(t, err)
+
+		// Compare AllFiles to filepathWalkAllFiles
+		assert.Equal(t, paths, paths2)
+
+		// Now ensure that links are followed
+		paths, err = AllPaths(secondDir)
 		assert.Nil(t, err)
 		assert.Equal(t, expected, paths)
 	}
@@ -333,5 +367,47 @@ func pathContainsHome(path string) (result bool) {
 			return
 		}
 	}
+	return
+}
+
+func filepathWalkAllFiles(root string) (result []string, err error) {
+	result = []string{}
+	if root, err = Abs(root); err != nil {
+		return
+	}
+	err = filepath.Walk(root, func(p string, i os.FileInfo, e error) error {
+		if e != nil {
+			return e
+		}
+		if p != root && p != "." && p != ".." && !i.IsDir() {
+			absPath, e := Abs(p)
+			if e != nil {
+				return e
+			}
+			result = append(result, absPath)
+		}
+		return nil
+	})
+	return
+}
+
+func filepathWalkAllPaths(root string) (result []string, err error) {
+	if root, err = Abs(root); err != nil {
+		return
+	}
+	result = []string{root}
+	err = filepath.Walk(root, func(p string, i os.FileInfo, e error) error {
+		if e != nil {
+			return e
+		}
+		if p != root && p != "." && p != ".." {
+			absPath, e := Abs(p)
+			if e != nil {
+				return e
+			}
+			result = append(result, absPath)
+		}
+		return nil
+	})
 	return
 }

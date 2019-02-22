@@ -7,3 +7,13 @@ type Opt struct {
 	Key string      // name of the option
 	Val interface{} // value of the option
 }
+
+// Find an option by the given key
+func Find(opts []*Opt, key string) *Opt {
+	for _, opt := range opts {
+		if opt.Key == key {
+			return opt
+		}
+	}
+	return nil
+}

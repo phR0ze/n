@@ -12,14 +12,22 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/phR0ze/n/pkg/opt"
 )
 
 // Copy copies src to dst recursively.
 // Handles globbing e.g. Copy("./*", "../")
 // The dst will be copied to if it is an existing directory.
 // The dst will be a clone of the src if it doesn't exist, but it's parent directory does.
-func Copy(src, dst string) (err error) {
+// Follows links by default but can be turned off with &Opt{"links", false}
+func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 	var sources []string
+
+	// Set following links by default
+	if links := opt.Find(opts, "links"); links == nil {
+		opts = append(opts, &opt.Opt{Key: "links", Val: true})
+	}
 
 	// Get Abs src and dst roots
 	var dstAbs, srcAbs string
@@ -45,7 +53,7 @@ func Copy(src, dst string) (err error) {
 		}
 
 		// Walk over file structure
-		err = filepath.Walk(srcRoot, func(srcPath string, info os.FileInfo, e error) error {
+		err = Walk(srcRoot, func(srcPath string, info *FileInfo, e error) error {
 			if e != nil {
 				return e
 			}
