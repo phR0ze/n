@@ -167,10 +167,10 @@ func CopyFile(src, dst string, opts ...*opt.Opt) (err error) {
 		if err = fout.Sync(); err != nil {
 			return
 		}
-	}
 
-	// Set permissions of dstPath same as srcPath
-	err = os.Chmod(dstPath, srcInfo.Mode())
+		// Set permissions of dstPath same as srcPath
+		err = os.Chmod(dstPath, srcInfo.Mode())
+	}
 
 	return
 }
