@@ -8,7 +8,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/phR0ze/n/pkg/opt"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -154,19 +153,46 @@ func TestHome(t *testing.T) {
 	assert.True(t, pathContainsHome(result))
 }
 
+func TestAllFilesWithFileLink(t *testing.T) {
+	cleanTmpDir()
+
+	// temp/first/f0,f1
+	firstDir, _ := MkdirP(path.Join(tmpDir, "first"))
+	Touch(path.Join(firstDir, "f0"))
+	Touch(path.Join(firstDir, "f1"))
+
+	// temp/first/second/s0,s1
+	secondDir, _ := MkdirP(path.Join(firstDir, "second"))
+	Touch(path.Join(secondDir, "s0"))
+	Touch(path.Join(secondDir, "s1"))
+
+	// temp/first/third/t0,t1
+	thirdDir, _ := MkdirP(path.Join(firstDir, "third"))
+	Touch(path.Join(thirdDir, "t0"))
+	Touch(path.Join(thirdDir, "t1"))
+
+	// temp/first/second/t0 => temp/first/third/t0
+	symlink := path.Join(secondDir, "t0")
+	os.Symlink(path.Join(thirdDir, "t0"), symlink)
+
+	// Test results using base names only
+	results, _ := AllFiles(firstDir)
+	for i := 0; i < len(results); i++ {
+		results[i] = SlicePath(results[i], -2, -1)
+	}
+	//assert.Equal(t, []string{"first/f0", "first/f1", "second/s0", "second/s1", "second/t0", "third/t0", "third/t1"}, results)
+}
+
 func TestAllFiles(t *testing.T) {
 	cleanTmpDir()
 
 	// Single dir of files - No links
-	// temp/first/0,1,2,3,4,5,6,7,8,9
+	// temp/first/f0,f1
 	{
-		targetDir := path.Join(tmpDir, "first")
-		targetDir, err := Abs(targetDir)
-		assert.Nil(t, err)
+		targetDir, _ := MkdirP(path.Join(tmpDir, "first"))
 		expected := []string{}
-		MkdirP(targetDir)
-		for i := 0; i < 10; i++ {
-			target := path.Join(targetDir, fmt.Sprintf("%d", i))
+		for i := 0; i < 2; i++ {
+			target := path.Join(targetDir, fmt.Sprintf("f%d", i))
 			Touch(target)
 			expected = append(expected, target)
 		}
@@ -176,15 +202,12 @@ func TestAllFiles(t *testing.T) {
 	}
 
 	// Single dir of files - No links
-	// temp/second/0,1,2,3,4
+	// temp/second/s0,s1
 	{
-		targetDir := path.Join(tmpDir, "second")
-		targetDir, err := Abs(targetDir)
-		assert.Nil(t, err)
+		targetDir, _ := MkdirP(path.Join(tmpDir, "second"))
 		expected := []string{}
-		MkdirP(targetDir)
-		for i := 0; i < 5; i++ {
-			target := path.Join(targetDir, fmt.Sprintf("%d", i))
+		for i := 0; i < 2; i++ {
+			target := path.Join(targetDir, fmt.Sprintf("s%d", i))
 			Touch(target)
 			expected = append(expected, target)
 		}
@@ -194,22 +217,20 @@ func TestAllFiles(t *testing.T) {
 	}
 
 	// Now create a link to a another directory in second
-	// temp/second/0,1,2,3,4,third/third-0,third-1,third-2,third-3,third-4
+	// temp/third/t0,t1
+	// temp/second/s0,s1,third => temp/third, t0
 	{
 		secondDir, _ := Abs(path.Join(tmpDir, "second"))
 
 		// Create third dir files
-		thirdDir := path.Join(tmpDir, "third")
-		thirdDir, err := Abs(thirdDir)
-		assert.Nil(t, err)
-		MkdirP(thirdDir)
+		thirdDir, _ := MkdirP(path.Join(tmpDir, "third"))
 		expected := []string{}
-		for i := 0; i < 5; i++ {
-			target := path.Join(secondDir, fmt.Sprintf("%d", i))
+		for i := 0; i < 2; i++ {
+			target := path.Join(secondDir, fmt.Sprintf("s%d", i))
 			expected = append(expected, target)
 		}
-		for i := 0; i < 5; i++ {
-			target := path.Join(thirdDir, fmt.Sprintf("third-%d", i))
+		for i := 0; i < 2; i++ {
+			target := path.Join(thirdDir, fmt.Sprintf("t%d", i))
 			Touch(target)
 			expected = append(expected, target)
 		}
@@ -218,37 +239,49 @@ func TestAllFiles(t *testing.T) {
 		symlink := path.Join(tmpDir, "second", "third")
 		os.Symlink(thirdDir, symlink)
 
+		// Create sysmlink in second dir to third dir file third-0
+		symlink = path.Join(tmpDir, "second", "t0")
+		os.Symlink(path.Join(thirdDir, "t0"), symlink)
+
 		// Compute results using AllFiles
-		paths, err := AllFiles(secondDir, &opt.Opt{Key: "links", Val: false})
+		paths, err := AllFiles(secondDir, newFollowOpt(false))
 		assert.Nil(t, err)
+		for i := range paths {
+			paths[i] = SlicePath(paths[i], -2, -1)
+		}
+		// as both second/t0 and second/third are links they should be excluded
+		assert.Equal(t, []string{"second/s0", "second/s1"}, paths)
 
 		// Compute results using filepath.Walk
 		paths2, err := filepathWalkAllFiles(secondDir)
+		for i := range paths2 {
+			paths2[i] = SlicePath(paths2[i], -2, -1)
+		}
 		assert.Nil(t, err)
-
-		// filepath.Walk doesn't exclude symlinks to dirs
-		paths = append(paths, paths2[len(paths2)-1])
-
-		// Compare AllFiles to filepathWalkAllFiles
-		assert.Equal(t, paths, paths2)
+		// filepath.Walk doesn't exclude symlinks
+		assert.Equal(t, []string{"second/s0", "second/s1", "second/t0", "second/third"}, paths2)
 
 		// Now ensure that links are followed
 		paths, err = AllFiles(secondDir)
 		assert.Nil(t, err)
-		assert.Equal(t, expected, paths)
+		for i := range paths {
+			paths[i] = SlicePath(paths[i], -2, -1)
+		}
+		// second/t0 is a link that will resolve to third/t0 so when third/t0 is walked it is dropped
+		assert.Equal(t, []string{"second/s0", "second/s1", "third/t0", "third/t1"}, paths)
 	}
 }
 
 func TestAllPaths(t *testing.T) {
 	cleanTmpDir()
+
+	// Single dir no links
+	// temp/first/f0,f1
 	{
-		targetDir := path.Join(tmpDir, "first")
-		targetDir, err := Abs(targetDir)
-		assert.Nil(t, err)
+		targetDir, _ := MkdirP(path.Join(tmpDir, "first"))
 		expected := []string{}
-		MkdirP(targetDir)
-		for i := 0; i < 10; i++ {
-			target := path.Join(targetDir, fmt.Sprintf("%d", i))
+		for i := 0; i < 2; i++ {
+			target := path.Join(targetDir, fmt.Sprintf("f%d", i))
 			Touch(target)
 			expected = append(expected, target)
 		}
@@ -257,14 +290,14 @@ func TestAllPaths(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, expected, paths)
 	}
+
+	// Second dir no links
+	// temp/second/s0,s1
 	{
-		targetDir := path.Join(tmpDir, "second")
-		targetDir, err := Abs(targetDir)
-		assert.Nil(t, err)
+		targetDir, _ := MkdirP(path.Join(tmpDir, "second"))
 		expected := []string{}
-		MkdirP(targetDir)
-		for i := 0; i < 5; i++ {
-			target := path.Join(targetDir, fmt.Sprintf("%d", i))
+		for i := 0; i < 2; i++ {
+			target := path.Join(targetDir, fmt.Sprintf("s%d", i))
 			Touch(target)
 			expected = append(expected, target)
 		}
@@ -273,47 +306,49 @@ func TestAllPaths(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, expected, paths)
 	}
+
+	// Now create a link to a another directory in second
+	// temp/second/s0,s1,third => third/t0,t1
 	{
-		// Now create a link to a another directory in second
 		secondDir, _ := Abs(path.Join(tmpDir, "second"))
 
 		// Create third dir files
-		thirdDir := path.Join(tmpDir, "third")
-		thirdDir, err := Abs(thirdDir)
-		assert.Nil(t, err)
-		MkdirP(thirdDir)
-		expected := []string{secondDir}
-		for i := 0; i < 5; i++ {
-			target := path.Join(secondDir, fmt.Sprintf("%d", i))
-			expected = append(expected, target)
-		}
-		expected = append(expected, thirdDir)
-		for i := 0; i < 5; i++ {
-			target := path.Join(thirdDir, fmt.Sprintf("third-%d", i))
+		thirdDir, _ := MkdirP(path.Join(tmpDir, "third"))
+		for i := 0; i < 2; i++ {
+			target := path.Join(thirdDir, fmt.Sprintf("t%d", i))
 			Touch(target)
-			expected = append(expected, target)
 		}
-		expected = append(expected, path.Join(secondDir, "third"))
+
+		// Test before links
+		paths, err := AllPaths(secondDir)
+		assert.Nil(t, err)
+		for i := range paths {
+			paths[i] = SlicePath(paths[i], -2, -1)
+		}
+		assert.Equal(t, []string{"temp/second", "second/s0", "second/s1"}, paths)
 
 		// Create sysmlink in second dir to third dir
 		symlink := path.Join(tmpDir, "second", "third")
 		os.Symlink(thirdDir, symlink)
+		symlink = path.Join(tmpDir, "second", "t0")
+		os.Symlink(path.Join(thirdDir, "t0"), symlink)
 
-		// Compute results using AllFiles
-		paths, err := AllPaths(secondDir, &opt.Opt{Key: "links", Val: false})
-		assert.Nil(t, err)
-
-		// Compute results using filepath.Walk
-		paths2, err := filepathWalkAllPaths(secondDir)
-		assert.Nil(t, err)
-
-		// Compare AllFiles to filepathWalkAllFiles
-		assert.Equal(t, paths, paths2)
-
-		// Now ensure that links are followed
+		// Test after links
 		paths, err = AllPaths(secondDir)
 		assert.Nil(t, err)
-		assert.Equal(t, expected, paths)
+		for i := range paths {
+			paths[i] = SlicePath(paths[i], -2, -1)
+		}
+		// order is different here because second/t0 actually resolves to third/t0 which is added then third/t0 is dropped to ensure distinctness
+		assert.Equal(t, []string{"temp/second", "second/s0", "second/s1", "third/t0", "second/t0", "temp/third", "third/t1", "second/third"}, paths)
+
+		// Don't follow links now
+		paths, err = AllPaths(secondDir, newFollowOpt(false))
+		assert.Nil(t, err)
+		for i := range paths {
+			paths[i] = SlicePath(paths[i], -2, -1)
+		}
+		assert.Equal(t, []string{"temp/second", "second/s0", "second/s1", "second/t0", "second/third"}, paths)
 	}
 }
 

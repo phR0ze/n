@@ -80,13 +80,13 @@ func IsDir(src string) bool {
 
 // IsFile returns true if the info is a file
 func (info *FileInfo) IsFile() bool {
-	return !info.v.IsDir()
+	return !info.v.IsDir() && info.v.Mode()&os.ModeSymlink == 0
 }
 
 // IsFile returns true if the given path is a file
 func IsFile(src string) bool {
 	if info, err := os.Lstat(src); err == nil {
-		return !info.IsDir()
+		return !info.IsDir() && info.Mode()&os.ModeSymlink == 0
 	}
 	return false
 }
@@ -126,7 +126,7 @@ func IsSymlinkDir(src string) bool {
 	return false
 }
 
-// IsSymlinkFile returns true if the symlink's target is a directory
+// IsSymlinkFile returns true if the symlink's target is a file
 func (info *FileInfo) IsSymlinkFile() bool {
 	if info.v.Mode()&os.ModeSymlink != 0 {
 		if target, err := filepath.EvalSymlinks(info.path); err == nil {

@@ -20,14 +20,12 @@ import (
 // Handles globbing e.g. Copy("./*", "../")
 // The dst will be copied to if it is an existing directory.
 // The dst will be a clone of the src if it doesn't exist, but it's parent directory does.
-// Follows links by default but can be turned off with &Opt{"links", false}
+// Follows links by default but can be turned off with &Opt{"follow", false}
 func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 	var sources []string
 
 	// Set following links by default
-	if links := opt.Find(opts, "links"); links == nil {
-		opts = append(opts, &opt.Opt{Key: "links", Val: true})
-	}
+	defaultFollowOpt(&opts, true)
 
 	// Get Abs src and dst roots
 	var dstAbs, srcAbs string
@@ -66,6 +64,11 @@ func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 				dstPath = path.Join(dstAbs, strings.TrimPrefix(srcPath, path.Dir(srcRoot)))
 			}
 			// fmt.Println(dstPath)
+
+			// // Handle links differently
+			// if info.IsSymlink() {
+			// 	fmt.Println(info.SymlinkTarget())
+			// }
 
 			// // Copy to destination
 			// if info.IsSymlinkDir() {
@@ -271,7 +274,7 @@ func Remove(target string) error {
 	return os.Remove(target)
 }
 
-// RemoveAll remotes the target path and any children it contains.
+// RemoveAll removes the target path and any children it contains.
 // It removes everything it can but returns the first error it encounters.
 // If the target path does not exist nil is returned
 func RemoveAll(target string) error {
@@ -288,6 +291,12 @@ func Size(src string) (result int64) {
 		}
 	}
 	return
+}
+
+// Symlink creates newname as a symbolic link to oldname. If there is an error,
+// it will be of type *LinkError. newname is created as ???
+func Symlink(oldname, newname string) error {
+	return os.Symlink(oldname, newname)
 }
 
 // Touch creates an empty text file similar to the linux touch command

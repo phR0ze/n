@@ -73,6 +73,7 @@ func TestIsSymlink(t *testing.T) {
 	{
 		// Check a regular file
 		assert.False(t, IsSymlink(testfile))
+		assert.True(t, IsFile(testfile))
 
 		// Create sysmlink
 		symlink := path.Join(tmpDir, "symlink")
@@ -80,7 +81,7 @@ func TestIsSymlink(t *testing.T) {
 		assert.True(t, IsSymlink(symlink))
 
 		// Check that IsFile works
-		assert.True(t, IsFile(symlink))
+		assert.False(t, IsFile(symlink))
 	}
 
 	// FileInfo
@@ -89,16 +90,17 @@ func TestIsSymlink(t *testing.T) {
 		info, err := Lstat(testfile)
 		assert.Nil(t, err)
 		assert.False(t, info.IsSymlink())
+		assert.True(t, info.IsFile())
 
 		// Create sysmlink
 		symlink := path.Join(tmpDir, "symlink")
 		os.Symlink(testfile, symlink)
 		info, err = Lstat(symlink)
 		assert.Nil(t, err)
-		assert.True(t, info.IsSymlink())
 
 		// Check that IsFile works
-		assert.True(t, info.IsFile())
+		assert.True(t, info.IsSymlink())
+		assert.False(t, info.IsFile())
 	}
 }
 

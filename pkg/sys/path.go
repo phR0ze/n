@@ -95,28 +95,33 @@ func Paths(target string) (result []string) {
 
 // AllFiles returns a list of all files recursively for the given root path
 // in a deterministic order. Follows links by default, but can be stopped
-// with &Opt{"links", false}
+// with &Opt{"follow", false}. Paths are distinct.
 func AllFiles(root string, opts ...*opt.Opt) (result []string, err error) {
-	result = []string{}
+	distinct := map[string]bool{}
 	if root, err = Abs(root); err != nil {
 		return
 	}
 
 	// Set following links by default
-	if links := opt.Find(opts, "links"); links == nil {
-		opts = append(opts, &opt.Opt{Key: "links", Val: true})
-	}
+	defaultFollowOpt(&opts, true)
 
 	err = Walk(root, func(p string, i *FileInfo, e error) error {
 		if e != nil {
 			return e
 		}
-		if p != root && p != "." && p != ".." && !i.IsDir() && !i.IsSymlinkDir() {
+		// IsFile will ignore both directories and links to files/dirs when not following.
+		// When followOpt is set then Walk will return followed files.
+		if p != root && p != "." && p != ".." && i.IsFile() {
 			absPath, e := Abs(p)
 			if e != nil {
 				return e
 			}
-			result = append(result, absPath)
+
+			// Ensure file paths are distinct
+			if _, exists := distinct[absPath]; !exists {
+				distinct[absPath] = true
+				result = append(result, absPath)
+			}
 		}
 		return nil
 	}, opts...)
@@ -125,16 +130,16 @@ func AllFiles(root string, opts ...*opt.Opt) (result []string, err error) {
 
 // AllPaths returns a list of all paths recursively for the given root path
 // in a deterministic order including the root path as first entry.
-// Follows links by default, but can be stopped with &Opt{"links", false}
+// Follows links by default, but can be stopped with &Opt{"follow", false}.
+// Paths are distinct.
 func AllPaths(root string, opts ...*opt.Opt) (result []string, err error) {
+	distinct := map[string]bool{}
 	if root, err = Abs(root); err != nil {
 		return
 	}
 
 	// Set following links by default
-	if links := opt.Find(opts, "links"); links == nil {
-		opts = append(opts, &opt.Opt{Key: "links", Val: true})
-	}
+	defaultFollowOpt(&opts, true)
 
 	result = []string{root}
 	err = Walk(root, func(p string, i *FileInfo, e error) error {
@@ -146,7 +151,12 @@ func AllPaths(root string, opts ...*opt.Opt) (result []string, err error) {
 			if e != nil {
 				return e
 			}
-			result = append(result, absPath)
+
+			// Ensure paths are distinct
+			if _, exists := distinct[absPath]; !exists {
+				distinct[absPath] = true
+				result = append(result, absPath)
+			}
 		}
 		return nil
 	}, opts...)
@@ -218,13 +228,11 @@ func TrimProtocol(target string) string {
 type WalkFunc func(path string, info *FileInfo, err error) error
 
 // Walk extends the filepath.Walk to allow for it to walk symlinks
-// by default but can be turned off with &Opt{"links", false}
+// by default but can be turned off with &Opt{"follow", false}
 func Walk(root string, walkFn WalkFunc, opts ...*opt.Opt) (err error) {
 
 	// Set following links by default
-	if links := opt.Find(opts, "links"); links == nil {
-		opts = append(opts, &opt.Opt{Key: "links", Val: true})
-	}
+	defaultFollowOpt(&opts, true)
 
 	var info *FileInfo
 	if info, err = Lstat(root); err != nil {
@@ -261,10 +269,12 @@ func walk(root string, info *FileInfo, walkFn WalkFunc, opts []*opt.Opt) (err er
 		target := filepath.Join(root, name)
 		var targetInfo *FileInfo
 		if targetInfo, err = Lstat(target); err != nil {
+			// Return errors to the user walkFn
 			if err = walkFn(target, targetInfo, err); err != nil && err != filepath.SkipDir {
 				return
 			}
 		} else {
+			// No error so recurse on the path
 			if err = walk(target, targetInfo, walkFn, opts); err != nil {
 				if !targetInfo.IsDir() && (targetInfo.Mode()&os.ModeSymlink == 0) || err != filepath.SkipDir {
 					return
@@ -277,7 +287,7 @@ func walk(root string, info *FileInfo, walkFn WalkFunc, opts []*opt.Opt) (err er
 
 // recurse on symlinks for walk
 func symlinkRecurse(root string, info *FileInfo, walkFn WalkFunc, opts []*opt.Opt) (err error) {
-	if info.IsSymlink() && len(opts) > 0 && opts[0].Key == "links" && (opts[0].Val.(bool)) {
+	if info.IsSymlink() && followOpt(opts) {
 
 		// Evaluate the symlink to get the symlink's target
 		var target string
