@@ -75,7 +75,7 @@ func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 				CopyFile(srcPath, dstPath)
 			}
 			return nil
-		})
+		}, opts...)
 	}
 	return
 }

@@ -7,6 +7,7 @@ import (
 	"path"
 	"testing"
 
+	"github.com/phR0ze/n/pkg/opt"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,10 +18,12 @@ var readme = "../../README.md"
 
 func TestCopyFollowLinks(t *testing.T) {
 	cleanTmpDir()
+	firstDir, _ := Abs(path.Join(tmpDir, "first"))
+	secondDir, _ := Abs(path.Join(tmpDir, "second"))
+	thirdDir, _ := Abs(path.Join(tmpDir, "third"))
 
 	// Create first directory
 	// temp/first/f0,f1,f2,f3,f4
-	firstDir, _ := Abs(path.Join(tmpDir, "first"))
 	MkdirP(firstDir)
 	for i := 0; i < 5; i++ {
 		target := path.Join(firstDir, fmt.Sprintf("f%d", i))
@@ -29,7 +32,6 @@ func TestCopyFollowLinks(t *testing.T) {
 
 	// Create second dir files
 	// temp/second/s0,s1,s2,s3,s4
-	secondDir, _ := Abs(path.Join(tmpDir, "second"))
 	MkdirP(secondDir)
 	for i := 0; i < 5; i++ {
 		target := path.Join(secondDir, fmt.Sprintf("s%d", i))
@@ -40,23 +42,21 @@ func TestCopyFollowLinks(t *testing.T) {
 	symlink := path.Join(tmpDir, "first", "second")
 	os.Symlink(secondDir, symlink)
 
-	// Get all the paths following symlinks
-	paths, err := AllPaths(firstDir)
+	// Copy first dir to third without following links
+	Copy(firstDir, thirdDir, &opt.Opt{Key: "links", Val: false})
+
+	// Compute results
+	paths, err := AllPaths(thirdDir)
 	assert.Nil(t, err)
+	results := []string{}
+	for _, target := range paths {
+		results = append(results, path.Base(target))
+	}
 
-	assert.Equal(t, []string{}, paths)
+	// Compare expected to results
+	assert.Equal(t, []string{"third", "f0", "f1", "f2", "f3", "f4", "second"}, results)
 
-	// // Compute results using filepath.Walk
-	// paths2, err := filepathWalkAllPaths(secondDir)
-	// assert.Nil(t, err)
-
-	// // Compare AllFiles to filepathWalkAllFiles
-	// assert.Equal(t, paths, paths2)
-
-	// // Now ensure that links are followed
-	// paths, err = AllPaths(secondDir)
-	// assert.Nil(t, err)
-	// assert.Equal(t, expected, paths)
+	// Now delete third and copy following links
 }
 
 func TestCopy(t *testing.T) {
