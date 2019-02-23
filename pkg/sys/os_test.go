@@ -271,10 +271,16 @@ func TestSize(t *testing.T) {
 
 func TestTouch(t *testing.T) {
 	cleanTmpDir()
+
+	// Doesn't exist so create
 	assert.False(t, Exists(tmpfile))
-	assert.Nil(t, Touch(tmpfile))
+	_, err := Touch(tmpfile)
+	assert.Nil(t, err)
 	assert.True(t, Exists(tmpfile))
-	assert.Nil(t, Touch(tmpfile))
+
+	// Truncate and re-create it
+	_, err = Touch(tmpfile)
+	assert.Nil(t, err)
 }
 
 func TestWriteFile(t *testing.T) {

@@ -314,13 +314,13 @@ func Symlink(oldname, newname string) error {
 }
 
 // Touch creates an empty text file similar to the linux touch command
-func Touch(target string) (err error) {
-	if target, err = Abs(target); err != nil {
+func Touch(target string) (path string, err error) {
+	if path, err = Abs(target); err != nil {
 		return
 	}
 
 	var f *os.File
-	if f, err = os.Create(target); !os.IsExist(err) {
+	if f, err = os.Create(path); !os.IsExist(err) {
 		return
 	}
 	if err == nil {
