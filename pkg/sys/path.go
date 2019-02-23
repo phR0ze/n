@@ -266,7 +266,7 @@ func walk(root string, info *FileInfo, walkFn WalkFunc, opts []*opt.Opt) (err er
 	// Links and directories are similar in that they have other paths to deal with
 	if info.IsDir() {
 		var names []string
-		if names, err = SortedPaths(root); err == nil {
+		if names, err = ReadDir(root); err == nil {
 			for _, name := range names {
 				target = filepath.Join(root, name)
 				targets = append(targets, target)
@@ -302,10 +302,11 @@ func walk(root string, info *FileInfo, walkFn WalkFunc, opts []*opt.Opt) (err er
 	return
 }
 
-// SortedPaths returns a list of the given directory's path names sorted
-func SortedPaths(dir string) (names []string, err error) {
+// ReadDir reads the directory named by dirname and returns
+// a list of directory entries sorted by filename.
+func ReadDir(dirname string) (names []string, err error) {
 	var f *os.File
-	if f, err = os.Open(dir); err != nil {
+	if f, err = os.Open(dirname); err != nil {
 		return
 	}
 	names, err = f.Readdirnames(-1)
