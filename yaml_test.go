@@ -59,7 +59,7 @@ func TestYaml(t *testing.T) {
 
 		q := Q(data)
 		assert.True(t, q.Any())
-		assert.Equal(t, expected, q.Yaml("1").M())
+		assert.Equal(t, expected, getM(t, q.Yaml("1")))
 	}
 	{
 		// Get map from map from map
@@ -72,7 +72,7 @@ func TestYaml(t *testing.T) {
 
 		q := Q(data)
 		assert.True(t, q.Any())
-		assert.Equal(t, expected, q.Yaml("1.2").M())
+		assert.Equal(t, expected, getM(t, q.Yaml("1.2")))
 	}
 	{
 		// Get slice from map
@@ -102,7 +102,7 @@ func TestYamlWithKeyIndexing(t *testing.T) {
 
 		q := Q(data)
 		assert.True(t, q.Any())
-		assert.Equal(t, expected, q.Yaml("foo.[name:2]").M())
+		assert.Equal(t, expected, getM(t, q.Yaml("foo.[name:2]")))
 	}
 	{
 		// Bad key
@@ -184,27 +184,27 @@ func TestYamlWithSliceIndexing(t *testing.T) {
 		assert.True(t, q.Any())
 		{
 			expected := map[string]interface{}{"name": 1.0}
-			assert.Equal(t, expected, q.Yaml("foo.[0]").M())
+			assert.Equal(t, expected, getM(t, q.Yaml("foo.[0]")))
 		}
 		{
 			expected := map[string]interface{}{"name": 2.0}
-			assert.Equal(t, expected, q.Yaml("foo.[1]").M())
+			assert.Equal(t, expected, getM(t, q.Yaml("foo.[1]")))
 		}
 		{
 			expected := map[string]interface{}{"name": 3.0}
-			assert.Equal(t, expected, q.Yaml("foo.[2]").M())
+			assert.Equal(t, expected, getM(t, q.Yaml("foo.[2]")))
 		}
 		{
 			expected := map[string]interface{}{"name": 3.0}
-			assert.Equal(t, expected, q.Yaml("foo.[-1]").M())
+			assert.Equal(t, expected, getM(t, q.Yaml("foo.[-1]")))
 		}
 		{
 			expected := map[string]interface{}{"name": 2.0}
-			assert.Equal(t, expected, q.Yaml("foo.[-2]").M())
+			assert.Equal(t, expected, getM(t, q.Yaml("foo.[-2]")))
 		}
 		{
 			expected := map[string]interface{}{"name": 1.0}
-			assert.Equal(t, expected, q.Yaml("foo.[-3]").M())
+			assert.Equal(t, expected, getM(t, q.Yaml("foo.[-3]")))
 		}
 	}
 	{
@@ -216,8 +216,8 @@ func TestYamlWithSliceIndexing(t *testing.T) {
 		q := Q(data)
 		assert.True(t, q.Any())
 		expected := map[string]interface{}{"name": 3.0}
-		assert.Equal(t, expected, q.Yaml("foo.[0]").M())
-		assert.Equal(t, expected, q.Yaml("foo.[-1]").M())
+		assert.Equal(t, expected, getM(t, q.Yaml("foo.[0]")))
+		assert.Equal(t, expected, getM(t, q.Yaml("foo.[-1]")))
 	}
 	{
 		// Select first element when only one
@@ -228,8 +228,8 @@ func TestYamlWithSliceIndexing(t *testing.T) {
 		q := Q(data)
 		assert.True(t, q.Any())
 		expected := map[string]interface{}{"name": 3.0}
-		assert.Equal(t, expected, q.Yaml("foo.[0]").M())
-		assert.Equal(t, expected, q.Yaml("foo.[-1]").M())
+		assert.Equal(t, expected, getM(t, q.Yaml("foo.[0]")))
+		assert.Equal(t, expected, getM(t, q.Yaml("foo.[-1]")))
 	}
 	{
 		// Continue keying in after slice: one
@@ -264,14 +264,14 @@ func TestYamlMergeMaps(t *testing.T) {
 		expected := map[string]interface{}{}
 		result, err := q.YamlMerge(map[string]interface{}{})
 		assert.Nil(t, err)
-		assert.Equal(t, expected, result.M())
+		assert.Equal(t, expected, getM(t, result))
 	}
 	{
 		q := Q(map[string]interface{}{"1": "one"})
 		expected := map[string]interface{}{"1": "one"}
 		result, err := q.YamlMerge(map[string]interface{}{})
 		assert.Nil(t, err)
-		assert.Equal(t, expected, result.M())
+		assert.Equal(t, expected, getM(t, result))
 	}
 	{
 		q := Q(map[string]interface{}{
@@ -283,7 +283,7 @@ func TestYamlMergeMaps(t *testing.T) {
 			assert.Nil(t, err)
 			expected := map[string]interface{}{
 				"1": "one", "2": "two", "3": "four"}
-			assert.Equal(t, expected, result.M())
+			assert.Equal(t, expected, getM(t, result))
 		}
 		{
 			// Modify 3
@@ -291,7 +291,7 @@ func TestYamlMergeMaps(t *testing.T) {
 			assert.Nil(t, err)
 			expected := map[string]interface{}{
 				"1": "one", "2": "two", "3": "three"}
-			assert.Equal(t, expected, result.M())
+			assert.Equal(t, expected, getM(t, result))
 		}
 		{
 			// Add 4
@@ -299,7 +299,7 @@ func TestYamlMergeMaps(t *testing.T) {
 			assert.Nil(t, err)
 			expected := map[string]interface{}{
 				"1": "one", "2": "two", "3": "three", "4": "four"}
-			assert.Equal(t, expected, result.M())
+			assert.Equal(t, expected, getM(t, result))
 		}
 	}
 }
@@ -345,7 +345,7 @@ func TestYamlSetInsertRoot(t *testing.T) {
 			"line1": map[string]interface{}{"line2": "foo"},
 			"spec":  map[string]interface{}{"template": map[string]interface{}{"spec": "initContainers"}},
 		}
-		assert.Equal(t, expected, inserted.M())
+		assert.Equal(t, expected, getM(t, inserted))
 	}
 }
 
@@ -379,7 +379,7 @@ func TestYamlSetInsertNested(t *testing.T) {
 				map[string]interface{}{"name": "bar", "image": "busybox:1.25.0", "imagePullPolicy": "Always"},
 			},
 		}}}}
-	assert.Equal(t, expected, inserted.M())
+	assert.Equal(t, expected, getM(t, inserted))
 }
 
 func TestYamlSetInsertByIndex(t *testing.T) {
@@ -407,7 +407,7 @@ func TestYamlSetInsertByIndex(t *testing.T) {
 				map[string]interface{}{"name": "bar", "image": "bar:1.2.3"},
 			},
 		}}}}
-	assert.Equal(t, expected, inserted.M())
+	assert.Equal(t, expected, getM(t, inserted))
 }
 
 func TestYamlSetOverrideByIndex(t *testing.T) {
@@ -434,7 +434,7 @@ func TestYamlSetOverrideByIndex(t *testing.T) {
 				map[string]interface{}{"name": "bar", "image": "bar:1.2.3"},
 			},
 		}}}}
-	assert.Equal(t, expected, inserted.M())
+	assert.Equal(t, expected, getM(t, inserted))
 }
 
 func TestYamlSetOverrideByName(t *testing.T) {
@@ -461,7 +461,7 @@ func TestYamlSetOverrideByName(t *testing.T) {
 				map[string]interface{}{"name": "bar", "image": "bar:1.2.3"},
 			},
 		}}}}
-	assert.Equal(t, expected, inserted.M())
+	assert.Equal(t, expected, getM(t, inserted))
 }
 
 func TestYamlSetUpdateListByIndex(t *testing.T) {
@@ -487,7 +487,7 @@ func TestYamlSetUpdateListByIndex(t *testing.T) {
 				map[string]interface{}{"name": "foo", "image": "foobar:1.2.3"},
 			},
 		}}}}
-	assert.Equal(t, expected, inserted.M())
+	assert.Equal(t, expected, getM(t, inserted))
 }
 
 func TestYamlSetUpdateListItemByName(t *testing.T) {
@@ -513,7 +513,7 @@ func TestYamlSetUpdateListItemByName(t *testing.T) {
 				map[string]interface{}{"name": "foo", "image": "foobar:1.2.3"},
 			},
 		}}}}
-	assert.Equal(t, expected, inserted.M())
+	assert.Equal(t, expected, getM(t, inserted))
 }
 
 func TestYamlSetDeepNesting(t *testing.T) {
@@ -546,7 +546,7 @@ func TestYamlSetDeepNesting(t *testing.T) {
 				}},
 			},
 		}}}}
-	assert.Equal(t, expected, inserted.M())
+	assert.Equal(t, expected, getM(t, inserted))
 }
 
 func TestYamlSetInsertIndexAtBegining(t *testing.T) {
@@ -575,7 +575,7 @@ func TestYamlSetInsertIndexAtBegining(t *testing.T) {
 				}},
 			},
 		}}}}
-	assert.Equal(t, expected, inserted.M())
+	assert.Equal(t, expected, getM(t, inserted))
 }
 
 func TestYamlSetInsertIndexMiddle(t *testing.T) {
@@ -607,7 +607,7 @@ func TestYamlSetInsertIndexMiddle(t *testing.T) {
 				}},
 			},
 		}}}}
-	assert.Equal(t, expected, inserted.M())
+	assert.Equal(t, expected, getM(t, inserted))
 }
 
 func TestYamlSetInsertAtName(t *testing.T) {
@@ -639,7 +639,7 @@ func TestYamlSetInsertAtName(t *testing.T) {
 				}},
 			},
 		}}}}
-	assert.Equal(t, expected, inserted.M())
+	assert.Equal(t, expected, getM(t, inserted))
 }
 
 func TestYamlSetCreatePath(t *testing.T) {
@@ -652,7 +652,7 @@ func TestYamlSetCreatePath(t *testing.T) {
 				map[string]interface{}{"name": "bar"},
 			},
 		}}}}
-	assert.Equal(t, expected, inserted.M())
+	assert.Equal(t, expected, getM(t, inserted))
 }
 
 func TestYamlSetNilMap(t *testing.T) {
@@ -665,7 +665,7 @@ func TestYamlSetNilMap(t *testing.T) {
 				map[string]interface{}{"name": "bar"},
 			},
 		}}}}
-	assert.Equal(t, expected, inserted.M())
+	assert.Equal(t, expected, getM(t, inserted))
 }
 
 func TestYamlSetNilSlice(t *testing.T) {

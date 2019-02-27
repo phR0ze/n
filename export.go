@@ -74,7 +74,7 @@ func (q *Queryable) Ints() (result []int, err error) {
 }
 
 // M exports queryable into a map
-func (q *Queryable) M() (result map[string]interface{}) {
+func (q *Queryable) M() (result map[string]interface{}, err error) {
 	result = map[string]interface{}{}
 	if q != nil && !q.Nil() {
 		if v, ok := q.O().(map[string]interface{}); ok {
@@ -84,11 +84,14 @@ func (q *Queryable) M() (result map[string]interface{}) {
 			for x, ok := next(); ok; x, ok = next() {
 				if pair, ok := x.(KeyVal); ok {
 					result[fmt.Sprint(pair.Key)] = pair.Val
+				} else {
+					err = fmt.Errorf("not a key value pair type")
+					return
 				}
 			}
 		}
 	}
-	return result
+	return
 }
 
 // O exports queryable into a interface{}
@@ -100,15 +103,15 @@ func (q *Queryable) O() interface{} {
 }
 
 // Strs exports queryable into an string slice
-func (q *Queryable) Strs() []string {
-	result := []string{}
+func (q *Queryable) Strs() (result []string) {
+	result = []string{}
 	if q != nil && !q.Nil() && q.TypeSlice() {
 		next := q.Iter()
 		for x, ok := next(); ok; x, ok = next() {
 			result = append(result, fmt.Sprint(x))
 		}
 	}
-	return result
+	return
 }
 
 // AAMap exports queryable into an string to string map

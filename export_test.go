@@ -81,24 +81,24 @@ func TestM(t *testing.T) {
 		assert.True(t, q.Any())
 
 		// Key exists
-		assert.Equal(t, map[string]interface{}{"bar": true}, q.Yaml("foo").M())
+		assert.Equal(t, map[string]interface{}{"bar": true}, getM(t, q.Yaml("foo")))
 
 		// Key doesn't exist
-		assert.Equal(t, map[string]interface{}{}, q.Yaml("bar").M())
+		assert.Equal(t, map[string]interface{}{}, getM(t, q.Yaml("bar")))
 	}
 	{
 		// Convert with simple cast
 		data := map[string]interface{}{"1": "one", "2": "two", "3": "three"}
 		q := Q(data)
 		assert.Equal(t, 3, q.Len())
-		assert.Equal(t, data, q.M())
+		assert.Equal(t, data, getM(t, q))
 	}
 	{
 		// Convert list of KeyVal into a map
 		q := Q([]string{"foo=bar"})
-		m := q.Map(func(x O) O {
+		m := getM(t, q.Map(func(x O) O {
 			return A(x.(string)).Split("=").YamlKeyVal()
-		}).M()
+		}))
 		assert.Equal(t, map[string]interface{}{"foo": "bar"}, m)
 	}
 }
@@ -278,6 +278,12 @@ func getI(t *testing.T, q *Queryable) int {
 
 func getInts(t *testing.T, q *Queryable) []int {
 	result, err := q.Ints()
+	assert.Nil(t, err)
+	return result
+}
+
+func getM(t *testing.T, q *Queryable) map[string]interface{} {
+	result, err := q.M()
 	assert.Nil(t, err)
 	return result
 }

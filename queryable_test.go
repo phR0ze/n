@@ -693,16 +693,16 @@ func TestCopy(t *testing.T) {
 			assert.False(t, q.Any())
 			data := map[string]interface{}{"1": "one"}
 			assert.True(t, q.Copy(data).Any())
-			assert.Equal(t, data, q.M())
+			assert.Equal(t, data, getM(t, q))
 		}
 		{
 			data1 := map[string]interface{}{"1": "one"}
 			data2 := map[string]interface{}{"1": "two"}
 			q := Q(data1)
 			assert.True(t, q.Any())
-			assert.Equal(t, data1, q.M())
+			assert.Equal(t, data1, getM(t, q))
 			assert.True(t, q.Copy(data2).Any())
-			assert.Equal(t, data2, q.M())
+			assert.Equal(t, data2, getM(t, q))
 		}
 	}
 	{
@@ -1057,9 +1057,9 @@ func TestMap(t *testing.T) {
 	{
 		// Get Yaml values from slice of key=value strings
 		q := Q([]string{"foo=bar"})
-		m := q.Map(func(x O) O {
+		m := getM(t, q.Map(func(x O) O {
 			return A(x.(string)).Split("=").YamlKeyVal()
-		}).M()
+		}))
 		assert.Equal(t, map[string]interface{}{"foo": "bar"}, m)
 	}
 	{
@@ -1153,11 +1153,11 @@ func TestMapSliceToMap(t *testing.T) {
 	{
 		// Building on the preceding tests now we will turn this into a map
 		q := Q([]string{"k1=v1,k2=v2"})
-		result := q.MapF(func(x O) O {
+		result := getM(t, q.MapF(func(x O) O {
 			return A(x.(string)).Split(",").Map(func(y string) O {
 				return A(y).Split("=").YamlKeyVal()
 			})
-		}).M()
+		}))
 		assert.Equal(t, map[string]interface{}{"k1": "v1", "k2": "v2"}, result)
 	}
 }
