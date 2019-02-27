@@ -81,6 +81,15 @@ func TestUint32BE(t *testing.T) {
 	assert.Equal(t, uint32(83886080), Uint32BE(data))
 }
 
+func TestUint64BE(t *testing.T) {
+
+	// Data in BigEndian format
+	data := []byte{0, 0, 0, 0, 238, 211, 146, 159}
+
+	assert.Equal(t, uint64(4006843039), Uint64BE(data))
+	assert.Equal(t, uint64(4006843039), Uint64BE(data))
+}
+
 func TestMediaTime32BE(t *testing.T) {
 	// Data in media time BigEndian format
 	data := []byte{0xce, 0x18, 0x72, 0x18}
