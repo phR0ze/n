@@ -117,8 +117,8 @@ func TestQI(t *testing.T) {
 		assert.Equal(t, q, q2)
 		assert.Equal(t, 2, q.Len())
 		assert.Equal(t, 2, q2.Len())
-		assert.Equal(t, 5, q.At(0).I())
-		assert.Equal(t, 2, q.At(1).I())
+		assert.Equal(t, 5, getI(t, q.At(0)))
+		assert.Equal(t, 2, getI(t, q.At(1)))
 	}
 	{
 		// Pointers
@@ -203,7 +203,7 @@ func TestQS(t *testing.T) {
 		assert.Equal(t, 1, q2.Len())
 		assert.True(t, q2.Any())
 		assert.Equal(t, q, q2)
-		assert.Equal(t, 2, q.At(0).I())
+		assert.Equal(t, 2, getI(t, q.At(0)))
 	}
 	{
 		q := Q([]interface{}{})
@@ -449,18 +449,18 @@ func TestAt(t *testing.T) {
 	{
 		// Single item case
 		assert.Equal(t, "t", Q("t").At(-1).A())
-		assert.Equal(t, 3, Q([]int{3}).At(-1).I())
+		assert.Equal(t, 3, getI(t, Q([]int{3}).At(-1)))
 	}
 	{
 		// []int
 		q := Q([]int{1, 2, 3, 4})
-		assert.Equal(t, 4, q.At(-1).I())
-		assert.Equal(t, 3, q.At(-2).I())
-		assert.Equal(t, 2, q.At(-3).I())
-		assert.Equal(t, 1, q.At(0).I())
-		assert.Equal(t, 2, q.At(1).I())
-		assert.Equal(t, 3, q.At(2).I())
-		assert.Equal(t, 4, q.At(3).I())
+		assert.Equal(t, 4, getI(t, q.At(-1)))
+		assert.Equal(t, 3, getI(t, q.At(-2)))
+		assert.Equal(t, 2, getI(t, q.At(-3)))
+		assert.Equal(t, 1, getI(t, q.At(0)))
+		assert.Equal(t, 2, getI(t, q.At(1)))
+		assert.Equal(t, 3, getI(t, q.At(2)))
+		assert.Equal(t, 4, getI(t, q.At(3)))
 	}
 }
 
@@ -843,7 +843,7 @@ func TestFind(t *testing.T) {
 }
 
 func TestFirst(t *testing.T) {
-	assert.Equal(t, 1, Q([]int{1, 2, 3}).First().I())
+	assert.Equal(t, 1, getI(t, Q([]int{1, 2, 3}).First()))
 	assert.Equal(t, "1", Q([]string{"1", "2", "3"}).First().A())
 	assert.Equal(t, N(), Q([]string{}).First())
 }
@@ -882,27 +882,27 @@ func TestInsert(t *testing.T) {
 	{
 		q := Q([]int{1, 2})
 		q.Insert(0, 3)
-		assert.Equal(t, []int{3, 1, 2}, q.Ints())
+		assert.Equal(t, []int{3, 1, 2}, getInts(t, q))
 	}
 	{
 		q := Q([]int{1, 2})
 		q.Insert(1, 3)
-		assert.Equal(t, []int{1, 3, 2}, q.Ints())
+		assert.Equal(t, []int{1, 3, 2}, getInts(t, q))
 	}
 	{
 		q := Q([]int{1, 2})
 		q.Insert(0, 4, 3)
-		assert.Equal(t, []int{4, 3, 1, 2}, q.Ints())
+		assert.Equal(t, []int{4, 3, 1, 2}, getInts(t, q))
 	}
 	{
 		q := Q([]int{1, 2})
 		q.Insert(-1, 4, 3)
-		assert.Equal(t, []int{1, 4, 3, 2}, q.Ints())
+		assert.Equal(t, []int{1, 4, 3, 2}, getInts(t, q))
 	}
 	{
 		q := Q([]int{1, 2})
 		q.Insert(2, 4, 3)
-		assert.Equal(t, []int{1, 2, 4, 3}, q.Ints())
+		assert.Equal(t, []int{1, 2, 4, 3}, getInts(t, q))
 	}
 }
 
@@ -958,7 +958,7 @@ func TestJoin(t *testing.T) {
 }
 
 func TestLast(t *testing.T) {
-	assert.Equal(t, 3, Q([]int{1, 2, 3}).Last().I())
+	assert.Equal(t, 3, getI(t, Q([]int{1, 2, 3}).Last()))
 	assert.Equal(t, "3", Q([]string{"1", "2", "3"}).Last().A())
 	assert.Equal(t, N(), Q([]string{}).Last())
 }
@@ -1217,9 +1217,9 @@ func TestSelect(t *testing.T) {
 func TestSet(t *testing.T) {
 	{
 		q := Q([]int{1, 2, 3})
-		assert.Equal(t, []int{1, 2, 3}, q.Ints())
+		assert.Equal(t, []int{1, 2, 3}, getInts(t, q))
 		q.Set(1, 5)
-		assert.Equal(t, []int{1, 5, 3}, q.Ints())
+		assert.Equal(t, []int{1, 5, 3}, getInts(t, q))
 	}
 	{
 		type bob struct {

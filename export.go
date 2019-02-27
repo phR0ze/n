@@ -22,7 +22,7 @@ func (q *Queryable) A() (result string) {
 }
 
 // B exports queryable into a bool
-func (q *Queryable) B() (result bool) {
+func (q *Queryable) B() (result bool, err error) {
 	if q != nil && !q.Nil() {
 		switch v := q.v.Interface().(type) {
 		case bool:
@@ -30,14 +30,14 @@ func (q *Queryable) B() (result bool) {
 		case int:
 			result = v != 0
 		case string:
-			result, _ = strconv.ParseBool(v)
+			result, err = strconv.ParseBool(v)
 		}
 	}
 	return
 }
 
 // I exports queryable into an int
-func (q *Queryable) I() (result int) {
+func (q *Queryable) I() (result int, err error) {
 	if q != nil && !q.Nil() {
 		switch v := q.v.Interface().(type) {
 		case int:
@@ -47,22 +47,27 @@ func (q *Queryable) I() (result int) {
 				result = 1
 			}
 		case string:
-			result, _ = strconv.Atoi(v)
+			result, err = strconv.Atoi(v)
 		}
 	}
 	return
-
 }
 
 // Ints exports queryable into an int slice
-func (q *Queryable) Ints() (result []int) {
+func (q *Queryable) Ints() (result []int, err error) {
 	result = []int{}
 	if q != nil && !q.Nil() {
 		if q.TypeSlice() {
 			next := q.Iter()
 			for x, ok := next(); ok; x, ok = next() {
-				result = append(result, x.(int))
+				if i, ok := x.(int); ok {
+					result = append(result, i)
+				} else {
+					err = fmt.Errorf("%v is not an int type", x)
+				}
 			}
+		} else {
+			err = fmt.Errorf("queryable is not a slice type")
 		}
 	}
 	return

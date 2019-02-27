@@ -26,28 +26,28 @@ func TestA(t *testing.T) {
 
 func TestB(t *testing.T) {
 	{
-		assert.Equal(t, true, Q(true).B())
-		assert.Equal(t, false, Q(false).B())
+		assert.Equal(t, true, getB(t, Q(true)))
+		assert.Equal(t, false, getB(t, Q(false)))
 	}
 	{
 		q := Q([]bool{true})
-		assert.Equal(t, true, q.At(0).B())
+		assert.Equal(t, true, getB(t, q.At(0)))
 	}
 	{
-		assert.Equal(t, true, Q(4).B())
-		assert.Equal(t, false, Q(0).B())
+		assert.Equal(t, true, getB(t, Q(4)))
+		assert.Equal(t, false, getB(t, Q(0)))
 	}
 	{
-		assert.Equal(t, true, Q("1").B())
-		assert.Equal(t, true, Q("T").B())
-		assert.Equal(t, true, Q("true").B())
-		assert.Equal(t, true, Q("True").B())
-		assert.Equal(t, true, Q("TRUE").B())
-		assert.Equal(t, false, Q("0").B())
-		assert.Equal(t, false, Q("F").B())
-		assert.Equal(t, false, Q("false").B())
-		assert.Equal(t, false, Q("False").B())
-		assert.Equal(t, false, Q("FALSE").B())
+		assert.Equal(t, true, getB(t, Q("1")))
+		assert.Equal(t, true, getB(t, Q("T")))
+		assert.Equal(t, true, getB(t, Q("true")))
+		assert.Equal(t, true, getB(t, Q("True")))
+		assert.Equal(t, true, getB(t, Q("TRUE")))
+		assert.Equal(t, false, getB(t, Q("0")))
+		assert.Equal(t, false, getB(t, Q("F")))
+		assert.Equal(t, false, getB(t, Q("false")))
+		assert.Equal(t, false, getB(t, Q("False")))
+		assert.Equal(t, false, getB(t, Q("FALSE")))
 	}
 	{
 		q, _ := FromYaml(`foo:
@@ -56,22 +56,22 @@ func TestB(t *testing.T) {
 
 		// Exists
 		assert.Equal(t, true, q.Yaml("foo.bar").O())
-		assert.Equal(t, true, q.Yaml("foo.bar").B())
+		assert.Equal(t, true, getB(t, q.Yaml("foo.bar")))
 
 		// Doesn't exist
 		assert.Equal(t, nil, q.Yaml("foo.foo").O())
-		assert.Equal(t, false, q.Yaml("foo.foo").B())
+		assert.Equal(t, false, getB(t, q.Yaml("foo.foo")))
 	}
 }
 
 func TestI(t *testing.T) {
-	assert.Equal(t, 2, Q(2).I())
-	assert.Equal(t, 2, Q("2").I())
+	assert.Equal(t, 2, getI(t, Q(2)))
+	assert.Equal(t, 2, getI(t, Q("2")))
 	assert.Equal(t, 3, Q([]int{2, 3}).At(1).O())
-	assert.Equal(t, 3, Q([]int{2, 3}).At(1).I())
-	assert.Equal(t, 3, Q([]string{"2", "3"}).At(1).I())
-	assert.Equal(t, 1, Q(true).I())
-	assert.Equal(t, 0, Q(false).I())
+	assert.Equal(t, 3, getI(t, Q([]int{2, 3}).At(1)))
+	assert.Equal(t, 3, getI(t, Q([]string{"2", "3"}).At(1)))
+	assert.Equal(t, 1, getI(t, Q(true)))
+	assert.Equal(t, 0, getI(t, Q(false)))
 }
 
 func TestM(t *testing.T) {
@@ -104,7 +104,7 @@ func TestM(t *testing.T) {
 }
 
 func TestInts(t *testing.T) {
-	assert.Equal(t, []int{1, 2, 3}, Q([]int{1, 2, 3}).Ints())
+	assert.Equal(t, []int{1, 2, 3}, getInts(t, Q([]int{1, 2, 3})))
 }
 
 func TestAAMap(t *testing.T) {
@@ -262,4 +262,22 @@ func TestCastToTypeOf(t *testing.T) {
 	//typof := []int{1, 2, 3}
 	//obj := []interface{}{4}[0]
 	//CastToTypeOf(typof, obj)
+}
+
+func getB(t *testing.T, q *Queryable) bool {
+	result, err := q.B()
+	assert.Nil(t, err)
+	return result
+}
+
+func getI(t *testing.T, q *Queryable) int {
+	result, err := q.I()
+	assert.Nil(t, err)
+	return result
+}
+
+func getInts(t *testing.T, q *Queryable) []int {
+	result, err := q.Ints()
+	assert.Nil(t, err)
+	return result
 }
