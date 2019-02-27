@@ -115,7 +115,7 @@ func (q *Queryable) Strs() (result []string) {
 }
 
 // AAMap exports queryable into an string to string map
-func (q *Queryable) AAMap() (result map[string]string) {
+func (q *Queryable) AAMap() (result map[string]string, err error) {
 	result = map[string]string{}
 	if q != nil && !q.Nil() {
 		if v, ok := q.O().(map[string]string); ok {
@@ -125,15 +125,18 @@ func (q *Queryable) AAMap() (result map[string]string) {
 			for x, ok := next(); ok; x, ok = next() {
 				if pair, ok := x.(KeyVal); ok {
 					result[fmt.Sprint(pair.Key)] = fmt.Sprint(pair.Val)
+				} else {
+					err = fmt.Errorf("not a key value pair type")
+					return
 				}
 			}
 		}
 	}
-	return result
+	return
 }
 
 // ASAMap exports queryable into an string to []string map
-func (q *Queryable) ASAMap() (result map[string][]string) {
+func (q *Queryable) ASAMap() (result map[string][]string, err error) {
 	result = map[string][]string{}
 	if q != nil && !q.Nil() {
 		if v, ok := q.O().(map[string][]string); ok {
@@ -152,11 +155,14 @@ func (q *Queryable) ASAMap() (result map[string][]string) {
 							result[key] = append(result[key], fmt.Sprint(y))
 						}
 					}
+				} else {
+					err = fmt.Errorf("not a key value pair type")
+					return
 				}
 			}
 		}
 	}
-	return result
+	return
 }
 
 // S exports queryable into an interface{} slice
@@ -172,13 +178,16 @@ func (q *Queryable) S() []interface{} {
 }
 
 // SAMap exports queryable into an slice of string to interface{} map
-func (q *Queryable) SAMap() (result []map[string]interface{}) {
+func (q *Queryable) SAMap() (result []map[string]interface{}, err error) {
 	result = []map[string]interface{}{}
 	if q != nil && !q.Nil() && q.TypeSlice() {
 		next := q.Iter()
 		for x, ok := next(); ok; x, ok = next() {
 			if m, ok := x.(map[string]interface{}); ok {
 				result = append(result, m)
+			} else {
+				err = fmt.Errorf("not a map[string]interface type")
+				return
 			}
 		}
 	}
