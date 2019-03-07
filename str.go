@@ -12,6 +12,7 @@ import (
 )
 
 var (
+	// ReGraphicalOnly is a regex to filter on graphical runes only
 	ReGraphicalOnly = regexp.MustCompile(`[^[:graph:]]+`)
 )
 

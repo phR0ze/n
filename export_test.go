@@ -182,6 +182,30 @@ func TestS(t *testing.T) {
 }
 
 func TestSAMap(t *testing.T) {
+	// test map[interface{}]interface{}
+	{
+		q := Q([]interface{}{
+			map[interface{}]interface{}{
+				"name": "name1",
+				"url":  "url1",
+			},
+			map[interface{}]interface{}{
+				"name": "name2",
+				"url":  "url2",
+			},
+		})
+		expected := []map[string]interface{}{
+			{
+				"name": "name1",
+				"url":  "url1",
+			},
+			{
+				"name": "name2",
+				"url":  "url2",
+			},
+		}
+		assert.Equal(t, expected, getSAMap(t, q))
+	}
 	{
 		q, _ := FromYaml(`items:
   - name: one
@@ -207,8 +231,57 @@ func TestSAMap(t *testing.T) {
 }
 
 func TestSAAMap(t *testing.T) {
+	// test map[interface{}]string
 	{
-		// slice of string to string map
+		q := Q([]interface{}{
+			map[interface{}]string{
+				"name": "name1",
+				"url":  "url1",
+			},
+			map[interface{}]string{
+				"name": "name2",
+				"url":  "url2",
+			},
+		})
+		expected := []map[string]string{
+			{
+				"name": "name1",
+				"url":  "url1",
+			},
+			{
+				"name": "name2",
+				"url":  "url2",
+			},
+		}
+		assert.Equal(t, expected, getSAAMap(t, q))
+	}
+	// test map[interface{}]interface{}
+	{
+		q := Q([]interface{}{
+			map[interface{}]interface{}{
+				"name": "name1",
+				"url":  "url1",
+			},
+			map[interface{}]interface{}{
+				"name": "name2",
+				"url":  "url2",
+			},
+		})
+		expected := []map[string]string{
+			{
+				"name": "name1",
+				"url":  "url1",
+			},
+			{
+				"name": "name2",
+				"url":  "url2",
+			},
+		}
+		assert.Equal(t, expected, getSAAMap(t, q))
+	}
+
+	// slice of string to string map
+	{
 		q, _ := FromYaml(`items:
   - name: one
   - name: two
@@ -219,10 +292,11 @@ func TestSAAMap(t *testing.T) {
 			{"name": "two"},
 			{"name": "three"},
 		}
-		assert.Equal(t, expected, q.Yaml("items").SAAMap())
+		assert.Equal(t, expected, getSAAMap(t, q.Yaml("items")))
 	}
+
+	// slice of string to int map
 	{
-		// slice of string to int map
 		q, _ := FromYaml(`items:
   - name: 1
   - name: 2
@@ -233,7 +307,7 @@ func TestSAAMap(t *testing.T) {
 			{"name": "2"},
 			{"name": "three"},
 		}
-		assert.Equal(t, expected, q.Yaml("items").SAAMap())
+		assert.Equal(t, expected, getSAAMap(t, q.Yaml("items")))
 	}
 }
 
@@ -302,6 +376,12 @@ func getASAMap(t *testing.T, q *Queryable) map[string][]string {
 
 func getSAMap(t *testing.T, q *Queryable) []map[string]interface{} {
 	result, err := q.SAMap()
+	assert.Nil(t, err)
+	return result
+}
+
+func getSAAMap(t *testing.T, q *Queryable) []map[string]string {
+	result, err := q.SAAMap()
 	assert.Nil(t, err)
 	return result
 }

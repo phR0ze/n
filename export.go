@@ -2,7 +2,6 @@ package n
 
 import (
 	"fmt"
-	"reflect"
 	"strconv"
 )
 
@@ -183,30 +182,17 @@ func (q *Queryable) SAMap() (result []map[string]interface{}, err error) {
 	if q != nil && !q.Nil() && q.TypeSlice() {
 		next := q.Iter()
 		for x, ok := next(); ok; x, ok = next() {
-			if m, ok := x.(map[string]interface{}); ok {
-				result = append(result, m)
-			} else {
-				err = fmt.Errorf("not a map[string]interface type")
-				return
-			}
-		}
-	}
-	return
-}
-
-// SAAMap exports queryable into an slice of string to string map
-func (q *Queryable) SAAMap() (result []map[string]string) {
-	result = []map[string]string{}
-	if q != nil && !q.Nil() && q.TypeSlice() {
-		next := q.Iter()
-		for x, ok := next(); ok; x, ok = next() {
-			m := map[string]string{}
-			if md, ok := x.(map[string]string); ok {
-				m = md
-			} else if md, ok := x.(map[string]interface{}); ok {
-				for k, v := range md {
-					m[fmt.Sprint(k)] = fmt.Sprint(v)
+			m := map[string]interface{}{}
+			switch x := x.(type) {
+			case map[string]interface{}:
+				m = x
+			case map[interface{}]interface{}:
+				for k, v := range x {
+					m[fmt.Sprint(k)] = v
 				}
+			default:
+				err = fmt.Errorf("%v is not of type map[string]interface{}", x)
+				return
 			}
 			result = append(result, m)
 		}
@@ -214,18 +200,34 @@ func (q *Queryable) SAAMap() (result []map[string]string) {
 	return
 }
 
-// CastToTypeOf casts the obj to the type of the typof
-func CastToTypeOf(typof interface{}, obj interface{}) *reflect.Value {
-	panic("TODO: experimenting with reflection")
-	typ := reflect.TypeOf(typof)
-	switch typ.Kind() {
-	case reflect.Array, reflect.Slice, reflect.Map:
-		targetType := typ.Elem()
-		originType := reflect.TypeOf(obj)
-		fmt.Println(targetType)
-		fmt.Println(originType)
-	default:
+// SAAMap exports queryable into an slice of string to string map
+func (q *Queryable) SAAMap() (result []map[string]string, err error) {
+	result = []map[string]string{}
+	if q != nil && !q.Nil() && q.TypeSlice() {
+		next := q.Iter()
+		for x, ok := next(); ok; x, ok = next() {
+			m := map[string]string{}
+			switch x := x.(type) {
+			case map[string]string:
+				m = x
+			case map[string]interface{}:
+				for k, v := range x {
+					m[fmt.Sprint(k)] = fmt.Sprint(v)
+				}
+			case map[interface{}]string:
+				for k, v := range x {
+					m[fmt.Sprint(k)] = fmt.Sprint(v)
+				}
+			case map[interface{}]interface{}:
+				for k, v := range x {
+					m[fmt.Sprint(k)] = fmt.Sprint(v)
+				}
+			default:
+				err = fmt.Errorf("%v is not of type map[string]string", x)
+				return
+			}
+			result = append(result, m)
+		}
 	}
-
-	return nil
+	return
 }
