@@ -151,6 +151,13 @@ func (tty *TTY) Close() (err error) {
 // TTY Methods
 //--------------------------------------------------------------------------------------------------
 
+// PromptRes prints out the given message and waits for user response terminated by a return
+func (tty *TTY) PromptRes(msg string) (res string, err error) {
+	fmt.Print(msg)
+	res, err = tty.ReadLine()
+	return
+}
+
 // ReadChar from the TTY, blocks until data is present
 func (tty *TTY) ReadChar() (res string, err error) {
 	var r rune
