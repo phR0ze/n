@@ -295,18 +295,6 @@ func RemoveAll(target string) error {
 	return os.RemoveAll(target)
 }
 
-// Size returns the size of the given path file or directory
-func Size(src string) (result int64) {
-	if target, err := Abs(src); err == nil {
-		if info, err := os.Stat(target); err == nil {
-			if !info.IsDir() {
-				result = info.Size()
-			}
-		}
-	}
-	return
-}
-
 // Symlink creates newname as a symbolic link to oldname. If there is an error,
 // it will be of type *LinkError. newname is created as ???
 func Symlink(oldname, newname string) error {

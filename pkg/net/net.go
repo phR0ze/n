@@ -2,11 +2,21 @@ package net
 
 import (
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"path"
+	"time"
 
 	"github.com/phR0ze/n/pkg/sys"
+)
+
+const (
+	// TCP is a protocol string constant
+	TCP = "tcp"
+
+	// UDP is a protocol string constant
+	UDP = "udp"
 )
 
 // DownloadFile from the given URL to the given destination
@@ -42,5 +52,23 @@ func DownloadFile(url, dst string, perms ...uint32) (result string, err error) {
 	// Write streamed http bits to the file
 	_, err = io.Copy(f, res.Body)
 
+	return
+}
+
+// Ping simply checks if the given protocol, address is accessible
+// and listening. An error will be returned if the ping was not successful.
+// optional timeout in seconds defaults to 1
+func Ping(proto, addr string, timeout ...int) (err error) {
+	_timeout := 1
+	if len(timeout) > 0 {
+		_timeout = timeout[0]
+	}
+
+	var conn net.Conn
+	dialer := net.Dialer{Timeout: time.Duration(_timeout) * time.Second}
+	if conn, err = dialer.Dial(proto, addr); err == nil {
+		conn.Close()
+		return
+	}
 	return
 }

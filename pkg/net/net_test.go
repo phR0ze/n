@@ -19,6 +19,14 @@ func TestDownloadFile(t *testing.T) {
 	assert.True(t, sys.Exists(dst))
 }
 
+func TestPing(t *testing.T) {
+	// err := Ping(TCP, "www.google.com", 80)
+	// assert.Nil(t, err)
+
+	// err = Ping(TCP, "blah", 80)
+	// assert.NotNil(t, err)
+}
+
 func cleanTmpDir() {
 	if sys.Exists(tmpDir) {
 		sys.RemoveAll(tmpDir)

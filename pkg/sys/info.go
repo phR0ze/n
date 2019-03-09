@@ -50,6 +50,16 @@ func (info *FileInfo) Size() int64 {
 	return info.v.Size()
 }
 
+// Size returns the size of the file in bytes
+func Size(src string) (size int64) {
+	if info, err := os.Lstat(src); err == nil {
+		if !info.IsDir() {
+			size = info.Size()
+		}
+	}
+	return
+}
+
 // Mode implements os.FileInfo and returns bits of the file
 func (info *FileInfo) Mode() os.FileMode {
 	return info.v.Mode()
