@@ -108,7 +108,7 @@ func CopyFile(src, dst string, opts ...*opt.Opt) (err error) {
 	}
 
 	// Get correct destination path
-	_, e := os.Stat(dst)
+	dstInfo, e := os.Stat(dst)
 	switch {
 
 	// Doesn't exist but maybe the parent does and this is the new dst name
@@ -121,12 +121,14 @@ func CopyFile(src, dst string, opts ...*opt.Opt) (err error) {
 		}
 		dstPath = path.Join(dstPath, path.Base(dst))
 
-	// dst is a valid directory so copy to it using src name
+	// Destination exists and is either a file to overwrite or a dir to copy into
 	case e == nil:
 		if dstPath, err = Abs(dst); err != nil {
 			return
 		}
-		dstPath = path.Join(dstPath, path.Base(srcPath))
+		if dstInfo.IsDir() {
+			dstPath = path.Join(dstPath, path.Base(srcPath))
+		}
 
 	// unknown error case
 	default:

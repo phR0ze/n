@@ -186,18 +186,28 @@ func TestCopyGlob(t *testing.T) {
 }
 
 func TestCopyFile(t *testing.T) {
-	{
-		cleanTmpDir()
-		foo := path.Join(tmpDir, "foo")
+	cleanTmpDir()
 
-		assert.False(t, Exists(foo))
-		CopyFile(readme, foo)
-		assert.True(t, Exists(foo))
+	// Copy regular file
+	foo := path.Join(tmpDir, "foo")
 
-		srcMD5, _ := MD5(readme)
-		dstMD5, _ := MD5(foo)
-		assert.Equal(t, srcMD5, dstMD5)
-	}
+	assert.False(t, Exists(foo))
+	CopyFile(readme, foo)
+	assert.True(t, Exists(foo))
+
+	srcMD5, err := MD5(readme)
+	assert.Nil(t, err)
+	dstMD5, err := MD5(foo)
+	assert.Nil(t, err)
+	assert.Equal(t, srcMD5, dstMD5)
+
+	// Overwrite file
+	CopyFile(testfile, foo)
+	srcMD5, err = MD5(testfile)
+	assert.Nil(t, err)
+	dstMD5, err = MD5(foo)
+	assert.Nil(t, err)
+	assert.Equal(t, srcMD5, dstMD5)
 }
 
 func TestExists(t *testing.T) {
