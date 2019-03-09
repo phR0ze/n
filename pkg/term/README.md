@@ -36,7 +36,7 @@ go func() {
 ### Read from TTY <a name="read-from-tty"></a>
 ```go
 var err error
-var tty *tty.TTY
+var tty *term.TTY
 if tty, err = term.Open(); err != nil {
 	return
 }

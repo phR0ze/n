@@ -15,6 +15,10 @@
 # General dependencies
 # -----------------------------------------------------------
 [[constraint]]
+  name = "github.com/phR0ze/go-errors"
+  version = "~0.8.2"
+
+[[constraint]]
   name = "github.com/mitchellh/go-homedir"
   version = "~1.0.0"
 

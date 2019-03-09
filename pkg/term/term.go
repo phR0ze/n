@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"unicode"
 
+	"github.com/phR0ze/go-errors"
 	"golang.org/x/sys/unix"
 )
 
@@ -36,8 +37,7 @@ func AnyKey() (err error) {
 	defer tty.Close()
 
 	// Read single rune
-	tty.ReadRune()
-
+	_, err = tty.ReadRune()
 	return
 }
 
@@ -51,8 +51,21 @@ func Prompt(msg string) (err error) {
 
 	// Read single rune
 	fmt.Println(msg)
-	tty.ReadRune()
+	_, err = tty.ReadRune()
+	return
+}
 
+// PromptRes prints out the given message and waits for user response terminated by a return
+func PromptRes(msg string) (res string, err error) {
+	var tty *TTY
+	if tty, err = Open(); err != nil {
+		return
+	}
+	defer tty.Close()
+
+	// Read single rune
+	fmt.Print(msg)
+	res, err = tty.ReadLine()
 	return
 }
 
@@ -66,7 +79,6 @@ func WaitForKey(key byte) (err error) {
 
 	// Read until given key is pressed
 	tty.Stdin.ReadString(key)
-
 	return
 }
 
@@ -77,9 +89,11 @@ func Open() (tty *TTY, err error) {
 
 	// Setup stdin/stdout reader/writer
 	if tty.infile, err = os.Open("/dev/tty"); err != nil {
+		err = errors.Wrap(err, "failed to open tty in")
 		return
 	}
 	if tty.outfile, err = os.OpenFile("/dev/tty", unix.O_WRONLY, 0); err != nil {
+		err = errors.Wrap(err, "failed to open tty out")
 		return
 	}
 	tty.Stdin = bufio.NewReader(tty.infile)
@@ -87,6 +101,7 @@ func Open() (tty *TTY, err error) {
 
 	// Save termios current state, errors out if tty.infile is not a valid terminal
 	if tty.termios, err = unix.IoctlGetTermios(int(tty.infile.Fd()), ioctlReadTermios); err != nil {
+		err = errors.Wrap(err, "failed to save termios current state")
 		return
 	}
 
@@ -100,6 +115,7 @@ func Open() (tty *TTY, err error) {
 	termios.Lflag &^= unix.ECHO   // turn off echoing so we can control output for passwords
 	termios.Lflag &^= unix.ICANON // turn off canonical mode so that input is made available  immediately
 	if err = unix.IoctlSetTermios(int(tty.infile.Fd()), ioctlWriteTermios, &termios); err != nil {
+		err = errors.Wrap(err, "failed to config termios to turn off terminal extras")
 		return
 	}
 
@@ -115,6 +131,7 @@ func Open() (tty *TTY, err error) {
 func (tty *TTY) Size() (col int, row int, err error) {
 	size, err := unix.IoctlGetWinsize(int(tty.infile.Fd()), unix.TIOCGWINSZ)
 	if err != nil {
+		err = errors.Wrap(err, "failed to get terminal window size")
 		return -1, -1, err
 	}
 	col, row = int(size.Col), int(size.Row)
@@ -125,7 +142,9 @@ func (tty *TTY) Size() (col int, row int, err error) {
 // Close TTY resources and restore termios save state
 func (tty *TTY) Close() (err error) {
 	close(tty.SigWinSizeChan)
-	err = unix.IoctlSetTermios(int(tty.infile.Fd()), ioctlWriteTermios, tty.termios)
+	if err = unix.IoctlSetTermios(int(tty.infile.Fd()), ioctlWriteTermios, tty.termios); err != nil {
+		err = errors.Wrap(err, "failed to close tty")
+	}
 	return
 }
 
@@ -133,41 +152,56 @@ func (tty *TTY) Close() (err error) {
 //--------------------------------------------------------------------------------------------------
 
 // ReadChar from the TTY, blocks until data is present
-func (tty *TTY) ReadChar() (string, error) {
-	r, _, err := tty.Stdin.ReadRune()
-	return string(r), err
+func (tty *TTY) ReadChar() (res string, err error) {
+	var r rune
+	if r, _, err = tty.Stdin.ReadRune(); err != nil {
+		err = errors.Wrap(err, "failed to read rune from stdin")
+		return
+	}
+	res = string(r)
+	return
 }
 
 // ReadRune from the TTY, blocks until data is present
-func (tty *TTY) ReadRune() (rune, error) {
-	r, _, err := tty.Stdin.ReadRune()
-	return r, err
+func (tty *TTY) ReadRune() (r rune, err error) {
+	if r, _, err = tty.Stdin.ReadRune(); err != nil {
+		err = errors.Wrap(err, "failed to read rune from stdin")
+	}
+	return
 }
 
 // ReadLine reads from the TTY until return is pressed i.e. '\r'
 // returned string does not include the trailing '\r'
 func (tty *TTY) ReadLine() (result string, err error) {
-	result, err = tty.Stdin.ReadString('\r')
+	if result, err = tty.Stdin.ReadString('\r'); err != nil {
+		err = errors.Wrap(err, "failed to read string from stdin")
+	}
 	return
 }
 
 // ReadString reads from the TTY until return is pressed and echos back to TTY rune by rune
 func (tty *TTY) ReadString() (result string, err error) {
-	result, err = tty.read(readOpts{echo: true})
+	if result, err = tty.read(readOpts{echo: true}); err != nil {
+		err = errors.Wrap(err, "failed to read string from stdin")
+	}
 	tty.outfile.WriteString("\n")
 	return
 }
 
 // ReadSensitive reads from TTY until return is pressed, does not echo
 func (tty *TTY) ReadSensitive() (result string, err error) {
-	result, err = tty.read(readOpts{})
+	if result, err = tty.read(readOpts{}); err != nil {
+		err = errors.Wrap(err, "failed to read sensitive from stdin")
+	}
 	tty.outfile.WriteString("\n")
 	return
 }
 
 // ReadPassword reads from TTY until return is pressed, printing out asterisks in place of echo
 func (tty *TTY) ReadPassword() (result string, err error) {
-	result, err = tty.read(readOpts{echo: true, mask: true})
+	if result, err = tty.read(readOpts{echo: true, mask: true}); err != nil {
+		err = errors.Wrap(err, "failed to read password from stdin")
+	}
 	tty.outfile.WriteString("\n")
 	return
 }

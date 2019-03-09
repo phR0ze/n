@@ -33,6 +33,14 @@
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:f3bc4dcbd92f5aa52b7e1e598ef696bde6a671ae1732e52511d26f4fd22703eb"
+  name = "github.com/phR0ze/go-errors"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "27936f6d90f9c8e1145f11ed52ffffbfdb9e0af7"
+  version = "v0.8.2"
+
+[[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
@@ -79,6 +87,7 @@
     "github.com/bouk/monkey",
     "github.com/ghodss/yaml",
     "github.com/mitchellh/go-homedir",
+    "github.com/phR0ze/go-errors",
     "github.com/stretchr/testify/assert",
     "github.com/valyala/bytebufferpool",
     "golang.org/x/sys/unix",
