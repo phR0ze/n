@@ -14,4 +14,21 @@ func TestToBase2Bytes(t *testing.T) {
 	assert.Equal(t, "3 GiB", HumanBase2(int64(3*GiB+500)))
 	assert.Equal(t, "3.49 GiB", HumanBase2(int64(3*GiB+500*MiB)))
 	assert.Equal(t, "3.05 MiB", HumanBase2(int64(3*MiB+50000)))
+	assert.Equal(t, "3.05 MiB", HumanBase2(int64(3195728)))
+}
+
+func TestToKiB(t *testing.T) {
+	assert.Equal(t, 1000.0, ToKiB(1000*KiB))
+}
+
+func TestToMiB(t *testing.T) {
+	assert.Equal(t, 3.0476837158203125, ToMiB(3195728))
+}
+
+func TestToGiB(t *testing.T) {
+	assert.Equal(t, 1000.0, ToGiB(1000*GiB))
+}
+
+func TestToTiB(t *testing.T) {
+	assert.Equal(t, 1000.0, ToTiB(1000*TiB))
 }

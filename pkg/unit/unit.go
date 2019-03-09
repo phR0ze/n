@@ -18,6 +18,7 @@ const (
 )
 
 // HumanBase2 converts the given value in bytes to a human readable format
+// e.g. 3195728 = 3.05 MiB
 func HumanBase2(val int64) (result string) {
 	unit := "bytes"
 	value := float64(val)
@@ -40,4 +41,24 @@ func HumanBase2(val int64) (result string) {
 	result = strings.TrimSuffix(fmt.Sprintf("%.2f", value), ".00")
 	result = fmt.Sprintf("%s %s", result, unit)
 	return
+}
+
+// ToKiB converts the given value in bytes to increments of KiB
+func ToKiB(val int64) (kib float64) {
+	return float64(val) / float64(KiB)
+}
+
+// ToMiB converts the given value in bytes to increments of MiB
+func ToMiB(val int64) (mib float64) {
+	return float64(val) / float64(MiB)
+}
+
+// ToGiB converts the given value in bytes to increments of GiB
+func ToGiB(val int64) (gib float64) {
+	return float64(val) / float64(GiB)
+}
+
+// ToTiB converts the given value in bytes to increments of TiB
+func ToTiB(val int64) (tib float64) {
+	return float64(val) / float64(TiB)
 }
