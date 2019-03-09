@@ -65,7 +65,7 @@ func PromptRes(msg string) (res string, err error) {
 
 	// Read single rune
 	fmt.Print(msg)
-	res, err = tty.ReadLine()
+	res, err = tty.ReadString()
 	return
 }
 
@@ -154,7 +154,7 @@ func (tty *TTY) Close() (err error) {
 // PromptRes prints out the given message and waits for user response terminated by a return
 func (tty *TTY) PromptRes(msg string) (res string, err error) {
 	fmt.Print(msg)
-	res, err = tty.ReadLine()
+	res, err = tty.ReadString()
 	return
 }
 

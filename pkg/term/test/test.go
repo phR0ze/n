@@ -16,11 +16,26 @@ func main() {
 	//test_ReadSensitive()
 	//test_ReadPassword()
 	//test_Size()
-	test_Prompt()
+	//test_Prompt()
+	//test_PromptRes()
+	test_PromptResClass()
 }
 
 func test_Prompt() {
 	term.Prompt("Press any key to continue")
+}
+
+func test_PromptRes() {
+	term.PromptRes("Enter reponse: ")
+}
+
+func test_PromptResClass() {
+	tty, err := term.Open()
+	if err != nil {
+		log.Fatal("failed to prompt res")
+	}
+	defer tty.Close()
+	term.PromptRes("Enter reponse: ")
 }
 
 func test_Size() {
