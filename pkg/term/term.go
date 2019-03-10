@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"unicode"
 
 	"github.com/phR0ze/go-errors"
@@ -55,17 +56,35 @@ func Prompt(msg string) (err error) {
 	return
 }
 
-// PromptRes prints out the given message and waits for user response terminated by a return
-func PromptRes(msg string) (res string, err error) {
+// PromptRes prints out the given message and waits for user response terminated by a return.
+// Optionally desired options may be given and the message repeated if not a valid option.
+// Options are not case sensitive
+func PromptRes(msg string, opts ...string) (res string, err error) {
 	var tty *TTY
 	if tty, err = Open(); err != nil {
 		return
 	}
 	defer tty.Close()
 
+Retry:
 	// Read single rune
 	fmt.Print(msg)
 	res, err = tty.ReadString()
+
+	// Handle options
+	if len(opts) > 0 {
+		found := false
+		for _, opt := range opts {
+			if strings.ToLower(res) == strings.ToLower(opt) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			goto Retry
+		}
+	}
+
 	return
 }
 
@@ -151,10 +170,29 @@ func (tty *TTY) Close() (err error) {
 // TTY Methods
 //--------------------------------------------------------------------------------------------------
 
-// PromptRes prints out the given message and waits for user response terminated by a return
-func (tty *TTY) PromptRes(msg string) (res string, err error) {
+// PromptRes prints out the given message and waits for user response terminated by a return.
+// Optionally desired options may be given and the message repeated if not a valid option.
+// Options are not case sensitive
+func (tty *TTY) PromptRes(msg string, opts ...string) (res string, err error) {
+Retry:
+	// Read single rune
 	fmt.Print(msg)
 	res, err = tty.ReadString()
+
+	// Handle options
+	if len(opts) > 0 {
+		found := false
+		for _, opt := range opts {
+			if strings.ToLower(res) == strings.ToLower(opt) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			goto Retry
+		}
+	}
+
 	return
 }
 

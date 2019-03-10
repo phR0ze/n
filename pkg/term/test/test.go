@@ -26,7 +26,7 @@ func test_Prompt() {
 }
 
 func test_PromptRes() {
-	term.PromptRes("Enter reponse: ")
+	term.PromptRes("Enter reponse [y/n]: ", "y", "n")
 }
 
 func test_PromptResClass() {
@@ -35,7 +35,7 @@ func test_PromptResClass() {
 		log.Fatal("failed to prompt res")
 	}
 	defer tty.Close()
-	term.PromptRes("Enter reponse: ")
+	term.PromptRes("Enter reponse [y/n]: ", "y", "n")
 }
 
 func test_Size() {
