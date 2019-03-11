@@ -145,6 +145,9 @@ func Open() (tty *TTY, err error) {
 	return
 }
 
+// TTY Methods
+//--------------------------------------------------------------------------------------------------
+
 // Size returns the current size of the terminal window.
 // Used in conjunction with the SigWinSizeChan one can react to terminal size changes.
 func (tty *TTY) Size() (col int, row int, err error) {

@@ -733,6 +733,125 @@ func TestCopy(t *testing.T) {
 		assert.Len(t, cnt, 3)
 	}
 }
+
+func TestDeleteAt(t *testing.T) {
+	// Nil
+	{
+		q := N()
+		assert.Equal(t, N(), q.DeleteAt(0))
+	}
+
+	// []int
+	{
+		// Empty
+		q := Q([]int{})
+		assert.Equal(t, N(), q.DeleteAt(0))
+
+		q = Q([]int{0, 1, 2, 3, 4, 5})
+
+		// Delete the first
+		assert.Equal(t, 0, getI(t, q.DeleteAt(0)))
+		assert.Equal(t, []int{1, 2, 3, 4, 5}, getInts(t, q))
+
+		// // Delete the last -1
+		// assert.Equal(t, "5", q.DeleteAt(-1).A())
+		// assert.Equal(t, "1234", q.A())
+
+		// // Delete middle pos
+		// assert.Equal(t, "2", q.DeleteAt(1).A())
+		// assert.Equal(t, "134", q.A())
+
+		// // Delete middle neg
+		// assert.Equal(t, "3", q.DeleteAt(-2).A())
+		// assert.Equal(t, "14", q.A())
+	}
+	// {
+	// 	// int
+	// 	q := Q(2)
+	// 	assert.True(t, q.Contains(2))
+	// }
+	// {
+	// 	// empty []string
+	// 	q := Q([]string{})
+	// 	assert.False(t, q.Contains(""))
+	// }
+
+	// string
+	{
+		q := Q("012345")
+		assert.Equal(t, "012345", q.A())
+
+		// Delete the first
+		assert.Equal(t, "0", q.DeleteAt(0).A())
+		assert.Equal(t, "12345", q.A())
+
+		// Delete the last -1
+		assert.Equal(t, "5", q.DeleteAt(-1).A())
+		assert.Equal(t, "1234", q.A())
+
+		// Delete middle pos
+		assert.Equal(t, "2", q.DeleteAt(1).A())
+		assert.Equal(t, "134", q.A())
+
+		// Delete middle neg
+		assert.Equal(t, "3", q.DeleteAt(-2).A())
+		assert.Equal(t, "14", q.A())
+	}
+	// {
+	// 	// full []string
+	// 	q := Q([]string{"1", "2", "3"})
+	// 	assert.False(t, q.Contains(""))
+	// 	assert.True(t, q.Contains("3"))
+	// }
+	// {
+	// 	// map
+	// 	data := map[string]interface{}{"1": "one", "2": "two", "3": "three"}
+	// 	q := Q(data)
+	// 	assert.True(t, q.Contains("1"))
+	// }
+	// {
+	// 	// Custom type
+	// 	q := Q([]bob{{data: "3"}})
+	// 	assert.False(t, q.Contains(""))
+	// 	assert.False(t, q.Contains(bob{data: "2"}))
+	// 	assert.True(t, q.Contains(bob{data: "3"}))
+	// }
+	// {
+	// 	q := Q([]int{1, 2, 3})
+	// 	assert.False(t, q.Contains([]string{}))
+	// 	assert.True(t, q.Contains(2))
+	// 	assert.False(t, q.Contains([]int{0, 3}))
+	// 	assert.True(t, q.Contains([]int{1, 3}))
+	// 	assert.True(t, q.Contains([]int{2, 3}))
+	// 	assert.False(t, q.Contains([]int{4, 5}))
+	// 	assert.False(t, q.Contains("2"))
+	// }
+	// {
+	// 	q := Q([]string{"1", "2", "3"})
+	// 	assert.False(t, q.Contains([]int{}))
+	// 	assert.False(t, q.Contains(2))
+	// 	assert.False(t, q.Contains([]string{"0", "3"}))
+	// 	assert.True(t, q.Contains([]string{"1", "3"}))
+	// 	assert.True(t, q.Contains([]string{"2", "3"}))
+	// 	assert.True(t, q.Contains("2"))
+	// }
+	// {
+	// 	assert.True(t, Q("test").Contains("tes"))
+	// 	assert.False(t, Q("test").Contains([]string{"foo", "test"}))
+	// 	assert.True(t, Q("test").Contains([]string{"tes", "test"}))
+	// 	assert.True(t, Q([]string{"foo", "test"}).Contains("test"))
+	// }
+	// {
+	// 	// map
+	// 	data := map[string]interface{}{"1": "one", "2": "two", "3": "three"}
+	// 	q := Q(data)
+	// 	assert.True(t, q.Contains("1"))
+	// 	assert.False(t, q.Contains("4"))
+	// 	assert.False(t, q.Contains([]string{"4", "2"}))
+	// 	assert.True(t, q.Contains([]string{"3", "2"}))
+	// }
+}
+
 func TestEach(t *testing.T) {
 	{
 		// []int

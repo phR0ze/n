@@ -332,12 +332,6 @@ func TestStrs(t *testing.T) {
 	}
 }
 
-func TestCastToTypeOf(t *testing.T) {
-	//typof := []int{1, 2, 3}
-	//obj := []interface{}{4}[0]
-	//CastToTypeOf(typof, obj)
-}
-
 func getB(t *testing.T, q *Queryable) bool {
 	result, err := q.B()
 	assert.Nil(t, err)
