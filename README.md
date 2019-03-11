@@ -13,7 +13,6 @@ required when coding in Go.
 ## Backlog <a name="backlog"></a>
 * Implement chainable slice functions
 * Implement deferred execution
-* Handle performance issues with reflection
 
 ## References <a name="references"></a>
 
