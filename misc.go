@@ -37,3 +37,10 @@ func Range(min, max int) []int {
 	}
 	return result
 }
+
+// SetIfEmpty sets the value of the given string to the other if not empty
+func SetIfEmpty(target *string, value string) {
+	if *target == "" {
+		*target = value
+	}
+}
