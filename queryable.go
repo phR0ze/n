@@ -373,14 +373,14 @@ func (q *Queryable) DeleteAt(i int) *Queryable {
 }
 func deleteObj(q *Queryable) {
 	// Helper function for DeleteAt
-	var result []rune
-	runes := []rune(str)
-	if i+1 < len(str) {
-		result = append(runes[:i], runes[i+1:]...)
-	} else {
-		result = runes[:i]
-	}
-	return string(result)
+	// var result []rune
+	// runes := []rune(str)
+	// if i+1 < len(str) {
+	// 	result = append(runes[:i], runes[i+1:]...)
+	// } else {
+	// 	result = runes[:i]
+	// }
+	// return string(result)
 }
 func deleteRune(str string, i int) string {
 	// Helper function for DeleteAt
