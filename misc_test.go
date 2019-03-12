@@ -120,17 +120,17 @@ func TestRange(t *testing.T) {
 	assert.Equal(t, []int{3, 4, 5, 6, 7, 8}, Range(3, 8))
 }
 
-func TestSetDefault(t *testing.T) {
+func TestSetValueOrDefault(t *testing.T) {
 	// Test default set
 	{
 		target := ""
-		assert.Equal(t, "test", SetDefault(&target, "", "test"))
+		assert.Equal(t, "test", SetValueOrDefault(&target, "", "test"))
 	}
 
 	// Test value set
 	{
 		target := ""
-		SetDefault(&target, "foo", "test")
+		SetValueOrDefault(&target, "foo", "test")
 		assert.Equal(t, "foo", target)
 	}
 }
@@ -139,13 +139,25 @@ func TestSetIfEmpty(t *testing.T) {
 	// Test empty
 	{
 		target := ""
-		SetIfEmpty(&target, "test")
+		SetValueIfEmpty(&target, "test")
 		assert.Equal(t, "test", target)
 	}
 
 	// Not empty
 	{
 		target := "foo"
-		assert.Equal(t, "foo", SetIfEmpty(&target, "test"))
+		assert.Equal(t, "foo", SetValueIfEmpty(&target, "test"))
+	}
+}
+
+func TestValueOrDefault(t *testing.T) {
+	// Test default set
+	{
+		assert.Equal(t, "test", ValueOrDefault("", "test"))
+	}
+
+	// Test value set
+	{
+		assert.Equal(t, "foo", ValueOrDefault("foo", "test"))
 	}
 }
