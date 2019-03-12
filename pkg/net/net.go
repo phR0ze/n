@@ -4,6 +4,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"time"
@@ -71,4 +72,20 @@ func Ping(proto, addr string, timeout ...int) (err error) {
 		return
 	}
 	return
+}
+
+// DisableProxy unsets the http_proxy env var and sets the http.DefaultTransport to not use a proxy
+func DisableProxy(proxy *url.URL) {
+	if proxy != nil {
+		os.Unsetenv("http_proxy")
+		http.DefaultTransport = &http.Transport{Proxy: nil}
+	}
+}
+
+// EnableProxy sets the http_proxy env var and sets the http.DefaultTransport to use a proxy
+func EnableProxy(proxy *url.URL) {
+	if proxy != nil {
+		os.Setenv("http_proxy", proxy.String())
+		http.DefaultTransport = &http.Transport{Proxy: http.ProxyURL(proxy)}
+	}
 }
