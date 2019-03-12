@@ -124,8 +124,7 @@ func TestSetDefault(t *testing.T) {
 	// Test default set
 	{
 		target := ""
-		SetDefault(&target, "", "test")
-		assert.Equal(t, "test", target)
+		assert.Equal(t, "test", SetDefault(&target, "", "test"))
 	}
 
 	// Test value set
@@ -147,7 +146,6 @@ func TestSetIfEmpty(t *testing.T) {
 	// Not empty
 	{
 		target := "foo"
-		SetIfEmpty(&target, "test")
-		assert.Equal(t, "foo", target)
+		assert.Equal(t, "foo", SetIfEmpty(&target, "test"))
 	}
 }

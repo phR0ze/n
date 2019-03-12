@@ -39,18 +39,22 @@ func Range(min, max int) []int {
 }
 
 // SetDefault sets the value of the given string 'target' to the
-// given 'value' if value is not empty else 'defaulty'
-func SetDefault(target *string, value, defaulty string) {
+// given 'value' if value is not empty else 'defaulty' and returns the value as well
+func SetDefault(target *string, value, defaulty string) string {
 	if value != "" {
 		*target = value
 	} else {
 		*target = defaulty
 	}
+
+	return *target
 }
 
 // SetIfEmpty sets the value of the given string to the other if not empty
-func SetIfEmpty(target *string, value string) {
+// and returns the target as well.
+func SetIfEmpty(target *string, value string) string {
 	if *target == "" {
 		*target = value
 	}
+	return *target
 }
