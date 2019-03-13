@@ -53,6 +53,15 @@ func TestBase(t *testing.T) {
 	assert.Equal(t, "", Base(""))
 	assert.Equal(t, "/", Base("/"))
 	assert.Equal(t, "foo", Base("/foo"))
+	assert.Equal(t, "foo", Base("/foo/"))
+}
+
+func TestDir(t *testing.T) {
+	assert.Equal(t, ".", filepath.Dir(""))
+	assert.Equal(t, "", Dir(""))
+	assert.Equal(t, "/", Dir("/"))
+	assert.Equal(t, "/", Dir("/foo"))
+	assert.Equal(t, "/", Dir("/foo/"))
 }
 
 func TestDirs(t *testing.T) {
@@ -115,6 +124,13 @@ func TestSlicePath(t *testing.T) {
 	assert.Equal(t, "", SlicePath("", 0, -1))
 	assert.Equal(t, "/", SlicePath("/", 0, -1))
 	assert.Equal(t, "/foo", SlicePath("/foo", 0, -1))
+
+	// Handle slash at end
+	assert.Equal(t, "/foo", SlicePath("/foo/bar/one/", 0, 0))
+	assert.Equal(t, "foo/bar", SlicePath("foo/bar/one/", 0, 1))
+	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one/", 0, 2))
+	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one/", 0, 3))
+	assert.Equal(t, "foo/bar/one", SlicePath("foo/bar/one/", 0, 3))
 
 	// Slice first count
 	assert.Equal(t, "", SlicePath("", 0, 1))

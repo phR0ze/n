@@ -28,7 +28,30 @@ func Abs(target string) (result string, err error) {
 
 // Base wraps the filepath.Base but doesn't default to . when empty
 func Base(src string) (result string) {
+
+	// Drop the trailing slash if it exists
+	if len(src) > 1 && rune(src[len(src)-1]) == '/' {
+		src = src[:len(src)-1]
+	}
+
+	// Call base function
 	base := filepath.Base(src)
+	if base != "." {
+		result = base
+	}
+	return
+}
+
+// Dir wraps the filepath.Dir and trims off tailing slashes
+func Dir(src string) (result string) {
+
+	// Drop the trailing slash if it exists
+	if len(src) > 1 && rune(src[len(src)-1]) == '/' {
+		src = src[:len(src)-1]
+	}
+
+	// Call base function
+	base := filepath.Dir(src)
 	if base != "." {
 		result = base
 	}
@@ -185,6 +208,12 @@ func SharedDir(first, second string) (result string) {
 
 // SlicePath provides a ruby like slice function for path nubs
 func SlicePath(target string, i, j int) (result string) {
+
+	// Drop the trailing slash if it exists
+	if len(target) > 1 && rune(target[len(target)-1]) == '/' {
+		target = target[:len(target)-1]
+	}
+
 	x := strings.Split(target, "/")
 
 	// Convert to positive notation to simplify logic
@@ -193,7 +222,7 @@ func SlicePath(target string, i, j int) (result string) {
 	}
 
 	// Offset indices to include root
-	if target != "" && rune(target[0]) == rune('/') {
+	if target != "" && rune(target[0]) == '/' {
 		if i == 1 {
 			i--
 		} else if i == 0 && j >= 0 {
