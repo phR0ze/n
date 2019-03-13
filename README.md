@@ -11,10 +11,14 @@ convenience functions and the Queryable type.
 * [Queryable](#queryable)
   * [Iterator Pattern](#iterator-pattern)
   * [Deferred Execution](#deferred-execution)
-  * [Types](#types)
-  * [Functions](#functions)
-  * [Methods](#methods)
-  * [Exports](#exports)
+  * [Types](#queryable-types)
+  * [Functions](#queryable-functions)
+  * [Methods](#queryable-methods)
+  * [Exports](#queryable-exports)
+* [QStr](#qstr)
+  * [QStr Functions](#qstr-functions)
+  * [QStr Exports](#qstr-exports)
+  * [QStr Methods](#qstr-methods)
 
 # Queryable <a name="queryable"></a>
 ***Queryable*** provides a way to generically handle Go collection types and provides a plethera
@@ -93,8 +97,9 @@ Some methods only apply to particular underlying collection types as called out 
 | Contains     | Check that all given items are found            | 1     | 1   | 1   | 1    |       |
 | ContainsAny  | Check that any given items are found            | 1     | 1   | 1   | 1    |       |
 | Copy         | Copy the given obj into this queryable          | 1     | 1   | 1   | 1    | 1x    |
-| DeleteAt     | Deletes the item at the given index location    | 1     | 1   | 1   | 1    | 1x    |
-| Each         | Iterate over the queryable and execute actions  | 1     | 1   | 1   | 1    | 1.10x |
+| Delete       | Delete all items that match the given obj       |       | 1   |     |      |       |
+| DeleteAt     | Deletes the item at the given index location    | 1     | 1   | 1   | 1    | 1.10x |
+| Each         | Iterate over the queryable and execute actions  | 1     | 1   | 1   | 1    | 1.33x |
 | Join         | Join slice items as string with given delimiter | 1     |     |     |      |       |
 | Len          | Get the length of the collection                | 1     | 1   | 1   | 1    |       |
 | Load         | Load Yaml/JSON from file into queryable         |       | 1   |     |      |       |
@@ -114,25 +119,44 @@ Some methods only apply to particular underlying collection types as called out 
 ## Exports <a name="exports"></a>
 Exports process deferred execution and convert the result to a usable external type
 
-| Function     | Description                                     | Return Type               |
-| ------------ | ----------------------------------------------- | ------------------------- |
-| A            | Export queryable as a string                    | `string`                  |
-| B            | Export queryable as a bool                      | `bool`                    |
-| I            | Export queryable as an int                      | `int`                     |
-| M            | Export queryable as a string map of interface{} | `map[string]interface{}`  |
-| O            | Export queryable as underlying type interface{} | `interface{}`             |
-| S            | Export queryable as a slice of interface{}      | `[]interface{}`           |
-| Ints         | Export queryable as a slice of int              | `[]int`                   |
-| Strs         | Export queryable as a slice of string           | `[]string`                |
-| AAMap        | Export queryable as a string map of string      | `map[string]string`       |
-| ASAMap       | Export queryable as a string map of []string    | `map[string][]string`     |
-| SAMap        | Export queryable as a slice of map...           | `[]map[string]interface{}`|
-| SAAMap       | Export queryable as a slice of map...           | `[]map[string]string`     |
+| Function     | Description                                           | Return Type               |
+| ------------ | ----------------------------------------------------- | ------------------------- |
+| A            | Export queryable as a string                          | `string`                  |
+| B            | Export queryable as a bool                            | `bool`                    |
+| I            | Export queryable as an int                            | `int`                     |
+| M            | Export queryable as a string map of interface{}       | `map[string]interface{}`  |
+| O            | Export queryable as underlying type interface{}       | `interface{}`             |
+| S            | Export queryable as a slice of interface{}            | `[]interface{}`           |
+| Ints         | Export queryable as a slice of int                    | `[]int`                   |
+| Strs         | Export queryable as a slice of string                 | `[]string`                |
+| AAMap        | Export queryable as a string map of string            | `map[string]string`       |
+| ASAMap       | Export queryable as a string map of []string          | `map[string][]string`     |
+| SAMap        | Export queryable as a slice of string map of...       | `[]map[string]interface{}`|
+| SAAMap       | Export queryable as a slice of string map of...       | `[]map[string]string`     |
 
-## String Functions <a name="string-functions"></a>
-| Function     | Description                                     | Done  |
-| ------------ | ----------------------------------------------- | ----- |
-| Split        | Split the string into a slice on delimiter      |       |
+# QStr <a name="qstr"></a>
+QStr implementes the Queryable Interface and integrates with other queryable types.  It provides a
+plethora of convenience methods to work with string types.
+
+## QStr Functions <a name="qstr-functions"></a>
+| Function     | Description                                                                | Bench |
+| ------------ | -------------------------------------------------------------------------- | ----- |
+| A            | Instantiate a new QStr optionally seeding it with the given value          |       |
+
+## QStr Exports <a name="qstr-exports"></a>
+Exports process deferred execution and convert the result to a usable external type
+
+| Function     | Description                                           | Return Type               |
+| ------------ | ----------------------------------------------------- | ------------------------- |
+| A            | Export QStr as a string                               | `string`                  |
+| B            | Export QStr as bytes                                  | `[]byte`                  |
+| Q            | Export QStr as a Queryable                            | `Queryable`               |
+
+## QStr Methods <a name="qstr-methods"></a>
+| Method       | Description                                                                | Bench |
+| ------------ | -------------------------------------------------------------------------- | ----- |
+| At           | Return run at the given neg/pos index notation                             | 1x    |
+| Type         | Return the QType identifying this queryable type                           | 1x    |
 
 ## Slice Functions
 | Function     | Description                                     | Slice | IntSlice | StrSlice | StrMapSlice |

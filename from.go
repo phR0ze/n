@@ -8,7 +8,7 @@ import (
 )
 
 // Load a yaml file as a Queryable
-func Load(filepath string) (result *Queryable, err error) {
+func Load(filepath string) (result *OldQueryable, err error) {
 	var yamlBytes []byte
 	if yamlBytes, err = ioutil.ReadFile(filepath); err == nil {
 		data := map[string]interface{}{}
@@ -20,7 +20,7 @@ func Load(filepath string) (result *Queryable, err error) {
 }
 
 // FromYaml return a queryable from the given Yaml
-func FromYaml(yml string) (result *Queryable, err error) {
+func FromYaml(yml string) (result *OldQueryable, err error) {
 	data := map[string]interface{}{}
 	if err = yaml.Unmarshal([]byte(yml), &data); err == nil {
 		result = Q(data)
@@ -30,7 +30,7 @@ func FromYaml(yml string) (result *Queryable, err error) {
 
 // FromYamlTmplFile loads a yaml file from disk and processes any templating
 // provided by the tmpl package returning an unmarshaled yaml block queryable.
-func FromYamlTmplFile(filepath string, vars map[string]string) *Queryable {
+func FromYamlTmplFile(filepath string, vars map[string]string) *OldQueryable {
 	if data, err := ioutil.ReadFile(filepath); err == nil {
 		if tpl, err := tmpl.New(string(data), "{{", "}}"); err == nil {
 			if result, err := tpl.Process(vars); err == nil {

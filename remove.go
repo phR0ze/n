@@ -3,7 +3,7 @@ package n
 import "reflect"
 
 // TakeFirst remove an return the first item.
-func (q *Queryable) TakeFirst() (item interface{}, ok bool) {
+func (q *OldQueryable) TakeFirst() (item interface{}, ok bool) {
 	if !q.TypeSingle() && q.v.Len() > 0 {
 		if q.Kind == reflect.Array || q.Kind == reflect.Slice {
 
@@ -24,7 +24,7 @@ func (q *Queryable) TakeFirst() (item interface{}, ok bool) {
 }
 
 // TakeFirstCnt remove cnt items and return them
-func (q *Queryable) TakeFirstCnt(cnt int) (result interface{}) {
+func (q *OldQueryable) TakeFirstCnt(cnt int) (result interface{}) {
 	result = []interface{}{}
 	if !q.TypeSingle() && q.v.Len() > 0 && cnt > 0 {
 		if q.Kind == reflect.Array || q.Kind == reflect.Slice {

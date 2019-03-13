@@ -8,7 +8,7 @@ import (
 // Collecting functions that return external Go types here
 
 // A exports queryable into a string
-func (q *Queryable) A() (result string) {
+func (q *OldQueryable) A() (result string) {
 	if q != nil && !q.Nil() {
 		switch v := q.v.Interface().(type) {
 		case string:
@@ -21,7 +21,7 @@ func (q *Queryable) A() (result string) {
 }
 
 // B exports queryable into a bool
-func (q *Queryable) B() (result bool, err error) {
+func (q *OldQueryable) B() (result bool, err error) {
 	if q != nil && !q.Nil() {
 		switch v := q.v.Interface().(type) {
 		case bool:
@@ -36,7 +36,7 @@ func (q *Queryable) B() (result bool, err error) {
 }
 
 // I exports queryable into an int
-func (q *Queryable) I() (result int, err error) {
+func (q *OldQueryable) I() (result int, err error) {
 	if q != nil && !q.Nil() {
 		switch v := q.v.Interface().(type) {
 		case int:
@@ -53,7 +53,7 @@ func (q *Queryable) I() (result int, err error) {
 }
 
 // Ints exports queryable into an int slice
-func (q *Queryable) Ints() (result []int, err error) {
+func (q *OldQueryable) Ints() (result []int, err error) {
 	result = []int{}
 	if q != nil && !q.Nil() {
 		if q.TypeSlice() {
@@ -73,7 +73,7 @@ func (q *Queryable) Ints() (result []int, err error) {
 }
 
 // M exports queryable into a map
-func (q *Queryable) M() (result map[string]interface{}, err error) {
+func (q *OldQueryable) M() (result map[string]interface{}, err error) {
 	result = map[string]interface{}{}
 	if q != nil && !q.Nil() {
 		if v, ok := q.O().(map[string]interface{}); ok {
@@ -94,7 +94,7 @@ func (q *Queryable) M() (result map[string]interface{}, err error) {
 }
 
 // O exports queryable into a interface{}
-func (q *Queryable) O() interface{} {
+func (q *OldQueryable) O() interface{} {
 	if q == nil || q.Nil() {
 		return nil
 	}
@@ -102,7 +102,7 @@ func (q *Queryable) O() interface{} {
 }
 
 // Strs exports queryable into an string slice
-func (q *Queryable) Strs() (result []string) {
+func (q *OldQueryable) Strs() (result []string) {
 	result = []string{}
 	if q != nil && !q.Nil() && q.TypeSlice() {
 		next := q.Iter()
@@ -114,7 +114,7 @@ func (q *Queryable) Strs() (result []string) {
 }
 
 // AAMap exports queryable into an string to string map
-func (q *Queryable) AAMap() (result map[string]string, err error) {
+func (q *OldQueryable) AAMap() (result map[string]string, err error) {
 	result = map[string]string{}
 	if q != nil && !q.Nil() {
 		if v, ok := q.O().(map[string]string); ok {
@@ -135,7 +135,7 @@ func (q *Queryable) AAMap() (result map[string]string, err error) {
 }
 
 // ASAMap exports queryable into an string to []string map
-func (q *Queryable) ASAMap() (result map[string][]string, err error) {
+func (q *OldQueryable) ASAMap() (result map[string][]string, err error) {
 	result = map[string][]string{}
 	if q != nil && !q.Nil() {
 		if v, ok := q.O().(map[string][]string); ok {
@@ -165,7 +165,7 @@ func (q *Queryable) ASAMap() (result map[string][]string, err error) {
 }
 
 // S exports queryable into an interface{} slice
-func (q *Queryable) S() []interface{} {
+func (q *OldQueryable) S() []interface{} {
 	result := []interface{}{}
 	if q != nil && !q.Nil() && q.TypeSlice() {
 		next := q.Iter()
@@ -177,7 +177,7 @@ func (q *Queryable) S() []interface{} {
 }
 
 // SAMap exports queryable into an slice of string to interface{} map
-func (q *Queryable) SAMap() (result []map[string]interface{}, err error) {
+func (q *OldQueryable) SAMap() (result []map[string]interface{}, err error) {
 	result = []map[string]interface{}{}
 	if q != nil && !q.Nil() && q.TypeSlice() {
 		next := q.Iter()
@@ -201,7 +201,7 @@ func (q *Queryable) SAMap() (result []map[string]interface{}, err error) {
 }
 
 // SAAMap exports queryable into an slice of string to string map
-func (q *Queryable) SAAMap() (result []map[string]string, err error) {
+func (q *OldQueryable) SAAMap() (result []map[string]string, err error) {
 	result = []map[string]string{}
 	if q != nil && !q.Nil() && q.TypeSlice() {
 		next := q.Iter()
