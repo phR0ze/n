@@ -116,14 +116,18 @@ Exports process deferred execution and convert the result to a usable external t
 
 | Function     | Description                                     | Return Type               |
 | ------------ | ----------------------------------------------- | ------------------------- |
-| A            | Export queryable into a string                  | `string`                  |
-| I            | Export queryable into an int                    | `int`                     |
-| M            | Export queryable to map                         | `map[string]interface{}`  |
-| O            | Export queryable to interface{}                 | `interface{}`             |
-| S            | Export queryable to a slice of interface{}      | `[]interface{}`           |
-| AAMap        | Export queryable to string to string map        | `map[string]string`       |
-| Ints         | Export queryable into an int slice              | `[]int`                   |
-| Strs         | Export queryable into a string slice            | `[]string`                |
+| A            | Export queryable as a string                    | `string`                  |
+| B            | Export queryable as a bool                      | `bool`                    |
+| I            | Export queryable as an int                      | `int`                     |
+| M            | Export queryable as a string map of interface{} | `map[string]interface{}`  |
+| O            | Export queryable as underlying type interface{} | `interface{}`             |
+| S            | Export queryable as a slice of interface{}      | `[]interface{}`           |
+| Ints         | Export queryable as a slice of int              | `[]int`                   |
+| Strs         | Export queryable as a slice of string           | `[]string`                |
+| AAMap        | Export queryable as a string map of string      | `map[string]string`       |
+| ASAMap       | Export queryable as a string map of []string    | `map[string][]string`     |
+| SAMap        | Export queryable as a slice of map...           | `[]map[string]interface{}`|
+| SAAMap       | Export queryable as a slice of map...           | `[]map[string]string`     |
 
 ## String Functions <a name="string-functions"></a>
 | Function     | Description                                     | Done  |
