@@ -8,7 +8,7 @@ import (
 )
 
 // O is an alias for interface{} to reduce verbosity
-// i'm using O for Object as I is already taken for Int types
+// i'm using O for Object as 'I' is already taken for Int types
 type O interface{}
 
 // Queryable provides chainable deferred execution
@@ -152,8 +152,9 @@ func (q *Queryable) AnyWhere(lambda func(O) bool) bool {
 	return false
 }
 
-// Append items to the end of the collection and return the queryable
-// converting to a collection if necessary
+// Append modifies the underlying type, converting it to a slice as needed,
+// then appending the given items to the underlying collection.
+// Returns the queryable for chaining.
 func (q *Queryable) Append(items ...interface{}) *Queryable {
 	q.toSlice(items...)
 	for i := 0; i < len(items); i++ {
