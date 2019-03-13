@@ -346,13 +346,6 @@ func (q *Queryable) Copy(obj interface{}) *Queryable {
 	return q
 }
 
-// Delete item from iterable. If iterable is a map the corresponding key will be deleted.
-// If iterable is a slice all matching entries will be deleted. Returns true if something
-// was deleted.
-func (q *Queryable) Delete(item interface{}) (ok bool) {
-	return
-}
-
 // DeleteAt deletes the item at the given index location. Allows for negative notation
 // returns the element in query form for Nil Queryable if missing
 func (q *Queryable) DeleteAt(i int) (item *Queryable) {

@@ -1,29 +1,33 @@
-# n or nub
-Collection of missing Go helper functions reminiscent of Ruby/C#. I love the
-elegance of Ruby's short named plethera of chainable methods while C# has
-some awesome deferred execution. This package was created to reduce the verbosity
-required when coding in Go.
+# n
+***n*** is a collection of missing Go helper functions reminiscent of Ruby/C#. I love the elegance
+of Ruby's short named plethera of chainable methods while C# has some awesome deferred execution.
+Why not stay with Ruby or C# then, well I like Go's ability to generate a single statically linked 
+binary, Go's concurrancy model, Go's performance, Go's package ecosystem and Go's tool chain.
+This package was created to reduce the verbosity required when coding in Go by providing some of the
+things I miss from other languages.
 
 ## Table of Contents
-* [Backlog](#backlog)
-* [References](#references)
+* [Queryable](#queryable)
   * [Iterator Pattern](#iterator-pattern)
-* [Implemented](#implemented)
+  * [Deferred Execution](#deferred-execution)
+  * [Implemented](#implemented)
 
-## Backlog <a name="backlog"></a>
-* Implement chainable slice functions
-* Implement deferred execution
+# Queryable <a name="queryable"></a>
+Queryable provides a way to generically handle Go collection types while providing a plethera of
+Ruby like methods to make life a little easier. Since I'm using Reflection to accomplish this it
+obviously comes at a cost, which in some cases isn't worth it. However as found in many cases, as
+found with languages like Ruby and C#, the actual work being done far out ways the bookkeeping
+overhead incurred with the use of reflection. Other times the speed and convenience of not having to
+reimplement a Delete or Contains function for a Slice far out weighs the performance cost.
 
-## References <a name="references"></a>
+## Iterator Pattern <a name="iterator-pattern"></a>
+Since Queryable is fundamentally based on the notion of iterables or iterating over collections that
+was the first challenge to solve. How do you generically iterate over all primitive Go types.
 
-### Deferred Execution <a name="deferred-execution"></a>
-TBD
-
-### Iterator Pattern <a name="iterator-pattern"></a>
 I implemented the iterator pattern based off of the iterator closure pattern disscussed
 by blog https://ewencp.org/blog/golang-iterators/index.htm mainly for syntactic style;
 other [sources](https://stackoverflow.com/questions/14000534/what-is-most-idiomatic-way-to-create-an-iterator-in-go)
-indicates that the closure style iterator is about 3x slower than normal. However my own benchmarking was much closer:
+indicate that the closure style iterator is about 3x slower than normal. However my own benchmarking was much closer:
 
 Changing the order in which my benchmarks run seems to affect the time (caching?)  
 At any rate on average I'm seeing only about a 33.33% performance hit. 33% in nested large
@@ -47,9 +51,12 @@ BenchmarkArrayIterator-16      	       1	1178876072 ns/op
 BenchmarkEach-16               	       1	1686159938 ns/op
 ```
 
-## Implemented <a name="implemented"></a>
+## Deferred Execution <a name="deferred-execution"></a>
+I haven't got around to it yet but the intent is there
 
-### Functions <a name="functions"></a>
+# Implemented <a name="implemented"></a>
+
+## Functions <a name="functions"></a>
 Some functions only apply to particular underlying collection types as called out in the table.
 
 **Key: '1' = Implemented, '0' = Not Implemented, 'blank' = NA**
@@ -85,7 +92,7 @@ Some functions only apply to particular underlying collection types as called ou
 | TypeSlice    | Is queryable reflect.Array or reflect.Map       | 1     | 1   | 1   | 1     |
 | TypeSingle   | Is queryable encapsualting a non-collection     | 1     | 1   | 1   | 1     |
 
-### Exports <a name="exports"></a>
+## Exports <a name="exports"></a>
 Exports process deferred execution and convert the result to a usable external type
 
 | Function     | Description                                     | Return Type               |
@@ -99,14 +106,14 @@ Exports process deferred execution and convert the result to a usable external t
 | Ints         | Export queryable into an int slice              | `[]int`                   |
 | Strs         | Export queryable into a string slice            | `[]string`                |
 
-### String Functions <a name="string-functions"></a>
+## String Functions <a name="string-functions"></a>
 | Function     | Description                                     | Done  |
 | ------------ | ----------------------------------------------- | ----- |
 | Split        | Split the string into a slice on delimiter      |       |
 
 
 
-### Slice Functions
+## Slice Functions
 | Function     | Description                                     | Slice | IntSlice | StrSlice | StrMapSlice |
 | ------------ | ----------------------------------------------- | ----- | -------- | -------- | ----------- |
 | NewTYPE      | Creates a new nub encapsulating the TYPE        | 1     | 1        | 1        | 1           |
@@ -133,7 +140,7 @@ Exports process deferred execution and convert the result to a usable external t
 | Uniq         | Ensure only uniq items exist in the slice       | 0     | 1        | 1        | 0           |
 | Where        | Select the items that match the given lambda    | 0     | 0        | 0        | 0           |
 
-### Map Functions
+## Map Functions
 | Function     | Description                                     | IntMap | StrMap | ? |
 | ------------ | ----------------------------------------------- | -------- | -------- | ----------- |
 | NewTYPE      | Creates a new nub encapsulating the TYPE        | 0        | 1        | 0           |
@@ -151,8 +158,3 @@ Exports process deferred execution and convert the result to a usable external t
 | StrMapByName | Get the str map by name and multi-key           | 0        | 1        | 0           |
 | StrMapSlice  | Get the str map slice by the multi-key          | 0        | 1        | 0           |
 | StrSlice     | Get the str slice by the multi-key              | 0        | 1        | 0           |
-
-## Thoughts
-https://golang.org/pkg/container/list/
-https://golang.org/src/container/list/list.go
-https://ewencp.org/blog/golang-iterators/index.html

@@ -3,12 +3,14 @@ package n
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 const benchMarkSize = 9999999
+const expensiveSize = 99999
 
 type bob struct {
 	o string
@@ -69,6 +71,28 @@ func BenchmarkFind_LargeStandardLoop(t *testing.B) {
 		if x == benchMarkSize-1 {
 			break
 		}
+	}
+}
+
+// Benchmark DeleteAt on large slices
+//--------------------------------------------------------------------------------------------------
+func BenchmarkDeleteAt_LargeSlice(t *testing.B) {
+	items := Range(0, expensiveSize)
+	for len(items) > 0 {
+		i := rand.Intn(len(items))
+		if i+1 < len(items) {
+			items = append(items[:i], items[i+1:]...)
+		} else {
+			items = items[:i]
+		}
+	}
+}
+
+func BenchmarkDeleteAt_Queryable(t *testing.B) {
+	q := Q(Range(0, expensiveSize))
+	for q.Len() > 0 {
+		i := rand.Intn(q.Len())
+		q.DeleteAt(i)
 	}
 }
 
