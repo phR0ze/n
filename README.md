@@ -14,6 +14,7 @@ convenience functions and the Queryable type.
   * [Types](#types)
   * [Functions](#functions)
   * [Methods](#methods)
+  * [Exports](#exports)
 
 # Queryable <a name="queryable"></a>
 ***Queryable*** provides a way to generically handle Go collection types and provides a plethera
@@ -72,41 +73,43 @@ I haven't got around to it yet but the intent is there
 ## Functions <a name="functions"></a>
 ***n*** provides a number of functions to assist in working with collection types.
 
-| Function     | Description                                     | Slice | Map | Str |  Cust |
-| ------------ | ----------------------------------------------- | ----- | ----| --- | ----- |
-| N            | Creates queryable encapsulating nil             | 1     |     |     |       |
-| Q            | Creates queryable encapsulating the given TYPE  | 1     | 1   | 1   | 1     |
+| Function     | Description                                     | Slice | Map | Str | Cust |
+| ------------ | ----------------------------------------------- | ----- | ----| --- | ---- |
+| N            | Creates queryable encapsulating nil             | 1     |     |     |      |
+| Q            | Creates queryable encapsulating the given TYPE  | 1     | 1   | 1   | 1    |
 
 ## Methods <a name="methods"></a>
 Some methods only apply to particular underlying collection types as called out in the table.
 
-**Key: '1' = Implemented, '0' = Not Implemented, 'blank' = NA**
+**Key: '1' = Implemented, '0' = Not Implemented, 'blank' = Unsupported, Bench nx = slowness**
 
-| Function     | Description                                     | Slice | Map | Str |  Cust | Bench |
-| ------------ | ----------------------------------------------- | ----- | ----| --- | ----- | ----- |
-| Any          | Check if the queryable is not nil and not empty | 1     | 1   | 1   | 1     |       |
-| AnyWhere     | Check if any match the given lambda             | 1     | 1   | 1   | 1     |       |
-| Append       | Add items to the end of the collection          | 1     | 0   | 1   | 0     |       |
-| At           | Return item at the given neg/pos index notation | 1     |     | 1   | 0     |       |
-| Clear        | Clear out the underlying collection             | 1     | 1   | 1   | 0     |       |
-| Contains     | Check that all given items are found            | 1     | 1   | 1   | 1     |       |
-| ContainsAny  | Check that any given items are found            | 1     | 1   | 1   | 1     |       |
-| Each         | Iterate over the queryable and execute actions  | 1     | 1   | 1   | 1     |       |
-| Join         | Join slice items as string with given delimiter | 1     |     |     |       |       |
-| Len          | Get the length of the collection                | 1     | 1   | 1   | 1     |       |
-| Load         | Load Yaml/JSON from file into queryable         |       | 1   |     |       |       |
-| Map          | Manipulate the queryable data into a new form   | 1     | 1   | 1   | 1     |       |
-| Merge        | Merge other queryables in priority order        | 0     | 0   | 0   | 0     |       |
-| Set          | Set the queryable's encapsulated object         | 1     | 1   | 1   | 1     |       |
-| TakeFirst    | Remove and return the first item                | 1     |     | 1   | 1     |       |
-| TakeFirstCnt | Remove and return the first cnt items           | 0     | 0   | 0   | 0     |       |
-| TakeLast     | Remove and return the last item                 | 0     | 0   | 0   | 0     |       |
-| TakeLastCnt  | Remove and return the last cnt items            | 0     | 0   | 0   | 0     |       |
-| TypeIter     | Is queryable iterable                           | 1     | 1   | 1   | 1     |       |
-| TypeMap      | Is queryable reflect.Map                        | 1     | 1   | 1   | 1     |       |
-| TypeStr      | Is queryable encapsualting a string             | 1     | 1   | 1   | 1     |       |
-| TypeSlice    | Is queryable reflect.Array or reflect.Map       | 1     | 1   | 1   | 1     |       |
-| TypeSingle   | Is queryable encapsualting a non-collection     | 1     | 1   | 1   | 1     |       |
+| Function     | Description                                     | Slice | Map | Str | Cust | Bench |
+| ------------ | ----------------------------------------------- | ----- | ----| --- | ---- | ----- |
+| Any          | Check if the queryable is not nil and not empty | 1     | 1   | 1   | 1    | 1x    |
+| AnyWhere     | Check if any match the given lambda             | 1     | 1   | 1   | 1    | 3x    |
+| Append       | Add items to the end of the collection          | 1     |     | 1   | 1    | 10x   |
+| At           | Return item at the given neg/pos index notation | 1     |     | 1   | 1    | 1x    |
+| Clear        | Clear out the underlying collection             | 1     | 1   | 1   | 1    | 1x    |
+| Contains     | Check that all given items are found            | 1     | 1   | 1   | 1    |       |
+| ContainsAny  | Check that any given items are found            | 1     | 1   | 1   | 1    |       |
+| Copy         | Copy the given obj into this queryable          | 1     | 1   | 1   | 1    | 1x    |
+| DeleteAt     | Deletes the item at the given index location    | 1     | 1   | 1   | 1    | 1x    |
+| Each         | Iterate over the queryable and execute actions  | 1     | 1   | 1   | 1    | 1.10x |
+| Join         | Join slice items as string with given delimiter | 1     |     |     |      |       |
+| Len          | Get the length of the collection                | 1     | 1   | 1   | 1    |       |
+| Load         | Load Yaml/JSON from file into queryable         |       | 1   |     |      |       |
+| Map          | Manipulate the queryable data into a new form   | 1     | 1   | 1   | 1    |       |
+| Merge        | Merge other queryables in priority order        | 0     | 0   | 0   | 0    |       |
+| Set          | Set the queryable's encapsulated object         | 1     | 1   | 1   | 1    |       |
+| TakeFirst    | Remove and return the first item                | 1     |     | 1   | 1    |       |
+| TakeFirstCnt | Remove and return the first cnt items           | 0     | 0   | 0   | 0    |       |
+| TakeLast     | Remove and return the last item                 | 0     | 0   | 0   | 0    |       |
+| TakeLastCnt  | Remove and return the last cnt items            | 0     | 0   | 0   | 0    |       |
+| TypeIter     | Is queryable iterable                           | 1     | 1   | 1   | 1    |       |
+| TypeMap      | Is queryable reflect.Map                        | 1     | 1   | 1   | 1    |       |
+| TypeStr      | Is queryable encapsualting a string             | 1     | 1   | 1   | 1    |       |
+| TypeSlice    | Is queryable reflect.Array or reflect.Map       | 1     | 1   | 1   | 1    |       |
+| TypeSingle   | Is queryable encapsualting a non-collection     | 1     | 1   | 1   | 1    |       |
 
 ## Exports <a name="exports"></a>
 Exports process deferred execution and convert the result to a usable external type
@@ -126,8 +129,6 @@ Exports process deferred execution and convert the result to a usable external t
 | Function     | Description                                     | Done  |
 | ------------ | ----------------------------------------------- | ----- |
 | Split        | Split the string into a slice on delimiter      |       |
-
-
 
 ## Slice Functions
 | Function     | Description                                     | Slice | IntSlice | StrSlice | StrMapSlice |

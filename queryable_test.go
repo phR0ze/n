@@ -9,8 +9,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const benchMarkSize = 9999999
-const expensiveSize = 99999
+const nines7 = 9999999
+const nines6 = 999999
+const nines5 = 99999
 
 type bob struct {
 	o string
@@ -25,7 +26,7 @@ var smallStringSet = []string{"Lorem", "ipsum", "dolor", "sit", "amet,", "consec
 	"culpa", "qui", "officia", "deserunt", "mollit", "anim", "id", "est", "laborum"}
 
 func BenchmarkClosureIterator(t *testing.B) {
-	q := Q(Range(0, benchMarkSize))
+	q := Q(Range(0, nines7))
 	next := q.Iter()
 	for x, ok := next(); ok; x, ok = next() {
 		fmt.Sprintln(x.(int) + 1)
@@ -33,13 +34,13 @@ func BenchmarkClosureIterator(t *testing.B) {
 }
 
 func BenchmarkArrayIterator(t *testing.B) {
-	for _, item := range Range(0, benchMarkSize) {
+	for _, item := range Range(0, nines7) {
 		fmt.Sprintln(item + 1)
 	}
 }
 
 func BenchmarkEach(t *testing.B) {
-	Q(Range(0, benchMarkSize)).Each(func(item O) {
+	Q(Range(0, nines7)).Each(func(item O) {
 		fmt.Sprintln(item.(int) + 1)
 	})
 }
@@ -61,38 +62,16 @@ func BenchmarkFind_SmallStandardLoop(t *testing.B) {
 
 // Benchmark Find - Large set
 func BenchmarkFind_LargeQueryable(t *testing.B) {
-	Q(Range(0, benchMarkSize)).Find(func(x O) bool {
-		return x.(int) == benchMarkSize-1
+	Q(Range(0, nines7)).Find(func(x O) bool {
+		return x.(int) == nines7-1
 	})
 }
 
 func BenchmarkFind_LargeStandardLoop(t *testing.B) {
-	for _, x := range Range(0, benchMarkSize) {
-		if x == benchMarkSize-1 {
+	for _, x := range Range(0, nines7) {
+		if x == nines7-1 {
 			break
 		}
-	}
-}
-
-// Benchmark DeleteAt on large slices
-//--------------------------------------------------------------------------------------------------
-func BenchmarkDeleteAt_LargeSlice(t *testing.B) {
-	items := Range(0, expensiveSize)
-	for len(items) > 0 {
-		i := rand.Intn(len(items))
-		if i+1 < len(items) {
-			items = append(items[:i], items[i+1:]...)
-		} else {
-			items = items[:i]
-		}
-	}
-}
-
-func BenchmarkDeleteAt_Queryable(t *testing.B) {
-	q := Q(Range(0, expensiveSize))
-	for q.Len() > 0 {
-		i := rand.Intn(q.Len())
-		q.DeleteAt(i)
 	}
 }
 
@@ -308,6 +287,8 @@ func TestCustomQ(t *testing.T) {
 	}
 }
 
+// Any
+//--------------------------------------------------------------------------------------------------
 func TestAny(t *testing.T) {
 	{
 		// empty []int
@@ -346,6 +327,23 @@ func TestAny(t *testing.T) {
 		assert.False(t, Q([]int{}).Any())
 		assert.True(t, Q([]int{1}).Any())
 	}
+}
+
+// AnyWhere
+//--------------------------------------------------------------------------------------------------
+func BenchmarkAnyWhere_Normal(t *testing.B) {
+	for _, item := range Range(0, nines7) {
+		if item == nines6 {
+			break
+		}
+	}
+}
+
+func BenchmarkAnyWhere_Queryable(t *testing.B) {
+	q := Q(Range(0, nines7))
+	q.AnyWhere(func(x O) bool {
+		return x.(int) == nines6
+	})
 }
 
 func TestAnyWhere(t *testing.T) {
@@ -408,29 +406,46 @@ func TestAnyWhere(t *testing.T) {
 	}
 }
 
+// Append
+//--------------------------------------------------------------------------------------------------
+func BenchmarkAppend_Normal(t *testing.B) {
+	ints := []int{}
+	for _, i := range Range(0, nines6) {
+		ints = append(ints, i)
+	}
+}
+
+func BenchmarkAppend_Queryable(t *testing.B) {
+	q := Q([]int{})
+	for _, i := range Range(0, nines6) {
+		q.Append(i)
+	}
+}
+
 func TestAppend(t *testing.T) {
+	// Append to valuetype
 	{
-		// Append to valuetype
 		q := Q(2)
 		assert.Equal(t, 1, q.Len())
-		assert.Equal(t, 2, q.Append(1).Len())
+		assert.Equal(t, []int{2, 1}, q.Append(1).O())
 	}
+
+	// Append one
 	{
-		// Append one
 		q := N()
 		assert.Equal(t, 0, q.Len())
-		assert.Equal(t, 1, q.Append(2).Len())
-		assert.Equal(t, 2, q.Append(3).Len())
+		assert.Equal(t, []int{2}, q.Append(2).O())
+		assert.Equal(t, []int{2, 3}, q.Append(3).O())
 	}
+
+	// Append many ints
 	{
-		// Append many ints
 		q := Q([]int{1})
-		assert.Equal(t, 1, q.Len())
-		assert.Equal(t, 3, q.Append(2, 3).Len())
-		assert.Equal(t, []int{1, 2, 3}, q.O())
+		assert.Equal(t, []int{1, 2, 3}, q.Append(2, 3).O())
 	}
+
+	// Append many strings
 	{
-		// Append many strings
 		{
 			q := N()
 			assert.Equal(t, 0, q.Len())
@@ -442,11 +457,30 @@ func TestAppend(t *testing.T) {
 			assert.Equal(t, 4, q.Append("3", "4").Len())
 		}
 	}
+
+	// Append to a slice of custom type
+	{
+		q := Q([]bob{{o: "3"}})
+		assert.Equal(t, []bob{{o: "3"}, {o: "1"}}, q.Append(bob{o: "1"}).O())
+		assert.Equal(t, []bob{{o: "3"}, {o: "1"}, {o: "2"}, {o: "4"}}, q.Append(bob{o: "2"}, bob{o: "4"}).O())
+	}
+
+	// Append to a map
+	{
+		q := Q(map[string]string{"1": "one"})
+		defer func() {
+			err := recover()
+			assert.Equal(t, "Append doesn't support map types", err)
+		}()
+		q.Append(KeyVal{Key: "2", Val: "two"})
+	}
 }
 
+// At
+//--------------------------------------------------------------------------------------------------
 func TestAt(t *testing.T) {
+	// String
 	{
-		// String
 		q := Q("test")
 		assert.Equal(t, "t", q.At(0).A())
 		assert.Equal(t, "e", q.At(1).A())
@@ -457,11 +491,12 @@ func TestAt(t *testing.T) {
 		assert.Equal(t, "e", q.At(-3).A())
 		assert.Equal(t, "t", q.At(-4).A())
 	}
+
+	// String pointer
 	{
-		// String pointer
 		str := "test"
 		q := Q(&str)
-		assert.Equal(t, "t", q.At(0).A())
+		assert.Equal(t, "t", q.At(0).O())
 		assert.Equal(t, "e", q.At(1).A())
 		assert.Equal(t, "s", q.At(2).A())
 		assert.Equal(t, "t", q.At(3).A())
@@ -470,61 +505,100 @@ func TestAt(t *testing.T) {
 		assert.Equal(t, "e", q.At(-3).A())
 		assert.Equal(t, "t", q.At(-4).A())
 	}
+
+	// Single item case
 	{
-		// Single item case
 		assert.Equal(t, "t", Q("t").At(-1).A())
 		assert.Equal(t, 3, getI(t, Q([]int{3}).At(-1)))
 	}
+
+	// []int
 	{
-		// []int
 		q := Q([]int{1, 2, 3, 4})
-		assert.Equal(t, 4, getI(t, q.At(-1)))
-		assert.Equal(t, 3, getI(t, q.At(-2)))
-		assert.Equal(t, 2, getI(t, q.At(-3)))
-		assert.Equal(t, 1, getI(t, q.At(0)))
-		assert.Equal(t, 2, getI(t, q.At(1)))
-		assert.Equal(t, 3, getI(t, q.At(2)))
-		assert.Equal(t, 4, getI(t, q.At(3)))
+		assert.Equal(t, 4, q.At(-1).O())
+		assert.Equal(t, 3, q.At(-2).O())
+		assert.Equal(t, 2, q.At(-3).O())
+		assert.Equal(t, 1, q.At(0).O())
+		assert.Equal(t, 2, q.At(1).O())
+		assert.Equal(t, 3, q.At(2).O())
+		assert.Equal(t, 4, q.At(3).O())
+	}
+
+	// custom type
+	{
+		q := Q([]bob{{o: "1"}, {o: "2"}, {o: "3"}, {o: "4"}})
+		assert.Equal(t, bob{o: "4"}, q.At(-1).O())
+		assert.Equal(t, bob{o: "3"}, q.At(-2).O())
+		assert.Equal(t, bob{o: "2"}, q.At(-3).O())
+		assert.Equal(t, bob{o: "1"}, q.At(0).O())
+		assert.Equal(t, bob{o: "2"}, q.At(1).O())
+		assert.Equal(t, bob{o: "3"}, q.At(2).O())
+		assert.Equal(t, bob{o: "4"}, q.At(3).O())
 	}
 }
 
+// Clear
+//--------------------------------------------------------------------------------------------------
 func TestClear(t *testing.T) {
+	// Empty
 	{
-		// Empty
 		q := Q("")
 		assert.False(t, q.Any())
 		assert.Equal(t, 0, q.Clear().Len())
 		assert.False(t, q.Any())
 	}
+
+	// String
 	{
-		// String
 		q := Q("test")
 		assert.True(t, q.Any())
 		assert.Equal(t, "test", q.A())
 		assert.Equal(t, 4, q.Len())
 		assert.Equal(t, 0, q.Clear().Len())
-		assert.False(t, q.Any())
-	}
-	{
-		// []int
-		q := Q([]int{1, 2, 3})
-		assert.True(t, q.Any())
-		assert.Equal(t, 3, q.Len())
-		q.Clear()
+		assert.Equal(t, "", q.A())
 		assert.False(t, q.Any())
 		assert.Equal(t, 0, q.Len())
 	}
+
+	// []int
 	{
-		// map[string]interface
-		q := Q(map[string]interface{}{"1": "one", "2": "two", "3": "three"})
+		q := Q([]int{1, 2, 3})
 		assert.True(t, q.Any())
 		assert.Equal(t, 3, q.Len())
+		assert.Equal(t, []int{1, 2, 3}, q.O())
 		q.Clear()
+		assert.Equal(t, []int{}, q.O())
+		assert.False(t, q.Any())
+		assert.Equal(t, 0, q.Len())
+	}
+
+	// map[string]interface
+	{
+		q := Q(map[string]string{"1": "one", "2": "two", "3": "three"})
+		assert.True(t, q.Any())
+		assert.Equal(t, 3, q.Len())
+		assert.Equal(t, map[string]string{"1": "one", "2": "two", "3": "three"}, q.O())
+		q.Clear()
+		assert.Equal(t, map[string]string{}, q.O())
+		assert.False(t, q.Any())
+		assert.Equal(t, 0, q.Len())
+	}
+
+	// custom type
+	{
+		q := Q([]bob{{o: "1"}, {o: "2"}, {o: "3"}, {o: "4"}})
+		assert.True(t, q.Any())
+		assert.Equal(t, 4, q.Len())
+		assert.Equal(t, []bob{{o: "1"}, {o: "2"}, {o: "3"}, {o: "4"}}, q.O())
+		q.Clear()
+		assert.Equal(t, []bob{}, q.O())
 		assert.False(t, q.Any())
 		assert.Equal(t, 0, q.Len())
 	}
 }
 
+// Contains
+//--------------------------------------------------------------------------------------------------
 func TestContains(t *testing.T) {
 	{
 		// Empty slice
@@ -613,6 +687,8 @@ func TestContains(t *testing.T) {
 	}
 }
 
+// ContainsAny
+//--------------------------------------------------------------------------------------------------
 func TestContainsAny(t *testing.T) {
 	{
 		// Empty slice
@@ -694,9 +770,21 @@ func TestContainsAny(t *testing.T) {
 	}
 }
 
+// Copy
+//--------------------------------------------------------------------------------------------------
 func TestCopy(t *testing.T) {
+
+	// Queryables
 	{
-		// Strings
+		q1 := N()
+		assert.Equal(t, N(), q1)
+		q2 := Q("test")
+		assert.Equal(t, "test", q2.O())
+		assert.Equal(t, "test", q1.Copy(q2).O())
+	}
+
+	// Strings
+	{
 		{
 			q := Q("")
 			assert.False(t, q.Any())
@@ -710,8 +798,9 @@ func TestCopy(t *testing.T) {
 			assert.Equal(t, "foo", q.A())
 		}
 	}
+
+	// Maps
 	{
-		// Maps
 		{
 			q := N()
 			assert.False(t, q.Any())
@@ -729,16 +818,18 @@ func TestCopy(t *testing.T) {
 			assert.Equal(t, data2, getM(t, q))
 		}
 	}
+
+	// custom type
 	{
-		// custom type
 		q := N()
 		assert.False(t, q.Any())
 		data := []bob{{o: "3"}}
 		assert.True(t, q.Copy(data).Any())
 		assert.Equal(t, data[0], q.At(0).O())
 	}
+
+	// []int
 	{
-		// []int
 		cnt := []bool{}
 		q := N()
 		q.Copy([]int{1, 2, 3})
@@ -755,6 +846,28 @@ func TestCopy(t *testing.T) {
 			}
 		}
 		assert.Len(t, cnt, 3)
+	}
+}
+
+// DeleteAt
+//--------------------------------------------------------------------------------------------------
+func BenchmarkDeleteAt_Normal(t *testing.B) {
+	items := Range(0, nines5)
+	for len(items) > 0 {
+		i := rand.Intn(len(items))
+		if i+1 < len(items) {
+			items = append(items[:i], items[i+1:]...)
+		} else {
+			items = items[:i]
+		}
+	}
+}
+
+func BenchmarkDeleteAt_Queryable(t *testing.B) {
+	q := Q(Range(0, nines5))
+	for q.Len() > 0 {
+		i := rand.Intn(q.Len())
+		q.DeleteAt(i)
 	}
 }
 

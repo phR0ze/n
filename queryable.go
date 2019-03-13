@@ -156,6 +156,9 @@ func (q *Queryable) AnyWhere(lambda func(O) bool) bool {
 // then appending the given items to the underlying collection.
 // Returns the queryable for chaining.
 func (q *Queryable) Append(items ...interface{}) *Queryable {
+	if q.TypeMap() {
+		panic("Append doesn't support map types")
+	}
 	q.toSlice(items...)
 	for i := 0; i < len(items); i++ {
 		item := reflect.ValueOf(items[i])
@@ -181,9 +184,28 @@ func (q *Queryable) At(i int) *Queryable {
 	return N()
 }
 
-// Clear the queryable collection
+// Clear the underlying collection in the queryable
 func (q *Queryable) Clear() *Queryable {
-	*q = *N()
+	switch q.Kind {
+
+	// Slice types
+	case reflect.Array, reflect.Slice:
+		*q.v = reflect.MakeSlice(q.v.Type(), 0, 10)
+		q.Iter = sliceIter(*q.v)
+
+	// Handle map types
+	case reflect.Map:
+		*q.v = reflect.MakeMap(q.v.Type())
+		q.Iter = mapIter(*q.v)
+
+	// Handle string types
+	case reflect.String:
+		*q.v = reflect.ValueOf("")
+		q.Iter = strIter(*q.v)
+
+	default:
+		panic("unhandled type")
+	}
 	return q
 }
 
@@ -340,15 +362,20 @@ func (q *Queryable) ContainsAny(obj interface{}) bool {
 
 // Copy given obj into this one and reset types
 func (q *Queryable) Copy(obj interface{}) *Queryable {
-	other := Q(obj)
+	var other *Queryable
+	if x, ok := obj.(*Queryable); ok {
+		other = x
+	} else {
+		other = Q(obj)
+	}
 	q.Kind = other.Kind
 	q.Iter = other.Iter
 	q.v = other.v
 	return q
 }
 
-// DeleteAt deletes the item at the given index location. Allows for negative notation
-// returns the element in query form for Nil Queryable if missing
+// DeleteAt deletes the item at the given index location. Allows for negative notation.
+// Returns the deleted element Queryable or Nil Queryable if missing.
 func (q *Queryable) DeleteAt(i int) (item *Queryable) {
 	if q.TypeIter() && !q.TypeMap() {
 		if i < 0 {
