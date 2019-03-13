@@ -346,52 +346,50 @@ func (q *Queryable) Copy(obj interface{}) *Queryable {
 	return q
 }
 
+// Delete item from iterable. If iterable is a map the corresponding key will be deleted.
+// If iterable is a slice all matching entries will be deleted. Returns true if something
+// was deleted.
+func (q *Queryable) Delete(item interface{}) (ok bool) {
+	return
+}
+
 // DeleteAt deletes the item at the given index location. Allows for negative notation
 // returns the element in query form for Nil Queryable if missing
-func (q *Queryable) DeleteAt(i int) *Queryable {
-	if q.TypeIter() {
+func (q *Queryable) DeleteAt(i int) (item *Queryable) {
+	if q.TypeIter() && !q.TypeMap() {
 		if i < 0 {
 			i = q.v.Len() + i
 		}
 		if i >= 0 && i < q.v.Len() {
+			switch x := q.v.Interface().(type) {
 
-			// for strings work at the rune level
-			if str, ok := q.v.Interface().(string); ok {
-				item := Q(string(str[i]))
-				*q.v = reflect.ValueOf(deleteRune(str, i))
-				q.Iter = sliceIter(*q.v)
-				return item
-			}
+			// for strings delete at the rune level
+			case string:
+				item = Q(string(x[i]))
+				if i+1 < len(x) {
+					*q.v = reflect.ValueOf(string(append([]rune(x[:i]), []rune(x[i+1:])...)))
+				} else {
+					*q.v = reflect.ValueOf(x[:i])
+				}
 
 			// delete object from iterable
-			item := Q(q.v.Index(i).Interface())
-			// delete item
+			default:
+				item = Q(q.v.Index(i).Interface())
+				if i+1 < q.v.Len() {
+					*q.v = reflect.AppendSlice(q.v.Slice(0, i), q.v.Slice(i+1, q.v.Len()))
+				} else {
+					*q.v = q.v.Slice(0, i)
+				}
+			}
+
+			q.Iter = sliceIter(*q.v)
 			return item
 		}
 	}
-	return N()
-}
-func deleteObj(q *Queryable) {
-	// Helper function for DeleteAt
-	// var result []rune
-	// runes := []rune(str)
-	// if i+1 < len(str) {
-	// 	result = append(runes[:i], runes[i+1:]...)
-	// } else {
-	// 	result = runes[:i]
-	// }
-	// return string(result)
-}
-func deleteRune(str string, i int) string {
-	// Helper function for DeleteAt
-	var result []rune
-	runes := []rune(str)
-	if i+1 < len(str) {
-		result = append(runes[:i], runes[i+1:]...)
-	} else {
-		result = runes[:i]
+	if item == nil {
+		item = N()
 	}
-	return string(result)
+	return
 }
 
 // Each iterates over the queryable and executes the given action

@@ -11,7 +11,7 @@ import (
 const benchMarkSize = 9999999
 
 type bob struct {
-	data string
+	o string
 }
 
 var smallStringSet = []string{"Lorem", "ipsum", "dolor", "sit", "amet,", "consectetur", "adipiscing", "elit,", "sed", "do",
@@ -261,26 +261,26 @@ func TestCustomQ(t *testing.T) {
 	}
 	{
 		// []bob
-		q := Q([]bob{{data: "3"}})
+		q := Q([]bob{{o: "3"}})
 		assert.True(t, q.Any())
-		assert.Equal(t, bob{data: "3"}, q.At(0).O())
+		assert.Equal(t, bob{o: "3"}, q.At(0).O())
 	}
 	{
 		// Pointer []bob
-		bober := []bob{{data: "3"}}
+		bober := []bob{{o: "3"}}
 		q := Q(&bober)
 		assert.True(t, q.Any())
-		assert.Equal(t, bob{data: "3"}, q.At(0).O())
+		assert.Equal(t, bob{o: "3"}, q.At(0).O())
 	}
 	{
 		// []bob
 		q := Q([]bob{})
 		assert.False(t, q.Any())
 		assert.Equal(t, 0, q.Len())
-		q.Append(bob{data: "3"})
+		q.Append(bob{o: "3"})
 		assert.True(t, q.Any())
 		assert.Equal(t, 1, q.Len())
-		assert.Equal(t, bob{data: "3"}, q.At(0).O())
+		assert.Equal(t, bob{o: "3"}, q.At(0).O())
 	}
 }
 
@@ -313,7 +313,7 @@ func TestAny(t *testing.T) {
 	}
 	{
 		// []bob
-		q := Q([]bob{{data: "3"}})
+		q := Q([]bob{{o: "3"}})
 		assert.True(t, q.Any())
 	}
 	{
@@ -363,12 +363,12 @@ func TestAnyWhere(t *testing.T) {
 	}
 	{
 		// []bob
-		q := Q([]bob{{data: "3"}, {data: "4"}})
+		q := Q([]bob{{o: "3"}, {o: "4"}})
 		assert.True(t, q.AnyWhere(func(x O) bool {
-			return (x.(bob)).data == "3"
+			return (x.(bob)).o == "3"
 		}))
 		assert.False(t, q.AnyWhere(func(x O) bool {
-			return (x.(bob)).data == "5"
+			return (x.(bob)).o == "5"
 		}))
 	}
 	{
@@ -548,10 +548,10 @@ func TestContains(t *testing.T) {
 	}
 	{
 		// Custom type
-		q := Q([]bob{{data: "3"}})
+		q := Q([]bob{{o: "3"}})
 		assert.False(t, q.Contains(""))
-		assert.False(t, q.Contains(bob{data: "2"}))
-		assert.True(t, q.Contains(bob{data: "3"}))
+		assert.False(t, q.Contains(bob{o: "2"}))
+		assert.True(t, q.Contains(bob{o: "3"}))
 	}
 	{
 		q := Q([]int{1, 2, 3})
@@ -636,10 +636,10 @@ func TestContainsAny(t *testing.T) {
 	}
 	{
 		// Custom type
-		q := Q([]bob{{data: "3"}})
+		q := Q([]bob{{o: "3"}})
 		assert.False(t, q.ContainsAny(""))
-		assert.False(t, q.ContainsAny(bob{data: "2"}))
-		assert.True(t, q.ContainsAny(bob{data: "3"}))
+		assert.False(t, q.ContainsAny(bob{o: "2"}))
+		assert.True(t, q.ContainsAny(bob{o: "3"}))
 	}
 	{
 		q := Q([]int{1, 2, 3})
@@ -709,7 +709,7 @@ func TestCopy(t *testing.T) {
 		// custom type
 		q := N()
 		assert.False(t, q.Any())
-		data := []bob{{data: "3"}}
+		data := []bob{{o: "3"}}
 		assert.True(t, q.Copy(data).Any())
 		assert.Equal(t, data[0], q.At(0).O())
 	}
@@ -753,28 +753,30 @@ func TestDeleteAt(t *testing.T) {
 		assert.Equal(t, 0, getI(t, q.DeleteAt(0)))
 		assert.Equal(t, []int{1, 2, 3, 4, 5}, getInts(t, q))
 
-		// // Delete the last -1
-		// assert.Equal(t, "5", q.DeleteAt(-1).A())
-		// assert.Equal(t, "1234", q.A())
+		// Delete the last -1
+		assert.Equal(t, 5, getI(t, q.DeleteAt(-1)))
+		assert.Equal(t, []int{1, 2, 3, 4}, getInts(t, q))
 
-		// // Delete middle pos
-		// assert.Equal(t, "2", q.DeleteAt(1).A())
-		// assert.Equal(t, "134", q.A())
+		// Delete middle pos
+		assert.Equal(t, 2, getI(t, q.DeleteAt(1)))
+		assert.Equal(t, []int{1, 3, 4}, getInts(t, q))
 
-		// // Delete middle neg
-		// assert.Equal(t, "3", q.DeleteAt(-2).A())
-		// assert.Equal(t, "14", q.A())
+		// Delete middle neg
+		assert.Equal(t, 3, getI(t, q.DeleteAt(-2)))
+		assert.Equal(t, []int{1, 4}, getInts(t, q))
 	}
-	// {
-	// 	// int
-	// 	q := Q(2)
-	// 	assert.True(t, q.Contains(2))
-	// }
-	// {
-	// 	// empty []string
-	// 	q := Q([]string{})
-	// 	assert.False(t, q.Contains(""))
-	// }
+
+	// int
+	{
+		q := Q(2)
+		assert.Equal(t, N(), q.DeleteAt(0))
+	}
+
+	// empty []string
+	{
+		q := Q([]string{})
+		assert.Equal(t, N(), q.DeleteAt(0))
+	}
 
 	// string
 	{
@@ -797,59 +799,54 @@ func TestDeleteAt(t *testing.T) {
 		assert.Equal(t, "3", q.DeleteAt(-2).A())
 		assert.Equal(t, "14", q.A())
 	}
-	// {
-	// 	// full []string
-	// 	q := Q([]string{"1", "2", "3"})
-	// 	assert.False(t, q.Contains(""))
-	// 	assert.True(t, q.Contains("3"))
-	// }
-	// {
-	// 	// map
-	// 	data := map[string]interface{}{"1": "one", "2": "two", "3": "three"}
-	// 	q := Q(data)
-	// 	assert.True(t, q.Contains("1"))
-	// }
-	// {
-	// 	// Custom type
-	// 	q := Q([]bob{{data: "3"}})
-	// 	assert.False(t, q.Contains(""))
-	// 	assert.False(t, q.Contains(bob{data: "2"}))
-	// 	assert.True(t, q.Contains(bob{data: "3"}))
-	// }
-	// {
-	// 	q := Q([]int{1, 2, 3})
-	// 	assert.False(t, q.Contains([]string{}))
-	// 	assert.True(t, q.Contains(2))
-	// 	assert.False(t, q.Contains([]int{0, 3}))
-	// 	assert.True(t, q.Contains([]int{1, 3}))
-	// 	assert.True(t, q.Contains([]int{2, 3}))
-	// 	assert.False(t, q.Contains([]int{4, 5}))
-	// 	assert.False(t, q.Contains("2"))
-	// }
-	// {
-	// 	q := Q([]string{"1", "2", "3"})
-	// 	assert.False(t, q.Contains([]int{}))
-	// 	assert.False(t, q.Contains(2))
-	// 	assert.False(t, q.Contains([]string{"0", "3"}))
-	// 	assert.True(t, q.Contains([]string{"1", "3"}))
-	// 	assert.True(t, q.Contains([]string{"2", "3"}))
-	// 	assert.True(t, q.Contains("2"))
-	// }
-	// {
-	// 	assert.True(t, Q("test").Contains("tes"))
-	// 	assert.False(t, Q("test").Contains([]string{"foo", "test"}))
-	// 	assert.True(t, Q("test").Contains([]string{"tes", "test"}))
-	// 	assert.True(t, Q([]string{"foo", "test"}).Contains("test"))
-	// }
-	// {
-	// 	// map
-	// 	data := map[string]interface{}{"1": "one", "2": "two", "3": "three"}
-	// 	q := Q(data)
-	// 	assert.True(t, q.Contains("1"))
-	// 	assert.False(t, q.Contains("4"))
-	// 	assert.False(t, q.Contains([]string{"4", "2"}))
-	// 	assert.True(t, q.Contains([]string{"3", "2"}))
-	// }
+
+	// full []string
+	{
+		q := Q([]string{"0", "1", "2", "3", "4", "5"})
+
+		// Delete the first
+		assert.Equal(t, "0", q.DeleteAt(0).A())
+		assert.Equal(t, []string{"1", "2", "3", "4", "5"}, q.Strs())
+
+		// Delete the last -1
+		assert.Equal(t, "5", q.DeleteAt(-1).A())
+		assert.Equal(t, []string{"1", "2", "3", "4"}, q.Strs())
+
+		// Delete middle pos
+		assert.Equal(t, "2", q.DeleteAt(1).A())
+		assert.Equal(t, []string{"1", "3", "4"}, q.Strs())
+
+		// Delete middle neg
+		assert.Equal(t, "3", q.DeleteAt(-2).A())
+		assert.Equal(t, []string{"1", "4"}, q.Strs())
+	}
+
+	// map - not allowed
+	{
+		q := Q(map[string]interface{}{"1": "one"})
+		assert.Equal(t, N(), q.DeleteAt(0))
+	}
+
+	// Custom type
+	{
+		q := Q([]bob{{o: "0"}, {o: "1"}, {o: "2"}, {o: "3"}, {o: "4"}, {o: "5"}})
+
+		// Delete the first
+		assert.Equal(t, bob{o: "0"}, q.DeleteAt(0).O())
+		assert.Equal(t, []bob{{o: "1"}, {o: "2"}, {o: "3"}, {o: "4"}, {o: "5"}}, q.O())
+
+		// Delete the last -1
+		assert.Equal(t, bob{o: "5"}, q.DeleteAt(-1).O())
+		assert.Equal(t, []bob{{o: "1"}, {o: "2"}, {o: "3"}, {o: "4"}}, q.O())
+
+		// Delete middle pos
+		assert.Equal(t, bob{o: "2"}, q.DeleteAt(1).O())
+		assert.Equal(t, []bob{{o: "1"}, {o: "3"}, {o: "4"}}, q.O())
+
+		// Delete middle neg
+		assert.Equal(t, bob{o: "3"}, q.DeleteAt(-2).O())
+		assert.Equal(t, []bob{{o: "1"}, {o: "4"}}, q.O())
+	}
 }
 
 func TestEach(t *testing.T) {
@@ -1043,7 +1040,7 @@ func TestJoin(t *testing.T) {
 		assert.Equal(t, "test", q.Join(".").A())
 	}
 	{
-		q := Q(bob{data: "3"})
+		q := Q(bob{o: "3"})
 		assert.Equal(t, "", q.Join(".").A())
 	}
 	{
@@ -1117,7 +1114,7 @@ func TestLen(t *testing.T) {
 	{
 		// Custom type
 		{
-			q := Q([]bob{{data: "3"}})
+			q := Q([]bob{{o: "3"}})
 			assert.Equal(t, 1, q.Len())
 		}
 	}
@@ -1377,7 +1374,7 @@ func TestSplit(t *testing.T) {
 		assert.Equal(t, []string{}, q.Split(".").S())
 	}
 	{
-		q := Q([]bob{{data: "2"}})
+		q := Q([]bob{{o: "2"}})
 		assert.Equal(t, []string{}, q.Split(".").S())
 	}
 	{
