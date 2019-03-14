@@ -12,11 +12,6 @@ type QObj struct {
 	v interface{} // underlying value
 }
 
-// Value implements the Queryable interface
-func (q *QObj) Value() interface{} {
-	return q.v
-}
-
 // A exports the interface as a string
 func (q *QObj) A() (result string) {
 	if q != nil {

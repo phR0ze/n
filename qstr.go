@@ -2,7 +2,6 @@ package n
 
 import (
 	"fmt"
-	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -42,13 +41,15 @@ func A(str interface{}) (result *QStr) {
 	return
 }
 
-// Kind implements the Queryable interface
-func (q *QStr) Kind() reflect.Kind {
-	return reflect.String
+// Type returns the identifier for this queryable type.
+// Implements the queryable interface.
+func (q *QStr) Type() QType {
+	return QStrType
 }
 
-// Value implements the Queryable interface
-func (q *QStr) Value() interface{} {
+// O returns the underlying data structure
+// Implements the queryable interface.
+func (q *QStr) O() interface{} {
 	return q.v
 }
 
@@ -141,6 +142,15 @@ func (q *QStr) HasSuffix(suffix string) bool {
 // Len returns the length of the string
 func (q *QStr) Len() int {
 	return len(q.v)
+}
+
+// Nil tests if the queryable is nil.
+// Implements Queryable interface
+func (q *QStr) Nil() bool {
+	if q == nil {
+		return true
+	}
+	return false
 }
 
 // Replace wraps strings.Replace and allows for chaining and defaults

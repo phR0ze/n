@@ -9,7 +9,6 @@ import (
 // It provides a plethora of convenience methods to work with slice types.
 type QSlice struct {
 	v    *reflect.Value // underlying value
-	elem reflect.Type   // type of element in the slice
 	kind reflect.Kind   // kind of the underlying value
 }
 
@@ -44,9 +43,16 @@ func S(obj interface{}) *QSlice {
 	return q
 }
 
-// O returns the underlying slice as is
+// Type returns the identifier for this queryable type.
+// Implements the queryable interface.
+func (q *QSlice) Type() QType {
+	return QSliceType
+}
+
+// O returns the underlying data structure
+// Implements the queryable interface.
 func (q *QSlice) O() interface{} {
-	if q == nil || q.Nil() {
+	if q.Nil() {
 		return nil
 	}
 	return q.v.Interface()
@@ -54,7 +60,7 @@ func (q *QSlice) O() interface{} {
 
 // S exports QSlice into an string slice
 func (q *QSlice) S() (result []string) {
-	if q != nil && !q.Nil() && q.isSliceType() {
+	if !q.Nil() && q.isSliceType() {
 		if v, ok := q.O().([]string); ok {
 			result = v
 		} else {
@@ -171,16 +177,10 @@ func (q *QSlice) S() (result []string) {
 // 	return reflect.DeepEqual(s, other)
 // }
 
-// First returns the first time as a *QObj
-func (q *QSlice) First() (result *QObj) {
-	if q.Nil() {
-		return
-	}
-	if q.v.Len() > 0 {
-		value := q.v.Index(0).Interface()
-		result = &QObj{v: value, kind: q.Kind()}
-	} else {
-		result = A("")
+// First returns the first item or nil
+func (q *QSlice) First() (result interface{}) {
+	if !q.Nil() && q.v.Len() > 0 {
+		result = q.v.Index(0).Interface()
 	}
 	return
 }
@@ -237,9 +237,10 @@ func (q *QSlice) Len() int {
 // 	return
 // }
 
-// Nil tests if the QSlice is a nil queryable
+// Nil tests if the queryable is nil.
+// Implements Queryable interface
 func (q *QSlice) Nil() bool {
-	if q.v == nil || q.Kind == reflect.Invalid {
+	if q == nil || q.v == nil || q.kind == reflect.Invalid {
 		return true
 	}
 	return false
@@ -399,5 +400,5 @@ func (q *QSlice) Nil() bool {
 // }
 
 func (q *QSlice) isSliceType() bool {
-	return q.Kind == reflect.Array || q.Kind == reflect.Slice
+	return q.kind == reflect.Array || q.kind == reflect.Slice
 }

@@ -7,14 +7,23 @@ import (
 	"strings"
 )
 
+const (
+	_          QType = iota // QType enumeration
+	QObjType                // identifies a QObj
+	QMapType                // identifies a QMap
+	QStrType                // identifies a QStr
+	QSliceType              // identifies a QSlice
+)
+
 // QType provides a simple way to track Queryable types
 type QType uint8
 
 // Queryable provides chainable deferred execution and an algorithm
 // abstraction layer for various underlying types
 type Queryable interface {
-	Kind() reflect.Kind // Kind of the underlying value
-	Value() interface{} // Underlying value of queryable
+	O() interface{} // O returns the underlying data structure
+	Type() QType    // Type returns the identifier for this queryable type
+	Nil() bool      // Nil tests if the queryable is nil
 }
 
 //
