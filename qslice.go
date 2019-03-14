@@ -1,25 +1,71 @@
 package n
 
+import (
+	"fmt"
+	"reflect"
+)
+
 // QSlice implementes the Queryable Interface and supports generic slice types.
 // It provides a plethora of convenience methods to work with slice types.
 type QSlice struct {
-	v interface{}
+	v    *reflect.Value // underlying value
+	elem reflect.Type   // type of element in the slice
+	kind reflect.Kind   // kind of the underlying value
 }
 
-// S instantiates a new QSlice optionally seeding it
-// with the given values which may be scalar value or slice value.
-func S(values interface{}) (q *QSlice) {
-	// if values == nil {
-	// 	valuts = []string{}
-	// }
-	// return &strSliceN{v: v}
+// S instantiates a new QSlice optionally seeding it with the given
+// with the given obj which may be a scalar value or a slice value.
+// Scalar values will be encapsulated in a new slice of that type.
+func S(obj interface{}) *QSlice {
+	v := reflect.ValueOf(obj)
+	q := &QSlice{v: &v, kind: v.Kind()}
+
+	//Switch:
+	switch q.kind {
+	case reflect.Array, reflect.Slice:
+		if q.v.IsNil() {
+			*q.v = reflect.MakeSlice(q.v.Type(), 0, 10)
+		}
+	case reflect.Ptr:
+		// pv := reflect.Indirect(reflect.ValueOf(obj))
+		// pq := &OldQueryable{v: &pv, Kind: pv.Kind()}
+		// switch nq.Kind {
+		// case reflect.Array, reflect.Slice, reflect.Map, reflect.String, reflect.Chan:
+		// 	v = nv
+		// 	q = nq
+		// 	goto Switch
+		// }
+
+	// Create a new slice of the given obj type and add the obj
+	default:
+		*q.v = reflect.MakeSlice(q.v.Type(), 0, 10)
+		*q.v = reflect.Append(*q.v, *q.v)
+	}
+	return q
+}
+
+// O returns the underlying slice as is
+func (q *QSlice) O() interface{} {
+	if q == nil || q.Nil() {
+		return nil
+	}
+	return q.v.Interface()
+}
+
+// S exports QSlice into an string slice
+func (q *QSlice) S() (result []string) {
+	if q != nil && !q.Nil() && q.isSliceType() {
+		if v, ok := q.O().([]string); ok {
+			result = v
+		} else {
+			for i := 0; i < q.v.Len(); i++ {
+				item := q.v.Index(i).Interface()
+				result = append(result, fmt.Sprint(item))
+			}
+		}
+	}
 	return
 }
-
-// // S convert the slice into an string slice
-// func (s *strSliceN) S() []string {
-// 	return s.v
-// }
 
 // // Any checks if the slice has anything in it
 // func (s *strSliceN) Any() bool {
@@ -125,15 +171,19 @@ func S(values interface{}) (q *QSlice) {
 // 	return reflect.DeepEqual(s, other)
 // }
 
-// // First returns the first time as a nub type
-// func (s *strSliceN) First() (result *strN) {
-// 	if len(s.v) > 0 {
-// 		result = A(s.v[0])
-// 	} else {
-// 		result = A("")
-// 	}
-// 	return
-// }
+// First returns the first time as a *QObj
+func (q *QSlice) First() (result *QObj) {
+	if q.Nil() {
+		return
+	}
+	if q.v.Len() > 0 {
+		value := q.v.Index(0).Interface()
+		result = &QObj{v: value, kind: q.Kind()}
+	} else {
+		result = A("")
+	}
+	return
+}
 
 // // Join the underlying slice with the given delim
 // func (s *strSliceN) Join(delim string) *strN {
@@ -150,10 +200,13 @@ func S(values interface{}) (q *QSlice) {
 // 	return
 // }
 
-// // Len is a pass through to the underlying slice
-// func (s *strSliceN) Len() int {
-// 	return len(s.v)
-// }
+// Len of the collection type
+func (q *QSlice) Len() int {
+	if q.Nil() {
+		return 0
+	}
+	return q.v.Len()
+}
 
 // // Map manipulates the slice into a new form
 // func (s *strSliceN) Map(sel func(string) O) (result *Queryable) {
@@ -183,6 +236,14 @@ func S(values interface{}) (q *QSlice) {
 // 	result = s.Map(sel).Flatten()
 // 	return
 // }
+
+// Nil tests if the QSlice is a nil queryable
+func (q *QSlice) Nil() bool {
+	if q.v == nil || q.Kind == reflect.Invalid {
+		return true
+	}
+	return false
+}
 
 // // Pair simply returns the first and second slice items
 // func (s *strSliceN) Pair() (first, second string) {
@@ -336,3 +397,7 @@ func S(values interface{}) (q *QSlice) {
 // 	}
 // 	return result
 // }
+
+func (q *QSlice) isSliceType() bool {
+	return q.Kind == reflect.Array || q.Kind == reflect.Slice
+}

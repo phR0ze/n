@@ -119,20 +119,20 @@ Some methods only apply to particular underlying collection types as called out 
 ## Exports <a name="exports"></a>
 Exports process deferred execution and convert the result to a usable external type
 
-| Function     | Description                                           | Return Type               |
-| ------------ | ----------------------------------------------------- | ------------------------- |
-| A            | Export queryable as a string                          | `string`                  |
-| B            | Export queryable as a bool                            | `bool`                    |
-| I            | Export queryable as an int                            | `int`                     |
-| M            | Export queryable as a string map of interface{}       | `map[string]interface{}`  |
-| O            | Export queryable as underlying type interface{}       | `interface{}`             |
-| S            | Export queryable as a slice of interface{}            | `[]interface{}`           |
-| Ints         | Export queryable as a slice of int                    | `[]int`                   |
-| Strs         | Export queryable as a slice of string                 | `[]string`                |
-| AAMap        | Export queryable as a string map of string            | `map[string]string`       |
-| ASAMap       | Export queryable as a string map of []string          | `map[string][]string`     |
-| SAMap        | Export queryable as a slice of string map of...       | `[]map[string]interface{}`|
-| SAAMap       | Export queryable as a slice of string map of...       | `[]map[string]string`     |
+| Function     | Description                                           | Return Type                |
+| ------------ | ----------------------------------------------------- | -------------------------- |
+| A            | Export queryable as a string                          | `string`                   |
+| B            | Export queryable as a bool                            | `bool`                     |
+| I            | Export queryable as an int                            | `int`                      |
+| M            | Export queryable as a string map of interface{}       | `map[string]interface{}`   |
+| O            | Export queryable as underlying type interface{}       | `interface{}`              |
+| S            | Export queryable as a slice of interface{}            | `[]interface{}`            |
+| Ints         | Export queryable as a slice of int                    | `[]int`                    |
+| Strs         | Export queryable as a slice of string                 | `[]string`                 |
+| AAMap        | Export queryable as a string map of string            | `map[string]string`        |
+| ASAMap       | Export queryable as a string map of []string          | `map[string][]string`      |
+| SAMap        | Export queryable as a slice of string map of...       | `[]map[string]interface{}` |
+| SAAMap       | Export queryable as a slice of string map of...       | `[]map[string]string`      |
 
 # QStr <a name="qstr"></a>
 QStr implementes the Queryable Interface and integrates with other queryable types.  It provides a
@@ -146,17 +146,30 @@ plethora of convenience methods to work with string types.
 ## QStr Exports <a name="qstr-exports"></a>
 Exports process deferred execution and convert the result to a usable external type
 
-| Function     | Description                                           | Return Type               |
-| ------------ | ----------------------------------------------------- | ------------------------- |
-| A            | Export QStr as a string                               | `string`                  |
-| B            | Export QStr as bytes                                  | `[]byte`                  |
-| Q            | Export QStr as a Queryable                            | `Queryable`               |
+| Function     | Description                                           | Return Type                |
+| ------------ | ----------------------------------------------------- | -------------------------- |
+| A            | Export QStr as a string                               | `string`                   |
+| B            | Export QStr as bytes                                  | `[]byte`                   |
+| Q            | Export QStr as a Queryable                            | `Queryable`                |
 
 ## QStr Methods <a name="qstr-methods"></a>
 | Method       | Description                                                                | Bench |
 | ------------ | -------------------------------------------------------------------------- | ----- |
 | At           | Return run at the given neg/pos index notation                             | 1x    |
 | Type         | Return the QType identifying this queryable type                           | 1x    |
+| Contains     | Check that the given item is contained in the QStr                         |       |
+| ContainsAll  | Check that all the given items are contained in the QStr                   |       |
+| ContainsAny  | Check that any of the given items are contained in the QStr                |       |
+| Empty        | Returns true if the pointer is nil, string is empty or whitespace only     |       |
+| HasAnyPrefix | Checks if the string has any of the given prefixes                         |       |
+| HasAnySuffix | Checks if the string has any of the given suffixes                         |       |
+| HasPrefix    | Checks if the string has the given prefix                                  |       |
+| Len          | Returns the length of the string                                           |       |
+| Replace      | Wraps strings.Replace and allows for chaining and defaults                 |       |
+| SpaceLeft    | Returns leading whitespace                                                 |       |
+| SpaceRight   | Returns trailing whitespace                                                |       |
+| Split        | Creates a new QSlice from the split string                                 |       |
+
 
 ## Slice Functions
 | Function     | Description                                     | Slice | IntSlice | StrSlice | StrMapSlice |

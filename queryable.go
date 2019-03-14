@@ -7,25 +7,23 @@ import (
 	"strings"
 )
 
-const (
-	_          QType = iota
-	QMapType         // identifies a QSlice type
-	QStrType         // identifies a QStr type
-	QSliceType       // identifies a QSlice type
-)
-
-// O is an alias for interface{} to reduce verbosity
-// i'm using O for Object as 'I' is already taken for Int types
-type O interface{}
-
 // QType provides a simple way to track Queryable types
 type QType uint8
 
 // Queryable provides chainable deferred execution and an algorithm
 // abstraction layer for various underlying types
 type Queryable interface {
-	Type() QType // Provides an easy way to identify Queryable types
+	Kind() reflect.Kind // Kind of the underlying value
+	Value() interface{} // Underlying value of queryable
 }
+
+//
+//
+//
+//
+//
+//
+//
 
 // OldQueryable provides chainable deferred execution
 // and is the heart of the algorithm abstraction layer

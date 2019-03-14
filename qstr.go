@@ -2,9 +2,11 @@ package n
 
 import (
 	"fmt"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 var (
@@ -40,9 +42,14 @@ func A(str interface{}) (result *QStr) {
 	return
 }
 
-// Type implements the Queryable interface
-func (q *QStr) Type() QType {
-	return QStrType
+// Kind implements the Queryable interface
+func (q *QStr) Kind() reflect.Kind {
+	return reflect.String
+}
+
+// Value implements the Queryable interface
+func (q *QStr) Value() interface{} {
+	return q.v
 }
 
 // A exports the QStr as an external string
@@ -77,110 +84,127 @@ func (q *QStr) Contains(target string) bool {
 }
 
 // ContainsAll checks if all the given targets are contained in this string
-func (q *QStr) ContainsAll(targets []string) bool {
-	result := true
+func (q *QStr) ContainsAll(targets ...string) bool {
+	for i := range targets {
+		if !strings.Contains(q.v, targets[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+// ContainsAny checks if any of the targets are contained in this string
+func (q *QStr) ContainsAny(targets ...string) bool {
 	for i := range targets {
 		if strings.Contains(q.v, targets[i]) {
 			return true
 		}
 	}
-	return result
+	return false
 }
 
-// // ContainsAny checks if any of the targets are contained in this string
-// func (q *strN) ContainsAny(targets ...string) bool {
-// 	for i := range targets {
-// 		if strings.Contains(q.v, targets[i]) {
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
+// Empty returns true if the pointer is nil, string is empty or whitespace only
+func (q *QStr) Empty() bool {
+	return q == nil || q.TrimSpace().v == ""
+}
 
-// // Empty return true if the string is nothing or just whitespace
-// func (q *strN) Empty() bool {
-// 	return q.TrimSpace().v == ""
-// }
+// HasAnyPrefix checks if the string has any of the given prefixes
+func (q *QStr) HasAnyPrefix(prefixes ...string) bool {
+	for i := range prefixes {
+		if strings.HasPrefix(q.v, prefixes[i]) {
+			return true
+		}
+	}
+	return false
+}
 
-// // HasAnyPrefix checks if the string has any of the given prefixes
-// func (q *strN) HasAnyPrefix(prefixes ...string) bool {
-// 	for i := range prefixes {
-// 		if strings.HasPrefix(q.v, prefixes[i]) {
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
+// HasAnySuffix checks if the string has any of the given suffixes
+func (q *QStr) HasAnySuffix(suffixes ...string) bool {
+	for i := range suffixes {
+		if strings.HasSuffix(q.v, suffixes[i]) {
+			return true
+		}
+	}
+	return false
+}
 
-// // HasAnySuffix checks if the string has any of the given suffixes
-// func (q *strN) HasAnySuffix(suffixes ...string) bool {
-// 	for i := range suffixes {
-// 		if strings.HasSuffix(q.v, suffixes[i]) {
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
+// HasPrefix checks if the string has the given prefix
+func (q *QStr) HasPrefix(prefix string) bool {
+	return strings.HasPrefix(q.v, prefix)
+}
 
-// // HasPrefix checks if the string has the given prefix
-// func (q *strN) HasPrefix(prefix string) bool {
-// 	return strings.HasPrefix(q.v, prefix)
-// }
+// HasSuffix checks if the string has the given suffix
+func (q *QStr) HasSuffix(suffix string) bool {
+	return strings.HasSuffix(q.v, suffix)
+}
 
-// // HasSuffix checks if the string has the given suffix
-// func (q *strN) HasSuffix(suffix string) bool {
-// 	return strings.HasSuffix(q.v, suffix)
-// }
+// Len returns the length of the string
+func (q *QStr) Len() int {
+	return len(q.v)
+}
 
-// // Len returns the length of the string
-// func (q *strN) Len() int {
-// 	return len(q.v)
-// }
+// Replace wraps strings.Replace and allows for chaining and defaults
+func (q *QStr) Replace(old, new string, ns ...int) *QStr {
+	n := -1
+	if len(ns) > 0 {
+		n = ns[0]
+	}
+	return A(strings.Replace(q.v, old, new, n))
+}
 
-// // Replace allows for chaining and default to all instances
-// func (q *strN) Replace(new, old string, ns ...int) *strN {
-// 	n := -1
-// 	if len(ns) > 0 {
-// 		n = ns[0]
-// 	}
-// 	return A(strings.Replace(q.v, new, old, n))
-// }
+// SpaceLeft returns leading whitespace
+func (q *QStr) SpaceLeft() *QStr {
+	spaces := []rune{}
+	for _, r := range q.v {
+		if unicode.IsSpace(r) {
+			spaces = append(spaces, r)
+		} else {
+			break
+		}
+	}
+	return A(spaces)
+}
 
-// // SpaceLeft returns leading whitespace
-// func (q *strN) SpaceLeft() string {
-// 	spaces := []rune{}
-// 	for _, r := range q.v {
-// 		if unicode.IsSpace(r) {
-// 			spaces = append(spaces, r)
-// 		} else {
-// 			break
-// 		}
-// 	}
-// 	return string(spaces)
-// }
+// SpaceRight returns trailing whitespace
+func (q *QStr) SpaceRight() *QStr {
+	spaces := []rune{}
+	for i := len(q.v) - 1; i > 0; i-- {
+		if unicode.IsSpace(rune(q.v[i])) {
+			spaces = append(spaces, rune(q.v[i]))
+		} else {
+			break
+		}
+	}
+	return A(spaces)
+}
 
-// // Split creates a new nub from the split string
-// func (q *strN) Split(delim string) *QSlice {
-// 	return S(strings.Split(q.v, delim)...)
-// }
+// Split creates a new QSlice from the split string.
+// Optional 'delim' defaults to space allows for changing the split delimiter.
+func (q *QStr) Split(delim ...string) *QSlice {
+	_delim := " "
+	if len(delim) > 0 {
+		_delim = delim[0]
+	}
+	return S(strings.Split(q.v, _delim))
+}
 
-// // SplitOn splits the string on the first occurance of the delim.
-// // The delim is included in the first component.
-// func (q *strN) SplitOn(delim string) (first, second string) {
-// 	if q.v != "" {
-// 		s := q.Split(delim)
-// 		if s.Len() > 0 {
-// 			first = s.First().A()
-// 			if strings.Contains(q.v, delim) {
-// 				first += delim
-// 			}
-// 		}
-// 		if s.Len() > 1 {
-// 			second = s.Slice(1, -1).Join(delim).A()
-// 		}
-// 	}
-// 	return
-// }
+// SplitOn splits the string on the first occurance of the delim.
+// The delim is included in the first component.
+func (q *QStr) SplitOn(delim string) (first, second string) {
+	// if q.v != "" {
+	// 	s := q.Split(delim)
+	// 	if s.Len() > 0 {
+	// 		first = s.First().A()
+	// 		if strings.Contains(q.v, delim) {
+	// 			first += delim
+	// 		}
+	// 	}
+	// 	if s.Len() > 1 {
+	// 		second = s.Slice(1, -1).Join(delim).A()
+	// 	}
+	// }
+	return
+}
 
 // // ToASCII with given string
 // func (q *strN) ToASCII() *strN {
@@ -192,10 +216,10 @@ func (q *QStr) ContainsAll(targets []string) bool {
 // 	return A(strings.TrimPrefix(q.v, prefix))
 // }
 
-// // TrimSpace pass through to strings.TrimSpace
-// func (q *strN) TrimSpace() *strN {
-// 	return A(strings.TrimSpace(q.v))
-// }
+// TrimSpace pass through to strings.TrimSpace
+func (q *QStr) TrimSpace() *QStr {
+	return A(strings.TrimSpace(q.v))
+}
 
 // // TrimSpaceLeft trims leading whitespace
 // func (q *strN) TrimSpaceLeft() *strN {

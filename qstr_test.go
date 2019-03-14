@@ -82,73 +82,114 @@ func TestQStr_At(t *testing.T) {
 	assert.Equal(t, 't', q.At(5))
 }
 
-// func TestStrContains(t *testing.T) {
-// 	assert.True(t, A("test").Contains("tes"))
-// 	assert.False(t, A("test").Contains("bob"))
-// }
+func TestQStr_Contains(t *testing.T) {
+	assert.True(t, A("test").Contains("tes"))
+	assert.False(t, A("test").Contains("bob"))
+}
 
-// func TestStrContainsAny(t *testing.T) {
-// 	assert.True(t, A("test").ContainsAny("tes"))
-// 	assert.True(t, A("test").ContainsAny("f", "t"))
-// 	assert.False(t, A("test").ContainsAny("f", "b"))
-// }
+func TestQStr_ContainsAll(t *testing.T) {
+	assert.True(t, A("test").ContainsAll("tes", "est"))
+	assert.False(t, A("test").ContainsAll("bob", "est"))
+}
 
-// func TestStrHasAnyPrefix(t *testing.T) {
-// 	assert.True(t, A("test").HasAnyPrefix("tes"))
-// 	assert.True(t, A("test").HasAnyPrefix("bob", "tes"))
-// 	assert.False(t, A("test").HasAnyPrefix("bob"))
-// }
+func TestQStr_ContainsAny(t *testing.T) {
+	assert.True(t, A("test").ContainsAny("tes"))
+	assert.True(t, A("test").ContainsAny("f", "t"))
+	assert.False(t, A("test").ContainsAny("f", "b"))
+}
 
-// func TestStrHasAnySuffix(t *testing.T) {
-// 	assert.True(t, A("test").HasAnySuffix("est"))
-// 	assert.True(t, A("test").HasAnySuffix("bob", "est"))
-// 	assert.False(t, A("test").HasAnySuffix("bob"))
-// }
+func TestQStr_Empty(t *testing.T) {
+	var empty *QStr
+	assert.True(t, A("").Empty())
+	assert.True(t, empty.Empty())
+	assert.True(t, A("  ").Empty())
+	assert.True(t, A("\n").Empty())
+	assert.True(t, A("\t").Empty())
+}
 
-// func TestStrHasPrefix(t *testing.T) {
-// 	assert.True(t, A("test").HasPrefix("tes"))
-// }
+func TestQStr_HasAnyPrefix(t *testing.T) {
+	assert.True(t, A("test").HasAnyPrefix("tes"))
+	assert.True(t, A("test").HasAnyPrefix("bob", "tes"))
+	assert.False(t, A("test").HasAnyPrefix("bob"))
+}
 
-// func TestStrHasSuffix(t *testing.T) {
-// 	assert.True(t, A("test").HasSuffix("est"))
-// }
+func TestQStr_HasAnySuffix(t *testing.T) {
+	assert.True(t, A("test").HasAnySuffix("est"))
+	assert.True(t, A("test").HasAnySuffix("bob", "est"))
+	assert.False(t, A("test").HasAnySuffix("bob"))
+}
 
-// func TestStrSplit(t *testing.T) {
-// 	assert.Equal(t, []string{"1", "2"}, A("1.2").Split(".").S())
-// }
+func TestQStr_HasPrefix(t *testing.T) {
+	assert.True(t, A("test").HasPrefix("tes"))
+}
 
-// func TestStrSplitOn(t *testing.T) {
-// 	{
-// 		first, second := A("").SplitOn(":")
-// 		assert.Equal(t, "", first)
-// 		assert.Equal(t, "", second)
-// 	}
-// 	{
-// 		first, second := A("foo").SplitOn(":")
-// 		assert.Equal(t, "foo", first)
-// 		assert.Equal(t, "", second)
-// 	}
-// 	{
-// 		first, second := A("foo:").SplitOn(":")
-// 		assert.Equal(t, "foo:", first)
-// 		assert.Equal(t, "", second)
-// 	}
-// 	{
-// 		first, second := A(":foo").SplitOn(":")
-// 		assert.Equal(t, ":", first)
-// 		assert.Equal(t, "foo", second)
-// 	}
-// 	{
-// 		first, second := A("foo: bar").SplitOn(":")
-// 		assert.Equal(t, "foo:", first)
-// 		assert.Equal(t, " bar", second)
-// 	}
-// 	{
-// 		first, second := A("foo: bar:frodo").SplitOn(":")
-// 		assert.Equal(t, "foo:", first)
-// 		assert.Equal(t, " bar:frodo", second)
-// 	}
-// }
+func TestQStr_HasSuffix(t *testing.T) {
+	assert.True(t, A("test").HasSuffix("est"))
+}
+
+func TestQStr_Len(t *testing.T) {
+	assert.Equal(t, 0, A("").Len())
+	assert.Equal(t, 4, A("test").Len())
+}
+
+func TestQStr_Replace(t *testing.T) {
+	assert.Equal(t, "tfoo", A("test").Replace("est", "foo").A())
+	assert.Equal(t, "foost", A("test").Replace("te", "foo").A())
+	assert.Equal(t, "foostfoo", A("testte").Replace("te", "foo").A())
+}
+
+func TestQStr_SpaceLeft(t *testing.T) {
+	assert.Equal(t, "", A("").SpaceLeft().A())
+	assert.Equal(t, "  ", A("  bob").SpaceLeft().A())
+	assert.Equal(t, "\n", A("\nbob").SpaceLeft().A())
+	assert.Equal(t, " \t ", A(" \t bob").SpaceLeft().A())
+}
+
+func TestQStr_SpaceRight(t *testing.T) {
+	assert.Equal(t, "", A("").SpaceRight().A())
+	assert.Equal(t, "  ", A("bob  ").SpaceRight().A())
+	assert.Equal(t, "\n", A("bob\n").SpaceRight().A())
+	assert.Equal(t, " \t ", A("bob \t ").SpaceRight().A())
+}
+
+func TestQStr_Split(t *testing.T) {
+	assert.Equal(t, []string{""}, A("").Split(".").O())
+	assert.Equal(t, []string{"1", "2"}, A("1.2").Split(".").O())
+	assert.Equal(t, []string{"1", "2"}, A("1.2").Split(".").S())
+}
+
+func TestQStr_SplitOn(t *testing.T) {
+	{
+		first, second := A("").SplitOn(":")
+		assert.Equal(t, "", first)
+		assert.Equal(t, "", second)
+	}
+	{
+		first, second := A("foo").SplitOn(":")
+		assert.Equal(t, "foo", first)
+		assert.Equal(t, "", second)
+	}
+	{
+		first, second := A("foo:").SplitOn(":")
+		assert.Equal(t, "foo:", first)
+		assert.Equal(t, "", second)
+	}
+	{
+		first, second := A(":foo").SplitOn(":")
+		assert.Equal(t, ":", first)
+		assert.Equal(t, "foo", second)
+	}
+	{
+		first, second := A("foo: bar").SplitOn(":")
+		assert.Equal(t, "foo:", first)
+		assert.Equal(t, " bar", second)
+	}
+	{
+		first, second := A("foo: bar:frodo").SplitOn(":")
+		assert.Equal(t, "foo:", first)
+		assert.Equal(t, " bar:frodo", second)
+	}
+}
 
 // func TestStrSpaceLeft(t *testing.T) {
 // 	assert.Equal(t, "", A("").SpaceLeft())
