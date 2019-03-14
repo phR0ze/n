@@ -152,44 +152,44 @@ func TestQStr_SpaceRight(t *testing.T) {
 	assert.Equal(t, " \t ", A("bob \t ").SpaceRight().A())
 }
 
-func TestQStr_Split(t *testing.T) {
-	assert.Equal(t, []string{""}, A("").Split(".").O())
-	assert.Equal(t, []string{"1", "2"}, A("1.2").Split(".").O())
-	assert.Equal(t, []string{"1", "2"}, A("1.2").Split(".").S())
-}
+// func TestQStr_Split(t *testing.T) {
+// 	assert.Equal(t, []string{""}, A("").Split(".").O())
+// 	assert.Equal(t, []string{"1", "2"}, A("1.2").Split(".").O())
+// 	assert.Equal(t, []string{"1", "2"}, A("1.2").Split(".").S())
+// }
 
-func TestQStr_SplitOn(t *testing.T) {
-	{
-		first, second := A("").SplitOn(":")
-		assert.Equal(t, "", first)
-		assert.Equal(t, "", second)
-	}
-	{
-		first, second := A("foo").SplitOn(":")
-		assert.Equal(t, "foo", first)
-		assert.Equal(t, "", second)
-	}
-	{
-		first, second := A("foo:").SplitOn(":")
-		assert.Equal(t, "foo:", first)
-		assert.Equal(t, "", second)
-	}
-	{
-		first, second := A(":foo").SplitOn(":")
-		assert.Equal(t, ":", first)
-		assert.Equal(t, "foo", second)
-	}
-	{
-		first, second := A("foo: bar").SplitOn(":")
-		assert.Equal(t, "foo:", first)
-		assert.Equal(t, " bar", second)
-	}
-	{
-		first, second := A("foo: bar:frodo").SplitOn(":")
-		assert.Equal(t, "foo:", first)
-		assert.Equal(t, " bar:frodo", second)
-	}
-}
+// func TestQStr_SplitOn(t *testing.T) {
+// 	{
+// 		first, second := A("").SplitOn(":")
+// 		assert.Equal(t, "", first)
+// 		assert.Equal(t, "", second)
+// 	}
+// 	{
+// 		first, second := A("foo").SplitOn(":")
+// 		assert.Equal(t, "foo", first)
+// 		assert.Equal(t, "", second)
+// 	}
+// 	{
+// 		first, second := A("foo:").SplitOn(":")
+// 		assert.Equal(t, "foo:", first)
+// 		assert.Equal(t, "", second)
+// 	}
+// 	{
+// 		first, second := A(":foo").SplitOn(":")
+// 		assert.Equal(t, ":", first)
+// 		assert.Equal(t, "foo", second)
+// 	}
+// 	{
+// 		first, second := A("foo: bar").SplitOn(":")
+// 		assert.Equal(t, "foo:", first)
+// 		assert.Equal(t, " bar", second)
+// 	}
+// 	{
+// 		first, second := A("foo: bar:frodo").SplitOn(":")
+// 		assert.Equal(t, "foo:", first)
+// 		assert.Equal(t, " bar:frodo", second)
+// 	}
+// }
 
 // func TestStrSpaceLeft(t *testing.T) {
 // 	assert.Equal(t, "", A("").SpaceLeft())

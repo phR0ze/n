@@ -188,15 +188,15 @@ func (q *QStr) SpaceRight() *QStr {
 	return A(spaces)
 }
 
-// Split creates a new QSlice from the split string.
-// Optional 'delim' defaults to space allows for changing the split delimiter.
-func (q *QStr) Split(delim ...string) *QSlice {
-	_delim := " "
-	if len(delim) > 0 {
-		_delim = delim[0]
-	}
-	return S(strings.Split(q.v, _delim))
-}
+// // Split creates a new QSlice from the split string.
+// // Optional 'delim' defaults to space allows for changing the split delimiter.
+// func (q *QStr) Split(delim ...string) *QSlice {
+// 	_delim := " "
+// 	if len(delim) > 0 {
+// 		_delim = delim[0]
+// 	}
+// 	return S(strings.Split(q.v, _delim))
+// }
 
 // SplitOn splits the string on the first occurance of the delim.
 // The delim is included in the first component.

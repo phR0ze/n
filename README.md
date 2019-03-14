@@ -10,6 +10,7 @@ convenience functions and the Queryable types.
 ## Table of Contents
 * [Queryable](#queryable)
   * [Types](#types)
+    * [Constructors](#constructors)
   * [Functions](#functions)
   * [QSlice](#qslice)
 
@@ -42,23 +43,45 @@ Queryable Requirements:
 * ***Comfort*** - use naming and concepts in similar ways to popular languages
 
 ## Types <a name="types"></a>
-***n*** provides a number of types to assist in working with collections.
+***n*** provides a number of types to assist in working with collections. 
 
 | Type         | Description                                                                        |
 | ------------ | ---------------------------------------------------------------------------------- |
 | QSlice       | Provides a generic way to work with slice types providing convenience methods      |
+
 
 | O            | O is an alias for interface{} to reduce verbosity                           |
 | Queryable    | Chainable execution and is the heart of algorithm abstration layer          |
 | Iterator     | Closure interator pattern implementation                                    |
 | KeyVal       | Simple key value pair structure for iterating over map types                |
 
+### Constructors <a name="constructors"></a>
+Each collection type implementing the Queryable interface should have three ways to create it.
+
+Example:
+```golang
+# The default constructor
+$ slice := &QSlice{}
+
+# The wrapper constructor
+$ slice := Slice([]string{"test"})
+
+# The variadic constructor
+$ slice := Slicef("test1", "test2")
+```
+
+| Function  | Description                                                                   | Bench |
+| --------- | ----------------------------------------------------------------------------- | ----- |
+| Slice     | Instantiates a new QSlice optionally seeding it with the given obj if a Slice |       |
+| Slicef    | Instantiates a new QSlice optionally seeding it with the given variadic obj   |       |
+
+
 ## Functions <a name="functions"></a>
 ***n*** provides a number of functions to assist in working with collection types.
 
-| Function Signature | Description                                                          | Bench |
-| ------------------ | -------------------------------------------------------------------- | ----- |
-| S(obj interface{}) | Instantiates a new QSlice optionally seeding it with the given obj   |       |
+| Function  | Description                                                                   | Bench |
+| --------- | ----------------------------------------------------------------------------- | ----- |
+
 
 | N            | Creates queryable encapsulating nil             | 1     |     |     |      |
 | Q            | Creates queryable encapsulating the given TYPE  | 1     | 1   | 1   | 1    |

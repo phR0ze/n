@@ -1,43 +1,42 @@
 package n
 
-// import (
-// 	"testing"
+import (
+	"testing"
 
-// 	"github.com/stretchr/testify/assert"
-// )
+	"github.com/stretchr/testify/assert"
+)
 
-// func TestNewStrSlice(t *testing.T) {
-// 	assert.NotNil(t, S().S())
-// }
-
-// func TestStrSlice(t *testing.T) {
-// 	assert.NotNil(t, S().S())
-// 	assert.NotNil(t, S([]string{}...).S())
-// }
+func TestQSlice_Slicef(t *testing.T) {
+	assert.Equal(t, nil, Slicef().O())
+	assert.Equal(t, true, Slicef().Nil())
+	assert.Equal(t, []string{"1", "2"}, Slicef("1", "2").O())
+	assert.Equal(t, [][]string{{"1"}}, Slicef([]string{"1"}).O())
+}
 
 // func TestStrSliceAny(t *testing.T) {
 // 	assert.False(t, S().Any())
 // 	assert.True(t, S().Append("2").Any())
 // }
 
-// func TestStrSliceAppend(t *testing.T) {
-// 	{
-// 		// Append one
-// 		slice := S()
-// 		assert.Equal(t, 0, slice.Len())
-// 		slice.Append("2")
-// 		assert.Equal(t, 1, slice.Len())
-// 		assert.Equal(t, []string{"2"}, slice.S())
-// 	}
-// 	{
-// 		// Append many
-// 		slice := S()
-// 		assert.Equal(t, 0, slice.Len())
-// 		slice.Append("2", "4", "6")
-// 		assert.Equal(t, 3, slice.Len())
-// 		assert.Equal(t, []string{"2", "4", "6"}, slice.S())
-// 	}
-// }
+func TestQSlice_Append(t *testing.T) {
+	{
+		// Append one
+		slice := Slicef()
+		assert.Equal(t, 0, slice.Len())
+		slice.Append("2")
+		assert.Equal(t, 1, slice.Len())
+		assert.Equal(t, []string{"2"}, slice.O())
+	}
+	{
+		// Append many
+		slice := Slicef()
+		assert.Equal(t, 0, slice.Len())
+		slice.Append("2", "4", "6")
+		assert.Equal(t, 3, slice.Len())
+		assert.Equal(t, []string{"2", "4", "6"}, slice.O())
+	}
+}
+
 // func TestStrSliceAt(t *testing.T) {
 // 	{
 // 		slice := S().Append("1", "2", "3", "4")
