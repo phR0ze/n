@@ -5,16 +5,16 @@ import (
 	"reflect"
 )
 
-// QSlice implementes the Queryable Interface and supports generic slice types.
-// It provides a plethora of convenience methods to work with slice types.
+// QSlice provides a generic way to work with slice types providing convenience methods
+// on par with other rapid development languages. Implements the Queryable interface.
 type QSlice struct {
 	v    *reflect.Value // underlying value
 	kind reflect.Kind   // kind of the underlying value
 }
 
 // S instantiates a new QSlice optionally seeding it with the given
-// with the given obj which may be a scalar value or a slice value.
-// Scalar values will be encapsulated in a new slice of that type.
+// obj which may be a scalar value or a slice value. Scalar values
+// will be encapsulated in a new slice of that type.
 func S(obj interface{}) *QSlice {
 	v := reflect.ValueOf(obj)
 	q := &QSlice{v: &v, kind: v.Kind()}

@@ -1,74 +1,53 @@
 # n
 ***n*** is a collection of missing Go convenience functions reminiscent of Ruby/C#. I love the
-elegance of Ruby's short named plethera of chainable methods while C# has some awesome deferred
-execution.  Why not stay with Ruby or C# then, well I like Go's ability to generate a single
+elegance of Ruby's plethera of descriptive chainable methods while C# has some awesome deferred
+execution. Why not stay with Ruby or C# then? Well I like Go's ability to generate a single
 statically linked binary, Go's concurrancy model, Go's performance, Go's package ecosystem and Go's
-tool chain.  This package was created to reduce the friction I had adopting Go as my primary
-language of choice.  ***n*** is intended to reduce the coding verbosity required by Go via
-convenience functions and the Queryable type.
+tool chain. This package was created to reduce the friction I had adopting Go as my primary
+language of choice. ***n*** is intended to reduce the coding verbosity required by Go via
+convenience functions and the Queryable types.
 
 ## Table of Contents
 * [Queryable](#queryable)
-  * [Iterator Pattern](#iterator-pattern)
-  * [Deferred Execution](#deferred-execution)
-  * [Types](#queryable-types)
-  * [Functions](#queryable-functions)
+  * [Types](#types)
+  * [Functions](#functions)
+  * [QSlice](#qslice)
+
   * [Methods](#queryable-methods)
   * [Exports](#queryable-exports)
 * [QStr](#qstr)
   * [QStr Functions](#qstr-functions)
   * [QStr Exports](#qstr-exports)
   * [QStr Methods](#qstr-methods)
+* [Background](#background)
+  * [Array Type](#array-type)
+  * [Deferred Execution](#deferred-execution)
+    * [Iterator Pattern](#iterator-pattern)
 
 # Queryable <a name="queryable"></a>
-***Queryable*** provides a way to generically handle Go collection types and provides a plethera
-of Ruby like methods to make life a little easier. Since I'm using Reflection to accomplish this it
-obviously comes at a cost, which in some cases isn't worth it. However as found in many cases, the
-actual work being done far out ways the bookkeeping overhead incurred with the use of reflection.
-Other times the speed and convenience of not having to reimplement a Delete or Contains function for
-a Slice for the millionth time far out weighs the performance cost.
+***Queryable*** provide a way to generically handle collections in Go with the convenience
+methods you would expect similar to Ruby or C# making life a little easier. Since I'm using
+Reflection to accomplish this it obviously comes at a cost, which in some cases isn't worth it.
+However, as found in many cases, the actual work being done far out ways the bookkeeping overhead
+incurred with the use of reflection. Other times the speed and convenience of not having to
+re-implement a Delete or Contains function for the millionth time far out weighs the performance
+cost.
 
-## Iterator Pattern <a name="iterator-pattern"></a>
-Since Queryable is fundamentally based on the notion of iterables, iterating over collections, that
-was the first challenge to solve. How do you generically iterate over all primitive Go types.
-
-I implemented the iterator pattern based off of the iterator closure pattern disscussed by blog
-https://ewencp.org/blog/golang-iterators/index.htm mainly for syntactic style.  Some
-[sources](https://stackoverflow.com/questions/14000534/what-is-most-idiomatic-way-to-create-an-iterator-in-go)
-indicate that the closure style iterator is about 3x slower than normal. However my own benchmarking
-was much closer coming in at only 33% hit. Even at 3x slower I'm willing to take that hit for
-convenience in most case.
-
-Changing the order in which my benchmarks run seems to affect the time (caching?).
-At any rate on average I'm seeing only about a 33.33% performance hit. 33% in nested large
-data sets may impact performance in some cases but I'm betting in most cases performance
-will be dominated by actual work and not looping overhead.
-
-```bash
-# 36% slower to use Each function
-BenchmarkEach-16               	       1	1732989848 ns/op
-BenchmarkArrayIterator-16      	       1	1111445479 ns/op
-BenchmarkClosureIterator-16    	       1	1565197326 ns/op
-
-# 25% slower to use Each function
-BenchmarkArrayIterator-16      	       1	1210185264 ns/op
-BenchmarkClosureIterator-16    	       1	1662226578 ns/op
-BenchmarkEach-16               	       1	1622667779 ns/op
-
-# 30% slower to use Each function
-BenchmarkClosureIterator-16    	       1	1695826796 ns/op
-BenchmarkArrayIterator-16      	       1	1178876072 ns/op
-BenchmarkEach-16               	       1	1686159938 ns/op
-```
-
-## Deferred Execution <a name="deferred-execution"></a>
-I haven't got around to it yet but the intent is there
+Queryable Requirements:
+* ***Chaining*** - the ability to call additional array methods via a returned reference to the collection
+* ***Brevity*** - keep the naming as concise as possible while not infringing on clarity
+* ***Clarity*** - keep the naming as unambiguous as possible while not infringing on brevity
+* ***Performance*** - keep convenience functions as performant as possible while calling out significant costs
+* ***Development Speed*** - provide convenience function parity with other rapid development languages
+* ***Comfort*** - use naming and concepts in similar ways to popular languages
 
 ## Types <a name="types"></a>
-***n*** provides a number of types to assis in working with collection types.
+***n*** provides a number of types to assist in working with collections.
 
-| Type         | Description                                                                 |
-| ------------ | --------------------------------------------------------------------------- |
+| Type         | Description                                                                        |
+| ------------ | ---------------------------------------------------------------------------------- |
+| QSlice       | Provides a generic way to work with slice types providing convenience methods      |
+
 | O            | O is an alias for interface{} to reduce verbosity                           |
 | Queryable    | Chainable execution and is the heart of algorithm abstration layer          |
 | Iterator     | Closure interator pattern implementation                                    |
@@ -77,10 +56,63 @@ I haven't got around to it yet but the intent is there
 ## Functions <a name="functions"></a>
 ***n*** provides a number of functions to assist in working with collection types.
 
-| Function     | Description                                     | Slice | Map | Str | Cust |
-| ------------ | ----------------------------------------------- | ----- | ----| --- | ---- |
+| Function Signature | Description                                                          | Bench |
+| ------------------ | -------------------------------------------------------------------- | ----- |
+| S(obj interface{}) | Instantiates a new QSlice optionally seeding it with the given obj   |       |
+
 | N            | Creates queryable encapsulating nil             | 1     |     |     |      |
 | Q            | Creates queryable encapsulating the given TYPE  | 1     | 1   | 1   | 1    |
+
+
+## QSlice <a name="qslice"></a>
+Every language has the ability to collect contiguous items together in an ordered way. Typically
+this is referred to as an array, list, or an arraylist. Languages typically include functions for
+manipulating these ordered items such as adding, removing, sorting, counting etc... ***QList***,
+which wraps a Go Slice, is intended to provide these missing conveniences.
+
+Other language method references:
+* C# - https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1.add?view=netframework-4.7.2
+* Ruby - https://ruby-doc.org/core-2.6.0.preview2/Array.html
+* Java - https://docs.oracle.com/javase/8/docs/api/java/util/List.html
+
+| Signature | Description                                                                           |
+| --------- | ------------------------------------------------------------------------------------- |
+| Append    | 
+| Go     | slice = append(slice, item)
+| C#     | list.Add(item)
+| Python | list.append(item)
+| Ruby   | list.append(item)
+| Ruby   | list.push(item)
+
+| append(item)           | Add a single element to the list
+| extend(other)          | Add elements of the given list to the list
+| insert(index, element) | Inserts element to the list
+| remove(element)        | Removes Element from the List
+| index()                | returns smallest index of element in list
+| count()                | returns occurrences of element in a list
+| pop()                  | Removes Element at Given Index
+| reverse()              | Reverses a List
+| sort()                 | sorts elements of a list
+| copy()                 | Returns Shallow Copy of a List
+| clear()                | Removes all Items from the List
+| any()                  | Checks if any Element of an Iterable is True
+| all()                  | returns true when all elements in iterable is true
+| ascii()                | Returns String Containing Printable Representation
+| bool()                 | Converts a Value to Boolean
+| enumerate()            | Returns an Enumerate Object
+| filter()               | constructs iterator from elements which are true
+| iter()                 | returns iterator for an object
+| list()                 | Function	creates list in Python
+| len()                  | Returns Length of an Object
+| max()                  | returns largest element
+| min()                  | returns smallest element
+| map()                  | Applies Function and Returns a List
+| reversed()             | returns reversed iterator of a sequence
+| slice()                | creates a slice object specified by range
+| sorted()               | returns sorted list from a given iterable
+| sum()                  | Add items of an Iterable
+| zip()                  | Returns an Iterator of Tuples
+
 
 ## Methods <a name="methods"></a>
 Some methods only apply to particular underlying collection types as called out in the table.
@@ -216,3 +248,59 @@ Exports process deferred execution and convert the result to a usable external t
 | StrMapByName | Get the str map by name and multi-key           | 0        | 1        | 0           |
 | StrMapSlice  | Get the str map slice by the multi-key          | 0        | 1        | 0           |
 | StrSlice     | Get the str slice by the multi-key              | 0        | 1        | 0           |
+
+# Background <a name="background"></a>
+Efficiency is paramount when developing. We want to develop quickly, be able to pick up someone
+else's code and understand it quickly and yet still have our code execute quickly. The industry uses
+terms like ***Code Readability***, ***Code Reuse***, ***Code Maintainablity***, ***Code Clarity***,
+***Code Performance*** to describe this. These best practices have developed over a long history
+swinging wildly from one end of the spectrum to the other and back again. 
+
+Development started in the 1950's with super low level langauges and little readability, clarity or
+maintainability but awesome performance (relatively speaking). This was far left on the efficiency
+spectrum of performance vs rapid development. Coding was tedious and laborious. Then came the systems
+level languages like C (1970's) and C++ (1980's) that began shifting a little more to the right with
+more abstraction and convenience functions to reuse algorithums and code thus higher development
+speed. This worked so well that higher level languages with even more abstractions and even more
+convenience functions were created like Java (1990's), Ruby (1990's), Python (1990's), C# (2000's)
+etc... all chasing this dream of optimal efficiency but swinging away from performance toward rapid
+development on the far right. The inventors of Golang felt that the trade off with current languages
+was unacceptable and designed Go to address the problem. To their credit they were able to get a
+pretty good mix between performance and speed of development.
+
+## Deferred Execution <a name="deferred-execution"></a>
+C# has some excellent defferred execution and the concept is really slick. I haven't found a great
+need for it yet and thus haven't gotten around to it, but it's fund to research how it's done.
+
+### Iterator Pattern <a name="iterator-pattern"></a>
+Since Queryable is fundamentally based on the notion of iterables, iterating over collections, that
+was the first challenge to solve. How do you generically iterate over all primitive Go types.
+
+I implemented the iterator pattern based off of the iterator closure pattern disscussed by blog
+https://ewencp.org/blog/golang-iterators/index.htm mainly for syntactic style.  Some
+[sources](https://stackoverflow.com/questions/14000534/what-is-most-idiomatic-way-to-create-an-iterator-in-go)
+indicate that the closure style iterator is about 3x slower than normal. However my own benchmarking
+was much closer coming in at only 33% hit. Even at 3x slower I'm willing to take that hit for
+convenience in most case.
+
+Changing the order in which my benchmarks run seems to affect the time (caching?).
+At any rate on average I'm seeing only about a 33.33% performance hit. 33% in nested large
+data sets may impact performance in some cases but I'm betting in most cases performance
+will be dominated by actual work and not looping overhead.
+
+```bash
+# 36% slower to use Each function
+BenchmarkEach-16               	       1	1732989848 ns/op
+BenchmarkArrayIterator-16      	       1	1111445479 ns/op
+BenchmarkClosureIterator-16    	       1	1565197326 ns/op
+
+# 25% slower to use Each function
+BenchmarkArrayIterator-16      	       1	1210185264 ns/op
+BenchmarkClosureIterator-16    	       1	1662226578 ns/op
+BenchmarkEach-16               	       1	1622667779 ns/op
+
+# 30% slower to use Each function
+BenchmarkClosureIterator-16    	       1	1695826796 ns/op
+BenchmarkArrayIterator-16      	       1	1178876072 ns/op
+BenchmarkEach-16               	       1	1686159938 ns/op
+```
