@@ -9,9 +9,9 @@ package n
 // 	"github.com/stretchr/testify/assert"
 // )
 
-// const nines7 = 9999999
-// const nines6 = 999999
-// const nines5 = 99999
+const nines7 = 9999999
+const nines6 = 999999
+const nines5 = 99999
 
 // type bob struct {
 // 	o string
@@ -403,76 +403,6 @@ package n
 // 		q := Q([]string{"1", "2", "3"})
 // 		assert.False(t, q.AnyWhere(func(x O) bool { return x == 3 }))
 // 		assert.True(t, q.AnyWhere(func(x O) bool { return x == "3" }))
-// 	}
-// }
-
-// // Append
-// //--------------------------------------------------------------------------------------------------
-// func BenchmarkAppend_Normal(t *testing.B) {
-// 	ints := []int{}
-// 	for _, i := range Range(0, nines6) {
-// 		ints = append(ints, i)
-// 	}
-// }
-
-// func BenchmarkAppend_Queryable(t *testing.B) {
-// 	q := Q([]int{})
-// 	for _, i := range Range(0, nines6) {
-// 		q.Append(i)
-// 	}
-// }
-
-// func TestAppend(t *testing.T) {
-// 	// Append to valuetype
-// 	{
-// 		q := Q(2)
-// 		assert.Equal(t, 1, q.Len())
-// 		assert.Equal(t, []int{2, 1}, q.Append(1).O())
-// 	}
-
-// 	// Append one
-// 	{
-// 		q := N()
-// 		assert.Equal(t, 0, q.Len())
-// 		assert.Equal(t, []int{2}, q.Append(2).O())
-// 		assert.Equal(t, []int{2, 3}, q.Append(3).O())
-// 	}
-
-// 	// Append many ints
-// 	{
-// 		q := Q([]int{1})
-// 		assert.Equal(t, []int{1, 2, 3}, q.Append(2, 3).O())
-// 	}
-
-// 	// Append many strings
-// 	{
-// 		{
-// 			q := N()
-// 			assert.Equal(t, 0, q.Len())
-// 			assert.Equal(t, 3, q.Append("1", "2", "3").Len())
-// 		}
-// 		{
-// 			q := Q([]string{"1", "2"})
-// 			assert.Equal(t, 2, q.Len())
-// 			assert.Equal(t, 4, q.Append("3", "4").Len())
-// 		}
-// 	}
-
-// 	// Append to a slice of custom type
-// 	{
-// 		q := Q([]bob{{o: "3"}})
-// 		assert.Equal(t, []bob{{o: "3"}, {o: "1"}}, q.Append(bob{o: "1"}).O())
-// 		assert.Equal(t, []bob{{o: "3"}, {o: "1"}, {o: "2"}, {o: "4"}}, q.Append(bob{o: "2"}, bob{o: "4"}).O())
-// 	}
-
-// 	// Append to a map
-// 	{
-// 		q := Q(map[string]string{"1": "one"})
-// 		defer func() {
-// 			err := recover()
-// 			assert.Equal(t, "Append doesn't support map types", err)
-// 		}()
-// 		q.Append(KeyVal{Key: "2", Val: "two"})
 // 	}
 // }
 

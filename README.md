@@ -98,9 +98,10 @@ Other language method references:
 * Ruby - https://ruby-doc.org/core-2.6.0.preview2/Array.html
 * Java - https://docs.oracle.com/javase/8/docs/api/java/util/List.html
 
-| Signature | Description                                                                           |
-| --------- | ------------------------------------------------------------------------------------- |
-| Append    | 
+| Method    | Description                                                                   | Bench |
+| --------- | ----------------------------------------------------------------------------- | ----- |
+| Append    | Append items to the end of the QSlice and return QSlice for chaining          | 9x    |
+
 | Go     | slice = append(slice, item)
 | C#     | list.Add(item)
 | Python | list.append(item)
