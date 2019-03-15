@@ -11,41 +11,44 @@ type QSlice struct {
 	kind reflect.Kind   // kind of the underlying value
 }
 
-// Slice instantiates a new QSlice seeding it with the given obj if of an Array or Slice type
-// else the obj is encapsulated in a new slice of that type.
-func Slice(obj interface{}) *QSlice {
+// Slice instantiates a new QSlice with the given array/slice avoiding reflect.ValueOf
+// processing during append at a 10x overhead savings. Non slice obj are encapsulated in a
+// new slice of that type.
+func Slice(obj interface{}) (q *QSlice) {
 	v := reflect.ValueOf(obj)
-	q := &QSlice{v: &v, kind: v.Kind()}
 
-	//Switch:
-	switch q.kind {
+	switch v.Kind() {
 	case reflect.Array, reflect.Slice:
-		if q.v.IsNil() {
-			*q.v = reflect.MakeSlice(q.v.Type(), 0, 10)
-		}
-	case reflect.Ptr:
-		// pv := reflect.Indirect(reflect.ValueOf(obj))
-		// pq := &OldQueryable{v: &pv, Kind: pv.Kind()}
-		// switch nq.Kind {
-		// case reflect.Array, reflect.Slice, reflect.Map, reflect.String, reflect.Chan:
-		// 	v = nv
-		// 	q = nq
-		// 	goto Switch
-		// }
+		q = &QSlice{v: &v, kind: v.Kind()}
 
-	// Create a new slice of the given obj type and add the obj
+	// Encapsulate any non-slice in a slice of that type
 	default:
-		*q.v = reflect.MakeSlice(q.v.Type(), 0, 10)
-		*q.v = reflect.Append(*q.v, *q.v)
+		q = Slicef(obj)
 	}
-	return q
+	return
 }
 
-// Slicef instantiates a new QSlice optionally seeding it with the given
-// variadic elements which will be encapsulated in a new slice of that type.
+// Slicef encapsulates the given variadic elements in a new slice of that type.
+// Incurs the full 10x reflect overhead for large slices use Slice func instead.
 func Slicef(items ...interface{}) (q *QSlice) {
-	q = newQSlice(items)
-	q.Append(items...)
+	var typ reflect.Type
+	if len(items) > 0 && items[0] != nil {
+		// Use variadic element type for new slice
+		typ = reflect.SliceOf(reflect.TypeOf(items[0]))
+	} else {
+		// Default new slice to interface{}
+		typ = reflect.TypeOf([]interface{}{})
+	}
+	slice := reflect.MakeSlice(typ, 0, 10)
+	q = &QSlice{v: &slice, kind: slice.Kind()}
+
+	// Add the variadic elements to the new slice
+	for i := 0; i < len(items); i++ {
+		if items[i] != nil {
+			item := reflect.ValueOf(items[i])
+			*q.v = reflect.Append(*q.v, item)
+		}
+	}
 	return
 }
 
@@ -95,11 +98,12 @@ func (q *QSlice) Nil() bool {
 func (q *QSlice) Append(items ...interface{}) *QSlice {
 	if len(items) > 0 {
 		if q.Nil() {
-			*q = *(newQSlice(items))
-		}
-		for i := 0; i < len(items); i++ {
-			item := reflect.ValueOf(items[i])
-			*q.v = reflect.Append(*q.v, item)
+			*q = *(Slicef(items...))
+		} else {
+			for i := 0; i < len(items); i++ {
+				item := reflect.ValueOf(items[i])
+				*q.v = reflect.Append(*q.v, item)
+			}
 		}
 	}
 	return q
@@ -415,19 +419,6 @@ func (q *QSlice) Len() int {
 // 	}
 // 	return result
 // }
-
-// create a new slice of the given array's element type
-func newQSlice(items []interface{}) (q *QSlice) {
-	if len(items) > 0 {
-		typ := reflect.SliceOf(reflect.TypeOf(items[0]))
-		v := reflect.MakeSlice(typ, 0, 10)
-		q = &QSlice{v: &v, kind: v.Kind()}
-	} else {
-		v := reflect.Value{}
-		q = &QSlice{v: &v, kind: v.Kind()}
-	}
-	return
-}
 
 // check if the internal type is a slice type
 func (q *QSlice) isSliceType() bool {

@@ -6,11 +6,25 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestQSlice_Slice(t *testing.T) {
+	assert.Equal(t, []int{1}, Slice(1).O())
+	assert.Equal(t, []interface{}{}, Slice(nil).O())
+	assert.Equal(t, []string{"1"}, Slice("1").O())
+	assert.Equal(t, []map[string]string{map[string]string{"1": "one"}}, Slice(map[string]string{"1": "one"}).O())
+	assert.Equal(t, []string{"1", "2"}, Slice([]string{"1", "2"}).O())
+}
+
 func TestQSlice_Slicef(t *testing.T) {
-	assert.Equal(t, nil, Slicef().O())
-	assert.Equal(t, true, Slicef().Nil())
+	assert.Equal(t, []int{1}, Slicef(1).O())
+	assert.Equal(t, []string{"1"}, Slicef("1").O())
+	assert.Equal(t, []interface{}{}, Slice(nil).O())
+	assert.Equal(t, []interface{}{}, Slicef(nil).O())
+	assert.Equal(t, []interface{}{}, Slicef().O())
+	assert.False(t, Slicef().Nil())
+	assert.Equal(t, 0, Slicef().Len())
 	assert.Equal(t, []string{"1", "2"}, Slicef("1", "2").O())
 	assert.Equal(t, [][]string{{"1"}}, Slicef([]string{"1"}).O())
+	assert.Equal(t, []map[string]string{map[string]string{"1": "one"}}, Slicef(map[string]string{"1": "one"}).O())
 }
 
 // func TestStrSliceAny(t *testing.T) {
@@ -37,7 +51,7 @@ func TestQSlice_Append(t *testing.T) {
 	}
 }
 
-// func TestStrSliceAt(t *testing.T) {
+// // func TestStrSliceAt(t *testing.T) {
 // 	{
 // 		slice := S().Append("1", "2", "3", "4")
 // 		assert.Equal(t, "4", slice.At(-1))
