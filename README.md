@@ -9,10 +9,13 @@ convenience functions and the Queryable types.
 
 ## Table of Contents
 * [Queryable](#queryable)
-  * [Types](#types)
-    * [Constructors](#constructors)
-  * [Functions](#functions)
+  * [Interface](#queryable-interface)
+  * [Types](#queryable-types)
+    * [Constructors](#queryable-constructors)
+  * [Functions](#queryable-functions)
   * [QSlice](#qslice)
+    * [QSlice Append](#qslice-append)
+    * [QSlice AppendSlice](#qslice-append-slice)
 
   * [Methods](#queryable-methods)
   * [Exports](#queryable-exports)
@@ -21,7 +24,10 @@ convenience functions and the Queryable types.
   * [QStr Exports](#qstr-exports)
   * [QStr Methods](#qstr-methods)
 * [Background](#background)
-  * [Array Type](#array-type)
+  * [Performance](#performance)
+    * [Go vs Python](#go-vs-python)
+    * [Pure Reflection - 10 cost](#pure-reflection-10x-cost)
+    * [Generic Slice - 18 cost](#generic-slice-18x-cost)
   * [Deferred Execution](#deferred-execution)
     * [Iterator Pattern](#iterator-pattern)
 
@@ -42,7 +48,16 @@ Queryable Requirements:
 * ***Development Speed*** - provide convenience function parity with other rapid development languages
 * ***Comfort*** - use naming and concepts in similar ways to popular languages
 
-## Types <a name="types"></a>
+## Queryable Interface <a name="queryable-interface"></a>
+
+| Type         | Description                                                                        |
+| ------------ | ---------------------------------------------------------------------------------- |
+| O            | Returns the underlying data structure as is without any shaping                    |
+| Nil          | Tests if the queryable is nil and is always callable even on nil values            |
+| Type         | Returns the queryable identifier for the queryable type                            |
+
+
+## Queryable Types <a name="queryable-types"></a>
 ***n*** provides a number of types to assist in working with collections. 
 
 | Type         | Description                                                                        |
@@ -50,30 +65,30 @@ Queryable Requirements:
 | QSlice       | Provides a generic way to work with slice types providing convenience methods      |
 
 
-| O            | O is an alias for interface{} to reduce verbosity                           |
-| Queryable    | Chainable execution and is the heart of algorithm abstration layer          |
-| Iterator     | Closure interator pattern implementation                                    |
-| KeyVal       | Simple key value pair structure for iterating over map types                |
-
-### Constructors <a name="constructors"></a>
+### Queryable Constructors <a name="queryable-constructors"></a>
 Each collection type implementing the Queryable interface should have three ways to create it.
 
-Example:
+**A default constructor:**
 ```golang
-# The default constructor
 $ slice := &QSlice{}
-
-# The wrapper constructor
-$ slice := Slice([]string{"test"})
-
-# The variadic constructor
-$ slice := Slicef("test1", "test2")
 ```
 
-| Function  | Description                                                                   | Bench |
-| --------- | ----------------------------------------------------------------------------- | ----- |
-| Slice     | Instantiates a new QSlice optionally seeding it with the given obj if a Slice |       |
-| Slicef    | Instantiates a new QSlice optionally seeding it with the given variadic obj   |       |
+**An intelligent constructor:** which will intelligently encapsulate the given collection without
+incurring the 10x reflection cost for optimized types.
+```golang
+slice := Slice([]string{"item"})    // stores as []string{"item"}
+```
+
+**A variadic constructor:** which will generically handle any type using reflection incurring the 10x
+reflection cost.
+```golang
+slice := Slicef("item1", "item2")   // stores as []string{"item1", "item2"}
+```
+
+| Function  | Description                                                                  | Bench  |
+| --------- | ---------------------------------------------------------------------------- | ------ |
+| Slice     | Instantiates a new QSlice seeding it with the given Slice type               | 2x-10x |
+| Slicef    | Instantiates a new QSlice optionally seeding it with the given variadic obj  | 10x    |
 
 
 ## Functions <a name="functions"></a>
@@ -81,10 +96,6 @@ $ slice := Slicef("test1", "test2")
 
 | Function  | Description                                                                   | Bench |
 | --------- | ----------------------------------------------------------------------------- | ----- |
-
-
-| N            | Creates queryable encapsulating nil             | 1     |     |     |      |
-| Q            | Creates queryable encapsulating the given TYPE  | 1     | 1   | 1   | 1    |
 
 
 ## QSlice <a name="qslice"></a>
@@ -98,15 +109,50 @@ Other language method references:
 * Ruby - https://ruby-doc.org/core-2.6.0.preview2/Array.html
 * Java - https://docs.oracle.com/javase/8/docs/api/java/util/List.html
 
-| Method    | Description                                                                   | Bench |
-| --------- | ----------------------------------------------------------------------------- | ----- |
-| Append    | Append items to the end of the QSlice and return QSlice for chaining          | 9x    |
+### QSlice Append <a name="qslice-append"></a>
+Append an item to the end of the QSlice and return QSlice for chaining. Avoids the 10x reflection
+overhead cost by type asserting common types all other types incur the 10x reflection overhead cost.
 
-| Go     | slice = append(slice, item)
-| C#     | list.Add(item)
-| Python | list.append(item)
-| Ruby   | list.append(item)
-| Ruby   | list.push(item)
+**func (q *QSlice) Append(item interface{}) *QSlice**
+
+```golang
+slice := Slicef()
+slice.Append("1").O()               // []string{"1"}
+slice.Append("2").Append("3").O()   // []string{"1", "2", "3"}
+```
+
+Other language equivalents:
+* Go - slice = ***append***(slice, item)
+* C# - list.***Add***(item)
+* Python - list.***append***(item)
+* Ruby - list.***append***(item)
+* Ruby - list.***push***(item)
+
+### QSlice AppendSlice <a name="qslice-append"></a>
+AppendSlice appends the slice using variadic expansion and returns QSlice for chaining.  Avoids the
+10x reflection overhead cost by type asserting common types falling back on reflection for
+unoptimized types.
+
+**func (q *QSlice) AppendSlice(items interface{}) *QSlice**
+
+Other language equivalents:
+* Go - slice = ***append***(slice, other...)
+* C# - list.***AddRange***(other)
+* Python - list.***extend***(other)
+* Ruby - list.***concat***(other1, other2,...)
+
+```golang
+slice := Slicef()
+slice.Append("1").O()               // []string{"1"}
+slice.Append("2").Append("3").O()   // []string{"1", "2", "3"}
+```
+
+
+
+
+
+
+
 
 | append(item)           | Add a single element to the list
 | extend(other)          | Add elements of the given list to the list
@@ -292,9 +338,116 @@ development on the far right. The inventors of Golang felt that the trade off wi
 was unacceptable and designed Go to address the problem. To their credit they were able to get a
 pretty good mix between performance and speed of development.
 
+## Language Popularity <a name="language-popularity"></a>
+* https://www.tiobe.com/tiobe-index/
+* https://stackify.com/popular-programming-languages-2018/
+
+## Performance <a name="performance"></a>
+Performance is a concern in handling generics as the Golang inventors rightly pointed out. Go was
+targeted as a systems language yet also noted as being a rapid development language. Certainly in my
+experience it is being used in place of rapid development languages such as Ruby, Python and C# but
+also Java as well. Generics are so vital to rapid development that a 10x cost may be worth it.
+
+### Benchmarks Game <a name="benchmarks-game"></a>
+
+* https://www.techempower.com/benchmarks/
+* https://www.quora.com/Why-use-Rails-if-NET-Core-is-so-much-faster-in-benchmarks
+* https://www.edureka.co/blog/golang-vs-python/
+* https://getstream.io/blog/switched-python-go/
+* https://benchmarksgame-team.pages.debian.net/benchmarksgame/faster/go.html
+* https://benchmarksgame-team.pages.debian.net/benchmarksgame/faster/python3-go.html
+* https://benchmarksgame-team.pages.debian.net/benchmarksgame/faster/ruby.html
+* https://codeburst.io/javascript-vs-ruby-vs-python-which-is-the-best-language-for-your-startup-e072b14bebc7
+* https://benchmarksgame-team.pages.debian.net/benchmarksgame/which-programs-are-fast.html
+* http://ece.uprm.edu/~nayda/Courses/Icom5047F06/Papers/paper4.pdf
+
+| Test            | Py 3.7.2 | Go 1.12 | C# 2.2.1 | Ruby 2.6 | Go vs Py |
+| --------------- | -------- | ------- | -------- | -------- | -------- |
+| Binary Trees    | 81.74s   | 26.94s  | 7.73s    | 64.97s   | 3.03x    | 
+| Fannkuch-redux  | 482.90s  | 18.07s  | 17.46s   | 545.63s  | 26.72x   | 
+| Fasta           | 63.18s   | 2.07s   | 2.27s    | 63.32s   | 30.52x   | 
+| K-nucleotide    | 73.60s   | 11.98s  | 5.48s    | 189.81s  | 6.14x    | 
+| Mandlebrot      | 265.56s  | 5.50s   | 5.54s    | 452.81s  | 48.28x   |
+| N-Body          | 819.56s  | 21.19s  | 21.41s   | 387.73s  | 38.68x   | 
+| Pidigits        | 3.33s    | 2.03s   | 0.84s    | 1.71s    | 1.64x    | 
+| Regex-Redux     | 17.28s   | 29.13s  | 2.22s    | 23.58    | -1.67x   | 
+| Reverse Comple  | 16.19s   | 3.98s   | 2.99s    | 23.09s   | 4.05x    | 
+| Spectral-Norm   | 170.52s  | 3.94s   | 4.07s    | 237.96s  | 43.28x   | 
+
+### Reflection Assisted - 2x cost <a name="reflection-assisted-2x-cost"></a>
+By storing items as a `reflect.ValueOf` we can use reflection to assist in handling generic
+types but then type assert for all common types to provide those types with only a 2x cost vs
+the 10x cost that falling back on pure reflection for unhandled types will cost.
+
+6 nines slice costs 0.02ns while this implementation costs 0.02ns:
+```golang
+func (q *QSlice) Append(item interface{}) *QSlice {
+	if q.Nil() {
+		nq := Slicef(item)
+		if !nq.Nil() {
+			*q = *nq
+		}
+	} else {
+		switch slice := q.v.Interface().(type) {
+		case []int:
+			if x, ok := item.(int); ok {
+				slice = append(slice, x)
+			} else {
+				panic(fmt.Sprintf("can't insert type '%T' into []string", item))
+			}
+		default:
+			panic("unsupported")
+			item := reflect.ValueOf(item)
+			*q.v = reflect.Append(*q.v, item)
+		}
+	}
+	return q
+}
+```
+
+### Pure Reflection - 10x cost <a name="pure-reflection-10x-cost"></a>
+Storing the items as a `reflect.ValueOf` is the most elegant and obvious way of
+doing this and as eveyone knows incurs the standard 10x reflection cost.
+
+6 nines slice costs 0.01ns while this implementation costs 0.10ns:
+```golang
+func (q *QSlice) Append(items ...interface{}) *QSlice {
+	if len(items) > 0 {
+		if q.Nil() {
+			*q = *(Slicef(items...))
+		} else {
+			for i := 0; i < len(items); i++ {
+				item := reflect.ValueOf(items[i])
+				*q.v = reflect.Append(*q.v, item)
+			}
+		}
+	}
+	return q
+}
+```
+
+### Generic Slice - 18x cost <a name="generic-slice-18x-cost"></a>
+Storing the items as a `[]interface{}` avoids the upfront 10x reflection cost but then requires
+looping over the entire set of items and performing a type assertion on each to return the final
+typed slice which resulted in an 18x cost even though reflection wasn't used. 
+
+6 nines slice costs 0.01ns while this implementation costs 0.20ns:
+```golang
+func (q *QSlice) Append(items ...interface{}) *QSlice {
+	if q.Nil() {
+		*q = *(Slicef(items))
+	} else {
+		for _, item := range items {
+			q.o = append(q.o, item)
+		}
+	}
+	return q
+}
+```
+
 ## Deferred Execution <a name="deferred-execution"></a>
 C# has some excellent defferred execution and the concept is really slick. I haven't found a great
-need for it yet and thus haven't gotten around to it, but it's fund to research how it's done.
+need for it yet and thus haven't gotten around to it, but it's fun to research how it's done.
 
 ### Iterator Pattern <a name="iterator-pattern"></a>
 Since Queryable is fundamentally based on the notion of iterables, iterating over collections, that

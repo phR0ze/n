@@ -1,14 +1,15 @@
 package n
 
 import (
+	"fmt"
 	"reflect"
 )
 
 // QSlice provides a generic way to work with slice types providing convenience methods
 // on par with other rapid development languages. Implements the Queryable interface.
 type QSlice struct {
-	v    *reflect.Value // underlying value
-	kind reflect.Kind   // kind of the underlying value
+	k reflect.Kind   // underlying kind
+	v *reflect.Value // underlying value
 }
 
 // Slice instantiates a new QSlice with the given array/slice avoiding reflect.ValueOf
@@ -16,10 +17,17 @@ type QSlice struct {
 // new slice of that type.
 func Slice(obj interface{}) (q *QSlice) {
 	v := reflect.ValueOf(obj)
+	q = &QSlice{v: &v, k: v.Kind()}
 
-	switch v.Kind() {
-	case reflect.Array, reflect.Slice:
-		q = &QSlice{v: &v, kind: v.Kind()}
+	switch q.k {
+
+	// Simply store the slice
+	case reflect.Slice:
+		return
+
+	// Seed new slice with array values
+	case reflect.Array:
+		q = newSlice(obj)
 
 	// Encapsulate any non-slice in a slice of that type
 	default:
@@ -29,23 +37,36 @@ func Slice(obj interface{}) (q *QSlice) {
 }
 
 // Slicef encapsulates the given variadic elements in a new slice of that type.
-// Incurs the full 10x reflect overhead for large slices use Slice func instead.
+// Incurs the full 10x reflect overhead. For large slices use Slice func instead.
 func Slicef(items ...interface{}) (q *QSlice) {
-	var typ reflect.Type
-	if len(items) > 0 && items[0] != nil {
-		// Use variadic element type for new slice
-		typ = reflect.SliceOf(reflect.TypeOf(items[0]))
-	} else {
-		// Default new slice to interface{}
-		typ = reflect.TypeOf([]interface{}{})
-	}
-	slice := reflect.MakeSlice(typ, 0, 10)
-	q = &QSlice{v: &slice, kind: slice.Kind()}
+	return newSlice(items)
+}
 
-	// Add the variadic elements to the new slice
-	for i := 0; i < len(items); i++ {
-		if items[i] != nil {
-			item := reflect.ValueOf(items[i])
+// handles []interface{} and arrays everything else will return nil
+func newSlice(items interface{}) (q *QSlice) {
+	q = &QSlice{v: &(reflect.Value{}), k: reflect.Invalid}
+
+	v := reflect.ValueOf(items)
+	switch v.Kind() {
+	case reflect.Slice, reflect.Array:
+
+		// Return nil queryable if nothing given
+		if v.Len() == 0 {
+			return
+		}
+		elem := v.Index(0).Interface()
+		if elem == nil {
+			return
+		}
+
+		// Create new slice with type of the element
+		typ := reflect.SliceOf(reflect.TypeOf(elem))
+		slice := reflect.MakeSlice(typ, 0, 10)
+		q = &QSlice{v: &slice, k: slice.Kind()}
+
+		// Add the variadic elements to the new slice
+		for i := 0; i < v.Len(); i++ {
+			item := reflect.ValueOf(v.Index(i).Interface())
 			*q.v = reflect.Append(*q.v, item)
 		}
 	}
@@ -55,11 +76,6 @@ func Slicef(items ...interface{}) (q *QSlice) {
 // Queryable interface methods
 //--------------------------------------------------------------------------------------------------
 
-// Type returns the identifier for this queryable type
-func (q *QSlice) Type() QType {
-	return QSliceType
-}
-
 // O returns the underlying data structure as is
 func (q *QSlice) O() interface{} {
 	if q.Nil() {
@@ -68,12 +84,49 @@ func (q *QSlice) O() interface{} {
 	return q.v.Interface()
 }
 
+// Any tests if the queryable is not empty
+func (q *QSlice) Any() bool {
+	return q.Len() != 0
+}
+
+// Len returns the number of elements in the queryable
+func (q *QSlice) Len() int {
+	if q.Nil() {
+		return 0
+	}
+	return q.v.Len()
+}
+
 // Nil tests if the queryable is nil
 func (q *QSlice) Nil() bool {
-	if q == nil || q.v == nil || q.kind == reflect.Invalid {
+	if q == nil || q.v == nil || q.k == reflect.Invalid {
 		return true
 	}
 	return false
+}
+
+// Type returns the identifier for this queryable type
+func (q *QSlice) Type() QType {
+	return QSliceType
+}
+
+// Export methods
+//--------------------------------------------------------------------------------------------------
+
+// A exports QSlice as a string slice
+func (q *QSlice) A() (result []string) {
+	// //if v, ok := q.o.([]string); ok {
+	// //	result = v
+	// //} else {
+	// for i := 0; i < len(q.o); i++ {
+	// 	if x, ok := q.o[i].(string); ok {
+	// 		result = append(result, x)
+	// 	} else {
+	// 		result = append(result, fmt.Sprint(q.o[i]))
+	// 	}
+	// }
+	// //}
+	return
 }
 
 // QSlice methods
@@ -94,35 +147,65 @@ func (q *QSlice) Nil() bool {
 // 	return false
 // }
 
-// Append items to the end of the QSlice and return QSlice
-func (q *QSlice) Append(items ...interface{}) *QSlice {
-	if len(items) > 0 {
-		if q.Nil() {
-			*q = *(Slicef(items...))
-		} else {
-			for i := 0; i < len(items); i++ {
-				item := reflect.ValueOf(items[i])
-				*q.v = reflect.Append(*q.v, item)
+// Append an item to the end of the QSlice and returns QSlice for chaining. Avoids the 10x reflection
+// overhead cost by type asserting common types all other types incur the 10x reflection overhead cost.
+func (q *QSlice) Append(item interface{}) *QSlice {
+	if q.Nil() {
+		nq := Slicef(item)
+		if !nq.Nil() {
+			*q = *nq
+		}
+	} else {
+		ok := false
+		switch slice := q.v.Interface().(type) {
+		case []bool:
+			var x bool
+			if x, ok = item.(bool); ok {
+				slice = append(slice, x)
 			}
+		case []int:
+			var x int
+			if x, ok = item.(int); ok {
+				slice = append(slice, x)
+			}
+		case []string:
+			var x string
+			if x, ok = item.(string); ok {
+				slice = append(slice, x)
+			}
+		default:
+			panic("unsupported")
+			item := reflect.ValueOf(item)
+			*q.v = reflect.Append(*q.v, item)
+		}
+		if !ok {
+			panic(fmt.Sprintf("can't insert type '%T' into '%T'", item, q.v.Interface()))
 		}
 	}
 	return q
 }
 
-// // S exports QSlice into an string slice
-// func (q *QSlice) S() (result []string) {
-// 	if !q.Nil() && q.isSliceType() {
-// 		if v, ok := q.O().([]string); ok {
-// 			result = v
-// 		} else {
-// 			for i := 0; i < q.v.Len(); i++ {
-// 				item := q.v.Index(i).Interface()
-// 				result = append(result, fmt.Sprint(item))
-// 			}
-// 		}
-// 	}
-// 	return
-// }
+// AppendSlice appends the slice using variadic expansion and returns QSlice for chaining.  Avoids
+// the 10x reflection overhead cost by type asserting common types falling back on reflection for
+// unoptimized types.
+func (q *QSlice) AppendSlice(items interface{}) *QSlice {
+	if q.Nil() {
+		*q = *(Slice(items))
+	} else {
+		switch slice := q.v.Interface().(type) {
+		case []string:
+			if x, ok := items.([]string); ok {
+				slice = append(slice, x...)
+			} else {
+				panic(fmt.Sprintf("can't insert type '%T' into []string", items))
+			}
+		default:
+			x := reflect.ValueOf(items)
+			*q.v = reflect.AppendSlice(*q.v, x)
+		}
+	}
+	return q
+}
 
 // // At returns the item at the given index location. Allows for negative notation
 // func (s *strSliceN) At(i int) string {
@@ -229,14 +312,6 @@ func (q *QSlice) Append(items ...interface{}) *QSlice {
 // 	}
 // 	return
 // }
-
-// Len of the collection type
-func (q *QSlice) Len() int {
-	if q.Nil() {
-		return 0
-	}
-	return q.v.Len()
-}
 
 // // Map manipulates the slice into a new form
 // func (s *strSliceN) Map(sel func(string) O) (result *Queryable) {
@@ -422,5 +497,5 @@ func (q *QSlice) Len() int {
 
 // check if the internal type is a slice type
 func (q *QSlice) isSliceType() bool {
-	return q.kind == reflect.Array || q.kind == reflect.Slice
+	return q.k == reflect.Array || q.k == reflect.Slice
 }

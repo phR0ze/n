@@ -7,49 +7,167 @@ import (
 )
 
 func TestQSlice_Slice(t *testing.T) {
+
+	// Arrays
+	var array [2]string
+	array[0] = "1"
+	array[1] = "2"
+	assert.Equal(t, []string{"1", "2"}, Slice(array).O())
+
+	// Slices and other types
 	assert.Equal(t, []int{1}, Slice(1).O())
-	assert.Equal(t, []interface{}{}, Slice(nil).O())
+	assert.Equal(t, nil, Slice(nil).O())
 	assert.Equal(t, []string{"1"}, Slice("1").O())
-	assert.Equal(t, []map[string]string{map[string]string{"1": "one"}}, Slice(map[string]string{"1": "one"}).O())
+	assert.Equal(t, []map[string]string{{"1": "one"}}, Slice(map[string]string{"1": "one"}).O())
 	assert.Equal(t, []string{"1", "2"}, Slice([]string{"1", "2"}).O())
 }
 
 func TestQSlice_Slicef(t *testing.T) {
 	assert.Equal(t, []int{1}, Slicef(1).O())
 	assert.Equal(t, []string{"1"}, Slicef("1").O())
-	assert.Equal(t, []interface{}{}, Slice(nil).O())
-	assert.Equal(t, []interface{}{}, Slicef(nil).O())
-	assert.Equal(t, []interface{}{}, Slicef().O())
-	assert.False(t, Slicef().Nil())
+	assert.Equal(t, nil, Slice(nil).O())
+	assert.Equal(t, nil, Slicef(nil).O())
+	assert.Equal(t, nil, Slicef().O())
+	assert.True(t, Slicef().Nil())
 	assert.Equal(t, 0, Slicef().Len())
 	assert.Equal(t, []string{"1", "2"}, Slicef("1", "2").O())
 	assert.Equal(t, [][]string{{"1"}}, Slicef([]string{"1"}).O())
-	assert.Equal(t, []map[string]string{map[string]string{"1": "one"}}, Slicef(map[string]string{"1": "one"}).O())
+	assert.Equal(t, []map[string]string{{"1": "one"}}, Slicef(map[string]string{"1": "one"}).O())
 }
 
+func TestQSlice_newSlice(t *testing.T) {
+
+	// Array
+	var array [2]string
+	array[0] = "1"
+	array[1] = "2"
+	assert.Equal(t, []string{"1", "2"}, newSlice(array).O())
+
+	// Slice of nil
+	assert.Equal(t, nil, newSlice(nil).O())
+
+	// Type other than array or slice
+	assert.Equal(t, nil, newSlice("").O())
+
+	// Empty slice
+	assert.Equal(t, nil, newSlice([]string{}).O())
+
+	assert.Equal(t, []int{1}, newSlice([]interface{}{1}).O())
+	assert.Equal(t, []string{"1"}, newSlice([]interface{}{"1"}).O())
+	assert.Equal(t, []string{"1", "2"}, newSlice([]interface{}{"1", "2"}).O())
+	assert.Equal(t, [][]string{{"1"}}, newSlice([]interface{}{[]string{"1"}}).O())
+	assert.Equal(t, []map[string]string{{"1": "one"}}, newSlice([]interface{}{map[string]string{"1": "one"}}).O())
+}
+
+// Any
+//--------------------------------------------------------------------------------------------------
 // func TestStrSliceAny(t *testing.T) {
 // 	assert.False(t, S().Any())
 // 	assert.True(t, S().Append("2").Any())
 // }
 
-func TestQSlice_Append(t *testing.T) {
-	{
-		// Append one
-		slice := Slicef()
-		assert.Equal(t, 0, slice.Len())
-		slice.Append("2")
-		assert.Equal(t, 1, slice.Len())
-		assert.Equal(t, []string{"2"}, slice.O())
-	}
-	{
-		// Append many
-		slice := Slicef()
-		assert.Equal(t, 0, slice.Len())
-		slice.Append("2", "4", "6")
-		assert.Equal(t, 3, slice.Len())
-		assert.Equal(t, []string{"2", "4", "6"}, slice.O())
+// Append
+//--------------------------------------------------------------------------------------------------
+func BenchmarkQSlice_Append_Normal(t *testing.B) {
+	ints := []int{}
+	for _, i := range Range(0, nines6) {
+		ints = append(ints, i)
 	}
 }
+
+func BenchmarkQSlice_Append_Queryable(t *testing.B) {
+	q := Slicef()
+	for _, i := range Range(0, nines6) {
+		q.Append(i)
+	}
+	q.A()
+}
+
+func TestQSlice_Append(t *testing.T) {
+	// Append one
+	{
+		slice := Slicef()
+		assert.Equal(t, 0, slice.Len())
+
+		// First append invokes 10x reflect overhead
+		slice.Append("1")
+		assert.Equal(t, 1, slice.Len())
+		assert.Equal(t, []string{"1"}, slice.O())
+
+		// Second append does a type assertion
+		defer func() {
+			err := recover()
+			assert.Equal(t, "can't insert type 'int' into '[]string'", err)
+		}()
+		slice.Append(2)
+
+		// Now insert correct type
+		slice.Append("2")
+		assert.Equal(t, []string{"1", "2"}, slice.O())
+	}
+	// {
+	// 	// Append many
+	// 	slice := Slicef()
+	// 	assert.Equal(t, 0, slice.Len())
+	// 	slice.Append("2", "4", "6")
+	// 	assert.Equal(t, 3, slice.Len())
+	// 	assert.Equal(t, []interface{}{"2", "4", "6"}, slice.O())
+	// }
+}
+
+// func TestAppend(t *testing.T) {
+//     // Append to valuetype
+//     {
+//             q := Q(2)
+//             assert.Equal(t, 1, q.Len())
+//             assert.Equal(t, []int{2, 1}, q.Append(1).O())
+//     }
+
+//     // Append one
+//     {
+//             q := N()
+//             assert.Equal(t, 0, q.Len())
+//             assert.Equal(t, []int{2}, q.Append(2).O())
+//             assert.Equal(t, []int{2, 3}, q.Append(3).O())
+//     }
+
+//     // Append many ints
+//     {
+//             q := Q([]int{1})
+//             assert.Equal(t, []int{1, 2, 3}, q.Append(2, 3).O())
+//     }
+
+//     // Append many strings
+//     {
+//             {
+//                     q := N()
+//                     assert.Equal(t, 0, q.Len())
+//                     assert.Equal(t, 3, q.Append("1", "2", "3").Len())
+//             }
+//             {
+//                     q := Q([]string{"1", "2"})
+//                     assert.Equal(t, 2, q.Len())
+//                     assert.Equal(t, 4, q.Append("3", "4").Len())
+//             }
+//     }
+
+//     // Append to a slice of custom type
+//     {
+//             q := Q([]bob{{o: "3"}})
+//             assert.Equal(t, []bob{{o: "3"}, {o: "1"}}, q.Append(bob{o: "1"}).O())
+//             assert.Equal(t, []bob{{o: "3"}, {o: "1"}, {o: "2"}, {o: "4"}}, q.Append(bob{o: "2"}, bob{o: "4"}).O())
+//     }
+
+//     // Append to a map
+//     {
+//             q := Q(map[string]string{"1": "one"})
+//             defer func() {
+//                     err := recover()
+//                     assert.Equal(t, "Append doesn't support map types", err)
+//             }()
+//             q.Append(KeyVal{Key: "2", Val: "two"})
+//     }
+// }
 
 // // func TestStrSliceAt(t *testing.T) {
 // 	{

@@ -165,6 +165,9 @@ func TestSlicePath(t *testing.T) {
 	assert.Equal(t, "bar/one", SlicePath("/foo/bar/one", -2, -1))
 	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one", -3, -1))
 	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one", -5, 2))
+
+	// Not a path
+	assert.Equal(t, "foobar", SlicePath("foobar", -5, -1))
 }
 
 func TestHome(t *testing.T) {

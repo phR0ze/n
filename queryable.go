@@ -22,6 +22,8 @@ type QType uint8
 // abstraction layer for various underlying types
 type Queryable interface {
 	O() interface{} // O returns the underlying data structure
+	Any() bool      // Any tests if the queryable is not empty
+	Len() int       // Len returns the number of elements in the queryable
 	Nil() bool      // Nil tests if the queryable is nil
 	Type() QType    // Type returns the identifier for this queryable type
 }
