@@ -3,74 +3,74 @@ package errs
 
 import "fmt"
 
-// NErrorType is an enumeration of well known error types
-type NErrorType string
+// ErrorType is an enumeration of well known error types
+type ErrorType string
 
 const (
-	// NErrorTypeTmplEndTagNotFound indicates that a start tag was found but not an end tag or a template variable
-	NErrorTypeTmplEndTagNotFound NErrorType = "TmplEndTagNotFound"
+	// ErrorTypeTmplEndTagNotFound indicates that a start tag was found but not an end tag or a template variable
+	ErrorTypeTmplEndTagNotFound ErrorType = "TmplEndTagNotFound"
 
-	// NErrorTypeTmplTagsInvalid indicates that the template start and/or end tags were invalid
-	NErrorTypeTmplTagsInvalid NErrorType = "TmplTagsInvalid"
+	// ErrorTypeTmplTagsInvalid indicates that the template start and/or end tags were invalid
+	ErrorTypeTmplTagsInvalid ErrorType = "TmplTagsInvalid"
 
-	// NErrorTypeTmplVarsNotFound indicates that template variables were not found
-	NErrorTypeTmplVarsNotFound NErrorType = "TmplVarsNotFound"
+	// ErrorTypeTmplVarsNotFound indicates that template variables were not found
+	ErrorTypeTmplVarsNotFound ErrorType = "TmplVarsNotFound"
 )
 
-// NError provides a common error type for N types
-type NError struct {
+// Error provides a common error type for N types
+type Error struct {
 	Message string
-	Type    NErrorType
+	Type    ErrorType
 }
 
-func (e NError) Error() string {
+func (e Error) Error() string {
 	return e.Message
 }
 
 // IsTmplEndTagNotFound returns true if the given err was created by NewTmplEndTagNotFound
 func IsTmplEndTagNotFound(err error) bool {
-	if nerr, ok := err.(NError); ok {
-		return nerr.Type == NErrorTypeTmplEndTagNotFound
+	if nerr, ok := err.(Error); ok {
+		return nerr.Type == ErrorTypeTmplEndTagNotFound
 	}
 	return false
 }
 
 // IsTmplTagsInvalid returns true if the given err was created by NewTmplTagsInvalid
 func IsTmplTagsInvalid(err error) bool {
-	if nerr, ok := err.(NError); ok {
-		return nerr.Type == NErrorTypeTmplTagsInvalid
+	if nerr, ok := err.(Error); ok {
+		return nerr.Type == ErrorTypeTmplTagsInvalid
 	}
 	return false
 }
 
 // IsTmplVarsNotFound returns true if the given err was created by NewTmplVarsNotFound
 func IsTmplVarsNotFound(err error) bool {
-	if nerr, ok := err.(NError); ok {
-		return nerr.Type == NErrorTypeTmplVarsNotFound
+	if nerr, ok := err.(Error); ok {
+		return nerr.Type == ErrorTypeTmplVarsNotFound
 	}
 	return false
 }
 
 // NewTmplEndTagNotFound indicates that a start tag was found but not an end tag or a template variable
-func NewTmplEndTagNotFound(endTag string, starting []byte) NError {
-	return NError{
+func NewTmplEndTagNotFound(endTag string, starting []byte) Error {
+	return Error{
 		Message: fmt.Sprintf("cannot find end tag=%s starting from %s", endTag, starting),
-		Type:    NErrorTypeTmplEndTagNotFound,
+		Type:    ErrorTypeTmplEndTagNotFound,
 	}
 }
 
 // NewTmplTagsInvalid indicates that the template start and/or end tags were invalid
-func NewTmplTagsInvalid() NError {
-	return NError{
+func NewTmplTagsInvalid() Error {
+	return Error{
 		Message: "start and/or end tag are invalid",
-		Type:    NErrorTypeTmplTagsInvalid,
+		Type:    ErrorTypeTmplTagsInvalid,
 	}
 }
 
 // NewTmplVarsNotFound indicates that template variables were not found
-func NewTmplVarsNotFound() NError {
-	return NError{
+func NewTmplVarsNotFound() Error {
+	return Error{
 		Message: "template variables were not found",
-		Type:    NErrorTypeTmplVarsNotFound,
+		Type:    ErrorTypeTmplVarsNotFound,
 	}
 }

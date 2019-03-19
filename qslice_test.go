@@ -59,12 +59,29 @@ func TestQSlice_newSlice(t *testing.T) {
 	assert.Equal(t, []map[string]string{{"1": "one"}}, newSlice([]interface{}{map[string]string{"1": "one"}}).O())
 }
 
-// Any
+// Queryably interface methods
 //--------------------------------------------------------------------------------------------------
-// func TestStrSliceAny(t *testing.T) {
-// 	assert.False(t, S().Any())
-// 	assert.True(t, S().Append("2").Any())
-// }
+func TestQSlice_O(t *testing.T) {
+	assert.Nil(t, Slicef().O())
+	assert.Len(t, Slicef().Append("2").O(), 1)
+}
+
+func TestQSlice_Any(t *testing.T) {
+	assert.False(t, Slicef().Any())
+	assert.True(t, Slicef().Append("2").Any())
+}
+
+func TestQSlice_Len(t *testing.T) {
+	assert.Equal(t, 0, Slicef().Len())
+	assert.Equal(t, 1, Slicef().Append("2").Len())
+}
+
+func TestQSlice_Nil(t *testing.T) {
+	assert.True(t, Slicef().Nil())
+	var q *QSlice
+	assert.True(t, q.Nil())
+	assert.False(t, Slicef().Append("2").Nil())
+}
 
 // Append
 //--------------------------------------------------------------------------------------------------
@@ -169,22 +186,38 @@ func TestQSlice_Append(t *testing.T) {
 //     }
 // }
 
-// // func TestStrSliceAt(t *testing.T) {
-// 	{
-// 		slice := S().Append("1", "2", "3", "4")
-// 		assert.Equal(t, "4", slice.At(-1))
-// 		assert.Equal(t, "3", slice.At(-2))
-// 		assert.Equal(t, "2", slice.At(-3))
-// 		assert.Equal(t, "1", slice.At(0))
-// 		assert.Equal(t, "2", slice.At(1))
-// 		assert.Equal(t, "3", slice.At(2))
-// 		assert.Equal(t, "4", slice.At(3))
-// 	}
-// 	{
-// 		slice := S().Append("1")
-// 		assert.Equal(t, "1", slice.At(-1))
-// 	}
-// }
+// At
+//--------------------------------------------------------------------------------------------------
+func BenchmarkQSlice_At_Normal(t *testing.B) {
+	ints := Range(0, nines6)
+	for _, i := range Range(0, nines6) {
+		assert.IsType(t, 0, ints[i])
+	}
+}
+
+func BenchmarkQSlice_At_Queryable(t *testing.B) {
+	slice := Slice(Range(0, nines6))
+	for _, i := range Range(0, nines6) {
+		assert.IsType(t, 0, slice.At(i))
+	}
+}
+
+func TestQSlice_At(t *testing.T) {
+	{
+		slice := Slicef("1", "2", "3", "4")
+		assert.Equal(t, "4", slice.At(-1))
+		assert.Equal(t, "3", slice.At(-2))
+		assert.Equal(t, "2", slice.At(-3))
+		assert.Equal(t, "1", slice.At(0))
+		assert.Equal(t, "2", slice.At(1))
+		assert.Equal(t, "3", slice.At(2))
+		assert.Equal(t, "4", slice.At(3))
+	}
+	{
+		slice := Slicef("1")
+		assert.Equal(t, "1", slice.At(-1))
+	}
+}
 
 // func TestStrSliceClear(t *testing.T) {
 // 	slice := S().Append("1", "2", "3", "4")

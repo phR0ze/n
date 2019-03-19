@@ -86,7 +86,7 @@ func (q *QSlice) O() interface{} {
 
 // Any tests if the queryable is not empty
 func (q *QSlice) Any() bool {
-	return q.Len() != 0
+	return q.Len() > 0
 }
 
 // Len returns the number of elements in the queryable
@@ -132,21 +132,6 @@ func (q *QSlice) A() (result []string) {
 // QSlice methods
 //--------------------------------------------------------------------------------------------------
 
-// // Any checks if the slice has anything in it
-// func (s *strSliceN) Any() bool {
-// 	return len(s.v) > 0
-// }
-
-// // AnyContain checks if any items in this slice contain the target
-// func (s *strSliceN) AnyContain(target string) bool {
-// 	for i := range s.v {
-// 		if strings.Contains(s.v[i], target) {
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
-
 // Append an item to the end of the QSlice and returns QSlice for chaining. Avoids the 10x reflection
 // overhead cost by type asserting common types all other types incur the 10x reflection overhead cost.
 func (q *QSlice) Append(item interface{}) *QSlice {
@@ -174,7 +159,6 @@ func (q *QSlice) Append(item interface{}) *QSlice {
 				slice = append(slice, x)
 			}
 		default:
-			panic("unsupported")
 			item := reflect.ValueOf(item)
 			*q.v = reflect.Append(*q.v, item)
 		}
@@ -207,21 +191,42 @@ func (q *QSlice) AppendSlice(items interface{}) *QSlice {
 	return q
 }
 
-// // At returns the item at the given index location. Allows for negative notation
-// func (s *strSliceN) At(i int) string {
-// 	if i < 0 {
-// 		i = len(s.v) + i
-// 	}
-// 	if i >= 0 && i < len(s.v) {
-// 		return s.v[i]
-// 	}
-// 	panic(errors.New("Index out of slice bounds"))
-// }
+// At returns the item at the given index location. Allows for negative notation
+func (q *QSlice) At(i int) interface{} {
+	if i < 0 {
+		i = q.v.Len() + i
+	}
+	if i >= 0 && i < q.v.Len() {
+		return q.v.Index(i).Interface()
+	}
+	panic("index out of slice bounds")
+}
+
+// AtQ returns a QObj for the item at the given index location. Allows for negative notation
+func (q *QSlice) AtQ(i int) *QObj {
+	if i < 0 {
+		i = q.v.Len() + i
+	}
+	if i >= 0 && i < q.v.Len() {
+		return &QObj{v: q.v.Index(i).Interface()}
+	}
+	panic("index out of slice bounds")
+}
 
 // // Clear the underlying slice
 // func (s *strSliceN) Clear() *strSliceN {
 // 	s.v = []string{}
 // 	return s
+// }
+
+// // AnyContain checks if any items in this slice contain the target
+// func (q *QSlice) AnyContain(target string) bool {
+// 	for i := range q.v {
+// 		if strings.Contains(q.v[i], target) {
+// 			return true
+// 		}
+// 	}
+// 	return false
 // }
 
 // // Contains checks if the given target is contained in this slice

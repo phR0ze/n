@@ -16,6 +16,7 @@ convenience functions and the Queryable types.
   * [QSlice](#qslice)
     * [QSlice Append](#qslice-append)
     * [QSlice AppendSlice](#qslice-append-slice)
+    * [QSlice At](#qslice-at)
 
   * [Methods](#queryable-methods)
   * [Exports](#queryable-exports)
@@ -115,6 +116,7 @@ overhead cost by type asserting common types all other types incur the 10x refle
 
 **func (q *QSlice) Append(item interface{}) *QSlice**
 
+Benchmark: 2x cost for optimized types, 10x cost everything else
 ```golang
 slice := Slicef()
 slice.Append("1").O()               // []string{"1"}
@@ -125,8 +127,7 @@ Other language equivalents:
 * Go - slice = ***append***(slice, item)
 * C# - list.***Add***(item)
 * Python - list.***append***(item)
-* Ruby - list.***append***(item)
-* Ruby - list.***push***(item)
+* Ruby - list.***append***(item) or list.***push***(item)
 
 ### QSlice AppendSlice <a name="qslice-append"></a>
 AppendSlice appends the slice using variadic expansion and returns QSlice for chaining.  Avoids the
@@ -140,6 +141,24 @@ Other language equivalents:
 * C# - list.***AddRange***(other)
 * Python - list.***extend***(other)
 * Ruby - list.***concat***(other1, other2,...)
+
+Benchmark: ??
+```golang
+slice := Slicef()
+slice.Append("1").O()               // []string{"1"}
+slice.Append("2").Append("3").O()   // []string{"1", "2", "3"}
+```
+
+### QSlice At <a name="qslice-at"></a>
+At returns the item at the given index location. Allows for negative notation
+
+**func (q *QSlice) At(i int) interface{}**
+
+Other language equivalents:
+* Go - slice***[0]***
+* C# - list.***[0]***
+* Python - list.***[0]***
+* Ruby - list***[0]*** or list.***at(0)***
 
 ```golang
 slice := Slicef()
