@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/phR0ze/n/pkg/nerr"
+	"github.com/phR0ze/n/pkg/errs"
 	"github.com/valyala/bytebufferpool"
 )
 
@@ -30,6 +30,9 @@ func Load(filepath string, startTag, endTag string, vars map[string]string) (res
 			if result, err = tpl.Process(vars); err == nil {
 				return
 			}
+		} else if errs.IsTmplVarsNotFound(err) {
+			err = nil
+			result = string(data)
 		}
 	}
 	return
@@ -47,17 +50,17 @@ func New(data, startTag, endTag string) (*Engine, error) {
 
 	// Check that we have valid tags
 	if startTag == "" || endTag == "" {
-		return nil, nerr.NewTmplTagsInvalid()
+		return nil, errs.NewTmplTagsInvalid()
 	}
 
 	s := []byte(data)
 	a := []byte(startTag)
 	b := []byte(endTag)
 
-	// Check that there is at least one tag
+	// Done if there are no template variables
 	tagsCount := bytes.Count(s, a)
 	if tagsCount == 0 {
-		return nil, nerr.NewTmplVarsNotFound()
+		return nil, errs.NewTmplVarsNotFound()
 	}
 
 	if tagsCount+1 > cap(tpl.texts) {
@@ -79,7 +82,7 @@ func New(data, startTag, endTag string) (*Engine, error) {
 		s = s[n+len(a):]
 		n = bytes.Index(s, b)
 		if n < 0 {
-			return nil, nerr.NewTmplEndTagNotFound(endTag, s)
+			return nil, errs.NewTmplEndTagNotFound(endTag, s)
 		}
 
 		// Fix bug in original code to remove wrapping spaces

@@ -34,6 +34,24 @@ func TestLoad(t *testing.T) {
 	assert.Equal(t, expected, result)
 }
 
+func TestNoTemplatVariablesFound(t *testing.T) {
+	// When no template varibles are found the file should simple be returned as is
+	cleanTmpDir()
+
+	data := `labels:
+  chart: foo
+  release: bar
+  heritage: foobar`
+	sys.WriteFile(tmpFile, []byte(data))
+
+	result, err := Load(tmpFile, "{{ ", " }}", map[string]string{
+		"name": "foo",
+	})
+	assert.Nil(t, err)
+	assert.Equal(t, data, result)
+
+}
+
 func TestTagSpaces(t *testing.T) {
 	{
 		// README.md example

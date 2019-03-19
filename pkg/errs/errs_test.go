@@ -1,4 +1,4 @@
-package nerr
+package errs
 
 import (
 	"errors"
@@ -14,7 +14,7 @@ func TestTmplEndTagNotFound(t *testing.T) {
 		assert.False(t, IsTmplEndTagNotFound(err))
 	}
 	{
-		// Invalid nerr type
+		// Invalid errs type
 		err := NewTmplVarsNotFound()
 		assert.False(t, IsTmplEndTagNotFound(err))
 	}
@@ -32,7 +32,7 @@ func TestTmplTagsInvalid(t *testing.T) {
 		assert.False(t, IsTmplTagsInvalid(err))
 	}
 	{
-		// Invalid nerr type
+		// Invalid errs type
 		err := NewTmplVarsNotFound()
 		assert.False(t, IsTmplTagsInvalid(err))
 	}
@@ -50,7 +50,7 @@ func TestTmplVarsNotFound(t *testing.T) {
 		assert.False(t, IsTmplVarsNotFound(err))
 	}
 	{
-		// Invalid nerr type
+		// Invalid errs type
 		err := NewTmplTagsInvalid()
 		assert.False(t, IsTmplVarsNotFound(err))
 	}
