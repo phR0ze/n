@@ -7,7 +7,7 @@
 // Conventions used across n types and pkgs
 //
 // • In order to deal with Golang's decision to not support function overloading n makes use
-// of a variety of suffix capital letters to indicate different function varieties. The
+// of a variety of prefix/suffix capital letters to indicate different function varieties. The
 // function that contains no suffix is known as the base function.
 //
 // • Function names suffixed with 'E' indicates the function is a corollary to the function
@@ -19,6 +19,13 @@
 //
 // • Function names suffixed with 'V' indicates the function is a corollary to the function
 // without the 'V' but accepts Variadic input.
+//
+// • Documentation should be thorough and relied upon for guidance as, for a love of brevity,
+// many functions use single capital letters frequently to indicate types. 'O' is being used to
+// indicate the interface{} type or to export the underlying Go type as an interface{}. 'S' is
+// used to refer to slice types, 'M' refers to map types. 'A' refers to string types and
+// combinations may be used to indicate complex types. The documentation will always call out
+// what exactly they mean, but the function name may be cryptic until understood.
 package n
 
 import (
@@ -47,6 +54,19 @@ type Enumerable interface {
 	Len() int       // Len returns the number of elements in the numerable
 	Nil() bool      // Nil tests if the numerable is nil
 	Type() NType    // Type returns the identifier for this numerable type
+}
+
+// Check to see if the given type is an optimized slice type
+func optimized(slice interface{}) (result bool) {
+	result = true
+	switch slice.(type) {
+	case []bool:
+	case []int:
+	case []string:
+	default:
+		result = false
+	}
+	return
 }
 
 //
@@ -703,7 +723,7 @@ func (q *OldNumerable) Set(i int, item interface{}) *OldNumerable {
 }
 
 // // Split the string into a slice on delimiter
-// func (q *Numerable) Split(delim string) *QSlice {
+// func (q *Numerable) Split(delim string) *NSlice {
 // 	if q.TypeStr() {
 // 		return A(q.v.Interface().(string)).Split(delim)
 // 	}

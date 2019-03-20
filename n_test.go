@@ -1,17 +1,21 @@
 package n
 
-// import (
-// 	"errors"
-// 	"fmt"
-// 	"math/rand"
-// 	"testing"
+import (
+	"testing"
 
-// 	"github.com/stretchr/testify/assert"
-// )
+	"github.com/stretchr/testify/assert"
+)
 
 const nines7 = 9999999
 const nines6 = 999999
 const nines5 = 99999
+
+func TestOptimized(t *testing.T) {
+	assert.True(t, optimized([]bool{}))
+	assert.True(t, optimized([]int{}))
+	assert.True(t, optimized([]string{}))
+	assert.False(t, optimized(""))
+}
 
 // type bob struct {
 // 	o string

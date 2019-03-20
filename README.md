@@ -13,6 +13,7 @@ https://godoc.org/github.com/phR0ze/n
 * [Numerable](#Numerable)
   * [Requirements](#requirements)
 * [Background](#background)
+  * [Resources](#resources)
   * [Performance](#performance)
     * [Go vs Python](#go-vs-python)
     * [Pure Reflection - 10 cost](#pure-reflection-10x-cost)
@@ -58,9 +59,12 @@ development on the far right. The inventors of Golang felt that the trade off wi
 was unacceptable and designed Go to address the problem. To their credit they were able to get a
 pretty good mix between performance and speed of development.
 
+## Resources <a name="resources"></a>
+* Go is not a Good language - http://yager.io/programming/go.html
+* http://speakmy.name/2014/09/14/modifying-interfaced-go-struct/
+
 ## Language Popularity <a name="language-popularity"></a>
 * https://www.tiobe.com/tiobe-index/
-* https://stackify.com/popular-programming-languages-2018/
 
 ## Performance <a name="performance"></a>
 Performance is a concern in handling generics as the Golang inventors rightly pointed out. Go was
@@ -101,7 +105,7 @@ the 10x cost that falling back on pure reflection for unhandled types will cost.
 
 6 nines slice costs 0.02ns while this implementation costs 0.02ns:
 ```golang
-func (q *QSlice) Append(item interface{}) *QSlice {
+func (q *NSlice) Append(item interface{}) *NSlice {
 	if q.Nil() {
 		nq := Slicef(item)
 		if !nq.Nil() {
@@ -131,18 +135,18 @@ doing this and as eveyone knows incurs the standard 10x reflection cost.
 
 6 nines slice costs 0.01ns while this implementation costs 0.10ns:
 ```golang
-func (q *QSlice) Append(items ...interface{}) *QSlice {
+func (n *NSlice) Append(items ...interface{}) *NSlice {
 	if len(items) > 0 {
-		if q.Nil() {
-			*q = *(Slicef(items...))
+		if n.Nil() {
+			*n = *(Slicef(items...))
 		} else {
 			for i := 0; i < len(items); i++ {
 				item := reflect.ValueOf(items[i])
-				*q.v = reflect.Append(*q.v, item)
+				*n.v = reflect.Append(*n.v, item)
 			}
 		}
 	}
-	return q
+	return n
 }
 ```
 
@@ -153,15 +157,15 @@ typed slice which resulted in an 18x cost even though reflection wasn't used.
 
 6 nines slice costs 0.01ns while this implementation costs 0.20ns:
 ```golang
-func (q *QSlice) Append(items ...interface{}) *QSlice {
-	if q.Nil() {
-		*q = *(Slicef(items))
+func (n *NSlice) Append(items ...interface{}) *NSlice {
+	if n.Nil() {
+		*n = *(Slicef(items))
 	} else {
 		for _, item := range items {
-			q.o = append(q.o, item)
+			n.o = append(n.o, item)
 		}
 	}
-	return q
+	return n
 }
 ```
 

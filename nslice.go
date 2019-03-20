@@ -5,21 +5,21 @@ import (
 	"reflect"
 )
 
-// QSlice provides a generic way to work with slice types providing convenience methods
+// NSlice provides a generic way to work with slice types providing convenience methods
 // on par with other rapid development languages.
 //
 // Implements the Numerable interface.
-type QSlice struct {
+type NSlice struct {
 	k reflect.Kind   // underlying kind
 	v *reflect.Value // underlying value
 }
 
-// Slice creates a new QSlice by simply storing slice obj directly to avoid using reflection
+// Slice creates a new NSlice by simply storing slice obj directly to avoid using reflection
 // processing at a 10x overhead savings. Non slice obj are encapsulated in a new slice of
 // that type using reflection, thus incurring the standard 10x overhead.
-func Slice(obj interface{}) (q *QSlice) {
+func Slice(obj interface{}) (q *NSlice) {
 	v := reflect.ValueOf(obj)
-	q = &QSlice{v: &v, k: v.Kind()}
+	q = &NSlice{v: &v, k: v.Kind()}
 
 	switch q.k {
 
@@ -38,16 +38,16 @@ func Slice(obj interface{}) (q *QSlice) {
 	return
 }
 
-// SliceV creates a new QSlice encapsulating the given variadic elements in a new slice of
+// SliceV creates a new NSlice encapsulating the given variadic elements in a new slice of
 // that type. Incurs the full 10x reflection overhead. For large slice params use the Slice
 // func instead.
-func SliceV(items ...interface{}) (q *QSlice) {
+func SliceV(items ...interface{}) (q *NSlice) {
 	return newSlice(items)
 }
 
 // handles []interface{} and arrays everything else will return nil
-func newSlice(items interface{}) (q *QSlice) {
-	q = &QSlice{v: &(reflect.Value{}), k: reflect.Invalid}
+func newSlice(items interface{}) (q *NSlice) {
+	q = &NSlice{v: &(reflect.Value{}), k: reflect.Invalid}
 
 	v := reflect.ValueOf(items)
 	switch v.Kind() {
@@ -65,7 +65,7 @@ func newSlice(items interface{}) (q *QSlice) {
 		// Create new slice with type of the element
 		typ := reflect.SliceOf(reflect.TypeOf(elem))
 		slice := reflect.MakeSlice(typ, 0, 10)
-		q = &QSlice{v: &slice, k: slice.Kind()}
+		q = &NSlice{v: &slice, k: slice.Kind()}
 
 		// Add the variadic elements to the new slice
 		for i := 0; i < v.Len(); i++ {
@@ -80,7 +80,7 @@ func newSlice(items interface{}) (q *QSlice) {
 //--------------------------------------------------------------------------------------------------
 
 // O returns the underlying data structure as is
-func (q *QSlice) O() interface{} {
+func (q *NSlice) O() interface{} {
 	if q.Nil() {
 		return nil
 	}
@@ -88,12 +88,12 @@ func (q *QSlice) O() interface{} {
 }
 
 // Any tests if the numerable is not empty
-func (q *QSlice) Any() bool {
+func (q *NSlice) Any() bool {
 	return q.Len() > 0
 }
 
 // Len returns the number of elements in the numerable
-func (q *QSlice) Len() int {
+func (q *NSlice) Len() int {
 	if q.Nil() {
 		return 0
 	}
@@ -101,7 +101,7 @@ func (q *QSlice) Len() int {
 }
 
 // Nil tests if the numerable is nil
-func (q *QSlice) Nil() bool {
+func (q *NSlice) Nil() bool {
 	if q == nil || q.v == nil || q.k == reflect.Invalid {
 		return true
 	}
@@ -109,15 +109,15 @@ func (q *QSlice) Nil() bool {
 }
 
 // Type returns the identifier for this numerable type
-func (q *QSlice) Type() NType {
+func (q *NSlice) Type() NType {
 	return NSliceType
 }
 
 // Export methods
 //--------------------------------------------------------------------------------------------------
 
-// // A exports QSlice as a string slice
-// func (q *QSlice) A() (result []string) {
+// // A exports NSlice as a string slice
+// func (q *NSlice) A() (result []string) {
 // 	// //if v, ok := q.o.([]string); ok {
 // 	// //	result = v
 // 	// //} else {
@@ -132,15 +132,15 @@ func (q *QSlice) Type() NType {
 // 	return
 // }
 
-// QSlice methods
+// NSlice methods
 //--------------------------------------------------------------------------------------------------
 
-// Append an item to the end of the QSlice and returns the QSlice for chaining. Avoids the 10x
+// Append an item to the end of the NSlice and returns the NSlice for chaining. Avoids the 10x
 // reflection overhead cost by type asserting common types. Types not optimized in this way incur
 // the full 10x reflection overhead cost.
 //
 // Optimized types: bool, int, string
-func (q *QSlice) Append(item interface{}) *QSlice {
+func (q *NSlice) Append(item interface{}) *NSlice {
 	if q.Nil() {
 		nq := SliceV(item)
 		if !nq.Nil() {
@@ -159,6 +159,7 @@ func (q *QSlice) Append(item interface{}) *QSlice {
 			if x, ok = item.(int); ok {
 				slice = append(slice, x)
 			}
+			fmt.Println(slice)
 		case []string:
 			var x string
 			if x, ok = item.(string); ok {
@@ -175,24 +176,24 @@ func (q *QSlice) Append(item interface{}) *QSlice {
 	return q
 }
 
-// AppendV appends an item to the end of the QSlice and returns the QSlice for chaining. Avoids
+// AppendV appends an item to the end of the NSlice and returns the NSlice for chaining. Avoids
 // the 10x reflection overhead cost by type asserting common types. Types not optimized in this
 // way incur the full 10x reflection overhead cost.
 //
 // Optimized types: bool, int, string
-func (q *QSlice) AppendV(items ...interface{}) *QSlice {
+func (q *NSlice) AppendV(items ...interface{}) *NSlice {
 	for _, item := range items {
 		q.Append(item)
 	}
 	return q
 }
 
-// AppendS appends the slice using variadic expansion and returns QSlice for chaining.  Avoids
+// AppendS appends the slice using variadic expansion and returns NSlice for chaining.  Avoids
 // the 10x reflection overhead cost by type asserting common types. Types not optimized in this
 // way incur the full 10x reflection overhead cost.
 //
 // Optimized types: []string
-func (q *QSlice) AppendS(items interface{}) *QSlice {
+func (q *NSlice) AppendS(items interface{}) *NSlice {
 	if q.Nil() {
 		*q = *(Slice(items))
 	} else {
@@ -215,7 +216,7 @@ func (q *QSlice) AppendS(items interface{}) *QSlice {
 }
 
 // At returns the item at the given index location. Allows for negative notation
-func (q *QSlice) At(i int) interface{} {
+func (q *NSlice) At(i int) interface{} {
 	if i < 0 {
 		i = q.v.Len() + i
 	}
@@ -226,7 +227,7 @@ func (q *QSlice) At(i int) interface{} {
 }
 
 // AtQ returns a QObj for the item at the given index location. Allows for negative notation
-func (q *QSlice) AtQ(i int) *QObj {
+func (q *NSlice) AtQ(i int) *QObj {
 	if i < 0 {
 		i = q.v.Len() + i
 	}
@@ -243,7 +244,7 @@ func (q *QSlice) AtQ(i int) *QObj {
 // }
 
 // // AnyContain checks if any items in this slice contain the target
-// func (q *QSlice) AnyContain(target string) bool {
+// func (q *NSlice) AnyContain(target string) bool {
 // 	for i := range q.v {
 // 		if strings.Contains(q.v[i], target) {
 // 			return true
@@ -319,7 +320,7 @@ func (q *QSlice) AtQ(i int) *QObj {
 // }
 
 // // First returns the first item or nil
-// func (q *QSlice) First() (result interface{}) {
+// func (q *NSlice) First() (result interface{}) {
 // 	if !q.Nil() && q.v.Len() > 0 {
 // 		result = q.v.Index(0).Interface()
 // 	}
@@ -524,6 +525,6 @@ func (q *QSlice) AtQ(i int) *QObj {
 // }
 
 // check if the internal type is a slice type
-func (q *QSlice) isSliceType() bool {
+func (q *NSlice) isSliceType() bool {
 	return q.k == reflect.Array || q.k == reflect.Slice
 }

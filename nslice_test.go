@@ -16,7 +16,7 @@ func ExampleSlice() {
 	// Output: [1 2 3]
 }
 
-func TestQSlice_Slice(t *testing.T) {
+func TestNSlice_Slice(t *testing.T) {
 
 	// Arrays
 	var array [2]string
@@ -47,7 +47,7 @@ func ExampleSlicef_variadic() {
 	// Output: [1 2 3]
 }
 
-func TestQSlice_Slicef(t *testing.T) {
+func TestNSlice_Slicef(t *testing.T) {
 	assert.Equal(t, []int{1}, SliceV(1).O())
 	assert.Equal(t, []string{"1"}, SliceV("1").O())
 	assert.Equal(t, nil, Slice(nil).O())
@@ -60,7 +60,7 @@ func TestQSlice_Slicef(t *testing.T) {
 	assert.Equal(t, []map[string]string{{"1": "one"}}, SliceV(map[string]string{"1": "one"}).O())
 }
 
-func TestQSlice_newSlice(t *testing.T) {
+func TestNSlice_newSlice(t *testing.T) {
 
 	// Array
 	var array [2]string
@@ -86,98 +86,106 @@ func TestQSlice_newSlice(t *testing.T) {
 
 // Numerably interface methods
 //--------------------------------------------------------------------------------------------------
-func TestQSlice_O(t *testing.T) {
+func TestNSlice_O(t *testing.T) {
 	assert.Nil(t, SliceV().O())
 	assert.Len(t, SliceV().Append("2").O(), 1)
 }
 
-func TestQSlice_Any(t *testing.T) {
+func TestNSlice_Any(t *testing.T) {
 	assert.False(t, SliceV().Any())
 	assert.True(t, SliceV().Append("2").Any())
 }
 
-func TestQSlice_Len(t *testing.T) {
+func TestNSlice_Len(t *testing.T) {
 	assert.Equal(t, 0, SliceV().Len())
 	assert.Equal(t, 1, SliceV().Append("2").Len())
 }
 
-func TestQSlice_Nil(t *testing.T) {
+func TestNSlice_Nil(t *testing.T) {
 	assert.True(t, SliceV().Nil())
-	var q *QSlice
+	var q *NSlice
 	assert.True(t, q.Nil())
 	assert.False(t, SliceV().Append("2").Nil())
 }
 
 // Append
 //--------------------------------------------------------------------------------------------------
-func BenchmarkQSlice_Append_Normal(t *testing.B) {
+func BenchmarkNSlice_Append_Normal(t *testing.B) {
 	ints := []int{}
 	for _, i := range Range(0, nines6) {
 		ints = append(ints, i)
 	}
 }
 
-func BenchmarkQSlice_Append_Numerable(t *testing.B) {
+func BenchmarkNSlice_Append_Numerable(t *testing.B) {
 	q := SliceV()
 	for _, i := range Range(0, nines6) {
 		q.Append(i)
 	}
 }
 
-// func ExampleQSlice_Append() {
-// 	slice := SliceV(1).Append(2).Append(3)
+// func ExampleNSlice_Append() {
+// 	slice := (&NSlice{}).Append(2).Append(3)
 // 	fmt.Println(slice.O())
 // 	// Output: [1 2]
 // }
-func TestQSlice_Append(t *testing.T) {
-	// Append one
-	{
-		slice := SliceV()
-		assert.Equal(t, 0, slice.Len())
-		assert.Equal(t, true, slice.Nil())
 
-		// First append invokes 10x reflect overhead because the slice is nil
-		slice.Append("1")
-		assert.Equal(t, 1, slice.Len())
-		assert.Equal(t, []string{"1"}, slice.O())
+func TestNSlice_Append_One(t *testing.T) {
+	slice := SliceV()
+	assert.Equal(t, 0, slice.Len())
+	assert.Equal(t, true, slice.Nil())
 
-		// Second append does a type assertion
-		defer func() {
-			err := recover()
-			assert.Equal(t, "can't insert type 'int' into '[]string'", err)
-		}()
-		slice.Append(2)
+	// First append invokes 10x reflect overhead because the slice is nil
+	slice.Append("1")
+	assert.Equal(t, 1, slice.Len())
+	assert.Equal(t, []string{"1"}, slice.O())
 
-		// Now insert correct type
-		slice.Append("2")
-		assert.Equal(t, []string{"1", "2"}, slice.O())
-	}
+	// Second append does a type assertion
+	defer func() {
+		err := recover()
+		assert.Equal(t, "can't insert type 'int' into '[]string'", err)
+	}()
+	slice.Append(2)
 
-	// Chain appending
-	{
-		// Start with nil not chained
-		{
-			slice := SliceV()
-			assert.Equal(t, 0, slice.Len())
-			slice.Append(1).Append(2).Append(3)
-			assert.Equal(t, 3, slice.Len())
-			assert.Equal(t, []int{1, 2, 3}, slice.O())
-		}
+	// Now insert correct type
+	slice.Append("2")
+	assert.Equal(t, []string{"1", "2"}, slice.O())
+}
 
-		// Start with nil chained
-		{
-			slice := SliceV().Append(1).Append(2)
-			assert.Equal(t, 2, slice.Len())
-			assert.Equal(t, []int{1, 2}, slice.O())
-		}
+func TestNSlice_Append_Multiple(t *testing.T) {
 
-		// Start with non nil
-		{
-			slice := SliceV(1).Append(2).Append(3)
-			assert.Equal(t, 3, slice.Len())
-			assert.Equal(t, []int{1, 2, 3}, slice.O())
-		}
-	}
+	// // Start with just appending without chaining
+	// {
+	// 	slice := SliceV()
+	// 	assert.Equal(t, 0, slice.Len())
+	// 	slice.Append(1)
+	// 	assert.Equal(t, []int{1}, slice.O())
+	// 	slice.Append(2)
+	// 	assert.Equal(t, []int{1, 2}, slice.O())
+	// }
+
+	// // Start with nil not chained
+	// {
+	// 	slice := SliceV()
+	// 	assert.Equal(t, 0, slice.Len())
+	// 	slice.Append(1).Append(2).Append(3)
+	// 	assert.Equal(t, 3, slice.Len())
+	// 	assert.Equal(t, []int{1, 2, 3}, slice.O())
+	// }
+
+	// // Start with nil chained
+	// {
+	// 	slice := SliceV().Append(1).Append(2)
+	// 	assert.Equal(t, 2, slice.Len())
+	// 	assert.Equal(t, []int{1, 2}, slice.O())
+	// }
+
+	// // Start with non nil
+	// {
+	// 	slice := SliceV(1).Append(2).Append(3)
+	// 	assert.Equal(t, 3, slice.Len())
+	// 	assert.Equal(t, []int{1, 2, 3}, slice.O())
+	// }
 }
 
 // func TestAppend(t *testing.T) {
@@ -236,21 +244,21 @@ func TestQSlice_Append(t *testing.T) {
 
 // At
 //--------------------------------------------------------------------------------------------------
-func BenchmarkQSlice_At_Normal(t *testing.B) {
+func BenchmarkNSlice_At_Normal(t *testing.B) {
 	ints := Range(0, nines6)
 	for _, i := range Range(0, nines6) {
 		assert.IsType(t, 0, ints[i])
 	}
 }
 
-func BenchmarkQSlice_At_Numerable(t *testing.B) {
+func BenchmarkNSlice_At_Numerable(t *testing.B) {
 	slice := Slice(Range(0, nines6))
 	for _, i := range Range(0, nines6) {
 		assert.IsType(t, 0, slice.At(i))
 	}
 }
 
-func TestQSlice_At(t *testing.T) {
+func TestNSlice_At(t *testing.T) {
 	{
 		slice := SliceV("1", "2", "3", "4")
 		assert.Equal(t, "4", slice.At(-1))

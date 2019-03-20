@@ -188,9 +188,9 @@ package n
 // 	return A(spaces)
 // }
 
-// // // Split creates a new QSlice from the split string.
+// // // Split creates a new NSlice from the split string.
 // // // Optional 'delim' defaults to space allows for changing the split delimiter.
-// // func (q *QStr) Split(delim ...string) *QSlice {
+// // func (q *QStr) Split(delim ...string) *NSlice {
 // // 	_delim := " "
 // // 	if len(delim) > 0 {
 // // 		_delim = delim[0]
