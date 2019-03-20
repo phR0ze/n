@@ -376,7 +376,7 @@ func TestNSlice_AppendS(t *testing.T) {
 	// Append many ints
 	{
 		n := SliceV(1)
-		assert.Equal(t, []int{1, 2, 3}, n.AppendV(2, 3).O())
+		assert.Equal(t, []int{1, 2, 3}, n.AppendS([]int{2, 3}).O())
 	}
 
 	// Append many strings
@@ -384,13 +384,13 @@ func TestNSlice_AppendS(t *testing.T) {
 		{
 			n := SliceV()
 			assert.Equal(t, 0, n.Len())
-			assert.Equal(t, []string{"1", "2", "3"}, n.AppendV("1", "2", "3").O())
+			assert.Equal(t, []string{"1", "2", "3"}, n.AppendS([]string{"1", "2", "3"}).O())
 			assert.Equal(t, 3, n.Len())
 		}
 		{
 			n := Slice([]string{"1"})
 			assert.Equal(t, 1, n.Len())
-			assert.Equal(t, []string{"1", "2", "3"}, n.AppendV("2", "3").O())
+			assert.Equal(t, []string{"1", "2", "3"}, n.AppendS([]string{"2", "3"}).O())
 			assert.Equal(t, 3, n.Len())
 		}
 	}
@@ -398,8 +398,8 @@ func TestNSlice_AppendS(t *testing.T) {
 	// Append to a slice of custom type
 	{
 		n := Slice([]bobS{{"3"}})
-		assert.Equal(t, []bobS{{"3"}, {"1"}}, n.AppendV(bobS{"1"}).O())
-		assert.Equal(t, []bobS{{"3"}, {"1"}, {"2"}, {"4"}}, n.AppendV(bobS{"2"}, bobS{"4"}).O())
+		assert.Equal(t, []bobS{{"3"}, {"1"}}, n.AppendS([]bobS{{"1"}}).O())
+		assert.Equal(t, []bobS{{"3"}, {"1"}, {"2"}, {"4"}}, n.AppendS([]bobS{{"2"}, {"4"}}).O())
 	}
 
 	// Append to a slice of map
@@ -409,7 +409,7 @@ func TestNSlice_AppendS(t *testing.T) {
 			{"1": "one"},
 			{"2": "two"},
 		}
-		assert.Equal(t, expected, n.AppendV(map[string]string{"2": "two"}).O())
+		assert.Equal(t, expected, n.AppendS([]map[string]string{{"2": "two"}}).O())
 	}
 
 	// Test all supported types
