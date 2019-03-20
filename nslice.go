@@ -17,6 +17,8 @@ type NSlice struct {
 // Slice creates a new NSlice by simply storing slice obj directly to avoid using reflection
 // processing at a 10x overhead savings. Non slice obj are encapsulated in a new slice of
 // that type using reflection, thus incurring the standard 10x overhead.
+//
+// Cost: 1x - 10x
 func Slice(obj interface{}) (n *NSlice) {
 	v := reflect.ValueOf(obj)
 
@@ -40,6 +42,8 @@ func Slice(obj interface{}) (n *NSlice) {
 // SliceV creates a new NSlice encapsulating the given variadic elements in a new slice of
 // that type. Incurs the full 10x reflection overhead. For large slice params use the Slice
 // func instead.
+//
+// Cost: 10x
 func SliceV(items ...interface{}) *NSlice {
 	return newSlice(items)
 }
@@ -140,6 +144,8 @@ func (n *NSlice) Type() NType {
 // reflection overhead cost by type asserting common types. Types not optimized in this way incur
 // the full 10x reflection overhead cost.
 //
+// Cost: 4x - 10x
+//
 // Optimized types: bool, int, string
 func (n *NSlice) Append(item interface{}) *NSlice {
 	if n.Nil() {
@@ -183,6 +189,8 @@ func (n *NSlice) Append(item interface{}) *NSlice {
 // the 10x reflection overhead cost by type asserting common types. Types not optimized in this
 // way incur the full 10x reflection overhead cost.
 //
+// Cost: 6x - 10x
+//
 // Optimized types: bool, int, string
 func (n *NSlice) AppendV(items ...interface{}) *NSlice {
 	for _, item := range items {
@@ -191,32 +199,53 @@ func (n *NSlice) AppendV(items ...interface{}) *NSlice {
 	return n
 }
 
-// // AppendS appends the slice using variadic expansion and returns NSlice for chaining.  Avoids
-// // the 10x reflection overhead cost by type asserting common types. Types not optimized in this
-// // way incur the full 10x reflection overhead cost.
-// //
-// // Optimized types: []string
-// func (q *NSlice) AppendS(items interface{}) *NSlice {
-// 	if q.Nil() {
-// 		*q = *(Slice(items))
-// 	} else {
-// 		ok := false
-// 		switch slice := q.v.Interface().(type) {
-// 		case []string:
-// 			var x []string
-// 			if x, ok = items.([]string); ok {
-// 				slice = append(slice, x...)
-// 			}
-// 		default:
-// 			x := reflect.ValueOf(items)
-// 			*q.v = reflect.AppendSlice(*q.v, x)
-// 		}
-// 		if !ok {
-// 			panic(fmt.Sprintf("can't concat type '%T' with '%T'", items, q.v.Interface()))
-// 		}
-// 	}
-// 	return q
-// }
+// AppendS appends the slice using variadic expansion and returns NSlice for chaining.  Avoids
+// the 10x reflection overhead cost by type asserting common types. Types not optimized in this
+// way incur the full 10x reflection overhead cost.
+//
+// Cost: ? - 10x
+//
+// Optimized types: []bool, []int, []string
+func (n *NSlice) AppendS(items interface{}) *NSlice {
+	if n.Nil() {
+		new := Slice(items)
+		if !new.Nil() {
+			*n = *new
+		}
+	} else {
+		ok := false
+		switch slice := n.o.(type) {
+		case []bool:
+			var x []bool
+			if x, ok = items.([]bool); ok {
+				n.o = append(slice, x...)
+				n.len += len(x)
+			}
+		case []int:
+			var x []int
+			if x, ok = items.([]int); ok {
+				n.o = append(slice, x...)
+				n.len += len(x)
+			}
+		case []string:
+			var x []string
+			if x, ok = items.([]string); ok {
+				n.o = append(slice, x...)
+				n.len += len(x)
+			}
+		default:
+			ok = true
+			v := reflect.ValueOf(n.o)
+			x := reflect.ValueOf(items)
+			n.o = reflect.AppendSlice(v, x).Interface()
+			n.len += x.Len()
+		}
+		if !ok {
+			panic(fmt.Sprintf("can't concat type '%T' with '%T'", items, n.o))
+		}
+	}
+	return n
+}
 
 // // At returns the item at the given index location. Allows for negative notation
 // func (q *NSlice) At(i int) interface{} {

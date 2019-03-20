@@ -218,6 +218,37 @@ func TestNSlice_Append(t *testing.T) {
 		assert.Equal(t, []int{1, 2}, n.Append(2).O())
 	}
 
+	// Test all supported types
+	{
+		// bool
+		{
+			n := SliceV(true)
+			assert.Equal(t, []bool{true, false}, n.Append(false).O())
+			assert.Equal(t, 2, n.Len())
+		}
+
+		// int
+		{
+			n := SliceV(0)
+			assert.Equal(t, []int{0, 1}, n.Append(1).O())
+			assert.Equal(t, 2, n.Len())
+		}
+
+		// string
+		{
+			n := SliceV("0")
+			assert.Equal(t, []string{"0", "1"}, n.Append("1").O())
+			assert.Equal(t, 2, n.Len())
+		}
+
+		// Append to a slice of custom type i.e. reflection
+		{
+			n := Slice([]bobS{{"3"}})
+			assert.Equal(t, []bobS{{"3"}, {"1"}}, n.Append(bobS{"1"}).O())
+			assert.Equal(t, 2, n.Len())
+		}
+	}
+
 	// Invalid type which will abort the function so put at end
 	{
 		n := SliceV("1")
@@ -231,44 +262,186 @@ func TestNSlice_Append(t *testing.T) {
 
 // AppendV
 //--------------------------------------------------------------------------------------------------
+func BenchmarkNSlice_AppendV_Normal(t *testing.B) {
+	ints := []int{}
+	ints = append(ints, Range(0, nines6)...)
+}
+
+func BenchmarkNSlice_AppendV_Optimized(t *testing.B) {
+	n := &NSlice{o: []int{}}
+	new := RangeO(0, nines6)
+	n.AppendV(new...)
+}
+
+func ExampleNSlice_AppendV() {
+	slice := SliceV(1).AppendV(2, 3)
+	fmt.Println(slice.O())
+	// Output: [1 2 3]
+}
+
 func TestNSlice_AppendV(t *testing.T) {
 
 	// Append many ints
 	{
-		//n := SliceV(1)
-		//assert.Equal(t, []int{1, 2, 3}, n.Append(2, 3).O())
+		n := SliceV(1)
+		assert.Equal(t, []int{1, 2, 3}, n.AppendV(2, 3).O())
 	}
 
-	// // Append many strings
-	// {
-	// 	{
-	// 		q := Nil()
-	// 		assert.Equal(t, 0, q.Len())
-	// 		assert.Equal(t, 3, q.Append("1", "2", "3").Len())
-	// 	}
-	// 	{
-	// 		q := Q([]string{"1", "2"})
-	// 		assert.Equal(t, 2, q.Len())
-	// 		assert.Equal(t, 4, q.Append("3", "4").Len())
-	// 	}
-	// }
+	// Append many strings
+	{
+		{
+			n := SliceV()
+			assert.Equal(t, 0, n.Len())
+			assert.Equal(t, []string{"1", "2", "3"}, n.AppendV("1", "2", "3").O())
+			assert.Equal(t, 3, n.Len())
+		}
+		{
+			n := Slice([]string{"1"})
+			assert.Equal(t, 1, n.Len())
+			assert.Equal(t, []string{"1", "2", "3"}, n.AppendV("2", "3").O())
+			assert.Equal(t, 3, n.Len())
+		}
+	}
 
-	// // Append to a slice of custom type
-	// {
-	// 	q := Q([]bob{{o: "3"}})
-	// 	assert.Equal(t, []bob{{o: "3"}, {o: "1"}}, q.Append(bob{o: "1"}).O())
-	// 	assert.Equal(t, []bob{{o: "3"}, {o: "1"}, {o: "2"}, {o: "4"}}, q.Append(bob{o: "2"}, bob{o: "4"}).O())
-	// }
+	// Append to a slice of custom type
+	{
+		n := Slice([]bobS{{"3"}})
+		assert.Equal(t, []bobS{{"3"}, {"1"}}, n.AppendV(bobS{"1"}).O())
+		assert.Equal(t, []bobS{{"3"}, {"1"}, {"2"}, {"4"}}, n.AppendV(bobS{"2"}, bobS{"4"}).O())
+	}
 
-	// // Append to a map
-	// {
-	// 	q := Q(map[string]string{"1": "one"})
-	// 	defer func() {
-	// 		err := recover()
-	// 		assert.Equal(t, "Append doesn't support map types", err)
-	// 	}()
-	// 	q.Append(KeyVal{Key: "2", Val: "two"})
-	// }
+	// Test all supported types
+	{
+		// bool
+		{
+			n := SliceV(true)
+			assert.Equal(t, []bool{true, false}, n.AppendV(false).O())
+			assert.Equal(t, 2, n.Len())
+		}
+
+		// int
+		{
+			n := SliceV(0)
+			assert.Equal(t, []int{0, 1}, n.AppendV(1).O())
+			assert.Equal(t, 2, n.Len())
+		}
+
+		// string
+		{
+			n := SliceV("0")
+			assert.Equal(t, []string{"0", "1"}, n.AppendV("1").O())
+			assert.Equal(t, 2, n.Len())
+		}
+
+		// Append to a slice of custom type i.e. reflection
+		{
+			n := Slice([]bobS{{"3"}})
+			assert.Equal(t, []bobS{{"3"}, {"1"}}, n.AppendV(bobS{"1"}).O())
+			assert.Equal(t, 2, n.Len())
+		}
+	}
+
+	// Append to a slice of map
+	{
+		n := SliceV(map[string]string{"1": "one"})
+		expected := []map[string]string{
+			{"1": "one"},
+			{"2": "two"},
+		}
+		assert.Equal(t, expected, n.AppendV(map[string]string{"2": "two"}).O())
+	}
+}
+
+// AppendS
+//--------------------------------------------------------------------------------------------------
+func BenchmarkNSlice_AppendS_Normal(t *testing.B) {
+	ints := []int{}
+	ints = append(ints, Range(0, nines6)...)
+}
+
+func BenchmarkNSlice_AppendS_Optimized(t *testing.B) {
+	n := &NSlice{o: []int{}}
+	new := RangeO(0, nines6)
+	n.AppendV(new...)
+}
+
+func ExampleNSlice_AppendS() {
+	slice := SliceV(1).AppendV(2, 3)
+	fmt.Println(slice.O())
+	// Output: [1 2 3]
+}
+
+func TestNSlice_AppendS(t *testing.T) {
+
+	// Append many ints
+	{
+		n := SliceV(1)
+		assert.Equal(t, []int{1, 2, 3}, n.AppendV(2, 3).O())
+	}
+
+	// Append many strings
+	{
+		{
+			n := SliceV()
+			assert.Equal(t, 0, n.Len())
+			assert.Equal(t, []string{"1", "2", "3"}, n.AppendV("1", "2", "3").O())
+			assert.Equal(t, 3, n.Len())
+		}
+		{
+			n := Slice([]string{"1"})
+			assert.Equal(t, 1, n.Len())
+			assert.Equal(t, []string{"1", "2", "3"}, n.AppendV("2", "3").O())
+			assert.Equal(t, 3, n.Len())
+		}
+	}
+
+	// Append to a slice of custom type
+	{
+		n := Slice([]bobS{{"3"}})
+		assert.Equal(t, []bobS{{"3"}, {"1"}}, n.AppendV(bobS{"1"}).O())
+		assert.Equal(t, []bobS{{"3"}, {"1"}, {"2"}, {"4"}}, n.AppendV(bobS{"2"}, bobS{"4"}).O())
+	}
+
+	// Append to a slice of map
+	{
+		n := SliceV(map[string]string{"1": "one"})
+		expected := []map[string]string{
+			{"1": "one"},
+			{"2": "two"},
+		}
+		assert.Equal(t, expected, n.AppendV(map[string]string{"2": "two"}).O())
+	}
+
+	// Test all supported types
+	{
+		// bool
+		{
+			n := SliceV(true)
+			assert.Equal(t, []bool{true, false}, n.AppendS([]bool{false}).O())
+			assert.Equal(t, 2, n.Len())
+		}
+
+		// int
+		{
+			n := SliceV(0)
+			assert.Equal(t, []int{0, 1}, n.AppendS([]int{1}).O())
+			assert.Equal(t, 2, n.Len())
+		}
+
+		// string
+		{
+			n := SliceV("0")
+			assert.Equal(t, []string{"0", "1"}, n.AppendS([]string{"1"}).O())
+			assert.Equal(t, 2, n.Len())
+		}
+
+		// Append to a slice of custom type i.e. reflection
+		{
+			n := Slice([]bobS{{"3"}})
+			assert.Equal(t, []bobS{{"3"}, {"1"}}, n.AppendS([]bobS{{"1"}}).O())
+			assert.Equal(t, 2, n.Len())
+		}
+	}
 }
 
 // // At
