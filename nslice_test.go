@@ -138,139 +138,138 @@ func ExampleNSlice_Append() {
 	// Output: [1 2 3]
 }
 
-func TestNSlice_Append_One_2x(t *testing.T) {
-	slice := SliceV()
-	assert.Equal(t, 0, slice.Len())
-	assert.Equal(t, true, slice.Nil())
-
-	// First append invokes 10x reflect overhead because the slice is nil
-	slice.Append("1")
-	assert.Equal(t, 1, slice.Len())
-	assert.Equal(t, []string{"1"}, slice.O())
-
-	// Second append another which will be 2x at most
-	slice.Append("2")
-	assert.Equal(t, 2, slice.Len())
-	assert.Equal(t, []string{"1", "2"}, slice.O())
-
-	// Given an invalid type which will abort the function so put at end
-	defer func() {
-		err := recover()
-		assert.Equal(t, "can't insert type 'int' into '[]string'", err)
-	}()
-	slice.Append(2)
-}
-
-func TestNSlice_Append_One_10x(t *testing.T) {
+func TestNSlice_Append_Reflect(t *testing.T) {
 
 	// Use a custom type to invoke reflection
-	slice := SliceV(bobS{"1"})
-	assert.Equal(t, 1, slice.Len())
-	assert.Equal(t, false, slice.Nil())
-	assert.Equal(t, []bobS{{"1"}}, slice.O())
+	n := SliceV(bobS{"1"})
+	assert.Equal(t, 1, n.Len())
+	assert.Equal(t, false, n.Nil())
+	assert.Equal(t, []bobS{{"1"}}, n.O())
 
 	// Append another to it
-	slice.Append(bobS{"2"})
-	assert.Equal(t, 2, slice.Len())
-	assert.Equal(t, []bobS{{"1"}, {"2"}}, slice.O())
+	n.Append(bobS{"2"})
+	assert.Equal(t, 2, n.Len())
+	assert.Equal(t, []bobS{{"1"}, {"2"}}, n.O())
 
 	// Given an invalid type which will abort the function so put at end
 	defer func() {
 		err := recover()
 		assert.Equal(t, "reflect.Set: value of type int is not assignable to type n.bobS", err)
 	}()
-	slice.Append(2)
+	n.Append(2)
 }
 
-func TestNSlice_Append_Multiple(t *testing.T) {
+func TestNSlice_Append(t *testing.T) {
+
+	// Append one back to back
+	{
+		n := SliceV()
+		assert.Equal(t, 0, n.Len())
+		assert.Equal(t, true, n.Nil())
+
+		// First append invokes 10x reflect overhead because the slice is nil
+		n.Append("1")
+		assert.Equal(t, 1, n.Len())
+		assert.Equal(t, []string{"1"}, n.O())
+
+		// Second append another which will be 2x at most
+		n.Append("2")
+		assert.Equal(t, 2, n.Len())
+		assert.Equal(t, []string{"1", "2"}, n.O())
+	}
 
 	// Start with just appending without chaining
 	{
-		slice := SliceV()
-		assert.Equal(t, 0, slice.Len())
-		slice.Append(1)
-		assert.Equal(t, []int{1}, slice.O())
-		slice.Append(2)
-		assert.Equal(t, []int{1, 2}, slice.O())
+		n := SliceV()
+		assert.Equal(t, 0, n.Len())
+		n.Append(1)
+		assert.Equal(t, []int{1}, n.O())
+		n.Append(2)
+		assert.Equal(t, []int{1, 2}, n.O())
 	}
 
 	// Start with nil not chained
 	{
-		slice := SliceV()
-		assert.Equal(t, 0, slice.Len())
-		slice.Append(1).Append(2).Append(3)
-		assert.Equal(t, 3, slice.Len())
-		assert.Equal(t, []int{1, 2, 3}, slice.O())
+		n := SliceV()
+		assert.Equal(t, 0, n.Len())
+		n.Append(1).Append(2).Append(3)
+		assert.Equal(t, 3, n.Len())
+		assert.Equal(t, []int{1, 2, 3}, n.O())
 	}
 
 	// Start with nil chained
 	{
-		slice := SliceV().Append(1).Append(2)
-		assert.Equal(t, 2, slice.Len())
-		assert.Equal(t, []int{1, 2}, slice.O())
+		n := SliceV().Append(1).Append(2)
+		assert.Equal(t, 2, n.Len())
+		assert.Equal(t, []int{1, 2}, n.O())
 	}
 
 	// Start with non nil
 	{
-		slice := SliceV(1).Append(2).Append(3)
-		assert.Equal(t, 3, slice.Len())
-		assert.Equal(t, []int{1, 2, 3}, slice.O())
+		n := SliceV(1).Append(2).Append(3)
+		assert.Equal(t, 3, n.Len())
+		assert.Equal(t, []int{1, 2, 3}, n.O())
+	}
+
+	// Use append result directly
+	{
+		n := SliceV(1)
+		assert.Equal(t, 1, n.Len())
+		assert.Equal(t, []int{1, 2}, n.Append(2).O())
+	}
+
+	// Invalid type which will abort the function so put at end
+	{
+		n := SliceV("1")
+		defer func() {
+			err := recover()
+			assert.Equal(t, "can't insert type 'int' into '[]string'", err)
+		}()
+		n.Append(2)
 	}
 }
 
-// // func TestAppend(t *testing.T) {
-// //     // Append to valuetype
-// //     {
-// //             q := Q(2)
-// //             assert.Equal(t, 1, q.Len())
-// //             assert.Equal(t, []int{2, 1}, q.Append(1).O())
-// //     }
+// AppendV
+//--------------------------------------------------------------------------------------------------
+func TestNSlice_AppendV(t *testing.T) {
 
-// //     // Append one
-// //     {
-// //             q := Nil()
-// //             assert.Equal(t, 0, q.Len())
-// //             assert.Equal(t, []int{2}, q.Append(2).O())
-// //             assert.Equal(t, []int{2, 3}, q.Append(3).O())
-// //     }
+	// Append many ints
+	{
+		//n := SliceV(1)
+		//assert.Equal(t, []int{1, 2, 3}, n.Append(2, 3).O())
+	}
 
-// //     // Append many ints
-// //     {
-// //             q := Q([]int{1})
-// //             assert.Equal(t, []int{1, 2, 3}, q.Append(2, 3).O())
-// //     }
+	// // Append many strings
+	// {
+	// 	{
+	// 		q := Nil()
+	// 		assert.Equal(t, 0, q.Len())
+	// 		assert.Equal(t, 3, q.Append("1", "2", "3").Len())
+	// 	}
+	// 	{
+	// 		q := Q([]string{"1", "2"})
+	// 		assert.Equal(t, 2, q.Len())
+	// 		assert.Equal(t, 4, q.Append("3", "4").Len())
+	// 	}
+	// }
 
-// //     // Append many strings
-// //     {
-// //             {
-// //                     q := Nil()
-// //                     assert.Equal(t, 0, q.Len())
-// //                     assert.Equal(t, 3, q.Append("1", "2", "3").Len())
-// //             }
-// //             {
-// //                     q := Q([]string{"1", "2"})
-// //                     assert.Equal(t, 2, q.Len())
-// //                     assert.Equal(t, 4, q.Append("3", "4").Len())
-// //             }
-// //     }
+	// // Append to a slice of custom type
+	// {
+	// 	q := Q([]bob{{o: "3"}})
+	// 	assert.Equal(t, []bob{{o: "3"}, {o: "1"}}, q.Append(bob{o: "1"}).O())
+	// 	assert.Equal(t, []bob{{o: "3"}, {o: "1"}, {o: "2"}, {o: "4"}}, q.Append(bob{o: "2"}, bob{o: "4"}).O())
+	// }
 
-// //     // Append to a slice of custom type
-// //     {
-// //             q := Q([]bob{{o: "3"}})
-// //             assert.Equal(t, []bob{{o: "3"}, {o: "1"}}, q.Append(bob{o: "1"}).O())
-// //             assert.Equal(t, []bob{{o: "3"}, {o: "1"}, {o: "2"}, {o: "4"}}, q.Append(bob{o: "2"}, bob{o: "4"}).O())
-// //     }
-
-// //     // Append to a map
-// //     {
-// //             q := Q(map[string]string{"1": "one"})
-// //             defer func() {
-// //                     err := recover()
-// //                     assert.Equal(t, "Append doesn't support map types", err)
-// //             }()
-// //             q.Append(KeyVal{Key: "2", Val: "two"})
-// //     }
-// // }
+	// // Append to a map
+	// {
+	// 	q := Q(map[string]string{"1": "one"})
+	// 	defer func() {
+	// 		err := recover()
+	// 		assert.Equal(t, "Append doesn't support map types", err)
+	// 	}()
+	// 	q.Append(KeyVal{Key: "2", Val: "two"})
+	// }
+}
 
 // // At
 // //--------------------------------------------------------------------------------------------------

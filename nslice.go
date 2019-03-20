@@ -179,17 +179,17 @@ func (n *NSlice) Append(item interface{}) *NSlice {
 	return n
 }
 
-// // AppendV appends an item to the end of the NSlice and returns the NSlice for chaining. Avoids
-// // the 10x reflection overhead cost by type asserting common types. Types not optimized in this
-// // way incur the full 10x reflection overhead cost.
-// //
-// // Optimized types: bool, int, string
-// func (q *NSlice) AppendV(items ...interface{}) *NSlice {
-// 	for _, item := range items {
-// 		q.Append(item)
-// 	}
-// 	return q
-// }
+// AppendV appends an item to the end of the NSlice and returns the NSlice for chaining. Avoids
+// the 10x reflection overhead cost by type asserting common types. Types not optimized in this
+// way incur the full 10x reflection overhead cost.
+//
+// Optimized types: bool, int, string
+func (n *NSlice) AppendV(items ...interface{}) *NSlice {
+	for _, item := range items {
+		n.Append(item)
+	}
+	return n
+}
 
 // // AppendS appends the slice using variadic expansion and returns NSlice for chaining.  Avoids
 // // the 10x reflection overhead cost by type asserting common types. Types not optimized in this
