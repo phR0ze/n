@@ -7,8 +7,8 @@ import (
 	"github.com/phR0ze/n/pkg/tmpl"
 )
 
-// Load a yaml file as a Queryable
-func Load(filepath string) (result *OldQueryable, err error) {
+// Load a yaml file as a Numerable
+func Load(filepath string) (result *OldNumerable, err error) {
 	var yamlBytes []byte
 	if yamlBytes, err = ioutil.ReadFile(filepath); err == nil {
 		data := map[string]interface{}{}
@@ -19,8 +19,8 @@ func Load(filepath string) (result *OldQueryable, err error) {
 	return
 }
 
-// FromYaml return a queryable from the given Yaml
-func FromYaml(yml string) (result *OldQueryable, err error) {
+// FromYaml return a numerable from the given Yaml
+func FromYaml(yml string) (result *OldNumerable, err error) {
 	data := map[string]interface{}{}
 	if err = yaml.Unmarshal([]byte(yml), &data); err == nil {
 		result = Q(data)
@@ -29,8 +29,8 @@ func FromYaml(yml string) (result *OldQueryable, err error) {
 }
 
 // FromYamlTmplFile loads a yaml file from disk and processes any templating
-// provided by the tmpl package returning an unmarshaled yaml block queryable.
-func FromYamlTmplFile(filepath string, vars map[string]string) *OldQueryable {
+// provided by the tmpl package returning an unmarshaled yaml block numerable.
+func FromYamlTmplFile(filepath string, vars map[string]string) *OldNumerable {
 	if data, err := ioutil.ReadFile(filepath); err == nil {
 		if tpl, err := tmpl.New(string(data), "{{", "}}"); err == nil {
 			if result, err := tpl.Process(vars); err == nil {
@@ -41,5 +41,5 @@ func FromYamlTmplFile(filepath string, vars map[string]string) *OldQueryable {
 			}
 		}
 	}
-	return N()
+	return Nil()
 }

@@ -46,7 +46,7 @@ const nines5 = 99999
 // }
 
 // // Benchmark Find - Small set
-// func BenchmarkFind_SmallQueryable(t *testing.B) {
+// func BenchmarkFind_SmallNumerable(t *testing.B) {
 // 	Q(smallStringSet).Find(func(x O) bool {
 // 		return x.(string) == "laborum"
 // 	})
@@ -61,7 +61,7 @@ const nines5 = 99999
 // }
 
 // // Benchmark Find - Large set
-// func BenchmarkFind_LargeQueryable(t *testing.B) {
+// func BenchmarkFind_LargeNumerable(t *testing.B) {
 // 	Q(Range(0, nines7)).Find(func(x O) bool {
 // 		return x.(int) == nines7-1
 // 	})
@@ -187,8 +187,8 @@ const nines5 = 99999
 
 // func TestQN(t *testing.T) {
 // 	{
-// 		// Test nil queryable indicates not found or invalid
-// 		q := N()
+// 		// Test nil numerable indicates not found or invalid
+// 		q := Nil()
 // 		assert.NotNil(t, q)
 // 		assert.Nil(t, q.Iter)
 // 		assert.True(t, q.Nil())
@@ -295,7 +295,7 @@ const nines5 = 99999
 // 		assert.False(t, Q([]int{}).Any())
 
 // 		// empty []interface{}
-// 		assert.False(t, N().Any())
+// 		assert.False(t, Nil().Any())
 // 	}
 // 	{
 // 		// int
@@ -307,7 +307,7 @@ const nines5 = 99999
 // 	}
 // 	{
 // 		// map
-// 		assert.False(t, N().Any())
+// 		assert.False(t, Nil().Any())
 // 		assert.False(t, Q(map[int]interface{}{}).Any())
 // 		assert.True(t, Q(map[int]interface{}{1: "one"}).Any())
 // 	}
@@ -322,8 +322,8 @@ const nines5 = 99999
 // 		assert.True(t, q.Any())
 // 	}
 // 	{
-// 		assert.False(t, N().Any())
-// 		assert.True(t, N().Append(1).Any())
+// 		assert.False(t, Nil().Any())
+// 		assert.True(t, Nil().Append(1).Any())
 // 		assert.False(t, Q([]int{}).Any())
 // 		assert.True(t, Q([]int{1}).Any())
 // 	}
@@ -339,7 +339,7 @@ const nines5 = 99999
 // 	}
 // }
 
-// func BenchmarkAnyWhere_Queryable(t *testing.B) {
+// func BenchmarkAnyWhere_Numerable(t *testing.B) {
 // 	q := Q(Range(0, nines7))
 // 	q.AnyWhere(func(x O) bool {
 // 		return x.(int) == nines6
@@ -367,7 +367,7 @@ const nines5 = 99999
 // 	}
 // 	{
 // 		// empty map
-// 		q := N()
+// 		q := Nil()
 // 		assert.False(t, q.AnyWhere(func(x O) bool {
 // 			return x == 3
 // 		}))
@@ -394,7 +394,7 @@ const nines5 = 99999
 // 		}))
 // 	}
 // 	{
-// 		q := N()
+// 		q := Nil()
 // 		assert.False(t, q.AnyWhere(func(x O) bool {
 // 			return x == 3
 // 		}))
@@ -532,7 +532,7 @@ const nines5 = 99999
 // func TestContains(t *testing.T) {
 // 	{
 // 		// Empty slice
-// 		q := N()
+// 		q := Nil()
 // 		assert.False(t, q.Contains(1))
 // 	}
 // 	{
@@ -622,7 +622,7 @@ const nines5 = 99999
 // func TestContainsAny(t *testing.T) {
 // 	{
 // 		// Empty slice
-// 		q := N()
+// 		q := Nil()
 // 		assert.False(t, q.ContainsAny(1))
 // 	}
 // 	{
@@ -704,10 +704,10 @@ const nines5 = 99999
 // //--------------------------------------------------------------------------------------------------
 // func TestCopy(t *testing.T) {
 
-// 	// Queryables
+// 	// Numerables
 // 	{
-// 		q1 := N()
-// 		assert.Equal(t, N(), q1)
+// 		q1 := Nil()
+// 		assert.Equal(t, Nil(), q1)
 // 		q2 := Q("test")
 // 		assert.Equal(t, "test", q2.O())
 // 		assert.Equal(t, "test", q1.Copy(q2).O())
@@ -732,7 +732,7 @@ const nines5 = 99999
 // 	// Maps
 // 	{
 // 		{
-// 			q := N()
+// 			q := Nil()
 // 			assert.False(t, q.Any())
 // 			data := map[string]interface{}{"1": "one"}
 // 			assert.True(t, q.Copy(data).Any())
@@ -751,7 +751,7 @@ const nines5 = 99999
 
 // 	// custom type
 // 	{
-// 		q := N()
+// 		q := Nil()
 // 		assert.False(t, q.Any())
 // 		data := []bob{{o: "3"}}
 // 		assert.True(t, q.Copy(data).Any())
@@ -761,7 +761,7 @@ const nines5 = 99999
 // 	// []int
 // 	{
 // 		cnt := []bool{}
-// 		q := N()
+// 		q := Nil()
 // 		q.Copy([]int{1, 2, 3})
 // 		next := q.Iter()
 // 		for x, ok := next(); ok; x, ok = next() {
@@ -795,15 +795,15 @@ const nines5 = 99999
 
 // 	// // Nil
 // 	// {
-// 	// 	q := N()
-// 	// 	assert.Equal(t, N(), q.DeleteAt(0))
+// 	// 	q := Nil()
+// 	// 	assert.Equal(t, Nil(), q.DeleteAt(0))
 // 	// }
 
 // 	// // []int
 // 	// {
 // 	// 	// Empty
 // 	// 	q := Q([]int{})
-// 	// 	assert.Equal(t, N(), q.DeleteAt(0))
+// 	// 	assert.Equal(t, Nil(), q.DeleteAt(0))
 
 // 	// 	q = Q([]int{0, 1, 2, 3, 4, 5})
 
@@ -827,13 +827,13 @@ const nines5 = 99999
 // 	// // int
 // 	// {
 // 	// 	q := Q(2)
-// 	// 	assert.Equal(t, N(), q.DeleteAt(0))
+// 	// 	assert.Equal(t, Nil(), q.DeleteAt(0))
 // 	// }
 
 // 	// // empty []string
 // 	// {
 // 	// 	q := Q([]string{})
-// 	// 	assert.Equal(t, N(), q.DeleteAt(0))
+// 	// 	assert.Equal(t, Nil(), q.DeleteAt(0))
 // 	// }
 
 // 	// // string
@@ -915,7 +915,7 @@ const nines5 = 99999
 // 	}
 // }
 
-// func BenchmarkDeleteAt_Queryable(t *testing.B) {
+// func BenchmarkDeleteAt_Numerable(t *testing.B) {
 // 	q := Q(Range(0, nines5))
 // 	for q.Len() > 0 {
 // 		i := rand.Intn(q.Len())
@@ -926,15 +926,15 @@ const nines5 = 99999
 // func TestDeleteAt(t *testing.T) {
 // 	// Nil
 // 	{
-// 		q := N()
-// 		assert.Equal(t, N(), q.DeleteAt(0))
+// 		q := Nil()
+// 		assert.Equal(t, Nil(), q.DeleteAt(0))
 // 	}
 
 // 	// []int
 // 	{
 // 		// Empty
 // 		q := Q([]int{})
-// 		assert.Equal(t, N(), q.DeleteAt(0))
+// 		assert.Equal(t, Nil(), q.DeleteAt(0))
 
 // 		q = Q([]int{0, 1, 2, 3, 4, 5})
 
@@ -958,13 +958,13 @@ const nines5 = 99999
 // 	// int
 // 	{
 // 		q := Q(2)
-// 		assert.Equal(t, N(), q.DeleteAt(0))
+// 		assert.Equal(t, Nil(), q.DeleteAt(0))
 // 	}
 
 // 	// empty []string
 // 	{
 // 		q := Q([]string{})
-// 		assert.Equal(t, N(), q.DeleteAt(0))
+// 		assert.Equal(t, Nil(), q.DeleteAt(0))
 // 	}
 
 // 	// string
@@ -1013,7 +1013,7 @@ const nines5 = 99999
 // 	// map - not allowed
 // 	{
 // 		q := Q(map[string]interface{}{"1": "one"})
-// 		assert.Equal(t, N(), q.DeleteAt(0))
+// 		assert.Equal(t, Nil(), q.DeleteAt(0))
 // 	}
 
 // 	// Custom type
@@ -1150,7 +1150,7 @@ const nines5 = 99999
 // func TestFirst(t *testing.T) {
 // 	assert.Equal(t, 1, getI(t, Q([]int{1, 2, 3}).First()))
 // 	assert.Equal(t, "1", Q([]string{"1", "2", "3"}).First().A())
-// 	assert.Equal(t, N(), Q([]string{}).First())
+// 	assert.Equal(t, Nil(), Q([]string{}).First())
 // }
 
 // func TestFlatten(t *testing.T) {
@@ -1217,11 +1217,11 @@ const nines5 = 99999
 // 		assert.Equal(t, "", q.Join(".").A())
 // 	}
 // 	{
-// 		q := N()
+// 		q := Nil()
 // 		assert.Equal(t, "", q.Join(".").A())
 // 	}
 // 	{
-// 		q := N()
+// 		q := Nil()
 // 		assert.Equal(t, "", q.Join(".").A())
 // 	}
 // 	{
@@ -1233,7 +1233,7 @@ const nines5 = 99999
 // 		assert.Equal(t, "", q.Join(".").A())
 // 	}
 // 	{
-// 		q := N().Append("1", "2", "3")
+// 		q := Nil().Append("1", "2", "3")
 // 		assert.Equal(t, 3, q.Len())
 // 		joined := q.Join(".")
 // 		assert.Equal(t, 5, joined.Len())
@@ -1247,7 +1247,7 @@ const nines5 = 99999
 // 		assert.Equal(t, "1.2.3", q.Join(".").A())
 // 	}
 // 	{
-// 		q := N().Append(1, 2, 3)
+// 		q := Nil().Append(1, 2, 3)
 // 		assert.Equal(t, 3, q.Len())
 // 		joined := q.Join(".")
 // 		assert.Equal(t, 5, joined.Len())
@@ -1265,7 +1265,7 @@ const nines5 = 99999
 // func TestLast(t *testing.T) {
 // 	assert.Equal(t, 3, getI(t, Q([]int{1, 2, 3}).Last()))
 // 	assert.Equal(t, "3", Q([]string{"1", "2", "3"}).Last().A())
-// 	assert.Equal(t, N(), Q([]string{}).Last())
+// 	assert.Equal(t, Nil(), Q([]string{}).Last())
 // }
 
 // func TestLen(t *testing.T) {
@@ -1277,7 +1277,7 @@ const nines5 = 99999
 // 	{
 // 		// Maps
 // 		{
-// 			q := N()
+// 			q := Nil()
 // 			assert.Equal(t, 0, q.Len())
 // 		}
 // 		{
@@ -1288,7 +1288,7 @@ const nines5 = 99999
 // 	{
 // 		// Slices
 // 		{
-// 			q := N()
+// 			q := Nil()
 // 			assert.Equal(t, 0, q.Len())
 // 		}
 // 		{
@@ -1539,7 +1539,7 @@ const nines5 = 99999
 
 // func TestSplit(t *testing.T) {
 // 	{
-// 		q := N()
+// 		q := Nil()
 // 		assert.Equal(t, []string{}, q.Split(".").S())
 // 	}
 // 	{
@@ -1555,7 +1555,7 @@ const nines5 = 99999
 // 		assert.Equal(t, []string{}, q.Split(".").S())
 // 	}
 // 	{
-// 		q := N()
+// 		q := Nil()
 // 		assert.Equal(t, []string{}, q.Split(".").S())
 // 	}
 // 	{

@@ -9,7 +9,7 @@ package n
 // func TestTakeFirst(t *testing.T) {
 // 	{
 // 		// empty
-// 		x, ok := N().TakeFirst()
+// 		x, ok := Nil().TakeFirst()
 // 		assert.False(t, ok)
 // 		assert.Nil(t, x)
 // 	}
@@ -38,7 +38,7 @@ package n
 // 	}
 // 	{
 // 		// strings
-// 		q := N().Append("1", "2", "3")
+// 		q := Nil().Append("1", "2", "3")
 // 		x, ok := q.TakeFirst()
 // 		assert.True(t, ok)
 // 		assert.NotNil(t, x)
@@ -55,7 +55,7 @@ package n
 // 	}
 // 	{
 // 		// bobs
-// 		q := N().Append(bob{o: "3"})
+// 		q := Nil().Append(bob{o: "3"})
 // 		assert.True(t, q.Any())
 // 		assert.Equal(t, bob{o: "3"}, q.First().O())
 // 		x, ok := q.TakeFirst()

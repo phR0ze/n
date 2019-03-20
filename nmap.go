@@ -1,11 +1,11 @@
 package n
 
-// QMap is a Queryable map
+// QMap is a Numerable map
 type QMap struct {
 }
 
-// // Any checks if the queryable has anything in it
-// func (q *Queryable) Any() bool {
+// // Any checks if the numerable has anything in it
+// func (q *Numerable) Any() bool {
 // 	if q.v == nil {
 // 		return false
 // 	}
@@ -16,7 +16,7 @@ type QMap struct {
 // }
 
 // // AnyWhere check if any match the given lambda
-// func (q *Queryable) AnyWhere(lambda func(O) bool) bool {
+// func (q *Numerable) AnyWhere(lambda func(O) bool) bool {
 // 	if !q.TypeSingle() {
 // 		next := q.Iter()
 // 		for x, ok := next(); ok; x, ok = next() {
@@ -34,8 +34,8 @@ type QMap struct {
 
 // // Append modifies the underlying type, converting it to a slice as needed,
 // // then appending the given items to the underlying collection.
-// // Returns the queryable for chaining.
-// func (q *Queryable) Append(items ...interface{}) *Queryable {
+// // Returns the numerable for chaining.
+// func (q *Numerable) Append(items ...interface{}) *Numerable {
 // 	if q.TypeMap() {
 // 		panic("Append doesn't support map types")
 // 	}
@@ -49,7 +49,7 @@ type QMap struct {
 // }
 
 // // At returns the item at the given index location. Allows for negative notation
-// func (q *Queryable) At(i int) *Queryable {
+// func (q *Numerable) At(i int) *Numerable {
 // 	if q.TypeIter() {
 // 		if i < 0 {
 // 			i = q.v.Len() + i
@@ -61,11 +61,11 @@ type QMap struct {
 // 			return Q(q.v.Index(i).Interface())
 // 		}
 // 	}
-// 	return N()
+// 	return Nil()
 // }
 
-// // Clear the underlying collection in the queryable
-// func (q *Queryable) Clear() *Queryable {
+// // Clear the underlying collection in the numerable
+// func (q *Numerable) Clear() *Numerable {
 // 	switch q.Kind {
 // 	case reflect.Array, reflect.Slice:
 // 		*q.v = reflect.MakeSlice(q.v.Type(), 0, 10)
@@ -90,7 +90,7 @@ type QMap struct {
 // // When obj is a slice of string and this is a string each string check using strings.Contains.
 // // When obj is a slice and this is a slice each item will be checked in the slice.
 // // When obj is a slice and this is a map each item will be checked in the map as a key.
-// func (q *Queryable) Contains(obj interface{}) bool {
+// func (q *Numerable) Contains(obj interface{}) bool {
 // 	other := Q(obj)
 // 	if !q.Any() || !other.Any() {
 // 		return false
@@ -164,7 +164,7 @@ type QMap struct {
 
 // // ContainsAny checks if any of the given obj is found.
 // // ContainsAny behaves much like Contains only it allows for matching any not all.
-// func (q *Queryable) ContainsAny(obj interface{}) bool {
+// func (q *Numerable) ContainsAny(obj interface{}) bool {
 // 	other := Q(obj)
 // 	if q.Nil() {
 // 		return false
@@ -234,9 +234,9 @@ type QMap struct {
 // }
 
 // // Copy given obj into this one and reset types
-// func (q *Queryable) Copy(obj interface{}) *Queryable {
-// 	var other *Queryable
-// 	if x, ok := obj.(*Queryable); ok {
+// func (q *Numerable) Copy(obj interface{}) *Numerable {
+// 	var other *Numerable
+// 	if x, ok := obj.(*Numerable); ok {
 // 		other = x
 // 	} else {
 // 		other = Q(obj)
@@ -249,7 +249,7 @@ type QMap struct {
 
 // // Delete all items that match the given item for slices or the key value
 // // pair for maps or matching rune for strings. Returns true if something was deleted.
-// func (q *Queryable) Delete(obj interface{}) (ok bool) {
+// func (q *Numerable) Delete(obj interface{}) (ok bool) {
 // 	switch q.Kind {
 // 	case reflect.Array, reflect.Slice:
 // 		//*q.v = reflect.MakeSlice(q.v.Type(), 0, 10)
@@ -270,8 +270,8 @@ type QMap struct {
 // }
 
 // // DeleteAt deletes the item at the given index location. Allows for negative notation.
-// // Returns the deleted element Queryable or Nil Queryable if missing.
-// func (q *Queryable) DeleteAt(i int) (item *Queryable) {
+// // Returns the deleted element Numerable or Nil Numerable if missing.
+// func (q *Numerable) DeleteAt(i int) (item *Numerable) {
 // 	if q.TypeIter() && !q.TypeMap() {
 // 		if i < 0 {
 // 			i = q.v.Len() + i
@@ -303,13 +303,13 @@ type QMap struct {
 // 		}
 // 	}
 // 	if item == nil {
-// 		item = N()
+// 		item = Nil()
 // 	}
 // 	return
 // }
 
-// // Each iterates over the queryable and executes the given action
-// func (q *Queryable) Each(action func(O)) {
+// // Each iterates over the numerable and executes the given action
+// func (q *Numerable) Each(action func(O)) {
 // 	if q.TypeIter() {
 // 		next := q.Iter()
 // 		for x, ok := next(); ok; x, ok = next() {
@@ -318,9 +318,9 @@ type QMap struct {
 // 	}
 // }
 
-// // EachE iterates over the queryable and executes the given action
+// // EachE iterates over the numerable and executes the given action
 // // Abort early and return error if non nil
-// func (q *Queryable) EachE(action func(O) error) (err error) {
+// func (q *Numerable) EachE(action func(O) error) (err error) {
 // 	if q.TypeIter() {
 // 		next := q.Iter()
 // 		for x, ok := next(); ok; x, ok = next() {
@@ -332,9 +332,9 @@ type QMap struct {
 // 	return
 // }
 
-// // Find returns a new queryable containing the first item which matches the given lambda.
+// // Find returns a new numerable containing the first item which matches the given lambda.
 // // Returns nil if not found.
-// func (q *Queryable) Find(lambda func(O) bool) (result *Queryable) {
+// func (q *Numerable) Find(lambda func(O) bool) (result *Numerable) {
 // 	next := q.Iter()
 // 	for x, ok := next(); ok; x, ok = next() {
 // 		if lambda(x) {
@@ -345,18 +345,18 @@ type QMap struct {
 // 	return
 // }
 
-// // First returns the first item as queryable
-// // returns a nil queryable when index out of bounds
-// func (q *Queryable) First() (result *Queryable) {
+// // First returns the first item as numerable
+// // returns a nil numerable when index out of bounds
+// func (q *Numerable) First() (result *Numerable) {
 // 	if q.Len() > 0 {
 // 		return q.At(0)
 // 	}
-// 	return N()
+// 	return Nil()
 // }
 
 // // Flatten returns a new slice that is one-dimensional flattening.
 // // That is, for every item that is a slice, extract its items into the new slice.
-// func (q *Queryable) Flatten() (result *Queryable) {
+// func (q *Numerable) Flatten() (result *Numerable) {
 // 	if q.TypeSlice() {
 // 		next := q.Iter()
 // 		for x, ok := next(); ok; x, ok = next() {
@@ -381,7 +381,7 @@ type QMap struct {
 // }
 
 // // Insert the item at the given index, negative notation supported
-// func (q *Queryable) Insert(i int, items ...interface{}) *Queryable {
+// func (q *Numerable) Insert(i int, items ...interface{}) *Numerable {
 // 	q.toSlice(items...)
 // 	if i < 0 {
 // 		i = q.v.Len() + i
@@ -416,7 +416,7 @@ type QMap struct {
 // }
 
 // // Join slice items as string with given delimeter
-// func (q *Queryable) Join(delim string) *Queryable {
+// func (q *Numerable) Join(delim string) *Numerable {
 // 	var joined bytes.Buffer
 // 	if q.TypeStr() {
 // 		joined.WriteString(q.v.Interface().(string))
@@ -436,17 +436,17 @@ type QMap struct {
 // 	return Q(strings.TrimSuffix(joined.String(), delim))
 // }
 
-// // Last returns the last item as queryable
-// // returns a nil queryable when index out of bounds
-// func (q *Queryable) Last() (result *Queryable) {
+// // Last returns the last item as numerable
+// // returns a nil numerable when index out of bounds
+// func (q *Numerable) Last() (result *Numerable) {
 // 	if q.Len() > 0 {
 // 		return q.At(-1)
 // 	}
-// 	return N()
+// 	return Nil()
 // }
 
 // // Len of the collection type including string
-// func (q *Queryable) Len() int {
+// func (q *Numerable) Len() int {
 // 	if q.TypeIter() {
 // 		return q.v.Len()
 // 	} else if q.Nil() {
@@ -455,14 +455,14 @@ type QMap struct {
 // 	return 1
 // }
 
-// // Map manipulates the queryable data into a new form
-// func (q *Queryable) Map(sel func(O) O) (result *Queryable) {
+// // Map manipulates the numerable data into a new form
+// func (q *Numerable) Map(sel func(O) O) (result *Numerable) {
 // 	next := q.Iter()
 // 	for x, ok := next(); ok; x, ok = next() {
 // 		obj := sel(x)
 
-// 		// Drill into queryables
-// 		if s, ok := obj.(*Queryable); ok {
+// 		// Drill into numerables
+// 		if s, ok := obj.(*Numerable); ok {
 // 			obj = s.v.Interface()
 // 		}
 
@@ -479,14 +479,14 @@ type QMap struct {
 // 	return
 // }
 
-// // MapF manipulates the queryable data into a new form then flattens
-// func (q *Queryable) MapF(sel func(O) O) (result *Queryable) {
+// // MapF manipulates the numerable data into a new form then flattens
+// func (q *Numerable) MapF(sel func(O) O) (result *Numerable) {
 // 	result = q.Map(sel).Flatten()
 // 	return
 // }
 
-// // MapMany manipulates the queryable data from two sources in a cross join
-// func (q *Queryable) MapMany(sel func(O) O) (result *Queryable) {
+// // MapMany manipulates the numerable data from two sources in a cross join
+// func (q *Numerable) MapMany(sel func(O) O) (result *Numerable) {
 // 	// next := q.Iter()
 // 	// for x, ok := next(); ok; x, ok = next() {
 // 	// 	s := sel(x)
@@ -502,16 +502,16 @@ type QMap struct {
 // 	return
 // }
 
-// // Nil tests if the queryable is a nil queryable
-// func (q *Queryable) Nil() bool {
+// // Nil tests if the numerable is a nil numerable
+// func (q *Numerable) Nil() bool {
 // 	if q.v == nil || q.Kind == reflect.Invalid {
 // 		return true
 // 	}
 // 	return false
 // }
 
-// // Select returns a new queryable containing all items which match the given lambda
-// func (q *Queryable) Select(lambda func(O) bool) (result *Queryable) {
+// // Select returns a new numerable containing all items which match the given lambda
+// func (q *Numerable) Select(lambda func(O) bool) (result *Numerable) {
 // 	result = q.newSlice()
 // 	next := q.Iter()
 // 	for x, ok := next(); ok; x, ok = next() {
@@ -523,7 +523,7 @@ type QMap struct {
 // }
 
 // // Set the item at the given index to the given item
-// func (q *Queryable) Set(i int, item interface{}) *Queryable {
+// func (q *Numerable) Set(i int, item interface{}) *Numerable {
 // 	if q.TypeIter() && !q.TypeStr() {
 // 		if i < 0 {
 // 			i = q.v.Len() + i
@@ -537,38 +537,38 @@ type QMap struct {
 // }
 
 // // Split the string into a slice on delimiter
-// func (q *Queryable) Split(delim string) *strSliceN {
+// func (q *Numerable) Split(delim string) *strSliceN {
 // 	if q.TypeStr() {
 // 		return A(q.v.Interface().(string)).Split(delim)
 // 	}
 // 	return S()
 // }
 
-// // TypeIter checks if the queryable is iterable
-// func (q *Queryable) TypeIter() bool {
+// // TypeIter checks if the numerable is iterable
+// func (q *Numerable) TypeIter() bool {
 // 	if q.Iter != nil {
 // 		return true
 // 	}
 // 	return false
 // }
 
-// // TypeMap checks if the queryable is reflect.Map
-// func (q *Queryable) TypeMap() bool {
+// // TypeMap checks if the numerable is reflect.Map
+// func (q *Numerable) TypeMap() bool {
 // 	return q.Kind == reflect.Map
 // }
 
-// // TypeSlice checks if the queryable is reflect.Array or reflect.Slice
-// func (q *Queryable) TypeSlice() bool {
+// // TypeSlice checks if the numerable is reflect.Array or reflect.Slice
+// func (q *Numerable) TypeSlice() bool {
 // 	return q.Kind == reflect.Array || q.Kind == reflect.Slice
 // }
 
-// // TypeStr checks if the queryable is encapsulating a string
-// func (q *Queryable) TypeStr() bool {
+// // TypeStr checks if the numerable is encapsulating a string
+// func (q *Numerable) TypeStr() bool {
 // 	return q.Kind == reflect.String
 // }
 
-// // TypeSingle checks if the queryable is ecapuslating a string or is not iterable
-// func (q *Queryable) TypeSingle() bool {
+// // TypeSingle checks if the numerable is ecapuslating a string or is not iterable
+// func (q *Numerable) TypeSingle() bool {
 // 	if !q.TypeIter() || q.TypeStr() || q.Nil() {
 // 		return true
 // 	}
@@ -576,7 +576,7 @@ type QMap struct {
 // }
 
 // // Convert the single type into a slice type
-// func (q *Queryable) toSlice(items ...interface{}) {
+// func (q *Numerable) toSlice(items ...interface{}) {
 // 	if q.TypeSingle() {
 // 		nq := q.newSlice(items...)
 // 		if !q.Nil() {
@@ -587,7 +587,7 @@ type QMap struct {
 // }
 
 // // Create a new slice of the inner type
-// func (q *Queryable) newSlice(items ...interface{}) *Queryable {
+// func (q *Numerable) newSlice(items ...interface{}) *Numerable {
 // 	var typ reflect.Type
 // 	switch {
 // 	case len(items) > 0:

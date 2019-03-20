@@ -2,7 +2,7 @@ bin/n
 vendor
 .vendor-new
 test/temp/*
-test/perf/queryable/queryable
+test/perf/numerable/numerable
 test/perf/standard/standard
 pkg/term/test/test
 

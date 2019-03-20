@@ -1,10 +1,20 @@
 package n
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+// Slice function
+//--------------------------------------------------------------------------------------------------
+
+func ExampleSlice() {
+	slice := Slice([]int{1, 2, 3})
+	fmt.Println(slice.O())
+	// Output: [1 2 3]
+}
 
 func TestQSlice_Slice(t *testing.T) {
 
@@ -22,17 +32,32 @@ func TestQSlice_Slice(t *testing.T) {
 	assert.Equal(t, []string{"1", "2"}, Slice([]string{"1", "2"}).O())
 }
 
+// Slicef function
+//--------------------------------------------------------------------------------------------------
+
+func ExampleSlicef_empty() {
+	slice := SliceV()
+	fmt.Println(slice.O())
+	// Output: <nil>
+}
+
+func ExampleSlicef_variadic() {
+	slice := SliceV(1, 2, 3)
+	fmt.Println(slice.O())
+	// Output: [1 2 3]
+}
+
 func TestQSlice_Slicef(t *testing.T) {
-	assert.Equal(t, []int{1}, Slicef(1).O())
-	assert.Equal(t, []string{"1"}, Slicef("1").O())
+	assert.Equal(t, []int{1}, SliceV(1).O())
+	assert.Equal(t, []string{"1"}, SliceV("1").O())
 	assert.Equal(t, nil, Slice(nil).O())
-	assert.Equal(t, nil, Slicef(nil).O())
-	assert.Equal(t, nil, Slicef().O())
-	assert.True(t, Slicef().Nil())
-	assert.Equal(t, 0, Slicef().Len())
-	assert.Equal(t, []string{"1", "2"}, Slicef("1", "2").O())
-	assert.Equal(t, [][]string{{"1"}}, Slicef([]string{"1"}).O())
-	assert.Equal(t, []map[string]string{{"1": "one"}}, Slicef(map[string]string{"1": "one"}).O())
+	assert.Equal(t, nil, SliceV(nil).O())
+	assert.Equal(t, nil, SliceV().O())
+	assert.True(t, SliceV().Nil())
+	assert.Equal(t, 0, SliceV().Len())
+	assert.Equal(t, []string{"1", "2"}, SliceV("1", "2").O())
+	assert.Equal(t, [][]string{{"1"}}, SliceV([]string{"1"}).O())
+	assert.Equal(t, []map[string]string{{"1": "one"}}, SliceV(map[string]string{"1": "one"}).O())
 }
 
 func TestQSlice_newSlice(t *testing.T) {
@@ -59,28 +84,28 @@ func TestQSlice_newSlice(t *testing.T) {
 	assert.Equal(t, []map[string]string{{"1": "one"}}, newSlice([]interface{}{map[string]string{"1": "one"}}).O())
 }
 
-// Queryably interface methods
+// Numerably interface methods
 //--------------------------------------------------------------------------------------------------
 func TestQSlice_O(t *testing.T) {
-	assert.Nil(t, Slicef().O())
-	assert.Len(t, Slicef().Append("2").O(), 1)
+	assert.Nil(t, SliceV().O())
+	assert.Len(t, SliceV().Append("2").O(), 1)
 }
 
 func TestQSlice_Any(t *testing.T) {
-	assert.False(t, Slicef().Any())
-	assert.True(t, Slicef().Append("2").Any())
+	assert.False(t, SliceV().Any())
+	assert.True(t, SliceV().Append("2").Any())
 }
 
 func TestQSlice_Len(t *testing.T) {
-	assert.Equal(t, 0, Slicef().Len())
-	assert.Equal(t, 1, Slicef().Append("2").Len())
+	assert.Equal(t, 0, SliceV().Len())
+	assert.Equal(t, 1, SliceV().Append("2").Len())
 }
 
 func TestQSlice_Nil(t *testing.T) {
-	assert.True(t, Slicef().Nil())
+	assert.True(t, SliceV().Nil())
 	var q *QSlice
 	assert.True(t, q.Nil())
-	assert.False(t, Slicef().Append("2").Nil())
+	assert.False(t, SliceV().Append("2").Nil())
 }
 
 // Append
@@ -92,21 +117,26 @@ func BenchmarkQSlice_Append_Normal(t *testing.B) {
 	}
 }
 
-func BenchmarkQSlice_Append_Queryable(t *testing.B) {
-	q := Slicef()
+func BenchmarkQSlice_Append_Numerable(t *testing.B) {
+	q := SliceV()
 	for _, i := range Range(0, nines6) {
 		q.Append(i)
 	}
-	q.A()
 }
 
+// func ExampleQSlice_Append() {
+// 	slice := SliceV(1).Append(2).Append(3)
+// 	fmt.Println(slice.O())
+// 	// Output: [1 2]
+// }
 func TestQSlice_Append(t *testing.T) {
 	// Append one
 	{
-		slice := Slicef()
+		slice := SliceV()
 		assert.Equal(t, 0, slice.Len())
+		assert.Equal(t, true, slice.Nil())
 
-		// First append invokes 10x reflect overhead
+		// First append invokes 10x reflect overhead because the slice is nil
 		slice.Append("1")
 		assert.Equal(t, 1, slice.Len())
 		assert.Equal(t, []string{"1"}, slice.O())
@@ -122,14 +152,32 @@ func TestQSlice_Append(t *testing.T) {
 		slice.Append("2")
 		assert.Equal(t, []string{"1", "2"}, slice.O())
 	}
-	// {
-	// 	// Append many
-	// 	slice := Slicef()
-	// 	assert.Equal(t, 0, slice.Len())
-	// 	slice.Append("2", "4", "6")
-	// 	assert.Equal(t, 3, slice.Len())
-	// 	assert.Equal(t, []interface{}{"2", "4", "6"}, slice.O())
-	// }
+
+	// Chain appending
+	{
+		// Start with nil not chained
+		{
+			slice := SliceV()
+			assert.Equal(t, 0, slice.Len())
+			slice.Append(1).Append(2).Append(3)
+			assert.Equal(t, 3, slice.Len())
+			assert.Equal(t, []int{1, 2, 3}, slice.O())
+		}
+
+		// Start with nil chained
+		{
+			slice := SliceV().Append(1).Append(2)
+			assert.Equal(t, 2, slice.Len())
+			assert.Equal(t, []int{1, 2}, slice.O())
+		}
+
+		// Start with non nil
+		{
+			slice := SliceV(1).Append(2).Append(3)
+			assert.Equal(t, 3, slice.Len())
+			assert.Equal(t, []int{1, 2, 3}, slice.O())
+		}
+	}
 }
 
 // func TestAppend(t *testing.T) {
@@ -142,7 +190,7 @@ func TestQSlice_Append(t *testing.T) {
 
 //     // Append one
 //     {
-//             q := N()
+//             q := Nil()
 //             assert.Equal(t, 0, q.Len())
 //             assert.Equal(t, []int{2}, q.Append(2).O())
 //             assert.Equal(t, []int{2, 3}, q.Append(3).O())
@@ -157,7 +205,7 @@ func TestQSlice_Append(t *testing.T) {
 //     // Append many strings
 //     {
 //             {
-//                     q := N()
+//                     q := Nil()
 //                     assert.Equal(t, 0, q.Len())
 //                     assert.Equal(t, 3, q.Append("1", "2", "3").Len())
 //             }
@@ -195,7 +243,7 @@ func BenchmarkQSlice_At_Normal(t *testing.B) {
 	}
 }
 
-func BenchmarkQSlice_At_Queryable(t *testing.B) {
+func BenchmarkQSlice_At_Numerable(t *testing.B) {
 	slice := Slice(Range(0, nines6))
 	for _, i := range Range(0, nines6) {
 		assert.IsType(t, 0, slice.At(i))
@@ -204,7 +252,7 @@ func BenchmarkQSlice_At_Queryable(t *testing.B) {
 
 func TestQSlice_At(t *testing.T) {
 	{
-		slice := Slicef("1", "2", "3", "4")
+		slice := SliceV("1", "2", "3", "4")
 		assert.Equal(t, "4", slice.At(-1))
 		assert.Equal(t, "3", slice.At(-2))
 		assert.Equal(t, "2", slice.At(-3))
@@ -214,7 +262,7 @@ func TestQSlice_At(t *testing.T) {
 		assert.Equal(t, "4", slice.At(3))
 	}
 	{
-		slice := Slicef("1")
+		slice := SliceV("1")
 		assert.Equal(t, "1", slice.At(-1))
 	}
 }

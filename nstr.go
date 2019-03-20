@@ -13,7 +13,7 @@ package n
 // 	ReGraphicalOnly = regexp.MustCompile(`[^[:graph:]]+`)
 // )
 
-// // QStr implementes the Queryable Interface and integrates with other queryable types.
+// // QStr implementes the Numerable Interface and integrates with other numerable types.
 // // It provides a plethora of convenience methods to work with string types.
 // type QStr struct {
 // 	v string
@@ -41,14 +41,14 @@ package n
 // 	return
 // }
 
-// // Type returns the identifier for this queryable type.
-// // Implements the queryable interface.
+// // Type returns the identifier for this numerable type.
+// // Implements the numerable interface.
 // func (q *QStr) Type() QType {
 // 	return QStrType
 // }
 
 // // O returns the underlying data structure
-// // Implements the queryable interface.
+// // Implements the numerable interface.
 // func (q *QStr) O() interface{} {
 // 	return q.v
 // }
@@ -63,9 +63,9 @@ package n
 // 	return []byte(q.v)
 // }
 
-// // Q casts the QStr as a Queryable
-// func (q *QStr) Q() Queryable {
-// 	return Queryable(q)
+// // Q casts the QStr as a Numerable
+// func (q *QStr) Q() Numerable {
+// 	return Numerable(q)
 // }
 
 // // At returns the rune at the given index location. Allows for negative notation
@@ -144,8 +144,8 @@ package n
 // 	return len(q.v)
 // }
 
-// // Nil tests if the queryable is nil.
-// // Implements Queryable interface
+// // Nil tests if the numerable is nil.
+// // Implements Numerable interface
 // func (q *QStr) Nil() bool {
 // 	if q == nil {
 // 		return true

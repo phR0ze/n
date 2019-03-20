@@ -177,7 +177,7 @@ package n
 //   - name: two
 //   - name: three`)
 // 		assert.True(t, q.Any())
-// 		assert.Equal(t, N(), q.Yaml(""))
+// 		assert.Equal(t, Nil(), q.Yaml(""))
 // 	}
 // }
 
@@ -332,49 +332,49 @@ package n
 // 	}
 // }
 
-// func getB(t *testing.T, q *Queryable) bool {
+// func getB(t *testing.T, q *Numerable) bool {
 // 	result, err := q.B()
 // 	assert.Nil(t, err)
 // 	return result
 // }
 
-// func getI(t *testing.T, q *Queryable) int {
+// func getI(t *testing.T, q *Numerable) int {
 // 	result, err := q.I()
 // 	assert.Nil(t, err)
 // 	return result
 // }
 
-// func getInts(t *testing.T, q *Queryable) []int {
+// func getInts(t *testing.T, q *Numerable) []int {
 // 	result, err := q.Ints()
 // 	assert.Nil(t, err)
 // 	return result
 // }
 
-// func getM(t *testing.T, q *Queryable) map[string]interface{} {
+// func getM(t *testing.T, q *Numerable) map[string]interface{} {
 // 	result, err := q.M()
 // 	assert.Nil(t, err)
 // 	return result
 // }
 
-// func getAAMap(t *testing.T, q *Queryable) map[string]string {
+// func getAAMap(t *testing.T, q *Numerable) map[string]string {
 // 	result, err := q.AAMap()
 // 	assert.Nil(t, err)
 // 	return result
 // }
 
-// func getASAMap(t *testing.T, q *Queryable) map[string][]string {
+// func getASAMap(t *testing.T, q *Numerable) map[string][]string {
 // 	result, err := q.ASAMap()
 // 	assert.Nil(t, err)
 // 	return result
 // }
 
-// func getSAMap(t *testing.T, q *Queryable) []map[string]interface{} {
+// func getSAMap(t *testing.T, q *Numerable) []map[string]interface{} {
 // 	result, err := q.SAMap()
 // 	assert.Nil(t, err)
 // 	return result
 // }
 
-// func getSAAMap(t *testing.T, q *Queryable) []map[string]string {
+// func getSAAMap(t *testing.T, q *Numerable) []map[string]string {
 // 	result, err := q.SAAMap()
 // 	assert.Nil(t, err)
 // 	return result

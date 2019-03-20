@@ -1,8 +1,8 @@
 package n
 
 // // Yaml gets data by key which can be dot delimited
-// // returns nil queryable on errors or keys not found
-// func (q *Queryable) Yaml(key string) (result *Queryable) {
+// // returns nil numerable on errors or keys not found
+// func (q *Numerable) Yaml(key string) (result *Numerable) {
 // 	keys := A(key).Split(".")
 // 	if key, ok := keys.TakeFirst(); ok {
 // 		switch x := q.v.Interface().(type) {
@@ -38,14 +38,14 @@ package n
 // 		}
 // 	}
 // 	if result == nil {
-// 		result = N()
+// 		result = Nil()
 // 	}
 // 	return
 // }
 
 // // YamlMerge merges the given yaml into the existing yaml
 // // with the given yaml having a higher precedence than the existing
-// func (q *Queryable) YamlMerge(data interface{}) (result *Queryable, err error) {
+// func (q *Numerable) YamlMerge(data interface{}) (result *Numerable, err error) {
 // 	result = q
 // 	switch x := q.v.Interface().(type) {
 // 	case map[string]interface{}:
@@ -74,7 +74,7 @@ package n
 // }
 
 // // YamlSet sets data by key which can be dot delimited
-// func (q *Queryable) YamlSet(key string, data interface{}) (result *Queryable, err error) {
+// func (q *Numerable) YamlSet(key string, data interface{}) (result *Numerable, err error) {
 // 	keys := A(key).Split(".")
 // 	if key, ok := keys.TakeFirst(); ok {
 // 		switch x := q.v.Interface().(type) {
@@ -163,6 +163,6 @@ package n
 // }
 
 // // Insert/set data in the unmarshalled yaml
-// func (q *Queryable) yamlSet() (err error) {
+// func (q *Numerable) yamlSet() (err error) {
 // 	return
 // }
