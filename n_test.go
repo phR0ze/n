@@ -10,6 +10,14 @@ const nines7 = 9999999
 const nines6 = 999999
 const nines5 = 99999
 
+type bobS struct {
+	o string
+}
+type bobI struct {
+	o int
+}
+
+// var smallStringSet = []string{"Lorem", "ipsum", "dolor", "sit", "amet,", "consectetur", "adipiscing", "elit,", "sed", "do",
 func TestOptimized(t *testing.T) {
 	assert.True(t, optimized([]bool{}))
 	assert.True(t, optimized([]int{}))
@@ -17,11 +25,6 @@ func TestOptimized(t *testing.T) {
 	assert.False(t, optimized(""))
 }
 
-// type bob struct {
-// 	o string
-// }
-
-// var smallStringSet = []string{"Lorem", "ipsum", "dolor", "sit", "amet,", "consectetur", "adipiscing", "elit,", "sed", "do",
 // 	"eiusmod", "tempor", "incididunt", "ut", "labore", "et", "dolore", "magna", "aliqua.", "Ut",
 // 	"enim", "ad", "minim", "veniam,", "quis", "nostrud", "exercitation", "ullamco", "laboris", "nisi",
 // 	"ut", "aliquip", "ex", "ea", "commodo", "consequat.", "Duis", "aute", "irure", "dolor", "in",
