@@ -1623,3 +1623,29 @@ func TestOptimized(t *testing.T) {
 // 		assert.Equal(t, []KeyVal{}, q.newSlice().O())
 // 	}
 // }
+
+// rangeBobI creates slice of the given range of numbers inclusive
+func rangeBobI(min, max int) []bobI {
+	result := make([]bobI, max-min+1)
+	for i := range result {
+		result[i] = bobI{min + i}
+	}
+	return result
+}
+
+func rangeBobIO(min, max int) []interface{} {
+	result := make([]interface{}, max-min+1)
+	for i := range result {
+		result[i] = bobI{min + i}
+	}
+	return result
+}
+
+// rangeO creates slice of the given range of numbers inclusive
+func rangeO(min, max int) []interface{} {
+	result := make([]interface{}, max-min+1)
+	for i := range result {
+		result[i] = min + i
+	}
+	return result
+}

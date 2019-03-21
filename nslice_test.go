@@ -269,7 +269,13 @@ func BenchmarkNSlice_AppendV_Normal(t *testing.B) {
 
 func BenchmarkNSlice_AppendV_Optimized(t *testing.B) {
 	n := &NSlice{o: []int{}}
-	new := RangeO(0, nines6)
+	new := rangeO(0, nines6)
+	n.AppendV(new...)
+}
+
+func BenchmarkNSlice_AppendV_Reflect(t *testing.B) {
+	n := &NSlice{o: []bobI{}}
+	new := rangeBobIO(0, nines6)
 	n.AppendV(new...)
 }
 
@@ -354,19 +360,68 @@ func TestNSlice_AppendV(t *testing.T) {
 
 // AppendS
 //--------------------------------------------------------------------------------------------------
-func BenchmarkNSlice_AppendS_Normal(t *testing.B) {
-	ints := []int{}
-	ints = append(ints, Range(0, nines6)...)
+func BenchmarkNSlice_AppendS_Normal10(t *testing.B) {
+	dest := []int{}
+	src := Range(0, nines6)
+	j := 0
+	for i := 10; i < len(src); i += 10 {
+		dest = append(dest, (src[j:i])...)
+		j = i
+	}
 }
 
-func BenchmarkNSlice_AppendS_Optimized(t *testing.B) {
-	n := &NSlice{o: []int{}}
-	new := RangeO(0, nines6)
-	n.AppendV(new...)
+func BenchmarkNSlice_AppendS_Normal100(t *testing.B) {
+	dest := []int{}
+	src := Range(0, nines6)
+	j := 0
+	for i := 100; i < len(src); i += 100 {
+		dest = append(dest, (src[j:i])...)
+		j = i
+	}
+}
+
+func BenchmarkNSlice_AppendS_Optimized19(t *testing.B) {
+	dest := &NSlice{o: []int{}}
+	src := Range(0, nines6)
+	j := 0
+	for i := 10; i < len(src); i += 10 {
+		dest.AppendS(src[j:i])
+		j = i
+	}
+}
+
+func BenchmarkNSlice_AppendS_Optimized100(t *testing.B) {
+	dest := &NSlice{o: []int{}}
+	src := Range(0, nines6)
+	j := 0
+	for i := 100; i < len(src); i += 100 {
+		dest.AppendS(src[j:i])
+		j = i
+	}
+}
+
+func BenchmarkNSlice_AppendS_Reflect10(t *testing.B) {
+	dest := &NSlice{o: []bobI{}}
+	src := rangeBobI(0, nines6)
+	j := 0
+	for i := 10; i < len(src); i += 10 {
+		dest.AppendS(src[j:i])
+		j = i
+	}
+}
+
+func BenchmarkNSlice_AppendS_Reflect100(t *testing.B) {
+	dest := &NSlice{o: []bobI{}}
+	src := rangeBobI(0, nines6)
+	j := 0
+	for i := 100; i < len(src); i += 100 {
+		dest.AppendS(src[j:i])
+		j = i
+	}
 }
 
 func ExampleNSlice_AppendS() {
-	slice := SliceV(1).AppendV(2, 3)
+	slice := SliceV(1).AppendS([]int{2, 3})
 	fmt.Println(slice.O())
 	// Output: [1 2 3]
 }
@@ -444,8 +499,8 @@ func TestNSlice_AppendS(t *testing.T) {
 	}
 }
 
-// // At
-// //--------------------------------------------------------------------------------------------------
+// At
+//--------------------------------------------------------------------------------------------------
 // func BenchmarkNSlice_At_Normal(t *testing.B) {
 // 	ints := Range(0, nines6)
 // 	for _, i := range Range(0, nines6) {
@@ -460,22 +515,22 @@ func TestNSlice_AppendS(t *testing.T) {
 // 	}
 // }
 
-// func TestNSlice_At(t *testing.T) {
-// 	{
-// 		slice := SliceV("1", "2", "3", "4")
-// 		assert.Equal(t, "4", slice.At(-1))
-// 		assert.Equal(t, "3", slice.At(-2))
-// 		assert.Equal(t, "2", slice.At(-3))
-// 		assert.Equal(t, "1", slice.At(0))
-// 		assert.Equal(t, "2", slice.At(1))
-// 		assert.Equal(t, "3", slice.At(2))
-// 		assert.Equal(t, "4", slice.At(3))
-// 	}
-// 	{
-// 		slice := SliceV("1")
-// 		assert.Equal(t, "1", slice.At(-1))
-// 	}
-// }
+func TestNSlice_At(t *testing.T) {
+	{
+		slice := SliceV("1", "2", "3", "4")
+		assert.Equal(t, "4", slice.At(-1))
+		assert.Equal(t, "3", slice.At(-2))
+		assert.Equal(t, "2", slice.At(-3))
+		assert.Equal(t, "1", slice.At(0))
+		assert.Equal(t, "2", slice.At(1))
+		assert.Equal(t, "3", slice.At(2))
+		assert.Equal(t, "4", slice.At(3))
+	}
+	{
+		slice := SliceV("1")
+		assert.Equal(t, "1", slice.At(-1))
+	}
+}
 
 // // func TestStrSliceClear(t *testing.T) {
 // // 	slice := S().Append("1", "2", "3", "4")

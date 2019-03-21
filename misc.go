@@ -38,15 +38,6 @@ func Range(min, max int) []int {
 	return result
 }
 
-// RangeO creates slice of the given range of numbers inclusive
-func RangeO(min, max int) []interface{} {
-	result := make([]interface{}, max-min+1)
-	for i := range result {
-		result[i] = min + i
-	}
-	return result
-}
-
 // SetValueOrDefault sets the value of the given string 'target' to the
 // given 'value' if value is not empty else 'defaulty' and returns the value as well
 func SetValueOrDefault(target *string, value, defaulty string) string {

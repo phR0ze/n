@@ -199,11 +199,11 @@ func (n *NSlice) AppendV(items ...interface{}) *NSlice {
 	return n
 }
 
-// AppendS appends the slice using variadic expansion and returns NSlice for chaining.  Avoids
+// AppendS appends the given slice using variadic expansion and returns NSlice for chaining. Avoids
 // the 10x reflection overhead cost by type asserting common types. Types not optimized in this
 // way incur the full 10x reflection overhead cost.
 //
-// Cost: ? - 10x
+// Cost: 1x - 2x
 //
 // Optimized types: []bool, []int, []string
 func (n *NSlice) AppendS(items interface{}) *NSlice {
@@ -247,16 +247,27 @@ func (n *NSlice) AppendS(items interface{}) *NSlice {
 	return n
 }
 
-// // At returns the item at the given index location. Allows for negative notation
-// func (q *NSlice) At(i int) interface{} {
-// 	if i < 0 {
-// 		i = q.v.Len() + i
-// 	}
-// 	if i >= 0 && i < q.v.Len() {
-// 		return q.v.Index(i).Interface()
-// 	}
-// 	panic("index out of slice bounds")
-// }
+// At returns the item at the given index location. Allows for negative notation
+//
+// Cost: ? - 10x
+func (n *NSlice) At(i int) interface{} {
+	if i < 0 {
+		i = n.len + i
+	}
+	if i >= 0 && i < n.len {
+		switch slice := n.o.(type) {
+		case []bool:
+			return slice[i]
+		case []int:
+			return slice[i]
+		case []string:
+			return slice[i]
+		default:
+			return reflect.ValueOf(n.o).Index(i).Interface()
+		}
+	}
+	panic("index out of slice bounds")
+}
 
 // // AtQ returns a QObj for the item at the given index location. Allows for negative notation
 // func (q *NSlice) AtQ(i int) *QObj {
@@ -269,7 +280,7 @@ func (n *NSlice) AppendS(items interface{}) *NSlice {
 // 	panic("index out of slice bounds")
 // }
 
-// // // Clear the underlying slice
+// // Clear the underlying slice
 // // func (s *strSliceN) Clear() *strSliceN {
 // // 	s.v = []string{}
 // // 	return s
