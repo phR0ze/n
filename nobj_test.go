@@ -176,3 +176,88 @@ func TestNObj_ToInt64(t *testing.T) {
 		assert.IsType(t, int64(1), obj)
 	}
 }
+
+func TestNObj_ToUInt(t *testing.T) {
+
+	// w/out error
+	{
+		n := &NObj{uint(1)}
+		assert.IsType(t, uint(1), n.ToUint())
+	}
+
+	// w/error
+	{
+		n := &NObj{uint(1)}
+		obj, e := n.ToUintE()
+		assert.Nil(t, e)
+		assert.IsType(t, uint(1), obj)
+	}
+}
+
+func TestNObj_ToUint8(t *testing.T) {
+
+	// w/out error
+	{
+		n := &NObj{uint8(1)}
+		assert.IsType(t, uint8(1), n.ToUint8())
+	}
+
+	// w/error
+	{
+		n := &NObj{uint8(1)}
+		obj, e := n.ToUint8E()
+		assert.Nil(t, e)
+		assert.IsType(t, uint8(1), obj)
+	}
+}
+
+func TestNObj_ToUint16(t *testing.T) {
+
+	// w/out error
+	{
+		n := &NObj{uint16(1)}
+		assert.IsType(t, uint16(1), n.ToUint16())
+	}
+
+	// w/error
+	{
+		n := &NObj{uint16(1)}
+		obj, e := n.ToUint16E()
+		assert.Nil(t, e)
+		assert.IsType(t, uint16(1), obj)
+	}
+}
+
+func TestNObj_ToUint32(t *testing.T) {
+
+	// w/out error
+	{
+		n := &NObj{uint32(1)}
+		assert.IsType(t, uint32(1), n.ToUint32())
+	}
+
+	// w/error
+	{
+		n := &NObj{uint32(1)}
+		obj, e := n.ToUint32E()
+		assert.Nil(t, e)
+		assert.IsType(t, uint32(1), obj)
+	}
+}
+
+func TestNObj_ToUint64(t *testing.T) {
+
+	// w/out error
+	{
+		n := &NObj{uint64(1)}
+		assert.IsType(t, uint64(1), n.ToUint64())
+	}
+
+	// w/error
+	{
+		n := &NObj{uint64(1)}
+		obj, e := n.ToUint64E()
+		assert.Nil(t, e)
+		assert.IsType(t, uint64(1), obj)
+	}
+}

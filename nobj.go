@@ -134,36 +134,65 @@ func (n *NObj) ToInt64E() (int64, error) {
 	return cast.ToInt64E(n.o)
 }
 
-// // ToUint casts an interface to a uint type.
-// func ToUint(i interface{}) uint {
-// 	v, _ := ToUintE(i)
-// 	return v
-// }
+// ToUint casts an interface to a uint type.
+func (n *NObj) ToUint() uint {
+	v, _ := cast.ToUintE(n.o)
+	return v
+}
 
-// // ToUint64 casts an interface to a uint64 type.
-// func ToUint64(i interface{}) uint64 {
-// 	v, _ := ToUint64E(i)
-// 	return v
-// }
+// ToUintE casts an interface to a uint type.
+func (n *NObj) ToUintE() (uint, error) {
+	return cast.ToUintE(n.o)
+}
 
-// // ToUint32 casts an interface to a uint32 type.
-// func ToUint32(i interface{}) uint32 {
-// 	v, _ := ToUint32E(i)
-// 	return v
-// }
+// ToUint8 casts an interface to a uint8 type.
+func (n *NObj) ToUint8() uint8 {
+	v, _ := cast.ToUint8E(n.o)
+	return v
+}
 
-// // ToUint16 casts an interface to a uint16 type.
-// func ToUint16(i interface{}) uint16 {
-// 	v, _ := ToUint16E(i)
-// 	return v
-// }
+// ToUint8E casts an interface to a uint8 type.
+func (n *NObj) ToUint8E() (uint8, error) {
+	return cast.ToUint8E(n.o)
+}
 
-// // ToUint8 casts an interface to a uint8 type.
-// func ToUint8(i interface{}) uint8 {
-// 	v, _ := ToUint8E(i)
-// 	return v
-// }
+// ToUint16 casts an interface to a uint16 type.
+func (n *NObj) ToUint16() uint16 {
+	v, _ := cast.ToUint16E(n.o)
+	return v
+}
 
+// ToUint16E casts an interface to a uint16 type.
+func (n *NObj) ToUint16E() (uint16, error) {
+	return cast.ToUint16E(n.o)
+}
+
+// ToUint32 casts an interface to a uint32 type.
+func (n *NObj) ToUint32() uint32 {
+	v, _ := cast.ToUint32E(n.o)
+	return v
+}
+
+// ToUint32E casts an interface to a uint32 type.
+func (n *NObj) ToUint32E() (uint32, error) {
+	return cast.ToUint32E(n.o)
+}
+
+// ToUint64 casts an interface to a uint64 type.
+func (n *NObj) ToUint64() uint64 {
+	v, _ := cast.ToUint64E(n.o)
+	return v
+}
+
+// ToUint64E casts an interface to a uint64 type.
+func (n *NObj) ToUint64E() (uint64, error) {
+	return cast.ToUint64E(n.o)
+}
+
+// String related
+//--------------------------------------------------------------------------------------------------
+
+// ToInt casts an interface to an int type.
 // // ToString casts an interface to a string type.
 // func ToString(i interface{}) string {
 // 	v, _ := ToStringE(i)
