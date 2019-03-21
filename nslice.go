@@ -114,7 +114,7 @@ func (n *NSlice) Nil() bool {
 }
 
 // Type returns the identifier for this numerable type
-func (n *NSlice) Type() NType {
+func (n *NSlice) Type() Type {
 	return NSliceType
 }
 
@@ -201,7 +201,8 @@ func (n *NSlice) AppendV(items ...interface{}) *NSlice {
 
 // AppendS appends the given slice using variadic expansion and returns NSlice for chaining. Avoids
 // the 10x reflection overhead cost by type asserting common types. Types not optimized in this
-// way incur the full 10x reflection overhead cost.
+// way incur the full 10x reflection overhead cost. However when appending larger slices fewer times
+// the cost reduces down to 2x.
 //
 // Cost: 1x - 2x
 //
@@ -247,10 +248,11 @@ func (n *NSlice) AppendS(items interface{}) *NSlice {
 	return n
 }
 
-// At returns the item at the given index location. Allows for negative notation
+// AtO returns the item at the given index location. Allows for negative notation.
+// Cost even for reflection in this case doesn't seem to to add much.
 //
-// Cost: ? - 10x
-func (n *NSlice) At(i int) interface{} {
+// Cost: 10% - 20%
+func (n *NSlice) AtO(i int) interface{} {
 	if i < 0 {
 		i = n.len + i
 	}
@@ -269,15 +271,11 @@ func (n *NSlice) At(i int) interface{} {
 	panic("index out of slice bounds")
 }
 
-// // AtQ returns a QObj for the item at the given index location. Allows for negative notation
-// func (q *NSlice) AtQ(i int) *QObj {
-// 	if i < 0 {
-// 		i = q.v.Len() + i
-// 	}
-// 	if i >= 0 && i < q.v.Len() {
-// 		return &QObj{v: q.v.Index(i).Interface()}
-// 	}
-// 	panic("index out of slice bounds")
+// At returns a NObj for the item at the given index location. Allows for negative notation
+//
+// Cost: ?
+// func (n *NSlice) At(i int) *NObj {
+// 	return &NObj{n.AtO(i)}
 // }
 
 // // Clear the underlying slice

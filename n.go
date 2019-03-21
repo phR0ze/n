@@ -36,24 +36,27 @@ import (
 )
 
 const (
-	_          NType = iota // NType enumeration
-	NObjType                // identifies a NObj
-	NMapType                // identifies a NMap
-	NStrType                // identifies a NStr
-	NSliceType              // identifies a NSlice
+	_          Type = iota // NType enumeration
+	NObjType               // identifies a NObj
+	NMapType               // identifies a NMap
+	NStrType               // identifies a NStr
+	NSliceType             // identifies a NSlice
 )
 
-// NType provides a simple way to track Numerable types
-type NType uint8
+// O is an alias for interface{} and provides a number of export methods
+type O interface{}
 
-// Enumerable provides chainable execution and an algorithm abstraction layer for various
+// Type provides a simple way to track Numerable types
+type Type uint8
+
+// Numerable provides chainable execution and an algorithm abstraction layer for various
 // underlying types
-type Enumerable interface {
+type Numerable interface {
 	O() interface{} // O returns the underlying data structure
 	Any() bool      // Any tests if the numerable is not empty
 	Len() int       // Len returns the number of elements in the numerable
 	Nil() bool      // Nil tests if the numerable is nil
-	Type() NType    // Type returns the identifier for this numerable type
+	Type() Type     // Type returns the identifier for this numerable type
 }
 
 // Check to see if the given type is an optimized slice type

@@ -499,36 +499,103 @@ func TestNSlice_AppendS(t *testing.T) {
 	}
 }
 
-// At
-//--------------------------------------------------------------------------------------------------
+// // AtO
+// //--------------------------------------------------------------------------------------------------
 // func BenchmarkNSlice_At_Normal(t *testing.B) {
 // 	ints := Range(0, nines6)
-// 	for _, i := range Range(0, nines6) {
+// 	for i := range ints {
 // 		assert.IsType(t, 0, ints[i])
 // 	}
 // }
 
-// func BenchmarkNSlice_At_Numerable(t *testing.B) {
-// 	slice := Slice(Range(0, nines6))
-// 	for _, i := range Range(0, nines6) {
-// 		assert.IsType(t, 0, slice.At(i))
+// func BenchmarkNSlice_At_Optimized(t *testing.B) {
+// 	src := Range(0, nines6)
+// 	slice := Slice(src)
+// 	for _, i := range src {
+// 		_, ok := (slice.At(i)).(int)
+// 		assert.True(t, ok)
 // 	}
 // }
 
-func TestNSlice_At(t *testing.T) {
+// func BenchmarkNSlice_At_Reflect(t *testing.B) {
+// 	src := rangeBobI(0, nines6)
+// 	slice := Slice(src)
+// 	for i := range src {
+// 		_, ok := (slice.At(i)).(bobI)
+// 		assert.True(t, ok)
+// 	}
+// }
+
+// func ExampleNSlice_At() {
+// 	slice := SliceV(1).AppendS([]int{2, 3})
+// 	fmt.Println(slice.At(2))
+// 	// Output: 3
+// }
+
+// func TestNSlice_At(t *testing.T) {
+// 	{
+// 		slice := SliceV("1", "2", "3", "4")
+// 		assert.Equal(t, "4", slice.At(-1))
+// 		assert.Equal(t, "3", slice.At(-2))
+// 		assert.Equal(t, "2", slice.At(-3))
+// 		assert.Equal(t, "1", slice.At(0))
+// 		assert.Equal(t, "2", slice.At(1))
+// 		assert.Equal(t, "3", slice.At(2))
+// 		assert.Equal(t, "4", slice.At(3))
+// 	}
+// 	{
+// 		slice := SliceV("1")
+// 		assert.Equal(t, "1", slice.At(-1))
+// 	}
+// }
+
+// AtO
+//--------------------------------------------------------------------------------------------------
+func BenchmarkNSlice_AtO_Normal(t *testing.B) {
+	ints := Range(0, nines6)
+	for i := range ints {
+		assert.IsType(t, 0, ints[i])
+	}
+}
+
+func BenchmarkNSlice_AtO_Optimized(t *testing.B) {
+	src := Range(0, nines6)
+	slice := Slice(src)
+	for _, i := range src {
+		_, ok := (slice.AtO(i)).(int)
+		assert.True(t, ok)
+	}
+}
+
+func BenchmarkNSlice_AtO_Reflect(t *testing.B) {
+	src := rangeBobI(0, nines6)
+	slice := Slice(src)
+	for i := range src {
+		_, ok := (slice.AtO(i)).(bobI)
+		assert.True(t, ok)
+	}
+}
+
+func ExampleNSlice_AtO() {
+	slice := SliceV(1).AppendS([]int{2, 3})
+	fmt.Println(slice.AtO(2))
+	// Output: 3
+}
+
+func TestNSlice_AtO(t *testing.T) {
 	{
 		slice := SliceV("1", "2", "3", "4")
-		assert.Equal(t, "4", slice.At(-1))
-		assert.Equal(t, "3", slice.At(-2))
-		assert.Equal(t, "2", slice.At(-3))
-		assert.Equal(t, "1", slice.At(0))
-		assert.Equal(t, "2", slice.At(1))
-		assert.Equal(t, "3", slice.At(2))
-		assert.Equal(t, "4", slice.At(3))
+		assert.Equal(t, "4", slice.AtO(-1))
+		assert.Equal(t, "3", slice.AtO(-2))
+		assert.Equal(t, "2", slice.AtO(-3))
+		assert.Equal(t, "1", slice.AtO(0))
+		assert.Equal(t, "2", slice.AtO(1))
+		assert.Equal(t, "3", slice.AtO(2))
+		assert.Equal(t, "4", slice.AtO(3))
 	}
 	{
 		slice := SliceV("1")
-		assert.Equal(t, "1", slice.At(-1))
+		assert.Equal(t, "1", slice.AtO(-1))
 	}
 }
 
