@@ -18,41 +18,37 @@ func ExampleSlice() {
 
 func TestNSlice_Slice(t *testing.T) {
 
-	// Arrays
+	// arrays
 	var array [2]string
 	array[0] = "1"
 	array[1] = "2"
 	assert.Equal(t, []string{"1", "2"}, Slice(array).O())
 
-	// Test empty
+	// empty
 	assert.Equal(t, nil, Slice(nil).O())
 	assert.Equal(t, &NSlice{}, Slice(nil))
 
-	// Test pointers
+	// pointers
 	var obj *NObj
 	assert.Equal(t, []*NObj{nil}, Slice(obj).O())
 	assert.Equal(t, []*NObj{&(NObj{"bob"})}, Slice(&(NObj{"bob"})).O())
 	assert.Equal(t, []*NObj{&(NObj{"1"}), &(NObj{"2"})}, Slice([]*NObj{&(NObj{"1"}), &(NObj{"2"})}).O())
 
-	// Test singles
+	// singles
 	assert.Equal(t, []int{1}, Slice(1).O())
 	assert.Equal(t, []bool{true}, Slice(true).O())
 	assert.Equal(t, []string{""}, Slice("").O())
 	assert.Equal(t, []string{"1"}, Slice("1").O())
+	assert.Equal(t, []NObj{{1}}, Slice(NObj{1}).O())
 	assert.Equal(t, []NObj{NObj{"bob"}}, Slice(NObj{"bob"}).O())
 	assert.Equal(t, []map[string]string{{"1": "one"}}, Slice(map[string]string{"1": "one"}).O())
 
-	// Test slices
+	// slices
 	assert.Equal(t, []int{1, 2}, Slice([]int{1, 2}).O())
+	assert.Equal(t, []bool{true}, Slice([]bool{true}).O())
+	assert.Equal(t, []NObj{{"bob"}}, Slice([]NObj{{"bob"}}).O())
 	assert.Equal(t, []string{"1", "2"}, Slice([]string{"1", "2"}).O())
-	// assert.Equal(t, []NObj{{1}}, newSlice(NObj{1}).O())
-
-	// // Slices
-	// assert.Equal(t, []int{1, 2}, newSlice([]int{1, 2}).O())
-	// assert.Equal(t, []bool{true}, newSlice([]bool{true}).O())
-	// assert.Equal(t, []string{"bob"}, newSlice([]string{"bob"}).O())
-	// assert.Equal(t, []NObj{{"bob"}}, newSlice([]NObj{{"bob"}}).O())
-	// //assert.Equal(t, [][]string{{"1"}}, newSlice([]interface{}{[]string{"1"}}).O())
+	assert.Equal(t, [][]string{{"1"}}, Slice([]interface{}{[]string{"1"}}).O())
 	// //assert.Equal(t, []map[string]string{{"1": "one"}}, newSlice([]interface{}{map[string]string{"1": "one"}}).O())
 
 	// // Empty slices

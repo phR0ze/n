@@ -63,10 +63,6 @@ func Slice(obj interface{}) (n *NSlice) {
 //
 // Cost: ~10x
 func SliceV(items ...interface{}) (n *NSlice) {
-
-	// We always need to unwrap the []interface{} as accepting a Variadic param means that
-	// the containing type is the one we want.  This implementation has to be different
-	// than newSlice for this reason.
 	n = &NSlice{}
 
 	// Return NSlice.Nil if nothing given
@@ -94,40 +90,6 @@ func SliceV(items ...interface{}) (n *NSlice) {
 	if slice != nil {
 		n.o = slice.Interface()
 		n.len = slice.Len()
-	}
-	return
-}
-
-func newSlice(items interface{}) (n *NSlice) {
-	n = &NSlice{}
-	v := reflect.ValueOf(items)
-	switch v.Kind() {
-
-	// Return the NSlice.Nil
-	case reflect.Invalid:
-
-	// Iterate over array and append
-	case reflect.Array:
-		for i := 0; i < v.Len(); i++ {
-			item := v.Index(i).Interface()
-			n.Append(item)
-		}
-
-	// Slice can be used directly unless of []interface{} type
-	case reflect.Slice:
-		if _, ok := items.([]interface{}); ok {
-			for i := 0; i < v.Len(); i++ {
-				item := v.Index(i).Interface()
-				n.Append(item)
-			}
-		} else {
-			n.o = items
-			n.len = v.Len()
-		}
-
-	// Append single items
-	default:
-		n.Append(items)
 	}
 	return
 }
