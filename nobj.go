@@ -12,6 +12,25 @@ type NObj struct {
 	o interface{} // value
 }
 
+// Numerable interface methods
+//--------------------------------------------------------------------------------------------------
+
+// O returns the underlying data structure as is
+func (n *NObj) O() interface{} {
+	if n.Nil() {
+		return nil
+	}
+	return n.o
+}
+
+// Nil tests if the numerable is nil
+func (n *NObj) Nil() bool {
+	if n == nil || n.o == nil {
+		return true
+	}
+	return false
+}
+
 // Bool related
 //--------------------------------------------------------------------------------------------------
 
@@ -192,75 +211,140 @@ func (n *NObj) ToUint64E() (uint64, error) {
 // String related
 //--------------------------------------------------------------------------------------------------
 
-// ToInt casts an interface to an int type.
-// // ToString casts an interface to a string type.
-// func ToString(i interface{}) string {
-// 	v, _ := ToStringE(i)
-// 	return v
-// }
+// ToString casts an interface to a string type.
+func (n *NObj) ToString() string {
+	v, _ := cast.ToStringE(n.o)
+	return v
+}
 
-// // ToStringMapString casts an interface to a map[string]string type.
-// func ToStringMapString(i interface{}) map[string]string {
-// 	v, _ := ToStringMapStringE(i)
-// 	return v
-// }
+// ToStringE casts an interface to a string type.
+func (n *NObj) ToStringE() (string, error) {
+	return cast.ToStringE(n.o)
+}
 
-// // ToStringMapStringSlice casts an interface to a map[string][]string type.
-// func ToStringMapStringSlice(i interface{}) map[string][]string {
-// 	v, _ := ToStringMapStringSliceE(i)
-// 	return v
-// }
+// Map related
+//--------------------------------------------------------------------------------------------------
 
-// // ToStringMapBool casts an interface to a map[string]bool type.
-// func ToStringMapBool(i interface{}) map[string]bool {
-// 	v, _ := ToStringMapBoolE(i)
-// 	return v
-// }
+// ToStringMapString casts an interface to a map[string]string type.
+func (n *NObj) ToStringMapString() map[string]string {
+	v, _ := cast.ToStringMapStringE(n.o)
+	return v
+}
 
-// // ToStringMapInt casts an interface to a map[string]int type.
-// func ToStringMapInt(i interface{}) map[string]int {
-// 	v, _ := ToStringMapIntE(i)
-// 	return v
-// }
+// ToStringMapStringE casts an interface to a map[string]string type.
+func (n *NObj) ToStringMapStringE() (map[string]string, error) {
+	return cast.ToStringMapStringE(n.o)
+}
 
-// // ToStringMapInt64 casts an interface to a map[string]int64 type.
-// func ToStringMapInt64(i interface{}) map[string]int64 {
-// 	v, _ := ToStringMapInt64E(i)
-// 	return v
-// }
+// ToStringMapStringSlice casts an interface to a map[string][]string type.
+func (n *NObj) ToStringMapStringSlice() map[string][]string {
+	v, _ := cast.ToStringMapStringSliceE(n.o)
+	return v
+}
 
-// // ToStringMap casts an interface to a map[string]interface{} type.
-// func ToStringMap(i interface{}) map[string]interface{} {
-// 	v, _ := ToStringMapE(i)
-// 	return v
-// }
+// ToStringMapStringSliceE casts an interface to a map[string][]string type.
+func (n *NObj) ToStringMapStringSliceE() (map[string][]string, error) {
+	return cast.ToStringMapStringSliceE(n.o)
+}
 
-// // ToSlice casts an interface to a []interface{} type.
-// func ToSlice(i interface{}) []interface{} {
-// 	v, _ := ToSliceE(i)
-// 	return v
-// }
+// ToStringMapBool casts an interface to a map[string]bool type.
+func (n *NObj) ToStringMapBool() map[string]bool {
+	v, _ := cast.ToStringMapBoolE(n.o)
+	return v
+}
 
-// // ToBoolSlice casts an interface to a []bool type.
-// func ToBoolSlice(i interface{}) []bool {
-// 	v, _ := ToBoolSliceE(i)
-// 	return v
-// }
+// ToStringMapBoolE casts an interface to a map[string]bool type.
+func (n *NObj) ToStringMapBoolE() (map[string]bool, error) {
+	return cast.ToStringMapBoolE(n.o)
+}
 
-// // ToStringSlice casts an interface to a []string type.
-// func ToStringSlice(i interface{}) []string {
-// 	v, _ := ToStringSliceE(i)
-// 	return v
-// }
+// ToStringMapInt casts an interface to a map[string]int type.
+func (n *NObj) ToStringMapInt() map[string]int {
+	v, _ := cast.ToStringMapIntE(n.o)
+	return v
+}
 
-// // ToIntSlice casts an interface to a []int type.
-// func ToIntSlice(i interface{}) []int {
-// 	v, _ := ToIntSliceE(i)
-// 	return v
-// }
+// ToStringMapIntE casts an interface to a map[string]int type.
+func (n *NObj) ToStringMapIntE() (map[string]int, error) {
+	return cast.ToStringMapIntE(n.o)
+}
 
-// // ToDurationSlice casts an interface to a []time.Duration type.
-// func ToDurationSlice(i interface{}) []time.Duration {
-// 	v, _ := ToDurationSliceE(i)
-// 	return v
-// }
+// ToStringMapInt64 casts an interface to a map[string]int64 type.
+func (n *NObj) ToStringMapInt64() map[string]int64 {
+	v, _ := cast.ToStringMapInt64E(n.o)
+	return v
+}
+
+// ToStringMapInt64E casts an interface to a map[string]int64 type.
+func (n *NObj) ToStringMapInt64E() (map[string]int64, error) {
+	return cast.ToStringMapInt64E(n.o)
+}
+
+// ToStringMap casts an interface to a map[string]interface{} type.
+func (n *NObj) ToStringMap() map[string]interface{} {
+	v, _ := cast.ToStringMapE(n.o)
+	return v
+}
+
+// ToStringMapE casts an interface to a map[string]interface{} type.
+func (n *NObj) ToStringMapE() (map[string]interface{}, error) {
+	return cast.ToStringMapE(n.o)
+}
+
+// Slice related
+//--------------------------------------------------------------------------------------------------
+
+// ToSlice casts an interface to a []interface{} type.
+func (n *NObj) ToSlice() []interface{} {
+	v, _ := cast.ToSliceE(n.o)
+	return v
+}
+
+// ToSliceE casts an interface to a []interface{} type.
+func (n *NObj) ToSliceE() ([]interface{}, error) {
+	return cast.ToSliceE(n.o)
+}
+
+// ToBoolSlice casts an interface to a []bool type.
+func (n *NObj) ToBoolSlice() []bool {
+	v, _ := cast.ToBoolSliceE(n.o)
+	return v
+}
+
+// ToBoolSliceE casts an interface to a []bool type.
+func (n *NObj) ToBoolSliceE() ([]bool, error) {
+	return cast.ToBoolSliceE(n.o)
+}
+
+// ToStringSlice casts an interface to a []string type.
+func (n *NObj) ToStringSlice() []string {
+	v, _ := cast.ToStringSliceE(n.o)
+	return v
+}
+
+// ToStringSliceE casts an interface to a []string type.
+func (n *NObj) ToStringSliceE() ([]string, error) {
+	return cast.ToStringSliceE(n.o)
+}
+
+// ToIntSlice casts an interface to a []int type.
+func (n *NObj) ToIntSlice() []int {
+	v, _ := cast.ToIntSliceE(n.o)
+	return v
+}
+
+// ToIntSliceE casts an interface to a []int type.
+func (n *NObj) ToIntSliceE() ([]int, error) {
+	return cast.ToIntSliceE(n.o)
+}
+
+// ToDurationSlice casts an interface to a []time.Duration type.
+func (n *NObj) ToDurationSlice() []time.Duration {
+	v, _ := cast.ToDurationSliceE(n.o)
+	return v
+}
+
+// ToDurationSliceE casts an interface to a []time.Duration type.
+func (n *NObj) ToDurationSliceE() ([]time.Duration, error) {
+	return cast.ToDurationSliceE(n.o)
+}
