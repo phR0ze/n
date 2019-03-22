@@ -10,7 +10,7 @@ import (
 //
 // Implements the Numerable interface.
 type NSlice struct {
-	o   interface{} // slice
+	o   interface{} // underlying slice object
 	len int         // slice length
 }
 
@@ -186,10 +186,10 @@ func (n *NSlice) Contains(obj interface{}) (result bool) {
 	default:
 		v := reflect.ValueOf(n.o)
 		x := reflect.ValueOf(obj)
-		if v.Type() == x.Type() {
+		if v.Type().Elem() == x.Type() {
 			ok = true
 			for i := 0; i < v.Len(); i++ {
-				if v.Index(i).Interface() == x {
+				if v.Index(i).Interface() == obj {
 					return true
 				}
 			}
