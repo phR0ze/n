@@ -27,12 +27,26 @@ func TestNSlice_Slice(t *testing.T) {
 	// empty
 	assert.Equal(t, nil, Slice(nil).O())
 	assert.Equal(t, &NSlice{}, Slice(nil))
+	assert.Equal(t, []int{}, Slice([]int{}).O())
+	assert.Equal(t, []bool{}, Slice([]bool{}).O())
+	assert.Equal(t, []string{}, Slice([]string{}).O())
+	assert.Equal(t, []NObj{}, Slice([]NObj{}).O())
+	assert.Equal(t, nil, Slice([]interface{}{}).O())
 
 	// pointers
 	var obj *NObj
 	assert.Equal(t, []*NObj{nil}, Slice(obj).O())
 	assert.Equal(t, []*NObj{&(NObj{"bob"})}, Slice(&(NObj{"bob"})).O())
 	assert.Equal(t, []*NObj{&(NObj{"1"}), &(NObj{"2"})}, Slice([]*NObj{&(NObj{"1"}), &(NObj{"2"})}).O())
+
+	// interface
+	assert.Equal(t, nil, Slice([]interface{}{nil}).O())
+	assert.Equal(t, []string{""}, Slice([]interface{}{nil, ""}).O())
+	assert.Equal(t, []bool{true}, Slice([]interface{}{true}).O())
+	assert.Equal(t, []int{1}, Slice([]interface{}{1}).O())
+	assert.Equal(t, []string{""}, Slice([]interface{}{""}).O())
+	assert.Equal(t, []string{"bob"}, Slice([]interface{}{"bob"}).O())
+	assert.Equal(t, []NObj{{nil}}, Slice([]interface{}{NObj{}}).O())
 
 	// singles
 	assert.Equal(t, []int{1}, Slice(1).O())
@@ -49,45 +63,7 @@ func TestNSlice_Slice(t *testing.T) {
 	assert.Equal(t, []NObj{{"bob"}}, Slice([]NObj{{"bob"}}).O())
 	assert.Equal(t, []string{"1", "2"}, Slice([]string{"1", "2"}).O())
 	assert.Equal(t, [][]string{{"1"}}, Slice([]interface{}{[]string{"1"}}).O())
-	// //assert.Equal(t, []map[string]string{{"1": "one"}}, newSlice([]interface{}{map[string]string{"1": "one"}}).O())
-
-	// // Empty slices
-	// assert.Equal(t, []int{}, newSlice([]int{}).O())
-	// assert.Equal(t, []bool{}, newSlice([]bool{}).O())
-	// assert.Equal(t, []string{}, newSlice([]string{}).O())
-	// assert.Equal(t, []NObj{}, newSlice([]NObj{}).O())
-
-	// Interface types
-	//assert.Equal(t, []interface{}{nil}, newSlice([]interface{}{nil}).O())
-	//assert.Equal(t, []bool{true}, newSlice([]interface{}{true}).O())
-	//assert.Equal(t, []int{1}, newSlice([]interface{}{1}).O())
-	//assert.Equal(t, []string{""}, newSlice([]interface{}{""}).O())
-	//assert.Equal(t, []string{"bob"}, newSlice([]interface{}{"bob"}).O())
-	//assert.Equal(t, []NObj{{0}}, newSlice([]interface{}{NObj{}}).O())
-
-	// Slice of nil
-	//assert.Equal(t, nil, newSlice(nil).O())
-
-	// // Type other than array or slice
-	// assert.Equal(t, nil, newSlice("").O())
-
-	// // Empty slice
-	// assert.Equal(t, nil, newSlice([]string{}).O())
-	// assert.Equal(t, nil, newSlice([]interface{}{}).O())
-
-	// // String
-	// assert.Equal(t, []int{1}, newSlice([]interface{}{1}).O())
-
-	// // Custom type
-	// assert.Equal(t, []NObj{{0}}, newSlice([]interface{}{NObj{}}).O())
-
-	// // Ints
-	// assert.Equal(t, []string{"1"}, newSlice([]interface{}{"1"}).O())
-	// assert.Equal(t, []string{"1", "2"}, newSlice([]interface{}{"1", "2"}).O())
-
-	// // Nested
-	// assert.Equal(t, [][]string{{"1"}}, newSlice([]interface{}{[]string{"1"}}).O())
-	// assert.Equal(t, []map[string]string{{"1": "one"}}, newSlice([]interface{}{map[string]string{"1": "one"}}).O())
+	assert.Equal(t, []map[string]string{{"1": "one"}}, Slice([]interface{}{map[string]string{"1": "one"}}).O())
 }
 
 // SliceV function
@@ -182,28 +158,6 @@ func TestNSlice_newEmptySlice(t *testing.T) {
 	assert.Equal(t, []string{}, newEmptySlice([]interface{}{""}).O())
 	assert.Equal(t, []NObj{}, newEmptySlice([]interface{}{NObj{}}).O())
 }
-
-// 		assert.Equal(t, []int{}, q.newSlice().O())
-// 	}
-// 	{
-// 		q := Q([]string{})
-// 		assert.Equal(t, []string{}, q.newSlice().O())
-// 	}
-// 	{
-// 		var slice []string
-// 		q := Q(slice)
-// 		assert.Equal(t, []string{}, q.newSlice().O())
-// 	}
-// 	{
-// 		var mapper map[string]interface{}
-// 		q := Q(mapper)
-// 		assert.Equal(t, []KeyVal{}, q.newSlice().O())
-// 	}
-// 	{
-// 		q := Q(map[string]interface{}{})
-// 		assert.Equal(t, []KeyVal{}, q.newSlice().O())
-// 	}
-// }
 
 // Numerably interface methods
 //--------------------------------------------------------------------------------------------------

@@ -18,7 +18,7 @@ type NSlice struct {
 // processing at a 10x overhead savings. Non slice obj are encapsulated in a new slice of
 // that type using reflection, thus incurring the standard 10x overhead.
 //
-// Return value n *NSlice will never be nil but n.Nil() may be true as nil or empty slice
+// Return value n *NSlice will never be nil but n.Nil() may be true as nil or empty []interface{}
 // values are ignored to avoid internally using a []interface{}. The internal type will be
 // set later with the given type when an n.AppendX method is called.
 //
@@ -26,29 +26,29 @@ type NSlice struct {
 func Slice(obj interface{}) (n *NSlice) {
 	n = &NSlice{}
 	v := reflect.ValueOf(obj)
-	switch v.Kind() {
+
+	k := v.Kind()
+	x, interfaceSliceType := obj.([]interface{})
+	switch {
 
 	// Return the NSlice.Nil
-	case reflect.Invalid:
+	case k == reflect.Invalid:
 
 	// Iterate over array and append
-	case reflect.Array:
+	case k == reflect.Array:
 		for i := 0; i < v.Len(); i++ {
 			item := v.Index(i).Interface()
 			n.Append(item)
 		}
 
-	// Slice can be used directly unless of []interface{} type
-	case reflect.Slice:
-		if _, ok := obj.([]interface{}); ok {
-			for i := 0; i < v.Len(); i++ {
-				item := v.Index(i).Interface()
-				n.Append(item)
-			}
-		} else {
-			n.o = obj
-			n.len = v.Len()
-		}
+	// Convert []interface to slice of elem type
+	case interfaceSliceType:
+		n = SliceV(x...)
+
+	// Slice of distinct type can be used directly
+	case k == reflect.Slice:
+		n.o = obj
+		n.len = v.Len()
 
 	// Append single items
 	default:
