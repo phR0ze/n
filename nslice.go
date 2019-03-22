@@ -488,17 +488,61 @@ func (n *NSlice) DeleteAt(i int) (obj *NObj) {
 	return
 }
 
-// // // Drop deletes first n elements and returns the modified slice
-// // func (s *strSliceN) Drop(cnt int) *strSliceN {
-// // 	if cnt > 0 {
-// // 		if len(s.v) >= cnt {
-// // 			s.v = s.v[cnt:]
-// // 		} else {
-// // 			s.v = []string{}
-// // 		}
-// // 	}
-// // 	return s
-// // }
+// Drop deletes first n elements and returns the modified slice. If a negative number is
+// given it drops the abs of that number from the end rather then the begining.
+//
+// Cost: ~0x - 3x
+//
+// Optimized types: []bool, []int, []string
+func (n *NSlice) Drop(cnt int) *NSlice {
+	if cnt == 0 {
+		return n
+	}
+
+	// Delete cnt items from the begining
+	end := false
+	if cnt < 0 {
+		end = true
+		cnt *= -1
+	}
+	if n.len >= cnt {
+		switch slice := n.o.(type) {
+		case []bool:
+			if end {
+				slice = slice[:len(slice)-cnt]
+			} else {
+				slice = slice[cnt:]
+			}
+			n.o = slice
+		case []int:
+			if end {
+				slice = slice[:len(slice)-cnt]
+			} else {
+				slice = slice[cnt:]
+			}
+			n.o = slice
+		case []string:
+			if end {
+				slice = slice[:len(slice)-cnt]
+			} else {
+				slice = slice[cnt:]
+			}
+			n.o = slice
+		default:
+			v := reflect.ValueOf(n.o)
+			if end {
+				n.o = v.Slice(0, v.Len()-cnt).Interface()
+			} else {
+				n.o = v.Slice(cnt, v.Len()).Interface()
+			}
+		}
+		n.len -= cnt
+	} else {
+		*n = *(newEmptySlice(n.o))
+	}
+
+	return n
+}
 
 // // // Each iterates over the numerable and executes the given action
 // // func (s *strSliceN) Each(action func(O)) {
