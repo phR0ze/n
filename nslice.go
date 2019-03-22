@@ -573,6 +573,44 @@ func (n *NSlice) Each(action func(O)) *NSlice {
 	return n
 }
 
+// EachE calls the given function once for each element in the numerable, passing that element in
+// as a parameter. Returns a reference to the numerable and any error from the user function.
+//
+// Cost: ~0
+//
+// Optimized types: []bool, []int, []string
+func (n *NSlice) EachE(action func(O) error) (s *NSlice, err error) {
+	s = n
+	switch slice := n.o.(type) {
+	case []bool:
+		for i := 0; i < len(slice); i++ {
+			if err = action(slice[i]); err != nil {
+				return
+			}
+		}
+	case []int:
+		for i := 0; i < len(slice); i++ {
+			if err = action(slice[i]); err != nil {
+				return
+			}
+		}
+	case []string:
+		for i := 0; i < len(slice); i++ {
+			if err = action(slice[i]); err != nil {
+				return
+			}
+		}
+	default:
+		v := reflect.ValueOf(n.o)
+		for i := 0; i < v.Len(); i++ {
+			if err = action(v.Index(i).Interface()); err != nil {
+				return
+			}
+		}
+	}
+	return
+}
+
 // // // Equals checks if the two slices are equal
 // // func (s *strSliceN) Equals(other *strSliceN) bool {
 // // 	return reflect.DeepEqual(s, other)
