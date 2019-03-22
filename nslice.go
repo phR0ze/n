@@ -133,66 +133,148 @@ func newEmptySlice(items interface{}) (n *NSlice) {
 	return
 }
 
-// Numerable interface methods
-//--------------------------------------------------------------------------------------------------
-
-// O returns the underlying data structure as is
-func (n *NSlice) O() interface{} {
-	if n.Nil() {
-		return nil
-	}
-	return n.o
-}
-
-// Any tests if the numerable is not empty
-func (n *NSlice) Any() bool {
-	return n.len > 0
-}
-
-// Contains checks if the given obj is contained in this slice
+// Any tests if the numerable is not empty or optionally if it contains
+// any of the given Variadic elements.
 //
 // Cost: ~1x - 10x
-func (n *NSlice) Contains(obj interface{}) (result bool) {
+//
+// Optimized types: bool, int, string
+func (n *NSlice) Any(obj ...interface{}) bool {
+
+	// No elements
+	if n.Nil() || n.len == 0 {
+		return false
+	}
+
+	// Elements and not looking for anything
+	if len(obj) == 0 {
+		return true
+	}
+
+	// Looking for something specific
+	ok := false
+	var typ reflect.Type
+	switch slice := n.o.(type) {
+	case []bool:
+		var x bool
+		for i := range obj {
+			if x, ok = obj[i].(bool); !ok {
+				typ = reflect.TypeOf(obj[i])
+				break
+			} else {
+				for j := range slice {
+					if slice[j] == x {
+						return true
+					}
+				}
+			}
+		}
+	case []int:
+		var x int
+		for i := range obj {
+			if x, ok = obj[i].(int); !ok {
+				typ = reflect.TypeOf(obj[i])
+				break
+			} else {
+				for j := range slice {
+					if slice[j] == x {
+						return true
+					}
+				}
+			}
+		}
+	case []string:
+		var x string
+		for i := range obj {
+			if x, ok = obj[i].(string); !ok {
+				typ = reflect.TypeOf(obj[i])
+				break
+			} else {
+				for j := range slice {
+					if slice[j] == x {
+						return true
+					}
+				}
+			}
+		}
+	default:
+		v := reflect.ValueOf(n.o)
+		for i := 0; i < len(obj); i++ {
+			x := reflect.ValueOf(obj[i])
+			typ = x.Type()
+			if v.Type().Elem() != typ {
+				break
+			} else {
+				ok = true
+				for j := 0; j < v.Len(); j++ {
+					if v.Index(j).Interface() == x.Interface() {
+						return true
+					}
+				}
+			}
+		}
+	}
+	if !ok {
+		panic(fmt.Sprintf("can't compare type '%v' with '%T' elements", typ, n.o))
+	}
+	return false
+}
+
+// AnyS checks if any of the given obj's elements are contained in this slice
+//
+// obj must be a slice type
+//
+// Cost: ~1x - 10x
+func (n *NSlice) AnyS(obj interface{}) (result bool) {
 	if n.Nil() {
 		return
 	}
 	ok := false
 	switch slice := n.o.(type) {
 	case []bool:
-		var x bool
-		if x, ok = obj.(bool); ok {
-			for i := range slice {
-				if slice[i] == x {
-					return true
+		var x []bool
+		if x, ok = obj.([]bool); ok {
+			for i := range x {
+				for j := range slice {
+					if slice[j] == x[i] {
+						return true
+					}
 				}
 			}
 		}
 	case []int:
-		var x int
-		if x, ok = obj.(int); ok {
-			for i := range slice {
-				if slice[i] == x {
-					return true
+		var x []int
+		if x, ok = obj.([]int); ok {
+			for i := range x {
+				for j := range slice {
+					if slice[j] == x[i] {
+						return true
+					}
 				}
 			}
 		}
 	case []string:
-		var x string
-		if x, ok = obj.(string); ok {
-			for i := range slice {
-				if slice[i] == x {
-					return true
+		var x []string
+		if x, ok = obj.([]string); ok {
+			for i := range x {
+				for j := range slice {
+					if slice[j] == x[i] {
+						return true
+					}
 				}
 			}
 		}
 	default:
 		v := reflect.ValueOf(n.o)
 		x := reflect.ValueOf(obj)
-		if v.Type().Elem() == x.Type() {
+		if v.Type() == x.Type() {
 			ok = true
-			for i := 0; i < v.Len(); i++ {
-				if v.Index(i).Interface() == obj {
-					return true
+
+			for i := 0; i < x.Len(); i++ {
+				for j := 0; j < v.Len(); j++ {
+					if v.Index(j).Interface() == x.Index(i).Interface() {
+						return true
+					}
 				}
 			}
 		}
@@ -201,27 +283,6 @@ func (n *NSlice) Contains(obj interface{}) (result bool) {
 		panic(fmt.Sprintf("can't compare type '%T' with '%T' elements", obj, n.o))
 	}
 	return
-}
-
-// Len returns the number of elements in the numerable
-func (n *NSlice) Len() int {
-	if n.Nil() {
-		return 0
-	}
-	return n.len
-}
-
-// Nil tests if the numerable is nil
-func (n *NSlice) Nil() bool {
-	if n == nil || n.o == nil {
-		return true
-	}
-	return false
-}
-
-// Type returns the identifier for this numerable type
-func (n *NSlice) Type() Type {
-	return NSliceType
 }
 
 // Export methods
@@ -378,20 +439,6 @@ func (n *NSlice) Clear() *NSlice {
 	return n
 }
 
-// // // ContainsAny checks if any of the targets are contained in this slice
-// // func (s *strSliceN) ContainsAny(targets []string) bool {
-// // 	if targets != nil && len(targets) > 0 {
-// // 		for i := range targets {
-// // 			for j := range s.v {
-// // 				if s.v[j] == targets[i] {
-// // 					return true
-// // 				}
-// // 			}
-// // 		}
-// // 	}
-// // 	return false
-// // }
-
 // // // Del deletes item using neg/pos index notation with status
 // // func (s *strSliceN) Del(i int) bool {
 // // 	result := false
@@ -457,6 +504,14 @@ func (n *NSlice) Clear() *NSlice {
 // // 	return
 // // }
 
+// Len returns the number of elements in the numerable
+func (n *NSlice) Len() int {
+	if n.Nil() {
+		return 0
+	}
+	return n.len
+}
+
 // // // Map manipulates the slice into a new form
 // // func (s *strSliceN) Map(sel func(string) O) (result *Numerable) {
 // // 	for i := range s.v {
@@ -496,6 +551,22 @@ func (n *NSlice) Clear() *NSlice {
 // // 	}
 // // 	return
 // // }
+
+// Nil tests if the numerable is nil
+func (n *NSlice) Nil() bool {
+	if n == nil || n.o == nil {
+		return true
+	}
+	return false
+}
+
+// O returns the underlying data structure as is
+func (n *NSlice) O() interface{} {
+	if n.Nil() {
+		return nil
+	}
+	return n.o
+}
 
 // // // Prepend items to the begining of the slice and return slice
 // // func (s *strSliceN) Prepend(items ...string) *strSliceN {
@@ -598,6 +669,11 @@ func (n *NSlice) Clear() *NSlice {
 // // 	}
 // // 	return
 // // }
+
+// Type returns the identifier for this numerable type
+func (n *NSlice) Type() Type {
+	return NSliceType
+}
 
 // // // Uniq removes all duplicates from the underlying slice
 // // func (s *strSliceN) Uniq() *strSliceN {
