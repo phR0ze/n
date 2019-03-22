@@ -36,6 +36,8 @@ func TestNSlice_Slice(t *testing.T) {
 
 	// Test singles
 	assert.Equal(t, []int{1}, Slice(1).O())
+	assert.Equal(t, []bool{true}, Slice(true).O())
+	assert.Equal(t, []string{""}, Slice("").O())
 	assert.Equal(t, []string{"1"}, Slice("1").O())
 	assert.Equal(t, []NObj{NObj{"bob"}}, Slice(NObj{"bob"}).O())
 	assert.Equal(t, []map[string]string{{"1": "one"}}, Slice(map[string]string{"1": "one"}).O())
@@ -43,6 +45,53 @@ func TestNSlice_Slice(t *testing.T) {
 	// Test slices
 	assert.Equal(t, []int{1, 2}, Slice([]int{1, 2}).O())
 	assert.Equal(t, []string{"1", "2"}, Slice([]string{"1", "2"}).O())
+	// assert.Equal(t, []NObj{{1}}, newSlice(NObj{1}).O())
+
+	// // Slices
+	// assert.Equal(t, []int{1, 2}, newSlice([]int{1, 2}).O())
+	// assert.Equal(t, []bool{true}, newSlice([]bool{true}).O())
+	// assert.Equal(t, []string{"bob"}, newSlice([]string{"bob"}).O())
+	// assert.Equal(t, []NObj{{"bob"}}, newSlice([]NObj{{"bob"}}).O())
+	// //assert.Equal(t, [][]string{{"1"}}, newSlice([]interface{}{[]string{"1"}}).O())
+	// //assert.Equal(t, []map[string]string{{"1": "one"}}, newSlice([]interface{}{map[string]string{"1": "one"}}).O())
+
+	// // Empty slices
+	// assert.Equal(t, []int{}, newSlice([]int{}).O())
+	// assert.Equal(t, []bool{}, newSlice([]bool{}).O())
+	// assert.Equal(t, []string{}, newSlice([]string{}).O())
+	// assert.Equal(t, []NObj{}, newSlice([]NObj{}).O())
+
+	// Interface types
+	//assert.Equal(t, []interface{}{nil}, newSlice([]interface{}{nil}).O())
+	//assert.Equal(t, []bool{true}, newSlice([]interface{}{true}).O())
+	//assert.Equal(t, []int{1}, newSlice([]interface{}{1}).O())
+	//assert.Equal(t, []string{""}, newSlice([]interface{}{""}).O())
+	//assert.Equal(t, []string{"bob"}, newSlice([]interface{}{"bob"}).O())
+	//assert.Equal(t, []NObj{{0}}, newSlice([]interface{}{NObj{}}).O())
+
+	// Slice of nil
+	//assert.Equal(t, nil, newSlice(nil).O())
+
+	// // Type other than array or slice
+	// assert.Equal(t, nil, newSlice("").O())
+
+	// // Empty slice
+	// assert.Equal(t, nil, newSlice([]string{}).O())
+	// assert.Equal(t, nil, newSlice([]interface{}{}).O())
+
+	// // String
+	// assert.Equal(t, []int{1}, newSlice([]interface{}{1}).O())
+
+	// // Custom type
+	// assert.Equal(t, []NObj{{0}}, newSlice([]interface{}{NObj{}}).O())
+
+	// // Ints
+	// assert.Equal(t, []string{"1"}, newSlice([]interface{}{"1"}).O())
+	// assert.Equal(t, []string{"1", "2"}, newSlice([]interface{}{"1", "2"}).O())
+
+	// // Nested
+	// assert.Equal(t, [][]string{{"1"}}, newSlice([]interface{}{[]string{"1"}}).O())
+	// assert.Equal(t, []map[string]string{{"1": "one"}}, newSlice([]interface{}{map[string]string{"1": "one"}}).O())
 }
 
 // SliceV function
@@ -101,69 +150,6 @@ func TestNSlice_SliceV(t *testing.T) {
 	assert.Equal(t, [][]string{{"1"}}, SliceV([]string{"1"}).O())
 }
 
-func TestNSlice_newSlice(t *testing.T) {
-
-	// Array
-	var array [2]string
-	array[0] = "1"
-	array[1] = "2"
-	assert.Equal(t, []string{"1", "2"}, newSlice(array).O())
-
-	// Singles
-	assert.Equal(t, []int{1}, newSlice(1).O())
-	assert.Equal(t, []bool{true}, newSlice(true).O())
-	assert.Equal(t, []string{""}, newSlice("").O())
-	assert.Equal(t, []string{"bob"}, newSlice("bob").O())
-	assert.Equal(t, []bobI{{1}}, newSlice(bobI{1}).O())
-
-	// Slices
-	assert.Equal(t, []int{1, 2}, newSlice([]int{1, 2}).O())
-	assert.Equal(t, []bool{true}, newSlice([]bool{true}).O())
-	assert.Equal(t, []string{"bob"}, newSlice([]string{"bob"}).O())
-	assert.Equal(t, []bobS{{"bob"}}, newSlice([]bobS{{"bob"}}).O())
-	//assert.Equal(t, [][]string{{"1"}}, newSlice([]interface{}{[]string{"1"}}).O())
-	//assert.Equal(t, []map[string]string{{"1": "one"}}, newSlice([]interface{}{map[string]string{"1": "one"}}).O())
-
-	// Empty slices
-	assert.Equal(t, []int{}, newSlice([]int{}).O())
-	assert.Equal(t, []bool{}, newSlice([]bool{}).O())
-	assert.Equal(t, []string{}, newSlice([]string{}).O())
-	assert.Equal(t, []bobS{}, newSlice([]bobS{}).O())
-
-	// Interface types
-	assert.Equal(t, nil, newSlice(nil).O())
-	//assert.Equal(t, []interface{}{nil}, newSlice([]interface{}{nil}).O())
-	//assert.Equal(t, []bool{true}, newSlice([]interface{}{true}).O())
-	//assert.Equal(t, []int{1}, newSlice([]interface{}{1}).O())
-	//assert.Equal(t, []string{""}, newSlice([]interface{}{""}).O())
-	//assert.Equal(t, []string{"bob"}, newSlice([]interface{}{"bob"}).O())
-	//assert.Equal(t, []bobI{{0}}, newSlice([]interface{}{bobI{}}).O())
-
-	// Slice of nil
-	//assert.Equal(t, nil, newSlice(nil).O())
-
-	// // Type other than array or slice
-	// assert.Equal(t, nil, newSlice("").O())
-
-	// // Empty slice
-	// assert.Equal(t, nil, newSlice([]string{}).O())
-	// assert.Equal(t, nil, newSlice([]interface{}{}).O())
-
-	// // String
-	// assert.Equal(t, []int{1}, newSlice([]interface{}{1}).O())
-
-	// // Custom type
-	// assert.Equal(t, []bobI{{0}}, newSlice([]interface{}{bobI{}}).O())
-
-	// // Ints
-	// assert.Equal(t, []string{"1"}, newSlice([]interface{}{"1"}).O())
-	// assert.Equal(t, []string{"1", "2"}, newSlice([]interface{}{"1", "2"}).O())
-
-	// // Nested
-	// assert.Equal(t, [][]string{{"1"}}, newSlice([]interface{}{[]string{"1"}}).O())
-	// assert.Equal(t, []map[string]string{{"1": "one"}}, newSlice([]interface{}{map[string]string{"1": "one"}}).O())
-}
-
 func TestNSlice_newEmptySlice(t *testing.T) {
 
 	// Array
@@ -176,13 +162,13 @@ func TestNSlice_newEmptySlice(t *testing.T) {
 	assert.Equal(t, []bool{}, newEmptySlice(true).O())
 	assert.Equal(t, []string{}, newEmptySlice("").O())
 	assert.Equal(t, []string{}, newEmptySlice("bob").O())
-	assert.Equal(t, []bobI{}, newEmptySlice(bobI{1}).O())
+	assert.Equal(t, []NObj{}, newEmptySlice(NObj{1}).O())
 
 	// Slices
 	assert.Equal(t, []int{}, newEmptySlice([]int{1, 2}).O())
 	assert.Equal(t, []bool{}, newEmptySlice([]bool{true}).O())
 	assert.Equal(t, []string{}, newEmptySlice([]string{"bob"}).O())
-	assert.Equal(t, []bobS{}, newEmptySlice([]bobS{{"bob"}}).O())
+	assert.Equal(t, []NObj{}, newEmptySlice([]NObj{{"bob"}}).O())
 	assert.Equal(t, [][]string{}, newEmptySlice([]interface{}{[]string{"1"}}).O())
 	assert.Equal(t, []map[string]string{}, newEmptySlice([]interface{}{map[string]string{"1": "one"}}).O())
 
@@ -190,7 +176,7 @@ func TestNSlice_newEmptySlice(t *testing.T) {
 	assert.Equal(t, []int{}, newEmptySlice([]int{}).O())
 	assert.Equal(t, []bool{}, newEmptySlice([]bool{}).O())
 	assert.Equal(t, []string{}, newEmptySlice([]string{}).O())
-	assert.Equal(t, []bobS{}, newEmptySlice([]bobS{}).O())
+	assert.Equal(t, []NObj{}, newEmptySlice([]NObj{}).O())
 
 	// Interface types
 	assert.Equal(t, []interface{}{}, newEmptySlice(nil).O())
@@ -198,7 +184,7 @@ func TestNSlice_newEmptySlice(t *testing.T) {
 	assert.Equal(t, []int{}, newEmptySlice([]interface{}{1}).O())
 	assert.Equal(t, []int{}, newEmptySlice([]interface{}{interface{}(1)}).O())
 	assert.Equal(t, []string{}, newEmptySlice([]interface{}{""}).O())
-	assert.Equal(t, []bobI{}, newEmptySlice([]interface{}{bobI{}}).O())
+	assert.Equal(t, []NObj{}, newEmptySlice([]interface{}{NObj{}}).O())
 }
 
 // 		assert.Equal(t, []int{}, q.newSlice().O())
@@ -264,9 +250,9 @@ func BenchmarkNSlice_Append_Optimized(t *testing.B) {
 }
 
 func BenchmarkNSlice_Append_Reflect(t *testing.B) {
-	n := &NSlice{o: []bobI{}}
+	n := &NSlice{o: []NObj{}}
 	for _, i := range Range(0, nines6) {
-		n.Append(bobI{i})
+		n.Append(NObj{i})
 	}
 }
 
@@ -279,20 +265,20 @@ func ExampleNSlice_Append() {
 func TestNSlice_Append_Reflect(t *testing.T) {
 
 	// Use a custom type to invoke reflection
-	n := SliceV(bobS{"1"})
+	n := SliceV(NObj{"1"})
 	assert.Equal(t, 1, n.Len())
 	assert.Equal(t, false, n.Nil())
-	assert.Equal(t, []bobS{{"1"}}, n.O())
+	assert.Equal(t, []NObj{{"1"}}, n.O())
 
 	// Append another to it
-	n.Append(bobS{"2"})
+	n.Append(NObj{"2"})
 	assert.Equal(t, 2, n.Len())
-	assert.Equal(t, []bobS{{"1"}, {"2"}}, n.O())
+	assert.Equal(t, []NObj{{"1"}, {"2"}}, n.O())
 
 	// Given an invalid type which will abort the function so put at end
 	defer func() {
 		err := recover()
-		assert.Equal(t, "reflect.Set: value of type int is not assignable to type n.bobS", err)
+		assert.Equal(t, "reflect.Set: value of type int is not assignable to type n.NObj", err)
 	}()
 	n.Append(2)
 }
@@ -381,8 +367,8 @@ func TestNSlice_Append(t *testing.T) {
 
 		// Append to a slice of custom type i.e. reflection
 		{
-			n := Slice([]bobS{{"3"}})
-			assert.Equal(t, []bobS{{"3"}, {"1"}}, n.Append(bobS{"1"}).O())
+			n := Slice([]NObj{{"3"}})
+			assert.Equal(t, []NObj{{"3"}, {"1"}}, n.Append(NObj{"1"}).O())
 			assert.Equal(t, 2, n.Len())
 		}
 	}
@@ -412,8 +398,8 @@ func BenchmarkNSlice_AppendV_Optimized(t *testing.B) {
 }
 
 func BenchmarkNSlice_AppendV_Reflect(t *testing.B) {
-	n := &NSlice{o: []bobI{}}
-	new := rangeBobIO(0, nines6)
+	n := &NSlice{o: []NObj{}}
+	new := rangeNObjO(0, nines6)
 	n.AppendV(new...)
 }
 
@@ -449,9 +435,9 @@ func TestNSlice_AppendV(t *testing.T) {
 
 	// Append to a slice of custom type
 	{
-		n := Slice([]bobS{{"3"}})
-		assert.Equal(t, []bobS{{"3"}, {"1"}}, n.AppendV(bobS{"1"}).O())
-		assert.Equal(t, []bobS{{"3"}, {"1"}, {"2"}, {"4"}}, n.AppendV(bobS{"2"}, bobS{"4"}).O())
+		n := Slice([]NObj{{"3"}})
+		assert.Equal(t, []NObj{{"3"}, {"1"}}, n.AppendV(NObj{"1"}).O())
+		assert.Equal(t, []NObj{{"3"}, {"1"}, {"2"}, {"4"}}, n.AppendV(NObj{"2"}, NObj{"4"}).O())
 	}
 
 	// Test all supported types
@@ -479,8 +465,8 @@ func TestNSlice_AppendV(t *testing.T) {
 
 		// Append to a slice of custom type i.e. reflection
 		{
-			n := Slice([]bobS{{"3"}})
-			assert.Equal(t, []bobS{{"3"}, {"1"}}, n.AppendV(bobS{"1"}).O())
+			n := Slice([]NObj{{"3"}})
+			assert.Equal(t, []NObj{{"3"}, {"1"}}, n.AppendV(NObj{"1"}).O())
 			assert.Equal(t, 2, n.Len())
 		}
 	}
@@ -539,8 +525,8 @@ func BenchmarkNSlice_AppendS_Optimized100(t *testing.B) {
 }
 
 func BenchmarkNSlice_AppendS_Reflect10(t *testing.B) {
-	dest := &NSlice{o: []bobI{}}
-	src := rangeBobI(0, nines6)
+	dest := &NSlice{o: []NObj{}}
+	src := rangeNObj(0, nines6)
 	j := 0
 	for i := 10; i < len(src); i += 10 {
 		dest.AppendS(src[j:i])
@@ -549,8 +535,8 @@ func BenchmarkNSlice_AppendS_Reflect10(t *testing.B) {
 }
 
 func BenchmarkNSlice_AppendS_Reflect100(t *testing.B) {
-	dest := &NSlice{o: []bobI{}}
-	src := rangeBobI(0, nines6)
+	dest := &NSlice{o: []NObj{}}
+	src := rangeNObj(0, nines6)
 	j := 0
 	for i := 100; i < len(src); i += 100 {
 		dest.AppendS(src[j:i])
@@ -590,9 +576,9 @@ func TestNSlice_AppendS(t *testing.T) {
 
 	// Append to a slice of custom type
 	{
-		n := Slice([]bobS{{"3"}})
-		assert.Equal(t, []bobS{{"3"}, {"1"}}, n.AppendS([]bobS{{"1"}}).O())
-		assert.Equal(t, []bobS{{"3"}, {"1"}, {"2"}, {"4"}}, n.AppendS([]bobS{{"2"}, {"4"}}).O())
+		n := Slice([]NObj{{"3"}})
+		assert.Equal(t, []NObj{{"3"}, {"1"}}, n.AppendS([]NObj{{"1"}}).O())
+		assert.Equal(t, []NObj{{"3"}, {"1"}, {"2"}, {"4"}}, n.AppendS([]NObj{{"2"}, {"4"}}).O())
 	}
 
 	// Append to a slice of map
@@ -630,8 +616,8 @@ func TestNSlice_AppendS(t *testing.T) {
 
 		// Append to a slice of custom type i.e. reflection
 		{
-			n := Slice([]bobS{{"3"}})
-			assert.Equal(t, []bobS{{"3"}, {"1"}}, n.AppendS([]bobS{{"1"}}).O())
+			n := Slice([]NObj{{"3"}})
+			assert.Equal(t, []NObj{{"3"}, {"1"}}, n.AppendS([]NObj{{"1"}}).O())
 			assert.Equal(t, 2, n.Len())
 		}
 	}
@@ -656,10 +642,10 @@ func BenchmarkNSlice_At_Optimized(t *testing.B) {
 }
 
 func BenchmarkNSlice_At_Reflect(t *testing.B) {
-	src := rangeBobI(0, nines6)
+	src := rangeNObj(0, nines6)
 	slice := Slice(src)
 	for i := range src {
-		_, ok := (slice.At(i).O()).(bobI)
+		_, ok := (slice.At(i).O()).(NObj)
 		assert.True(t, ok)
 	}
 }

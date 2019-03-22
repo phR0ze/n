@@ -10,13 +10,6 @@ const nines7 = 9999999
 const nines6 = 999999
 const nines5 = 99999
 
-type bobS struct {
-	o string
-}
-type bobI struct {
-	o int
-}
-
 // var smallStringSet = []string{"Lorem", "ipsum", "dolor", "sit", "amet,", "consectetur", "adipiscing", "elit,", "sed", "do",
 func TestOptimized(t *testing.T) {
 	assert.True(t, optimized([]bool{}))
@@ -1583,19 +1576,18 @@ func TestOptimized(t *testing.T) {
 // 	}
 // }
 
-// rangeBobI creates slice of the given range of numbers inclusive
-func rangeBobI(min, max int) []bobI {
-	result := make([]bobI, max-min+1)
+func rangeNObj(min, max int) []NObj {
+	result := make([]NObj, max-min+1)
 	for i := range result {
-		result[i] = bobI{min + i}
+		result[i] = NObj{min + i}
 	}
 	return result
 }
 
-func rangeBobIO(min, max int) []interface{} {
+func rangeNObjO(min, max int) []interface{} {
 	result := make([]interface{}, max-min+1)
 	for i := range result {
-		result[i] = bobI{min + i}
+		result[i] = NObj{min + i}
 	}
 	return result
 }

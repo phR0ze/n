@@ -18,23 +18,41 @@ type NSlice struct {
 // processing at a 10x overhead savings. Non slice obj are encapsulated in a new slice of
 // that type using reflection, thus incurring the standard 10x overhead.
 //
+// Return value n *NSlice will never be nil but n.Nil() may be true as nil or empty slice
+// values are ignored to avoid internally using a []interface{}. The internal type will be
+// set later with the given type when an n.AppendX method is called.
+//
 // Cost: ~1x - 10x
 func Slice(obj interface{}) (n *NSlice) {
+	n = &NSlice{}
 	v := reflect.ValueOf(obj)
-
 	switch v.Kind() {
 
-	// Simply store the slice
-	case reflect.Slice:
-		n = &NSlice{o: obj, len: v.Len()}
+	// Return the NSlice.Nil
+	case reflect.Invalid:
 
-	// Seed new slice with array values
+	// Iterate over array and append
 	case reflect.Array:
-		n = newSlice(obj)
+		for i := 0; i < v.Len(); i++ {
+			item := v.Index(i).Interface()
+			n.Append(item)
+		}
 
-	// Encapsulate any non-slice in a slice of that type
+	// Slice can be used directly unless of []interface{} type
+	case reflect.Slice:
+		if _, ok := obj.([]interface{}); ok {
+			for i := 0; i < v.Len(); i++ {
+				item := v.Index(i).Interface()
+				n.Append(item)
+			}
+		} else {
+			n.o = obj
+			n.len = v.Len()
+		}
+
+	// Append single items
 	default:
-		n = newSlice(obj)
+		n.Append(obj)
 	}
 	return
 }
@@ -80,12 +98,6 @@ func SliceV(items ...interface{}) (n *NSlice) {
 	return
 }
 
-// create a new slice of the given type or if a slice/array create it from the element type
-// and populate the new slice with the elements of the given slice/array or the single not slice item
-//
-// return NSlice.Nil if there are no items in the new list. the reason for this is that we want to
-// avoid the []interface{} type as much as possible and thus wait until something is appeneded before
-// setting the internal type.
 func newSlice(items interface{}) (n *NSlice) {
 	n = &NSlice{}
 	v := reflect.ValueOf(items)
@@ -101,7 +113,7 @@ func newSlice(items interface{}) (n *NSlice) {
 			n.Append(item)
 		}
 
-	// Slice can be appended directly unless of []interface{} type
+	// Slice can be used directly unless of []interface{} type
 	case reflect.Slice:
 		if _, ok := items.([]interface{}); ok {
 			for i := 0; i < v.Len(); i++ {
@@ -109,7 +121,8 @@ func newSlice(items interface{}) (n *NSlice) {
 				n.Append(item)
 			}
 		} else {
-			n.AppendS(items)
+			n.o = items
+			n.len = v.Len()
 		}
 
 	// Append single items
