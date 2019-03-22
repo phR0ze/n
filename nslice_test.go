@@ -951,7 +951,7 @@ func TestNSlice_DeleteAt(t *testing.T) {
 	}
 }
 
-// DeleteAt
+// Drop
 //--------------------------------------------------------------------------------------------------
 func BenchmarkNSlice_Drop_Normal(t *testing.B) {
 	ints := Range(0, nines7)
@@ -1106,6 +1106,80 @@ func TestNSlice_Drop(t *testing.T) {
 			assert.Equal(t, []NObj{}, slice.Drop(4).O())
 			assert.Equal(t, 0, slice.Len())
 		}
+	}
+}
+
+// Each
+//--------------------------------------------------------------------------------------------------
+func BenchmarkNSlice_Each_Normal(t *testing.B) {
+	action := func(x interface{}) {
+		assert.IsType(t, 0, x)
+	}
+	for i := range Range(0, nines6) {
+		action(i)
+	}
+}
+
+func BenchmarkNSlice_Each_Optimized(t *testing.B) {
+	Slice(Range(0, nines6)).Each(func(x O) {
+		assert.IsType(t, 0, x)
+	})
+}
+
+func BenchmarkNSlice_Each_Reflect(t *testing.B) {
+	Slice(rangeNObj(0, nines6)).Each(func(x O) {
+		assert.IsType(t, NObj{}, x)
+	})
+}
+
+func ExampleNSlice_Each() {
+	SliceV(1, 2, 3).Each(func(x O) {
+		fmt.Printf("%v", x)
+	})
+	// Output: 123
+}
+
+func TestNSlice_Each(t *testing.T) {
+	// int
+	{
+		SliceV(1, 2, 3).Each(func(x O) {
+			switch x {
+			case 1:
+				assert.Equal(t, 1, x)
+			case 2:
+				assert.Equal(t, 2, x)
+			case 3:
+				assert.Equal(t, 3, x)
+			}
+		})
+	}
+
+	// string
+	{
+		SliceV("1", "2", "3").Each(func(x O) {
+			switch x {
+			case "1":
+				assert.Equal(t, "1", x)
+			case "2":
+				assert.Equal(t, "2", x)
+			case "3":
+				assert.Equal(t, "3", x)
+			}
+		})
+	}
+
+	// custom
+	{
+		Slice([]NObj{{1}, {2}, {3}}).Each(func(x O) {
+			switch x {
+			case NObj{1}:
+				assert.Equal(t, NObj{1}, x)
+			case NObj{2}:
+				assert.Equal(t, NObj{2}, x)
+			case NObj{3}:
+				assert.Equal(t, NObj{3}, x)
+			}
+		})
 	}
 }
 

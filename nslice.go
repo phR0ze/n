@@ -489,7 +489,7 @@ func (n *NSlice) DeleteAt(i int) (obj *NObj) {
 }
 
 // Drop deletes first n elements and returns the modified slice. If a negative number is
-// given it drops the abs of that number from the end rather then the begining.
+// given it drops the absolute value of that number from the end rather then the begining.
 //
 // Cost: ~0x - 3x
 //
@@ -544,12 +544,34 @@ func (n *NSlice) Drop(cnt int) *NSlice {
 	return n
 }
 
-// // // Each iterates over the numerable and executes the given action
-// // func (s *strSliceN) Each(action func(O)) {
-// // 	for i := range s.v {
-// // 		action(s.v[i])
-// // 	}
-// // }
+// Each calls the given function once for each element in the numerable, passing that element in
+// as a parameter. Returns a reference to the numerable
+//
+// Cost: ~0
+//
+// Optimized types: []bool, []int, []string
+func (n *NSlice) Each(action func(O)) *NSlice {
+	switch slice := n.o.(type) {
+	case []bool:
+		for i := 0; i < len(slice); i++ {
+			action(slice[i])
+		}
+	case []int:
+		for i := 0; i < len(slice); i++ {
+			action(slice[i])
+		}
+	case []string:
+		for i := 0; i < len(slice); i++ {
+			action(slice[i])
+		}
+	default:
+		v := reflect.ValueOf(n.o)
+		for i := 0; i < v.Len(); i++ {
+			action(v.Index(i).Interface())
+		}
+	}
+	return n
+}
 
 // // // Equals checks if the two slices are equal
 // // func (s *strSliceN) Equals(other *strSliceN) bool {
