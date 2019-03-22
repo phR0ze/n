@@ -1583,47 +1583,6 @@ func TestOptimized(t *testing.T) {
 // 	}
 // }
 
-// func TestNewSlice(t *testing.T) {
-// 	{
-// 		q := Q(nil)
-// 		assert.Equal(t, []interface{}{}, q.newSlice().O())
-// 	}
-// 	{
-// 		q := Q(1)
-// 		assert.Equal(t, []int{}, q.newSlice().O())
-// 	}
-// 	{
-// 		q := Q(1)
-// 		assert.Equal(t, []string{}, q.newSlice("bob").O())
-// 	}
-// 	{
-// 		q := Q("one")
-// 		assert.Equal(t, []string{}, q.newSlice().O())
-// 	}
-// 	{
-// 		q := Q([]int{})
-// 		assert.Equal(t, []int{}, q.newSlice().O())
-// 	}
-// 	{
-// 		q := Q([]string{})
-// 		assert.Equal(t, []string{}, q.newSlice().O())
-// 	}
-// 	{
-// 		var slice []string
-// 		q := Q(slice)
-// 		assert.Equal(t, []string{}, q.newSlice().O())
-// 	}
-// 	{
-// 		var mapper map[string]interface{}
-// 		q := Q(mapper)
-// 		assert.Equal(t, []KeyVal{}, q.newSlice().O())
-// 	}
-// 	{
-// 		q := Q(map[string]interface{}{})
-// 		assert.Equal(t, []KeyVal{}, q.newSlice().O())
-// 	}
-// }
-
 // rangeBobI creates slice of the given range of numbers inclusive
 func rangeBobI(min, max int) []bobI {
 	result := make([]bobI, max-min+1)

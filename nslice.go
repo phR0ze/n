@@ -18,7 +18,7 @@ type NSlice struct {
 // processing at a 10x overhead savings. Non slice obj are encapsulated in a new slice of
 // that type using reflection, thus incurring the standard 10x overhead.
 //
-// Cost: 1x - 10x
+// Cost: ~1x - 10x
 func Slice(obj interface{}) (n *NSlice) {
 	v := reflect.ValueOf(obj)
 
@@ -34,7 +34,7 @@ func Slice(obj interface{}) (n *NSlice) {
 
 	// Encapsulate any non-slice in a slice of that type
 	default:
-		n = SliceV(obj)
+		n = newSlice(obj)
 	}
 	return
 }
@@ -43,41 +43,118 @@ func Slice(obj interface{}) (n *NSlice) {
 // that type. Incurs the full 10x reflection overhead. For large slice params use the Slice
 // func instead.
 //
-// Cost: 10x
-func SliceV(items ...interface{}) *NSlice {
-	return newSlice(items)
-}
+// Cost: ~10x
+func SliceV(items ...interface{}) (n *NSlice) {
 
-// handles []interface{} and arrays everything else will return nil
-func newSlice(items interface{}) (n *NSlice) {
+	// We always need to unwrap the []interface{} as accepting a Variadic param means that
+	// the containing type is the one we want.  This implementation has to be different
+	// than newSlice for this reason.
 	n = &NSlice{}
 
-	v := reflect.ValueOf(items)
-	switch v.Kind() {
-	case reflect.Slice, reflect.Array:
+	// Return NSlice.Nil if nothing given
+	if len(items) == 0 {
+		return
+	}
 
-		// Return nil numerable if nothing given
-		if v.Len() == 0 {
-			return
-		}
-		elem := v.Index(0).Interface()
-		if elem == nil {
-			return
-		}
+	// Create new slice from the type of the first non Invalid element
+	var slice *reflect.Value
+	for i := 0; i < len(items); i++ {
 
-		// Create new slice with type of the element
-		typ := reflect.SliceOf(reflect.TypeOf(elem))
-		slice := reflect.MakeSlice(typ, 0, 10)
-
-		// Add the variadic elements to the new slice
-		for i := 0; i < v.Len(); i++ {
-			item := reflect.ValueOf(v.Index(i).Interface())
-			slice = reflect.Append(slice, item)
+		// Create target slice from first Valid element
+		if slice == nil && reflect.ValueOf(items[i]).IsValid() {
+			typ := reflect.SliceOf(reflect.TypeOf(items[i]))
+			v := reflect.MakeSlice(typ, 0, 10)
+			slice = &v
 		}
 
+		// Append item to slice
+		if slice != nil {
+			item := reflect.ValueOf(items[i])
+			*slice = reflect.Append(*slice, item)
+		}
+	}
+	if slice != nil {
 		n.o = slice.Interface()
 		n.len = slice.Len()
 	}
+	return
+}
+
+// create a new slice of the given type or if a slice/array create it from the element type
+// and populate the new slice with the elements of the given slice/array or the single not slice item
+//
+// return NSlice.Nil if there are no items in the new list. the reason for this is that we want to
+// avoid the []interface{} type as much as possible and thus wait until something is appeneded before
+// setting the internal type.
+func newSlice(items interface{}) (n *NSlice) {
+	n = &NSlice{}
+	v := reflect.ValueOf(items)
+	switch v.Kind() {
+
+	// Return the NSlice.Nil
+	case reflect.Invalid:
+
+	// Iterate over array and append
+	case reflect.Array:
+		for i := 0; i < v.Len(); i++ {
+			item := v.Index(i).Interface()
+			n.Append(item)
+		}
+
+	// Slice can be appended directly unless of []interface{} type
+	case reflect.Slice:
+		if _, ok := items.([]interface{}); ok {
+			for i := 0; i < v.Len(); i++ {
+				item := v.Index(i).Interface()
+				n.Append(item)
+			}
+		} else {
+			n.AppendS(items)
+		}
+
+	// Append single items
+	default:
+		n.Append(items)
+	}
+	return
+}
+
+// create a new empty slice of the given type or element type if a slice/array
+// want to return a new *NSlice so that we can use this in the AppendX functions
+// to defer creating an underlying slice type until we have an actual type to work with.
+func newEmptySlice(items interface{}) (n *NSlice) {
+	n = &NSlice{}
+	v := reflect.ValueOf(items)
+	typ := reflect.TypeOf([]interface{}{})
+
+	k := v.Kind()
+	switch k {
+
+	// Use a new generic slice for nils
+	case reflect.Invalid:
+
+	// Use the element type of slice/arrays
+	case reflect.Slice, reflect.Array:
+
+		// Use slice type if not generic
+		if _, ok := items.([]interface{}); !ok {
+			typ = reflect.SliceOf(v.Type().Elem())
+		} else {
+			// For generics try to find actual element type
+			if v.Len() != 0 {
+				elem := v.Index(0).Interface()
+				if elem != nil {
+					typ = reflect.SliceOf(reflect.TypeOf(elem))
+				}
+			}
+		}
+	default:
+		typ = reflect.SliceOf(v.Type())
+	}
+
+	// Create new slice with type of the element
+	slice := reflect.MakeSlice(typ, 0, 10)
+	n.o = slice.Interface()
 	return
 }
 
@@ -121,7 +198,6 @@ func (n *NSlice) Type() Type {
 // Export methods
 //--------------------------------------------------------------------------------------------------
 
-// // A exports NSlice as a string slice
 // func (q *NSlice) A() (result []string) {
 // 	// //if v, ok := q.o.([]string); ok {
 // 	// //	result = v
@@ -144,44 +220,40 @@ func (n *NSlice) Type() Type {
 // reflection overhead cost by type asserting common types. Types not optimized in this way incur
 // the full 10x reflection overhead cost.
 //
-// Cost: 4x - 10x
+// Cost: ~4x - 10x
 //
 // Optimized types: bool, int, string
 func (n *NSlice) Append(item interface{}) *NSlice {
 	if n.Nil() {
-		new := SliceV(item)
-		if !new.Nil() {
-			*n = *new
-		}
-	} else {
-		ok := false
-		switch slice := n.o.(type) {
-		case []bool:
-			var x bool
-			if x, ok = item.(bool); ok {
-				n.o = append(slice, x)
-			}
-		case []int:
-			var x int
-			if x, ok = item.(int); ok {
-				n.o = append(slice, x)
-			}
-		case []string:
-			var x string
-			if x, ok = item.(string); ok {
-				n.o = append(slice, x)
-			}
-		default:
-			ok = true
-			v := reflect.ValueOf(n.o)
-			item := reflect.ValueOf(item)
-			n.o = reflect.Append(v, item).Interface()
-		}
-		if !ok {
-			panic(fmt.Sprintf("can't insert type '%T' into '%T'", item, n.o))
-		}
-		n.len++
+		*n = *(newEmptySlice(item))
 	}
+	ok := false
+	switch slice := n.o.(type) {
+	case []bool:
+		var x bool
+		if x, ok = item.(bool); ok {
+			n.o = append(slice, x)
+		}
+	case []int:
+		var x int
+		if x, ok = item.(int); ok {
+			n.o = append(slice, x)
+		}
+	case []string:
+		var x string
+		if x, ok = item.(string); ok {
+			n.o = append(slice, x)
+		}
+	default:
+		ok = true
+		v := reflect.ValueOf(n.o)
+		item := reflect.ValueOf(item)
+		n.o = reflect.Append(v, item).Interface()
+	}
+	if !ok {
+		panic(fmt.Sprintf("can't insert type '%T' into '%T'", item, n.o))
+	}
+	n.len++
 	return n
 }
 
@@ -189,7 +261,7 @@ func (n *NSlice) Append(item interface{}) *NSlice {
 // the 10x reflection overhead cost by type asserting common types. Types not optimized in this
 // way incur the full 10x reflection overhead cost.
 //
-// Cost: 6x - 10x
+// Cost: ~6x - 10x
 //
 // Optimized types: bool, int, string
 func (n *NSlice) AppendV(items ...interface{}) *NSlice {
@@ -204,85 +276,77 @@ func (n *NSlice) AppendV(items ...interface{}) *NSlice {
 // way incur the full 10x reflection overhead cost. However when appending larger slices fewer times
 // the cost reduces down to 2x.
 //
-// Cost: 1x - 2x
+// Cost: ~1x - 2x
 //
 // Optimized types: []bool, []int, []string
 func (n *NSlice) AppendS(items interface{}) *NSlice {
 	if n.Nil() {
-		new := Slice(items)
-		if !new.Nil() {
-			*n = *new
+		*n = *(newEmptySlice(items))
+	}
+	ok := false
+	switch slice := n.o.(type) {
+	case []bool:
+		var x []bool
+		if x, ok = items.([]bool); ok {
+			n.o = append(slice, x...)
+			n.len += len(x)
 		}
-	} else {
-		ok := false
-		switch slice := n.o.(type) {
-		case []bool:
-			var x []bool
-			if x, ok = items.([]bool); ok {
-				n.o = append(slice, x...)
-				n.len += len(x)
-			}
-		case []int:
-			var x []int
-			if x, ok = items.([]int); ok {
-				n.o = append(slice, x...)
-				n.len += len(x)
-			}
-		case []string:
-			var x []string
-			if x, ok = items.([]string); ok {
-				n.o = append(slice, x...)
-				n.len += len(x)
-			}
-		default:
-			ok = true
-			v := reflect.ValueOf(n.o)
-			x := reflect.ValueOf(items)
-			n.o = reflect.AppendSlice(v, x).Interface()
-			n.len += x.Len()
+	case []int:
+		var x []int
+		if x, ok = items.([]int); ok {
+			n.o = append(slice, x...)
+			n.len += len(x)
 		}
-		if !ok {
-			panic(fmt.Sprintf("can't concat type '%T' with '%T'", items, n.o))
+	case []string:
+		var x []string
+		if x, ok = items.([]string); ok {
+			n.o = append(slice, x...)
+			n.len += len(x)
 		}
+	default:
+		ok = true
+		v := reflect.ValueOf(n.o)
+		x := reflect.ValueOf(items)
+		n.o = reflect.AppendSlice(v, x).Interface()
+		n.len += x.Len()
+	}
+	if !ok {
+		panic(fmt.Sprintf("can't concat type '%T' with '%T'", items, n.o))
 	}
 	return n
 }
 
-// AtO returns the item at the given index location. Allows for negative notation.
+// At returns the item at the given index location. Allows for negative notation.
 // Cost even for reflection in this case doesn't seem to to add much.
 //
-// Cost: 10% - 20%
-func (n *NSlice) AtO(i int) interface{} {
+// Cost: ~20% - 2x
+func (n *NSlice) At(i int) *NObj {
 	if i < 0 {
 		i = n.len + i
 	}
 	if i >= 0 && i < n.len {
 		switch slice := n.o.(type) {
 		case []bool:
-			return slice[i]
+			return &NObj{slice[i]}
 		case []int:
-			return slice[i]
+			return &NObj{slice[i]}
 		case []string:
-			return slice[i]
+			return &NObj{slice[i]}
 		default:
-			return reflect.ValueOf(n.o).Index(i).Interface()
+			return &NObj{reflect.ValueOf(n.o).Index(i).Interface()}
 		}
 	}
 	panic("index out of slice bounds")
 }
 
-// At returns a NObj for the item at the given index location. Allows for negative notation
-//
-// Cost: ?
-// func (n *NSlice) At(i int) *NObj {
-// 	return &NObj{n.AtO(i)}
-// }
-
-// // Clear the underlying slice
-// // func (s *strSliceN) Clear() *strSliceN {
-// // 	s.v = []string{}
-// // 	return s
-// // }
+// Clear the underlying slice
+func (n *NSlice) Clear() *NSlice {
+	// if n == nil {
+	// 	typ := reflect.SliceOf(reflect.TypeOf(elem))
+	// 	slice := reflect.MakeSlice(typ, 0, 10)
+	// }
+	return n
+}
 
 // // // AnyContain checks if any items in this slice contain the target
 // // func (q *NSlice) AnyContain(target string) bool {
