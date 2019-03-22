@@ -9,7 +9,6 @@ import (
 
 // Slice function
 //--------------------------------------------------------------------------------------------------
-
 func ExampleSlice() {
 	slice := Slice([]int{1, 2, 3})
 	fmt.Println(slice.O())
@@ -68,7 +67,6 @@ func TestNSlice_Slice(t *testing.T) {
 
 // SliceV function
 //--------------------------------------------------------------------------------------------------
-
 func ExampleSliceV_empty() {
 	slice := SliceV()
 	fmt.Println(slice.O())
@@ -157,25 +155,6 @@ func TestNSlice_newEmptySlice(t *testing.T) {
 	assert.Equal(t, []int{}, newEmptySlice([]interface{}{interface{}(1)}).O())
 	assert.Equal(t, []string{}, newEmptySlice([]interface{}{""}).O())
 	assert.Equal(t, []NObj{}, newEmptySlice([]interface{}{NObj{}}).O())
-}
-
-// Numerably interface methods
-//--------------------------------------------------------------------------------------------------
-func TestNSlice_O(t *testing.T) {
-	assert.Nil(t, SliceV().O())
-	assert.Len(t, SliceV().Append("2").O(), 1)
-}
-
-func TestNSlice_Len(t *testing.T) {
-	assert.Equal(t, 0, SliceV().Len())
-	assert.Equal(t, 1, SliceV().Append("2").Len())
-}
-
-func TestNSlice_Nil(t *testing.T) {
-	assert.True(t, SliceV().Nil())
-	var q *NSlice
-	assert.True(t, q.Nil())
-	assert.False(t, SliceV().Append("2").Nil())
 }
 
 // Any
@@ -782,6 +761,25 @@ func ExampleNSlice_At() {
 	// Output: 3
 }
 
+func TestNSlice_indexAbs(t *testing.T) {
+	//             -4,-3,-2,-1
+	//              0, 1, 2, 3
+	slice := SliceV(0, 0, 0, 0)
+	assert.Equal(t, 3, slice.absIndex(-1))
+	assert.Equal(t, 2, slice.absIndex(-2))
+	assert.Equal(t, 1, slice.absIndex(-3))
+	assert.Equal(t, 0, slice.absIndex(-4))
+
+	assert.Equal(t, 0, slice.absIndex(0))
+	assert.Equal(t, 1, slice.absIndex(1))
+	assert.Equal(t, 2, slice.absIndex(2))
+	assert.Equal(t, 3, slice.absIndex(3))
+
+	// out of bounds
+	assert.Equal(t, -1, slice.absIndex(4))
+	assert.Equal(t, -1, slice.absIndex(-5))
+}
+
 func TestNSlice_At(t *testing.T) {
 
 	// strings
@@ -795,9 +793,14 @@ func TestNSlice_At(t *testing.T) {
 		assert.Equal(t, "3", slice.At(2).O())
 		assert.Equal(t, "4", slice.At(3).O())
 	}
+
+	// index out of bounds
 	{
 		slice := SliceV("1")
-		assert.Equal(t, "1", slice.At(-1).O())
+		assert.Equal(t, &NObj{}, slice.At(3))
+		assert.Equal(t, nil, slice.At(3).O())
+		assert.Equal(t, &NObj{}, slice.At(-3))
+		assert.Equal(t, nil, slice.At(-3).O())
 	}
 }
 
@@ -955,6 +958,29 @@ func TestQSlice_Clear(t *testing.T) {
 // // 		assert.Equal(t, []string{"1"}, q.S())
 // // 	}
 // // }
+
+// Len
+//--------------------------------------------------------------------------------------------------
+func TestNSlice_Len(t *testing.T) {
+	assert.Equal(t, 0, SliceV().Len())
+	assert.Equal(t, 1, SliceV().Append("2").Len())
+}
+
+// Nil
+//--------------------------------------------------------------------------------------------------
+func TestNSlice_Nil(t *testing.T) {
+	assert.True(t, SliceV().Nil())
+	var q *NSlice
+	assert.True(t, q.Nil())
+	assert.False(t, SliceV().Append("2").Nil())
+}
+
+// O
+//--------------------------------------------------------------------------------------------------
+func TestNSlice_O(t *testing.T) {
+	assert.Nil(t, SliceV().O())
+	assert.Len(t, SliceV().Append("2").O(), 1)
+}
 
 // // func TestStrSlicePrepend(t *testing.T) {
 // // 	slice := S().Prepend("1")

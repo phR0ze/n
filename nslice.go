@@ -225,6 +225,8 @@ func (n *NSlice) Any(obj ...interface{}) bool {
 // obj must be a slice type
 //
 // Cost: ~1x - 10x
+//
+// Optimized types: bool, int, string
 func (n *NSlice) AnyS(obj interface{}) (result bool) {
 	if n.Nil() {
 		return
@@ -284,27 +286,6 @@ func (n *NSlice) AnyS(obj interface{}) (result bool) {
 	}
 	return
 }
-
-// Export methods
-//--------------------------------------------------------------------------------------------------
-
-// func (q *NSlice) A() (result []string) {
-// 	// //if v, ok := q.o.([]string); ok {
-// 	// //	result = v
-// 	// //} else {
-// 	// for i := 0; i < len(q.o); i++ {
-// 	// 	if x, ok := q.o[i].(string); ok {
-// 	// 		result = append(result, x)
-// 	// 	} else {
-// 	// 		result = append(result, fmt.Sprint(q.o[i]))
-// 	// 	}
-// 	// }
-// 	// //}
-// 	return
-// }
-
-// NSlice methods
-//--------------------------------------------------------------------------------------------------
 
 // Append an item to the end of the NSlice and returns the NSlice for chaining. Avoids the 10x
 // reflection overhead cost by type asserting common types. Types not optimized in this way incur
@@ -406,27 +387,43 @@ func (n *NSlice) AppendS(items interface{}) *NSlice {
 	return n
 }
 
+// get the absolute value for the pos/neg index.
+// return of -1 indicates out of bounds
+func (n *NSlice) absIndex(i int) (abs int) {
+	if i < 0 {
+		abs = n.len + i
+	} else {
+		abs = i
+	}
+	if abs < 0 || abs >= n.len {
+		abs = -1
+	}
+	return
+}
+
 // At returns the item at the given index location. Allows for negative notation.
-// Cost even for reflection in this case doesn't seem to to add much.
+// Cost for reflection in this case doesn't seem to to add much.
 //
 // Cost: ~20% - 2x
-func (n *NSlice) At(i int) *NObj {
-	if i < 0 {
-		i = n.len + i
+//
+// Optimized types: []bool, []int, []string
+func (n *NSlice) At(i int) (obj *NObj) {
+	obj = &NObj{}
+	if i = n.absIndex(i); i == -1 {
+		return
 	}
-	if i >= 0 && i < n.len {
-		switch slice := n.o.(type) {
-		case []bool:
-			return &NObj{slice[i]}
-		case []int:
-			return &NObj{slice[i]}
-		case []string:
-			return &NObj{slice[i]}
-		default:
-			return &NObj{reflect.ValueOf(n.o).Index(i).Interface()}
-		}
+
+	switch slice := n.o.(type) {
+	case []bool:
+		obj.o = slice[i]
+	case []int:
+		obj.o = slice[i]
+	case []string:
+		obj.o = slice[i]
+	default:
+		obj.o = reflect.ValueOf(n.o).Index(i).Interface()
 	}
-	panic("index out of slice bounds")
+	return
 }
 
 // Clear the underlying slice.
@@ -439,23 +436,42 @@ func (n *NSlice) Clear() *NSlice {
 	return n
 }
 
-// // // Del deletes item using neg/pos index notation with status
-// // func (s *strSliceN) Del(i int) bool {
-// // 	result := false
-// // 	if i < 0 {
-// // 		i = len(s.v) + i
-// // 	}
-// // 	if i >= 0 && i < len(s.v) {
-// // 		if i+1 < len(s.v) {
-// // 			s.v = append(s.v[:i], s.v[i+1:]...)
-// // 			result = true
-// // 		} else {
-// // 			s.v = s.v[:i]
-// // 			result = true
-// // 		}
-// // 	}
-// // 	return result
-// // }
+// DeleteAt deletes the item at the given index location. Allows for negative notation.
+// Returns the deleted item as a NObj which will have NObj.Nil() true if it didn't exist.
+// Cost for reflection in this case doesn't seem to to add much.
+//
+// Cost: ~20% - 2x
+//
+// Optimized types: []bool, []int, []string
+func (n *NSlice) DeleteAt(i int) (obj *NObj) {
+
+	// Get the item and check out-of-bounds
+	obj = n.At(i)
+	if obj.Nil() {
+		return
+	}
+	i = n.absIndex(i) // don't need bounds check as At call handles this
+
+	// Delete the item
+	switch slice := n.o.(type) {
+	case []bool:
+		// if i+1 < len(slice) {
+		// 	slice = append(slice[:i], slice[i+1:]...)
+		// 	result = true
+		// } else {
+		// 	s.v = s.v[:i]
+		// 	result = true
+		// }
+	case []int:
+		obj.o = slice[i]
+	case []string:
+		obj.o = slice[i]
+	default:
+		obj.o = reflect.ValueOf(n.o).Index(i).Interface()
+	}
+	n.len--
+	return
+}
 
 // // // Drop deletes first n elements and returns the modified slice
 // // func (s *strSliceN) Drop(cnt int) *strSliceN {
