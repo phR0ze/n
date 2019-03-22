@@ -9,6 +9,8 @@ import (
 const nines7 = 9999999
 const nines6 = 999999
 const nines5 = 99999
+const nines4 = 9999
+const nines3 = 999
 
 // var smallStringSet = []string{"Lorem", "ipsum", "dolor", "sit", "amet,", "consectetur", "adipiscing", "elit,", "sed", "do",
 func TestOptimized(t *testing.T) {

@@ -150,6 +150,8 @@ func (n *NSlice) Any() bool {
 }
 
 // Contains checks if the given obj is contained in this slice
+//
+// Cost: ~1x - 10x
 func (n *NSlice) Contains(obj interface{}) (result bool) {
 	if n.Nil() {
 		return

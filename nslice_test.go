@@ -171,31 +171,6 @@ func TestNSlice_Any(t *testing.T) {
 	assert.True(t, SliceV().Append("2").Any())
 }
 
-func TestNSlice_Contains(t *testing.T) {
-
-	// bool
-	assert.True(t, SliceV(false, true).Contains(true))
-	assert.False(t, SliceV(true, true).Contains(false))
-
-	// int
-	assert.True(t, SliceV(1, 2, 3).Contains(2))
-	assert.False(t, SliceV(1, 2, 3).Contains(4))
-
-	// string
-	assert.True(t, SliceV("1", "2", "3").Contains("2"))
-	assert.False(t, SliceV("1", "2", "3").Contains("4"))
-
-	// custom
-	assert.True(t, SliceV(NObj{1}, NObj{2}).Contains(NObj{1}))
-
-	// panics need to go as last item as they abort the test method
-	defer func() {
-		err := recover()
-		assert.Equal(t, "can't compare type 'int' with '[]n.NObj' elements", err)
-	}()
-	assert.True(t, SliceV(NObj{1}, NObj{2}).Contains(2))
-}
-
 func TestNSlice_Len(t *testing.T) {
 	assert.Equal(t, 0, SliceV().Len())
 	assert.Equal(t, 1, SliceV().Append("2").Len())
@@ -660,6 +635,70 @@ func TestQSlice_Clear(t *testing.T) {
 	assert.Equal(t, 0, slice.Len())
 	slice.Clear()
 	assert.Equal(t, 0, slice.Len())
+}
+
+// Contains
+//--------------------------------------------------------------------------------------------------
+func BenchmarkNSlice_Contains_Normal(t *testing.B) {
+	contains := func(list []int, x int) bool {
+		for i := range list {
+			if list[i] == x {
+				return true
+			}
+		}
+		return false
+	}
+
+	// test here
+	ints := Range(0, nines4)
+	for i := range ints {
+		contains(ints, i)
+	}
+}
+
+func BenchmarkNSlice_Contains_Optimized(t *testing.B) {
+	src := Range(0, nines4)
+	slice := Slice(src)
+	for i := range src {
+		slice.Contains(i)
+	}
+}
+
+func BenchmarkNSlice_Contains_Reflect(t *testing.B) {
+	src := rangeNObj(0, nines4)
+	slice := Slice(src)
+	for _, i := range src {
+		slice.Contains(i)
+	}
+}
+
+func TestNSlice_Contains(t *testing.T) {
+
+	// bool
+	assert.True(t, SliceV(false, true).Contains(true))
+	assert.False(t, SliceV(true, true).Contains(false))
+
+	// int
+	assert.True(t, SliceV(1, 2, 3).Contains(2))
+	assert.False(t, SliceV(1, 2, 3).Contains(4))
+
+	// int64
+	assert.True(t, SliceV(int64(1), int64(2), int64(3)).Contains(int64(2)))
+	assert.False(t, SliceV(int64(1), int64(2), int64(3)).Contains(int64(4)))
+
+	// string
+	assert.True(t, SliceV("1", "2", "3").Contains("2"))
+	assert.False(t, SliceV("1", "2", "3").Contains("4"))
+
+	// custom
+	assert.True(t, SliceV(NObj{1}, NObj{2}).Contains(NObj{1}))
+
+	// panics need to go as last item as they abort the test method
+	defer func() {
+		err := recover()
+		assert.Equal(t, "can't compare type 'int' with '[]n.NObj' elements", err)
+	}()
+	assert.True(t, SliceV(NObj{1}, NObj{2}).Contains(2))
 }
 
 // // func TestStrSliceDel(t *testing.T) {
