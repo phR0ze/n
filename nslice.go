@@ -149,6 +149,58 @@ func (n *NSlice) Any() bool {
 	return n.len > 0
 }
 
+// Contains checks if the given obj is contained in this slice
+func (n *NSlice) Contains(obj interface{}) (result bool) {
+	if n.Nil() {
+		return
+	}
+	ok := false
+	switch slice := n.o.(type) {
+	case []bool:
+		var x bool
+		if x, ok = obj.(bool); ok {
+			for i := range slice {
+				if slice[i] == x {
+					return true
+				}
+			}
+		}
+	case []int:
+		var x int
+		if x, ok = obj.(int); ok {
+			for i := range slice {
+				if slice[i] == x {
+					return true
+				}
+			}
+		}
+	case []string:
+		var x string
+		if x, ok = obj.(string); ok {
+			for i := range slice {
+				if slice[i] == x {
+					return true
+				}
+			}
+		}
+	default:
+		v := reflect.ValueOf(n.o)
+		x := reflect.ValueOf(obj)
+		if v.Type() == x.Type() {
+			ok = true
+			for i := 0; i < v.Len(); i++ {
+				if v.Index(i).Interface() == x {
+					return true
+				}
+			}
+		}
+	}
+	if !ok {
+		panic(fmt.Sprintf("can't compare type '%T' with '%T' elements", obj, n.o))
+	}
+	return
+}
+
 // Len returns the number of elements in the numerable
 func (n *NSlice) Len() int {
 	if n.Nil() {
@@ -314,34 +366,15 @@ func (n *NSlice) At(i int) *NObj {
 	panic("index out of slice bounds")
 }
 
-// Clear the underlying slice
+// Clear the underlying slice.
+//
+// Cost: constant
 func (n *NSlice) Clear() *NSlice {
-	// if n == nil {
-	// 	typ := reflect.SliceOf(reflect.TypeOf(elem))
-	// 	slice := reflect.MakeSlice(typ, 0, 10)
-	// }
+	if !n.Nil() {
+		*n = *(newEmptySlice(n.o))
+	}
 	return n
 }
-
-// // // AnyContain checks if any items in this slice contain the target
-// // func (q *NSlice) AnyContain(target string) bool {
-// // 	for i := range q.v {
-// // 		if strings.Contains(q.v[i], target) {
-// // 			return true
-// // 		}
-// // 	}
-// // 	return false
-// // }
-
-// // // Contains checks if the given target is contained in this slice
-// // func (s *strSliceN) Contains(target string) bool {
-// // 	for i := range s.v {
-// // 		if s.v[i] == target {
-// // 			return true
-// // 		}
-// // 	}
-// // 	return false
-// // }
 
 // // // ContainsAny checks if any of the targets are contained in this slice
 // // func (s *strSliceN) ContainsAny(targets []string) bool {

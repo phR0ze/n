@@ -625,14 +625,17 @@ func TestNSlice_At(t *testing.T) {
 	}
 }
 
-// // func TestStrSliceClear(t *testing.T) {
-// // 	slice := S().Append("1", "2", "3", "4")
-// // 	assert.Equal(t, 4, slice.Len())
-// // 	slice.Clear()
-// // 	assert.Equal(t, 0, slice.Len())
-// // 	slice.Clear()
-// // 	assert.Equal(t, 0, slice.Len())
-// // }
+// Clear
+//--------------------------------------------------------------------------------------------------
+
+func TestQSlice_Clear(t *testing.T) {
+	slice := SliceV("1", "2", "3", "4")
+	assert.Equal(t, 4, slice.Len())
+	slice.Clear()
+	assert.Equal(t, 0, slice.Len())
+	slice.Clear()
+	assert.Equal(t, 0, slice.Len())
+}
 
 // // func TestStrSliceAnyContain(t *testing.T) {
 // // 	assert.True(t, S("one", "two", "three").AnyContain("thr"))
