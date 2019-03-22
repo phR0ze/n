@@ -22,7 +22,7 @@ type NSlice struct {
 // values are ignored to avoid internally using a []interface{}. The internal type will be
 // set later with the given type when an n.AppendX method is called.
 //
-// Cost: ~1x - 10x
+// Cost: ~0x - 10x
 func Slice(obj interface{}) (n *NSlice) {
 	n = &NSlice{}
 	v := reflect.ValueOf(obj)
@@ -136,7 +136,7 @@ func newEmptySlice(items interface{}) (n *NSlice) {
 // Any tests if the numerable is not empty or optionally if it contains
 // any of the given Variadic elements.
 //
-// Cost: ~1x - 10x
+// Cost: ~0x - 10x
 //
 // Optimized types: bool, int, string
 func (n *NSlice) Any(obj ...interface{}) bool {
@@ -224,7 +224,7 @@ func (n *NSlice) Any(obj ...interface{}) bool {
 //
 // obj must be a slice type
 //
-// Cost: ~1x - 10x
+// Cost: ~0x - 10x
 //
 // Optimized types: bool, int, string
 func (n *NSlice) AnyS(obj interface{}) (result bool) {
@@ -347,7 +347,7 @@ func (n *NSlice) AppendV(items ...interface{}) *NSlice {
 // way incur the full 10x reflection overhead cost. However when appending larger slices fewer times
 // the cost reduces down to 2x.
 //
-// Cost: ~1x - 2x
+// Cost: ~0x - 2x
 //
 // Optimized types: []bool, []int, []string
 func (n *NSlice) AppendS(items interface{}) *NSlice {
@@ -404,7 +404,7 @@ func (n *NSlice) absIndex(i int) (abs int) {
 // At returns the item at the given index location. Allows for negative notation.
 // Cost for reflection in this case doesn't seem to to add much.
 //
-// Cost: ~20% - 2x
+// Cost: ~0x - 2x
 //
 // Optimized types: []bool, []int, []string
 func (n *NSlice) At(i int) (obj *NObj) {
@@ -440,7 +440,7 @@ func (n *NSlice) Clear() *NSlice {
 // Returns the deleted item as a NObj which will have NObj.Nil() true if it didn't exist.
 // Cost for reflection in this case doesn't seem to to add much.
 //
-// Cost: ~20% - 2x
+// Cost: ~0x - 3x
 //
 // Optimized types: []bool, []int, []string
 func (n *NSlice) DeleteAt(i int) (obj *NObj) {
@@ -455,19 +455,34 @@ func (n *NSlice) DeleteAt(i int) (obj *NObj) {
 	// Delete the item
 	switch slice := n.o.(type) {
 	case []bool:
-		// if i+1 < len(slice) {
-		// 	slice = append(slice[:i], slice[i+1:]...)
-		// 	result = true
-		// } else {
-		// 	s.v = s.v[:i]
-		// 	result = true
-		// }
+		if i+1 < len(slice) {
+			slice = append(slice[:i], slice[i+1:]...)
+		} else {
+			slice = slice[:i]
+		}
+		n.o = slice
 	case []int:
-		obj.o = slice[i]
+		if i+1 < len(slice) {
+			slice = append(slice[:i], slice[i+1:]...)
+		} else {
+			slice = slice[:i]
+		}
+		n.o = slice
 	case []string:
-		obj.o = slice[i]
+		if i+1 < len(slice) {
+			slice = append(slice[:i], slice[i+1:]...)
+		} else {
+			slice = slice[:i]
+		}
+		n.o = slice
 	default:
-		obj.o = reflect.ValueOf(n.o).Index(i).Interface()
+		v := reflect.ValueOf(n.o)
+		if i+1 < v.Len() {
+			v = reflect.AppendSlice(v.Slice(0, i), v.Slice(i+1, v.Len()))
+		} else {
+			v = v.Slice(0, i)
+		}
+		n.o = slice
 	}
 	n.len--
 	return
