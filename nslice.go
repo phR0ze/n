@@ -488,55 +488,77 @@ func (n *NSlice) DeleteAt(i int) (obj *NObj) {
 	return
 }
 
-// Drop deletes first n elements and returns the modified slice. If a negative number is
-// given it drops the absolute value of that number from the end rather then the begining.
+// DropFirst deletes first element or optionally first cnt elements and returns the rest of
+// the elements in the array.
 //
 // Cost: ~0x - 3x
 //
 // Optimized types: []bool, []int, []string
-func (n *NSlice) Drop(cnt int) *NSlice {
-	if cnt == 0 {
+func (n *NSlice) DropFirst(cnt ...int) *NSlice {
+	_cnt := 1
+	if len(cnt) != 0 {
+		_cnt = cnt[0]
+	}
+	if _cnt == 0 {
 		return n
 	}
 
 	// Delete cnt items from the begining
-	end := false
-	if cnt < 0 {
-		end = true
-		cnt *= -1
-	}
-	if n.len >= cnt {
+	if n.len >= _cnt {
 		switch slice := n.o.(type) {
 		case []bool:
-			if end {
-				slice = slice[:len(slice)-cnt]
-			} else {
-				slice = slice[cnt:]
-			}
+			slice = slice[_cnt:]
 			n.o = slice
 		case []int:
-			if end {
-				slice = slice[:len(slice)-cnt]
-			} else {
-				slice = slice[cnt:]
-			}
+			slice = slice[_cnt:]
 			n.o = slice
 		case []string:
-			if end {
-				slice = slice[:len(slice)-cnt]
-			} else {
-				slice = slice[cnt:]
-			}
+			slice = slice[_cnt:]
 			n.o = slice
 		default:
 			v := reflect.ValueOf(n.o)
-			if end {
-				n.o = v.Slice(0, v.Len()-cnt).Interface()
-			} else {
-				n.o = v.Slice(cnt, v.Len()).Interface()
-			}
+			n.o = v.Slice(_cnt, v.Len()).Interface()
 		}
-		n.len -= cnt
+		n.len -= _cnt
+	} else {
+		*n = *(newEmptySlice(n.o))
+	}
+
+	return n
+}
+
+// DropLast deletes last element or optionally last cnt elements and returns the rest of
+// the elements in the array.
+//
+// Cost: ~0x - 3x
+//
+// Optimized types: []bool, []int, []string
+func (n *NSlice) DropLast(cnt ...int) *NSlice {
+	_cnt := 1
+	if len(cnt) != 0 {
+		_cnt = cnt[0]
+	}
+	if _cnt == 0 {
+		return n
+	}
+
+	// Delete cnt items from the begining
+	if n.len >= _cnt {
+		switch slice := n.o.(type) {
+		case []bool:
+			slice = slice[:len(slice)-_cnt]
+			n.o = slice
+		case []int:
+			slice = slice[:len(slice)-_cnt]
+			n.o = slice
+		case []string:
+			slice = slice[:len(slice)-_cnt]
+			n.o = slice
+		default:
+			v := reflect.ValueOf(n.o)
+			n.o = v.Slice(0, v.Len()-_cnt).Interface()
+		}
+		n.len -= _cnt
 	} else {
 		*n = *(newEmptySlice(n.o))
 	}
@@ -621,18 +643,61 @@ func (n *NSlice) Empty() bool {
 	return false
 }
 
-// // // Equals checks if the two slices are equal
-// // func (s *strSliceN) Equals(other *strSliceN) bool {
-// // 	return reflect.DeepEqual(s, other)
-// // }
+// First returns the first element or first n elements. If the slice is empty
+// the returned slice will be NSlice.Nil.
+//
+// Cost: ~0x - 3x
+//
+// Optimized types: []bool, []int, []string
+func (n *NSlice) First(cnt int) *NSlice {
+	if cnt == 0 {
+		return n
+	}
 
-// // // First returns the first item or nil
-// // func (q *NSlice) First() (result interface{}) {
-// // 	if !q.Nil() && q.v.Len() > 0 {
-// // 		result = q.v.Index(0).Interface()
-// // 	}
-// // 	return
-// // }
+	// Delete cnt items from the begining
+	end := false
+	if cnt < 0 {
+		end = true
+		cnt *= -1
+	}
+	if n.len >= cnt {
+		switch slice := n.o.(type) {
+		case []bool:
+			if end {
+				slice = slice[:len(slice)-cnt]
+			} else {
+				slice = slice[cnt:]
+			}
+			n.o = slice
+		case []int:
+			if end {
+				slice = slice[:len(slice)-cnt]
+			} else {
+				slice = slice[cnt:]
+			}
+			n.o = slice
+		case []string:
+			if end {
+				slice = slice[:len(slice)-cnt]
+			} else {
+				slice = slice[cnt:]
+			}
+			n.o = slice
+		default:
+			v := reflect.ValueOf(n.o)
+			if end {
+				n.o = v.Slice(0, v.Len()-cnt).Interface()
+			} else {
+				n.o = v.Slice(cnt, v.Len()).Interface()
+			}
+		}
+		n.len -= cnt
+	} else {
+		*n = *(newEmptySlice(n.o))
+	}
+
+	return n
+}
 
 // // // Join the underlying slice with the given delim
 // // func (s *strSliceN) Join(delim string) *strN {
