@@ -955,22 +955,22 @@ func TestNSlice_DeleteAt(t *testing.T) {
 //--------------------------------------------------------------------------------------------------
 func BenchmarkNSlice_DropFirst_Normal(t *testing.B) {
 	ints := Range(0, nines7)
-	for len(ints) > 10 {
-		ints = ints[10:]
+	for len(ints) > 1 {
+		ints = ints[1:]
 	}
 }
 
 func BenchmarkNSlice_DropFirst_Optimized(t *testing.B) {
 	slice := Slice(Range(0, nines7))
 	for slice.Len() > 0 {
-		slice.DropFirst(10)
+		slice.DropFirst()
 	}
 }
 
 func BenchmarkNSlice_DropFirst_Reflect(t *testing.B) {
 	slice := Slice(rangeNObj(0, nines7))
 	for slice.Len() > 0 {
-		slice.DropFirst(10)
+		slice.DropFirst()
 	}
 }
 
@@ -980,44 +980,104 @@ func ExampleNSlice_DropFirst() {
 	// Output: [2 3]
 }
 
-func ExampleNSlice_DropFirst_count() {
+func TestNSlice_DropFirst(t *testing.T) {
+	// bool
+	{
+		slice := SliceV(true, true, false)
+		assert.Equal(t, []bool{true, false}, slice.DropFirst().O())
+		assert.Equal(t, 2, slice.Len())
+		assert.Equal(t, []bool{false}, slice.DropFirst().O())
+		assert.Equal(t, 1, slice.Len())
+		assert.Equal(t, []bool{}, slice.DropFirst().O())
+		assert.Equal(t, 0, slice.Len())
+		assert.Equal(t, []bool{}, slice.DropFirst().O())
+		assert.Equal(t, 0, slice.Len())
+	}
+
+	// int
+	{
+		slice := SliceV(1, 2, 3)
+		assert.Equal(t, []int{2, 3}, slice.DropFirst().O())
+		assert.Equal(t, 2, slice.Len())
+		assert.Equal(t, []int{3}, slice.DropFirst().O())
+		assert.Equal(t, 1, slice.Len())
+		assert.Equal(t, []int{}, slice.DropFirst().O())
+		assert.Equal(t, 0, slice.Len())
+		assert.Equal(t, []int{}, slice.DropFirst().O())
+		assert.Equal(t, 0, slice.Len())
+	}
+
+	// string
+	{
+		slice := SliceV("1", "2", "3")
+		assert.Equal(t, []string{"2", "3"}, slice.DropFirst().O())
+		assert.Equal(t, 2, slice.Len())
+		assert.Equal(t, []string{"3"}, slice.DropFirst().O())
+		assert.Equal(t, 1, slice.Len())
+		assert.Equal(t, []string{}, slice.DropFirst().O())
+		assert.Equal(t, 0, slice.Len())
+		assert.Equal(t, []string{}, slice.DropFirst().O())
+		assert.Equal(t, 0, slice.Len())
+	}
+
+	// custom
+	{
+		slice := Slice([]NObj{{1}, {2}, {3}})
+		assert.Equal(t, []NObj{{2}, {3}}, slice.DropFirst().O())
+		assert.Equal(t, 2, slice.Len())
+		assert.Equal(t, []NObj{{3}}, slice.DropFirst().O())
+		assert.Equal(t, 1, slice.Len())
+		assert.Equal(t, []NObj{}, slice.DropFirst().O())
+		assert.Equal(t, 0, slice.Len())
+		assert.Equal(t, []NObj{}, slice.DropFirst().O())
+		assert.Equal(t, 0, slice.Len())
+	}
+}
+
+// DropFirstN
+//--------------------------------------------------------------------------------------------------
+func BenchmarkNSlice_DropFirstN_Normal(t *testing.B) {
+	ints := Range(0, nines7)
+	for len(ints) > 10 {
+		ints = ints[10:]
+	}
+}
+
+func BenchmarkNSlice_DropFirstN_Optimized(t *testing.B) {
+	slice := Slice(Range(0, nines7))
+	for slice.Len() > 0 {
+		slice.DropFirstN(10)
+	}
+}
+
+func BenchmarkNSlice_DropFirstN_Reflect(t *testing.B) {
+	slice := Slice(rangeNObj(0, nines7))
+	for slice.Len() > 0 {
+		slice.DropFirstN(10)
+	}
+}
+
+func ExampleNSlice_DropFirstN() {
 	slice := SliceV(1, 2, 3)
-	fmt.Println(slice.DropFirst(2).O())
+	fmt.Println(slice.DropFirstN(2).O())
 	// Output: [3]
 }
 
-func TestNSlice_DropFirst(t *testing.T) {
-
-	// drop 1 default
-	{
-		// int
-		{
-			slice := SliceV(1, 2, 3)
-			assert.Equal(t, []int{2, 3}, slice.DropFirst().O())
-			assert.Equal(t, 2, slice.Len())
-		}
-
-		// custom
-		{
-			slice := Slice([]NObj{{1}, {2}, {3}})
-			assert.Equal(t, []NObj{{2}, {3}}, slice.DropFirst().O())
-			assert.Equal(t, 2, slice.Len())
-		}
-	}
+func TestNSlice_DropFirstN(t *testing.T) {
 
 	// drop none
 	{
 		// int
 		{
 			slice := SliceV(1, 2, 3)
-			assert.Equal(t, []int{1, 2, 3}, slice.DropFirst(0).O())
+			assert.Equal(t, []int{1, 2, 3}, slice.DropFirstN(0).O())
 			assert.Equal(t, 3, slice.Len())
 		}
 
 		// custom
 		{
 			slice := Slice([]NObj{{1}, {2}, {3}})
-			assert.Equal(t, []NObj{{1}, {2}, {3}}, slice.DropFirst(0).O())
+			assert.Equal(t, []NObj{{1}, {2}, {3}}, slice.DropFirstN(0).O())
 			assert.Equal(t, 3, slice.Len())
 		}
 	}
@@ -1027,28 +1087,28 @@ func TestNSlice_DropFirst(t *testing.T) {
 		// bool
 		{
 			slice := SliceV(true, true, false)
-			assert.Equal(t, []bool{true, false}, slice.DropFirst(1).O())
+			assert.Equal(t, []bool{true, false}, slice.DropFirstN(1).O())
 			assert.Equal(t, 2, slice.Len())
 		}
 
 		// int
 		{
 			slice := SliceV(1, 2, 3)
-			assert.Equal(t, []int{2, 3}, slice.DropFirst(1).O())
+			assert.Equal(t, []int{2, 3}, slice.DropFirstN(1).O())
 			assert.Equal(t, 2, slice.Len())
 		}
 
 		// string
 		{
 			slice := SliceV("1", "2", "3")
-			assert.Equal(t, []string{"2", "3"}, slice.DropFirst(1).O())
+			assert.Equal(t, []string{"2", "3"}, slice.DropFirstN(1).O())
 			assert.Equal(t, 2, slice.Len())
 		}
 
 		// custom
 		{
 			slice := Slice([]NObj{{1}, {2}, {3}})
-			assert.Equal(t, []NObj{{2}, {3}}, slice.DropFirst(1).O())
+			assert.Equal(t, []NObj{{2}, {3}}, slice.DropFirstN(1).O())
 			assert.Equal(t, 2, slice.Len())
 		}
 	}
@@ -1058,28 +1118,28 @@ func TestNSlice_DropFirst(t *testing.T) {
 		// bool
 		{
 			slice := SliceV(true, false, false)
-			assert.Equal(t, []bool{false}, slice.DropFirst(2).O())
+			assert.Equal(t, []bool{false}, slice.DropFirstN(2).O())
 			assert.Equal(t, 1, slice.Len())
 		}
 
 		// int
 		{
 			slice := SliceV(1, 2, 3)
-			assert.Equal(t, []int{3}, slice.DropFirst(2).O())
+			assert.Equal(t, []int{3}, slice.DropFirstN(2).O())
 			assert.Equal(t, 1, slice.Len())
 		}
 
 		// string
 		{
 			slice := SliceV("1", "2", "3")
-			assert.Equal(t, []string{"3"}, slice.DropFirst(2).O())
+			assert.Equal(t, []string{"3"}, slice.DropFirstN(2).O())
 			assert.Equal(t, 1, slice.Len())
 		}
 
 		// custom
 		{
 			slice := Slice([]NObj{{1}, {2}, {3}})
-			assert.Equal(t, []NObj{{3}}, slice.DropFirst(2).O())
+			assert.Equal(t, []NObj{{3}}, slice.DropFirstN(2).O())
 			assert.Equal(t, 1, slice.Len())
 		}
 	}
@@ -1089,14 +1149,14 @@ func TestNSlice_DropFirst(t *testing.T) {
 		// int
 		{
 			slice := SliceV(1, 2, 3)
-			assert.Equal(t, []int{}, slice.DropFirst(3).O())
+			assert.Equal(t, []int{}, slice.DropFirstN(3).O())
 			assert.Equal(t, 0, slice.Len())
 		}
 
 		// custom
 		{
 			slice := Slice([]NObj{{1}, {2}, {3}})
-			assert.Equal(t, []NObj{}, slice.DropFirst(3).O())
+			assert.Equal(t, []NObj{}, slice.DropFirstN(3).O())
 			assert.Equal(t, 0, slice.Len())
 		}
 	}
@@ -1106,14 +1166,14 @@ func TestNSlice_DropFirst(t *testing.T) {
 		// int
 		{
 			slice := SliceV(1, 2, 3)
-			assert.Equal(t, []int{}, slice.DropFirst(4).O())
+			assert.Equal(t, []int{}, slice.DropFirstN(4).O())
 			assert.Equal(t, 0, slice.Len())
 		}
 
 		// custom
 		{
 			slice := Slice([]NObj{{1}, {2}, {3}})
-			assert.Equal(t, []NObj{}, slice.DropFirst(4).O())
+			assert.Equal(t, []NObj{}, slice.DropFirstN(4).O())
 			assert.Equal(t, 0, slice.Len())
 		}
 	}
@@ -1123,22 +1183,22 @@ func TestNSlice_DropFirst(t *testing.T) {
 //--------------------------------------------------------------------------------------------------
 func BenchmarkNSlice_DropLast_Normal(t *testing.B) {
 	ints := Range(0, nines7)
-	for len(ints) > 10 {
-		ints = ints[10:]
+	for len(ints) > 1 {
+		ints = ints[1:]
 	}
 }
 
 func BenchmarkNSlice_DropLast_Optimized(t *testing.B) {
 	slice := Slice(Range(0, nines7))
 	for slice.Len() > 0 {
-		slice.DropLast(10)
+		slice.DropLast()
 	}
 }
 
 func BenchmarkNSlice_DropLast_Reflect(t *testing.B) {
 	slice := Slice(rangeNObj(0, nines7))
 	for slice.Len() > 0 {
-		slice.DropLast(10)
+		slice.DropLast()
 	}
 }
 
@@ -1148,44 +1208,104 @@ func ExampleNSlice_DropLast() {
 	// Output: [1 2]
 }
 
-func ExampleNSlice_DropLast_count() {
+func TestNSlice_DropLast(t *testing.T) {
+	// bool
+	{
+		slice := SliceV(true, true, false)
+		assert.Equal(t, []bool{true, true}, slice.DropLast().O())
+		assert.Equal(t, 2, slice.Len())
+		assert.Equal(t, []bool{true}, slice.DropLast().O())
+		assert.Equal(t, 1, slice.Len())
+		assert.Equal(t, []bool{}, slice.DropLast().O())
+		assert.Equal(t, 0, slice.Len())
+		assert.Equal(t, []bool{}, slice.DropLast().O())
+		assert.Equal(t, 0, slice.Len())
+	}
+
+	// int
+	{
+		slice := SliceV(1, 2, 3)
+		assert.Equal(t, []int{1, 2}, slice.DropLast().O())
+		assert.Equal(t, 2, slice.Len())
+		assert.Equal(t, []int{1}, slice.DropLast().O())
+		assert.Equal(t, 1, slice.Len())
+		assert.Equal(t, []int{}, slice.DropLast().O())
+		assert.Equal(t, 0, slice.Len())
+		assert.Equal(t, []int{}, slice.DropLast().O())
+		assert.Equal(t, 0, slice.Len())
+	}
+
+	// string
+	{
+		slice := SliceV("1", "2", "3")
+		assert.Equal(t, []string{"1", "2"}, slice.DropLast().O())
+		assert.Equal(t, 2, slice.Len())
+		assert.Equal(t, []string{"1"}, slice.DropLast().O())
+		assert.Equal(t, 1, slice.Len())
+		assert.Equal(t, []string{}, slice.DropLast().O())
+		assert.Equal(t, 0, slice.Len())
+		assert.Equal(t, []string{}, slice.DropLast().O())
+		assert.Equal(t, 0, slice.Len())
+	}
+
+	// custom
+	{
+		slice := Slice([]NObj{{1}, {2}, {3}})
+		assert.Equal(t, []NObj{{1}, {2}}, slice.DropLast().O())
+		assert.Equal(t, 2, slice.Len())
+		assert.Equal(t, []NObj{{1}}, slice.DropLast().O())
+		assert.Equal(t, 1, slice.Len())
+		assert.Equal(t, []NObj{}, slice.DropLast().O())
+		assert.Equal(t, 0, slice.Len())
+		assert.Equal(t, []NObj{}, slice.DropLast().O())
+		assert.Equal(t, 0, slice.Len())
+	}
+}
+
+// DropLastN
+//--------------------------------------------------------------------------------------------------
+func BenchmarkNSlice_DropLastN_Normal(t *testing.B) {
+	ints := Range(0, nines7)
+	for len(ints) > 10 {
+		ints = ints[10:]
+	}
+}
+
+func BenchmarkNSlice_DropLastN_Optimized(t *testing.B) {
+	slice := Slice(Range(0, nines7))
+	for slice.Len() > 0 {
+		slice.DropLastN(10)
+	}
+}
+
+func BenchmarkNSlice_DropLastN_Reflect(t *testing.B) {
+	slice := Slice(rangeNObj(0, nines7))
+	for slice.Len() > 0 {
+		slice.DropLastN(10)
+	}
+}
+
+func ExampleNSlice_DropLastN() {
 	slice := SliceV(1, 2, 3)
-	fmt.Println(slice.DropLast(2).O())
+	fmt.Println(slice.DropLastN(2).O())
 	// Output: [1]
 }
 
-func TestNSlice_DropLast(t *testing.T) {
-
-	// drop 1 default
-	{
-		// int
-		{
-			slice := SliceV(1, 2, 3)
-			assert.Equal(t, []int{1, 2}, slice.DropLast().O())
-			assert.Equal(t, 2, slice.Len())
-		}
-
-		// custom
-		{
-			slice := Slice([]NObj{{1}, {2}, {3}})
-			assert.Equal(t, []NObj{{1}, {2}}, slice.DropLast().O())
-			assert.Equal(t, 2, slice.Len())
-		}
-	}
+func TestNSlice_DropLastN(t *testing.T) {
 
 	// drop none
 	{
 		// int
 		{
 			slice := SliceV(1, 2, 3)
-			assert.Equal(t, []int{1, 2, 3}, slice.DropLast(0).O())
+			assert.Equal(t, []int{1, 2, 3}, slice.DropLastN(0).O())
 			assert.Equal(t, 3, slice.Len())
 		}
 
 		// custom
 		{
 			slice := Slice([]NObj{{1}, {2}, {3}})
-			assert.Equal(t, []NObj{{1}, {2}, {3}}, slice.DropLast(0).O())
+			assert.Equal(t, []NObj{{1}, {2}, {3}}, slice.DropLastN(0).O())
 			assert.Equal(t, 3, slice.Len())
 		}
 	}
@@ -1195,28 +1315,28 @@ func TestNSlice_DropLast(t *testing.T) {
 		// bool
 		{
 			slice := SliceV(true, true, false)
-			assert.Equal(t, []bool{true, true}, slice.DropLast(1).O())
+			assert.Equal(t, []bool{true, true}, slice.DropLastN(1).O())
 			assert.Equal(t, 2, slice.Len())
 		}
 
 		// int
 		{
 			slice := SliceV(1, 2, 3)
-			assert.Equal(t, []int{1, 2}, slice.DropLast(1).O())
+			assert.Equal(t, []int{1, 2}, slice.DropLastN(1).O())
 			assert.Equal(t, 2, slice.Len())
 		}
 
 		// string
 		{
 			slice := SliceV("1", "2", "3")
-			assert.Equal(t, []string{"1", "2"}, slice.DropLast(1).O())
+			assert.Equal(t, []string{"1", "2"}, slice.DropLastN(1).O())
 			assert.Equal(t, 2, slice.Len())
 		}
 
 		// custom
 		{
 			slice := Slice([]NObj{{1}, {2}, {3}})
-			assert.Equal(t, []NObj{{1}, {2}}, slice.DropLast(1).O())
+			assert.Equal(t, []NObj{{1}, {2}}, slice.DropLastN(1).O())
 			assert.Equal(t, 2, slice.Len())
 		}
 	}
@@ -1226,28 +1346,28 @@ func TestNSlice_DropLast(t *testing.T) {
 		// bool
 		{
 			slice := SliceV(true, false, false)
-			assert.Equal(t, []bool{true}, slice.DropLast(2).O())
+			assert.Equal(t, []bool{true}, slice.DropLastN(2).O())
 			assert.Equal(t, 1, slice.Len())
 		}
 
 		// int
 		{
 			slice := SliceV(1, 2, 3)
-			assert.Equal(t, []int{1}, slice.DropLast(2).O())
+			assert.Equal(t, []int{1}, slice.DropLastN(2).O())
 			assert.Equal(t, 1, slice.Len())
 		}
 
 		// string
 		{
 			slice := SliceV("1", "2", "3")
-			assert.Equal(t, []string{"1"}, slice.DropLast(2).O())
+			assert.Equal(t, []string{"1"}, slice.DropLastN(2).O())
 			assert.Equal(t, 1, slice.Len())
 		}
 
 		// custom
 		{
 			slice := Slice([]NObj{{1}, {2}, {3}})
-			assert.Equal(t, []NObj{{1}}, slice.DropLast(2).O())
+			assert.Equal(t, []NObj{{1}}, slice.DropLastN(2).O())
 			assert.Equal(t, 1, slice.Len())
 		}
 	}
@@ -1257,14 +1377,14 @@ func TestNSlice_DropLast(t *testing.T) {
 		// int
 		{
 			slice := SliceV(1, 2, 3)
-			assert.Equal(t, []int{}, slice.DropLast(3).O())
+			assert.Equal(t, []int{}, slice.DropLastN(3).O())
 			assert.Equal(t, 0, slice.Len())
 		}
 
 		// custom
 		{
 			slice := Slice([]NObj{{1}, {2}, {3}})
-			assert.Equal(t, []NObj{}, slice.DropLast(3).O())
+			assert.Equal(t, []NObj{}, slice.DropLastN(3).O())
 			assert.Equal(t, 0, slice.Len())
 		}
 	}
@@ -1274,14 +1394,14 @@ func TestNSlice_DropLast(t *testing.T) {
 		// int
 		{
 			slice := SliceV(1, 2, 3)
-			assert.Equal(t, []int{}, slice.DropLast(4).O())
+			assert.Equal(t, []int{}, slice.DropLastN(4).O())
 			assert.Equal(t, 0, slice.Len())
 		}
 
 		// custom
 		{
 			slice := Slice([]NObj{{1}, {2}, {3}})
-			assert.Equal(t, []NObj{}, slice.DropLast(4).O())
+			assert.Equal(t, []NObj{}, slice.DropLastN(4).O())
 			assert.Equal(t, 0, slice.Len())
 		}
 	}

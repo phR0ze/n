@@ -14,8 +14,8 @@ type NSlice struct {
 	len int         // slice length
 }
 
-// Slice creates a new NSlice by simply storing slice obj directly to avoid using reflection
-// processing at a 10x overhead savings. Non slice obj are encapsulated in a new slice of
+// Slice creates a new NSlice by simply storing slice 'obj' directly to avoid using reflection
+// processing at a 10x overhead savings. Non slice 'obj' are encapsulated in a new slice of
 // that type using reflection, thus incurring the standard 10x overhead.
 //
 // Return value n *NSlice will never be nil but n.Nil() may be true as nil or empty []interface{}
@@ -58,8 +58,8 @@ func Slice(obj interface{}) (n *NSlice) {
 }
 
 // SliceV creates a new NSlice encapsulating the given variadic elements in a new slice of
-// that type. Incurs the full 10x reflection overhead. For large slice params use the Slice
-// func instead.
+// that type. Thi call incurs the full 10x reflection overhead. For large slice params use
+// the Slice() func instead.
 //
 // Cost: ~10x
 func SliceV(items ...interface{}) (n *NSlice) {
@@ -139,10 +139,10 @@ func newEmptySlice(items interface{}) (n *NSlice) {
 // Cost: ~0x - 10x
 //
 // Optimized types: bool, int, string
-func (n *NSlice) Any(obj ...interface{}) bool {
+func (s *NSlice) Any(obj ...interface{}) bool {
 
 	// No elements
-	if n.Nil() || n.len == 0 {
+	if s.Nil() || s.len == 0 {
 		return false
 	}
 
@@ -154,7 +154,7 @@ func (n *NSlice) Any(obj ...interface{}) bool {
 	// Looking for something specific
 	ok := false
 	var typ reflect.Type
-	switch slice := n.o.(type) {
+	switch slice := s.o.(type) {
 	case []bool:
 		var x bool
 		for i := range obj {
@@ -198,7 +198,7 @@ func (n *NSlice) Any(obj ...interface{}) bool {
 			}
 		}
 	default:
-		v := reflect.ValueOf(n.o)
+		v := reflect.ValueOf(s.o)
 		for i := 0; i < len(obj); i++ {
 			x := reflect.ValueOf(obj[i])
 			typ = x.Type()
@@ -215,24 +215,24 @@ func (n *NSlice) Any(obj ...interface{}) bool {
 		}
 	}
 	if !ok {
-		panic(fmt.Sprintf("can't compare type '%v' with '%T' elements", typ, n.o))
+		panic(fmt.Sprintf("can't compare type '%v' with '%T' elements", typ, s.o))
 	}
 	return false
 }
 
-// AnyS checks if any of the given obj's elements are contained in this slice
+// AnyS checks if any of the given 'obj' elements are contained in this Numerable
 //
-// obj must be a slice type
+// 'obj' must be a slice type
 //
 // Cost: ~0x - 10x
 //
 // Optimized types: bool, int, string
-func (n *NSlice) AnyS(obj interface{}) (result bool) {
-	if n.Nil() {
+func (s *NSlice) AnyS(obj interface{}) (result bool) {
+	if s.Nil() {
 		return
 	}
 	ok := false
-	switch slice := n.o.(type) {
+	switch slice := s.o.(type) {
 	case []bool:
 		var x []bool
 		if x, ok = obj.([]bool); ok {
@@ -267,7 +267,7 @@ func (n *NSlice) AnyS(obj interface{}) (result bool) {
 			}
 		}
 	default:
-		v := reflect.ValueOf(n.o)
+		v := reflect.ValueOf(s.o)
 		x := reflect.ValueOf(obj)
 		if v.Type() == x.Type() {
 			ok = true
@@ -282,7 +282,7 @@ func (n *NSlice) AnyS(obj interface{}) (result bool) {
 		}
 	}
 	if !ok {
-		panic(fmt.Sprintf("can't compare type '%T' with '%T' elements", obj, n.o))
+		panic(fmt.Sprintf("can't compare type '%T' with '%T' elements", obj, s.o))
 	}
 	return
 }
@@ -294,52 +294,52 @@ func (n *NSlice) AnyS(obj interface{}) (result bool) {
 // Cost: ~4x - 10x
 //
 // Optimized types: bool, int, string
-func (n *NSlice) Append(item interface{}) *NSlice {
-	if n.Nil() {
-		*n = *(newEmptySlice(item))
+func (s *NSlice) Append(item interface{}) *NSlice {
+	if s.Nil() {
+		*s = *(newEmptySlice(item))
 	}
 	ok := false
-	switch slice := n.o.(type) {
+	switch slice := s.o.(type) {
 	case []bool:
 		var x bool
 		if x, ok = item.(bool); ok {
-			n.o = append(slice, x)
+			s.o = append(slice, x)
 		}
 	case []int:
 		var x int
 		if x, ok = item.(int); ok {
-			n.o = append(slice, x)
+			s.o = append(slice, x)
 		}
 	case []string:
 		var x string
 		if x, ok = item.(string); ok {
-			n.o = append(slice, x)
+			s.o = append(slice, x)
 		}
 	default:
 		ok = true
-		v := reflect.ValueOf(n.o)
+		v := reflect.ValueOf(s.o)
 		item := reflect.ValueOf(item)
-		n.o = reflect.Append(v, item).Interface()
+		s.o = reflect.Append(v, item).Interface()
 	}
 	if !ok {
-		panic(fmt.Sprintf("can't insert type '%T' into '%T'", item, n.o))
+		panic(fmt.Sprintf("can't insert type '%T' into '%T'", item, s.o))
 	}
-	n.len++
-	return n
+	s.len++
+	return s
 }
 
-// AppendV appends an item to the end of the NSlice and returns the NSlice for chaining. Avoids
-// the 10x reflection overhead cost by type asserting common types. Types not optimized in this
-// way incur the full 10x reflection overhead cost.
+// AppendV appends the variadic items to the end of the NSlice and returns the NSlice for chaining.
+// Avoids the 10x reflection overhead cost by type asserting common types. Types not optimized in
+// this way incur the full 10x reflection overhead cost.
 //
 // Cost: ~6x - 10x
 //
 // Optimized types: bool, int, string
-func (n *NSlice) AppendV(items ...interface{}) *NSlice {
+func (s *NSlice) AppendV(items ...interface{}) *NSlice {
 	for _, item := range items {
-		n.Append(item)
+		s.Append(item)
 	}
-	return n
+	return s
 }
 
 // AppendS appends the given slice using variadic expansion and returns NSlice for chaining. Avoids
@@ -350,70 +350,70 @@ func (n *NSlice) AppendV(items ...interface{}) *NSlice {
 // Cost: ~0x - 2x
 //
 // Optimized types: []bool, []int, []string
-func (n *NSlice) AppendS(items interface{}) *NSlice {
-	if n.Nil() {
-		*n = *(newEmptySlice(items))
+func (s *NSlice) AppendS(items interface{}) *NSlice {
+	if s.Nil() {
+		*s = *(newEmptySlice(items))
 	}
 	ok := false
-	switch slice := n.o.(type) {
+	switch slice := s.o.(type) {
 	case []bool:
 		var x []bool
 		if x, ok = items.([]bool); ok {
-			n.o = append(slice, x...)
-			n.len += len(x)
+			s.o = append(slice, x...)
+			s.len += len(x)
 		}
 	case []int:
 		var x []int
 		if x, ok = items.([]int); ok {
-			n.o = append(slice, x...)
-			n.len += len(x)
+			s.o = append(slice, x...)
+			s.len += len(x)
 		}
 	case []string:
 		var x []string
 		if x, ok = items.([]string); ok {
-			n.o = append(slice, x...)
-			n.len += len(x)
+			s.o = append(slice, x...)
+			s.len += len(x)
 		}
 	default:
 		ok = true
-		v := reflect.ValueOf(n.o)
+		v := reflect.ValueOf(s.o)
 		x := reflect.ValueOf(items)
-		n.o = reflect.AppendSlice(v, x).Interface()
-		n.len += x.Len()
+		s.o = reflect.AppendSlice(v, x).Interface()
+		s.len += x.Len()
 	}
 	if !ok {
-		panic(fmt.Sprintf("can't concat type '%T' with '%T'", items, n.o))
+		panic(fmt.Sprintf("can't concat type '%T' with '%T'", items, s.o))
 	}
-	return n
+	return s
 }
 
 // get the absolute value for the pos/neg index.
 // return of -1 indicates out of bounds
-func (n *NSlice) absIndex(i int) (abs int) {
+func (s *NSlice) absIndex(i int) (abs int) {
 	if i < 0 {
-		abs = n.len + i
+		abs = s.len + i
 	} else {
 		abs = i
 	}
-	if abs < 0 || abs >= n.len {
+	if abs < 0 || abs >= s.len {
 		abs = -1
 	}
 	return
 }
 
 // At returns the item at the given index location. Allows for negative notation.
-// Cost for reflection in this case doesn't seem to to add much.
+// Cost for reflection in this case doesn't seem to add much.
 //
 // Cost: ~0x - 2x
 //
 // Optimized types: []bool, []int, []string
-func (n *NSlice) At(i int) (obj *NObj) {
+func (s *NSlice) At(i int) (obj *NObj) {
 	obj = &NObj{}
-	if i = n.absIndex(i); i == -1 {
+	if i = s.absIndex(i); i == -1 {
 		return
 	}
 
-	switch slice := n.o.(type) {
+	switch slice := s.o.(type) {
 	case []bool:
 		obj.o = slice[i]
 	case []int:
@@ -421,7 +421,7 @@ func (n *NSlice) At(i int) (obj *NObj) {
 	case []string:
 		obj.o = slice[i]
 	default:
-		obj.o = reflect.ValueOf(n.o).Index(i).Interface()
+		obj.o = reflect.ValueOf(s.o).Index(i).Interface()
 	}
 	return
 }
@@ -429,141 +429,183 @@ func (n *NSlice) At(i int) (obj *NObj) {
 // Clear the underlying slice.
 //
 // Cost: constant
-func (n *NSlice) Clear() *NSlice {
-	if !n.Nil() {
-		*n = *(newEmptySlice(n.o))
+func (s *NSlice) Clear() *NSlice {
+	if !s.Nil() {
+		*s = *(newEmptySlice(s.o))
 	}
-	return n
+	return s
 }
 
 // DeleteAt deletes the item at the given index location. Allows for negative notation.
-// Returns the deleted item as a NObj which will have NObj.Nil() true if it didn't exist.
-// Cost for reflection in this case doesn't seem to to add much.
+// Returns the deleted item as a NObj which will be NObj.Nil() true if it didn't exist.
+// Cost for reflection in this case doesn't seem to add much.
 //
 // Cost: ~0x - 3x
 //
 // Optimized types: []bool, []int, []string
-func (n *NSlice) DeleteAt(i int) (obj *NObj) {
+func (s *NSlice) DeleteAt(i int) (obj *NObj) {
 
 	// Get the item and check out-of-bounds
-	obj = n.At(i)
+	obj = s.At(i)
 	if obj.Nil() {
 		return
 	}
-	i = n.absIndex(i) // don't need bounds check as At call handles this
+	i = s.absIndex(i) // don't need bounds check as At call handles this
 
 	// Delete the item
-	switch slice := n.o.(type) {
+	switch slice := s.o.(type) {
 	case []bool:
 		if i+1 < len(slice) {
 			slice = append(slice[:i], slice[i+1:]...)
 		} else {
 			slice = slice[:i]
 		}
-		n.o = slice
+		s.o = slice
 	case []int:
 		if i+1 < len(slice) {
 			slice = append(slice[:i], slice[i+1:]...)
 		} else {
 			slice = slice[:i]
 		}
-		n.o = slice
+		s.o = slice
 	case []string:
 		if i+1 < len(slice) {
 			slice = append(slice[:i], slice[i+1:]...)
 		} else {
 			slice = slice[:i]
 		}
-		n.o = slice
+		s.o = slice
 	default:
-		v := reflect.ValueOf(n.o)
+		v := reflect.ValueOf(s.o)
 		if i+1 < v.Len() {
 			v = reflect.AppendSlice(v.Slice(0, i), v.Slice(i+1, v.Len()))
 		} else {
 			v = v.Slice(0, i)
 		}
-		n.o = slice
+		s.o = slice
 	}
-	n.len--
+	s.len--
 	return
 }
 
-// DropFirst deletes first element or optionally first cnt elements and returns the rest of
-// the elements in the array.
+// DropFirst deletes the first element and returns the rest of the elements in the slice.
 //
 // Cost: ~0x - 3x
 //
 // Optimized types: []bool, []int, []string
-func (n *NSlice) DropFirst(cnt ...int) *NSlice {
-	_cnt := 1
-	if len(cnt) != 0 {
-		_cnt = cnt[0]
-	}
-	if _cnt == 0 {
-		return n
-	}
-
-	// Delete cnt items from the begining
-	if n.len >= _cnt {
-		switch slice := n.o.(type) {
+func (s *NSlice) DropFirst() *NSlice {
+	n := 1
+	if s.len >= n {
+		switch slice := s.o.(type) {
 		case []bool:
-			slice = slice[_cnt:]
-			n.o = slice
+			slice = slice[n:]
+			s.o = slice
 		case []int:
-			slice = slice[_cnt:]
-			n.o = slice
+			slice = slice[n:]
+			s.o = slice
 		case []string:
-			slice = slice[_cnt:]
-			n.o = slice
+			slice = slice[n:]
+			s.o = slice
 		default:
-			v := reflect.ValueOf(n.o)
-			n.o = v.Slice(_cnt, v.Len()).Interface()
+			v := reflect.ValueOf(s.o)
+			s.o = v.Slice(n, v.Len()).Interface()
 		}
-		n.len -= _cnt
+		s.len -= n
 	} else {
-		*n = *(newEmptySlice(n.o))
+		*s = *(newEmptySlice(s.o))
 	}
-
-	return n
+	return s
 }
 
-// DropLast deletes last element or optionally last cnt elements and returns the rest of
-// the elements in the array.
+// DropFirstN deletes first n elements and returns the rest of the elements in the slice.
 //
 // Cost: ~0x - 3x
 //
 // Optimized types: []bool, []int, []string
-func (n *NSlice) DropLast(cnt ...int) *NSlice {
-	_cnt := 1
-	if len(cnt) != 0 {
-		_cnt = cnt[0]
+func (s *NSlice) DropFirstN(n int) *NSlice {
+	if n == 0 {
+		return s
 	}
-	if _cnt == 0 {
-		return n
-	}
-
-	// Delete cnt items from the begining
-	if n.len >= _cnt {
-		switch slice := n.o.(type) {
+	if s.len >= n {
+		switch slice := s.o.(type) {
 		case []bool:
-			slice = slice[:len(slice)-_cnt]
-			n.o = slice
+			slice = slice[n:]
+			s.o = slice
 		case []int:
-			slice = slice[:len(slice)-_cnt]
-			n.o = slice
+			slice = slice[n:]
+			s.o = slice
 		case []string:
-			slice = slice[:len(slice)-_cnt]
-			n.o = slice
+			slice = slice[n:]
+			s.o = slice
 		default:
-			v := reflect.ValueOf(n.o)
-			n.o = v.Slice(0, v.Len()-_cnt).Interface()
+			v := reflect.ValueOf(s.o)
+			s.o = v.Slice(n, v.Len()).Interface()
 		}
-		n.len -= _cnt
+		s.len -= n
 	} else {
-		*n = *(newEmptySlice(n.o))
+		*s = *(newEmptySlice(s.o))
 	}
+	return s
+}
 
-	return n
+// DropLast deletes last element returns the rest of the elements in the slice.
+//
+// Cost: ~0x - 3x
+//
+// Optimized types: []bool, []int, []string
+func (s *NSlice) DropLast() *NSlice {
+	n := 1
+	if s.len >= n {
+		switch slice := s.o.(type) {
+		case []bool:
+			slice = slice[:len(slice)-n]
+			s.o = slice
+		case []int:
+			slice = slice[:len(slice)-n]
+			s.o = slice
+		case []string:
+			slice = slice[:len(slice)-n]
+			s.o = slice
+		default:
+			v := reflect.ValueOf(s.o)
+			s.o = v.Slice(0, v.Len()-n).Interface()
+		}
+		s.len -= n
+	} else {
+		*s = *(newEmptySlice(s.o))
+	}
+	return s
+}
+
+// DropLastN deletes last n elements and returns the rest of the elements in the slice.
+//
+// Cost: ~0x - 3x
+//
+// Optimized types: []bool, []int, []string
+func (s *NSlice) DropLastN(n int) *NSlice {
+	if n == 0 {
+		return s
+	}
+	if s.len >= n {
+		switch slice := s.o.(type) {
+		case []bool:
+			slice = slice[:len(slice)-n]
+			s.o = slice
+		case []int:
+			slice = slice[:len(slice)-n]
+			s.o = slice
+		case []string:
+			slice = slice[:len(slice)-n]
+			s.o = slice
+		default:
+			v := reflect.ValueOf(s.o)
+			s.o = v.Slice(0, v.Len()-n).Interface()
+		}
+		s.len -= n
+	} else {
+		*s = *(newEmptySlice(s.o))
+	}
+	return s
 }
 
 // Each calls the given function once for each element in the numerable, passing that element in
@@ -572,8 +614,8 @@ func (n *NSlice) DropLast(cnt ...int) *NSlice {
 // Cost: ~0
 //
 // Optimized types: []bool, []int, []string
-func (n *NSlice) Each(action func(O)) *NSlice {
-	switch slice := n.o.(type) {
+func (s *NSlice) Each(action func(O)) *NSlice {
+	switch slice := s.o.(type) {
 	case []bool:
 		for i := 0; i < len(slice); i++ {
 			action(slice[i])
@@ -587,12 +629,12 @@ func (n *NSlice) Each(action func(O)) *NSlice {
 			action(slice[i])
 		}
 	default:
-		v := reflect.ValueOf(n.o)
+		v := reflect.ValueOf(s.o)
 		for i := 0; i < v.Len(); i++ {
 			action(v.Index(i).Interface())
 		}
 	}
-	return n
+	return s
 }
 
 // EachE calls the given function once for each element in the numerable, passing that element in
@@ -601,125 +643,169 @@ func (n *NSlice) Each(action func(O)) *NSlice {
 // Cost: ~0
 //
 // Optimized types: []bool, []int, []string
-func (n *NSlice) EachE(action func(O) error) (s *NSlice, err error) {
-	s = n
-	switch slice := n.o.(type) {
+func (s *NSlice) EachE(action func(O) error) (*NSlice, error) {
+	var err error
+	switch slice := s.o.(type) {
 	case []bool:
 		for i := 0; i < len(slice); i++ {
 			if err = action(slice[i]); err != nil {
-				return
+				return s, err
 			}
 		}
 	case []int:
 		for i := 0; i < len(slice); i++ {
 			if err = action(slice[i]); err != nil {
-				return
+				return s, err
 			}
 		}
 	case []string:
 		for i := 0; i < len(slice); i++ {
 			if err = action(slice[i]); err != nil {
-				return
+				return s, err
 			}
 		}
 	default:
-		v := reflect.ValueOf(n.o)
+		v := reflect.ValueOf(s.o)
 		for i := 0; i < v.Len(); i++ {
 			if err = action(v.Index(i).Interface()); err != nil {
-				return
+				return s, err
 			}
 		}
 	}
-	return
+	return s, err
 }
 
 // Empty tests if the numerable is empty.
 //
 // Cost: ~0x
-func (n *NSlice) Empty() bool {
-	if n.Nil() || n.len == 0 {
+func (s *NSlice) Empty() bool {
+	if s.Nil() || s.len == 0 {
 		return true
 	}
 	return false
 }
 
-// First returns the first element or first n elements. If the slice is empty
+// First returns the first element or first cnt elements. If the slice is empty
 // the returned slice will be NSlice.Nil.
 //
 // Cost: ~0x - 3x
 //
 // Optimized types: []bool, []int, []string
-func (n *NSlice) First(cnt int) *NSlice {
-	if cnt == 0 {
-		return n
-	}
+// func (n *NSlice) First(cnt ...int) *NSlice {
+// 	_cnt := 1
+// 	if len(cnt) != 0 {
+// 		_cnt = cnt[0]
+// 	}
+// 	if _cnt == 0 {
+// 		return n
+// 	}
 
-	// Delete cnt items from the begining
-	end := false
-	if cnt < 0 {
-		end = true
-		cnt *= -1
-	}
-	if n.len >= cnt {
-		switch slice := n.o.(type) {
-		case []bool:
-			if end {
-				slice = slice[:len(slice)-cnt]
-			} else {
-				slice = slice[cnt:]
-			}
-			n.o = slice
-		case []int:
-			if end {
-				slice = slice[:len(slice)-cnt]
-			} else {
-				slice = slice[cnt:]
-			}
-			n.o = slice
-		case []string:
-			if end {
-				slice = slice[:len(slice)-cnt]
-			} else {
-				slice = slice[cnt:]
-			}
-			n.o = slice
-		default:
-			v := reflect.ValueOf(n.o)
-			if end {
-				n.o = v.Slice(0, v.Len()-cnt).Interface()
-			} else {
-				n.o = v.Slice(cnt, v.Len()).Interface()
-			}
-		}
-		n.len -= cnt
-	} else {
-		*n = *(newEmptySlice(n.o))
-	}
+// 	// Get _cnt items from the begining
+// 	if n.len >= cnt {
+// 		switch slice := n.o.(type) {
+// 		case []bool:
+// 			if end {
+// 				slice = slice[:len(slice)-cnt]
+// 			} else {
+// 				slice = slice[cnt:]
+// 			}
+// 			n.o = slice
+// 		case []int:
+// 			if end {
+// 				slice = slice[:len(slice)-cnt]
+// 			} else {
+// 				slice = slice[cnt:]
+// 			}
+// 			n.o = slice
+// 		case []string:
+// 			if end {
+// 				slice = slice[:len(slice)-cnt]
+// 			} else {
+// 				slice = slice[cnt:]
+// 			}
+// 			n.o = slice
+// 		default:
+// 			v := reflect.ValueOf(n.o)
+// 			if end {
+// 				n.o = v.Slice(0, v.Len()-cnt).Interface()
+// 			} else {
+// 				n.o = v.Slice(cnt, v.Len()).Interface()
+// 			}
+// 		}
+// 		n.len -= cnt
+// 	} else {
+// 		*n = *(newEmptySlice(n.o))
+// 	}
 
-	return n
-}
+// 	return n
+// }
 
 // // // Join the underlying slice with the given delim
 // // func (s *strSliceN) Join(delim string) *strN {
 // // 	return A(strings.Join(s.v, delim))
 // // }
 
-// // // Last returns the last item as a nub type
-// // func (s *strSliceN) Last() (result *strN) {
-// // 	if len(s.v) > 0 {
-// // 		result = A(s.At(-1))
-// // 	} else {
-// // 		result = A("")
-// // 	}
-// // 	return
-// // }
+// Last returns the last element or last cnt elements. If the slice is empty
+// the returned slice will be NSlice.Nil.
+//
+// Cost: ~0x - 3x
+//
+// Optimized types: []bool, []int, []string
+// func (n *NSlice) Last(cnt ...int) *NSlice {
+// 	_cnt := 1
+// 	if len(cnt) != 0 {
+// 		_cnt = cnt[0]
+// 	}
+// 	if _cnt == 0 {
+// 		return n
+// 	}
+
+// 	// Get _cnt items from the begining
+// 	if n.len >= cnt {
+// 		switch slice := n.o.(type) {
+// 		case []bool:
+// 			if end {
+// 				slice = slice[:len(slice)-cnt]
+// 			} else {
+// 				slice = slice[cnt:]
+// 			}
+// 			n.o = slice
+// 		case []int:
+// 			if end {
+// 				slice = slice[:len(slice)-cnt]
+// 			} else {
+// 				slice = slice[cnt:]
+// 			}
+// 			n.o = slice
+// 		case []string:
+// 			if end {
+// 				slice = slice[:len(slice)-cnt]
+// 			} else {
+// 				slice = slice[cnt:]
+// 			}
+// 			n.o = slice
+// 		default:
+// 			v := reflect.ValueOf(n.o)
+// 			if end {
+// 				n.o = v.Slice(0, v.Len()-cnt).Interface()
+// 			} else {
+// 				n.o = v.Slice(cnt, v.Len()).Interface()
+// 			}
+// 		}
+// 		n.len -= cnt
+// 	} else {
+// 		*n = *(newEmptySlice(n.o))
+// 	}
+
+// 	return n
+// }
 
 // Len returns the number of elements in the numerable
-func (n *NSlice) Len() int {
-	if n.Nil() {
+func (s *NSlice) Len() int {
+	if s.Nil() {
 		return 0
 	}
-	return n.len
+	return s.len
 }
 
 // // // Map manipulates the slice into a new form
@@ -763,19 +849,19 @@ func (n *NSlice) Len() int {
 // // }
 
 // Nil tests if the numerable is nil
-func (n *NSlice) Nil() bool {
-	if n == nil || n.o == nil {
+func (s *NSlice) Nil() bool {
+	if s == nil || s.o == nil {
 		return true
 	}
 	return false
 }
 
 // O returns the underlying data structure as is
-func (n *NSlice) O() interface{} {
-	if n.Nil() {
+func (s *NSlice) O() interface{} {
+	if s.Nil() {
 		return nil
 	}
-	return n.o
+	return s.o
 }
 
 // // // Prepend items to the begining of the slice and return slice
@@ -881,7 +967,7 @@ func (n *NSlice) O() interface{} {
 // // }
 
 // Type returns the identifier for this numerable type
-func (n *NSlice) Type() Type {
+func (s *NSlice) Type() Type {
 	return NSliceType
 }
 
