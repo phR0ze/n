@@ -1183,6 +1183,99 @@ func TestNSlice_Each(t *testing.T) {
 	}
 }
 
+// EachE
+//--------------------------------------------------------------------------------------------------
+func BenchmarkNSlice_EachE_Normal(t *testing.B) {
+	action := func(x interface{}) {
+		assert.IsType(t, 0, x)
+	}
+	for i := range Range(0, nines6) {
+		action(i)
+	}
+}
+
+func BenchmarkNSlice_EachE_Optimized(t *testing.B) {
+	Slice(Range(0, nines6)).Each(func(x O) {
+		assert.IsType(t, 0, x)
+	})
+}
+
+func BenchmarkNSlice_EachE_Reflect(t *testing.B) {
+	Slice(rangeNObj(0, nines6)).Each(func(x O) {
+		assert.IsType(t, NObj{}, x)
+	})
+}
+
+func ExampleNSlice_EachE() {
+	SliceV(1, 2, 3).EachE(func(x O) error {
+		fmt.Printf("%v", x)
+		return nil
+	})
+	// Output: 123
+}
+
+func TestNSlice_EachE(t *testing.T) {
+	// int
+	{
+		SliceV(1, 2, 3).EachE(func(x O) error {
+			switch x {
+			case 1:
+				assert.Equal(t, 1, x)
+			case 2:
+				assert.Equal(t, 2, x)
+			case 3:
+				assert.Equal(t, 3, x)
+			}
+			return nil
+		})
+	}
+
+	// string
+	{
+		SliceV("1", "2", "3").EachE(func(x O) error {
+			switch x {
+			case "1":
+				assert.Equal(t, "1", x)
+			case "2":
+				assert.Equal(t, "2", x)
+			case "3":
+				assert.Equal(t, "3", x)
+			}
+			return nil
+		})
+	}
+
+	// custom
+	{
+		Slice([]NObj{{1}, {2}, {3}}).EachE(func(x O) error {
+			switch x {
+			case NObj{1}:
+				assert.Equal(t, NObj{1}, x)
+			case NObj{2}:
+				assert.Equal(t, NObj{2}, x)
+			case NObj{3}:
+				assert.Equal(t, NObj{3}, x)
+			}
+			return nil
+		})
+	}
+}
+
+// Empty
+//--------------------------------------------------------------------------------------------------
+func ExampleNSlice_Empty() {
+	fmt.Println(SliceV().Empty())
+	// Output: true
+}
+
+func TestNSlice_Empty(t *testing.T) {
+	assert.Equal(t, true, SliceV().Empty())
+	assert.Equal(t, false, SliceV(1).Empty())
+	assert.Equal(t, false, SliceV(1, 2, 3).Empty())
+	assert.Equal(t, false, Slice(1).Empty())
+	assert.Equal(t, false, Slice([]int{1, 2, 3}).Empty())
+}
+
 // // func TestStrSliceEquals(t *testing.T) {
 // // 	{
 // // 		slice := S().Append("1", "2", "3")

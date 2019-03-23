@@ -611,6 +611,16 @@ func (n *NSlice) EachE(action func(O) error) (s *NSlice, err error) {
 	return
 }
 
+// Empty tests if the numerable is empty.
+//
+// Cost: ~0x
+func (n *NSlice) Empty() bool {
+	if n.Nil() || n.len == 0 {
+		return true
+	}
+	return false
+}
+
 // // // Equals checks if the two slices are equal
 // // func (s *strSliceN) Equals(other *strSliceN) bool {
 // // 	return reflect.DeepEqual(s, other)

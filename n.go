@@ -52,13 +52,12 @@ type Type uint8
 // Numerable provides chainable execution and an algorithm abstraction layer for various
 // underlying types
 type Numerable interface {
-	O() interface{}                   // O returns the underlying data structure
-	Any(obj ...interface{}) bool      // Any tests if the numerable is not empty or optionally if it contains any of the given Variadic elements.
-	Contains(obj interface{}) bool    // Contains tests if the numerable contains the given obj
-	ContainsAny(obj interface{}) bool // ContainsAny tests if the numerable contains any of the obj items where obj must be a slice
-	Len() int                         // Len returns the number of elements in the numerable
-	Nil() bool                        // Nil tests if the numerable is nil
-	Type() Type                       // Type returns the identifier for this numerable type
+	O() interface{}              // O returns the underlying data structure
+	Any(obj ...interface{}) bool // Any tests if the numerable is not empty or optionally if it contains any of the given Variadic elements.
+	Empty() bool                 // Empty tests if the numerable is empty.
+	Len() int                    // Len returns the number of elements in the numerable
+	Nil() bool                   // Nil tests if the numerable is nil
+	Type() Type                  // Type returns the identifier for this numerable type
 }
 
 // Check to see if the given type is an optimized slice type
