@@ -685,60 +685,122 @@ func (s *NSlice) Empty() bool {
 	return false
 }
 
-// First returns the first element or first cnt elements. If the slice is empty
-// the returned slice will be NSlice.Nil.
+// First returns the first element in the slice as NObj which will be NObj.Nil true if
+// there are no elements in the slice.
 //
 // Cost: ~0x - 3x
 //
 // Optimized types: []bool, []int, []string
-// func (n *NSlice) First(cnt ...int) *NSlice {
-// 	_cnt := 1
-// 	if len(cnt) != 0 {
-// 		_cnt = cnt[0]
-// 	}
-// 	if _cnt == 0 {
-// 		return n
-// 	}
+func (s *NSlice) First() (obj *NObj) {
+	obj = &NObj{}
+	if s.len == 0 {
+		return
+	}
+	switch slice := s.o.(type) {
+	case []bool:
+		obj.o = slice[0]
+	case []int:
+		obj.o = slice[0]
+	case []string:
+		obj.o = slice[0]
+	default:
+		obj.o = reflect.ValueOf(s.o).Index(0)
+	}
+	return
+}
 
-// 	// Get _cnt items from the begining
-// 	if n.len >= cnt {
-// 		switch slice := n.o.(type) {
-// 		case []bool:
-// 			if end {
-// 				slice = slice[:len(slice)-cnt]
-// 			} else {
-// 				slice = slice[cnt:]
-// 			}
-// 			n.o = slice
-// 		case []int:
-// 			if end {
-// 				slice = slice[:len(slice)-cnt]
-// 			} else {
-// 				slice = slice[cnt:]
-// 			}
-// 			n.o = slice
-// 		case []string:
-// 			if end {
-// 				slice = slice[:len(slice)-cnt]
-// 			} else {
-// 				slice = slice[cnt:]
-// 			}
-// 			n.o = slice
-// 		default:
-// 			v := reflect.ValueOf(n.o)
-// 			if end {
-// 				n.o = v.Slice(0, v.Len()-cnt).Interface()
-// 			} else {
-// 				n.o = v.Slice(cnt, v.Len()).Interface()
-// 			}
-// 		}
-// 		n.len -= cnt
-// 	} else {
-// 		*n = *(newEmptySlice(n.o))
-// 	}
+// FirstN returns the first n elements in the slice as a NSlice. Best effort returning as many as it can.
+//
+// Cost: ~0x - 3x
+//
+// Optimized types: []bool, []int, []string
+func (s *NSlice) FirstN(n int) (result *NSlice) {
+	result = newEmptySlice(s.o)
+	if n == 0 {
+		return
+	}
+	if s.len >= n {
+		switch slice := s.o.(type) {
+		case []bool:
+			slice = slice[n:]
+			s.o = slice
+		case []int:
+			slice = slice[n:]
+			s.o = slice
+		case []string:
+			slice = slice[n:]
+			s.o = slice
+		default:
+			v := reflect.ValueOf(s.o)
+			s.o = v.Slice(n, v.Len()).Interface()
+		}
+		s.len -= n
+	} else {
+		*s = *(newEmptySlice(s.o))
+	}
+	return
+}
 
-// 	return n
-// }
+// Last returns the last element in the slice as NObj which will be NObj.Nil true if
+// there are no elements in the slice.
+//
+// Cost: ~0x - 3x
+//
+// Optimized types: []bool, []int, []string
+func (s *NSlice) Last() *NObj {
+	n := 1
+	if s.len >= n {
+		switch slice := s.o.(type) {
+		case []bool:
+			slice = slice[:len(slice)-n]
+			s.o = slice
+		case []int:
+			slice = slice[:len(slice)-n]
+			s.o = slice
+		case []string:
+			slice = slice[:len(slice)-n]
+			s.o = slice
+		default:
+			v := reflect.ValueOf(s.o)
+			s.o = v.Slice(0, v.Len()-n).Interface()
+		}
+		s.len -= n
+	} else {
+		*s = *(newEmptySlice(s.o))
+	}
+	return s
+}
+
+// LastN returns the last n elements in the slice as a NSlice. Best effort returning as many as it can.
+//
+// Cost: ~0x - 3x
+//
+// Optimized types: []bool, []int, []string
+func (s *NSlice) LastN(n int) *NSlice {
+	if n == 0 {
+		return s
+	}
+	if s.len >= n {
+		switch slice := s.o.(type) {
+		case []bool:
+			slice = slice[:len(slice)-n]
+			s.o = slice
+		case []int:
+			slice = slice[:len(slice)-n]
+			s.o = slice
+		case []string:
+			slice = slice[:len(slice)-n]
+			s.o = slice
+		default:
+			v := reflect.ValueOf(s.o)
+			s.o = v.Slice(0, v.Len()-n).Interface()
+		}
+		s.len -= n
+	} else {
+		*s = *(newEmptySlice(s.o))
+	}
+	return s
+}
 
 // // // Join the underlying slice with the given delim
 // // func (s *strSliceN) Join(delim string) *strN {
