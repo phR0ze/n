@@ -709,34 +709,39 @@ func (s *NSlice) First() (obj *NObj) {
 	return
 }
 
-// FirstN returns the first n elements in the slice as a NSlice. Best effort returning as many as it can.
+// FirstN returns the first n elements in the slice as a NSlice. Best effort is used such
+// that as many as can be will be returned if there are not as many elements as requested.
 //
 // Cost: ~0x - 3x
 //
 // Optimized types: []bool, []int, []string
 func (s *NSlice) FirstN(n int) (result *NSlice) {
-	result = newEmptySlice(s.o)
+	result = &NSlice{}
 	if n == 0 {
 		return
 	}
-	if s.len >= n {
-		switch slice := s.o.(type) {
-		case []bool:
-			slice = slice[n:]
-			s.o = slice
-		case []int:
-			slice = slice[n:]
-			s.o = slice
-		case []string:
-			slice = slice[n:]
-			s.o = slice
-		default:
-			v := reflect.ValueOf(s.o)
-			s.o = v.Slice(n, v.Len()).Interface()
+	switch slice := s.o.(type) {
+	case []bool:
+		if s.len >= n {
+			result.o = slice[:n]
+		} else {
+			result.o = slice[:n]
 		}
-		s.len -= n
-	} else {
-		*s = *(newEmptySlice(s.o))
+	case []int:
+		if s.len >= n {
+			result.o = slice[:n]
+		} else {
+			result.o = slice[:n]
+		}
+	case []string:
+		if s.len >= n {
+			result.o = slice[:n]
+		} else {
+			result.o = slice[:n]
+		}
+	default:
+		v := reflect.ValueOf(s.o)
+		s.o = v.Slice(0, n).Interface()
 	}
 	return
 }
