@@ -692,25 +692,11 @@ func (s *NSlice) Empty() bool {
 //
 // Optimized types: []bool, []int, []string
 func (s *NSlice) First() (obj *NObj) {
-	obj = &NObj{}
-	if s.len == 0 {
-		return
-	}
-	switch slice := s.o.(type) {
-	case []bool:
-		obj.o = slice[0]
-	case []int:
-		obj.o = slice[0]
-	case []string:
-		obj.o = slice[0]
-	default:
-		obj.o = reflect.ValueOf(s.o).Index(0)
-	}
-	return
+	return s.At(0)
 }
 
 // FirstN returns the first n elements in the slice as a NSlice. Best effort is used such
-// that as many as can be will be returned if there are not as many elements as requested.
+// that as many as can be will be returned up until the request is satisfied.
 //
 // Cost: ~0x - 3x
 //
@@ -725,23 +711,27 @@ func (s *NSlice) FirstN(n int) (result *NSlice) {
 		if s.len >= n {
 			result.o = slice[:n]
 		} else {
-			result.o = slice[:n]
+			result.o = slice[:]
 		}
 	case []int:
 		if s.len >= n {
 			result.o = slice[:n]
 		} else {
-			result.o = slice[:n]
+			result.o = slice[:]
 		}
 	case []string:
 		if s.len >= n {
 			result.o = slice[:n]
 		} else {
-			result.o = slice[:n]
+			result.o = slice[:]
 		}
 	default:
 		v := reflect.ValueOf(s.o)
-		s.o = v.Slice(0, n).Interface()
+		if s.len >= n {
+			result.o = v.Slice(0, n).Interface()
+		} else {
+			result.o = v.Slice(0, s.len).Interface()
+		}
 	}
 	return
 }
@@ -753,27 +743,7 @@ func (s *NSlice) FirstN(n int) (result *NSlice) {
 //
 // Optimized types: []bool, []int, []string
 func (s *NSlice) Last() *NObj {
-	n := 1
-	if s.len >= n {
-		switch slice := s.o.(type) {
-		case []bool:
-			slice = slice[:len(slice)-n]
-			s.o = slice
-		case []int:
-			slice = slice[:len(slice)-n]
-			s.o = slice
-		case []string:
-			slice = slice[:len(slice)-n]
-			s.o = slice
-		default:
-			v := reflect.ValueOf(s.o)
-			s.o = v.Slice(0, v.Len()-n).Interface()
-		}
-		s.len -= n
-	} else {
-		*s = *(newEmptySlice(s.o))
-	}
-	return s
+	return s.At(-1)
 }
 
 // LastN returns the last n elements in the slice as a NSlice. Best effort returning as many as it can.
@@ -807,64 +777,9 @@ func (s *NSlice) LastN(n int) *NSlice {
 	return s
 }
 
-// // // Join the underlying slice with the given delim
-// // func (s *strSliceN) Join(delim string) *strN {
-// // 	return A(strings.Join(s.v, delim))
-// // }
-
-// Last returns the last element or last cnt elements. If the slice is empty
-// the returned slice will be NSlice.Nil.
-//
-// Cost: ~0x - 3x
-//
-// Optimized types: []bool, []int, []string
-// func (n *NSlice) Last(cnt ...int) *NSlice {
-// 	_cnt := 1
-// 	if len(cnt) != 0 {
-// 		_cnt = cnt[0]
-// 	}
-// 	if _cnt == 0 {
-// 		return n
-// 	}
-
-// 	// Get _cnt items from the begining
-// 	if n.len >= cnt {
-// 		switch slice := n.o.(type) {
-// 		case []bool:
-// 			if end {
-// 				slice = slice[:len(slice)-cnt]
-// 			} else {
-// 				slice = slice[cnt:]
-// 			}
-// 			n.o = slice
-// 		case []int:
-// 			if end {
-// 				slice = slice[:len(slice)-cnt]
-// 			} else {
-// 				slice = slice[cnt:]
-// 			}
-// 			n.o = slice
-// 		case []string:
-// 			if end {
-// 				slice = slice[:len(slice)-cnt]
-// 			} else {
-// 				slice = slice[cnt:]
-// 			}
-// 			n.o = slice
-// 		default:
-// 			v := reflect.ValueOf(n.o)
-// 			if end {
-// 				n.o = v.Slice(0, v.Len()-cnt).Interface()
-// 			} else {
-// 				n.o = v.Slice(cnt, v.Len()).Interface()
-// 			}
-// 		}
-// 		n.len -= cnt
-// 	} else {
-// 		*n = *(newEmptySlice(n.o))
-// 	}
-
-// 	return n
+// // Join the underlying slice with the given delim
+// func (s *strSliceN) Join(delim string) *strN {
+// 	return A(strings.Join(s.v, delim))
 // }
 
 // Len returns the number of elements in the numerable
@@ -943,46 +858,62 @@ func (s *NSlice) O() interface{} {
 // // 	return s.Len() == 1
 // // }
 
-// // // Slice provides a python like slice function for slice nubs.
-// // // Has an inclusive behavior such that Slice(0, -1) includes index -1
-// // // e.g. [1,2,3][0:-1] eq [1,2,3] and [1,2,3][1:2] eq [2,3]
-// // // returns entire slice if indices are out of bounds
-// // func (s *strSliceN) Slice(i, j int) (result *strSliceN) {
+// Slice provides a Ruby like slice function for NSlice allowing for positive and negative notation.
+// Slice uses an inclusive behavior such that Slice(0, -1) includes index -1 as opposed to Go's exclusive
+// behavior. Out of founds indices will be moved within bounds.
+//
+// e.g. [1,2,3][0:-1] == [1,2,3] && [1,2,3][1:2] == [2,3]
+func (s *NSlice) Slice(i, j int) (result *NSlice) {
+	result = &NSlice{}
+	if s.len == 0 {
+		return
+	}
 
-// // 	// Convert to postive notation
-// // 	if i < 0 {
-// // 		i = s.Len() + i
-// // 	}
-// // 	if j < 0 {
-// // 		j = s.Len() + j
-// // 	}
+	// Convert to postive notation
+	if i < 0 {
+		i = s.len + i
+	}
+	if j < 0 {
+		j = s.len + j
+	}
 
-// // 	// Move start/end within bounds
-// // 	if i < 0 {
-// // 		i = 0
-// // 	}
-// // 	if j >= s.Len() {
-// // 		j = s.Len() - 1
-// // 	}
+	// Start can't be past end else nothing to get
+	if i > j {
+		return
+	}
 
-// // 	// Specifically offsetting j to get an inclusive behavior out of Go
-// // 	j++
+	// Move start/end within bounds
+	if i < 0 {
+		i = 0
+	}
+	if j >= s.len {
+		j = s.len - 1
+	}
 
-// // 	// Only operate when indexes are within bounds
-// // 	// allow j to be len of s as that is how we include last item
-// // 	if i >= 0 && i < s.Len() && j >= 0 && j <= s.Len() {
-// // 		result = S(s.v[i:j]...)
-// // 	} else {
-// // 		result = S()
-// // 	}
-// // 	return
-// // }
+	// Go has an exclusive behavior by default and we want inclusive
+	// so offsetting the end by one
+	j++
 
-// // // Sort the underlying slice
-// // func (s *strSliceN) Sort() *strSliceN {
-// // 	sort.Strings(s.v)
-// // 	return s
-// // }
+	switch slice := s.o.(type) {
+	case []bool:
+		result.o = slice[i:j]
+	case []int:
+		result.o = slice[i:j]
+	case []string:
+		result.o = slice[i:j]
+	default:
+		v := reflect.ValueOf(s.o)
+		result.o = v.Slice(i, j).Interface()
+	}
+	result.len = j - i
+	return
+}
+
+// // Sort the underlying slice
+// func (s *strSliceN) Sort() *strSliceN {
+// 	sort.Strings(s.v)
+// 	return s
+// }
 
 // // // TakeFirst updates the underlying slice and returns the item and status
 // // func (s *strSliceN) TakeFirst() (string, bool) {

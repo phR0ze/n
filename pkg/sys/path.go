@@ -206,7 +206,7 @@ func SharedDir(first, second string) (result string) {
 	return strings.Join(sharedParts, "/")
 }
 
-// SlicePath provides a ruby like slice function for path nubs
+// SlicePath provides a ruby like slice function for path manipulation
 func SlicePath(target string, i, j int) (result string) {
 
 	// Drop the trailing slash if it exists
