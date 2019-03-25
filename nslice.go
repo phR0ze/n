@@ -858,9 +858,49 @@ func (s *NSlice) O() interface{} {
 // // 	return s.Len() == 1
 // // }
 
+// Set the item at the given index location to the given item. Allows for negative notation.
+// Returns the slice for chaining. Cost for reflection in this case doesn't seem to add much.
+//
+// Cost: ~1x - 10x
+//
+// Optimized types: []bool, []int, []string
+func (s *NSlice) Set(i int, obj interface{}) *NSlice {
+	if i = s.absIndex(i); i == -1 {
+		panic("slice assignment is out of bounds")
+	}
+
+	var ok bool
+	switch slice := s.o.(type) {
+	case []bool:
+		var x bool
+		if x, ok = obj.(bool); ok {
+			slice[i] = x
+		}
+	case []int:
+		var x int
+		if x, ok = obj.(int); ok {
+			slice[i] = x
+		}
+	case []string:
+		var x string
+		if x, ok = obj.(string); ok {
+			slice[i] = x
+		}
+	default:
+		ok = true
+		v := reflect.ValueOf(s.o)
+		item := v.Index(i)
+		item.Set(reflect.ValueOf(obj))
+	}
+	if !ok {
+		panic(fmt.Sprintf("can't insert type '%T' into '%T'", obj, s.o))
+	}
+	return s
+}
+
 // Slice provides a Ruby like slice function for NSlice allowing for positive and negative notation.
 // Slice uses an inclusive behavior such that Slice(0, -1) includes index -1 as opposed to Go's exclusive
-// behavior. Out of founds indices will be moved within bounds.
+// behavior. Out of bounds indices will be moved within bounds.
 //
 // e.g. [1,2,3][0:-1] == [1,2,3] && [1,2,3][1:2] == [2,3]
 func (s *NSlice) Slice(i, j int) (result *NSlice) {

@@ -1728,6 +1728,84 @@ func TestNSlice_O(t *testing.T) {
 // // 	assert.Equal(t, []string{"a", "b", "d"}, slice.Sort().S())
 // // }
 
+// Set
+//--------------------------------------------------------------------------------------------------
+func BenchmarkNSlice_Set_Normal(t *testing.B) {
+	ints := Range(0, nines6)
+	for i := 0; i < len(ints); i++ {
+		ints[i] = 0
+	}
+}
+
+func BenchmarkNSlice_Set_Optimized(t *testing.B) {
+	slice := Slice(Range(0, nines6))
+	for i := 0; i < slice.Len(); i++ {
+		slice.Set(i, 0)
+	}
+}
+
+func BenchmarkNSlice_Set_Reflect(t *testing.B) {
+	slice := Slice(rangeNObj(0, nines6))
+	for i := 0; i < slice.Len(); i++ {
+		slice.Set(i, NObj{0})
+	}
+}
+
+func ExampleNSlice_Set() {
+	slice := SliceV(1, 2, 3)
+	fmt.Println(slice.Set(0, 0).O())
+	// Output: [0 2 3]
+}
+
+func TestNSlice_Set(t *testing.T) {
+	// bool
+	{
+		assert.Equal(t, []bool{false, true, true}, SliceV(true, true, true).Set(0, false).O())
+		assert.Equal(t, []bool{true, false, true}, SliceV(true, true, true).Set(1, false).O())
+		assert.Equal(t, []bool{true, true, false}, SliceV(true, true, true).Set(2, false).O())
+		assert.Equal(t, []bool{false, true, true}, SliceV(true, true, true).Set(-3, false).O())
+		assert.Equal(t, []bool{true, false, true}, SliceV(true, true, true).Set(-2, false).O())
+		assert.Equal(t, []bool{true, true, false}, SliceV(true, true, true).Set(-1, false).O())
+	}
+
+	// int
+	{
+		assert.Equal(t, []int{0, 2, 3}, SliceV(1, 2, 3).Set(0, 0).O())
+		assert.Equal(t, []int{1, 0, 3}, SliceV(1, 2, 3).Set(1, 0).O())
+		assert.Equal(t, []int{1, 2, 0}, SliceV(1, 2, 3).Set(2, 0).O())
+		assert.Equal(t, []int{0, 2, 3}, SliceV(1, 2, 3).Set(-3, 0).O())
+		assert.Equal(t, []int{1, 0, 3}, SliceV(1, 2, 3).Set(-2, 0).O())
+		assert.Equal(t, []int{1, 2, 0}, SliceV(1, 2, 3).Set(-1, 0).O())
+	}
+
+	// string
+	{
+		assert.Equal(t, []string{"0", "2", "3"}, SliceV("1", "2", "3").Set(0, "0").O())
+		assert.Equal(t, []string{"1", "0", "3"}, SliceV("1", "2", "3").Set(1, "0").O())
+		assert.Equal(t, []string{"1", "2", "0"}, SliceV("1", "2", "3").Set(2, "0").O())
+		assert.Equal(t, []string{"0", "2", "3"}, SliceV("1", "2", "3").Set(-3, "0").O())
+		assert.Equal(t, []string{"1", "0", "3"}, SliceV("1", "2", "3").Set(-2, "0").O())
+		assert.Equal(t, []string{"1", "2", "0"}, SliceV("1", "2", "3").Set(-1, "0").O())
+	}
+
+	// custom
+	{
+		assert.Equal(t, []NObj{{0}, {2}, {3}}, Slice([]NObj{{1}, {2}, {3}}).Set(0, NObj{0}).O())
+		assert.Equal(t, []NObj{{1}, {0}, {3}}, Slice([]NObj{{1}, {2}, {3}}).Set(1, NObj{0}).O())
+		assert.Equal(t, []NObj{{1}, {2}, {0}}, Slice([]NObj{{1}, {2}, {3}}).Set(2, NObj{0}).O())
+		assert.Equal(t, []NObj{{0}, {2}, {3}}, Slice([]NObj{{1}, {2}, {3}}).Set(-3, NObj{0}).O())
+		assert.Equal(t, []NObj{{1}, {0}, {3}}, Slice([]NObj{{1}, {2}, {3}}).Set(-2, NObj{0}).O())
+		assert.Equal(t, []NObj{{1}, {2}, {0}}, Slice([]NObj{{1}, {2}, {3}}).Set(-1, NObj{0}).O())
+	}
+
+	// panics need to run as the last test as they abort the test method
+	defer func() {
+		err := recover()
+		assert.Equal(t, "slice assignment is out of bounds", err)
+	}()
+	SliceV(1, 2, 3).Set(5, 1)
+}
+
 // Slice
 //--------------------------------------------------------------------------------------------------
 func BenchmarkNSlice_Slice_Normal(t *testing.B) {
@@ -1761,8 +1839,9 @@ func TestNSlice_Slice(t *testing.T) {
 
 	// Test that the original slice wasn't modified
 	{
-		// original := SliceV(1, 2, 3, 4)
-		// result := SliceV(1, 2, 3, 4)
+		//original := SliceV(1, 2, 3, 4)
+		//result := original.Slice(0, -1)
+		//result[]
 	}
 
 	// slice full array
