@@ -946,9 +946,9 @@ func TestNSlice_Copy(t *testing.T) {
 
 	// slice full array
 	{
-		assert.Equal(t, SliceV(), SliceV().Slice(0, -1))
-		assert.Equal(t, SliceV(), SliceV().Slice(0, 1))
-		assert.Equal(t, SliceV(), SliceV().Slice(0, 5))
+		assert.Equal(t, &NSlice{o: []interface{}{}}, SliceV().Slice(0, -1))
+		assert.Equal(t, &NSlice{o: []interface{}{}}, SliceV().Slice(0, 1))
+		assert.Equal(t, &NSlice{o: []interface{}{}}, SliceV().Slice(0, 5))
 		assert.Equal(t, SliceV(""), SliceV("").Slice(0, -1))
 		assert.Equal(t, SliceV(""), SliceV("").Slice(0, 1))
 		assert.Equal(t, SliceV(1, 2, 3), SliceV(1, 2, 3).Slice(0, -1))
@@ -969,11 +969,11 @@ func TestNSlice_Copy(t *testing.T) {
 	// mutually exclusive
 	{
 		slice := SliceV(1, 2, 3, 4)
-		assert.Equal(t, &NSlice{}, slice.Slice(2, -3))
-		assert.Equal(t, &NSlice{}, slice.Slice(0, -5))
-		assert.Equal(t, &NSlice{}, slice.Slice(4, -1))
-		assert.Equal(t, &NSlice{}, slice.Slice(6, -1))
-		assert.Equal(t, &NSlice{}, slice.Slice(3, 2))
+		assert.Equal(t, &NSlice{o: []int{}}, slice.Slice(2, -3))
+		assert.Equal(t, &NSlice{o: []int{}}, slice.Slice(0, -5))
+		assert.Equal(t, &NSlice{o: []int{}}, slice.Slice(4, -1))
+		assert.Equal(t, &NSlice{o: []int{}}, slice.Slice(6, -1))
+		assert.Equal(t, &NSlice{o: []int{}}, slice.Slice(3, 2))
 	}
 
 	// singles
@@ -1100,6 +1100,12 @@ func ExampleNSlice_DeleteAt() {
 
 func TestNSlice_DeleteAt(t *testing.T) {
 
+	// nil or empty
+	{
+		var nilSlice *NSlice
+		assert.Equal(t, &NObj{}, nilSlice.DeleteAt(0))
+	}
+
 	// Delete all and more
 	{
 		slice := SliceV(0, 1, 2)
@@ -1219,6 +1225,13 @@ func ExampleNSlice_DropFirst() {
 }
 
 func TestNSlice_DropFirst(t *testing.T) {
+
+	// nil or empty
+	{
+		var nilSlice *NSlice
+		assert.Equal(t, (*NSlice)(nil), nilSlice.DropFirst())
+	}
+
 	// bool
 	{
 		slice := SliceV(true, true, false)
@@ -1302,6 +1315,12 @@ func ExampleNSlice_DropFirstN() {
 }
 
 func TestNSlice_DropFirstN(t *testing.T) {
+
+	// nil or empty
+	{
+		var nilSlice *NSlice
+		assert.Equal(t, (*NSlice)(nil), nilSlice.DropFirstN(1))
+	}
 
 	// drop none
 	{
@@ -1447,6 +1466,13 @@ func ExampleNSlice_DropLast() {
 }
 
 func TestNSlice_DropLast(t *testing.T) {
+
+	// nil or empty
+	{
+		var nilSlice *NSlice
+		assert.Equal(t, (*NSlice)(nil), nilSlice.DropLast())
+	}
+
 	// bool
 	{
 		slice := SliceV(true, true, false)
@@ -1530,6 +1556,12 @@ func ExampleNSlice_DropLastN() {
 }
 
 func TestNSlice_DropLastN(t *testing.T) {
+
+	// nil or empty
+	{
+		var nilSlice *NSlice
+		assert.Equal(t, (*NSlice)(nil), nilSlice.DropLastN(1))
+	}
 
 	// drop none
 	{
@@ -1676,6 +1708,13 @@ func ExampleNSlice_Each() {
 }
 
 func TestNSlice_Each(t *testing.T) {
+
+	// nil or empty
+	{
+		var nilSlice *NSlice
+		nilSlice.Each(func(x O) {})
+	}
+
 	// int
 	{
 		SliceV(1, 2, 3).Each(func(x O) {
@@ -1751,6 +1790,15 @@ func ExampleNSlice_EachE() {
 }
 
 func TestNSlice_EachE(t *testing.T) {
+
+	// nil or empty
+	{
+		var nilSlice *NSlice
+		nilSlice.EachE(func(x O) error {
+			return nil
+		})
+	}
+
 	// int
 	{
 		SliceV(1, 2, 3).EachE(func(x O) error {
@@ -1805,6 +1853,13 @@ func ExampleNSlice_Empty() {
 }
 
 func TestNSlice_Empty(t *testing.T) {
+
+	// nil or empty
+	{
+		var nilSlice *NSlice
+		assert.Equal(t, true, nilSlice.Empty())
+	}
+
 	assert.Equal(t, true, SliceV().Empty())
 	assert.Equal(t, false, SliceV(1).Empty())
 	assert.Equal(t, false, SliceV(1, 2, 3).Empty())
@@ -1907,12 +1962,6 @@ func TestNSlice_First(t *testing.T) {
 // // 	assert.Equal(t, "", S().Join(".").A())
 // // 	assert.Equal(t, "1", S("1").Join(".").A())
 // // 	assert.Equal(t, "1.2", S("1", "2").Join(".").A())
-// // }
-
-// // func TestStrSliceLen(t *testing.T) {
-// // 	assert.Equal(t, 0, S().Len())
-// // 	assert.Equal(t, 1, S("1").Len())
-// // 	assert.Equal(t, 2, S("1", "2").Len())
 // // }
 
 // // func TestStrSliceLast(t *testing.T) {
@@ -2093,9 +2142,9 @@ func TestNSlice_Slice(t *testing.T) {
 
 	// slice full array
 	{
-		assert.Equal(t, SliceV(), SliceV().Slice(0, -1))
-		assert.Equal(t, SliceV(), SliceV().Slice(0, 1))
-		assert.Equal(t, SliceV(), SliceV().Slice(0, 5))
+		assert.Equal(t, &NSlice{o: []interface{}{}}, SliceV().Slice(0, -1))
+		assert.Equal(t, &NSlice{o: []interface{}{}}, SliceV().Slice(0, 1))
+		assert.Equal(t, &NSlice{o: []interface{}{}}, SliceV().Slice(0, 5))
 		assert.Equal(t, SliceV(""), SliceV("").Slice(0, -1))
 		assert.Equal(t, SliceV(""), SliceV("").Slice(0, 1))
 		assert.Equal(t, SliceV(1, 2, 3), SliceV(1, 2, 3).Slice(0, -1))
@@ -2116,11 +2165,11 @@ func TestNSlice_Slice(t *testing.T) {
 	// mutually exclusive
 	{
 		slice := SliceV(1, 2, 3, 4)
-		assert.Equal(t, &NSlice{}, slice.Slice(2, -3))
-		assert.Equal(t, &NSlice{}, slice.Slice(0, -5))
-		assert.Equal(t, &NSlice{}, slice.Slice(4, -1))
-		assert.Equal(t, &NSlice{}, slice.Slice(6, -1))
-		assert.Equal(t, &NSlice{}, slice.Slice(3, 2))
+		assert.Equal(t, &NSlice{o: []int{}}, slice.Slice(2, -3))
+		assert.Equal(t, &NSlice{o: []int{}}, slice.Slice(0, -5))
+		assert.Equal(t, &NSlice{o: []int{}}, slice.Slice(4, -1))
+		assert.Equal(t, &NSlice{o: []int{}}, slice.Slice(6, -1))
+		assert.Equal(t, &NSlice{o: []int{}}, slice.Slice(3, 2))
 	}
 
 	// singles

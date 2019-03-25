@@ -565,7 +565,9 @@ func (s *NSlice) DeleteAt(i int) (obj *NObj) {
 // Optimized types: []bool, []int, []string
 func (s *NSlice) DropFirst() *NSlice {
 	n := 1
-	if s.len >= n {
+	if s.Nil() {
+		return s
+	} else if s.len >= n {
 		switch slice := s.o.(type) {
 		case []bool:
 			slice = slice[n:]
@@ -596,7 +598,9 @@ func (s *NSlice) DropFirstN(n int) *NSlice {
 	if n == 0 {
 		return s
 	}
-	if s.len >= n {
+	if s.Nil() {
+		return s
+	} else if s.len >= n {
 		switch slice := s.o.(type) {
 		case []bool:
 			slice = slice[n:]
@@ -625,7 +629,9 @@ func (s *NSlice) DropFirstN(n int) *NSlice {
 // Optimized types: []bool, []int, []string
 func (s *NSlice) DropLast() *NSlice {
 	n := 1
-	if s.len >= n {
+	if s.Nil() {
+		return s
+	} else if s.len >= n {
 		switch slice := s.o.(type) {
 		case []bool:
 			slice = slice[:len(slice)-n]
@@ -656,7 +662,9 @@ func (s *NSlice) DropLastN(n int) *NSlice {
 	if n == 0 {
 		return s
 	}
-	if s.len >= n {
+	if s.Nil() {
+		return s
+	} else if s.len >= n {
 		switch slice := s.o.(type) {
 		case []bool:
 			slice = slice[:len(slice)-n]
@@ -685,6 +693,9 @@ func (s *NSlice) DropLastN(n int) *NSlice {
 //
 // Optimized types: []bool, []int, []string
 func (s *NSlice) Each(action func(O)) *NSlice {
+	if s.Nil() {
+		return s
+	}
 	switch slice := s.o.(type) {
 	case []bool:
 		for i := 0; i < len(slice); i++ {
@@ -715,6 +726,9 @@ func (s *NSlice) Each(action func(O)) *NSlice {
 // Optimized types: []bool, []int, []string
 func (s *NSlice) EachE(action func(O) error) (*NSlice, error) {
 	var err error
+	if s.Nil() {
+		return s, err
+	}
 	switch slice := s.o.(type) {
 	case []bool:
 		for i := 0; i < len(slice); i++ {
@@ -935,6 +949,9 @@ func (s *NSlice) O() interface{} {
 //
 // Optimized types: []bool, []int, []string
 func (s *NSlice) Set(i int, obj interface{}) *NSlice {
+	if s.Nil() {
+		return s
+	}
 	if i = s.absIndex(i); i == -1 {
 		panic("slice assignment is out of bounds")
 	}
