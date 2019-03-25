@@ -219,6 +219,8 @@ func ExampleNSlice_Any_containsAny() {
 }
 
 func TestNSlice_Any(t *testing.T) {
+	var nilSlice *NSlice
+	assert.False(t, nilSlice.Any())
 	assert.False(t, SliceV().Any())
 	assert.True(t, SliceV().Append("2").Any())
 
@@ -304,6 +306,8 @@ func ExampleNSlice_AnyS() {
 }
 
 func TestNSlice_AnyS(t *testing.T) {
+	var nilSlice *NSlice
+	assert.False(t, nilSlice.AnyS([]bool{true}))
 
 	// bool
 	assert.True(t, SliceV(true, true).AnyS([]bool{true}))
@@ -389,6 +393,13 @@ func TestNSlice_Append_Reflect(t *testing.T) {
 }
 
 func TestNSlice_Append(t *testing.T) {
+
+	// nil
+	{
+		var nilSlice *NSlice
+		assert.Equal(t, SliceV(0), nilSlice.Append(0))
+		assert.Equal(t, (*NSlice)(nil), nilSlice)
+	}
 
 	// Append one back to back
 	{
@@ -515,6 +526,13 @@ func ExampleNSlice_AppendV() {
 }
 
 func TestNSlice_AppendV(t *testing.T) {
+
+	// nil
+	{
+		var nilSlice *NSlice
+		assert.Equal(t, (*NSlice)(nil), nilSlice.AppendV(0))
+		assert.Equal(t, (*NSlice)(nil), nilSlice)
+	}
 
 	// Append many ints
 	{
@@ -657,6 +675,13 @@ func ExampleNSlice_AppendS() {
 
 func TestNSlice_AppendS(t *testing.T) {
 
+	// nil
+	{
+		var nilSlice *NSlice
+		assert.Equal(t, SliceV(1, 2), nilSlice.AppendS([]int{1, 2}))
+		assert.Equal(t, (*NSlice)(nil), nilSlice)
+	}
+
 	// Append many ints
 	{
 		n := SliceV(1)
@@ -782,6 +807,12 @@ func TestNSlice_indexAbs(t *testing.T) {
 
 func TestNSlice_At(t *testing.T) {
 
+	// nil
+	{
+		var nilSlice *NSlice
+		assert.Equal(t, &NObj{nil}, nilSlice.At(0))
+	}
+
 	// strings
 	{
 		slice := SliceV("1", "2", "3", "4")
@@ -814,12 +845,219 @@ func ExampleNSlice_Clear() {
 }
 
 func TestQSlice_Clear(t *testing.T) {
-	slice := SliceV("1", "2", "3", "4")
-	assert.Equal(t, 4, slice.Len())
-	slice.Clear()
-	assert.Equal(t, 0, slice.Len())
-	slice.Clear()
-	assert.Equal(t, 0, slice.Len())
+
+	// nil
+	{
+		var nilSlice *NSlice
+		assert.Equal(t, &NObj{nil}, nilSlice.At(0))
+	}
+
+	// bool
+	{
+		slice := SliceV(true, false)
+		assert.Equal(t, 2, slice.Len())
+		slice.Clear()
+		assert.Equal(t, 0, slice.Len())
+		slice.Clear()
+		assert.Equal(t, 0, slice.Len())
+		assert.Equal(t, &NSlice{o: []bool{}}, slice)
+	}
+
+	// int
+	{
+		slice := SliceV(1, 2, 3, 4)
+		assert.Equal(t, 4, slice.Len())
+		slice.Clear()
+		assert.Equal(t, 0, slice.Len())
+		slice.Clear()
+		assert.Equal(t, 0, slice.Len())
+		assert.Equal(t, &NSlice{o: []int{}}, slice)
+	}
+
+	// string
+	{
+		slice := SliceV("1", "2", "3", "4")
+		assert.Equal(t, 4, slice.Len())
+		slice.Clear()
+		assert.Equal(t, 0, slice.Len())
+		slice.Clear()
+		assert.Equal(t, 0, slice.Len())
+		assert.Equal(t, &NSlice{o: []string{}}, slice)
+	}
+
+	// custom
+	{
+		slice := Slice([]NObj{{1}, {2}, {3}})
+		assert.Equal(t, 3, slice.Len())
+		slice.Clear()
+		assert.Equal(t, 0, slice.Len())
+		slice.Clear()
+		assert.Equal(t, 0, slice.Len())
+		assert.Equal(t, &NSlice{o: []NObj{}}, slice)
+	}
+}
+
+// Copy
+//--------------------------------------------------------------------------------------------------
+func BenchmarkNSlice_Copy_Normal(t *testing.B) {
+	ints := Range(0, nines7)
+	for len(ints) > 1 {
+		ints = ints[1:]
+	}
+}
+
+func BenchmarkNSlice_Copy_Optimized(t *testing.B) {
+	slice := Slice(Range(0, nines7))
+	for slice.Len() > 0 {
+		slice.DropFirst()
+	}
+}
+
+func BenchmarkNSlice_Copy_Reflect(t *testing.B) {
+	slice := Slice(rangeNObj(0, nines7))
+	for slice.Len() > 0 {
+		slice.DropFirst()
+	}
+}
+
+func ExampleNSlice_Copy() {
+	slice := SliceV(1, 2, 3)
+	fmt.Println(slice.DropFirst().O())
+	// Output: [2 3]
+}
+
+func TestNSlice_Copy(t *testing.T) {
+
+	// nil or empty
+	{
+		var nilSlice *NSlice
+		assert.Equal(t, SliceV(), nilSlice.Copy(0, -1))
+		slice := SliceV(0).Clear()
+		assert.Equal(t, &NSlice{o: []int{}}, slice.Copy(0, -1))
+	}
+
+	// Test that the original is modified when the slice is modified
+	{
+		original := SliceV(1, 2, 3)
+		result := original.Slice(0, -1).Set(0, 0)
+		assert.Equal(t, []int{0, 2, 3}, original.O())
+		assert.Equal(t, []int{0, 2, 3}, result.O())
+	}
+
+	// slice full array
+	{
+		assert.Equal(t, SliceV(), SliceV().Slice(0, -1))
+		assert.Equal(t, SliceV(), SliceV().Slice(0, 1))
+		assert.Equal(t, SliceV(), SliceV().Slice(0, 5))
+		assert.Equal(t, SliceV(""), SliceV("").Slice(0, -1))
+		assert.Equal(t, SliceV(""), SliceV("").Slice(0, 1))
+		assert.Equal(t, SliceV(1, 2, 3), SliceV(1, 2, 3).Slice(0, -1))
+		assert.Equal(t, Slice([]int{1, 2, 3}), Slice([]int{1, 2, 3}).Slice(0, -1))
+		assert.Equal(t, SliceV("1", "2", "3"), SliceV("1", "2", "3").Slice(0, 2))
+		assert.Equal(t, Slice([]NObj{{1}, {2}, {3}}), Slice([]NObj{{1}, {2}, {3}}).Slice(0, -1))
+	}
+
+	// out of bounds should be moved in
+	{
+		assert.Equal(t, SliceV("1"), SliceV("1").Slice(0, 2))
+		assert.Equal(t, SliceV(true, false), SliceV(true, false).Slice(-6, 6))
+		assert.Equal(t, SliceV(1, 2, 3), SliceV(1, 2, 3).Slice(-6, 6))
+		assert.Equal(t, SliceV("1", "2", "3"), SliceV("1", "2", "3").Slice(-6, 6))
+		assert.Equal(t, Slice([]NObj{{1}, {2}, {3}}), Slice([]NObj{{1}, {2}, {3}}).Slice(-6, 6))
+	}
+
+	// mutually exclusive
+	{
+		slice := SliceV(1, 2, 3, 4)
+		assert.Equal(t, &NSlice{}, slice.Slice(2, -3))
+		assert.Equal(t, &NSlice{}, slice.Slice(0, -5))
+		assert.Equal(t, &NSlice{}, slice.Slice(4, -1))
+		assert.Equal(t, &NSlice{}, slice.Slice(6, -1))
+		assert.Equal(t, &NSlice{}, slice.Slice(3, 2))
+	}
+
+	// singles
+	{
+		slice := SliceV(1, 2, 3, 4)
+		assert.Equal(t, SliceV(4), slice.Slice(-1, -1))
+		assert.Equal(t, SliceV(3), slice.Slice(-2, -2))
+		assert.Equal(t, SliceV(2), slice.Slice(-3, -3))
+		assert.Equal(t, SliceV(1), slice.Slice(0, 0))
+		assert.Equal(t, SliceV(1), slice.Slice(-4, -4))
+		assert.Equal(t, SliceV(2), slice.Slice(1, 1))
+		assert.Equal(t, SliceV(2), slice.Slice(1, -3))
+		assert.Equal(t, SliceV(3), slice.Slice(2, 2))
+		assert.Equal(t, SliceV(3), slice.Slice(2, -2))
+		assert.Equal(t, SliceV(4), slice.Slice(3, 3))
+		assert.Equal(t, SliceV(4), slice.Slice(3, -1))
+	}
+
+	// grab all but first
+	{
+		assert.Equal(t, SliceV(false, true), SliceV(true, false, true).Slice(1, -1))
+		assert.Equal(t, SliceV(false, true), SliceV(true, false, true).Slice(1, 2))
+		assert.Equal(t, SliceV(false, true), SliceV(true, false, true).Slice(-2, -1))
+		assert.Equal(t, SliceV(false, true), SliceV(true, false, true).Slice(-2, 2))
+		assert.Equal(t, SliceV(2, 3), SliceV(1, 2, 3).Slice(1, -1))
+		assert.Equal(t, SliceV(2, 3), SliceV(1, 2, 3).Slice(1, 2))
+		assert.Equal(t, SliceV(2, 3), SliceV(1, 2, 3).Slice(-2, -1))
+		assert.Equal(t, SliceV(2, 3), SliceV(1, 2, 3).Slice(-2, 2))
+		assert.Equal(t, SliceV("2", "3"), SliceV("1", "2", "3").Slice(1, -1))
+		assert.Equal(t, SliceV("2", "3"), SliceV("1", "2", "3").Slice(1, 2))
+		assert.Equal(t, SliceV("2", "3"), SliceV("1", "2", "3").Slice(-2, -1))
+		assert.Equal(t, SliceV("2", "3"), SliceV("1", "2", "3").Slice(-2, 2))
+		assert.Equal(t, Slice([]NObj{{2}, {3}}), Slice([]NObj{{1}, {2}, {3}}).Slice(1, -1))
+		assert.Equal(t, Slice([]NObj{{2}, {3}}), Slice([]NObj{{1}, {2}, {3}}).Slice(1, 2))
+		assert.Equal(t, Slice([]NObj{{2}, {3}}), Slice([]NObj{{1}, {2}, {3}}).Slice(-2, -1))
+		assert.Equal(t, Slice([]NObj{{2}, {3}}), Slice([]NObj{{1}, {2}, {3}}).Slice(-2, 2))
+	}
+
+	// grab all but last
+	{
+		assert.Equal(t, SliceV(true, false), SliceV(true, false, true).Slice(0, -2))
+		assert.Equal(t, SliceV(true, false), SliceV(true, false, true).Slice(-3, -2))
+		assert.Equal(t, SliceV(true, false), SliceV(true, false, true).Slice(-3, 1))
+		assert.Equal(t, SliceV(true, false), SliceV(true, false, true).Slice(0, 1))
+		assert.Equal(t, SliceV(1, 2), SliceV(1, 2, 3).Slice(0, -2))
+		assert.Equal(t, SliceV(1, 2), SliceV(1, 2, 3).Slice(-3, -2))
+		assert.Equal(t, SliceV(1, 2), SliceV(1, 2, 3).Slice(-3, 1))
+		assert.Equal(t, SliceV(1, 2), SliceV(1, 2, 3).Slice(0, 1))
+		assert.Equal(t, SliceV("1", "2"), SliceV("1", "2", "3").Slice(0, -2))
+		assert.Equal(t, SliceV("1", "2"), SliceV("1", "2", "3").Slice(-3, -2))
+		assert.Equal(t, SliceV("1", "2"), SliceV("1", "2", "3").Slice(-3, 1))
+		assert.Equal(t, SliceV("1", "2"), SliceV("1", "2", "3").Slice(0, 1))
+		assert.Equal(t, Slice([]NObj{{1}, {2}}), Slice([]NObj{{1}, {2}, {3}}).Slice(0, -2))
+		assert.Equal(t, Slice([]NObj{{1}, {2}}), Slice([]NObj{{1}, {2}, {3}}).Slice(-3, -2))
+		assert.Equal(t, Slice([]NObj{{1}, {2}}), Slice([]NObj{{1}, {2}, {3}}).Slice(-3, 1))
+		assert.Equal(t, Slice([]NObj{{1}, {2}}), Slice([]NObj{{1}, {2}, {3}}).Slice(0, 1))
+	}
+
+	// grab middle
+	{
+		assert.Equal(t, SliceV(true, true), SliceV(false, true, true, false).Slice(1, -2))
+		assert.Equal(t, SliceV(true, true), SliceV(false, true, true, false).Slice(-3, -2))
+		assert.Equal(t, SliceV(true, true), SliceV(false, true, true, false).Slice(-3, 2))
+		assert.Equal(t, SliceV(true, true), SliceV(false, true, true, false).Slice(1, 2))
+		assert.Equal(t, SliceV(2, 3), SliceV(1, 2, 3, 4).Slice(1, -2))
+		assert.Equal(t, SliceV(2, 3), SliceV(1, 2, 3, 4).Slice(-3, -2))
+		assert.Equal(t, SliceV(2, 3), SliceV(1, 2, 3, 4).Slice(-3, 2))
+		assert.Equal(t, SliceV(2, 3), SliceV(1, 2, 3, 4).Slice(1, 2))
+		assert.Equal(t, SliceV("2", "3"), SliceV("1", "2", "3", "4").Slice(1, -2))
+		assert.Equal(t, SliceV("2", "3"), SliceV("1", "2", "3", "4").Slice(-3, -2))
+		assert.Equal(t, SliceV("2", "3"), SliceV("1", "2", "3", "4").Slice(-3, 2))
+		assert.Equal(t, SliceV("2", "3"), SliceV("1", "2", "3", "4").Slice(1, 2))
+		assert.Equal(t, Slice([]NObj{{2}, {3}}), Slice([]NObj{{1}, {2}, {3}, {4}}).Slice(1, -2))
+		assert.Equal(t, Slice([]NObj{{2}, {3}}), Slice([]NObj{{1}, {2}, {3}, {4}}).Slice(-3, -2))
+		assert.Equal(t, Slice([]NObj{{2}, {3}}), Slice([]NObj{{1}, {2}, {3}, {4}}).Slice(-3, 2))
+		assert.Equal(t, Slice([]NObj{{2}, {3}}), Slice([]NObj{{1}, {2}, {3}, {4}}).Slice(1, 2))
+	}
+
+	// random
+	{
+		assert.Equal(t, SliceV("1"), SliceV("1", "2", "3").Slice(0, -3))
+		assert.Equal(t, SliceV("2", "3"), SliceV("1", "2", "3").Slice(1, 2))
+		assert.Equal(t, SliceV("1", "2", "3"), SliceV("1", "2", "3").Slice(0, 2))
+	}
 }
 
 // DeleteAt
@@ -1837,11 +2075,20 @@ func ExampleNSlice_Slice() {
 
 func TestNSlice_Slice(t *testing.T) {
 
-	// Test that the original slice wasn't modified
+	// nil or empty
 	{
-		//original := SliceV(1, 2, 3, 4)
-		//result := original.Slice(0, -1)
-		//result[]
+		var nilSlice *NSlice
+		assert.Equal(t, SliceV(), nilSlice.Slice(0, -1))
+		slice := SliceV(0).Clear()
+		assert.Equal(t, &NSlice{o: []int{}}, slice.Slice(0, -1))
+	}
+
+	// Test that the original is modified when the slice is modified
+	{
+		original := SliceV(1, 2, 3)
+		result := original.Slice(0, -1).Set(0, 0)
+		assert.Equal(t, []int{0, 2, 3}, original.O())
+		assert.Equal(t, []int{0, 2, 3}, result.O())
 	}
 
 	// slice full array

@@ -296,7 +296,11 @@ func (s *NSlice) AnyS(obj interface{}) (result bool) {
 // Optimized types: bool, int, string
 func (s *NSlice) Append(item interface{}) *NSlice {
 	if s.Nil() {
-		*s = *(newEmptySlice(item))
+		if s == nil {
+			s = newEmptySlice(item)
+		} else {
+			*s = *(newEmptySlice(item))
+		}
 	}
 	ok := false
 	switch slice := s.o.(type) {
@@ -352,7 +356,11 @@ func (s *NSlice) AppendV(items ...interface{}) *NSlice {
 // Optimized types: []bool, []int, []string
 func (s *NSlice) AppendS(items interface{}) *NSlice {
 	if s.Nil() {
-		*s = *(newEmptySlice(items))
+		if s == nil {
+			s = newEmptySlice(items)
+		} else {
+			*s = *(newEmptySlice(items))
+		}
 	}
 	ok := false
 	switch slice := s.o.(type) {
@@ -409,6 +417,9 @@ func (s *NSlice) absIndex(i int) (abs int) {
 // Optimized types: []bool, []int, []string
 func (s *NSlice) At(i int) (obj *NObj) {
 	obj = &NObj{}
+	if s.Nil() {
+		return
+	}
 	if i = s.absIndex(i); i == -1 {
 		return
 	}
@@ -434,6 +445,65 @@ func (s *NSlice) Clear() *NSlice {
 		*s = *(newEmptySlice(s.o))
 	}
 	return s
+}
+
+// Copy performs a deep copy such that modifications to the copy will not affect the original. Supports
+// positive and negative notation and uses an inclusive behavior such that Slice(0, -1) includes
+// index -1 as opposed to Go's exclusive  behavior. Out of bounds indices will be moved within bounds.
+//
+// e.g. [1,2,3][0:-1] == [1,2,3] && [1,2,3][1:2] == [2,3]
+//
+// Cost: ~0x - 10x
+//
+// Optimized types: []bool, []int, []string
+func (s *NSlice) Copy(i, j int) (result *NSlice) {
+	if s == nil {
+		result = &NSlice{}
+		return
+	}
+	result = newEmptySlice(s.o)
+	if s.len == 0 {
+		return
+	}
+
+	// Convert to postive notation
+	if i < 0 {
+		i = s.len + i
+	}
+	if j < 0 {
+		j = s.len + j
+	}
+
+	// Start can't be past end else nothing to get
+	if i > j {
+		return
+	}
+
+	// Move start/end within bounds
+	if i < 0 {
+		i = 0
+	}
+	if j >= s.len {
+		j = s.len - 1
+	}
+
+	// Go has an exclusive behavior by default and we want inclusive
+	// so offsetting the end by one
+	j++
+
+	switch slice := s.o.(type) {
+	case []bool:
+		result.o = slice[i:j]
+	case []int:
+		result.o = slice[i:j]
+	case []string:
+		result.o = slice[i:j]
+	default:
+		v := reflect.ValueOf(s.o)
+		result.o = v.Slice(i, j).Interface()
+	}
+	result.len = j - i
+	return
 }
 
 // DeleteAt deletes the item at the given index location. Allows for negative notation.
@@ -903,8 +973,16 @@ func (s *NSlice) Set(i int, obj interface{}) *NSlice {
 // behavior. Out of bounds indices will be moved within bounds.
 //
 // e.g. [1,2,3][0:-1] == [1,2,3] && [1,2,3][1:2] == [2,3]
+//
+// Cost: ~0x - 10x
+//
+// Optimized types: []bool, []int, []string
 func (s *NSlice) Slice(i, j int) (result *NSlice) {
-	result = &NSlice{}
+	if s == nil {
+		result = &NSlice{}
+		return
+	}
+	result = newEmptySlice(s.o)
 	if s.len == 0 {
 		return
 	}
