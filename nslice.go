@@ -447,23 +447,34 @@ func (s *NSlice) Clear() *NSlice {
 	return s
 }
 
-// Copy performs a deep copy such that modifications to the copy will not affect the original. Supports
-// positive and negative notation and uses an inclusive behavior such that Slice(0, -1) includes
-// index -1 as opposed to Go's exclusive  behavior. Out of bounds indices will be moved within bounds.
+// Copy performs a deep copy such that modifications to the copy will not affect
+// the original. Expects nothing, in which case everything is copied, or two
+// indices i and j, in which case positive and negative notation is supported and
+// uses an inclusive behavior such that Slice(0, -1) includes index -1 as opposed
+// to Go's exclusive  behavior. Out of bounds indices will be moved within bounds.
 //
-// e.g. [1,2,3][0:-1] == [1,2,3] && [1,2,3][1:2] == [2,3]
+// An empty NSlice is returned if indicies are mutually exclusive or nothing can be returned.
+//
+// e.g. SliceV(1,2,3).Copy() == [1,2,3] && SliceV(1,2,3).Copy(1,2) == [2,3]
 //
 // Cost: ~0x - 10x
 //
 // Optimized types: []bool, []int, []string
-func (s *NSlice) Copy(i, j int) (result *NSlice) {
+func (s *NSlice) Copy(indices ...int) (result *NSlice) {
 	if s == nil {
 		result = &NSlice{}
 		return
 	}
 	result = newEmptySlice(s.o)
-	if s.len == 0 {
+	if s.len == 0 || len(indices) == 1 {
 		return
+	}
+
+	// Get indices
+	i, j := 0, s.len-1
+	if len(indices) == 2 {
+		i = indices[0]
+		j = indices[1]
 	}
 
 	// Convert to postive notation
@@ -491,18 +502,26 @@ func (s *NSlice) Copy(i, j int) (result *NSlice) {
 	// so offsetting the end by one
 	j++
 
+	result.len = j - i
 	switch slice := s.o.(type) {
 	case []bool:
-		result.o = slice[i:j]
+		x := make([]bool, result.len, result.len)
+		copy(x, slice[i:j])
+		result.o = x
 	case []int:
-		result.o = slice[i:j]
+		x := make([]int, result.len, result.len)
+		copy(x, slice[i:j])
+		result.o = x
 	case []string:
-		result.o = slice[i:j]
+		x := make([]string, result.len, result.len)
+		copy(x, slice[i:j])
+		result.o = x
 	default:
 		v := reflect.ValueOf(s.o)
-		result.o = v.Slice(i, j).Interface()
+		x := reflect.MakeSlice(v.Type(), result.len, result.len)
+		reflect.Copy(x, v.Slice(i, j))
+		result.o = x.Interface()
 	}
-	result.len = j - i
 	return
 }
 
@@ -989,7 +1008,9 @@ func (s *NSlice) Set(i int, obj interface{}) *NSlice {
 // Slice uses an inclusive behavior such that Slice(0, -1) includes index -1 as opposed to Go's exclusive
 // behavior. Out of bounds indices will be moved within bounds.
 //
-// e.g. [1,2,3][0:-1] == [1,2,3] && [1,2,3][1:2] == [2,3]
+// An empty NSlice is returned if indicies are mutually exclusive or nothing can be returned.
+//
+// e.g. SliceV(1,2,3).Slice(0, -1) == [1,2,3] && SliceV(1,2,3).Slice(1,2) == [2,3]
 //
 // Cost: ~0x - 10x
 //
