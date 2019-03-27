@@ -1948,19 +1948,71 @@ func TestNSlice_First(t *testing.T) {
 	}
 }
 
-// // func TestStrSliceFirst(t *testing.T) {
-// // 	assert.Equal(t, A(""), S().First())
-// // 	assert.Equal(t, A("1"), S("1").First())
-// // 	assert.Equal(t, A("1"), S("1", "2").First())
-// // 	assert.Equal(t, "foo", A("foo::").Split("::").First().A())
-// // 	{
-// // 		// Test that the original slice wasn't modified
-// // 		q := S("1")
-// // 		assert.Equal(t, []string{"1"}, q.S())
-// // 		assert.Equal(t, A("1"), q.First())
-// // 		assert.Equal(t, []string{"1"}, q.S())
-// // 	}
-// // }
+// FirstN
+//--------------------------------------------------------------------------------------------------
+func BenchmarkNSlice_FirstN_Normal(t *testing.B) {
+	ints := Range(0, nines7)
+	_ = ints[0:10]
+}
+
+func BenchmarkNSlice_FirstN_Optimized(t *testing.B) {
+	slice := Slice(Range(0, nines7))
+	slice.FirstN(10)
+}
+
+func BenchmarkNSlice_FirstN_Reflect(t *testing.B) {
+	slice := Slice(rangeNObj(0, nines7))
+	slice.FirstN(10)
+}
+
+func ExampleNSlice_FirstN() {
+	slice := SliceV(1, 2, 3)
+	fmt.Println(slice.FirstN(2).O())
+	// Output: [1 2]
+}
+
+func TestNSlice_FirstN(t *testing.T) {
+
+	// nil or empty
+	{
+		var nilSlice *NSlice
+		assert.Equal(t, SliceV(), nilSlice.FirstN(1))
+		slice := SliceV(0).Clear()
+		assert.Equal(t, &NSlice{o: []int{}}, slice.FirstN(-1))
+	}
+
+	// Test that the original is modified when the slice is modified
+	{
+		original := SliceV(1, 2, 3)
+		result := original.FirstN(2).Set(0, 0)
+		assert.Equal(t, []int{0, 2, 3}, original.O())
+		assert.Equal(t, []int{0, 2}, result.O())
+	}
+
+	// slice full array includeing out of bounds
+	{
+		assert.Equal(t, &NSlice{o: []interface{}{}}, SliceV().FirstN(1))
+		assert.Equal(t, &NSlice{o: []interface{}{}}, SliceV().FirstN(10))
+		assert.Equal(t, SliceV(""), SliceV("").FirstN(1))
+		assert.Equal(t, SliceV(""), SliceV("").FirstN(10))
+		assert.Equal(t, SliceV(1, 2, 3), SliceV(1, 2, 3).FirstN(10))
+		assert.Equal(t, Slice([]int{1, 2, 3}), Slice([]int{1, 2, 3}).FirstN(10))
+		assert.Equal(t, SliceV("1", "2", "3"), SliceV("1", "2", "3").FirstN(10))
+		assert.Equal(t, Slice([]NObj{{1}, {2}, {3}}), Slice([]NObj{{1}, {2}, {3}}).FirstN(10))
+	}
+
+	// grab a few diff
+	{
+		assert.Equal(t, SliceV(true), SliceV(true, false, true).FirstN(1))
+		assert.Equal(t, SliceV(true, false), SliceV(true, false, true).FirstN(2))
+		assert.Equal(t, SliceV(1), SliceV(1, 2, 3).FirstN(1))
+		assert.Equal(t, SliceV(1, 2), SliceV(1, 2, 3).FirstN(2))
+		assert.Equal(t, SliceV("1"), SliceV("1", "2", "3").FirstN(1))
+		assert.Equal(t, SliceV("1", "2"), SliceV("1", "2", "3").FirstN(2))
+		assert.Equal(t, Slice([]NObj{{1}}), Slice([]NObj{{1}, {2}, {3}}).FirstN(1))
+		assert.Equal(t, Slice([]NObj{{1}, {2}}), Slice([]NObj{{1}, {2}, {3}}).FirstN(2))
+	}
+}
 
 // // func TestStrSliceJoin(t *testing.T) {
 // // 	assert.Equal(t, "", S().Join(".").A())
@@ -1968,19 +2020,73 @@ func TestNSlice_First(t *testing.T) {
 // // 	assert.Equal(t, "1.2", S("1", "2").Join(".").A())
 // // }
 
-// // func TestStrSliceLast(t *testing.T) {
-// // 	assert.Equal(t, A(""), S().Last())
-// // 	assert.Equal(t, A("1"), S("1").Last())
-// // 	assert.Equal(t, A("2"), S("1", "2").Last())
-// // 	assert.Equal(t, "foo", A("::foo").Split("::").Last().A())
-// // 	{
-// // 		// Test that the original slice wasn't modified
-// // 		q := S("1")
-// // 		assert.Equal(t, []string{"1"}, q.S())
-// // 		assert.Equal(t, A("1"), q.Last())
-// // 		assert.Equal(t, []string{"1"}, q.S())
-// // 	}
-// // }
+// LastN
+//--------------------------------------------------------------------------------------------------
+func BenchmarkNSlice_LastN_Normal(t *testing.B) {
+	ints := Range(0, nines7)
+	_ = ints[0:10]
+}
+
+func BenchmarkNSlice_LastN_Optimized(t *testing.B) {
+	slice := Slice(Range(0, nines7))
+	slice.LastN(10)
+}
+
+func BenchmarkNSlice_LastN_Reflect(t *testing.B) {
+	slice := Slice(rangeNObj(0, nines7))
+	slice.LastN(10)
+}
+
+func ExampleNSlice_LastN() {
+	slice := SliceV(1, 2, 3)
+	fmt.Println(slice.LastN(2).O())
+	// Output: [2 3]
+}
+
+func TestNSlice_LastN(t *testing.T) {
+
+	// nil or empty
+	{
+		var nilSlice *NSlice
+		assert.Equal(t, SliceV(), nilSlice.LastN(1))
+		slice := SliceV(0).Clear()
+		assert.Equal(t, &NSlice{o: []int{}}, slice.LastN(-1))
+	}
+
+	// Test that the original is modified when the slice is modified
+	{
+		original := SliceV(1, 2, 3)
+		result := original.LastN(2).Set(0, 0)
+		assert.Equal(t, []int{1, 0, 3}, original.O())
+		assert.Equal(t, []int{0, 3}, result.O())
+	}
+
+	// slice full array includeing out of bounds
+	{
+		assert.Equal(t, &NSlice{o: []interface{}{}}, SliceV().LastN(1))
+		assert.Equal(t, &NSlice{o: []interface{}{}}, SliceV().LastN(10))
+		assert.Equal(t, SliceV(""), SliceV("").LastN(1))
+		assert.Equal(t, SliceV(""), SliceV("").LastN(10))
+		assert.Equal(t, SliceV(1, 2, 3), SliceV(1, 2, 3).LastN(10))
+		assert.Equal(t, Slice([]int{1, 2, 3}), Slice([]int{1, 2, 3}).LastN(10))
+		assert.Equal(t, SliceV("1", "2", "3"), SliceV("1", "2", "3").LastN(10))
+		assert.Equal(t, Slice([]NObj{{1}, {2}, {3}}), Slice([]NObj{{1}, {2}, {3}}).LastN(10))
+	}
+
+	// grab a few diff
+	{
+		assert.Equal(t, SliceV(false), SliceV(true, true, false).LastN(1))
+		assert.Equal(t, SliceV(false), SliceV(true, true, false).LastN(-1))
+		assert.Equal(t, SliceV(false, true), SliceV(true, false, true).LastN(2))
+		assert.Equal(t, SliceV(false, true), SliceV(true, false, true).LastN(-2))
+		assert.Equal(t, SliceV(3), SliceV(1, 2, 3).LastN(1))
+		assert.Equal(t, SliceV(2, 3), SliceV(1, 2, 3).LastN(2))
+		assert.Equal(t, SliceV("3"), SliceV("1", "2", "3").LastN(1))
+		assert.Equal(t, SliceV("2", "3"), SliceV("1", "2", "3").LastN(2))
+		assert.Equal(t, Slice([]NObj{{3}}), Slice([]NObj{{1}, {2}, {3}}).LastN(1))
+		assert.Equal(t, Slice([]NObj{{2}, {3}}), Slice([]NObj{{1}, {2}, {3}}).LastN(2))
+	}
+}
 
 // Len
 //--------------------------------------------------------------------------------------------------

@@ -801,42 +801,15 @@ func (s *NSlice) First() (obj *NObj) {
 // FirstN returns the first n elements in the slice as a NSlice. Best effort is used such
 // that as many as can be will be returned up until the request is satisfied.
 //
-// Cost: ~0x - 3x
+// Cost: ~0x - 10x
 //
 // Optimized types: []bool, []int, []string
 func (s *NSlice) FirstN(n int) (result *NSlice) {
-	result = &NSlice{}
-	if n == 0 {
-		return
+	j := n - 1
+	if n < 0 {
+		j = (n * -1) - 1
 	}
-	switch slice := s.o.(type) {
-	case []bool:
-		if s.len >= n {
-			result.o = slice[:n]
-		} else {
-			result.o = slice[:]
-		}
-	case []int:
-		if s.len >= n {
-			result.o = slice[:n]
-		} else {
-			result.o = slice[:]
-		}
-	case []string:
-		if s.len >= n {
-			result.o = slice[:n]
-		} else {
-			result.o = slice[:]
-		}
-	default:
-		v := reflect.ValueOf(s.o)
-		if s.len >= n {
-			result.o = v.Slice(0, n).Interface()
-		} else {
-			result.o = v.Slice(0, s.len).Interface()
-		}
-	}
-	return
+	return s.Slice(0, j)
 }
 
 // Last returns the last element in the slice as NObj which will be NObj.Nil true if
@@ -849,35 +822,18 @@ func (s *NSlice) Last() *NObj {
 	return s.At(-1)
 }
 
-// LastN returns the last n elements in the slice as a NSlice. Best effort returning as many as it can.
+// LastN returns the last n elements in the slice as a NSlice. Best effort is used such
+// that as many as can be will be returned up until the request is satisfied.
 //
-// Cost: ~0x - 3x
+// Cost: ~0x - 10x
 //
 // Optimized types: []bool, []int, []string
 func (s *NSlice) LastN(n int) *NSlice {
-	if n == 0 {
-		return s
+	i := n * -1
+	if n < 0 {
+		i = n
 	}
-	if s.len >= n {
-		switch slice := s.o.(type) {
-		case []bool:
-			slice = slice[:len(slice)-n]
-			s.o = slice
-		case []int:
-			slice = slice[:len(slice)-n]
-			s.o = slice
-		case []string:
-			slice = slice[:len(slice)-n]
-			s.o = slice
-		default:
-			v := reflect.ValueOf(s.o)
-			s.o = v.Slice(0, v.Len()-n).Interface()
-		}
-		s.len -= n
-	} else {
-		*s = *(newEmptySlice(s.o))
-	}
-	return s
+	return s.Slice(i, -1)
 }
 
 // // Join the underlying slice with the given delim
