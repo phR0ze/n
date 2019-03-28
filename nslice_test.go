@@ -2101,9 +2101,9 @@ func BenchmarkNSlice_Insert_Reflect(t *testing.B) {
 }
 
 func ExampleNSlice_Insert() {
-	slice := SliceV(1, 2, 3)
-	fmt.Println(slice.Take(2).O())
-	// Output: 3
+	slice := SliceV(1, 3)
+	fmt.Println(slice.Insert(1, 2).O())
+	// Output: [1 2 3]
 }
 
 func TestNSlice_Insert(t *testing.T) {
@@ -2302,19 +2302,75 @@ func TestNSlice_O(t *testing.T) {
 	assert.Len(t, SliceV().Append("2").O(), 1)
 }
 
-// // func TestStrSlicePrepend(t *testing.T) {
-// // 	slice := S().Prepend("1")
-// // 	assert.Equal(t, "1", slice.At(0))
+// Prepend
+//--------------------------------------------------------------------------------------------------
+func BenchmarkNSlice_Prepend_Normal(t *testing.B) {
+	ints := []int{}
+	for i := range Range(0, nines6) {
+		ints = append(ints, i)
+		copy(ints[1:], ints[1:])
+		ints[0] = i
+	}
+}
 
-// // 	slice.Prepend("2", "3")
-// // 	assert.Equal(t, "2", slice.At(0))
-// // 	assert.Equal(t, []string{"2", "3", "1"}, slice.S())
-// // }
+func BenchmarkNSlice_Prepend_Optimized(t *testing.B) {
+	slice := &NSlice{o: []int{}}
+	for i := range Range(0, nines6) {
+		slice.Prepend(i)
+	}
+}
 
-// // func TestStrSliceSort(t *testing.T) {
-// // 	slice := S().Append("b", "d", "a")
-// // 	assert.Equal(t, []string{"a", "b", "d"}, slice.Sort().S())
-// // }
+func BenchmarkNSlice_Prepend_Reflect(t *testing.B) {
+	slice := &NSlice{o: []NObj{}}
+	for i := range Range(0, nines6) {
+		slice.Prepend(NObj{i})
+	}
+}
+
+func ExampleNSlice_Prepend() {
+	slice := SliceV(2, 3)
+	fmt.Println(slice.Prepend(1).O())
+	// Output: [1 2 3]
+}
+
+func TestNSlice_Prepend(t *testing.T) {
+
+	// int
+	{
+		// happy path
+		{
+			slice := SliceV()
+			assert.Equal(t, SliceV(2), slice.Prepend(2))
+			assert.Equal(t, SliceV(1, 2), slice.Prepend(1))
+			assert.Equal(t, SliceV(0, 1, 2), slice.Prepend(0))
+		}
+
+		// error cases
+		{
+			var slice *NSlice
+			assert.True(t, slice.Prepend(0).Nil())
+			assert.Equal(t, (*NSlice)(nil), slice.Prepend(0))
+		}
+	}
+
+	// custom
+	{
+		// prepend
+		{
+			slice := SliceV()
+			assert.Equal(t, SliceV(NObj{2}), slice.Prepend(NObj{2}))
+			assert.Equal(t, Slice([]NObj{{1}, {2}}), slice.Prepend(NObj{1}))
+			assert.Equal(t, Slice([]NObj{{0}, {1}, {2}}), slice.Prepend(NObj{0}))
+		}
+
+		// error cases
+		{
+			var slice *NSlice
+			assert.True(t, slice.Prepend(NObj{0}).Nil())
+			assert.Equal(t, (*NSlice)(nil), slice.Prepend(NObj{0}))
+		}
+	}
+}
 
 // Set
 //--------------------------------------------------------------------------------------------------

@@ -816,7 +816,7 @@ func (s *NSlice) FirstN(n int) (result *NSlice) {
 // will insert the values at the end of the slice. Slice is returned for chaining. Invalid
 // index locations will not change the slice.
 //
-// Cost: ~0x - 3x
+// Cost: ~0x - 10x
 //
 // Optimized types: []bool, []int, []string
 func (s *NSlice) Insert(i int, obj interface{}) *NSlice {
@@ -994,12 +994,14 @@ func (s *NSlice) O() interface{} {
 	return s.o
 }
 
-// // // Prepend items to the begining of the slice and return slice
-// // func (s *strSliceN) Prepend(items ...string) *strSliceN {
-// // 	items = append(items, s.v...)
-// // 	s.v = items
-// // 	return s
-// // }
+// Prepend the given value at the begining of the slice.
+//
+// Cost: ~0x - 10x
+//
+// Optimized types: []bool, []int, []string
+func (s *NSlice) Prepend(obj interface{}) *NSlice {
+	return s.Insert(0, obj)
+}
 
 // // // Single simple report true if there is only one item
 // // func (s *strSliceN) Single() (result bool) {
