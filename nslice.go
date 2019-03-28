@@ -1004,10 +1004,10 @@ func (s *NSlice) Prepend(obj interface{}) *NSlice {
 	return s.Insert(0, obj)
 }
 
-// // // Single simple report true if there is only one item
-// // func (s *strSliceN) Single() (result bool) {
-// // 	return s.Len() == 1
-// // }
+// Single simply reports true if there is only one item
+func (s *NSlice) Single() bool {
+	return s.len == 1
+}
 
 // Set the item at the given index location to the given item. Allows for negative notation.
 // Returns the slice for chaining. Cost for reflection in this case doesn't seem to add much.

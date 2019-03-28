@@ -2511,6 +2511,32 @@ func TestNSlice_Set(t *testing.T) {
 	SliceV(1, 2, 3).Set(5, 1)
 }
 
+// Single
+//--------------------------------------------------------------------------------------------------
+
+func ExampleNSlice_Single() {
+	slice := SliceV(1)
+	fmt.Println(slice.Single())
+	// Output: true
+}
+
+func TestNSlice_Single(t *testing.T) {
+
+	// int
+	{
+		assert.Equal(t, false, SliceV().Single())
+		assert.Equal(t, true, SliceV(1).Single())
+		assert.Equal(t, false, SliceV(1, 2).Single())
+	}
+
+	// custom
+	{
+		assert.Equal(t, false, SliceV().Single())
+		assert.Equal(t, true, SliceV(NObj{1}).Single())
+		assert.Equal(t, false, SliceV(NObj{1}, NObj{2}).Single())
+	}
+}
+
 // Slice
 //--------------------------------------------------------------------------------------------------
 func BenchmarkNSlice_Slice_Normal(t *testing.B) {
