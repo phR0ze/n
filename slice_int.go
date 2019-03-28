@@ -98,6 +98,19 @@ func (p *IntSlice) AppendV(elems ...interface{}) Slice {
 	return p
 }
 
+// At returns the element at the given index location. Allows for negative notation.
+func (p *IntSlice) At(i int) (obj *NObj) {
+	obj = &NObj{}
+	if p == nil {
+		return
+	}
+	if i = absIndex(len(*p), i); i == -1 {
+		return
+	}
+	obj.o = (*p)[i]
+	return
+}
+
 // Empty tests if the slice is empty.
 func (p *IntSlice) Empty() bool {
 	if p == nil || len(*p) == 0 {

@@ -382,6 +382,60 @@ func TestIntSlice_AppendV(t *testing.T) {
 	}
 }
 
+// At
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_At_Go(t *testing.B) {
+	ints := Range(0, nines6)
+	for i := range ints {
+		assert.IsType(t, 0, ints[i])
+	}
+}
+
+func BenchmarkIntSlice_At_Slice(t *testing.B) {
+	src := Range(0, nines6)
+	slice := NewIntSlice(src)
+	for _, i := range src {
+		_, ok := (slice.At(i).O()).(int)
+		assert.True(t, ok)
+	}
+}
+
+func ExampleIntSlice_At() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.At(2).O())
+	// Output: 3
+}
+
+func TestIntSlice_At(t *testing.T) {
+
+	// nil
+	{
+		var nilSlice *IntSlice
+		assert.Equal(t, &NObj{nil}, nilSlice.At(0))
+	}
+
+	// ints
+	{
+		slice := NewIntSliceV(1, 2, 3, 4)
+		assert.Equal(t, 4, slice.At(-1).O())
+		assert.Equal(t, 3, slice.At(-2).O())
+		assert.Equal(t, 2, slice.At(-3).O())
+		assert.Equal(t, 1, slice.At(0).O())
+		assert.Equal(t, 2, slice.At(1).O())
+		assert.Equal(t, 3, slice.At(2).O())
+		assert.Equal(t, 4, slice.At(3).O())
+	}
+
+	// index out of bounds
+	{
+		slice := NewIntSliceV(1)
+		assert.Equal(t, &NObj{}, slice.At(3))
+		assert.Equal(t, nil, slice.At(3).O())
+		assert.Equal(t, &NObj{}, slice.At(-3))
+		assert.Equal(t, nil, slice.At(-3).O())
+	}
+}
+
 // Empty
 //--------------------------------------------------------------------------------------------------
 func ExampleIntSlice_Empty() {

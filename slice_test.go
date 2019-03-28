@@ -812,25 +812,6 @@ func ExampleNSlice_At() {
 	// Output: 3
 }
 
-func TestNSlice_indexAbs(t *testing.T) {
-	//             -4,-3,-2,-1
-	//              0, 1, 2, 3
-	slice := NewSliceV(0, 0, 0, 0)
-	assert.Equal(t, 3, slice.absIndex(-1))
-	assert.Equal(t, 2, slice.absIndex(-2))
-	assert.Equal(t, 1, slice.absIndex(-3))
-	assert.Equal(t, 0, slice.absIndex(-4))
-
-	assert.Equal(t, 0, slice.absIndex(0))
-	assert.Equal(t, 1, slice.absIndex(1))
-	assert.Equal(t, 2, slice.absIndex(2))
-	assert.Equal(t, 3, slice.absIndex(3))
-
-	// out of bounds
-	assert.Equal(t, -1, slice.absIndex(4))
-	assert.Equal(t, -1, slice.absIndex(-5))
-}
-
 func TestNSlice_At(t *testing.T) {
 
 	// nil

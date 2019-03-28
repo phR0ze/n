@@ -10,15 +10,16 @@ import (
 // Slice provides a generic way to work with slice types providing convenience methods
 // on par with other rapid development languages.
 type Slice interface {
-	Any(elems ...interface{}) bool      // Any tests if the slice is not empty or optionally if it contains any of the given variadic elements
-	AnyS(other interface{}) bool        // AnyS tests if the slice contains any of the other slice's elements
-	Append(elem interface{}) Slice      // Append an element to the end of the Slice and returns the Slice for chaining
-	AppendS(other interface{}) Slice    // AppendS appends the other slice using variadic expansion and returns Slice for chaining
-	AppendV(elems ...interface{}) Slice // AppendV appends the variadic elements to the end of the Slice and returns the Slice for chaining
-	Empty() bool                        // Empty tests if the slice is empty
-	Len() int                           // Len returns the number of elements in the slice
-	Nil() bool                          // Nil tests if the slice is nil
-	O() interface{}                     // O returns the underlying data structure
+	Any(elems ...interface{}) bool      // Any tests if the slice is not empty or optionally if it contains any of the given variadic elements.
+	AnyS(other interface{}) bool        // AnyS tests if the slice contains any of the other slice's elements.
+	Append(elem interface{}) Slice      // Append an element to the end of the Slice and returns the Slice for chaining.
+	AppendS(other interface{}) Slice    // AppendS appends the other slice using variadic expansion and returns Slice for chaining.
+	AppendV(elems ...interface{}) Slice // AppendV appends the variadic elements to the end of the Slice and returns the Slice for chaining.
+	At(i int) (obj *NObj)               // At returns the element at the given index location. Allows for negative notation.
+	Empty() bool                        // Empty tests if the slice is empty.
+	Len() int                           // Len returns the number of elements in the slice.
+	Nil() bool                          // Nil tests if the slice is nil.
+	O() interface{}                     // O returns the underlying data structure.
 }
 
 // NSlice provides a generic way to work with slice types providing convenience methods
@@ -411,23 +412,6 @@ func (p *NSlice) AppendS(items interface{}) *NSlice {
 	return p
 }
 
-// get the absolute value for the pos/neg index.
-// return of -1 indicates out of bounds
-func (p *NSlice) absIndex(i int) (abs int) {
-	if p.Nil() {
-		return -1
-	}
-	if i < 0 {
-		abs = p.len + i
-	} else {
-		abs = i
-	}
-	if abs < 0 || abs >= p.len {
-		abs = -1
-	}
-	return
-}
-
 // At returns the item at the given index location. Allows for negative notation.
 // Cost for reflection in this case doesn't seem to add much.
 //
@@ -439,7 +423,7 @@ func (p *NSlice) At(i int) (obj *NObj) {
 	if p.Nil() {
 		return
 	}
-	if i = p.absIndex(i); i == -1 {
+	if i = absIndex(p.len, i); i == -1 {
 		return
 	}
 
@@ -551,7 +535,10 @@ func (p *NSlice) Copy(indices ...int) (result *NSlice) {
 //
 // Optimized types: []bool, []int, []string
 func (p *NSlice) Drop(i int) *NSlice {
-	if i = p.absIndex(i); i == -1 {
+	if p.Nil() {
+		return p
+	}
+	if i = absIndex(p.len, i); i == -1 {
 		return p
 	}
 
@@ -841,7 +828,7 @@ func (p *NSlice) Insert(i int, obj interface{}) *NSlice {
 		return p
 	}
 	j := i
-	if j = p.absIndex(j); j == -1 {
+	if j = absIndex(p.len, j); j == -1 {
 		return p
 	}
 	if i < 0 {
@@ -1063,7 +1050,7 @@ func (p *NSlice) Set(i int, obj interface{}) *NSlice {
 	if p.Nil() {
 		return p
 	}
-	if i = p.absIndex(i); i == -1 {
+	if i = absIndex(p.len, i); i == -1 {
 		panic("slice assignment is out of bounds")
 	}
 
@@ -1229,7 +1216,7 @@ func (p *NSlice) Take(i int) (obj *NObj) {
 	if obj.Nil() {
 		return
 	}
-	i = p.absIndex(i) // don't need bounds check as At call handles this
+	i = absIndex(p.len, i) // don't need bounds check as At call handles this
 
 	// Delete the item
 	switch slice := p.o.(type) {
