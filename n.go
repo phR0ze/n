@@ -43,6 +43,13 @@ const (
 	NSliceType             // identifies a NSlice
 )
 
+// Comparable provides a means of comparing arbitrary types
+// These methods should be implemented using a non-pointer receiver
+type Comparable interface {
+	Less(left, right interface{}) bool  // Less returns true if the l object is less than the r object
+	Equal(left, right interface{}) bool // Equal returns true if the l object is value equal to the r object
+}
+
 // O is an alias for interface{} and provides a number of export methods
 type O interface{}
 
@@ -58,6 +65,14 @@ type Numerable interface {
 	Len() int                    // Len returns the number of elements in the numerable
 	Nil() bool                   // Nil tests if the numerable is nil
 	Type() Type                  // Type returns the identifier for this numerable type
+}
+
+// indirect dereferences the reflect.Value recursively until its a non-pointer type
+func indirect(v reflect.Value) reflect.Value {
+	if v.Kind() != reflect.Ptr {
+		return v
+	}
+	return indirect(v.Elem())
 }
 
 // Check to see if the given type is an optimized slice type

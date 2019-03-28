@@ -12,12 +12,63 @@ type NObj struct {
 	o interface{} // value
 }
 
-// NObjSlice provides a means of implementing other list related Interfaces
-type NObjSlice []NObj
+// Equal returns true if the left object is value equal to the right object.
+// The unerlying type must be the same else false is always returned
+//
+// Supported element types: bool, int, string
+func (p NObj) Equal(left, right interface{}) bool {
+	l, okl := left.(NObj)
+	r, okr := right.(NObj)
+	if okl && okr {
+		switch x := l.o.(type) {
+		case bool:
+			y, _ := r.o.(bool)
+			if x == y {
+				return true
+			}
+		case int:
+			y, _ := r.o.(int)
+			if x == y {
+				return true
+			}
+		case string:
+			y, _ := r.o.(string)
+			if x == y {
+				return true
+			}
+		}
+	}
+	return false
+}
 
-//func (p IntSlice) Len() int           { return len(p) }
-//func (p IntSlice) Less(i, j int) bool { return p[i] < p[j] }
-//func (p IntSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+// Less returns true if the left object is less than the right object.
+// The unerlying type must be the same else false is always returned
+//
+// Supported element types: bool, int, string
+func (p NObj) Less(left, right interface{}) bool {
+	l, okl := left.(NObj)
+	r, okr := right.(NObj)
+	if okl && okr {
+		switch x := l.o.(type) {
+		case bool:
+			y, _ := r.o.(bool)
+			if x == false && y == true {
+				return true
+			}
+		case int:
+			y, _ := r.o.(int)
+			if x < y {
+				return true
+			}
+		case string:
+			y, _ := r.o.(string)
+			if x < y {
+				return true
+			}
+		}
+	}
+	return false
+}
 
 // Numerable interface methods
 //--------------------------------------------------------------------------------------------------
