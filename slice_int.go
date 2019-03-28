@@ -68,11 +68,32 @@ func (p *IntSlice) AnyS(other interface{}) bool {
 // Append an element to the end of the Slice and returns the Slice for chaining
 func (p *IntSlice) Append(elem interface{}) Slice {
 	if p == nil {
-		new := IntSlice([]int{})
-		p = &new
+		p = NewIntSliceV()
 	}
 	if x, ok := elem.(int); ok {
 		*p = append(*p, x)
+	}
+	return p
+}
+
+// AppendS appends the other slice using variadic expansion and returns Slice for chaining
+func (p *IntSlice) AppendS(other interface{}) Slice {
+	if p == nil {
+		p = NewIntSliceV()
+	}
+	if x, ok := other.([]int); ok {
+		*p = append(*p, x...)
+	}
+	return p
+}
+
+// AppendV appends the variadic elements to the end of the Slice and returns the Slice for chaining
+func (p *IntSlice) AppendV(elems ...interface{}) Slice {
+	if p == nil {
+		p = NewIntSliceV()
+	}
+	for _, elem := range elems {
+		p.Append(elem)
 	}
 	return p
 }

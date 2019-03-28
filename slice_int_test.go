@@ -305,6 +305,83 @@ func TestIntSlice_Append(t *testing.T) {
 	}
 }
 
+// AppendS
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_AppendS_Go(t *testing.B) {
+	dest := []int{}
+	src := Range(0, nines6)
+	j := 0
+	for i := 10; i < len(src); i += 10 {
+		dest = append(dest, (src[j:i])...)
+		j = i
+	}
+}
+
+func BenchmarkIntSlice_AppendS_Slice(t *testing.B) {
+	dest := NewIntSliceV()
+	src := Range(0, nines6)
+	j := 0
+	for i := 10; i < len(src); i += 10 {
+		dest.AppendS(src[j:i])
+		j = i
+	}
+}
+
+func ExampleIntSlice_AppendS() {
+	slice := NewIntSliceV(1).AppendS([]int{2, 3})
+	fmt.Println(slice.O())
+	// Output: [1 2 3]
+}
+
+func TestIntSlice_AppendS(t *testing.T) {
+
+	// nil
+	{
+		var nilSlice *IntSlice
+		assert.Equal(t, NewIntSliceV(1, 2), nilSlice.AppendS([]int{1, 2}))
+	}
+
+	// Append many ints
+	{
+		assert.Equal(t, []int{1, 2, 3}, NewIntSliceV(1).AppendS([]int{2, 3}).O())
+		assert.Equal(t, []int{1, 2, 3}, NewIntSlice([]int{1}).AppendS([]int{2, 3}).O())
+	}
+}
+
+// AppendV
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_AppendV_Go(t *testing.B) {
+	ints := []int{}
+	ints = append(ints, Range(0, nines6)...)
+}
+
+func BenchmarkIntSlice_AppendV_Slice(t *testing.B) {
+	n := NewIntSliceV()
+	new := rangeO(0, nines6)
+	n.AppendV(new...)
+}
+
+func ExampleIntSlice_AppendV() {
+	slice := NewIntSliceV(1).AppendV(2, 3)
+	fmt.Println(slice.O())
+	// Output: [1 2 3]
+}
+
+func TestIntSlice_AppendV(t *testing.T) {
+
+	// nil
+	{
+		var nilSlice *IntSlice
+		assert.Equal(t, NewIntSliceV(1, 2), nilSlice.AppendV(1, 2))
+	}
+
+	// Append many ints
+	{
+		assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1).AppendV(2, 3))
+		assert.Equal(t, NewIntSliceV(1, 2, 3, 4, 5), NewIntSliceV(1).AppendV(2, 3).AppendV(4, 5))
+	}
+}
+
 // Empty
 //--------------------------------------------------------------------------------------------------
 func ExampleIntSlice_Empty() {
