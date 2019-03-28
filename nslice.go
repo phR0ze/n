@@ -326,7 +326,7 @@ func (s *NSlice) Append(item interface{}) *NSlice {
 		s.o = reflect.Append(v, item).Interface()
 	}
 	if !ok {
-		panic(fmt.Sprintf("can't insert type '%T' into '%T'", item, s.o))
+		panic(fmt.Sprintf("can't append type '%T' to '%T'", item, s.o))
 	}
 	s.len++
 	return s
@@ -398,6 +398,9 @@ func (s *NSlice) AppendS(items interface{}) *NSlice {
 // get the absolute value for the pos/neg index.
 // return of -1 indicates out of bounds
 func (s *NSlice) absIndex(i int) (abs int) {
+	if s.Nil() {
+		return -1
+	}
 	if i < 0 {
 		abs = s.len + i
 	} else {
@@ -575,6 +578,53 @@ func (s *NSlice) DeleteAt(i int) (obj *NObj) {
 	}
 	s.len--
 	return
+}
+
+// Drop deletes the item at the given index location. Allows for negative notation.
+// Returns the rest of the elements in the slice for chaining.
+//
+// Cost: ~0x - 3x
+//
+// Optimized types: []bool, []int, []string
+func (s *NSlice) Drop(i int) *NSlice {
+	if i = s.absIndex(i); i == -1 {
+		return s
+	}
+
+	// Delete the item
+	switch slice := s.o.(type) {
+	case []bool:
+		if i+1 < len(slice) {
+			slice = append(slice[:i], slice[i+1:]...)
+		} else {
+			slice = slice[:i]
+		}
+		s.o = slice
+	case []int:
+		if i+1 < len(slice) {
+			slice = append(slice[:i], slice[i+1:]...)
+		} else {
+			slice = slice[:i]
+		}
+		s.o = slice
+	case []string:
+		if i+1 < len(slice) {
+			slice = append(slice[:i], slice[i+1:]...)
+		} else {
+			slice = slice[:i]
+		}
+		s.o = slice
+	default:
+		v := reflect.ValueOf(s.o)
+		if i+1 < v.Len() {
+			v = reflect.AppendSlice(v.Slice(0, i), v.Slice(i+1, v.Len()))
+		} else {
+			v = v.Slice(0, i)
+		}
+		s.o = slice
+	}
+	s.len--
+	return s
 }
 
 // DropFirst deletes the first element and returns the rest of the elements in the slice.
@@ -812,6 +862,58 @@ func (s *NSlice) FirstN(n int) (result *NSlice) {
 	return s.Slice(0, j)
 }
 
+// Insert deletes the item at the given index location. Allows for negative notation.
+// Returns the deleted item as a NObj which will be NObj.Nil() true if it didn't exist.
+// Cost for reflection in this case doesn't seem to add much.
+//
+// Cost: ~0x - 3x
+//
+// Optimized types: []bool, []int, []string
+func (s *NSlice) Insert(i int) (obj *NObj) {
+
+	// Get the item and check out-of-bounds
+	obj = s.At(i)
+	if obj.Nil() {
+		return
+	}
+	i = s.absIndex(i) // don't need bounds check as At call handles this
+
+	// Delete the item
+	switch slice := s.o.(type) {
+	case []bool:
+		if i+1 < len(slice) {
+			slice = append(slice[:i], slice[i+1:]...)
+		} else {
+			slice = slice[:i]
+		}
+		s.o = slice
+	case []int:
+		if i+1 < len(slice) {
+			slice = append(slice[:i], slice[i+1:]...)
+		} else {
+			slice = slice[:i]
+		}
+		s.o = slice
+	case []string:
+		if i+1 < len(slice) {
+			slice = append(slice[:i], slice[i+1:]...)
+		} else {
+			slice = slice[:i]
+		}
+		s.o = slice
+	default:
+		v := reflect.ValueOf(s.o)
+		if i+1 < v.Len() {
+			v = reflect.AppendSlice(v.Slice(0, i), v.Slice(i+1, v.Len()))
+		} else {
+			v = v.Slice(0, i)
+		}
+		s.o = slice
+	}
+	s.len--
+	return
+}
+
 // Last returns the last element in the slice as NObj which will be NObj.Nil true if
 // there are no elements in the slice.
 //
@@ -955,7 +1057,7 @@ func (s *NSlice) Set(i int, obj interface{}) *NSlice {
 		item.Set(reflect.ValueOf(obj))
 	}
 	if !ok {
-		panic(fmt.Sprintf("can't insert type '%T' into '%T'", obj, s.o))
+		panic(fmt.Sprintf("can't set type '%T' in '%T'", obj, s.o))
 	}
 	return s
 }
