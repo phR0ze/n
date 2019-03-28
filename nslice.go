@@ -10,7 +10,7 @@ import (
 // NSlice provides a generic way to work with slice types providing convenience methods
 // on par with other rapid development languages.
 //
-// Implements the Numerable interface.
+// Implements the Slice interface.
 type NSlice struct {
 	o   interface{} // underlying slice object
 	len int         // slice length
@@ -1175,6 +1175,7 @@ func (p *NSlice) Sort() *NSlice {
 }
 
 // Swap elements in the underlying slice. Implements the sort.Interface.
+// Takes advantage of underlying slice's sort.Interface implementations if they exist.
 // Reflection cost is doubled, for non-optimized types, as two items being reflected over.
 //
 // Cost: ~0x - 20x
@@ -1184,14 +1185,15 @@ func (p *NSlice) Swap(i, j int) {
 	if p.Nil() || p.len < 2 || i < 0 || j < 0 || i >= p.len || j >= p.len {
 		return
 	}
-	switch slice := p.o.(type) {
-	case []bool:
-		slice[i], slice[j] = slice[j], slice[i]
-	case []int:
-		slice[i], slice[j] = slice[j], slice[i]
-	case []string:
-		slice[i], slice[j] = slice[j], slice[i]
-	default:
+	if x, ok := p.o.([]bool); ok {
+		x[i], x[j] = x[j], x[i]
+	} else if x, ok := p.o.([]int); ok {
+		x[i], x[j] = x[j], x[i]
+	} else if x, ok := p.o.([]string); ok {
+		x[i], x[j] = x[j], x[i]
+	} else if x, ok := p.o.(sort.Interface); ok {
+		x.Swap(i, j)
+	} else {
 		v := reflect.ValueOf(p.o)
 		x, y := v.Index(i).Interface(), v.Index(j).Interface()
 		v.Index(i).Set(reflect.ValueOf(y))

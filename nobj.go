@@ -12,6 +12,40 @@ type NObj struct {
 	o interface{} // value
 }
 
+// // sort.Interface methods
+// //--------------------------------------------------------------------------------------------------
+// type NObjSlice []NObj
+
+// // Less returns true if the object is less than the other object.
+// // The unerlying type must be the same else false is always returned
+// //
+// // Supported element types: bool, int, string
+// func (p NObj) Less(other interface{}) bool {
+// 	if o, ok := other.(NObj); ok {
+// 		switch x := p.o.(type) {
+// 		case bool:
+// 			y, _ := o.o.(bool)
+// 			if x == false && y == true {
+// 				return true
+// 			}
+// 		case int:
+// 			y, _ := o.o.(int)
+// 			if x < y {
+// 				return true
+// 			}
+// 		case string:
+// 			y, _ := o.o.(string)
+// 			if x < y {
+// 				return true
+// 			}
+// 		}
+// 	}
+// 	return false
+// }
+
+// Comparable interface methods
+//--------------------------------------------------------------------------------------------------
+
 // Equal returns true if the object is value equal to the other object.
 // The unerlying type must be the same else false is always returned
 //
