@@ -2302,6 +2302,67 @@ func TestNSlice_O(t *testing.T) {
 	assert.Len(t, SliceV().Append("2").O(), 1)
 }
 
+// Pair
+//--------------------------------------------------------------------------------------------------
+
+func ExampleNSlice_Pair() {
+	slice := SliceV(1, 2)
+	first, second := slice.Pair()
+	fmt.Println(first.O(), second.O())
+	// Output: 1 2
+}
+
+func TestNSlice_Pair(t *testing.T) {
+
+	// int
+	{
+		// two values
+		{
+			first, second := SliceV(1, 2).Pair()
+			assert.Equal(t, &NObj{1}, first)
+			assert.Equal(t, &NObj{2}, second)
+		}
+
+		// one value
+		{
+			first, second := SliceV(1).Pair()
+			assert.Equal(t, &NObj{1}, first)
+			assert.Equal(t, &NObj{nil}, second)
+		}
+
+		// no values
+		{
+			first, second := SliceV().Pair()
+			assert.Equal(t, &NObj{nil}, first)
+			assert.Equal(t, &NObj{nil}, second)
+		}
+	}
+
+	// custom
+	{
+		// two values
+		{
+			first, second := Slice([]NObj{{1}, {2}}).Pair()
+			assert.Equal(t, &NObj{NObj{1}}, first)
+			assert.Equal(t, &NObj{NObj{2}}, second)
+		}
+
+		// one value
+		{
+			first, second := Slice([]NObj{{1}}).Pair()
+			assert.Equal(t, &NObj{NObj{1}}, first)
+			assert.Equal(t, &NObj{nil}, second)
+		}
+
+		// no values
+		{
+			first, second := SliceV().Pair()
+			assert.Equal(t, &NObj{nil}, first)
+			assert.Equal(t, &NObj{nil}, second)
+		}
+	}
+}
+
 // Prepend
 //--------------------------------------------------------------------------------------------------
 func BenchmarkNSlice_Prepend_Normal(t *testing.B) {

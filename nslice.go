@@ -967,16 +967,17 @@ func (s *NSlice) Len() int {
 // // 	return
 // // }
 
-// // // Pair simply returns the first and second slice items
-// // func (s *strSliceN) Pair() (first, second string) {
-// // 	if s.Len() > 0 {
-// // 		first = s.v[0]
-// // 	}
-// // 	if s.Len() > 1 {
-// // 		second = s.v[1]
-// // 	}
-// // 	return
-// // }
+// Pair simply returns the first and second slice items as NObj
+func (s *NSlice) Pair() (first, second *NObj) {
+	first, second = &NObj{}, &NObj{}
+	if s.Len() > 0 {
+		first = s.At(0)
+	}
+	if s.Len() > 1 {
+		second = s.At(1)
+	}
+	return
+}
 
 // Nil tests if the numerable is nil
 func (s *NSlice) Nil() bool {
