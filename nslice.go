@@ -528,58 +528,6 @@ func (s *NSlice) Copy(indices ...int) (result *NSlice) {
 	return
 }
 
-// DeleteAt deletes the item at the given index location. Allows for negative notation.
-// Returns the deleted item as a NObj which will be NObj.Nil() true if it didn't exist.
-// Cost for reflection in this case doesn't seem to add much.
-//
-// Cost: ~0x - 3x
-//
-// Optimized types: []bool, []int, []string
-func (s *NSlice) DeleteAt(i int) (obj *NObj) {
-
-	// Get the item and check out-of-bounds
-	obj = s.At(i)
-	if obj.Nil() {
-		return
-	}
-	i = s.absIndex(i) // don't need bounds check as At call handles this
-
-	// Delete the item
-	switch slice := s.o.(type) {
-	case []bool:
-		if i+1 < len(slice) {
-			slice = append(slice[:i], slice[i+1:]...)
-		} else {
-			slice = slice[:i]
-		}
-		s.o = slice
-	case []int:
-		if i+1 < len(slice) {
-			slice = append(slice[:i], slice[i+1:]...)
-		} else {
-			slice = slice[:i]
-		}
-		s.o = slice
-	case []string:
-		if i+1 < len(slice) {
-			slice = append(slice[:i], slice[i+1:]...)
-		} else {
-			slice = slice[:i]
-		}
-		s.o = slice
-	default:
-		v := reflect.ValueOf(s.o)
-		if i+1 < v.Len() {
-			v = reflect.AppendSlice(v.Slice(0, i), v.Slice(i+1, v.Len()))
-		} else {
-			v = v.Slice(0, i)
-		}
-		s.o = slice
-	}
-	s.len--
-	return
-}
-
 // Drop deletes the item at the given index location. Allows for negative notation.
 // Returns the rest of the elements in the slice for chaining.
 //
@@ -621,7 +569,7 @@ func (s *NSlice) Drop(i int) *NSlice {
 		} else {
 			v = v.Slice(0, i)
 		}
-		s.o = slice
+		s.o = v.Interface()
 	}
 	s.len--
 	return s
@@ -862,56 +810,91 @@ func (s *NSlice) FirstN(n int) (result *NSlice) {
 	return s.Slice(0, j)
 }
 
-// Insert deletes the item at the given index location. Allows for negative notation.
-// Returns the deleted item as a NObj which will be NObj.Nil() true if it didn't exist.
-// Cost for reflection in this case doesn't seem to add much.
+// Insert the given value before the element with the given index. Negative indices count
+// backwards from the end of the array, where -1 is the last element. If a negative index
+// is used, the given values will be inserted after that element, so using an index of -1
+// will insert the values at the end of the slice. Slice is returned for chaining. Invalid
+// index locations will not change the slice.
 //
 // Cost: ~0x - 3x
 //
 // Optimized types: []bool, []int, []string
-func (s *NSlice) Insert(i int) (obj *NObj) {
-
-	// Get the item and check out-of-bounds
-	obj = s.At(i)
-	if obj.Nil() {
-		return
+func (s *NSlice) Insert(i int, obj interface{}) *NSlice {
+	if s.Nil() {
+		s.Append(obj)
+		return s
 	}
-	i = s.absIndex(i) // don't need bounds check as At call handles this
+	j := i
+	if j = s.absIndex(j); j == -1 {
+		return s
+	}
+	if i < 0 {
+		j++
+	}
 
-	// Delete the item
+	// Insert the item before j if pos and after j if neg
+	var ok bool
 	switch slice := s.o.(type) {
 	case []bool:
-		if i+1 < len(slice) {
-			slice = append(slice[:i], slice[i+1:]...)
-		} else {
-			slice = slice[:i]
+		var x bool
+		if x, ok = obj.(bool); ok {
+			if j == 0 {
+				slice = append([]bool{x}, slice...)
+			} else if j < len(slice) {
+				slice = append(slice, x)
+				copy(slice[j+1:], slice[j:])
+				slice[j] = x
+			} else {
+				slice = append(slice, x)
+			}
+			s.o = slice
 		}
-		s.o = slice
 	case []int:
-		if i+1 < len(slice) {
-			slice = append(slice[:i], slice[i+1:]...)
-		} else {
-			slice = slice[:i]
+		var x int
+		if x, ok = obj.(int); ok {
+			if j == 0 {
+				slice = append([]int{x}, slice...)
+			} else if j < len(slice) {
+				slice = append(slice, x)
+				copy(slice[j+1:], slice[j:])
+				slice[j] = x
+			} else {
+				slice = append(slice, x)
+			}
+			s.o = slice
 		}
-		s.o = slice
 	case []string:
-		if i+1 < len(slice) {
-			slice = append(slice[:i], slice[i+1:]...)
-		} else {
-			slice = slice[:i]
+		var x string
+		if x, ok = obj.(string); ok {
+			if j == 0 {
+				slice = append([]string{x}, slice...)
+			} else if j < len(slice) {
+				slice = append(slice, x)
+				copy(slice[j+1:], slice[j:])
+				slice[j] = x
+			} else {
+				slice = append(slice, x)
+			}
+			s.o = slice
 		}
-		s.o = slice
 	default:
-		v := reflect.ValueOf(s.o)
-		if i+1 < v.Len() {
-			v = reflect.AppendSlice(v.Slice(0, i), v.Slice(i+1, v.Len()))
-		} else {
-			v = v.Slice(0, i)
-		}
-		s.o = slice
+		// v := reflect.ValueOf(s.o)
+		// x := reflect.ValueOf(obj)
+		// if j == 0 {
+		// 	v = reflect.AppendSlice(v.Slice(0, i), v.Slice(i+1, v.Len()))
+		// }
+		// if i+1 < v.Len() {
+		// 	v = reflect.AppendSlice(v.Slice(0, i), v.Slice(i+1, v.Len()))
+		// } else {
+		// 	v = v.Slice(0, i)
+		// }
+		// s.o = slice
 	}
-	s.len--
-	return
+	if !ok {
+		panic(fmt.Sprintf("can't insert type '%T' into '%T'", obj, s.o))
+	}
+	s.len++
+	return s
 }
 
 // Last returns the last element in the slice as NObj which will be NObj.Nil true if
@@ -1128,6 +1111,57 @@ func (s *NSlice) Slice(i, j int) (result *NSlice) {
 // 	sort.Strings(s.v)
 // 	return s
 // }
+
+// Take deletes the item at the given index location and returns it as an *NObj which
+// will be NObj.Nil() true if it didn't exist. Allows for negative notation.
+//
+// Cost: ~0x - 3x
+//
+// Optimized types: []bool, []int, []string
+func (s *NSlice) Take(i int) (obj *NObj) {
+
+	// Get the item and check out-of-bounds
+	obj = s.At(i)
+	if obj.Nil() {
+		return
+	}
+	i = s.absIndex(i) // don't need bounds check as At call handles this
+
+	// Delete the item
+	switch slice := s.o.(type) {
+	case []bool:
+		if i+1 < len(slice) {
+			slice = append(slice[:i], slice[i+1:]...)
+		} else {
+			slice = slice[:i]
+		}
+		s.o = slice
+	case []int:
+		if i+1 < len(slice) {
+			slice = append(slice[:i], slice[i+1:]...)
+		} else {
+			slice = slice[:i]
+		}
+		s.o = slice
+	case []string:
+		if i+1 < len(slice) {
+			slice = append(slice[:i], slice[i+1:]...)
+		} else {
+			slice = slice[:i]
+		}
+		s.o = slice
+	default:
+		v := reflect.ValueOf(s.o)
+		if i+1 < v.Len() {
+			v = reflect.AppendSlice(v.Slice(0, i), v.Slice(i+1, v.Len()))
+		} else {
+			v = v.Slice(0, i)
+		}
+		s.o = v.Interface()
+	}
+	s.len--
+	return
+}
 
 // // // TakeFirst updates the underlying slice and returns the item and status
 // // func (s *strSliceN) TakeFirst() (string, bool) {
