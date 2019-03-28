@@ -7,6 +7,18 @@ import (
 	"sort"
 )
 
+// Slice provides a generic way to work with slice types providing convenience methods
+// on par with other rapid development languages.
+type Slice interface {
+	Any(elems ...interface{}) bool // Any tests if the slice is not empty or optionally if it contains any of the given Variadic elements
+	AnyS(other interface{}) bool   // AnyS tests if the slice contains any of the other slice's elements
+	Append(elem interface{}) Slice // Append an element to the end of the Slice and returns the Slice for chaining
+	Empty() bool                   // Empty tests if the slice is empty
+	Len() int                      // Len returns the number of elements in the slice
+	Nil() bool                     // Nil tests if the slice is nil
+	O() interface{}                // O returns the underlying data structure
+}
+
 // NSlice provides a generic way to work with slice types providing convenience methods
 // on par with other rapid development languages.
 //
@@ -16,7 +28,7 @@ type NSlice struct {
 	len int         // slice length
 }
 
-// Slice creates a new NSlice by simply storing slice 'obj' directly to avoid using reflection
+// NewSlice creates a new NSlice by simply storing slice 'obj' directly to avoid using reflection
 // processing at a 10x overhead savings. Non slice 'obj' are encapsulated in a new slice of
 // that type using reflection, thus incurring the standard 10x overhead.
 //
@@ -25,7 +37,7 @@ type NSlice struct {
 // set later with the given type when an n.AppendX method is called.
 //
 // Cost: ~0x - 10x
-func Slice(obj interface{}) (n *NSlice) {
+func NewSlice(obj interface{}) (n *NSlice) {
 	n = &NSlice{}
 	v := reflect.ValueOf(obj)
 
@@ -45,7 +57,7 @@ func Slice(obj interface{}) (n *NSlice) {
 
 	// Convert []interface to slice of elem type
 	case interfaceSliceType:
-		n = SliceV(x...)
+		n = NewSliceV(x...)
 
 	// Slice of distinct type can be used directly
 	case k == reflect.Slice:
@@ -59,12 +71,12 @@ func Slice(obj interface{}) (n *NSlice) {
 	return
 }
 
-// SliceV creates a new NSlice encapsulating the given variadic elements in a new slice of
+// NewSliceV creates a new NSlice encapsulating the given variadic elements in a new slice of
 // that type. Thi call incurs the full 10x reflection overhead. For large slice params use
 // the Slice() func instead.
 //
 // Cost: ~10x
-func SliceV(items ...interface{}) (n *NSlice) {
+func NewSliceV(items ...interface{}) (n *NSlice) {
 	n = &NSlice{}
 
 	// Return NSlice.Nil if nothing given
