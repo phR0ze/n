@@ -111,6 +111,16 @@ func (p *IntSlice) At(i int) (obj *NObj) {
 	return
 }
 
+// Clear the underlying slice, returns Slice for chaining.
+func (p *IntSlice) Clear() Slice {
+	if p == nil {
+		p = NewIntSliceV()
+	} else {
+		*p = *NewIntSliceV()
+	}
+	return p
+}
+
 // Empty tests if the slice is empty.
 func (p *IntSlice) Empty() bool {
 	if p == nil || len(*p) == 0 {

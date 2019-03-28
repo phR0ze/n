@@ -16,6 +16,7 @@ type Slice interface {
 	AppendS(other interface{}) Slice    // AppendS appends the other slice using variadic expansion and returns Slice for chaining.
 	AppendV(elems ...interface{}) Slice // AppendV appends the variadic elements to the end of the Slice and returns the Slice for chaining.
 	At(i int) (obj *NObj)               // At returns the element at the given index location. Allows for negative notation.
+	Clear() Slice                       // Clear the underlying slice, returns Slice for chaining.
 	Empty() bool                        // Empty tests if the slice is empty.
 	Len() int                           // Len returns the number of elements in the slice.
 	Nil() bool                          // Nil tests if the slice is nil.

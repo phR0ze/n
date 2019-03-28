@@ -436,6 +436,33 @@ func TestIntSlice_At(t *testing.T) {
 	}
 }
 
+// Clear
+//--------------------------------------------------------------------------------------------------
+
+func ExampleIntSlice_Clear() {
+	slice := NewIntSliceV(1).AppendS([]int{2, 3})
+	fmt.Println(slice.Clear().O())
+	// Output: []
+}
+
+func TestIntSlice_Clear(t *testing.T) {
+
+	// nil
+	{
+		var slice *IntSlice
+		assert.Equal(t, NewIntSliceV(), slice.Clear())
+		assert.Equal(t, (*IntSlice)(nil), slice)
+	}
+
+	// int
+	{
+		slice := NewIntSliceV(1, 2, 3, 4)
+		assert.Equal(t, NewIntSliceV(), slice.Clear())
+		assert.Equal(t, NewIntSliceV(), slice.Clear())
+		assert.Equal(t, NewIntSliceV(), slice)
+	}
+}
+
 // Empty
 //--------------------------------------------------------------------------------------------------
 func ExampleIntSlice_Empty() {
