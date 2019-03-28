@@ -878,17 +878,21 @@ func (s *NSlice) Insert(i int, obj interface{}) *NSlice {
 			s.o = slice
 		}
 	default:
-		// v := reflect.ValueOf(s.o)
-		// x := reflect.ValueOf(obj)
-		// if j == 0 {
-		// 	v = reflect.AppendSlice(v.Slice(0, i), v.Slice(i+1, v.Len()))
-		// }
-		// if i+1 < v.Len() {
-		// 	v = reflect.AppendSlice(v.Slice(0, i), v.Slice(i+1, v.Len()))
-		// } else {
-		// 	v = v.Slice(0, i)
-		// }
-		// s.o = slice
+		ok = true
+		v := reflect.ValueOf(s.o)
+		x := reflect.ValueOf(obj)
+		if j == 0 {
+			new := reflect.MakeSlice(reflect.SliceOf(x.Type()), 1, 1)
+			new.Index(0).Set(x)
+			v = reflect.AppendSlice(new, v.Slice(0, v.Len()))
+		} else if j < s.len {
+			v = reflect.Append(v, x)
+			reflect.Copy(v.Slice(j+1, v.Len()), v.Slice(j, v.Len()))
+			v.Index(j).Set(x)
+		} else {
+			v = reflect.Append(v, x)
+		}
+		s.o = v.Interface()
 	}
 	if !ok {
 		panic(fmt.Sprintf("can't insert type '%T' into '%T'", obj, s.o))

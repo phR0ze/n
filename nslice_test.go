@@ -2078,32 +2078,25 @@ func TestNSlice_FirstN(t *testing.T) {
 // Insert
 //--------------------------------------------------------------------------------------------------
 func BenchmarkNSlice_Insert_Normal(t *testing.B) {
-	ints := Range(0, nines5)
-	index := Range(0, nines5)
-	for i := range index {
-		if i+1 < len(ints) {
-			ints = append(ints[:i], ints[i+1:]...)
-		} else if i >= 0 && i < len(ints) {
-			ints = ints[:i]
-		}
+	ints := []int{}
+	for i := range Range(0, nines6) {
+		ints = append(ints, i)
+		copy(ints[1:], ints[1:])
+		ints[0] = i
 	}
 }
 
 func BenchmarkNSlice_Insert_Optimized(t *testing.B) {
-	src := Range(0, nines5)
-	index := Range(0, nines5)
-	slice := Slice(src)
-	for i := range index {
-		slice.Take(i)
+	slice := &NSlice{o: []int{}}
+	for i := range Range(0, nines6) {
+		slice.Insert(0, i)
 	}
 }
 
 func BenchmarkNSlice_Insert_Reflect(t *testing.B) {
-	src := rangeNObj(0, nines5)
-	index := Range(0, nines5)
-	slice := Slice(src)
-	for i := range index {
-		slice.Take(i)
+	slice := &NSlice{o: []NObj{}}
+	for i := range Range(0, nines6) {
+		slice.Insert(0, NObj{i})
 	}
 }
 
@@ -2160,6 +2153,54 @@ func TestNSlice_Insert(t *testing.T) {
 			assert.Equal(t, SliceV(0, 1), SliceV(0, 1).Insert(10, 1))
 			assert.Equal(t, SliceV(0, 1), SliceV(0, 1).Insert(2, 1))
 			assert.Equal(t, SliceV(0, 1), SliceV(0, 1).Insert(-3, 1))
+		}
+	}
+
+	// custom
+	{
+		// append
+		{
+			slice := SliceV()
+			assert.Equal(t, SliceV(0), slice.Insert(-1, 0))
+			assert.Equal(t, SliceV(0, 1), slice.Insert(-1, 1))
+			assert.Equal(t, SliceV(0, 1, 2), slice.Insert(-1, 2))
+		}
+
+		// prepend
+		{
+			slice := SliceV()
+			assert.Equal(t, SliceV(NObj{2}), slice.Insert(0, NObj{2}))
+			assert.Equal(t, Slice([]NObj{{1}, {2}}), slice.Insert(0, NObj{1}))
+			assert.Equal(t, Slice([]NObj{{0}, {1}, {2}}), slice.Insert(0, NObj{0}))
+		}
+
+		// middle pos
+		{
+			slice := Slice([]NObj{{0}, {5}})
+			assert.Equal(t, Slice([]NObj{{0}, {1}, {5}}), slice.Insert(1, NObj{1}))
+			assert.Equal(t, Slice([]NObj{{0}, {1}, {2}, {5}}), slice.Insert(2, NObj{2}))
+			assert.Equal(t, Slice([]NObj{{0}, {1}, {2}, {3}, {5}}), slice.Insert(3, NObj{3}))
+			assert.Equal(t, Slice([]NObj{{0}, {1}, {2}, {3}, {4}, {5}}), slice.Insert(4, NObj{4}))
+		}
+
+		// middle neg
+		{
+			slice := Slice([]NObj{{0}, {5}})
+			assert.Equal(t, Slice([]NObj{{0}, {1}, {5}}), slice.Insert(-2, NObj{1}))
+			assert.Equal(t, Slice([]NObj{{0}, {1}, {2}, {5}}), slice.Insert(-2, NObj{2}))
+			assert.Equal(t, Slice([]NObj{{0}, {1}, {2}, {3}, {5}}), slice.Insert(-2, NObj{3}))
+			assert.Equal(t, Slice([]NObj{{0}, {1}, {2}, {3}, {4}, {5}}), slice.Insert(-2, NObj{4}))
+		}
+
+		// error cases
+		{
+			var slice *NSlice
+			assert.True(t, slice.Insert(0, NObj{0}).Nil())
+			assert.Equal(t, (*NSlice)(nil), slice.Insert(0, NObj{0}))
+			assert.Equal(t, Slice([]NObj{{0}, {1}}), Slice([]NObj{{0}, {1}}).Insert(-10, 1))
+			assert.Equal(t, Slice([]NObj{{0}, {1}}), Slice([]NObj{{0}, {1}}).Insert(10, 1))
+			assert.Equal(t, Slice([]NObj{{0}, {1}}), Slice([]NObj{{0}, {1}}).Insert(2, 1))
+			assert.Equal(t, Slice([]NObj{{0}, {1}}), Slice([]NObj{{0}, {1}}).Insert(-3, 1))
 		}
 	}
 }
