@@ -944,6 +944,8 @@ func (p *NSlice) Len() int {
 // Less returns true if the object indexed by i is less than the object indexed by j.
 // Implements the sort.Interface
 //
+// Cost: ~0x - 30x
+//
 // Optimized types: []bool, []int, []string, []NObj
 func (p *NSlice) Less(i, j int) (result bool) {
 	if p.Nil() || p.len < 2 || i < 0 || j < 0 || i >= p.len || j >= p.len {
@@ -957,26 +959,17 @@ func (p *NSlice) Less(i, j int) (result bool) {
 		result = slice[i] < slice[j]
 	case []string:
 		result = slice[i] < slice[j]
+	case []NObj:
+		result = slice[i].Less(slice[j])
 	default:
 		v := reflect.ValueOf(p.o)
-
-		// Resolve to non-pointer method
 		x, y := indirect(v.Index(i)), indirect(v.Index(j))
 		if comparable, ok := x.Interface().(Comparable); ok {
-			if comparable.Less(x.Interface(), y.Interface()) {
+			if comparable.Less(y.Interface()) {
 				result = true
 			}
 		}
 	}
-	// if x, ok := p.o.([]bool); ok {
-	// 	result = (x[i] == false && x[j] == true)
-	// } else if x, ok := p.o.([]int); ok {
-	// 	result = x[i] < x[j]
-	// } else if x, ok := p.o.([]string); ok {
-	// 	result = x[i] < x[j]
-	// } else if x, ok := p.o.([]NObj); ok {
-	// 	result = x.Less(i, j)
-	// }
 	return
 }
 

@@ -12,27 +12,25 @@ type NObj struct {
 	o interface{} // value
 }
 
-// Equal returns true if the left object is value equal to the right object.
+// Equal returns true if the object is value equal to the other object.
 // The unerlying type must be the same else false is always returned
 //
 // Supported element types: bool, int, string
-func (p NObj) Equal(left, right interface{}) bool {
-	l, okl := left.(NObj)
-	r, okr := right.(NObj)
-	if okl && okr {
-		switch x := l.o.(type) {
+func (p NObj) Equal(other interface{}) bool {
+	if o, ok := other.(NObj); ok {
+		switch x := p.o.(type) {
 		case bool:
-			y, _ := r.o.(bool)
+			y, _ := o.o.(bool)
 			if x == y {
 				return true
 			}
 		case int:
-			y, _ := r.o.(int)
+			y, _ := o.o.(int)
 			if x == y {
 				return true
 			}
 		case string:
-			y, _ := r.o.(string)
+			y, _ := o.o.(string)
 			if x == y {
 				return true
 			}
@@ -41,27 +39,25 @@ func (p NObj) Equal(left, right interface{}) bool {
 	return false
 }
 
-// Less returns true if the left object is less than the right object.
+// Less returns true if the object is less than the other object.
 // The unerlying type must be the same else false is always returned
 //
 // Supported element types: bool, int, string
-func (p NObj) Less(left, right interface{}) bool {
-	l, okl := left.(NObj)
-	r, okr := right.(NObj)
-	if okl && okr {
-		switch x := l.o.(type) {
+func (p NObj) Less(other interface{}) bool {
+	if o, ok := other.(NObj); ok {
+		switch x := p.o.(type) {
 		case bool:
-			y, _ := r.o.(bool)
+			y, _ := o.o.(bool)
 			if x == false && y == true {
 				return true
 			}
 		case int:
-			y, _ := r.o.(int)
+			y, _ := o.o.(int)
 			if x < y {
 				return true
 			}
 		case string:
-			y, _ := r.o.(string)
+			y, _ := o.o.(string)
 			if x < y {
 				return true
 			}

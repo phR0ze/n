@@ -46,8 +46,8 @@ const (
 // Comparable provides a means of comparing arbitrary types
 // These methods should be implemented using a non-pointer receiver
 type Comparable interface {
-	Less(left, right interface{}) bool  // Less returns true if the l object is less than the r object
-	Equal(left, right interface{}) bool // Equal returns true if the l object is value equal to the r object
+	Less(other interface{}) bool  // Less returns true if the object is less than the other object
+	Equal(other interface{}) bool // Equal returns true if the object is value equal to the other object
 }
 
 // O is an alias for interface{} and provides a number of export methods

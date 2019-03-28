@@ -2278,7 +2278,7 @@ func BenchmarkNSlice_Less_Normal(t *testing.B) {
 	ints := Range(0, nines6)
 	for i := 0; i < len(ints); i++ {
 		if i+1 < len(ints) {
-			ints[i], ints[i+1] = ints[i+1], ints[i]
+			_ = ints[i] < ints[i+1]
 		}
 	}
 }
@@ -2287,7 +2287,7 @@ func BenchmarkNSlice_Less_Optimized(t *testing.B) {
 	slice := Slice(Range(0, nines6))
 	for i := 0; i < slice.Len(); i++ {
 		if i+1 < slice.Len() {
-			slice.Swap(i, i+1)
+			slice.Less(i, i+1)
 		}
 	}
 }
@@ -2296,7 +2296,7 @@ func BenchmarkNSlice_Less_Reflect(t *testing.B) {
 	slice := Slice(rangeNObj(0, nines6))
 	for i := 0; i < slice.Len(); i++ {
 		if i+1 < slice.Len() {
-			slice.Swap(i, i+1)
+			slice.Less(i, i+1)
 		}
 	}
 }

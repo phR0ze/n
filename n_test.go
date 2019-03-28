@@ -12,6 +12,10 @@ const nines5 = 99999
 const nines4 = 9999
 const nines3 = 999
 
+type bob struct {
+	o interface{}
+}
+
 // var smallStringSet = []string{"Lorem", "ipsum", "dolor", "sit", "amet,", "consectetur", "adipiscing", "elit,", "sed", "do",
 func TestOptimized(t *testing.T) {
 	assert.True(t, optimized([]bool{}))
