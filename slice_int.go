@@ -2,6 +2,7 @@ package n
 
 import (
 	"sort"
+	"strings"
 
 	"github.com/pkg/errors"
 )
@@ -289,6 +290,29 @@ func (p *IntSlice) Insert(i int, elem interface{}) Slice {
 		}
 	}
 	return p
+}
+
+// Join converts each element into a string then joins them together using the given separator or comma
+// if the separator is not given.
+func (p *IntSlice) Join(separator ...string) (str *Object) {
+	if p == nil || len(*p) == 0 {
+		str = &Object{""}
+		return
+	}
+	sep := ","
+	if len(separator) > 0 {
+		sep = separator[0]
+	}
+
+	var builder strings.Builder
+	for i := 0; i < len(*p); i++ {
+		builder.WriteString((&Object{(*p)[i]}).ToString())
+		if i+1 < len(*p) {
+			builder.WriteString(sep)
+		}
+	}
+	str = &Object{builder.String()}
+	return
 }
 
 // Last returns the last element in the slice as Object which will be Object.Nil true if

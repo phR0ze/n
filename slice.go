@@ -33,11 +33,12 @@ type Slice interface {
 	First() (elem *Object)                     // First returns the first element in the slice as Object
 	FirstN(n int) Slice                        // FirstN returns the first n elements in the slice as a Slice
 	//Flatten() Slice                              // Flatten
-	Insert(i int, elem interface{}) Slice // Insert the given element before the element with the given index.
-	Last() (elem *Object)                 // Last returns the last element in the slice as Object.
-	LastN(n int) Slice                    // LastN returns the last n elements in the slice as a Slice.
-	Len() int                             // Len returns the number of elements in the slice.
-	Less(i, j int) bool                   // Less returns true if the element indexed by i is less than the element indexed by j.
+	Insert(i int, elem interface{}) Slice   // Insert the given element before the element with the given index.
+	Join(separator ...string) (str *Object) // Join converts each element into a string then joins them together using the given separator or comma
+	Last() (elem *Object)                   // Last returns the last element in the slice as Object.
+	LastN(n int) Slice                      // LastN returns the last n elements in the slice as a Slice.
+	Len() int                               // Len returns the number of elements in the slice.
+	Less(i, j int) bool                     // Less returns true if the element indexed by i is less than the element indexed by j.
 	//Map(sel func(O) O) (other Slice)             // Map projects the slice into a new form by executing the lambda against all elements.
 	//MapF(sel func(O) O) (other Slice)            // Map projects the slice into a new form by executing the lambda against all elements then calls Flatten.
 	Nil() bool                                   // Nil tests if the slice is nil.

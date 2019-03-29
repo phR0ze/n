@@ -2,6 +2,7 @@ package n
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -1156,6 +1157,44 @@ func TestIntSlice_Insert(t *testing.T) {
 		assert.Equal(t, NewIntSliceV(0, 1), NewIntSliceV(0, 1).Insert(2, 1))
 		assert.Equal(t, NewIntSliceV(0, 1), NewIntSliceV(0, 1).Insert(-3, 1))
 	}
+}
+
+// Join
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_Join_Go(t *testing.B) {
+	ints := Range(0, nines4)
+	strs := []string{}
+	for i := 0; i < len(ints); i++ {
+		strs = append(strs, fmt.Sprintf("%v", ints[i]))
+	}
+	strings.Join(strs, ",")
+}
+
+func BenchmarkIntSlice_Join_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines4))
+	slice.Join()
+}
+
+func ExampleIntSlice_Join() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.Join().O())
+	// Output: 1,2,3
+}
+
+func TestIntSlice_Join(t *testing.T) {
+	// nil
+	{
+		var slice *IntSlice
+		assert.Equal(t, &Object{""}, slice.Join())
+	}
+
+	// empty
+	{
+		assert.Equal(t, &Object{""}, NewIntSliceV().Join())
+	}
+
+	assert.Equal(t, "1,2,3", NewIntSliceV(1, 2, 3).Join().O())
+	assert.Equal(t, "1.2.3", NewIntSliceV(1, 2, 3).Join(".").O())
 }
 
 // Last
