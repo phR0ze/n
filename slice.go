@@ -12,30 +12,34 @@ import (
 // Slice provides a generic way to work with slice types providing convenience methods
 // on par with other rapid development languages.
 type Slice interface {
-	Any(elems ...interface{}) bool               // Any tests if the slice is not empty or optionally if it contains any of the given variadic elements.
-	AnyS(other interface{}) bool                 // AnyS tests if the slice contains any of the other slice's elements.
-	Append(elem interface{}) Slice               // Append an element to the end of the Slice and returns the Slice for chaining.
-	AppendS(other interface{}) Slice             // AppendS appends the other slice using variadic expansion and returns Slice for chaining.
-	AppendV(elems ...interface{}) Slice          // AppendV appends the variadic elements to the end of the Slice and returns the Slice for chaining.
-	At(i int) (elem *Object)                     // At returns the element at the given index location. Allows for negative notation.
-	Clear() Slice                                // Clear the underlying slice, returns Slice for chaining.
-	Copy(indices ...int) (other Slice)           // Copy performs a deep copy such that modifications to the copy will not affect the original.
-	Drop(indices ...int) Slice                   // Drop deletes a range of elements and returns the rest of the elements in the slice.
-	DropAt(i int) Slice                          // DropAt deletes the element at the given index location. Allows for negative notation.
-	DropFirst() Slice                            // DropFirst deletes the first element and returns the rest of the elements in the slice.
-	DropFirstN(n int) Slice                      // DropFirstN deletes the first n elements and returns the rest of the elements in the slice.
-	DropLast() Slice                             // DropLast deletes the last element and returns the rest of the elements in the slice.
-	DropLastN(n int) Slice                       // DropLastN deletes the last n elements and returns the rest of the elements in the slice.
-	Each(action func(O)) Slice                   // Each calls the given function once for each element in the slice, passing that element in
-	EachE(action func(O) error) (Slice, error)   // EachE calls the given function once for each element in the slice, passing that element in
-	Empty() bool                                 // Empty tests if the slice is empty.
-	First() (elem *Object)                       // First returns the first element in the slice as Object
-	FirstN(n int) Slice                          // FirstN returns the first n elements in the slice as a Slice
-	Insert(i int, elem interface{}) Slice        // Insert the given element before the element with the given index.
-	Last() (elem *Object)                        // Last returns the last element in the slice as Object.
-	LastN(n int) Slice                           // LastN returns the last n elements in the slice as a Slice.
-	Len() int                                    // Len returns the number of elements in the slice.
-	Less(i, j int) bool                          // Less returns true if the element indexed by i is less than the element indexed by j.
+	Any(elems ...interface{}) bool // Any tests if the slice is not empty or optionally if it contains any of the given variadic elements.
+	AnyS(other interface{}) bool   // AnyS tests if the slice contains any of the other slice's elements.
+	//AnyWhere(sel func(O) bool) bool              // AnyWhere tests if the slice contains any that match the lambda selector.
+	Append(elem interface{}) Slice             // Append an element to the end of the Slice and returns the Slice for chaining.
+	AppendS(other interface{}) Slice           // AppendS appends the other slice using variadic expansion and returns Slice for chaining.
+	AppendV(elems ...interface{}) Slice        // AppendV appends the variadic elements to the end of the Slice and returns the Slice for chaining.
+	At(i int) (elem *Object)                   // At returns the element at the given index location. Allows for negative notation.
+	Clear() Slice                              // Clear the underlying slice, returns Slice for chaining.
+	Copy(indices ...int) (other Slice)         // Copy performs a deep copy such that modifications to the copy will not affect the original.
+	Drop(indices ...int) Slice                 // Drop deletes a range of elements and returns the rest of the elements in the slice.
+	DropAt(i int) Slice                        // DropAt deletes the element at the given index location. Allows for negative notation.
+	DropFirst() Slice                          // DropFirst deletes the first element and returns the rest of the elements in the slice.
+	DropFirstN(n int) Slice                    // DropFirstN deletes the first n elements and returns the rest of the elements in the slice.
+	DropLast() Slice                           // DropLast deletes the last element and returns the rest of the elements in the slice.
+	DropLastN(n int) Slice                     // DropLastN deletes the last n elements and returns the rest of the elements in the slice.
+	Each(action func(O)) Slice                 // Each calls the given function once for each element in the slice, passing that element in
+	EachE(action func(O) error) (Slice, error) // EachE calls the given function once for each element in the slice, passing that element in
+	Empty() bool                               // Empty tests if the slice is empty.
+	First() (elem *Object)                     // First returns the first element in the slice as Object
+	FirstN(n int) Slice                        // FirstN returns the first n elements in the slice as a Slice
+	//Flatten() Slice                              // Flatten
+	Insert(i int, elem interface{}) Slice // Insert the given element before the element with the given index.
+	Last() (elem *Object)                 // Last returns the last element in the slice as Object.
+	LastN(n int) Slice                    // LastN returns the last n elements in the slice as a Slice.
+	Len() int                             // Len returns the number of elements in the slice.
+	Less(i, j int) bool                   // Less returns true if the element indexed by i is less than the element indexed by j.
+	//Map(sel func(O) O) (other Slice)             // Map projects the slice into a new form by executing the lambda against all elements.
+	//MapF(sel func(O) O) (other Slice)            // Map projects the slice into a new form by executing the lambda against all elements then calls Flatten.
 	Nil() bool                                   // Nil tests if the slice is nil.
 	O() interface{}                              // O returns the underlying data structure.
 	Pair() (first, second *Object)               // Pair simply returns the first and second slice elements as Object
@@ -52,6 +56,7 @@ type Slice interface {
 	TakeFirstN(n int) (other Slice)              // TakeFirstN deletes the first n elements and returns them as a new slice.
 	TakeLast() (elem *Object)                    // TakeLast deletes the last element and returns it as an Object.
 	TakeLastN(n int) (other Slice)               // TakeLastN deletes the last n elements and returns them as a new slice.
+	//Uniq() Slice                                 // Uniq removes all elements that are not uniq.
 }
 
 // NSlice provides a generic way to work with slice types providing convenience methods
@@ -1285,55 +1290,6 @@ func (p *NSlice) Take(i int) (obj *Object) {
 	p.len--
 	return
 }
-
-// // // TakeFirst updates the underlying slice and returns the item and status
-// // func (p *strSliceN) TakeFirst() (string, bool) {
-// // 	if len(p.v) > 0 {
-// // 		item := s.v[0]
-// // 		s.v = s.v[1:]
-// // 		return item, true
-// // 	}
-// // 	return "", false
-// // }
-
-// // // TakeFirstCnt updates the underlying slice and returns the items
-// // func (p *strSliceN) TakeFirstCnt(cnt int) (result *strSliceN) {
-// // 	if cnt > 0 {
-// // 		if len(p.v) >= cnt {
-// // 			result = S(p.v[:cnt]...)
-// // 			s.v = s.v[cnt:]
-// // 		} else {
-// // 			result = S(p.v...)
-// // 			s.v = []string{}
-// // 		}
-// // 	}
-// // 	return
-// // }
-
-// // // TakeLast updates the underlying slice and returns the item and status
-// // func (p *strSliceN) TakeLast() (ptring, bool) {
-// // 	if len(p.v) > 0 {
-// // 		item := s.v[len(p.v)-1]
-// // 		s.v = s.v[:len(p.v)-1]
-// // 		return item, true
-// // 	}
-// // 	return "", false
-// // }
-
-// // // TakeLastCnt updates the underlying slice and returns a new nub
-// // func (p *strSliceN) TakeLastCnt(cnt int) (result *strSliceN) {
-// // 	if cnt > 0 {
-// // 		if len(p.v) >= cnt {
-// // 			i := len(p.v) - cnt
-// // 			result = S(p.v[i:]...)
-// // 			s.v = s.v[:i]
-// // 		} else {
-// // 			result = S(p.v...)
-// // 			s.v = []string{}
-// // 		}
-// // 	}
-// // 	return
-// // }
 
 // // // Uniq removes all duplicates from the underlying slice
 // // func (p *strSliceN) Uniq() *strSliceN {
