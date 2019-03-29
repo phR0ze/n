@@ -20,12 +20,12 @@ type Slice interface {
 	At(i int) (elem *Object)                     // At returns the element at the given index location. Allows for negative notation.
 	Clear() Slice                                // Clear the underlying slice, returns Slice for chaining.
 	Copy(indices ...int) (other Slice)           // Copy performs a deep copy such that modifications to the copy will not affect the original.
-	Drop(i int) Slice                            // Drop deletes the element at the given index location. Allows for negative notation.
+	DropRange(indices ...int) Slice              // DropRange deletes a range of elements and returns the rest of the elements in the slice.
+	DropAt(i int) Slice                          // Drop deletes the element at the given index location. Allows for negative notation.
 	DropFirst() Slice                            // DropFirst deletes the first element and returns the rest of the elements in the slice.
 	DropFirstN(n int) Slice                      // DropFirstN deletes the first n elements and returns the rest of the elements in the slice.
 	DropLast() Slice                             // DropLast deletes the last element and returns the rest of the elements in the slice.
 	DropLastN(n int) Slice                       // DropLastN deletes the last n elements and returns the rest of the elements in the slice.
-	DropRange(i, j int) Slice                    // DropRange deletes a range of elements and returns the rest of the elements in the slice.
 	Each(action func(O)) Slice                   // Each calls the given function once for each element in the slice, passing that element in
 	EachE(action func(O) error) (Slice, error)   // EachE calls the given function once for each element in the slice, passing that element in
 	Empty() bool                                 // Empty tests if the slice is empty.
@@ -43,7 +43,7 @@ type Slice interface {
 	Set(i int, elem interface{}) Slice           // Set the element at the given index location to the given element. Allows for negative notation.
 	SetE(i int, elem interface{}) (Slice, error) // Set the element at the given index location to the given element. Allows for negative notation.
 	Single() bool                                // Single simply reports true if there is only one element in the slice
-	Slice(i, j int) Slice                        // Slice provides a Ruby like slice function allowing for positive and negative notation.
+	Slice(indices ...int) Slice                  // Slice provides a Ruby like slice function allowing for positive and negative notation.
 	Sort() Slice                                 // Sort the underlying slice and return a pointer for chaining.
 	Swap(i, j int)                               // Swap elements in the underlying slice.
 	//Take(i int) (elem *Object)                   // Take deletes the elemement at the given index location and returns it as an Object.
@@ -1415,34 +1415,43 @@ func absIndex(len, i int) (abs int) {
 
 // convert to positive notation, move them within bounds
 // returns an error if mutually exclusive
-func absIndices(len, i, j int) (absi int, absj int, err error) {
-	absi, absj = i, j
+func absIndices(l int, indices ...int) (i int, j int, err error) {
+
+	// Get indices must be either none or two
+	i, j = 0, -1
+	if len(indices) == 2 {
+		i = indices[0]
+		j = indices[1]
+	} else if len(indices) == 1 {
+		err = errors.Errorf("only one index given")
+		return
+	}
 
 	// Convert to postive notation
-	if absi < 0 {
-		absi = len + absi
+	if i < 0 {
+		i = l + i
 	}
-	if absj < 0 {
-		absj = len + absj
+	if j < 0 {
+		j = l + j
 	}
 
 	// Start can't be past end else invalid
-	if absi > absj {
+	if i > j {
 		err = errors.Errorf("indices are mutually exclusive")
 		return
 	}
 
 	// Move start/end within bounds
-	if absi < 0 {
-		absi = 0
+	if i < 0 {
+		i = 0
 	}
-	if absj >= len {
-		absj = len - 1
+	if j >= l {
+		j = l - 1
 	}
 
 	// Go has an exclusive behavior by default and we want inclusive
 	// so offsetting the end by one
-	absj++
+	j++
 
 	return
 }

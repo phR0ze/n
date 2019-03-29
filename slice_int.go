@@ -122,7 +122,7 @@ func (p *IntSlice) Clear() Slice {
 	if p == nil {
 		p = NewIntSliceV()
 	} else {
-		*p = *NewIntSliceV()
+		p.DropRange()
 	}
 	return p
 }
@@ -140,15 +140,8 @@ func (p *IntSlice) Copy(indices ...int) (other Slice) {
 		return
 	}
 
-	// Get indices
-	i, j := 0, len(*p)-1
-	if len(indices) == 2 {
-		i = indices[0]
-		j = indices[1]
-	}
-
 	// Handle index manipulation
-	i, j, err := absIndices(len(*p), i, j)
+	i, j, err := absIndices(len(*p), indices...)
 	if err != nil {
 		other = NewIntSliceV()
 		return
@@ -162,7 +155,7 @@ func (p *IntSlice) Copy(indices ...int) (other Slice) {
 
 // Drop deletes the element at the given index location. Allows for negative notation.
 // Returns the rest of the elements in the slice for chaining.
-func (p *IntSlice) Drop(i int) Slice {
+func (p *IntSlice) DropAt(i int) Slice {
 	return p.DropRange(i, i)
 }
 
@@ -192,18 +185,20 @@ func (p *IntSlice) DropLastN(n int) Slice {
 	return p.DropRange(absNeg(n), -1)
 }
 
-// DropRange deletes a range of elements and returns the rest of the elements in the slice
-// allowing for positive and negative notation. Uses inclusive behavior such that DropRange(0, -1)
-// includes index -1 as opposed to Go's exclusive behavior. Out of bounds indices will be moved within bounds.
-func (p *IntSlice) DropRange(i, j int) Slice {
+// DropRange deletes a range of elements and returns the rest of the elements in the slice.
+// Expects nothing, in which case everything is dropped, or two indices i and j, in which case
+// positive and negative notation is supported and uses an inclusive behavior such that
+// DropAt(0, -1) includes index -1 as opposed to Go's exclusive behavior. Out of bounds indices
+// will be moved within bounds.
+func (p *IntSlice) DropRange(indices ...int) Slice {
 	if p == nil || len(*p) == 0 {
 		return p
 	}
 
 	// Handle index manipulation
-	i, j, err := absIndices(len(*p), i, j)
+	i, j, err := absIndices(len(*p), indices...)
 	if err != nil {
-		return NewIntSliceV()
+		return p
 	}
 
 	// Execute
@@ -388,19 +383,20 @@ func (p *IntSlice) Single() bool {
 }
 
 // Slice provides a Ruby like slice function for Slice allowing for positive and negative notation.
-// Slice uses an inclusive behavior such that Slice(0, -1) includes index -1 as opposed to Go's exclusive
-// behavior. Out of bounds indices will be moved within bounds.
+// Expects nothing, in which case everything is included, or two indices i and j, in which case
+// an inclusive behavior is used such that Slice(0, -1) includes index -1 as opposed to Go's
+// exclusive behavior. Out of bounds indices will be moved within bounds.
 //
 // An empty Slice is returned if indicies are mutually exclusive or nothing can be returned.
 //
 // e.g. NewIntSliceV(1,2,3).Slice(0, -1) == [1,2,3] && NewIntSliceV(1,2,3).Slice(1,2) == [2,3]
-func (p *IntSlice) Slice(i, j int) Slice {
+func (p *IntSlice) Slice(indices ...int) Slice {
 	if p == nil || len(*p) == 0 {
 		return NewIntSliceV()
 	}
 
 	// Handle index manipulation
-	i, j, err := absIndices(len(*p), i, j)
+	i, j, err := absIndices(len(*p), indices...)
 	if err != nil {
 		return NewIntSliceV()
 	}

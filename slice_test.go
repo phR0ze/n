@@ -3289,6 +3289,22 @@ func TestSlice_absIndices(t *testing.T) {
 	// -4,-3,-2,-1
 	//  0, 1, 2, 3
 
+	// no indicies given
+	{
+		i, j, err := absIndices(len)
+		assert.Equal(t, 0, i)
+		assert.Equal(t, 4, j)
+		assert.Nil(t, err)
+	}
+
+	// one index given
+	{
+		i, j, err := absIndices(len, 1)
+		assert.Equal(t, 0, i)
+		assert.Equal(t, -1, j)
+		assert.Equal(t, "only one index given", err.Error())
+	}
+
 	// end
 	{
 		i, j, err := absIndices(len, -3, -1)
