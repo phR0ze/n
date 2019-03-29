@@ -230,6 +230,33 @@ func (p *IntSlice) DropLastN(n int) Slice {
 	return p
 }
 
+// Each calls the given function once for each element in the slice, passing that element in
+// as a parameter. Returns a reference to the slice
+func (p *IntSlice) Each(action func(O)) Slice {
+	if p == nil {
+		return p
+	}
+	for i := 0; i < len(*p); i++ {
+		action((*p)[i])
+	}
+	return p
+}
+
+// EachE calls the given function once for each element in the slice, passing that element in
+// as a parameter. Returns a reference to the slice and any error from the user function.
+func (p *IntSlice) EachE(action func(O) error) (Slice, error) {
+	var err error
+	if p == nil {
+		return p, err
+	}
+	for i := 0; i < len(*p); i++ {
+		if err = action((*p)[i]); err != nil {
+			return p, err
+		}
+	}
+	return p, err
+}
+
 // Empty tests if the slice is empty.
 func (p *IntSlice) Empty() bool {
 	if p == nil || len(*p) == 0 {

@@ -23,6 +23,8 @@ type Slice interface {
 	DropFirstN(n int) Slice                      // DropFirstN deletes the first n elements and returns the rest of the elements in the slice.
 	DropLast() Slice                             // DropLast deletes the last element and returns the rest of the elements in the slice.
 	DropLastN(n int) Slice                       // DropLastN deletes the last n elements and returns the rest of the elements in the slice.
+	Each(action func(O)) Slice                   // Each calls the given function once for each element in the slice, passing that element in
+	EachE(action func(O) error) (Slice, error)   // EachE calls the given function once for each element in the slice, passing that element in
 	Empty() bool                                 // Empty tests if the slice is empty.
 	Len() int                                    // Len returns the number of elements in the slice.
 	Nil() bool                                   // Nil tests if the slice is nil.
