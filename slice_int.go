@@ -1,7 +1,6 @@
 package n
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 
@@ -380,8 +379,9 @@ func (p *IntSlice) Reverse() Slice {
 	if p == nil || len(*p) == 0 {
 		return p
 	}
-	result := sort.Reverse(p)
-	fmt.Println(result)
+	for i, j := 0, len(*p)-1; i < j; i, j = i+1, j-1 {
+		p.Swap(i, j)
+	}
 	return p
 }
 

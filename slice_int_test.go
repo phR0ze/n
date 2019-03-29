@@ -1460,6 +1460,9 @@ func ExampleIntSlice_Reverse() {
 }
 
 func TestIntSlice_Reverse(t *testing.T) {
+
+	assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 3, 2).Reverse())
+
 	// nil
 	{
 		var slice *IntSlice
@@ -1470,9 +1473,6 @@ func TestIntSlice_Reverse(t *testing.T) {
 	{
 		assert.Equal(t, &Object{""}, NewIntSliceV().Join())
 	}
-
-	assert.Equal(t, "1,2,3", NewIntSliceV(1, 2, 3).Join().O())
-	assert.Equal(t, "1.2.3", NewIntSliceV(1, 2, 3).Join(".").O())
 }
 
 // Set
