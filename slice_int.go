@@ -232,6 +232,30 @@ func (p *IntSlice) DropLastN(n int) Slice {
 	return p
 }
 
+// DropRange deletes a range of elements and returns the rest of the elements in the slice
+// allowing for positive and negative notation. Uses inclusive behavior such that DropRange(0, -1)
+// includes index -1 as opposed to Go's exclusive behavior. Out of bounds indices will be moved within bounds.
+func (p *IntSlice) DropRange(i, j int) Slice {
+	if p == nil || len(*p) == 0 {
+		return p
+	}
+
+	// Handle index manipulation
+	i, j, err := absIndices(len(*p), i, j)
+	if err != nil {
+		return NewIntSliceV()
+	}
+
+	// Execute
+	n := j - i
+	if i+n < len(*p) {
+		*p = append((*p)[:i], (*p)[i+n:]...)
+	} else {
+		*p = (*p)[:i]
+	}
+	return p
+}
+
 // Each calls the given function once for each element in the slice, passing that element in
 // as a parameter. Returns a reference to the slice
 func (p *IntSlice) Each(action func(O)) Slice {

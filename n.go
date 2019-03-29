@@ -66,20 +66,6 @@ func indirect(v reflect.Value) reflect.Value {
 	return indirect(v.Elem())
 }
 
-// get the absolute value for the pos/neg index.
-// return of -1 indicates out of bounds
-func absIndex(len, i int) (abs int) {
-	if i < 0 {
-		abs = len + i
-	} else {
-		abs = i
-	}
-	if abs < 0 || abs >= len {
-		abs = -1
-	}
-	return
-}
-
 // Check to see if the given type is an optimized slice type
 func optimized(slice interface{}) (result bool) {
 	result = true

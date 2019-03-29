@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"reflect"
 	"sort"
+
+	"github.com/pkg/errors"
 )
 
 // Slice provides a generic way to work with slice types providing convenience methods
@@ -23,6 +25,7 @@ type Slice interface {
 	DropFirstN(n int) Slice                      // DropFirstN deletes the first n elements and returns the rest of the elements in the slice.
 	DropLast() Slice                             // DropLast deletes the last element and returns the rest of the elements in the slice.
 	DropLastN(n int) Slice                       // DropLastN deletes the last n elements and returns the rest of the elements in the slice.
+	DropRange(i, j int) Slice                    // DropRange deletes a range of elements and returns the rest of the elements in the slice.
 	Each(action func(O)) Slice                   // Each calls the given function once for each element in the slice, passing that element in
 	EachE(action func(O) error) (Slice, error)   // EachE calls the given function once for each element in the slice, passing that element in
 	Empty() bool                                 // Empty tests if the slice is empty.
@@ -40,9 +43,14 @@ type Slice interface {
 	Set(i int, elem interface{}) Slice           // Set the element at the given index location to the given element. Allows for negative notation.
 	SetE(i int, elem interface{}) (Slice, error) // Set the element at the given index location to the given element. Allows for negative notation.
 	Single() bool                                // Single simply reports true if there is only one element in the slice
-	Slice(i, j int) Slice                        // Slice provides a Ruby like slice function for Slice allowing for positive and negative notation.
+	Slice(i, j int) Slice                        // Slice provides a Ruby like slice function allowing for positive and negative notation.
 	Sort() Slice                                 // Sort the underlying slice and return a pointer for chaining.
 	Swap(i, j int)                               // Swap elements in the underlying slice.
+	//Take(i int) (elem *Object)                   // Take deletes the elemement at the given index location and returns it as an Object.
+	//TakeFirst() (elem *Object)                   // TakeFirst deletes the first element and returns it as an Object.
+	//TakeFirstN(n int) Slice                      // TakeFirstN deletes the first n elements and returns them as a new slice.
+	//TakeLast() (elem *Object)                    // TakeLast deletes the last element and returns it as an Object.
+	//TakeLastN(n int) Slice                       // TakeLastN deletes the last n elements and returns them as a new slice.
 }
 
 // NSlice provides a generic way to work with slice types providing convenience methods
@@ -1370,3 +1378,51 @@ func (p *NSlice) Take(i int) (obj *Object) {
 // func (q *NSlice) isSliceType() bool {
 // 	return q.k == reflect.Array || q.k == reflect.Slice
 // }
+
+// get the absolute value for the pos/neg index.
+// return of -1 indicates out of bounds
+func absIndex(len, i int) (abs int) {
+	if i < 0 {
+		abs = len + i
+	} else {
+		abs = i
+	}
+	if abs < 0 || abs >= len {
+		abs = -1
+	}
+	return
+}
+
+// convert to positive notation, move them within bounds
+// returns an error if mutually exclusive
+func absIndices(len, i, j int) (absi int, absj int, err error) {
+	absi, absj = i, j
+
+	// Convert to postive notation
+	if absi < 0 {
+		absi = len + absi
+	}
+	if absj < 0 {
+		absj = len + absj
+	}
+
+	// Start can't be past end else invalid
+	if absi > absj {
+		err = errors.Errorf("indices are mutually exclusive")
+		return
+	}
+
+	// Move start/end within bounds
+	if absi < 0 {
+		absi = 0
+	}
+	if absj >= len {
+		absj = len - 1
+	}
+
+	// Go has an exclusive behavior by default and we want inclusive
+	// so offsetting the end by one
+	absj++
+
+	return
+}

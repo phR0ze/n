@@ -23,24 +23,6 @@ func TestOptimized(t *testing.T) {
 	assert.False(t, optimized(""))
 }
 
-func TestNSlice_indexAbs(t *testing.T) {
-	//             -4,-3,-2,-1
-	//              0, 1, 2, 3
-	assert.Equal(t, 3, absIndex(4, -1))
-	assert.Equal(t, 2, absIndex(4, -2))
-	assert.Equal(t, 1, absIndex(4, -3))
-	assert.Equal(t, 0, absIndex(4, -4))
-
-	assert.Equal(t, 0, absIndex(4, 0))
-	assert.Equal(t, 1, absIndex(4, 1))
-	assert.Equal(t, 2, absIndex(4, 2))
-	assert.Equal(t, 3, absIndex(4, 3))
-
-	// out of bounds
-	assert.Equal(t, -1, absIndex(4, 4))
-	assert.Equal(t, -1, absIndex(4, -5))
-}
-
 // var smallStringSet = []string{"Lorem", "ipsum", "dolor", "sit", "amet,", "consectetur", "adipiscing", "elit,", "sed", "do",
 
 // 	"eiusmod", "tempor", "incididunt", "ut", "labore", "et", "dolore", "magna", "aliqua.", "Ut",
