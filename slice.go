@@ -1379,6 +1379,26 @@ func (p *NSlice) Take(i int) (obj *Object) {
 // 	return q.k == reflect.Array || q.k == reflect.Slice
 // }
 
+// simply pass positive values through and convert negative to positive
+func abs(i int) (abs int) {
+	if i < 0 {
+		abs = i * -1
+	} else {
+		abs = i
+	}
+	return
+}
+
+// simply pass negative values through and convert positive to negative
+func absNeg(i int) (abs int) {
+	if i < 0 {
+		abs = i
+	} else {
+		abs = i * -1
+	}
+	return
+}
+
 // get the absolute value for the pos/neg index.
 // return of -1 indicates out of bounds
 func absIndex(len, i int) (abs int) {

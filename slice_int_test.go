@@ -712,6 +712,9 @@ func TestIntSlice_DropFirstN(t *testing.T) {
 		assert.Equal(t, (*IntSlice)(nil), slice.DropFirstN(1))
 	}
 
+	// negative value
+	assert.Equal(t, NewIntSliceV(2, 3), NewIntSliceV(1, 2, 3).DropFirstN(-1))
+
 	// drop none
 	assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 2, 3).DropFirstN(0))
 
@@ -757,6 +760,9 @@ func TestIntSlice_DropLast(t *testing.T) {
 		var slice *IntSlice
 		assert.Equal(t, (*IntSlice)(nil), slice.DropLast())
 	}
+
+	// negative value
+	assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1, 2, 3).DropLastN(-1))
 
 	slice := NewIntSliceV(1, 2, 3)
 	assert.Equal(t, NewIntSliceV(1, 2), slice.DropLast())
@@ -862,19 +868,21 @@ func TestIntSlice_DropRange(t *testing.T) {
 
 	// drop 2
 	assert.Equal(t, NewIntSliceV(3, 4), NewIntSliceV(1, 2, 3, 4).DropRange(0, 1))
-	assert.Equal(t, NewIntSliceV(1, 3, 4), NewIntSliceV(1, 2, 3, 4).DropRange(1, 2))
-	assert.Equal(t, NewIntSliceV(1, 2, 4), NewIntSliceV(1, 2, 3, 4).DropRange(2, 3))
-	assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 2, 3, 4).DropRange(3, 4))
-	assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 2, 3, 4).DropRange(-1, -1))
-	assert.Equal(t, NewIntSliceV(1, 2, 4), NewIntSliceV(1, 2, 3, 4).DropRange(-2, -2))
-	assert.Equal(t, NewIntSliceV(1, 3, 4), NewIntSliceV(1, 2, 3, 4).DropRange(-3, -3))
-	assert.Equal(t, NewIntSliceV(2, 3, 4), NewIntSliceV(1, 2, 3, 4).DropRange(-4, -4))
+	assert.Equal(t, NewIntSliceV(1, 4), NewIntSliceV(1, 2, 3, 4).DropRange(1, 2))
+	assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1, 2, 3, 4).DropRange(2, 3))
+	assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1, 2, 3, 4).DropRange(-2, -1))
+	assert.Equal(t, NewIntSliceV(1, 4), NewIntSliceV(1, 2, 3, 4).DropRange(-3, -2))
+	assert.Equal(t, NewIntSliceV(3, 4), NewIntSliceV(1, 2, 3, 4).DropRange(-4, -3))
 
 	// drop 3
 	assert.Equal(t, NewIntSliceV(), NewIntSliceV(1, 2, 3, 4).DropLastN(4))
 
 	// drop beyond
 	assert.Equal(t, NewIntSliceV(), NewIntSliceV(1, 2, 3, 4).DropLastN(5))
+
+	// move index within bounds
+	assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 2, 3, 4).DropRange(3, 4))
+	assert.Equal(t, NewIntSliceV(2, 3, 4), NewIntSliceV(1, 2, 3, 4).DropRange(-5, 0))
 }
 
 // Each

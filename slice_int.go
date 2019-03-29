@@ -147,31 +147,13 @@ func (p *IntSlice) Copy(indices ...int) (other Slice) {
 		j = indices[1]
 	}
 
-	// Convert to postive notation
-	if i < 0 {
-		i = len(*p) + i
-	}
-	if j < 0 {
-		j = len(*p) + j
-	}
-
-	// Start can't be past end else nothing to get
-	if i > j {
+	// Handle index manipulation
+	i, j, err := absIndices(len(*p), i, j)
+	if err != nil {
 		other = NewIntSliceV()
 		return
 	}
 
-	// Move start/end within bounds
-	if i < 0 {
-		i = 0
-	}
-	if j >= len(*p) {
-		j = len(*p) - 1
-	}
-
-	// Go has an exclusive behavior by default and we want inclusive
-	// so offsetting the end by one
-	j++
 	x := make([]int, j-i, j-i)
 	copy(x, (*p)[i:j])
 	other = NewIntSlice(x)
@@ -181,55 +163,33 @@ func (p *IntSlice) Copy(indices ...int) (other Slice) {
 // Drop deletes the element at the given index location. Allows for negative notation.
 // Returns the rest of the elements in the slice for chaining.
 func (p *IntSlice) Drop(i int) Slice {
-	if p == nil {
-		return p
-	}
-	if i = absIndex(len(*p), i); i == -1 {
-		return p
-	}
-
-	if i+1 < len(*p) {
-		*p = append((*p)[:i], (*p)[i+1:]...)
-	} else {
-		*p = (*p)[:i]
-	}
-	return p
+	return p.DropRange(i, i)
 }
 
 // DropFirst deletes the first element and returns the rest of the elements in the slice.
 func (p *IntSlice) DropFirst() Slice {
-	return p.DropFirstN(1)
+	return p.DropRange(0, 0)
 }
 
 // DropFirstN deletes first n elements and returns the rest of the elements in the slice.
 func (p *IntSlice) DropFirstN(n int) Slice {
-	if p == nil || n == 0 {
+	if n == 0 {
 		return p
 	}
-	if len(*p) <= n {
-		*p = *NewIntSliceV()
-		return p
-	}
-	*p = (*p)[n:]
-	return p
+	return p.DropRange(0, abs(n)-1)
 }
 
 // DropLast deletes last element returns the rest of the elements in the slice.
 func (p *IntSlice) DropLast() Slice {
-	return p.DropLastN(1)
+	return p.DropRange(-1, -1)
 }
 
 // DropLastN deletes last n elements and returns the rest of the elements in the slice.
 func (p *IntSlice) DropLastN(n int) Slice {
-	if p == nil || n == 0 {
+	if n == 0 {
 		return p
 	}
-	if len(*p) <= n {
-		*p = *NewIntSliceV()
-		return p
-	}
-	*p = (*p)[:len(*p)-n]
-	return p
+	return p.DropRange(absNeg(n), -1)
 }
 
 // DropRange deletes a range of elements and returns the rest of the elements in the slice
@@ -301,11 +261,7 @@ func (p *IntSlice) First() (elem *Object) {
 // FirstN returns the first n elements in the slice as a Slice. Best effort is used such
 // that as many as can be will be returned up until the request is satisfied.
 func (p *IntSlice) FirstN(n int) Slice {
-	j := n - 1
-	if n < 0 {
-		j = (n * -1) - 1
-	}
-	return p.Slice(0, j)
+	return p.Slice(0, abs(n)-1)
 }
 
 // Insert the given element before the element with the given index. Negative indices count
@@ -350,11 +306,7 @@ func (p *IntSlice) Last() (elem *Object) {
 // LastN returns the last n elements in the slice as a NSlice. Best effort is used such
 // that as many as can be will be returned up until the request is satisfied.
 func (p *IntSlice) LastN(n int) Slice {
-	i := n * -1
-	if n < 0 {
-		i = n
-	}
-	return p.Slice(i, -1)
+	return p.Slice(absNeg(n), -1)
 }
 
 // Len returns the number of elements in the slice
@@ -447,30 +399,11 @@ func (p *IntSlice) Slice(i, j int) Slice {
 		return NewIntSliceV()
 	}
 
-	// Convert to postive notation
-	if i < 0 {
-		i = len(*p) + i
-	}
-	if j < 0 {
-		j = len(*p) + j
-	}
-
-	// Start can't be past end else nothing to get
-	if i > j {
+	// Handle index manipulation
+	i, j, err := absIndices(len(*p), i, j)
+	if err != nil {
 		return NewIntSliceV()
 	}
-
-	// Move start/end within bounds
-	if i < 0 {
-		i = 0
-	}
-	if j >= len(*p) {
-		j = len(*p) - 1
-	}
-
-	// Go has an exclusive behavior by default and we want inclusive
-	// so offsetting the end by one
-	j++
 
 	return NewIntSlice((*p)[i:j])
 }
