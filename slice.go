@@ -26,11 +26,14 @@ type Slice interface {
 	Each(action func(O)) Slice                   // Each calls the given function once for each element in the slice, passing that element in
 	EachE(action func(O) error) (Slice, error)   // EachE calls the given function once for each element in the slice, passing that element in
 	Empty() bool                                 // Empty tests if the slice is empty.
+	First() (elem *Object)                       // First returns the first element in the slice as Object
+	FirstN(n int) Slice                          // FirstN returns the first n elements in the slice as a Slice
 	Len() int                                    // Len returns the number of elements in the slice.
 	Nil() bool                                   // Nil tests if the slice is nil.
 	O() interface{}                              // O returns the underlying data structure.
 	Set(i int, elem interface{}) Slice           // Set the element at the given index location to the given element. Allows for negative notation.
 	SetE(i int, elem interface{}) (Slice, error) // Set the element at the given index location to the given element. Allows for negative notation.
+	Slice(i, j int) Slice                        // Slice provides a Ruby like slice function for Slice allowing for positive and negative notation.
 }
 
 // NSlice provides a generic way to work with slice types providing convenience methods

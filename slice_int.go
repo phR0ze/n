@@ -265,6 +265,23 @@ func (p *IntSlice) Empty() bool {
 	return false
 }
 
+// First returns the first element in the slice as Object which will be Object.Nil true if
+// there are no elements in the slice.
+func (p *IntSlice) First() (elem *Object) {
+	elem = p.At(0)
+	return
+}
+
+// FirstN returns the first n elements in the slice as a Slice. Best effort is used such
+// that as many as can be will be returned up until the request is satisfied.
+func (p *IntSlice) FirstN(n int) Slice {
+	j := n - 1
+	if n < 0 {
+		j = (n * -1) - 1
+	}
+	return p.Slice(0, j)
+}
+
 // Len returns the number of elements in the slice
 func (p *IntSlice) Len() int {
 	if p == nil {
@@ -311,4 +328,44 @@ func (p *IntSlice) SetE(i int, elem interface{}) (Slice, error) {
 		err = errors.Errorf("can't set type '%T' in '%T'", elem, p)
 	}
 	return p, err
+}
+
+// Slice provides a Ruby like slice function for Slice allowing for positive and negative notation.
+// Slice uses an inclusive behavior such that Slice(0, -1) includes index -1 as opposed to Go's exclusive
+// behavior. Out of bounds indices will be moved within bounds.
+//
+// An empty Slice is returned if indicies are mutually exclusive or nothing can be returned.
+//
+// e.g. NewIntSliceV(1,2,3).Slice(0, -1) == [1,2,3] && NewIntSliceV(1,2,3).Slice(1,2) == [2,3]
+func (p *IntSlice) Slice(i, j int) Slice {
+	if p == nil || len(*p) == 0 {
+		return NewIntSliceV()
+	}
+
+	// Convert to postive notation
+	if i < 0 {
+		i = len(*p) + i
+	}
+	if j < 0 {
+		j = len(*p) + j
+	}
+
+	// Start can't be past end else nothing to get
+	if i > j {
+		return NewIntSliceV()
+	}
+
+	// Move start/end within bounds
+	if i < 0 {
+		i = 0
+	}
+	if j >= len(*p) {
+		j = len(*p) - 1
+	}
+
+	// Go has an exclusive behavior by default and we want inclusive
+	// so offsetting the end by one
+	j++
+
+	return NewIntSlice((*p)[i:j])
 }

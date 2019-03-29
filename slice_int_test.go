@@ -925,6 +925,84 @@ func TestIntSlice_Empty(t *testing.T) {
 	assert.Equal(t, false, NewIntSlice([]int{1, 2, 3}).Empty())
 }
 
+// First
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_First_Go(t *testing.B) {
+	ints := Range(0, nines7)
+	for len(ints) > 1 {
+		ints = ints[1:]
+	}
+}
+
+func BenchmarkIntSlice_First_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines7))
+	for slice.Len() > 0 {
+		slice.First()
+	}
+}
+
+func ExampleIntSlice_First() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.First().O())
+	// Output: 1
+}
+
+func TestIntSlice_First(t *testing.T) {
+	// invalid
+	assert.Equal(t, &Object{nil}, NewIntSliceV().First())
+
+	// int
+	assert.Equal(t, &Object{2}, NewIntSliceV(2, 3).First())
+	assert.Equal(t, &Object{3}, NewIntSliceV(3, 2).First())
+	assert.Equal(t, &Object{1}, NewIntSliceV(1, 3, 2).First())
+}
+
+// FirstN
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_FirstN_Go(t *testing.B) {
+	ints := Range(0, nines7)
+	_ = ints[0:10]
+}
+
+func BenchmarkIntSlice_FirstN_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines7))
+	slice.FirstN(10)
+}
+
+func ExampleIntSlice_FirstN() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.FirstN(2).O())
+	// Output: [1 2]
+}
+
+func TestIntSlice_FirstN(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *IntSlice
+		assert.Equal(t, NewIntSliceV(), slice.FirstN(1))
+		assert.Equal(t, NewIntSliceV(), slice.FirstN(-1))
+	}
+
+	// Test that the original is modified when the slice is modified
+	{
+		original := NewIntSliceV(1, 2, 3)
+		result := original.FirstN(2).Set(0, 0)
+		assert.Equal(t, NewIntSliceV(0, 2, 3), original)
+		assert.Equal(t, NewIntSliceV(0, 2), result)
+	}
+
+	// slice full array includeing out of bounds
+	assert.Equal(t, NewIntSliceV(), NewIntSliceV().FirstN(1))
+	assert.Equal(t, NewIntSliceV(), NewIntSliceV().FirstN(10))
+	assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 2, 3).FirstN(10))
+	assert.Equal(t, NewIntSlice([]int{1, 2, 3}), NewIntSlice([]int{1, 2, 3}).FirstN(10))
+
+	// grab a few diff
+	assert.Equal(t, NewIntSliceV(1), NewIntSliceV(1, 2, 3).FirstN(1))
+	assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1, 2, 3).FirstN(2))
+}
+
 // Len
 //--------------------------------------------------------------------------------------------------
 func ExampleIntSlice_Len() {
@@ -1009,5 +1087,112 @@ func TestIntSlice_Set(t *testing.T) {
 		slice, err := NewIntSliceV(1, 2, 3).SetE(5, "1")
 		assert.NotNil(t, slice)
 		assert.NotNil(t, err)
+	}
+}
+
+// Slice
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_Slice_Go(t *testing.B) {
+	ints := Range(0, nines7)
+	_ = ints[0:len(ints)]
+}
+
+func BenchmarkIntSlice_Slice_Slice(t *testing.B) {
+	slice := NewSlice(Range(0, nines7))
+	slice.Slice(0, -1)
+}
+
+func ExampleIntSlice_Slice() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.Slice(1, -1).O())
+	// Output: [2 3]
+}
+
+func TestIntSlice_Slice(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *IntSlice
+		assert.Equal(t, NewIntSliceV(), slice.Slice(0, -1))
+		assert.Equal(t, NewIntSliceV(), NewIntSliceV().Slice(0, -1))
+	}
+
+	// Test that the original is modified when the slice is modified
+	{
+		original := NewIntSliceV(1, 2, 3)
+		result := original.Slice(0, -1).Set(0, 0)
+		assert.Equal(t, []int{0, 2, 3}, original.O())
+		assert.Equal(t, []int{0, 2, 3}, result.O())
+	}
+
+	// slice full array
+	{
+		assert.Equal(t, NewIntSliceV(), NewIntSliceV().Slice(0, -1))
+		assert.Equal(t, NewIntSliceV(), NewIntSliceV().Slice(0, 1))
+		assert.Equal(t, NewIntSliceV(), NewIntSliceV().Slice(0, 5))
+		assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 2, 3).Slice(0, -1))
+		assert.Equal(t, NewIntSlice([]int{1, 2, 3}), NewIntSlice([]int{1, 2, 3}).Slice(0, -1))
+	}
+
+	// out of bounds should be moved in
+	{
+		assert.Equal(t, NewIntSliceV(1), NewIntSliceV(1).Slice(0, 2))
+		assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 2, 3).Slice(-6, 6))
+	}
+
+	// mutually exclusive
+	{
+		assert.Equal(t, NewIntSliceV(), NewIntSliceV(1, 2, 3, 4).Slice(2, -3))
+		assert.Equal(t, NewIntSliceV(), NewIntSliceV(1, 2, 3, 4).Slice(0, -5))
+		assert.Equal(t, NewIntSliceV(), NewIntSliceV(1, 2, 3, 4).Slice(4, -1))
+		assert.Equal(t, NewIntSliceV(), NewIntSliceV(1, 2, 3, 4).Slice(6, -1))
+		assert.Equal(t, NewIntSliceV(), NewIntSliceV(1, 2, 3, 4).Slice(3, 2))
+	}
+
+	// singles
+	{
+		slice := NewIntSliceV(1, 2, 3, 4)
+		assert.Equal(t, NewIntSliceV(4), slice.Slice(-1, -1))
+		assert.Equal(t, NewIntSliceV(3), slice.Slice(-2, -2))
+		assert.Equal(t, NewIntSliceV(2), slice.Slice(-3, -3))
+		assert.Equal(t, NewIntSliceV(1), slice.Slice(0, 0))
+		assert.Equal(t, NewIntSliceV(1), slice.Slice(-4, -4))
+		assert.Equal(t, NewIntSliceV(2), slice.Slice(1, 1))
+		assert.Equal(t, NewIntSliceV(2), slice.Slice(1, -3))
+		assert.Equal(t, NewIntSliceV(3), slice.Slice(2, 2))
+		assert.Equal(t, NewIntSliceV(3), slice.Slice(2, -2))
+		assert.Equal(t, NewIntSliceV(4), slice.Slice(3, 3))
+		assert.Equal(t, NewIntSliceV(4), slice.Slice(3, -1))
+	}
+
+	// grab all but first
+	{
+		assert.Equal(t, NewIntSliceV(2, 3), NewIntSliceV(1, 2, 3).Slice(1, -1))
+		assert.Equal(t, NewIntSliceV(2, 3), NewIntSliceV(1, 2, 3).Slice(1, 2))
+		assert.Equal(t, NewIntSliceV(2, 3), NewIntSliceV(1, 2, 3).Slice(-2, -1))
+		assert.Equal(t, NewIntSliceV(2, 3), NewIntSliceV(1, 2, 3).Slice(-2, 2))
+	}
+
+	// grab all but last
+	{
+		assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1, 2, 3).Slice(0, -2))
+		assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1, 2, 3).Slice(-3, -2))
+		assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1, 2, 3).Slice(-3, 1))
+		assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1, 2, 3).Slice(0, 1))
+	}
+
+	// grab middle
+	{
+		assert.Equal(t, NewIntSliceV(2, 3), NewIntSliceV(1, 2, 3, 4).Slice(1, -2))
+		assert.Equal(t, NewIntSliceV(2, 3), NewIntSliceV(1, 2, 3, 4).Slice(-3, -2))
+		assert.Equal(t, NewIntSliceV(2, 3), NewIntSliceV(1, 2, 3, 4).Slice(-3, 2))
+		assert.Equal(t, NewIntSliceV(2, 3), NewIntSliceV(1, 2, 3, 4).Slice(1, 2))
+	}
+
+	// random
+	{
+		assert.Equal(t, NewIntSliceV(1), NewIntSliceV(1, 2, 3).Slice(0, -3))
+		assert.Equal(t, NewIntSliceV(2, 3), NewIntSliceV(1, 2, 3).Slice(1, 2))
+		assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 2, 3).Slice(0, 2))
 	}
 }
