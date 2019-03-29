@@ -1,5 +1,9 @@
 package n
 
+import (
+	"github.com/pkg/errors"
+)
+
 // IntSlice implements the Slice interface providing a generic way to work with slice types
 // including convenience methods on par with other rapid development languages.
 type IntSlice []int
@@ -99,15 +103,15 @@ func (p *IntSlice) AppendV(elems ...interface{}) Slice {
 }
 
 // At returns the element at the given index location. Allows for negative notation.
-func (p *IntSlice) At(i int) (obj *Object) {
-	obj = &Object{}
+func (p *IntSlice) At(i int) (elem *Object) {
+	elem = &Object{}
 	if p == nil {
 		return
 	}
 	if i = absIndex(len(*p), i); i == -1 {
 		return
 	}
-	obj.o = (*p)[i]
+	elem.o = (*p)[i]
 	return
 }
 
@@ -128,9 +132,9 @@ func (p *IntSlice) Clear() Slice {
 // to Go's exclusive  behavior. Out of bounds indices will be moved within bounds.
 //
 // An empty Slice is returned if indicies are mutually exclusive or nothing can be returned.
-func (p *IntSlice) Copy(indices ...int) (result Slice) {
+func (p *IntSlice) Copy(indices ...int) (other Slice) {
 	if p == nil || len(*p) == 0 || len(indices) == 1 {
-		result = NewIntSliceV()
+		other = NewIntSliceV()
 		return
 	}
 
@@ -151,6 +155,7 @@ func (p *IntSlice) Copy(indices ...int) (result Slice) {
 
 	// Start can't be past end else nothing to get
 	if i > j {
+		other = NewIntSliceV()
 		return
 	}
 
@@ -167,8 +172,26 @@ func (p *IntSlice) Copy(indices ...int) (result Slice) {
 	j++
 	x := make([]int, j-i, j-i)
 	copy(x, (*p)[i:j])
-	result = NewIntSlice(x)
+	other = NewIntSlice(x)
 	return
+}
+
+// Drop deletes the element at the given index location. Allows for negative notation.
+// Returns the rest of the elements in the slice for chaining.
+func (p *IntSlice) Drop(i int) Slice {
+	if p == nil {
+		return p
+	}
+	if i = absIndex(len(*p), i); i == -1 {
+		return p
+	}
+
+	if i+1 < len(*p) {
+		*p = append((*p)[:i], (*p)[i+1:]...)
+	} else {
+		*p = (*p)[:i]
+	}
+	return p
 }
 
 // Empty tests if the slice is empty.
@@ -198,4 +221,31 @@ func (p *IntSlice) Nil() bool {
 // O returns the underlying data structure as is
 func (p *IntSlice) O() interface{} {
 	return []int(*p)
+}
+
+// Set the element at the given index location to the given element. Allows for negative notation.
+// Returns the slice for chaining and swallows any errors if out of bounds or elem is the wrong type
+func (p *IntSlice) Set(i int, elem interface{}) Slice {
+	slice, _ := p.SetE(i, elem)
+	return slice
+}
+
+// SetE the element at the given index location to the given element. Allows for negative notation.
+// Returns the slice for chaining and an error if out of bounds or elem is the wrong type
+func (p *IntSlice) SetE(i int, elem interface{}) (Slice, error) {
+	var err error
+	if p == nil {
+		return p, err
+	}
+	if i = absIndex(len(*p), i); i == -1 {
+		err = errors.Errorf("slice assignment is out of bounds")
+		return p, err
+	}
+
+	if x, ok := elem.(int); ok {
+		(*p)[i] = x
+	} else {
+		err = errors.Errorf("can't set type '%T' in '%T'", elem, p)
+	}
+	return p, err
 }

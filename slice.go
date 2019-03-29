@@ -10,18 +10,21 @@ import (
 // Slice provides a generic way to work with slice types providing convenience methods
 // on par with other rapid development languages.
 type Slice interface {
-	Any(elems ...interface{}) bool             // Any tests if the slice is not empty or optionally if it contains any of the given variadic elements.
-	AnyS(other interface{}) bool               // AnyS tests if the slice contains any of the other slice's elements.
-	Append(elem interface{}) (this Slice)      // Append an element to the end of the Slice and returns the Slice for chaining.
-	AppendS(other interface{}) (this Slice)    // AppendS appends the other slice using variadic expansion and returns Slice for chaining.
-	AppendV(elems ...interface{}) (this Slice) // AppendV appends the variadic elements to the end of the Slice and returns the Slice for chaining.
-	At(i int) (obj *Object)                    // At returns the element at the given index location. Allows for negative notation.
-	Clear() Slice                              // Clear the underlying slice, returns Slice for chaining.
-	Copy(indices ...int) Slice                 // Copy performs a deep copy such that modifications to the copy will not affect the original.
-	Empty() bool                               // Empty tests if the slice is empty.
-	Len() int                                  // Len returns the number of elements in the slice.
-	Nil() bool                                 // Nil tests if the slice is nil.
-	O() interface{}                            // O returns the underlying data structure.
+	Any(elems ...interface{}) bool               // Any tests if the slice is not empty or optionally if it contains any of the given variadic elements.
+	AnyS(other interface{}) bool                 // AnyS tests if the slice contains any of the other slice's elements.
+	Append(elem interface{}) Slice               // Append an element to the end of the Slice and returns the Slice for chaining.
+	AppendS(other interface{}) Slice             // AppendS appends the other slice using variadic expansion and returns Slice for chaining.
+	AppendV(elems ...interface{}) Slice          // AppendV appends the variadic elements to the end of the Slice and returns the Slice for chaining.
+	At(i int) (elem *Object)                     // At returns the element at the given index location. Allows for negative notation.
+	Clear() Slice                                // Clear the underlying slice, returns Slice for chaining.
+	Copy(indices ...int) (other Slice)           // Copy performs a deep copy such that modifications to the copy will not affect the original.
+	Drop(i int) Slice                            // Drop deletes the element at the given index location. Allows for negative notation.
+	Empty() bool                                 // Empty tests if the slice is empty.
+	Len() int                                    // Len returns the number of elements in the slice.
+	Nil() bool                                   // Nil tests if the slice is nil.
+	O() interface{}                              // O returns the underlying data structure.
+	Set(i int, elem interface{}) Slice           // Set the element at the given index location to the given element. Allows for negative notation.
+	SetE(i int, elem interface{}) (Slice, error) // Set the element at the given index location to the given element. Allows for negative notation.
 }
 
 // NSlice provides a generic way to work with slice types providing convenience methods
