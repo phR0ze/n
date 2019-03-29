@@ -1,6 +1,8 @@
 package n
 
 import (
+	"sort"
+
 	"github.com/pkg/errors"
 )
 
@@ -404,6 +406,11 @@ func (p *IntSlice) SetE(i int, elem interface{}) (Slice, error) {
 	return p, err
 }
 
+// Single simply reports true if there is only one element in the slice
+func (p *IntSlice) Single() bool {
+	return len(*p) == 1
+}
+
 // Slice provides a Ruby like slice function for Slice allowing for positive and negative notation.
 // Slice uses an inclusive behavior such that Slice(0, -1) includes index -1 as opposed to Go's exclusive
 // behavior. Out of bounds indices will be moved within bounds.
@@ -442,4 +449,22 @@ func (p *IntSlice) Slice(i, j int) Slice {
 	j++
 
 	return NewIntSlice((*p)[i:j])
+}
+
+// Sort the underlying slice and return a pointer for chaining.
+func (p *IntSlice) Sort() Slice {
+	if p == nil || len(*p) < 2 {
+		return p
+	}
+	sort.Sort(p)
+	return p
+}
+
+// Swap elements in the underlying slice. Implements the sort.Interface.
+// Takes advantage of underlying slice's sort.Interface implementations if they exist.
+func (p *IntSlice) Swap(i, j int) {
+	if p == nil || len(*p) < 2 || i < 0 || j < 0 || i >= len(*p) || j >= len(*p) {
+		return
+	}
+	(*p)[i], (*p)[j] = (*p)[j], (*p)[i]
 }

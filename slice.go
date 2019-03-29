@@ -39,7 +39,10 @@ type Slice interface {
 	Prepend(elem interface{}) Slice              // Prepend the given element at the begining of the slice.
 	Set(i int, elem interface{}) Slice           // Set the element at the given index location to the given element. Allows for negative notation.
 	SetE(i int, elem interface{}) (Slice, error) // Set the element at the given index location to the given element. Allows for negative notation.
+	Single() bool                                // Single simply reports true if there is only one element in the slice
 	Slice(i, j int) Slice                        // Slice provides a Ruby like slice function for Slice allowing for positive and negative notation.
+	Sort() Slice                                 // Sort the underlying slice and return a pointer for chaining.
+	Swap(i, j int)                               // Swap elements in the underlying slice.
 }
 
 // NSlice provides a generic way to work with slice types providing convenience methods
