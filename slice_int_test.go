@@ -1151,7 +1151,7 @@ func TestIntSlice_LastN(t *testing.T) {
 		assert.Equal(t, NewIntSliceV(), NewIntSliceV().LastN(1))
 		assert.Equal(t, NewIntSliceV(), NewIntSliceV().LastN(10))
 		assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 2, 3).LastN(10))
-		assert.Equal(t, NewSlice([]int{1, 2, 3}), NewSlice([]int{1, 2, 3}).LastN(10))
+		assert.Equal(t, NewIntSlice([]int{1, 2, 3}), NewIntSlice([]int{1, 2, 3}).LastN(10))
 	}
 
 	// grab a few diff
@@ -1215,9 +1215,9 @@ func TestIntSlice_Less(t *testing.T) {
 	}
 
 	// valid
-	assert.Equal(t, true, NewSliceV(0, 1, 2).Less(0, 1))
-	assert.Equal(t, false, NewSliceV(0, 1, 2).Less(1, 0))
-	assert.Equal(t, true, NewSliceV(0, 1, 2).Less(1, 2))
+	assert.Equal(t, true, NewIntSliceV(0, 1, 2).Less(0, 1))
+	assert.Equal(t, false, NewIntSliceV(0, 1, 2).Less(1, 0))
+	assert.Equal(t, true, NewIntSliceV(0, 1, 2).Less(1, 2))
 }
 
 // Nil
@@ -1393,7 +1393,7 @@ func BenchmarkIntSlice_Slice_Go(t *testing.B) {
 }
 
 func BenchmarkIntSlice_Slice_Slice(t *testing.B) {
-	slice := NewSlice(Range(0, nines7))
+	slice := NewIntSlice(Range(0, nines7))
 	slice.Slice(0, -1)
 }
 
@@ -1494,48 +1494,37 @@ func TestIntSlice_Slice(t *testing.T) {
 
 // Sort
 //--------------------------------------------------------------------------------------------------
-func BenchmarkNSlice_Sort_Normal(t *testing.B) {
+func BenchmarkIntSlice_Sort_Go(t *testing.B) {
 	ints := Range(0, nines7)
 	_ = ints[0:len(ints)]
 }
 
-func BenchmarkNSlice_Sort_Optimized(t *testing.B) {
-	slice := NewSlice(Range(0, nines7))
+func BenchmarkIntSlice_Sort_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines7))
 	slice.Slice(0, -1)
 }
 
-func BenchmarkNSlice_Sort_Reflect(t *testing.B) {
-	slice := NewSlice(rangeNObject(0, nines7))
-	slice.Slice(0, -1)
-}
-
-func ExampleNSlice_Sort() {
-	slice := NewSliceV(2, 3, 1)
+func ExampleIntSlice_Sort() {
+	slice := NewIntSliceV(2, 3, 1)
 	fmt.Println(slice.Sort().O())
 	// Output: [1 2 3]
 }
 
-func TestNSlice_Sort(t *testing.T) {
+func TestIntSlice_Sort(t *testing.T) {
 
 	// empty
-	//assert.Equal(t, SliceV(), SliceV().Sort())
+	assert.Equal(t, NewIntSliceV(), NewIntSliceV().Sort())
 
-	// bool
-	//assert.Equal(t, SliceV(false, true, true), SliceV(true, false, true).Sort())
+	// pos
+	assert.Equal(t, NewIntSliceV(1, 2, 3, 4, 5), NewIntSliceV(5, 3, 2, 4, 1).Sort())
 
-	// int
-	assert.Equal(t, NewSliceV(1, 2, 3, 4, 5), NewSliceV(5, 3, 2, 4, 1).Sort())
-
-	// string
-	//assert.Equal(t, SliceV("1", "2", "3", "4", "5"), SliceV("5", "3", "2", "4", "1").Sort())
-
-	// custom
-	//assert.Equal(t, Slice([]Object{{1}, {2}, {3}, {4}, {5}}), Slice([]Object{{5}, {3}, {2}, {4}, {1}}).Sort())
+	// neg
+	assert.Equal(t, NewIntSliceV(-2, -1, 3, 4, 5), NewIntSliceV(5, 3, -2, 4, -1).Sort())
 }
 
 // Swap
 //--------------------------------------------------------------------------------------------------
-func BenchmarkNSlice_Swap_Normal(t *testing.B) {
+func BenchmarkIntSlice_Swap_Go(t *testing.B) {
 	ints := Range(0, nines6)
 	for i := 0; i < len(ints); i++ {
 		if i+1 < len(ints) {
@@ -1544,8 +1533,8 @@ func BenchmarkNSlice_Swap_Normal(t *testing.B) {
 	}
 }
 
-func BenchmarkNSlice_Swap_Optimized(t *testing.B) {
-	slice := NewSlice(Range(0, nines6))
+func BenchmarkIntSlice_Swap_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines6))
 	for i := 0; i < slice.Len(); i++ {
 		if i+1 < slice.Len() {
 			slice.Swap(i, i+1)
@@ -1553,70 +1542,40 @@ func BenchmarkNSlice_Swap_Optimized(t *testing.B) {
 	}
 }
 
-func BenchmarkNSlice_Swap_Reflect(t *testing.B) {
-	slice := NewSlice(rangeNObject(0, nines6))
-	for i := 0; i < slice.Len(); i++ {
-		if i+1 < slice.Len() {
-			slice.Swap(i, i+1)
-		}
-	}
-}
-
-func ExampleNSlice_Swap() {
-	slice := NewSliceV(2, 3, 1)
+func ExampleIntSlice_Swap() {
+	slice := NewIntSliceV(2, 3, 1)
 	slice.Swap(0, 2)
 	slice.Swap(1, 2)
 	fmt.Println(slice.O())
 	// Output: [1 2 3]
 }
 
-func TestNSlice_Swap(t *testing.T) {
+func TestIntSlice_Swap(t *testing.T) {
 
 	// invalid cases
 	{
-		var slice *NSlice
+		var slice *IntSlice
 		slice.Swap(0, 0)
-		assert.Equal(t, (*NSlice)(nil), slice)
+		assert.Equal(t, (*IntSlice)(nil), slice)
 
-		slice = NewSliceV()
+		slice = NewIntSliceV()
 		slice.Swap(0, 0)
-		assert.Equal(t, NewSliceV(), slice)
+		assert.Equal(t, NewIntSliceV(), slice)
 
 		slice.Swap(1, 2)
-		assert.Equal(t, NewSliceV(), slice)
+		assert.Equal(t, NewIntSliceV(), slice)
 
 		slice.Swap(-1, 2)
-		assert.Equal(t, NewSliceV(), slice)
+		assert.Equal(t, NewIntSliceV(), slice)
 
 		slice.Swap(1, -2)
-		assert.Equal(t, NewSliceV(), slice)
+		assert.Equal(t, NewIntSliceV(), slice)
 	}
 
-	// bool
+	// normal
 	{
-		slice := NewSliceV(true, false, true)
+		slice := NewIntSliceV(0, 1, 2)
 		slice.Swap(0, 1)
-		assert.Equal(t, NewSliceV(false, true, true), slice)
-	}
-
-	// int
-	{
-		slice := NewSliceV(0, 1, 2)
-		slice.Swap(0, 1)
-		assert.Equal(t, NewSliceV(1, 0, 2), slice)
-	}
-
-	// string
-	{
-		slice := NewSliceV("0", "1", "2")
-		slice.Swap(0, 1)
-		assert.Equal(t, NewSliceV("1", "0", "2"), slice)
-	}
-
-	// custom
-	{
-		slice := NewSlice([]Object{{0}, {1}, {2}})
-		slice.Swap(0, 1)
-		assert.Equal(t, NewSlice([]Object{{1}, {0}, {2}}), slice)
+		assert.Equal(t, NewIntSliceV(1, 0, 2), slice)
 	}
 }
