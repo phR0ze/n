@@ -43,8 +43,9 @@ type Slice interface {
 	//MapF(sel func(O) O) (other Slice)            // Map projects the slice into a new form by executing the lambda against all elements then calls Flatten.
 	Nil() bool                                   // Nil tests if the slice is nil.
 	O() interface{}                              // O returns the underlying data structure.
-	Pair() (first, second *Object)               // Pair simply returns the first and second slice elements as Object
+	Pair() (first, second *Object)               // Pair simply returns the first and second slice elements as Object.
 	Prepend(elem interface{}) Slice              // Prepend the given element at the begining of the slice.
+	Reverse() Slice                              // Reverse reverses the order of the elements in the slice and returns a reference for chaining.
 	Set(i int, elem interface{}) Slice           // Set the element at the given index location to the given element. Allows for negative notation.
 	SetE(i int, elem interface{}) (Slice, error) // Set the element at the given index location to the given element. Allows for negative notation.
 	Single() bool                                // Single simply reports true if there is only one element in the slice

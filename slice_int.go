@@ -1,6 +1,7 @@
 package n
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 
@@ -372,6 +373,16 @@ func (p *IntSlice) Pair() (first, second *Object) {
 // Prepend the given element at the begining of the slice.
 func (p *IntSlice) Prepend(elem interface{}) Slice {
 	return p.Insert(0, elem)
+}
+
+// Reverse reverses the order of the elements in the slice and returns a reference for chaining.
+func (p *IntSlice) Reverse() Slice {
+	if p == nil || len(*p) == 0 {
+		return p
+	}
+	result := sort.Reverse(p)
+	fmt.Println(result)
+	return p
 }
 
 // Set the element at the given index location to the given element. Allows for negative notation.
