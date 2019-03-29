@@ -28,6 +28,9 @@ type Slice interface {
 	Empty() bool                                 // Empty tests if the slice is empty.
 	First() (elem *Object)                       // First returns the first element in the slice as Object
 	FirstN(n int) Slice                          // FirstN returns the first n elements in the slice as a Slice
+	Insert(i int, elem interface{}) Slice        // Insert the given element before the element with the given index.
+	Last() (elem *Object)                        // Last returns the last element in the slice as Object.
+	LastN(n int) Slice                           // LastN returns the last n elements in the slice as a Slice.
 	Len() int                                    // Len returns the number of elements in the slice.
 	Nil() bool                                   // Nil tests if the slice is nil.
 	O() interface{}                              // O returns the underlying data structure.

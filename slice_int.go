@@ -282,6 +282,55 @@ func (p *IntSlice) FirstN(n int) Slice {
 	return p.Slice(0, j)
 }
 
+// Insert the given element before the element with the given index. Negative indices count
+// backwards from the end of the slice, where -1 is the last element. If a negative index
+// is used, the given element will be inserted after that element, so using an index of -1
+// will insert the element at the end of the slice. Slice is returned for chaining. Invalid
+// index locations will not change the slice.
+func (p *IntSlice) Insert(i int, elem interface{}) Slice {
+	if p == nil || len(*p) == 0 {
+		return p.Append(elem)
+	}
+	j := i
+	if j = absIndex(len(*p), j); j == -1 {
+		return p
+	}
+	if i < 0 {
+		j++
+	}
+
+	// Insert the item before j if pos and after j if neg
+	if x, ok := elem.(int); ok {
+		if j == 0 {
+			*p = append([]int{x}, (*p)...)
+		} else if j < len(*p) {
+			*p = append(*p, x)
+			copy((*p)[j+1:], (*p)[j:])
+			(*p)[j] = x
+		} else {
+			*p = append(*p, x)
+		}
+	}
+	return p
+}
+
+// Last returns the last element in the slice as Object which will be Object.Nil true if
+// there are no elements in the slice.
+func (p *IntSlice) Last() (elem *Object) {
+	elem = p.At(-1)
+	return
+}
+
+// LastN returns the last n elements in the slice as a NSlice. Best effort is used such
+// that as many as can be will be returned up until the request is satisfied.
+func (p *IntSlice) LastN(n int) Slice {
+	i := n * -1
+	if n < 0 {
+		i = n
+	}
+	return p.Slice(i, -1)
+}
+
 // Len returns the number of elements in the slice
 func (p *IntSlice) Len() int {
 	if p == nil {
