@@ -32,8 +32,11 @@ type Slice interface {
 	Last() (elem *Object)                        // Last returns the last element in the slice as Object.
 	LastN(n int) Slice                           // LastN returns the last n elements in the slice as a Slice.
 	Len() int                                    // Len returns the number of elements in the slice.
+	Less(i, j int) bool                          // Less returns true if the element indexed by i is less than the element indexed by j.
 	Nil() bool                                   // Nil tests if the slice is nil.
 	O() interface{}                              // O returns the underlying data structure.
+	Pair() (first, second *Object)               // Pair simply returns the first and second slice elements as Object
+	Prepend(elem interface{}) Slice              // Prepend the given element at the begining of the slice.
 	Set(i int, elem interface{}) Slice           // Set the element at the given index location to the given element. Allows for negative notation.
 	SetE(i int, elem interface{}) (Slice, error) // Set the element at the given index location to the given element. Allows for negative notation.
 	Slice(i, j int) Slice                        // Slice provides a Ruby like slice function for Slice allowing for positive and negative notation.

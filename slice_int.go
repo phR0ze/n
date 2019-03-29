@@ -339,6 +339,14 @@ func (p *IntSlice) Len() int {
 	return len(*p)
 }
 
+// Less returns true if the element indexed by i is less than the element indexed by j.
+func (p *IntSlice) Less(i, j int) bool {
+	if p == nil || len(*p) < 2 || i < 0 || j < 0 || i >= len(*p) || j >= len(*p) {
+		return false
+	}
+	return (*p)[i] < (*p)[j]
+}
+
 // Nil tests if the slice is nil
 func (p *IntSlice) Nil() bool {
 	if p == nil {
@@ -350,6 +358,23 @@ func (p *IntSlice) Nil() bool {
 // O returns the underlying data structure as is
 func (p *IntSlice) O() interface{} {
 	return []int(*p)
+}
+
+// Pair simply returns the first and second slice elements as Object
+func (p *IntSlice) Pair() (first, second *Object) {
+	first, second = &Object{}, &Object{}
+	if len(*p) > 0 {
+		first = p.At(0)
+	}
+	if len(*p) > 1 {
+		second = p.At(1)
+	}
+	return
+}
+
+// Prepend the given element at the begining of the slice.
+func (p *IntSlice) Prepend(elem interface{}) Slice {
+	return p.Insert(0, elem)
 }
 
 // Set the element at the given index location to the given element. Allows for negative notation.

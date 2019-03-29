@@ -1174,6 +1174,52 @@ func TestIntSlice_Len(t *testing.T) {
 	assert.Equal(t, 2, NewIntSliceV(1, 2).Len())
 }
 
+// Less
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_Less_Go(t *testing.B) {
+	ints := Range(0, nines6)
+	for i := 0; i < len(ints); i++ {
+		if i+1 < len(ints) {
+			_ = ints[i] < ints[i+1]
+		}
+	}
+}
+
+func BenchmarkIntSlice_Less_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines6))
+	for i := 0; i < slice.Len(); i++ {
+		if i+1 < slice.Len() {
+			slice.Less(i, i+1)
+		}
+	}
+}
+
+func ExampleIntSlice_Less() {
+	slice := NewIntSliceV(2, 3, 1)
+	fmt.Println(slice.Less(0, 2))
+	// Output: false
+}
+
+func TestIntSlice_Less(t *testing.T) {
+
+	// invalid cases
+	{
+		var slice *IntSlice
+		assert.False(t, slice.Less(0, 0))
+
+		slice = NewIntSliceV()
+		assert.False(t, slice.Less(0, 0))
+		assert.False(t, slice.Less(1, 2))
+		assert.False(t, slice.Less(-1, 2))
+		assert.False(t, slice.Less(1, -2))
+	}
+
+	// valid
+	assert.Equal(t, true, NewSliceV(0, 1, 2).Less(0, 1))
+	assert.Equal(t, false, NewSliceV(0, 1, 2).Less(1, 0))
+	assert.Equal(t, true, NewSliceV(0, 1, 2).Less(1, 2))
+}
+
 // Nil
 //--------------------------------------------------------------------------------------------------
 func ExampleIntSlice_Nil() {
@@ -1199,6 +1245,81 @@ func ExampleIntSlice_O() {
 func TestIntSlice_O(t *testing.T) {
 	assert.Equal(t, []int{}, NewIntSliceV().O())
 	assert.Equal(t, []int{1, 2, 3}, NewIntSliceV(1, 2, 3).O())
+}
+
+// Pair
+//--------------------------------------------------------------------------------------------------
+
+func ExampleIntSlice_Pair() {
+	slice := NewIntSliceV(1, 2)
+	first, second := slice.Pair()
+	fmt.Println(first.O(), second.O())
+	// Output: 1 2
+}
+
+func TestIntSlice_Pair(t *testing.T) {
+
+	// two values
+	{
+		first, second := NewIntSliceV(1, 2).Pair()
+		assert.Equal(t, &Object{1}, first)
+		assert.Equal(t, &Object{2}, second)
+	}
+
+	// one value
+	{
+		first, second := NewIntSliceV(1).Pair()
+		assert.Equal(t, &Object{1}, first)
+		assert.Equal(t, &Object{nil}, second)
+	}
+
+	// no values
+	{
+		first, second := NewIntSliceV().Pair()
+		assert.Equal(t, &Object{nil}, first)
+		assert.Equal(t, &Object{nil}, second)
+	}
+}
+
+// Prepend
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_Prepend_Go(t *testing.B) {
+	ints := []int{}
+	for i := range Range(0, nines6) {
+		ints = append(ints, i)
+		copy(ints[1:], ints[1:])
+		ints[0] = i
+	}
+}
+
+func BenchmarkIntSlice_Prepend_Slice(t *testing.B) {
+	slice := NewIntSliceV()
+	for i := range Range(0, nines6) {
+		slice.Prepend(i)
+	}
+}
+
+func ExampleIntSlice_Prepend() {
+	slice := NewIntSliceV(2, 3)
+	fmt.Println(slice.Prepend(1).O())
+	// Output: [1 2 3]
+}
+
+func TestIntSlice_Prepend(t *testing.T) {
+
+	// happy path
+	{
+		slice := NewIntSliceV()
+		assert.Equal(t, NewIntSliceV(2), slice.Prepend(2))
+		assert.Equal(t, NewIntSliceV(1, 2), slice.Prepend(1))
+		assert.Equal(t, NewIntSliceV(0, 1, 2), slice.Prepend(0))
+	}
+
+	// error cases
+	{
+		var slice *IntSlice
+		assert.Equal(t, NewIntSliceV(0), slice.Prepend(0))
+	}
 }
 
 // Set
