@@ -154,7 +154,7 @@ func TestIntSlice_Any(t *testing.T) {
 	assert.True(t, NewIntSliceV(2).Any())
 
 	// invalid
-	assert.False(t, NewIntSliceV(1, 2).Any(NObj{2}))
+	assert.False(t, NewIntSliceV(1, 2).Any(Object{2}))
 
 	assert.True(t, NewIntSliceV(1, 2, 3).Any(2))
 	assert.False(t, NewIntSliceV(1, 2, 3).Any(4))
@@ -411,7 +411,7 @@ func TestIntSlice_At(t *testing.T) {
 	// nil
 	{
 		var nilSlice *IntSlice
-		assert.Equal(t, &NObj{nil}, nilSlice.At(0))
+		assert.Equal(t, &Object{nil}, nilSlice.At(0))
 	}
 
 	// ints
@@ -429,9 +429,9 @@ func TestIntSlice_At(t *testing.T) {
 	// index out of bounds
 	{
 		slice := NewIntSliceV(1)
-		assert.Equal(t, &NObj{}, slice.At(3))
+		assert.Equal(t, &Object{}, slice.At(3))
 		assert.Equal(t, nil, slice.At(3).O())
-		assert.Equal(t, &NObj{}, slice.At(-3))
+		assert.Equal(t, &Object{}, slice.At(-3))
 		assert.Equal(t, nil, slice.At(-3).O())
 	}
 }
@@ -460,6 +460,167 @@ func TestIntSlice_Clear(t *testing.T) {
 		assert.Equal(t, NewIntSliceV(), slice.Clear())
 		assert.Equal(t, NewIntSliceV(), slice.Clear())
 		assert.Equal(t, NewIntSliceV(), slice)
+	}
+}
+
+// Copy
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_Copy_Go(t *testing.B) {
+	ints := Range(0, nines6)
+	dst := make([]int, len(ints), len(ints))
+	copy(dst, ints)
+}
+
+func BenchmarkIntSlice_Copy_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines6))
+	slice.Copy()
+}
+
+func ExampleIntSlice_Copy() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.Copy().O())
+	// Output: [1 2 3]
+}
+
+func TestIntSlice_Copy(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *IntSlice
+		assert.Equal(t, NewIntSliceV(), slice.Copy(0, -1))
+		assert.Equal(t, NewIntSliceV(), NewIntSliceV(0).Clear().Copy(0, -1))
+	}
+
+	// Test that the original is NOT modified when the slice is modified
+	{
+		original := NewSliceV(1, 2, 3)
+		result := original.Copy(0, -1)
+		assert.Equal(t, []int{1, 2, 3}, original.O())
+		assert.Equal(t, []int{1, 2, 3}, result.O())
+		result.Set(0, 0)
+		assert.Equal(t, []int{1, 2, 3}, original.O())
+		assert.Equal(t, []int{0, 2, 3}, result.O())
+	}
+
+	// copy full array
+	{
+		assert.Equal(t, &NSlice{o: []interface{}{}}, NewSliceV().Copy())
+		assert.Equal(t, &NSlice{o: []interface{}{}}, NewSliceV().Copy(0, -1))
+		assert.Equal(t, &NSlice{o: []interface{}{}}, NewSliceV().Copy(0, 1))
+		assert.Equal(t, &NSlice{o: []interface{}{}}, NewSliceV().Copy(0, 5))
+		assert.Equal(t, NewSliceV(""), NewSliceV("").Copy())
+		assert.Equal(t, NewSliceV(""), NewSliceV("").Copy(0, -1))
+		assert.Equal(t, NewSliceV(""), NewSliceV("").Copy(0, 1))
+		assert.Equal(t, NewSliceV(1, 2, 3), NewSliceV(1, 2, 3).Copy())
+		assert.Equal(t, NewSliceV(1, 2, 3), NewSliceV(1, 2, 3).Copy(0, -1))
+		assert.Equal(t, NewSlice([]int{1, 2, 3}), NewSlice([]int{1, 2, 3}).Copy())
+		assert.Equal(t, NewSlice([]int{1, 2, 3}), NewSlice([]int{1, 2, 3}).Copy(0, -1))
+		assert.Equal(t, NewSliceV("1", "2", "3"), NewSliceV("1", "2", "3").Copy())
+		assert.Equal(t, NewSliceV("1", "2", "3"), NewSliceV("1", "2", "3").Copy(0, 2))
+		assert.Equal(t, NewSlice([]Object{{1}, {2}, {3}}), NewSlice([]Object{{1}, {2}, {3}}).Copy())
+		assert.Equal(t, NewSlice([]Object{{1}, {2}, {3}}), NewSlice([]Object{{1}, {2}, {3}}).Copy(0, -1))
+	}
+
+	// out of bounds should be moved in
+	{
+		assert.Equal(t, NewSliceV("1"), NewSliceV("1").Copy(0, 2))
+		assert.Equal(t, NewSliceV(true, false), NewSliceV(true, false).Copy(-6, 6))
+		assert.Equal(t, NewSliceV(1, 2, 3), NewSliceV(1, 2, 3).Copy(-6, 6))
+		assert.Equal(t, NewSliceV("1", "2", "3"), NewSliceV("1", "2", "3").Copy(-6, 6))
+		assert.Equal(t, NewSlice([]Object{{1}, {2}, {3}}), NewSlice([]Object{{1}, {2}, {3}}).Copy(-6, 6))
+	}
+
+	// mutually exclusive
+	{
+		slice := NewSliceV(1, 2, 3, 4)
+		assert.Equal(t, &NSlice{o: []int{}}, slice.Copy(2, -3))
+		assert.Equal(t, &NSlice{o: []int{}}, slice.Copy(0, -5))
+		assert.Equal(t, &NSlice{o: []int{}}, slice.Copy(4, -1))
+		assert.Equal(t, &NSlice{o: []int{}}, slice.Copy(6, -1))
+		assert.Equal(t, &NSlice{o: []int{}}, slice.Copy(3, 2))
+	}
+
+	// singles
+	{
+		slice := NewSliceV(1, 2, 3, 4)
+		assert.Equal(t, NewSliceV(4), slice.Copy(-1, -1))
+		assert.Equal(t, NewSliceV(3), slice.Copy(-2, -2))
+		assert.Equal(t, NewSliceV(2), slice.Copy(-3, -3))
+		assert.Equal(t, NewSliceV(1), slice.Copy(0, 0))
+		assert.Equal(t, NewSliceV(1), slice.Copy(-4, -4))
+		assert.Equal(t, NewSliceV(2), slice.Copy(1, 1))
+		assert.Equal(t, NewSliceV(2), slice.Copy(1, -3))
+		assert.Equal(t, NewSliceV(3), slice.Copy(2, 2))
+		assert.Equal(t, NewSliceV(3), slice.Copy(2, -2))
+		assert.Equal(t, NewSliceV(4), slice.Copy(3, 3))
+		assert.Equal(t, NewSliceV(4), slice.Copy(3, -1))
+	}
+
+	// grab all but first
+	{
+		assert.Equal(t, NewSliceV(false, true), NewSliceV(true, false, true).Copy(1, -1))
+		assert.Equal(t, NewSliceV(false, true), NewSliceV(true, false, true).Copy(1, 2))
+		assert.Equal(t, NewSliceV(false, true), NewSliceV(true, false, true).Copy(-2, -1))
+		assert.Equal(t, NewSliceV(false, true), NewSliceV(true, false, true).Copy(-2, 2))
+		assert.Equal(t, NewSliceV(2, 3), NewSliceV(1, 2, 3).Copy(1, -1))
+		assert.Equal(t, NewSliceV(2, 3), NewSliceV(1, 2, 3).Copy(1, 2))
+		assert.Equal(t, NewSliceV(2, 3), NewSliceV(1, 2, 3).Copy(-2, -1))
+		assert.Equal(t, NewSliceV(2, 3), NewSliceV(1, 2, 3).Copy(-2, 2))
+		assert.Equal(t, NewSliceV("2", "3"), NewSliceV("1", "2", "3").Copy(1, -1))
+		assert.Equal(t, NewSliceV("2", "3"), NewSliceV("1", "2", "3").Copy(1, 2))
+		assert.Equal(t, NewSliceV("2", "3"), NewSliceV("1", "2", "3").Copy(-2, -1))
+		assert.Equal(t, NewSliceV("2", "3"), NewSliceV("1", "2", "3").Copy(-2, 2))
+		assert.Equal(t, NewSlice([]Object{{2}, {3}}), NewSlice([]Object{{1}, {2}, {3}}).Copy(1, -1))
+		assert.Equal(t, NewSlice([]Object{{2}, {3}}), NewSlice([]Object{{1}, {2}, {3}}).Copy(1, 2))
+		assert.Equal(t, NewSlice([]Object{{2}, {3}}), NewSlice([]Object{{1}, {2}, {3}}).Copy(-2, -1))
+		assert.Equal(t, NewSlice([]Object{{2}, {3}}), NewSlice([]Object{{1}, {2}, {3}}).Copy(-2, 2))
+	}
+
+	// grab all but last
+	{
+		assert.Equal(t, NewSliceV(true, false), NewSliceV(true, false, true).Copy(0, -2))
+		assert.Equal(t, NewSliceV(true, false), NewSliceV(true, false, true).Copy(-3, -2))
+		assert.Equal(t, NewSliceV(true, false), NewSliceV(true, false, true).Copy(-3, 1))
+		assert.Equal(t, NewSliceV(true, false), NewSliceV(true, false, true).Copy(0, 1))
+		assert.Equal(t, NewSliceV(1, 2), NewSliceV(1, 2, 3).Copy(0, -2))
+		assert.Equal(t, NewSliceV(1, 2), NewSliceV(1, 2, 3).Copy(-3, -2))
+		assert.Equal(t, NewSliceV(1, 2), NewSliceV(1, 2, 3).Copy(-3, 1))
+		assert.Equal(t, NewSliceV(1, 2), NewSliceV(1, 2, 3).Copy(0, 1))
+		assert.Equal(t, NewSliceV("1", "2"), NewSliceV("1", "2", "3").Copy(0, -2))
+		assert.Equal(t, NewSliceV("1", "2"), NewSliceV("1", "2", "3").Copy(-3, -2))
+		assert.Equal(t, NewSliceV("1", "2"), NewSliceV("1", "2", "3").Copy(-3, 1))
+		assert.Equal(t, NewSliceV("1", "2"), NewSliceV("1", "2", "3").Copy(0, 1))
+		assert.Equal(t, NewSlice([]Object{{1}, {2}}), NewSlice([]Object{{1}, {2}, {3}}).Copy(0, -2))
+		assert.Equal(t, NewSlice([]Object{{1}, {2}}), NewSlice([]Object{{1}, {2}, {3}}).Copy(-3, -2))
+		assert.Equal(t, NewSlice([]Object{{1}, {2}}), NewSlice([]Object{{1}, {2}, {3}}).Copy(-3, 1))
+		assert.Equal(t, NewSlice([]Object{{1}, {2}}), NewSlice([]Object{{1}, {2}, {3}}).Copy(0, 1))
+	}
+
+	// grab middle
+	{
+		assert.Equal(t, NewSliceV(true, true), NewSliceV(false, true, true, false).Copy(1, -2))
+		assert.Equal(t, NewSliceV(true, true), NewSliceV(false, true, true, false).Copy(-3, -2))
+		assert.Equal(t, NewSliceV(true, true), NewSliceV(false, true, true, false).Copy(-3, 2))
+		assert.Equal(t, NewSliceV(true, true), NewSliceV(false, true, true, false).Copy(1, 2))
+		assert.Equal(t, NewSliceV(2, 3), NewSliceV(1, 2, 3, 4).Copy(1, -2))
+		assert.Equal(t, NewSliceV(2, 3), NewSliceV(1, 2, 3, 4).Copy(-3, -2))
+		assert.Equal(t, NewSliceV(2, 3), NewSliceV(1, 2, 3, 4).Copy(-3, 2))
+		assert.Equal(t, NewSliceV(2, 3), NewSliceV(1, 2, 3, 4).Copy(1, 2))
+		assert.Equal(t, NewSliceV("2", "3"), NewSliceV("1", "2", "3", "4").Copy(1, -2))
+		assert.Equal(t, NewSliceV("2", "3"), NewSliceV("1", "2", "3", "4").Copy(-3, -2))
+		assert.Equal(t, NewSliceV("2", "3"), NewSliceV("1", "2", "3", "4").Copy(-3, 2))
+		assert.Equal(t, NewSliceV("2", "3"), NewSliceV("1", "2", "3", "4").Copy(1, 2))
+		assert.Equal(t, NewSlice([]Object{{2}, {3}}), NewSlice([]Object{{1}, {2}, {3}, {4}}).Copy(1, -2))
+		assert.Equal(t, NewSlice([]Object{{2}, {3}}), NewSlice([]Object{{1}, {2}, {3}, {4}}).Copy(-3, -2))
+		assert.Equal(t, NewSlice([]Object{{2}, {3}}), NewSlice([]Object{{1}, {2}, {3}, {4}}).Copy(-3, 2))
+		assert.Equal(t, NewSlice([]Object{{2}, {3}}), NewSlice([]Object{{1}, {2}, {3}, {4}}).Copy(1, 2))
+	}
+
+	// random
+	{
+		assert.Equal(t, NewSliceV("1"), NewSliceV("1", "2", "3").Copy(0, -3))
+		assert.Equal(t, NewSliceV("2", "3"), NewSliceV("1", "2", "3").Copy(1, 2))
+		assert.Equal(t, NewSliceV("1", "2", "3"), NewSliceV("1", "2", "3").Copy(0, 2))
 	}
 }
 

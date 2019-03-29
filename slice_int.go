@@ -99,8 +99,8 @@ func (p *IntSlice) AppendV(elems ...interface{}) Slice {
 }
 
 // At returns the element at the given index location. Allows for negative notation.
-func (p *IntSlice) At(i int) (obj *NObj) {
-	obj = &NObj{}
+func (p *IntSlice) At(i int) (obj *Object) {
+	obj = &Object{}
 	if p == nil {
 		return
 	}
@@ -119,6 +119,56 @@ func (p *IntSlice) Clear() Slice {
 		*p = *NewIntSliceV()
 	}
 	return p
+}
+
+// Copy performs a deep copy such that modifications to the copy will not affect
+// the original. Expects nothing, in which case everything is copied, or two
+// indices i and j, in which case positive and negative notation is supported and
+// uses an inclusive behavior such that Slice(0, -1) includes index -1 as opposed
+// to Go's exclusive  behavior. Out of bounds indices will be moved within bounds.
+//
+// An empty Slice is returned if indicies are mutually exclusive or nothing can be returned.
+func (p *IntSlice) Copy(indices ...int) (result Slice) {
+	if p == nil || len(*p) == 0 || len(indices) == 1 {
+		result = NewIntSliceV()
+		return
+	}
+
+	// Get indices
+	i, j := 0, len(*p)-1
+	if len(indices) == 2 {
+		i = indices[0]
+		j = indices[1]
+	}
+
+	// Convert to postive notation
+	if i < 0 {
+		i = len(*p) + i
+	}
+	if j < 0 {
+		j = len(*p) + j
+	}
+
+	// Start can't be past end else nothing to get
+	if i > j {
+		return
+	}
+
+	// Move start/end within bounds
+	if i < 0 {
+		i = 0
+	}
+	if j >= len(*p) {
+		j = len(*p) - 1
+	}
+
+	// Go has an exclusive behavior by default and we want inclusive
+	// so offsetting the end by one
+	j++
+	x := make([]int, j-i, j-i)
+	copy(x, (*p)[i:j])
+	result = NewIntSlice(x)
+	return
 }
 
 // Empty tests if the slice is empty.

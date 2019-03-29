@@ -35,14 +35,6 @@ import (
 	"strings"
 )
 
-const (
-	_          Type = iota // NType enumeration
-	NObjType               // identifies a NObj
-	NMapType               // identifies a NMap
-	NStrType               // identifies a NStr
-	NSliceType             // identifies a NSlice
-)
-
 // Comparable provides a means of comparing arbitrary types
 // These methods should be implemented using a non-pointer receiver
 type Comparable interface {
@@ -64,7 +56,6 @@ type Numerable interface {
 	Empty() bool                 // Empty tests if the numerable is empty.
 	Len() int                    // Len returns the number of elements in the numerable
 	Nil() bool                   // Nil tests if the numerable is nil
-	Type() Type                  // Type returns the identifier for this numerable type
 }
 
 // indirect dereferences the reflect.Value recursively until its a non-pointer type

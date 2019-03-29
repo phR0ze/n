@@ -10,17 +10,18 @@ import (
 // Slice provides a generic way to work with slice types providing convenience methods
 // on par with other rapid development languages.
 type Slice interface {
-	Any(elems ...interface{}) bool      // Any tests if the slice is not empty or optionally if it contains any of the given variadic elements.
-	AnyS(other interface{}) bool        // AnyS tests if the slice contains any of the other slice's elements.
-	Append(elem interface{}) Slice      // Append an element to the end of the Slice and returns the Slice for chaining.
-	AppendS(other interface{}) Slice    // AppendS appends the other slice using variadic expansion and returns Slice for chaining.
-	AppendV(elems ...interface{}) Slice // AppendV appends the variadic elements to the end of the Slice and returns the Slice for chaining.
-	At(i int) (obj *NObj)               // At returns the element at the given index location. Allows for negative notation.
-	Clear() Slice                       // Clear the underlying slice, returns Slice for chaining.
-	Empty() bool                        // Empty tests if the slice is empty.
-	Len() int                           // Len returns the number of elements in the slice.
-	Nil() bool                          // Nil tests if the slice is nil.
-	O() interface{}                     // O returns the underlying data structure.
+	Any(elems ...interface{}) bool             // Any tests if the slice is not empty or optionally if it contains any of the given variadic elements.
+	AnyS(other interface{}) bool               // AnyS tests if the slice contains any of the other slice's elements.
+	Append(elem interface{}) (this Slice)      // Append an element to the end of the Slice and returns the Slice for chaining.
+	AppendS(other interface{}) (this Slice)    // AppendS appends the other slice using variadic expansion and returns Slice for chaining.
+	AppendV(elems ...interface{}) (this Slice) // AppendV appends the variadic elements to the end of the Slice and returns the Slice for chaining.
+	At(i int) (obj *Object)                    // At returns the element at the given index location. Allows for negative notation.
+	Clear() Slice                              // Clear the underlying slice, returns Slice for chaining.
+	Copy(indices ...int) Slice                 // Copy performs a deep copy such that modifications to the copy will not affect the original.
+	Empty() bool                               // Empty tests if the slice is empty.
+	Len() int                                  // Len returns the number of elements in the slice.
+	Nil() bool                                 // Nil tests if the slice is nil.
+	O() interface{}                            // O returns the underlying data structure.
 }
 
 // NSlice provides a generic way to work with slice types providing convenience methods
@@ -419,8 +420,8 @@ func (p *NSlice) AppendS(items interface{}) *NSlice {
 // Cost: ~0x - 2x
 //
 // Optimized types: []bool, []int, []string
-func (p *NSlice) At(i int) (obj *NObj) {
-	obj = &NObj{}
+func (p *NSlice) At(i int) (obj *Object) {
+	obj = &Object{}
 	if p.Nil() {
 		return
 	}
@@ -790,13 +791,13 @@ func (p *NSlice) Empty() bool {
 	return false
 }
 
-// First returns the first element in the slice as NObj which will be NObj.Nil true if
+// First returns the first element in the slice as Object which will be Object.Nil true if
 // there are no elements in the slice.
 //
 // Cost: ~0x - 3x
 //
 // Optimized types: []bool, []int, []string
-func (p *NSlice) First() (obj *NObj) {
+func (p *NSlice) First() (obj *Object) {
 	return p.At(0)
 }
 
@@ -905,13 +906,13 @@ func (p *NSlice) Insert(i int, obj interface{}) *NSlice {
 	return p
 }
 
-// Last returns the last element in the slice as NObj which will be NObj.Nil true if
+// Last returns the last element in the slice as Object which will be Object.Nil true if
 // there are no elements in the slice.
 //
 // Cost: ~0x - 3x
 //
 // Optimized types: []bool, []int, []string
-func (p *NSlice) Last() *NObj {
+func (p *NSlice) Last() *Object {
 	return p.At(-1)
 }
 
@@ -948,7 +949,7 @@ func (p *NSlice) Len() int {
 //
 // Cost: ~0x - 30x
 //
-// Optimized types: []bool, []int, []string, []NObj
+// Optimized types: []bool, []int, []string, []Object
 func (p *NSlice) Less(i, j int) (result bool) {
 	if p.Nil() || p.len < 2 || i < 0 || j < 0 || i >= p.len || j >= p.len {
 		return
@@ -961,7 +962,7 @@ func (p *NSlice) Less(i, j int) (result bool) {
 		result = slice[i] < slice[j]
 	case []string:
 		result = slice[i] < slice[j]
-	case []NObj:
+	case []Object:
 		result = slice[i].Less(slice[j])
 	default:
 		v := reflect.ValueOf(p.o)
@@ -1020,9 +1021,9 @@ func (p *NSlice) O() interface{} {
 	return p.o
 }
 
-// Pair simply returns the first and second slice items as NObj
-func (p *NSlice) Pair() (first, second *NObj) {
-	first, second = &NObj{}, &NObj{}
+// Pair simply returns the first and second slice items as Object
+func (p *NSlice) Pair() (first, second *Object) {
+	first, second = &Object{}, &Object{}
 	if p.len > 0 {
 		first = p.At(0)
 	}
@@ -1204,13 +1205,13 @@ func (p *NSlice) Swap(i, j int) {
 	}
 }
 
-// Take deletes the item at the given index location and returns it as an *NObj which
-// will be NObj.Nil() true if it didn't exist. Allows for negative notation.
+// Take deletes the item at the given index location and returns it as an *Object which
+// will be Object.Nil() true if it didn't exist. Allows for negative notation.
 //
 // Cost: ~0x - 3x
 //
 // Optimized types: []bool, []int, []string
-func (p *NSlice) Take(i int) (obj *NObj) {
+func (p *NSlice) Take(i int) (obj *Object) {
 
 	// Get the item and check out-of-bounds
 	obj = p.At(i)
@@ -1303,11 +1304,6 @@ func (p *NSlice) Take(i int) (obj *NObj) {
 // // 	}
 // // 	return
 // // }
-
-// Type returns the identifier for this numerable type
-func (p *NSlice) Type() Type {
-	return NSliceType
-}
 
 // // // Uniq removes all duplicates from the underlying slice
 // // func (p *strSliceN) Uniq() *strSliceN {

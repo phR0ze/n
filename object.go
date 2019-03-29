@@ -6,22 +6,22 @@ import (
 	"github.com/phR0ze/cast"
 )
 
-// NObj is a wrapper around an interface{} value wproviding a number of export methods
+// Object is a wrapper around an interface{} value wproviding a number of export methods
 // for casting and converting to other types via the excellent cast package.
-type NObj struct {
+type Object struct {
 	o interface{} // value
 }
 
 // // sort.Interface methods
 // //--------------------------------------------------------------------------------------------------
-// type NObjSlice []NObj
+// type ObjectSlice []Object
 
 // // Less returns true if the object is less than the other object.
 // // The unerlying type must be the same else false is always returned
 // //
 // // Supported element types: bool, int, string
-// func (p NObj) Less(other interface{}) bool {
-// 	if o, ok := other.(NObj); ok {
+// func (p Object) Less(other interface{}) bool {
+// 	if o, ok := other.(Object); ok {
 // 		switch x := p.o.(type) {
 // 		case bool:
 // 			y, _ := o.o.(bool)
@@ -50,8 +50,8 @@ type NObj struct {
 // The unerlying type must be the same else false is always returned
 //
 // Supported element types: bool, int, string
-func (p NObj) Equal(other interface{}) bool {
-	if o, ok := other.(NObj); ok {
+func (p Object) Equal(other interface{}) bool {
+	if o, ok := other.(Object); ok {
 		switch x := p.o.(type) {
 		case bool:
 			y, _ := o.o.(bool)
@@ -77,8 +77,8 @@ func (p NObj) Equal(other interface{}) bool {
 // The unerlying type must be the same else false is always returned
 //
 // Supported element types: bool, int, string
-func (p NObj) Less(other interface{}) bool {
-	if o, ok := other.(NObj); ok {
+func (p Object) Less(other interface{}) bool {
+	if o, ok := other.(Object); ok {
 		switch x := p.o.(type) {
 		case bool:
 			y, _ := o.o.(bool)
@@ -104,7 +104,7 @@ func (p NObj) Less(other interface{}) bool {
 //--------------------------------------------------------------------------------------------------
 
 // O returns the underlying data structure as is
-func (p *NObj) O() interface{} {
+func (p *Object) O() interface{} {
 	if p.Nil() {
 		return nil
 	}
@@ -112,7 +112,7 @@ func (p *NObj) O() interface{} {
 }
 
 // Nil tests if the numerable is nil
-func (p *NObj) Nil() bool {
+func (p *Object) Nil() bool {
 	if p == nil || p.o == nil {
 		return true
 	}
@@ -123,13 +123,13 @@ func (p *NObj) Nil() bool {
 //--------------------------------------------------------------------------------------------------
 
 // ToBool casts an interface to a bool type.
-func (p *NObj) ToBool() bool {
+func (p *Object) ToBool() bool {
 	v, _ := cast.ToBoolE(p.o)
 	return v
 }
 
 // ToBoolE casts an interface to a bool type.
-func (p *NObj) ToBoolE() (bool, error) {
+func (p *Object) ToBoolE() (bool, error) {
 	return cast.ToBoolE(p.o)
 }
 
@@ -137,24 +137,24 @@ func (p *NObj) ToBoolE() (bool, error) {
 //--------------------------------------------------------------------------------------------------
 
 // ToTime casts an interface to a time.Time type.
-func (p *NObj) ToTime() time.Time {
+func (p *Object) ToTime() time.Time {
 	v, _ := cast.ToTimeE(p.o)
 	return v
 }
 
 // ToTimeE casts an interface to a time.Time type.
-func (p *NObj) ToTimeE() (time.Time, error) {
+func (p *Object) ToTimeE() (time.Time, error) {
 	return cast.ToTimeE(p.o)
 }
 
 // ToDuration casts an interface to a time.Duration type.
-func (p *NObj) ToDuration() time.Duration {
+func (p *Object) ToDuration() time.Duration {
 	v, _ := cast.ToDurationE(p.o)
 	return v
 }
 
 // ToDurationE casts an interface to a time.Duration type.
-func (p *NObj) ToDurationE() (time.Duration, error) {
+func (p *Object) ToDurationE() (time.Duration, error) {
 	return cast.ToDurationE(p.o)
 }
 
@@ -162,24 +162,24 @@ func (p *NObj) ToDurationE() (time.Duration, error) {
 //--------------------------------------------------------------------------------------------------
 
 // ToFloat32 casts an interface to a float32 type.
-func (p *NObj) ToFloat32() float32 {
+func (p *Object) ToFloat32() float32 {
 	v, _ := cast.ToFloat32E(p.o)
 	return v
 }
 
 // ToFloat32E casts an interface to a float32 type.
-func (p *NObj) ToFloat32E() (float32, error) {
+func (p *Object) ToFloat32E() (float32, error) {
 	return cast.ToFloat32E(p.o)
 }
 
 // ToFloat64 casts an interface to a float64 type.
-func (p *NObj) ToFloat64() float64 {
+func (p *Object) ToFloat64() float64 {
 	v, _ := cast.ToFloat64E(p.o)
 	return v
 }
 
 // ToFloat64E casts an interface to a float64 type.
-func (p *NObj) ToFloat64E() (float64, error) {
+func (p *Object) ToFloat64E() (float64, error) {
 	return cast.ToFloat64E(p.o)
 }
 
@@ -187,112 +187,112 @@ func (p *NObj) ToFloat64E() (float64, error) {
 //--------------------------------------------------------------------------------------------------
 
 // ToInt casts an interface to an int type.
-func (p *NObj) ToInt() int {
+func (p *Object) ToInt() int {
 	v, _ := cast.ToIntE(p.o)
 	return v
 }
 
 // ToIntE casts an interface to an int type.
-func (p *NObj) ToIntE() (int, error) {
+func (p *Object) ToIntE() (int, error) {
 	return cast.ToIntE(p.o)
 }
 
 // ToInt8 casts an interface to an int8 type.
-func (p *NObj) ToInt8() int8 {
+func (p *Object) ToInt8() int8 {
 	v, _ := cast.ToInt8E(p.o)
 	return v
 }
 
 // ToInt8E casts an interface to an int8 type.
-func (p *NObj) ToInt8E() (int8, error) {
+func (p *Object) ToInt8E() (int8, error) {
 	return cast.ToInt8E(p.o)
 }
 
 // ToInt16 casts an interface to an int16 type.
-func (p *NObj) ToInt16() int16 {
+func (p *Object) ToInt16() int16 {
 	v, _ := cast.ToInt16E(p.o)
 	return v
 }
 
 // ToInt16E casts an interface to an int16 type.
-func (p *NObj) ToInt16E() (int16, error) {
+func (p *Object) ToInt16E() (int16, error) {
 	return cast.ToInt16E(p.o)
 }
 
 // ToInt32 casts an interface to an int32 type.
-func (p *NObj) ToInt32() int32 {
+func (p *Object) ToInt32() int32 {
 	v, _ := cast.ToInt32E(p.o)
 	return v
 }
 
 // ToInt32E casts an interface to an int32 type.
-func (p *NObj) ToInt32E() (int32, error) {
+func (p *Object) ToInt32E() (int32, error) {
 	return cast.ToInt32E(p.o)
 }
 
 // ToInt64 casts an interface to an int64 type.
-func (p *NObj) ToInt64() int64 {
+func (p *Object) ToInt64() int64 {
 	v, _ := cast.ToInt64E(p.o)
 	return v
 }
 
 // ToInt64E casts an interface to an int64 type.
-func (p *NObj) ToInt64E() (int64, error) {
+func (p *Object) ToInt64E() (int64, error) {
 	return cast.ToInt64E(p.o)
 }
 
 // ToUint casts an interface to a uint type.
-func (p *NObj) ToUint() uint {
+func (p *Object) ToUint() uint {
 	v, _ := cast.ToUintE(p.o)
 	return v
 }
 
 // ToUintE casts an interface to a uint type.
-func (p *NObj) ToUintE() (uint, error) {
+func (p *Object) ToUintE() (uint, error) {
 	return cast.ToUintE(p.o)
 }
 
 // ToUint8 casts an interface to a uint8 type.
-func (p *NObj) ToUint8() uint8 {
+func (p *Object) ToUint8() uint8 {
 	v, _ := cast.ToUint8E(p.o)
 	return v
 }
 
 // ToUint8E casts an interface to a uint8 type.
-func (p *NObj) ToUint8E() (uint8, error) {
+func (p *Object) ToUint8E() (uint8, error) {
 	return cast.ToUint8E(p.o)
 }
 
 // ToUint16 casts an interface to a uint16 type.
-func (p *NObj) ToUint16() uint16 {
+func (p *Object) ToUint16() uint16 {
 	v, _ := cast.ToUint16E(p.o)
 	return v
 }
 
 // ToUint16E casts an interface to a uint16 type.
-func (p *NObj) ToUint16E() (uint16, error) {
+func (p *Object) ToUint16E() (uint16, error) {
 	return cast.ToUint16E(p.o)
 }
 
 // ToUint32 casts an interface to a uint32 type.
-func (p *NObj) ToUint32() uint32 {
+func (p *Object) ToUint32() uint32 {
 	v, _ := cast.ToUint32E(p.o)
 	return v
 }
 
 // ToUint32E casts an interface to a uint32 type.
-func (p *NObj) ToUint32E() (uint32, error) {
+func (p *Object) ToUint32E() (uint32, error) {
 	return cast.ToUint32E(p.o)
 }
 
 // ToUint64 casts an interface to a uint64 type.
-func (p *NObj) ToUint64() uint64 {
+func (p *Object) ToUint64() uint64 {
 	v, _ := cast.ToUint64E(p.o)
 	return v
 }
 
 // ToUint64E casts an interface to a uint64 type.
-func (p *NObj) ToUint64E() (uint64, error) {
+func (p *Object) ToUint64E() (uint64, error) {
 	return cast.ToUint64E(p.o)
 }
 
@@ -300,13 +300,13 @@ func (p *NObj) ToUint64E() (uint64, error) {
 //--------------------------------------------------------------------------------------------------
 
 // ToString casts an interface to a string type.
-func (p *NObj) ToString() string {
+func (p *Object) ToString() string {
 	v, _ := cast.ToStringE(p.o)
 	return v
 }
 
 // ToStringE casts an interface to a string type.
-func (p *NObj) ToStringE() (string, error) {
+func (p *Object) ToStringE() (string, error) {
 	return cast.ToStringE(p.o)
 }
 
@@ -314,68 +314,68 @@ func (p *NObj) ToStringE() (string, error) {
 //--------------------------------------------------------------------------------------------------
 
 // ToStringMapString casts an interface to a map[string]string type.
-func (p *NObj) ToStringMapString() map[string]string {
+func (p *Object) ToStringMapString() map[string]string {
 	v, _ := cast.ToStringMapStringE(p.o)
 	return v
 }
 
 // ToStringMapStringE casts an interface to a map[string]string type.
-func (p *NObj) ToStringMapStringE() (map[string]string, error) {
+func (p *Object) ToStringMapStringE() (map[string]string, error) {
 	return cast.ToStringMapStringE(p.o)
 }
 
 // ToStringMapStringSlice casts an interface to a map[string][]string type.
-func (p *NObj) ToStringMapStringSlice() map[string][]string {
+func (p *Object) ToStringMapStringSlice() map[string][]string {
 	v, _ := cast.ToStringMapStringSliceE(p.o)
 	return v
 }
 
 // ToStringMapStringSliceE casts an interface to a map[string][]string type.
-func (p *NObj) ToStringMapStringSliceE() (map[string][]string, error) {
+func (p *Object) ToStringMapStringSliceE() (map[string][]string, error) {
 	return cast.ToStringMapStringSliceE(p.o)
 }
 
 // ToStringMapBool casts an interface to a map[string]bool type.
-func (p *NObj) ToStringMapBool() map[string]bool {
+func (p *Object) ToStringMapBool() map[string]bool {
 	v, _ := cast.ToStringMapBoolE(p.o)
 	return v
 }
 
 // ToStringMapBoolE casts an interface to a map[string]bool type.
-func (p *NObj) ToStringMapBoolE() (map[string]bool, error) {
+func (p *Object) ToStringMapBoolE() (map[string]bool, error) {
 	return cast.ToStringMapBoolE(p.o)
 }
 
 // ToStringMapInt casts an interface to a map[string]int type.
-func (p *NObj) ToStringMapInt() map[string]int {
+func (p *Object) ToStringMapInt() map[string]int {
 	v, _ := cast.ToStringMapIntE(p.o)
 	return v
 }
 
 // ToStringMapIntE casts an interface to a map[string]int type.
-func (p *NObj) ToStringMapIntE() (map[string]int, error) {
+func (p *Object) ToStringMapIntE() (map[string]int, error) {
 	return cast.ToStringMapIntE(p.o)
 }
 
 // ToStringMapInt64 casts an interface to a map[string]int64 type.
-func (p *NObj) ToStringMapInt64() map[string]int64 {
+func (p *Object) ToStringMapInt64() map[string]int64 {
 	v, _ := cast.ToStringMapInt64E(p.o)
 	return v
 }
 
 // ToStringMapInt64E casts an interface to a map[string]int64 type.
-func (p *NObj) ToStringMapInt64E() (map[string]int64, error) {
+func (p *Object) ToStringMapInt64E() (map[string]int64, error) {
 	return cast.ToStringMapInt64E(p.o)
 }
 
 // ToStringMap casts an interface to a map[string]interface{} type.
-func (p *NObj) ToStringMap() map[string]interface{} {
+func (p *Object) ToStringMap() map[string]interface{} {
 	v, _ := cast.ToStringMapE(p.o)
 	return v
 }
 
 // ToStringMapE casts an interface to a map[string]interface{} type.
-func (p *NObj) ToStringMapE() (map[string]interface{}, error) {
+func (p *Object) ToStringMapE() (map[string]interface{}, error) {
 	return cast.ToStringMapE(p.o)
 }
 
@@ -383,56 +383,56 @@ func (p *NObj) ToStringMapE() (map[string]interface{}, error) {
 //--------------------------------------------------------------------------------------------------
 
 // ToSlice casts an interface to a []interface{} type.
-func (p *NObj) ToSlice() []interface{} {
+func (p *Object) ToSlice() []interface{} {
 	v, _ := cast.ToSliceE(p.o)
 	return v
 }
 
 // ToSliceE casts an interface to a []interface{} type.
-func (p *NObj) ToSliceE() ([]interface{}, error) {
+func (p *Object) ToSliceE() ([]interface{}, error) {
 	return cast.ToSliceE(p.o)
 }
 
 // ToBoolSlice casts an interface to a []bool type.
-func (p *NObj) ToBoolSlice() []bool {
+func (p *Object) ToBoolSlice() []bool {
 	v, _ := cast.ToBoolSliceE(p.o)
 	return v
 }
 
 // ToBoolSliceE casts an interface to a []bool type.
-func (p *NObj) ToBoolSliceE() ([]bool, error) {
+func (p *Object) ToBoolSliceE() ([]bool, error) {
 	return cast.ToBoolSliceE(p.o)
 }
 
 // ToStringSlice casts an interface to a []string type.
-func (p *NObj) ToStringSlice() []string {
+func (p *Object) ToStringSlice() []string {
 	v, _ := cast.ToStringSliceE(p.o)
 	return v
 }
 
 // ToStringSliceE casts an interface to a []string type.
-func (p *NObj) ToStringSliceE() ([]string, error) {
+func (p *Object) ToStringSliceE() ([]string, error) {
 	return cast.ToStringSliceE(p.o)
 }
 
 // ToIntSlice casts an interface to a []int type.
-func (p *NObj) ToIntSlice() []int {
+func (p *Object) ToIntSlice() []int {
 	v, _ := cast.ToIntSliceE(p.o)
 	return v
 }
 
 // ToIntSliceE casts an interface to a []int type.
-func (p *NObj) ToIntSliceE() ([]int, error) {
+func (p *Object) ToIntSliceE() ([]int, error) {
 	return cast.ToIntSliceE(p.o)
 }
 
 // ToDurationSlice casts an interface to a []time.Duration type.
-func (p *NObj) ToDurationSlice() []time.Duration {
+func (p *Object) ToDurationSlice() []time.Duration {
 	v, _ := cast.ToDurationSliceE(p.o)
 	return v
 }
 
 // ToDurationSliceE casts an interface to a []time.Duration type.
-func (p *NObj) ToDurationSliceE() ([]time.Duration, error) {
+func (p *Object) ToDurationSliceE() ([]time.Duration, error) {
 	return cast.ToDurationSliceE(p.o)
 }

@@ -1601,18 +1601,18 @@ func TestNSlice_indexAbs(t *testing.T) {
 // 	}
 // }
 
-func rangeNObj(min, max int) []NObj {
-	result := make([]NObj, max-min+1)
+func rangeObject(min, max int) []Object {
+	result := make([]Object, max-min+1)
 	for i := range result {
-		result[i] = NObj{min + i}
+		result[i] = Object{min + i}
 	}
 	return result
 }
 
-func rangeNObjO(min, max int) []interface{} {
+func rangeNObject(min, max int) []interface{} {
 	result := make([]interface{}, max-min+1)
 	for i := range result {
-		result[i] = NObj{min + i}
+		result[i] = Object{min + i}
 	}
 	return result
 }
