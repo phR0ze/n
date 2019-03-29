@@ -20,8 +20,8 @@ type Slice interface {
 	At(i int) (elem *Object)                     // At returns the element at the given index location. Allows for negative notation.
 	Clear() Slice                                // Clear the underlying slice, returns Slice for chaining.
 	Copy(indices ...int) (other Slice)           // Copy performs a deep copy such that modifications to the copy will not affect the original.
-	DropRange(indices ...int) Slice              // DropRange deletes a range of elements and returns the rest of the elements in the slice.
-	DropAt(i int) Slice                          // Drop deletes the element at the given index location. Allows for negative notation.
+	Drop(indices ...int) Slice                   // Drop deletes a range of elements and returns the rest of the elements in the slice.
+	DropAt(i int) Slice                          // DropAt deletes the element at the given index location. Allows for negative notation.
 	DropFirst() Slice                            // DropFirst deletes the first element and returns the rest of the elements in the slice.
 	DropFirstN(n int) Slice                      // DropFirstN deletes the first n elements and returns the rest of the elements in the slice.
 	DropLast() Slice                             // DropLast deletes the last element and returns the rest of the elements in the slice.

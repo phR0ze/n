@@ -122,7 +122,7 @@ func (p *IntSlice) Clear() Slice {
 	if p == nil {
 		p = NewIntSliceV()
 	} else {
-		p.DropRange()
+		p.Drop()
 	}
 	return p
 }
@@ -153,44 +153,12 @@ func (p *IntSlice) Copy(indices ...int) (other Slice) {
 	return
 }
 
-// Drop deletes the element at the given index location. Allows for negative notation.
-// Returns the rest of the elements in the slice for chaining.
-func (p *IntSlice) DropAt(i int) Slice {
-	return p.DropRange(i, i)
-}
-
-// DropFirst deletes the first element and returns the rest of the elements in the slice.
-func (p *IntSlice) DropFirst() Slice {
-	return p.DropRange(0, 0)
-}
-
-// DropFirstN deletes first n elements and returns the rest of the elements in the slice.
-func (p *IntSlice) DropFirstN(n int) Slice {
-	if n == 0 {
-		return p
-	}
-	return p.DropRange(0, abs(n)-1)
-}
-
-// DropLast deletes last element returns the rest of the elements in the slice.
-func (p *IntSlice) DropLast() Slice {
-	return p.DropRange(-1, -1)
-}
-
-// DropLastN deletes last n elements and returns the rest of the elements in the slice.
-func (p *IntSlice) DropLastN(n int) Slice {
-	if n == 0 {
-		return p
-	}
-	return p.DropRange(absNeg(n), -1)
-}
-
-// DropRange deletes a range of elements and returns the rest of the elements in the slice.
+// Drop deletes a range of elements and returns the rest of the elements in the slice.
 // Expects nothing, in which case everything is dropped, or two indices i and j, in which case
 // positive and negative notation is supported and uses an inclusive behavior such that
 // DropAt(0, -1) includes index -1 as opposed to Go's exclusive behavior. Out of bounds indices
 // will be moved within bounds.
-func (p *IntSlice) DropRange(indices ...int) Slice {
+func (p *IntSlice) Drop(indices ...int) Slice {
 	if p == nil || len(*p) == 0 {
 		return p
 	}
@@ -209,6 +177,38 @@ func (p *IntSlice) DropRange(indices ...int) Slice {
 		*p = (*p)[:i]
 	}
 	return p
+}
+
+// DropAt deletes the element at the given index location. Allows for negative notation.
+// Returns the rest of the elements in the slice for chaining.
+func (p *IntSlice) DropAt(i int) Slice {
+	return p.Drop(i, i)
+}
+
+// DropFirst deletes the first element and returns the rest of the elements in the slice.
+func (p *IntSlice) DropFirst() Slice {
+	return p.Drop(0, 0)
+}
+
+// DropFirstN deletes first n elements and returns the rest of the elements in the slice.
+func (p *IntSlice) DropFirstN(n int) Slice {
+	if n == 0 {
+		return p
+	}
+	return p.Drop(0, abs(n)-1)
+}
+
+// DropLast deletes last element returns the rest of the elements in the slice.
+func (p *IntSlice) DropLast() Slice {
+	return p.Drop(-1, -1)
+}
+
+// DropLastN deletes last n elements and returns the rest of the elements in the slice.
+func (p *IntSlice) DropLastN(n int) Slice {
+	if n == 0 {
+		return p
+	}
+	return p.Drop(absNeg(n), -1)
 }
 
 // Each calls the given function once for each element in the slice, passing that element in
