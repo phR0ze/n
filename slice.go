@@ -19,6 +19,10 @@ type Slice interface {
 	Clear() Slice                                // Clear the underlying slice, returns Slice for chaining.
 	Copy(indices ...int) (other Slice)           // Copy performs a deep copy such that modifications to the copy will not affect the original.
 	Drop(i int) Slice                            // Drop deletes the element at the given index location. Allows for negative notation.
+	DropFirst() Slice                            // DropFirst deletes the first element and returns the rest of the elements in the slice.
+	DropFirstN(n int) Slice                      // DropFirstN deletes the first n elements and returns the rest of the elements in the slice.
+	DropLast() Slice                             // DropLast deletes the last element and returns the rest of the elements in the slice.
+	DropLastN(n int) Slice                       // DropLastN deletes the last n elements and returns the rest of the elements in the slice.
 	Empty() bool                                 // Empty tests if the slice is empty.
 	Len() int                                    // Len returns the number of elements in the slice.
 	Nil() bool                                   // Nil tests if the slice is nil.

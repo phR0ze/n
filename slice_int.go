@@ -194,6 +194,42 @@ func (p *IntSlice) Drop(i int) Slice {
 	return p
 }
 
+// DropFirst deletes the first element and returns the rest of the elements in the slice.
+func (p *IntSlice) DropFirst() Slice {
+	return p.DropFirstN(1)
+}
+
+// DropFirstN deletes first n elements and returns the rest of the elements in the slice.
+func (p *IntSlice) DropFirstN(n int) Slice {
+	if p == nil || n == 0 {
+		return p
+	}
+	if len(*p) <= n {
+		*p = *NewIntSliceV()
+		return p
+	}
+	*p = (*p)[n:]
+	return p
+}
+
+// DropLast deletes last element returns the rest of the elements in the slice.
+func (p *IntSlice) DropLast() Slice {
+	return p.DropLastN(1)
+}
+
+// DropLastN deletes last n elements and returns the rest of the elements in the slice.
+func (p *IntSlice) DropLastN(n int) Slice {
+	if p == nil || n == 0 {
+		return p
+	}
+	if len(*p) <= n {
+		*p = *NewIntSliceV()
+		return p
+	}
+	*p = (*p)[:len(*p)-n]
+	return p
+}
+
 // Empty tests if the slice is empty.
 func (p *IntSlice) Empty() bool {
 	if p == nil || len(*p) == 0 {

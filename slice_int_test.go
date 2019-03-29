@@ -642,6 +642,175 @@ func TestIntSlice_Drop(t *testing.T) {
 	assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(0, 1, 2).Drop(-3))
 }
 
+// DropFirst
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_DropFirst_Go(t *testing.B) {
+	ints := Range(0, nines7)
+	for len(ints) > 1 {
+		ints = ints[1:]
+	}
+}
+
+func BenchmarkIntSlice_DropFirst_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines7))
+	for slice.Len() > 0 {
+		slice.DropFirst()
+	}
+}
+
+func ExampleIntSlice_DropFirst() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.DropFirst().O())
+	// Output: [2 3]
+}
+
+func TestIntSlice_DropFirst(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *IntSlice
+		assert.Equal(t, (*IntSlice)(nil), slice.DropFirst())
+	}
+
+	// drop all and beyond
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		assert.Equal(t, NewIntSliceV(2, 3), slice.DropFirst())
+		assert.Equal(t, NewIntSliceV(3), slice.DropFirst())
+		assert.Equal(t, NewIntSliceV(), slice.DropFirst())
+		assert.Equal(t, NewIntSliceV(), slice.DropFirst())
+	}
+}
+
+// DropFirstN
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_DropFirstN_Go(t *testing.B) {
+	ints := Range(0, nines7)
+	for len(ints) > 10 {
+		ints = ints[10:]
+	}
+}
+
+func BenchmarkIntSlice_DropFirstN_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines7))
+	for slice.Len() > 0 {
+		slice.DropFirstN(10)
+	}
+}
+
+func ExampleIntSlice_DropFirstN() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.DropFirstN(2).O())
+	// Output: [3]
+}
+
+func TestIntSlice_DropFirstN(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *IntSlice
+		assert.Equal(t, (*IntSlice)(nil), slice.DropFirstN(1))
+	}
+
+	// drop none
+	assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 2, 3).DropFirstN(0))
+
+	// drop 1
+	assert.Equal(t, NewIntSliceV(2, 3), NewIntSliceV(1, 2, 3).DropFirstN(1))
+
+	// drop 2
+	assert.Equal(t, NewIntSliceV(3), NewIntSliceV(1, 2, 3).DropFirstN(2))
+
+	// drop 3
+	assert.Equal(t, NewIntSliceV(), NewIntSliceV(1, 2, 3).DropFirstN(3))
+
+	// drop beyond
+	assert.Equal(t, NewIntSliceV(), NewIntSliceV(1, 2, 3).DropFirstN(4))
+}
+
+// DropLast
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_DropLast_Go(t *testing.B) {
+	ints := Range(0, nines7)
+	for len(ints) > 1 {
+		ints = ints[1:]
+	}
+}
+
+func BenchmarkIntSlice_DropLast_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines7))
+	for slice.Len() > 0 {
+		slice.DropLast()
+	}
+}
+
+func ExampleIntSlice_DropLast() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.DropLast().O())
+	// Output: [1 2]
+}
+
+func TestIntSlice_DropLast(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *IntSlice
+		assert.Equal(t, (*IntSlice)(nil), slice.DropLast())
+	}
+
+	slice := NewIntSliceV(1, 2, 3)
+	assert.Equal(t, NewIntSliceV(1, 2), slice.DropLast())
+	assert.Equal(t, NewIntSliceV(1), slice.DropLast())
+	assert.Equal(t, NewIntSliceV(), slice.DropLast())
+	assert.Equal(t, NewIntSliceV(), slice.DropLast())
+}
+
+// DropLastN
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_DropLastN_Go(t *testing.B) {
+	ints := Range(0, nines7)
+	for len(ints) > 10 {
+		ints = ints[10:]
+	}
+}
+
+func BenchmarkIntSlice_DropLastN_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines7))
+	for slice.Len() > 0 {
+		slice.DropLastN(10)
+	}
+}
+
+func ExampleIntSlice_DropLastN() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.DropLastN(2).O())
+	// Output: [1]
+}
+
+func TestIntSlice_DropLastN(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *IntSlice
+		assert.Equal(t, (*IntSlice)(nil), slice.DropLastN(1))
+	}
+
+	// drop none
+	assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 2, 3).DropLastN(0))
+
+	// drop 1
+	assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1, 2, 3).DropLastN(1))
+
+	// drop 2
+	assert.Equal(t, NewIntSliceV(1), NewIntSliceV(1, 2, 3).DropLastN(2))
+
+	// drop 3
+	assert.Equal(t, NewIntSliceV(), NewIntSliceV(1, 2, 3).DropLastN(3))
+
+	// drop beyond
+	assert.Equal(t, NewIntSliceV(), NewIntSliceV(1, 2, 3).DropLastN(4))
+}
+
 // Empty
 //--------------------------------------------------------------------------------------------------
 func ExampleIntSlice_Empty() {
