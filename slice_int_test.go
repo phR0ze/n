@@ -1660,3 +1660,523 @@ func TestIntSlice_Swap(t *testing.T) {
 		assert.Equal(t, NewIntSliceV(1, 0, 2), slice)
 	}
 }
+
+// Take
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_Take_Go(t *testing.B) {
+	ints := Range(0, nines7)
+	for len(ints) > 11 {
+		i := 1
+		n := 10
+		if i+n < len(ints) {
+			ints = append(ints[:i], ints[i+n:]...)
+		} else {
+			ints = ints[:i]
+		}
+	}
+}
+
+func BenchmarkIntSlice_Take_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines7))
+	for slice.Len() > 1 {
+		slice.Take(1, 10)
+	}
+}
+
+func ExampleIntSlice_Take() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.Take(0, 1).O())
+	// Output: [1 2]
+}
+
+func TestIntSlice_Take(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *IntSlice
+		assert.Equal(t, NewIntSliceV(), slice.Take(0, 1))
+	}
+
+	// invalid
+	{
+		slice := NewIntSliceV(1, 2, 3, 4)
+		assert.Equal(t, NewIntSliceV(), slice.Take(1))
+		assert.Equal(t, NewIntSliceV(1, 2, 3, 4), slice)
+		assert.Equal(t, NewIntSliceV(), slice.Take(4, 4))
+		assert.Equal(t, NewIntSliceV(1, 2, 3, 4), slice)
+	}
+
+	// take 1
+	{
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(1), slice.Take(0, 0))
+			assert.Equal(t, NewIntSliceV(2, 3, 4), slice)
+		}
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(2), slice.Take(1, 1))
+			assert.Equal(t, NewIntSliceV(1, 3, 4), slice)
+		}
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(3), slice.Take(2, 2))
+			assert.Equal(t, NewIntSliceV(1, 2, 4), slice)
+		}
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(4), slice.Take(3, 3))
+			assert.Equal(t, NewIntSliceV(1, 2, 3), slice)
+		}
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(4), slice.Take(-1, -1))
+			assert.Equal(t, NewIntSliceV(1, 2, 3), slice)
+		}
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(3), slice.Take(-2, -2))
+			assert.Equal(t, NewIntSliceV(1, 2, 4), slice)
+		}
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(2), slice.Take(-3, -3))
+			assert.Equal(t, NewIntSliceV(1, 3, 4), slice)
+		}
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(1), slice.Take(-4, -4))
+			assert.Equal(t, NewIntSliceV(2, 3, 4), slice)
+		}
+	}
+
+	// take 2
+	{
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(1, 2), slice.Take(0, 1))
+			assert.Equal(t, NewIntSliceV(3, 4), slice)
+		}
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(2, 3), slice.Take(1, 2))
+			assert.Equal(t, NewIntSliceV(1, 4), slice)
+		}
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(3, 4), slice.Take(2, 3))
+			assert.Equal(t, NewIntSliceV(1, 2), slice)
+		}
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(3, 4), slice.Take(-2, -1))
+			assert.Equal(t, NewIntSliceV(1, 2), slice)
+		}
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(2, 3), slice.Take(-3, -2))
+			assert.Equal(t, NewIntSliceV(1, 4), slice)
+		}
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(1, 2), slice.Take(-4, -3))
+			assert.Equal(t, NewIntSliceV(3, 4), slice)
+		}
+	}
+
+	// take 3
+	{
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(1, 2, 3), slice.Take(0, 2))
+			assert.Equal(t, NewIntSliceV(4), slice)
+		}
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(2, 3, 4), slice.Take(-3, -1))
+			assert.Equal(t, NewIntSliceV(1), slice)
+		}
+	}
+
+	// take everything and beyond
+	{
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(1, 2, 3, 4), slice.Take())
+			assert.Equal(t, NewIntSliceV(), slice)
+		}
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(1, 2, 3, 4), slice.Take(0, 3))
+			assert.Equal(t, NewIntSliceV(), slice)
+		}
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(1, 2, 3, 4), slice.Take(0, -1))
+			assert.Equal(t, NewIntSliceV(), slice)
+		}
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(1, 2, 3, 4), slice.Take(-4, -1))
+			assert.Equal(t, NewIntSliceV(), slice)
+		}
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(1, 2, 3, 4), slice.Take(-6, -1))
+			assert.Equal(t, NewIntSliceV(), slice)
+		}
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(1, 2, 3, 4), slice.Take(0, 10))
+			assert.Equal(t, NewIntSliceV(), slice)
+		}
+	}
+
+	// move index within bounds
+	{
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(4), slice.Take(3, 4))
+			assert.Equal(t, NewIntSliceV(1, 2, 3), slice)
+		}
+		{
+			slice := NewIntSliceV(1, 2, 3, 4)
+			assert.Equal(t, NewIntSliceV(1), slice.Take(-5, 0))
+			assert.Equal(t, NewIntSliceV(2, 3, 4), slice)
+		}
+	}
+}
+
+// TakeAt
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_TakeAt_Go(t *testing.B) {
+	ints := Range(0, nines5)
+	index := Range(0, nines5)
+	for i := range index {
+		if i+1 < len(ints) {
+			ints = append(ints[:i], ints[i+1:]...)
+		} else if i >= 0 && i < len(ints) {
+			ints = ints[:i]
+		}
+	}
+}
+
+func BenchmarkIntSlice_TakeAt_Slice(t *testing.B) {
+	src := Range(0, nines5)
+	index := Range(0, nines5)
+	slice := NewIntSlice(src)
+	for i := range index {
+		slice.TakeAt(i)
+	}
+}
+
+func ExampleIntSlice_TakeAt() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.TakeAt(1).O())
+	// Output: 2
+}
+
+func TestIntSlice_TakeAt(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *IntSlice
+		assert.Equal(t, &Object{nil}, slice.TakeAt(0))
+	}
+
+	// all and more
+	{
+		slice := NewIntSliceV(0, 1, 2)
+		assert.Equal(t, &Object{2}, slice.TakeAt(-1))
+		assert.Equal(t, NewIntSliceV(0, 1), slice)
+		assert.Equal(t, &Object{1}, slice.TakeAt(-1))
+		assert.Equal(t, NewIntSliceV(0), slice)
+		assert.Equal(t, &Object{0}, slice.TakeAt(-1))
+		assert.Equal(t, NewIntSliceV(), slice)
+		assert.Equal(t, &Object{nil}, slice.TakeAt(-1))
+		assert.Equal(t, NewIntSliceV(), slice)
+	}
+
+	// take invalid
+	{
+		{
+			slice := NewIntSliceV(0, 1, 2)
+			assert.Equal(t, &Object{nil}, slice.TakeAt(3))
+			assert.Equal(t, NewIntSliceV(0, 1, 2), slice)
+		}
+		{
+			slice := NewIntSliceV(0, 1, 2)
+			assert.Equal(t, &Object{nil}, slice.TakeAt(-4))
+			assert.Equal(t, NewIntSliceV(0, 1, 2), slice)
+		}
+	}
+
+	// take last
+	{
+		{
+			slice := NewIntSliceV(0, 1, 2)
+			assert.Equal(t, &Object{2}, slice.TakeAt(2))
+			assert.Equal(t, NewIntSliceV(0, 1), slice)
+		}
+		{
+			slice := NewIntSliceV(0, 1, 2)
+			assert.Equal(t, &Object{2}, slice.TakeAt(-1))
+			assert.Equal(t, NewIntSliceV(0, 1), slice)
+		}
+	}
+
+	// take middle
+	{
+		{
+			slice := NewIntSliceV(0, 1, 2)
+			assert.Equal(t, &Object{1}, slice.TakeAt(1))
+			assert.Equal(t, NewIntSliceV(0, 2), slice)
+		}
+		{
+			slice := NewIntSliceV(0, 1, 2)
+			assert.Equal(t, &Object{1}, slice.TakeAt(-2))
+			assert.Equal(t, NewIntSliceV(0, 2), slice)
+		}
+	}
+
+	// take first
+	{
+		{
+			slice := NewIntSliceV(0, 1, 2)
+			assert.Equal(t, &Object{0}, slice.TakeAt(0))
+			assert.Equal(t, NewIntSliceV(1, 2), slice)
+		}
+		{
+			slice := NewIntSliceV(0, 1, 2)
+			assert.Equal(t, &Object{0}, slice.TakeAt(-3))
+			assert.Equal(t, NewIntSliceV(1, 2), slice)
+		}
+	}
+}
+
+// TakeFirst
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_TakeFirst_Go(t *testing.B) {
+	ints := Range(0, nines7)
+	for len(ints) > 1 {
+		ints = ints[1:]
+	}
+}
+
+func BenchmarkIntSlice_TakeFirst_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines7))
+	for slice.Len() > 0 {
+		slice.TakeFirst()
+	}
+}
+
+func ExampleIntSlice_TakeFirst() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.TakeFirst().O())
+	// Output: 1
+}
+
+func TestIntSlice_TakeFirst(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *IntSlice
+		assert.Equal(t, &Object{nil}, slice.TakeFirst())
+	}
+
+	// take all and beyond
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		assert.Equal(t, &Object{1}, slice.TakeFirst())
+		assert.Equal(t, NewIntSliceV(2, 3), slice)
+		assert.Equal(t, &Object{2}, slice.TakeFirst())
+		assert.Equal(t, NewIntSliceV(3), slice)
+		assert.Equal(t, &Object{3}, slice.TakeFirst())
+		assert.Equal(t, NewIntSliceV(), slice)
+		assert.Equal(t, &Object{nil}, slice.TakeFirst())
+		assert.Equal(t, NewIntSliceV(), slice)
+	}
+}
+
+// TakeFirstN
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_TakeFirstN_Go(t *testing.B) {
+	ints := Range(0, nines7)
+	for len(ints) > 10 {
+		ints = ints[10:]
+	}
+}
+
+func BenchmarkIntSlice_TakeFirstN_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines7))
+	for slice.Len() > 0 {
+		slice.TakeFirstN(10)
+	}
+}
+
+func ExampleIntSlice_TakeFirstN() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.TakeFirstN(2).O())
+	// Output: [1 2]
+}
+
+func TestIntSlice_TakeFirstN(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *IntSlice
+		assert.Equal(t, NewIntSliceV(), slice.TakeFirstN(1))
+	}
+
+	// negative value
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		assert.Equal(t, NewIntSliceV(1), slice.TakeFirstN(-1))
+		assert.Equal(t, NewIntSliceV(2, 3), slice)
+	}
+
+	// take none
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		assert.Equal(t, NewIntSliceV(), slice.TakeFirstN(0))
+		assert.Equal(t, NewIntSliceV(1, 2, 3), slice)
+	}
+
+	// take 1
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		assert.Equal(t, NewIntSliceV(1), slice.TakeFirstN(1))
+		assert.Equal(t, NewIntSliceV(2, 3), slice)
+	}
+
+	// take 2
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		assert.Equal(t, NewIntSliceV(1, 2), slice.TakeFirstN(2))
+		assert.Equal(t, NewIntSliceV(3), slice)
+	}
+
+	// take 3
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		assert.Equal(t, NewIntSliceV(1, 2, 3), slice.TakeFirstN(3))
+		assert.Equal(t, NewIntSliceV(), slice)
+	}
+
+	// take beyond
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		assert.Equal(t, NewIntSliceV(1, 2, 3), slice.TakeFirstN(4))
+		assert.Equal(t, NewIntSliceV(), slice)
+	}
+}
+
+// TakeLast
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_TakeLast_Go(t *testing.B) {
+	ints := Range(0, nines7)
+	for len(ints) > 1 {
+		ints = ints[1:]
+	}
+}
+
+func BenchmarkIntSlice_TakeLast_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines7))
+	for slice.Len() > 0 {
+		slice.TakeLast()
+	}
+}
+
+func ExampleIntSlice_TakeLast() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.TakeLast().O())
+	// Output: 3
+}
+
+func TestIntSlice_TakeLast(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *IntSlice
+		assert.Equal(t, &Object{nil}, slice.TakeLast())
+	}
+
+	// take all one at a time
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		assert.Equal(t, &Object{3}, slice.TakeLast())
+		assert.Equal(t, NewIntSliceV(1, 2), slice)
+		assert.Equal(t, &Object{2}, slice.TakeLast())
+		assert.Equal(t, NewIntSliceV(1), slice)
+		assert.Equal(t, &Object{1}, slice.TakeLast())
+		assert.Equal(t, NewIntSliceV(), slice)
+		assert.Equal(t, &Object{nil}, slice.TakeLast())
+		assert.Equal(t, NewIntSliceV(), slice)
+	}
+}
+
+// TakeLastN
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_TakeLastN_Go(t *testing.B) {
+	ints := Range(0, nines7)
+	for len(ints) > 10 {
+		ints = ints[10:]
+	}
+}
+
+func BenchmarkIntSlice_TakeLastN_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines7))
+	for slice.Len() > 0 {
+		slice.TakeLastN(10)
+	}
+}
+
+func ExampleIntSlice_TakeLastN() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.TakeLastN(2).O())
+	// Output: [2 3]
+}
+
+func TestIntSlice_TakeLastN(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *IntSlice
+		assert.Equal(t, NewIntSliceV(), slice.TakeLastN(1))
+	}
+
+	// take none
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		assert.Equal(t, NewIntSliceV(), slice.TakeLastN(0))
+		assert.Equal(t, NewIntSliceV(1, 2, 3), slice)
+	}
+
+	// take 1
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		assert.Equal(t, NewIntSliceV(3), slice.TakeLastN(1))
+		assert.Equal(t, NewIntSliceV(1, 2), slice)
+	}
+
+	// take 2
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		assert.Equal(t, NewIntSliceV(2, 3), slice.TakeLastN(2))
+		assert.Equal(t, NewIntSliceV(1), slice)
+	}
+
+	// take 3
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		assert.Equal(t, NewIntSliceV(1, 2, 3), slice.TakeLastN(3))
+		assert.Equal(t, NewIntSliceV(), slice)
+	}
+
+	// take beyond
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		assert.Equal(t, NewIntSliceV(1, 2, 3), slice.TakeLastN(4))
+		assert.Equal(t, NewIntSliceV(), slice)
+	}
+}

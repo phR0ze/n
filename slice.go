@@ -46,11 +46,12 @@ type Slice interface {
 	Slice(indices ...int) Slice                  // Slice provides a Ruby like slice function allowing for positive and negative notation.
 	Sort() Slice                                 // Sort the underlying slice and return a pointer for chaining.
 	Swap(i, j int)                               // Swap elements in the underlying slice.
-	//Take(i int) (elem *Object)                   // Take deletes the elemement at the given index location and returns it as an Object.
-	//TakeFirst() (elem *Object)                   // TakeFirst deletes the first element and returns it as an Object.
-	//TakeFirstN(n int) Slice                      // TakeFirstN deletes the first n elements and returns them as a new slice.
-	//TakeLast() (elem *Object)                    // TakeLast deletes the last element and returns it as an Object.
-	//TakeLastN(n int) Slice                       // TakeLastN deletes the last n elements and returns them as a new slice.
+	Take(indices ...int) (other Slice)           // Take deletes a range of elements and returns them as a new slice.
+	TakeAt(i int) (elem *Object)                 // TakeAt deletes the elemement at the given index location and returns it as an Object.
+	TakeFirst() (elem *Object)                   // TakeFirst deletes the first element and returns it as an Object.
+	TakeFirstN(n int) (other Slice)              // TakeFirstN deletes the first n elements and returns them as a new slice.
+	TakeLast() (elem *Object)                    // TakeLast deletes the last element and returns it as an Object.
+	TakeLastN(n int) (other Slice)               // TakeLastN deletes the last n elements and returns them as a new slice.
 }
 
 // NSlice provides a generic way to work with slice types providing convenience methods

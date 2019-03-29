@@ -135,7 +135,7 @@ func (p *IntSlice) Clear() Slice {
 //
 // An empty Slice is returned if indicies are mutually exclusive or nothing can be returned.
 func (p *IntSlice) Copy(indices ...int) (other Slice) {
-	if p == nil || len(*p) == 0 || len(indices) == 1 {
+	if p == nil || len(*p) == 0 {
 		other = NewIntSliceV()
 		return
 	}
@@ -420,4 +420,57 @@ func (p *IntSlice) Swap(i, j int) {
 		return
 	}
 	(*p)[i], (*p)[j] = (*p)[j], (*p)[i]
+}
+
+// Take deletes a range of elements and returns them as a new slice.
+// Expects nothing, in which case everything is taken, or two indices i and j, in which case
+// positive and negative notation is supported and uses an inclusive behavior such that
+// DropAt(0, -1) includes index -1 as opposed to Go's exclusive behavior. Out of bounds indices
+// will be moved within bounds.
+func (p *IntSlice) Take(indices ...int) (other Slice) {
+	other = p.Copy(indices...)
+	p.Drop(indices...)
+	return
+}
+
+// TakeAt deletes the elemement at the given index location and returns it as an Object.
+// Allows for negative notation.
+func (p *IntSlice) TakeAt(i int) (elem *Object) {
+	elem = p.At(i)
+	p.DropAt(i)
+	return
+}
+
+// TakeFirst deletes the first element and returns it as an Object.
+func (p *IntSlice) TakeFirst() (elem *Object) {
+	elem = p.First()
+	p.DropFirst()
+	return
+}
+
+// TakeFirstN deletes the first n elements and returns them as a new slice.
+func (p *IntSlice) TakeFirstN(n int) (other Slice) {
+	if n == 0 {
+		return NewIntSliceV()
+	}
+	other = p.Copy(0, abs(n)-1)
+	p.DropFirstN(n)
+	return
+}
+
+// TakeLast deletes the last element and returns it as an Object.
+func (p *IntSlice) TakeLast() (elem *Object) {
+	elem = p.Last()
+	p.DropLast()
+	return
+}
+
+// TakeLastN deletes the last n elements and returns them as a new slice.
+func (p *IntSlice) TakeLastN(n int) (other Slice) {
+	if n == 0 {
+		return NewIntSliceV()
+	}
+	other = p.Copy(absNeg(n), -1)
+	p.DropLastN(n)
+	return
 }
