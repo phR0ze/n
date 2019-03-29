@@ -1445,12 +1445,15 @@ func TestIntSlice_Prepend(t *testing.T) {
 // Reverse
 //--------------------------------------------------------------------------------------------------
 func BenchmarkIntSlice_Reverse_Go(t *testing.B) {
-	//sort.Reverse(Range(0, nines4))
+	ints := Range(0, nines6)
+	for i, j := 0, len(ints)-1; i < j; i, j = i+1, j-1 {
+		ints[i], ints[j] = ints[j], ints[i]
+	}
 }
 
 func BenchmarkIntSlice_Reverse_Slice(t *testing.B) {
-	slice := NewIntSlice(Range(0, nines4))
-	slice.Join()
+	slice := NewIntSlice(Range(0, nines6))
+	slice.Reverse()
 }
 
 func ExampleIntSlice_Reverse() {
@@ -1461,8 +1464,6 @@ func ExampleIntSlice_Reverse() {
 
 func TestIntSlice_Reverse(t *testing.T) {
 
-	assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 3, 2).Reverse())
-
 	// nil
 	{
 		var slice *IntSlice
@@ -1471,8 +1472,11 @@ func TestIntSlice_Reverse(t *testing.T) {
 
 	// empty
 	{
-		assert.Equal(t, &Object{""}, NewIntSliceV().Join())
+		assert.Equal(t, NewIntSliceV(), NewIntSliceV().Reverse())
 	}
+
+	assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(3, 2, 1).Reverse())
+	assert.Equal(t, NewIntSliceV(-3, -2, 3, 2), NewIntSliceV(2, 3, -2, -3).Reverse())
 }
 
 // Set
