@@ -53,7 +53,8 @@ type Slice interface {
 	O() interface{}                              // O returns the underlying data structure.
 	Pair() (first, second *Object)               // Pair simply returns the first and second slice elements as Object.
 	Prepend(elem interface{}) Slice              // Prepend the given element at the begining of the slice.
-	Reverse() Slice                              // Reverse reverses the order of the elements in the slice and returns a reference for chaining.
+	Reverse() (new Slice)                        // Reverse returns a new Slice with the order of the elements reversed.
+	ReverseM() Slice                             // ReverseM modifies this Slice reversing the order of the elements and returns a reference for chaining.
 	Select(sel func(O) bool) (new Slice)         // Select creates a new slice with the elements that match the lambda expression.
 	Set(i int, elem interface{}) Slice           // Set the element at the given index location to the given element. Allows for negative notation.
 	SetE(i int, elem interface{}) (Slice, error) // Set the element at the given index location to the given element. Allows for negative notation.

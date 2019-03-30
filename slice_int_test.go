@@ -1676,7 +1676,7 @@ func TestIntSlice_Reverse(t *testing.T) {
 	// nil
 	{
 		var slice *IntSlice
-		assert.Equal(t, (*IntSlice)(nil), slice.Reverse())
+		assert.Equal(t, NewIntSliceV(), slice.Reverse())
 	}
 
 	// empty
@@ -1684,8 +1684,71 @@ func TestIntSlice_Reverse(t *testing.T) {
 		assert.Equal(t, NewIntSliceV(), NewIntSliceV().Reverse())
 	}
 
-	assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(3, 2, 1).Reverse())
-	assert.Equal(t, NewIntSliceV(-3, -2, 3, 2), NewIntSliceV(2, 3, -2, -3).Reverse())
+	// pos
+	{
+		slice := NewIntSliceV(3, 2, 1)
+		reversed := slice.Reverse()
+		assert.Equal(t, NewIntSliceV(3, 2, 1, 4), slice.Append(4))
+		assert.Equal(t, NewIntSliceV(1, 2, 3), reversed)
+	}
+
+	// neg
+	{
+		slice := NewIntSliceV(2, 3, -2, -3)
+		reversed := slice.Reverse()
+		assert.Equal(t, NewIntSliceV(2, 3, -2, -3, 4), slice.Append(4))
+		assert.Equal(t, NewIntSliceV(-3, -2, 3, 2), reversed)
+	}
+}
+
+// ReverseM
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_ReverseM_Go(t *testing.B) {
+	ints := Range(0, nines6)
+	for i, j := 0, len(ints)-1; i < j; i, j = i+1, j-1 {
+		ints[i], ints[j] = ints[j], ints[i]
+	}
+}
+
+func BenchmarkIntSlice_ReverseM_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines6))
+	slice.ReverseM()
+}
+
+func ExampleIntSlice_ReverseM() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.ReverseM().O())
+	// Output: [3 2 1]
+}
+
+func TestIntSlice_ReverseM(t *testing.T) {
+
+	// nil
+	{
+		var slice *IntSlice
+		assert.Equal(t, NewIntSliceV(), slice.Reverse())
+	}
+
+	// empty
+	{
+		assert.Equal(t, NewIntSliceV(), NewIntSliceV().Reverse())
+	}
+
+	// pos
+	{
+		slice := NewIntSliceV(3, 2, 1)
+		reversed := slice.ReverseM()
+		assert.Equal(t, NewIntSliceV(1, 2, 3, 4), slice.Append(4))
+		assert.Equal(t, NewIntSliceV(1, 2, 3, 4), reversed)
+	}
+
+	// neg
+	{
+		slice := NewIntSliceV(2, 3, -2, -3)
+		reversed := slice.ReverseM()
+		assert.Equal(t, NewIntSliceV(-3, -2, 3, 2, 4), slice.Append(4))
+		assert.Equal(t, NewIntSliceV(-3, -2, 3, 2, 4), reversed)
+	}
 }
 
 // Select

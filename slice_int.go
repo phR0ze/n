@@ -446,8 +446,16 @@ func (p *IntSlice) Prepend(elem interface{}) Slice {
 	return p.Insert(0, elem)
 }
 
-// Reverse reverses the order of the elements in the slice and returns a reference for chaining.
-func (p *IntSlice) Reverse() Slice {
+// Reverse returns a new Slice with the order of the elements reversed.
+func (p *IntSlice) Reverse() (new Slice) {
+	if p == nil || len(*p) < 2 {
+		return p.Copy()
+	}
+	return p.Copy().ReverseM()
+}
+
+// ReverseM modifies this Slice reversing the order of the elements and returns a reference for chaining.
+func (p *IntSlice) ReverseM() Slice {
 	if p == nil || len(*p) == 0 {
 		return p
 	}
