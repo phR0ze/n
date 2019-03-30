@@ -2,6 +2,7 @@ package n
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"testing"
 
@@ -893,6 +894,72 @@ func TestIntSlice_DropLastN(t *testing.T) {
 	assert.Equal(t, NewIntSliceV(), NewIntSliceV(1, 2, 3).DropLastN(4))
 }
 
+// DropWhere
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_DropWhere_Go(t *testing.B) {
+	ints := Range(0, nines5)
+	l := len(ints)
+	for i := 0; i < l; i++ {
+		if ints[i]%2 == 0 {
+			if i+1 < l {
+				ints = append(ints[:i], ints[i+1:]...)
+			} else if i >= 0 && i < l {
+				ints = ints[:i]
+			}
+			l--
+			i--
+		}
+	}
+}
+
+func BenchmarkIntSlice_DropWhere_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines5))
+	slice.DropWhere(func(x O) bool {
+		if x.(int)%2 == 0 {
+			return true
+		}
+		return false
+	}).O()
+}
+
+func ExampleIntSlice_DropWhere() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.DropWhere(func(x O) bool {
+		if x.(int)%2 == 0 {
+			return true
+		}
+		return false
+	}).O())
+	// Output: [1 3]
+}
+
+func TestIntSlice_DropWhere(t *testing.T) {
+
+	// drop all odd values
+	{
+		slice := NewIntSliceV(1, 2, 3, 4, 5, 6, 7, 8, 9)
+		slice.DropWhere(func(x O) bool {
+			if x.(int)%2 != 0 {
+				return true
+			}
+			return false
+		})
+		assert.Equal(t, NewIntSliceV(2, 4, 6, 8), slice)
+	}
+
+	// drop all even values
+	{
+		slice := NewIntSliceV(1, 2, 3, 4, 5, 6, 7, 8, 9)
+		slice.DropWhere(func(x O) bool {
+			if x.(int)%2 == 0 {
+				return true
+			}
+			return false
+		})
+		assert.Equal(t, NewIntSliceV(1, 3, 5, 7, 9), slice)
+	}
+}
+
 // Each
 //--------------------------------------------------------------------------------------------------
 func BenchmarkIntSlice_Each_Go(t *testing.B) {
@@ -1479,6 +1546,71 @@ func TestIntSlice_Reverse(t *testing.T) {
 	assert.Equal(t, NewIntSliceV(-3, -2, 3, 2), NewIntSliceV(2, 3, -2, -3).Reverse())
 }
 
+// Select
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_Select_Go(t *testing.B) {
+	even := []int{}
+	ints := Range(0, nines6)
+	for i := 0; i < len(ints); i++ {
+		if ints[i]%2 == 0 {
+			even = append(even, ints[i])
+		}
+	}
+}
+
+func BenchmarkIntSlice_Select_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines6))
+	slice.Select(func(x O) bool {
+		if x.(int)%2 == 0 {
+			return true
+		}
+		return false
+	}).O()
+
+}
+
+func ExampleIntSlice_Select() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.Select(func(x O) bool {
+		if x.(int) == 2 || x.(int) == 3 {
+			return true
+		}
+		return false
+	}).O())
+	// Output: [2 3]
+}
+
+func TestIntSlice_Select(t *testing.T) {
+
+	// Select all odd values
+	{
+		slice := NewIntSliceV(1, 2, 3, 4, 5, 6, 7, 8, 9)
+		new := slice.Select(func(x O) bool {
+			if x.(int)%2 != 0 {
+				return true
+			}
+			return false
+		})
+		slice.DropFirst()
+		assert.Equal(t, NewIntSliceV(2, 3, 4, 5, 6, 7, 8, 9), slice)
+		assert.Equal(t, NewIntSliceV(1, 3, 5, 7, 9), new)
+	}
+
+	// Select all even values
+	{
+		slice := NewIntSliceV(1, 2, 3, 4, 5, 6, 7, 8, 9)
+		new := slice.Select(func(x O) bool {
+			if x.(int)%2 == 0 {
+				return true
+			}
+			return false
+		})
+		slice.DropAt(1)
+		assert.Equal(t, NewIntSliceV(1, 3, 4, 5, 6, 7, 8, 9), slice)
+		assert.Equal(t, NewIntSliceV(2, 4, 6, 8), new)
+	}
+}
+
 // Set
 //--------------------------------------------------------------------------------------------------
 func BenchmarkIntSlice_Set_Go(t *testing.B) {
@@ -1652,13 +1784,13 @@ func TestIntSlice_Slice(t *testing.T) {
 // Sort
 //--------------------------------------------------------------------------------------------------
 func BenchmarkIntSlice_Sort_Go(t *testing.B) {
-	ints := Range(0, nines7)
-	_ = ints[0:len(ints)]
+	ints := Range(0, nines6)
+	sort.Sort(sort.IntSlice(ints))
 }
 
 func BenchmarkIntSlice_Sort_Slice(t *testing.B) {
-	slice := NewIntSlice(Range(0, nines7))
-	slice.Slice(0, -1)
+	slice := NewIntSlice(Range(0, nines6))
+	slice.Sort()
 }
 
 func ExampleIntSlice_Sort() {
@@ -1677,6 +1809,36 @@ func TestIntSlice_Sort(t *testing.T) {
 
 	// neg
 	assert.Equal(t, NewIntSliceV(-2, -1, 3, 4, 5), NewIntSliceV(5, 3, -2, 4, -1).Sort())
+}
+
+// SortReverse
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_SortReverse_Go(t *testing.B) {
+	ints := Range(0, nines6)
+	sort.Sort(sort.Reverse(sort.IntSlice(ints)))
+}
+
+func BenchmarkIntSlice_SortReverse_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines6))
+	slice.SortReverse()
+}
+
+func ExampleIntSlice_SortReverse() {
+	slice := NewIntSliceV(2, 3, 1)
+	fmt.Println(slice.SortReverse().O())
+	// Output: [3 2 1]
+}
+
+func TestIntSlice_SortReverse(t *testing.T) {
+
+	// empty
+	assert.Equal(t, NewIntSliceV(), NewIntSliceV().SortReverse())
+
+	// pos
+	assert.Equal(t, NewIntSliceV(5, 4, 3, 2, 1), NewIntSliceV(3, 5, 2, 1, 4).SortReverse())
+
+	// neg
+	assert.Equal(t, NewIntSliceV(5, 4, 3, -1, -2), NewIntSliceV(5, 3, -2, 4, -1).SortReverse())
 }
 
 // Swap

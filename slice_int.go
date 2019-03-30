@@ -212,6 +212,24 @@ func (p *IntSlice) DropLastN(n int) Slice {
 	return p.Drop(absNeg(n), -1)
 }
 
+// DropWhere deletes the elements where the lambda returns true. Returns the Slice for chaining.
+// The slice is updated instantly when lambda expression is evaluated not after DropWhere is called.
+func (p *IntSlice) DropWhere(sel func(O) bool) Slice {
+	if p == nil || len(*p) == 0 {
+		return p
+	}
+
+	l := len(*p)
+	for i := 0; i < l; i++ {
+		if sel((*p)[i]) {
+			p.DropAt(i)
+			l--
+			i--
+		}
+	}
+	return p
+}
+
 // Each calls the given function once for each element in the slice, passing that element in
 // as a parameter. Returns a reference to the slice
 func (p *IntSlice) Each(action func(O)) Slice {
@@ -344,6 +362,11 @@ func (p *IntSlice) Less(i, j int) bool {
 	return (*p)[i] < (*p)[j]
 }
 
+// Map projects the slice into a new form by executing the lambda against all elements.
+func (p *IntSlice) Map(sel func(O) O) (other Slice) {
+	return p
+}
+
 // Nil tests if the slice is nil
 func (p *IntSlice) Nil() bool {
 	if p == nil {
@@ -383,6 +406,21 @@ func (p *IntSlice) Reverse() Slice {
 		p.Swap(i, j)
 	}
 	return p
+}
+
+// Select creates a new slice with the elements that match the lambda expression.
+func (p *IntSlice) Select(sel func(O) bool) (other Slice) {
+	new := NewIntSliceV()
+	if p == nil || len(*p) == 0 {
+		return new
+	}
+
+	for i := 0; i < len(*p); i++ {
+		if sel((*p)[i]) {
+			*new = append(*new, (*p)[i])
+		}
+	}
+	return new
 }
 
 // Set the element at the given index location to the given element. Allows for negative notation.
@@ -445,6 +483,15 @@ func (p *IntSlice) Sort() Slice {
 		return p
 	}
 	sort.Sort(p)
+	return p
+}
+
+// SortReverse sorts the underlying slice in reverse and return a pointer for chaining.
+func (p *IntSlice) SortReverse() Slice {
+	if p == nil || len(*p) < 2 {
+		return p
+	}
+	sort.Sort(sort.Reverse(p))
 	return p
 }
 
