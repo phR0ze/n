@@ -16,10 +16,10 @@ type Slice interface {
 	AnyS(other interface{}) bool        // AnyS tests if the slice contains any of the other slice's elements.
 	AnyWhere(sel func(O) bool) bool     // AnyWhere tests if the slice contains any that match the lambda selector.
 	Append(elem interface{}) Slice      // Append an element to the end of the Slice and returns the Slice for chaining.
-	AppendS(other interface{}) Slice    // AppendS appends the other slice using variadic expansion and returns Slice for chaining.
 	AppendV(elems ...interface{}) Slice // AppendV appends the variadic elements to the end of the Slice and returns the Slice for chaining.
 	At(i int) (elem *Object)            // At returns the element at the given index location. Allows for negative notation.
 	Clear() Slice                       // Clear the underlying slice, returns Slice for chaining.
+	Concat(other interface{}) Slice     // Concat appends the other slice using variadic expansion and returns Slice for chaining.
 	Copy(indices ...int) (other Slice)  // Copy performs a deep copy such that modifications to the copy will not affect the original.
 	Drop(indices ...int) Slice          // Drop deletes a range of elements and returns the rest of the elements in the slice.
 	DropAt(i int) Slice                 // DropAt deletes the element at the given index location. Allows for negative notation.

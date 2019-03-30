@@ -349,49 +349,6 @@ func TestIntSlice_Append(t *testing.T) {
 	}
 }
 
-// AppendS
-//--------------------------------------------------------------------------------------------------
-func BenchmarkIntSlice_AppendS_Go(t *testing.B) {
-	dest := []int{}
-	src := Range(0, nines6)
-	j := 0
-	for i := 10; i < len(src); i += 10 {
-		dest = append(dest, (src[j:i])...)
-		j = i
-	}
-}
-
-func BenchmarkIntSlice_AppendS_Slice(t *testing.B) {
-	dest := NewIntSliceV()
-	src := Range(0, nines6)
-	j := 0
-	for i := 10; i < len(src); i += 10 {
-		dest.AppendS(src[j:i])
-		j = i
-	}
-}
-
-func ExampleIntSlice_AppendS() {
-	slice := NewIntSliceV(1).AppendS([]int{2, 3})
-	fmt.Println(slice.O())
-	// Output: [1 2 3]
-}
-
-func TestIntSlice_AppendS(t *testing.T) {
-
-	// nil
-	{
-		var nilSlice *IntSlice
-		assert.Equal(t, NewIntSliceV(1, 2), nilSlice.AppendS([]int{1, 2}))
-	}
-
-	// Append many ints
-	{
-		assert.Equal(t, []int{1, 2, 3}, NewIntSliceV(1).AppendS([]int{2, 3}).O())
-		assert.Equal(t, []int{1, 2, 3}, NewIntSlice([]int{1}).AppendS([]int{2, 3}).O())
-	}
-}
-
 // AppendV
 //--------------------------------------------------------------------------------------------------
 func BenchmarkIntSlice_AppendV_Go(t *testing.B) {
@@ -484,7 +441,7 @@ func TestIntSlice_At(t *testing.T) {
 //--------------------------------------------------------------------------------------------------
 
 func ExampleIntSlice_Clear() {
-	slice := NewIntSliceV(1).AppendS([]int{2, 3})
+	slice := NewIntSliceV(1).Concat([]int{2, 3})
 	fmt.Println(slice.Clear().O())
 	// Output: []
 }
@@ -504,6 +461,49 @@ func TestIntSlice_Clear(t *testing.T) {
 		assert.Equal(t, NewIntSliceV(), slice.Clear())
 		assert.Equal(t, NewIntSliceV(), slice.Clear())
 		assert.Equal(t, NewIntSliceV(), slice)
+	}
+}
+
+// Concat
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_Concat_Go(t *testing.B) {
+	dest := []int{}
+	src := Range(0, nines6)
+	j := 0
+	for i := 10; i < len(src); i += 10 {
+		dest = append(dest, (src[j:i])...)
+		j = i
+	}
+}
+
+func BenchmarkIntSlice_Concat_Slice(t *testing.B) {
+	dest := NewIntSliceV()
+	src := Range(0, nines6)
+	j := 0
+	for i := 10; i < len(src); i += 10 {
+		dest.Concat(src[j:i])
+		j = i
+	}
+}
+
+func ExampleIntSlice_Concat() {
+	slice := NewIntSliceV(1).Concat([]int{2, 3})
+	fmt.Println(slice.O())
+	// Output: [1 2 3]
+}
+
+func TestIntSlice_Concat(t *testing.T) {
+
+	// nil
+	{
+		var nilSlice *IntSlice
+		assert.Equal(t, NewIntSliceV(1, 2), nilSlice.Concat([]int{1, 2}))
+	}
+
+	// Append many ints
+	{
+		assert.Equal(t, []int{1, 2, 3}, NewIntSliceV(1).Concat([]int{2, 3}).O())
+		assert.Equal(t, []int{1, 2, 3}, NewIntSlice([]int{1}).Concat([]int{2, 3}).O())
 	}
 }
 

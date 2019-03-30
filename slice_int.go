@@ -96,17 +96,6 @@ func (p *IntSlice) Append(elem interface{}) Slice {
 	return p
 }
 
-// AppendS appends the other slice using variadic expansion and returns Slice for chaining
-func (p *IntSlice) AppendS(other interface{}) Slice {
-	if p == nil {
-		p = NewIntSliceV()
-	}
-	if x, ok := other.([]int); ok {
-		*p = append(*p, x...)
-	}
-	return p
-}
-
 // AppendV appends the variadic elements to the end of the Slice and returns the Slice for chaining
 func (p *IntSlice) AppendV(elems ...interface{}) Slice {
 	if p == nil {
@@ -137,6 +126,17 @@ func (p *IntSlice) Clear() Slice {
 		p = NewIntSliceV()
 	} else {
 		p.Drop()
+	}
+	return p
+}
+
+// Concat appends the other slice using variadic expansion and returns Slice for chaining
+func (p *IntSlice) Concat(other interface{}) Slice {
+	if p == nil {
+		p = NewIntSliceV()
+	}
+	if x, ok := other.([]int); ok {
+		*p = append(*p, x...)
 	}
 	return p
 }
