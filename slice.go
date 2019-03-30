@@ -12,9 +12,9 @@ import (
 // Slice provides a generic way to work with slice types providing convenience methods
 // on par with other rapid development languages.
 type Slice interface {
-	Any(elems ...interface{}) bool // Any tests if the slice is not empty or optionally if it contains any of the given variadic elements.
-	AnyS(other interface{}) bool   // AnyS tests if the slice contains any of the other slice's elements.
-	//AnyWhere(sel func(O) bool) bool              // AnyWhere tests if the slice contains any that match the lambda selector.
+	Any(elems ...interface{}) bool      // Any tests if the slice is not empty or optionally if it contains any of the given variadic elements.
+	AnyS(other interface{}) bool        // AnyS tests if the slice contains any of the other slice's elements.
+	AnyWhere(sel func(O) bool) bool     // AnyWhere tests if the slice contains any that match the lambda selector.
 	Append(elem interface{}) Slice      // Append an element to the end of the Slice and returns the Slice for chaining.
 	AppendS(other interface{}) Slice    // AppendS appends the other slice using variadic expansion and returns Slice for chaining.
 	AppendV(elems ...interface{}) Slice // AppendV appends the variadic elements to the end of the Slice and returns the Slice for chaining.
@@ -64,7 +64,7 @@ type Slice interface {
 	TakeFirstN(n int) (other Slice)              // TakeFirstN deletes the first n elements and returns them as a new slice.
 	TakeLast() (elem *Object)                    // TakeLast deletes the last element and returns it as an Object.
 	TakeLastN(n int) (other Slice)               // TakeLastN deletes the last n elements and returns them as a new slice.
-	//TakeWhere(sel func(O) bool) (other Slice) // TakeWhere deletes the elements from the Slice and creates a new slice with the elements that match the lambda expression.
+	TakeWhere(sel func(O) bool) (other Slice)    // TakeWhere deletes the elements from the Slice and creates a new slice with the elements that match the lambda expression.
 	//Uniq() Slice                                 // Uniq removes all elements that are not uniq.
 }
 
@@ -1010,7 +1010,7 @@ func (p *NSlice) Less(i, j int) (result bool) {
 		result = slice[i].Less(slice[j])
 	default:
 		v := reflect.ValueOf(p.o)
-		x, y := indirect(v.Index(i)), indirect(v.Index(j))
+		x, y := Indirect(v.Index(i)), Indirect(v.Index(j))
 		if comparable, ok := x.Interface().(Comparable); ok {
 			if comparable.Less(y.Interface()) {
 				result = true

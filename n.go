@@ -1,8 +1,8 @@
 // Package n provides many Go types with convenience functions reminiscent of Ruby or C#.
 //
 // n was created to reduce the friction I had adopting Go as my primary language of choice by
-// reducing coding verbosity required by Go via code reuse. The Numerable types wrapp various
-// Go types to provide this functionality.
+// reducing coding verbosity required by Go via code reuse. The n types wrapp various Go
+// types to provide this functionality.
 //
 // Conventions used across n types and pkgs
 //
@@ -13,15 +13,17 @@
 // • Function names suffixed with 'E' indicates the function is a corollary to the function
 // without the 'E' but returns an Error while the base function does not.
 //
-// • Function names suffixed with 'V' indicates the function is a corollary to the function
-// • function names suffixed with 'S' indicates the function is a corollary to the function
+// • Function names suffixed with 'S' indicates the function is a corollary to the function
 // without the 'S' but either accepts a slice as input or returns a Slice.
 //
 // • Function names suffixed with 'V' indicates the function is a corollary to the function
-// without the 'V' but accepts Variadic input.
+// without the 'V' but accepts variadic input.
+//
+// • Function names suffixed with 'Where' indicates the function is a corollary to the function
+// without the 'Where' but accepts a lambda expression.
 //
 // • Documentation should be thorough and relied upon for guidance as, for a love of brevity,
-// many functions use single capital letters frequently to indicate types. 'O' is being used to
+// some functions use single capital letters frequently to indicate types. 'O' is being used to
 // indicate the interface{} type or to export the underlying Go type as an interface{}. 'S' is
 // used to refer to slice types, 'M' refers to map types. 'A' refers to string types and
 // combinations may be used to indicate complex types. The documentation will always call out
@@ -35,15 +37,48 @@ import (
 	"strings"
 )
 
+// Lambda convenience type/functions
+//--------------------------------------------------------------------------------------------------
+
+// O is an alias for interface{} used in lambda expresssions for brevity.
+type O interface{}
+
+// BoolEx avoids the gastly 4 line monstrosity that it is when used in lambda expression
+func BoolEx(exp bool) bool {
+	if exp {
+		return true
+	}
+	return false
+}
+
+// Reflection convenience type/functions
+//--------------------------------------------------------------------------------------------------
+
+// Indirect dereferences the reflect.Value recursively until its a non-pointer type
+func Indirect(v reflect.Value) reflect.Value {
+	if v.Kind() != reflect.Ptr {
+		return v
+	}
+	return Indirect(v.Elem())
+}
+
+//
+//
+//
+//
+// Old below here
+//
+//
+//
+//
+//
+
 // Comparable provides a means of comparing arbitrary types
 // These methods should be implemented using a non-pointer receiver
 type Comparable interface {
 	Less(other interface{}) bool  // Less returns true if the object is less than the other object
 	Equal(other interface{}) bool // Equal returns true if the object is value equal to the other object
 }
-
-// O is an alias for interface{} and provides a number of export methods
-type O interface{}
 
 // Type provides a simple way to track Numerable types
 type Type uint8
@@ -56,14 +91,6 @@ type Numerable interface {
 	Empty() bool                 // Empty tests if the numerable is empty.
 	Len() int                    // Len returns the number of elements in the numerable
 	Nil() bool                   // Nil tests if the numerable is nil
-}
-
-// indirect dereferences the reflect.Value recursively until its a non-pointer type
-func indirect(v reflect.Value) reflect.Value {
-	if v.Kind() != reflect.Ptr {
-		return v
-	}
-	return indirect(v.Elem())
 }
 
 // Check to see if the given type is an optimized slice type

@@ -72,6 +72,19 @@ func (p *IntSlice) AnyS(other interface{}) bool {
 	return false
 }
 
+// AnyWhere tests if the slice contains any that match the lambda selector.
+func (p *IntSlice) AnyWhere(sel func(O) bool) bool {
+	if p == nil || len(*p) == 0 {
+		return false
+	}
+	for i := 0; i < len(*p); i++ {
+		if sel((*p)[i]) {
+			return true
+		}
+	}
+	return false
+}
+
 // Append an element to the end of the Slice and returns the Slice for chaining
 func (p *IntSlice) Append(elem interface{}) Slice {
 	if p == nil {
@@ -218,7 +231,6 @@ func (p *IntSlice) DropWhere(sel func(O) bool) Slice {
 	if p == nil || len(*p) == 0 {
 		return p
 	}
-
 	l := len(*p)
 	for i := 0; i < l; i++ {
 		if sel((*p)[i]) {
@@ -362,8 +374,19 @@ func (p *IntSlice) Less(i, j int) bool {
 	return (*p)[i] < (*p)[j]
 }
 
-// Map projects the slice into a new form by executing the lambda against all elements.
+// Map projects the slice into a new form by executing the lambda against all elements
+// and collecting the returned elements into a new Slice.
 func (p *IntSlice) Map(sel func(O) O) (other Slice) {
+	// new := NewIntSliceV()
+	// if p == nil || len(*p) == 0 {
+	// 	return new
+	// }
+
+	// for i := 0; i < len(*p); i++ {
+	// 	elem := sel((*p)[i]))
+	// 	//*new = append(*new, sel((*p)[i]))
+	// }
+	// return new
 	return p
 }
 
@@ -414,7 +437,6 @@ func (p *IntSlice) Select(sel func(O) bool) (other Slice) {
 	if p == nil || len(*p) == 0 {
 		return new
 	}
-
 	for i := 0; i < len(*p); i++ {
 		if sel((*p)[i]) {
 			*new = append(*new, (*p)[i])
@@ -555,4 +577,22 @@ func (p *IntSlice) TakeLastN(n int) (other Slice) {
 	other = p.Copy(absNeg(n), -1)
 	p.DropLastN(n)
 	return
+}
+
+// TakeWhere deletes the elements from the Slice and creates a new slice with the elements that match the lambda expression.
+func (p *IntSlice) TakeWhere(sel func(O) bool) (other Slice) {
+	new := NewIntSliceV()
+	if p == nil || len(*p) == 0 {
+		return new
+	}
+	l := len(*p)
+	for i := 0; i < l; i++ {
+		if sel((*p)[i]) {
+			*new = append(*new, (*p)[i])
+			p.DropAt(i)
+			l--
+			i--
+		}
+	}
+	return new
 }
