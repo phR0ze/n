@@ -22,7 +22,7 @@ type Slice interface {
 	At(i int) (elem *Object)               // At returns the element at the given index location. Allows for negative notation.
 	Clear() Slice                          // Clear the underlying slice, returns Slice for chaining.
 	Concat(other interface{}) Slice        // Concat appends the other slice using variadic expansion and returns Slice for chaining.
-	Copy(indices ...int) (new Slice)       // Copy performs a deep copy such that modifications to the copy will not affect the original.
+	Copy(indices ...int) (new Slice)       // Copy returns a new Slice with the element copied from this Slice.
 	Count(elem interface{}) (cnt int)      // Count the number of elements equal the given element.
 	CountWhere(sel func(O) bool) (cnt int) // CountWhere the number of elements that match the lambda expression.
 	Drop(indices ...int) Slice             // Drop deletes a range of elements and returns the rest of the elements in the slice.
@@ -59,7 +59,8 @@ type Slice interface {
 	SetE(i int, elem interface{}) (Slice, error) // Set the element at the given index location to the given element. Allows for negative notation.
 	Single() bool                                // Single reports true if there is only one element in this Slice.
 	Slice(indices ...int) Slice                  // Slice returns a range of elements from this Slice. Allows for negative notation.
-	Sort() Slice                                 // Sort this Slice and returns a reference for chaining.
+	Sort() (new Slice)                           // Sort returns a new Slice with sorted elements.
+	SortM() Slice                                // SortM modifies this Slice sorting the elements and returns a reference for chaining.
 	SortReverse() Slice                          // SortReverse sorts this Slice in reverse and returns a reference for chaining.
 	Swap(i, j int)                               // Swap elements in this Slice.
 	Take(indices ...int) (new Slice)             // Take removes a range of elements from this Slice and returns them as a new Slice.
@@ -69,7 +70,7 @@ type Slice interface {
 	TakeLast() (elem *Object)                    // TakeLast removes the last element from this Slice and returns it as an Object.
 	TakeLastN(n int) (new Slice)                 // TakeLastN removes the last n elements from this Slice and returns them as a new Slice.
 	TakeWhere(sel func(O) bool) (new Slice)      // TakeWhere removes the elements from this Slice that match the lambda selector and returns them as a new Slice.
-	Uniq() Slice                                 // Uniq returns a new Slice with all non uniq elements removed while preserving element order.
+	Uniq() (new Slice)                           // Uniq returns a new Slice with all non uniq elements removed while preserving element order.
 	UniqM() Slice                                // UniqM modifies this Slice to remove all non uniq elements while preserving element order.
 }
 

@@ -1935,10 +1935,60 @@ func TestIntSlice_Sort(t *testing.T) {
 	assert.Equal(t, NewIntSliceV(), NewIntSliceV().Sort())
 
 	// pos
-	assert.Equal(t, NewIntSliceV(1, 2, 3, 4, 5), NewIntSliceV(5, 3, 2, 4, 1).Sort())
+	{
+		slice := NewIntSliceV(5, 3, 2, 4, 1)
+		sorted := slice.Sort()
+		assert.Equal(t, NewIntSliceV(1, 2, 3, 4, 5, 6), sorted.Append(6))
+		assert.Equal(t, NewIntSliceV(5, 3, 2, 4, 1), slice)
+	}
 
 	// neg
-	assert.Equal(t, NewIntSliceV(-2, -1, 3, 4, 5), NewIntSliceV(5, 3, -2, 4, -1).Sort())
+	{
+		slice := NewIntSliceV(5, 3, -2, 4, -1)
+		sorted := slice.Sort()
+		assert.Equal(t, NewIntSliceV(-2, -1, 3, 4, 5, 6), sorted.Append(6))
+		assert.Equal(t, NewIntSliceV(5, 3, -2, 4, -1), slice)
+	}
+}
+
+// SortM
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_SortM_Go(t *testing.B) {
+	ints := Range(0, nines6)
+	sort.Sort(sort.IntSlice(ints))
+}
+
+func BenchmarkIntSlice_SortM_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines6))
+	slice.SortM()
+}
+
+func ExampleIntSlice_SortM() {
+	slice := NewIntSliceV(2, 3, 1)
+	fmt.Println(slice.SortM().O())
+	// Output: [1 2 3]
+}
+
+func TestIntSlice_SortM(t *testing.T) {
+
+	// empty
+	assert.Equal(t, NewIntSliceV(), NewIntSliceV().SortM())
+
+	// pos
+	{
+		slice := NewIntSliceV(5, 3, 2, 4, 1)
+		sorted := slice.SortM()
+		assert.Equal(t, NewIntSliceV(1, 2, 3, 4, 5, 6), sorted.Append(6))
+		assert.Equal(t, NewIntSliceV(1, 2, 3, 4, 5, 6), slice)
+	}
+
+	// neg
+	{
+		slice := NewIntSliceV(5, 3, -2, 4, -1)
+		sorted := slice.SortM()
+		assert.Equal(t, NewIntSliceV(-2, -1, 3, 4, 5, 6), sorted.Append(6))
+		assert.Equal(t, NewIntSliceV(-2, -1, 3, 4, 5, 6), slice)
+	}
 }
 
 // SortReverse
@@ -2665,5 +2715,72 @@ func TestIntSlice_Uniq(t *testing.T) {
 		assert.Equal(t, NewIntSliceV(1, 2, 3), uniq)
 		assert.Equal(t, NewIntSliceV(1, 2, 3, 4), slice.Append(4))
 		assert.Equal(t, NewIntSliceV(1, 2, 3), uniq)
+	}
+}
+
+// UniqM
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_UniqM_Go(t *testing.B) {
+	// ints := Range(0, nines7)
+	// for len(ints) > 10 {
+	// 	ints = ints[10:]
+	// }
+}
+
+func BenchmarkIntSlice_UniqM_Slice(t *testing.B) {
+	// slice := NewIntSlice(Range(0, nines7))
+	// for slice.Len() > 0 {
+	// 	slice.TakeLastN(10)
+	// }
+}
+
+func ExampleIntSlice_UniqM() {
+	slice := NewIntSliceV(1, 2, 3, 3)
+	fmt.Println(slice.UniqM().O())
+	// Output: [1 2 3]
+}
+
+func TestIntSlice_UniqM(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *IntSlice
+		assert.Equal(t, (*IntSlice)(nil), slice.UniqM())
+	}
+
+	// size of one
+	{
+		slice := NewIntSliceV(1)
+		uniq := slice.UniqM()
+		assert.Equal(t, NewIntSliceV(1), uniq)
+		assert.Equal(t, NewIntSliceV(1, 2), slice.Append(2))
+		assert.Equal(t, NewIntSliceV(1, 2), uniq)
+	}
+
+	// one duplicate
+	{
+		slice := NewIntSliceV(1, 1)
+		uniq := slice.UniqM()
+		assert.Equal(t, NewIntSliceV(1), uniq)
+		assert.Equal(t, NewIntSliceV(1, 2), slice.Append(2))
+		assert.Equal(t, NewIntSliceV(1, 2), uniq)
+	}
+
+	// multiple duplicates
+	{
+		slice := NewIntSliceV(1, 2, 2, 3, 3)
+		uniq := slice.UniqM()
+		assert.Equal(t, NewIntSliceV(1, 2, 3), uniq)
+		assert.Equal(t, NewIntSliceV(1, 2, 3, 4), slice.Append(4))
+		assert.Equal(t, NewIntSliceV(1, 2, 3, 4), uniq)
+	}
+
+	// no duplicates
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		uniq := slice.UniqM()
+		assert.Equal(t, NewIntSliceV(1, 2, 3), uniq)
+		assert.Equal(t, NewIntSliceV(1, 2, 3, 4), slice.Append(4))
+		assert.Equal(t, NewIntSliceV(1, 2, 3, 4), uniq)
 	}
 }

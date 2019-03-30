@@ -133,30 +133,28 @@ func (p *IntSlice) Concat(other interface{}) Slice {
 	return p
 }
 
-// Copy performs a deep copy such that modifications to the copy will not affect
-// the original. Expects nothing, in which case everything is copied, or two
+// Copy returns a new Slice with the element copied from this Slice.
+// Expects nothing, in which case everything is copied, or two
 // indices i and j, in which case positive and negative notation is supported and
 // uses an inclusive behavior such that Slice(0, -1) includes index -1 as opposed
 // to Go's exclusive  behavior. Out of bounds indices will be moved within bounds.
 //
 // An empty Slice is returned if indicies are mutually exclusive or nothing can be returned.
-func (p *IntSlice) Copy(indices ...int) (other Slice) {
+func (p *IntSlice) Copy(indices ...int) (new Slice) {
 	if p == nil || len(*p) == 0 {
-		other = NewIntSliceV()
-		return
+		return NewIntSliceV()
 	}
 
 	// Handle index manipulation
 	i, j, err := absIndices(len(*p), indices...)
 	if err != nil {
-		other = NewIntSliceV()
-		return
+		return NewIntSliceV()
 	}
 
+	// Copy elements over to new Slice
 	x := make([]int, j-i, j-i)
 	copy(x, (*p)[i:j])
-	other = NewIntSlice(x)
-	return
+	return NewIntSlice(x)
 }
 
 // Count the number of elements equal the given element.
@@ -527,8 +525,16 @@ func (p *IntSlice) Slice(indices ...int) Slice {
 	return NewIntSlice((*p)[i:j])
 }
 
-// Sort this Slice and returns a reference for chaining.
-func (p *IntSlice) Sort() Slice {
+// Sort returns a new Slice with sorted elements.
+func (p *IntSlice) Sort() (new Slice) {
+	if p == nil || len(*p) < 2 {
+		return p.Copy()
+	}
+	return p.Copy().SortM()
+}
+
+// SortM modifies this Slice sorting the elements and returns a reference for chaining.
+func (p *IntSlice) SortM() Slice {
 	if p == nil || len(*p) < 2 {
 		return p
 	}
@@ -625,8 +631,9 @@ func (p *IntSlice) TakeWhere(sel func(O) bool) (new Slice) {
 }
 
 // Uniq returns a new Slice with all non uniq elements removed while preserving element order.
+// Cost for this call vs the UniqM is roughly the same, this one is appending that one dropping.
 func (p *IntSlice) Uniq() (new Slice) {
-	if p == nil || len(*p) <= 1 {
+	if p == nil || len(*p) < 2 {
 		return p.Copy()
 	}
 	m := NewIntMapBool()
@@ -640,16 +647,19 @@ func (p *IntSlice) Uniq() (new Slice) {
 }
 
 // UniqM modifies this Slice to remove all non uniq elements while preserving element order.
-func (p *IntSlice) UniqM() (new Slice) {
-	if p == nil || len(*p) <= 1 {
-		return p.Copy()
+// Cost for this call vs the Uniq is roughly the same, this one is dropping that one appending.
+func (p *IntSlice) UniqM() Slice {
+	if p == nil || len(*p) < 2 {
+		return p
 	}
 	m := NewIntMapBool()
-	slice := NewIntSliceV()
-	for i := 0; i < len(*p); i++ {
-		if ok := m.Set((*p)[i], true); ok {
-			slice.Append((*p)[i])
+	l := len(*p)
+	for i := 0; i < l; i++ {
+		if ok := m.Set((*p)[i], true); !ok {
+			p.DropAt(i)
+			l--
+			i--
 		}
 	}
-	return slice
+	return p
 }
