@@ -1184,6 +1184,42 @@ func TestIntSlice_FirstN(t *testing.T) {
 	assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1, 2, 3).FirstN(2))
 }
 
+// Index
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_Index_Go(t *testing.B) {
+	ints := Range(0, nines5)
+	for i := range ints {
+		if ints[i] == nines4 {
+			break
+		}
+	}
+}
+
+func BenchmarkIntSlice_Index_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines5))
+	slice.Index(nines4)
+}
+
+func ExampleIntSlice_Index() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.Index(2))
+	// Output: 1
+}
+
+func TestIntSlice_Index(t *testing.T) {
+
+	// empty
+	var slice *IntSlice
+	assert.Equal(t, -1, slice.Index(2))
+	assert.Equal(t, -1, NewIntSliceV().Index(1))
+
+	assert.Equal(t, 0, NewIntSliceV(1, 2, 3).Index(1))
+	assert.Equal(t, 1, NewIntSliceV(1, 2, 3).Index(2))
+	assert.Equal(t, 2, NewIntSliceV(1, 2, 3).Index(3))
+	assert.Equal(t, -1, NewIntSliceV(1, 2, 3).Index(4))
+	assert.Equal(t, -1, NewIntSliceV(1, 2, 3).Index(5))
+}
+
 // Insert
 //--------------------------------------------------------------------------------------------------
 func BenchmarkIntSlice_Insert_Go(t *testing.B) {

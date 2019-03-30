@@ -36,7 +36,7 @@ type Slice interface {
 	First() (elem *Object) // First returns the first element in the slice as Object
 	FirstN(n int) Slice    // FirstN returns the first n elements in the slice as a Slice
 	//Flatten() Slice                              // Flatten
-	//Index(elem interface{}) int             // Index returns the index of the first element in the slice where element == elem
+	Index(elem interface{}) int             // Index returns the index of the first element in the slice where element == elem
 	Insert(i int, elem interface{}) Slice   // Insert the given element before the element with the given index.
 	Join(separator ...string) (str *Object) // Join converts each element into a string then joins them together using the given separator or comma
 	Last() (elem *Object)                   // Last returns the last element in the slice as Object.

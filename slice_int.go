@@ -290,6 +290,21 @@ func (p *IntSlice) FirstN(n int) Slice {
 	return p.Slice(0, abs(n)-1)
 }
 
+// Index returns the index of the first element in the slice where element == elem
+// Returns a -1 if the element was not not found.
+func (p *IntSlice) Index(elem interface{}) int {
+	result := -1
+	if p == nil || len(*p) == 0 {
+		return result
+	}
+	for i := 0; i < len(*p); i++ {
+		if elem == (*p)[i] {
+			return i
+		}
+	}
+	return result
+}
+
 // Insert the given element before the element with the given index. Negative indices count
 // backwards from the end of the slice, where -1 is the last element. If a negative index
 // is used, the given element will be inserted after that element, so using an index of -1
