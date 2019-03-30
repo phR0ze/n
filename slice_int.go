@@ -542,8 +542,16 @@ func (p *IntSlice) SortM() Slice {
 	return p
 }
 
-// SortReverse sorts this Slice in reverse and returns a reference for chaining.
-func (p *IntSlice) SortReverse() Slice {
+// SortReverse returns a new Slice sorting the elements in reverse.
+func (p *IntSlice) SortReverse() (new Slice) {
+	if p == nil || len(*p) < 2 {
+		return p.Copy()
+	}
+	return p.Copy().SortReverseM()
+}
+
+// SortReverseM modifies this Slice sorting the elements in reverse and returns a reference for chaining.
+func (p *IntSlice) SortReverseM() Slice {
 	if p == nil || len(*p) < 2 {
 		return p
 	}

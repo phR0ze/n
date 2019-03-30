@@ -2015,10 +2015,60 @@ func TestIntSlice_SortReverse(t *testing.T) {
 	assert.Equal(t, NewIntSliceV(), NewIntSliceV().SortReverse())
 
 	// pos
-	assert.Equal(t, NewIntSliceV(5, 4, 3, 2, 1), NewIntSliceV(3, 5, 2, 1, 4).SortReverse())
+	{
+		slice := NewIntSliceV(5, 3, 2, 4, 1)
+		sorted := slice.SortReverse()
+		assert.Equal(t, NewIntSliceV(5, 4, 3, 2, 1, 6), sorted.Append(6))
+		assert.Equal(t, NewIntSliceV(5, 3, 2, 4, 1), slice)
+	}
 
 	// neg
-	assert.Equal(t, NewIntSliceV(5, 4, 3, -1, -2), NewIntSliceV(5, 3, -2, 4, -1).SortReverse())
+	{
+		slice := NewIntSliceV(5, 3, -2, 4, -1)
+		sorted := slice.SortReverse()
+		assert.Equal(t, NewIntSliceV(5, 4, 3, -1, -2, 6), sorted.Append(6))
+		assert.Equal(t, NewIntSliceV(5, 3, -2, 4, -1), slice)
+	}
+}
+
+// SortReverseM
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_SortReverseM_Go(t *testing.B) {
+	ints := Range(0, nines6)
+	sort.Sort(sort.Reverse(sort.IntSlice(ints)))
+}
+
+func BenchmarkIntSlice_SortReverseM_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines6))
+	slice.SortReverseM()
+}
+
+func ExampleIntSlice_SortReverseM() {
+	slice := NewIntSliceV(2, 3, 1)
+	fmt.Println(slice.SortReverseM().O())
+	// Output: [3 2 1]
+}
+
+func TestIntSlice_SortReverseM(t *testing.T) {
+
+	// empty
+	assert.Equal(t, NewIntSliceV(), NewIntSliceV().SortReverse())
+
+	// pos
+	{
+		slice := NewIntSliceV(5, 3, 2, 4, 1)
+		sorted := slice.SortReverseM()
+		assert.Equal(t, NewIntSliceV(5, 4, 3, 2, 1, 6), sorted.Append(6))
+		assert.Equal(t, NewIntSliceV(5, 4, 3, 2, 1, 6), slice)
+	}
+
+	// neg
+	{
+		slice := NewIntSliceV(5, 3, -2, 4, -1)
+		sorted := slice.SortReverseM()
+		assert.Equal(t, NewIntSliceV(5, 4, 3, -1, -2, 6), sorted.Append(6))
+		assert.Equal(t, NewIntSliceV(5, 4, 3, -1, -2, 6), slice)
+	}
 }
 
 // Swap

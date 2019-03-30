@@ -61,7 +61,8 @@ type Slice interface {
 	Slice(indices ...int) Slice                  // Slice returns a range of elements from this Slice. Allows for negative notation.
 	Sort() (new Slice)                           // Sort returns a new Slice with sorted elements.
 	SortM() Slice                                // SortM modifies this Slice sorting the elements and returns a reference for chaining.
-	SortReverse() Slice                          // SortReverse sorts this Slice in reverse and returns a reference for chaining.
+	SortReverse() (new Slice)                    // SortReverse returns a new Slice sorting the elements in reverse.
+	SortReverseM() Slice                         // SortReverseM modifies this Slice sorting the elements in reverse and returns a reference for chaining.
 	Swap(i, j int)                               // Swap elements in this Slice.
 	Take(indices ...int) (new Slice)             // Take removes a range of elements from this Slice and returns them as a new Slice.
 	TakeAt(i int) (elem *Object)                 // TakeAt removes the elemement at the given index location from this Slice and returns it as an Object.
