@@ -623,6 +623,82 @@ func TestIntSlice_Copy(t *testing.T) {
 	}
 }
 
+// Count
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_Count_Go(t *testing.B) {
+	ints := Range(0, nines5)
+	for i := range ints {
+		if i == nines4 {
+			break
+		}
+	}
+}
+
+func BenchmarkIntSlice_Count_Slice(t *testing.B) {
+	src := Range(0, nines5)
+	NewIntSlice(src).Count(nines4)
+}
+
+func ExampleIntSlice_Count() {
+	slice := NewIntSliceV(1, 2, 2)
+	fmt.Println(slice.Count(2))
+	// Output: 2
+}
+
+func TestIntSlice_Count(t *testing.T) {
+
+	// empty
+	var slice *IntSlice
+	assert.Equal(t, 0, slice.Count(0))
+	assert.Equal(t, 0, NewIntSliceV().Count(0))
+
+	assert.Equal(t, 1, NewIntSliceV(2, 3).Count(2))
+	assert.Equal(t, 2, NewIntSliceV(1, 2, 2).Count(2))
+	assert.Equal(t, 4, NewIntSliceV(4, 4, 3, 4, 4).Count(4))
+	assert.Equal(t, 3, NewIntSliceV(3, 2, 3, 3, 5).Count(3))
+	assert.Equal(t, 1, NewIntSliceV(1, 2, 3).Count(3))
+}
+
+// CountWhere
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_CountWhere_Go(t *testing.B) {
+	ints := Range(0, nines5)
+	for i := range ints {
+		if i == nines4 {
+			break
+		}
+	}
+}
+
+func BenchmarkIntSlice_CountWhere_Slice(t *testing.B) {
+	src := Range(0, nines5)
+	NewIntSlice(src).CountWhere(func(x O) bool {
+		return BoolEx(x.(int) == nines4)
+	})
+}
+
+func ExampleIntSlice_CountWhere() {
+	slice := NewIntSliceV(1, 2, 2)
+	fmt.Println(slice.CountWhere(func(x O) bool {
+		return BoolEx(x.(int) == 2)
+	}))
+	// Output: 2
+}
+
+func TestIntSlice_CountWhere(t *testing.T) {
+
+	// empty
+	var slice *IntSlice
+	assert.Equal(t, 0, slice.CountWhere(func(x O) bool { return BoolEx(x.(int) > 0) }))
+	assert.Equal(t, 0, NewIntSliceV().CountWhere(func(x O) bool { return BoolEx(x.(int) > 0) }))
+
+	assert.Equal(t, 1, NewIntSliceV(2, 3).CountWhere(func(x O) bool { return BoolEx(x.(int) > 2) }))
+	assert.Equal(t, 1, NewIntSliceV(1, 2).CountWhere(func(x O) bool { return BoolEx(x.(int) == 2) }))
+	assert.Equal(t, 2, NewIntSliceV(1, 2, 3, 4, 5).CountWhere(func(x O) bool { return BoolEx(x.(int)%2 == 0) }))
+	assert.Equal(t, 3, NewIntSliceV(1, 2, 3, 4, 5).CountWhere(func(x O) bool { return BoolEx(x.(int)%2 != 0) }))
+	assert.Equal(t, 1, NewIntSliceV(1, 2, 3).CountWhere(func(x O) bool { return BoolEx(x.(int) == 4 || x.(int) == 3) }))
+}
+
 // Drop
 //--------------------------------------------------------------------------------------------------
 func BenchmarkIntSlice_Drop_Go(t *testing.B) {

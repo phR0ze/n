@@ -74,15 +74,7 @@ func (p *IntSlice) AnyS(other interface{}) bool {
 
 // AnyWhere tests if the slice contains any that match the lambda selector.
 func (p *IntSlice) AnyWhere(sel func(O) bool) bool {
-	if p == nil || len(*p) == 0 {
-		return false
-	}
-	for i := 0; i < len(*p); i++ {
-		if sel((*p)[i]) {
-			return true
-		}
-	}
-	return false
+	return p.CountWhere(sel) != 0
 }
 
 // Append an element to the end of the Slice and returns the Slice for chaining
@@ -164,6 +156,27 @@ func (p *IntSlice) Copy(indices ...int) (other Slice) {
 	x := make([]int, j-i, j-i)
 	copy(x, (*p)[i:j])
 	other = NewIntSlice(x)
+	return
+}
+
+// Count the number of elements equal the given element.
+func (p *IntSlice) Count(elem interface{}) (cnt int) {
+	if y, ok := elem.(int); ok {
+		cnt = p.CountWhere(func(x O) bool { return BoolEx(x.(int) == y) })
+	}
+	return
+}
+
+// CountWhere the number of elements that match the lambda expression.
+func (p *IntSlice) CountWhere(sel func(O) bool) (cnt int) {
+	if p == nil || len(*p) == 0 {
+		return
+	}
+	for i := 0; i < len(*p); i++ {
+		if sel((*p)[i]) {
+			cnt++
+		}
+	}
 	return
 }
 
@@ -292,17 +305,17 @@ func (p *IntSlice) FirstN(n int) Slice {
 
 // Index returns the index of the first element in the slice where element == elem
 // Returns a -1 if the element was not not found.
-func (p *IntSlice) Index(elem interface{}) int {
-	result := -1
+func (p *IntSlice) Index(elem interface{}) (loc int) {
+	loc = -1
 	if p == nil || len(*p) == 0 {
-		return result
+		return
 	}
 	for i := 0; i < len(*p); i++ {
 		if elem == (*p)[i] {
 			return i
 		}
 	}
-	return result
+	return
 }
 
 // Insert the given element before the element with the given index. Negative indices count
