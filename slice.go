@@ -67,7 +67,7 @@ type Slice interface {
 	TakeLast() (elem *Object)                    // TakeLast deletes the last element and returns it as an Object.
 	TakeLastN(n int) (other Slice)               // TakeLastN deletes the last n elements and returns them as a new slice.
 	TakeWhere(sel func(O) bool) (other Slice)    // TakeWhere deletes the elements from the Slice and creates a new slice with the elements that match the lambda expression.
-	//Uniq() Slice                                 // Uniq removes all elements that are not uniq.
+	Uniq() Slice                                 // Uniq removes all elements that are not uniq.
 }
 
 // NSlice provides a generic way to work with slice types providing convenience methods

@@ -2600,3 +2600,70 @@ func TestIntSlice_TakeWhere(t *testing.T) {
 		assert.Equal(t, NewIntSliceV(2, 4, 6, 8), new)
 	}
 }
+
+// Uniq
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_Uniq_Go(t *testing.B) {
+	// ints := Range(0, nines7)
+	// for len(ints) > 10 {
+	// 	ints = ints[10:]
+	// }
+}
+
+func BenchmarkIntSlice_Uniq_Slice(t *testing.B) {
+	// slice := NewIntSlice(Range(0, nines7))
+	// for slice.Len() > 0 {
+	// 	slice.TakeLastN(10)
+	// }
+}
+
+func ExampleIntSlice_Uniq() {
+	slice := NewIntSliceV(1, 2, 3, 3)
+	fmt.Println(slice.Uniq().O())
+	// Output: [1 2 3]
+}
+
+func TestIntSlice_Uniq(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *IntSlice
+		assert.Equal(t, NewIntSliceV(), slice.Uniq())
+	}
+
+	// size of one
+	{
+		slice := NewIntSliceV(1)
+		uniq := slice.Uniq()
+		assert.Equal(t, NewIntSliceV(1), uniq)
+		assert.Equal(t, NewIntSliceV(1, 2), slice.Append(2))
+		assert.Equal(t, NewIntSliceV(1), uniq)
+	}
+
+	// one duplicate
+	{
+		slice := NewIntSliceV(1, 1)
+		uniq := slice.Uniq()
+		assert.Equal(t, NewIntSliceV(1), uniq)
+		assert.Equal(t, NewIntSliceV(1, 1, 2), slice.Append(2))
+		assert.Equal(t, NewIntSliceV(1), uniq)
+	}
+
+	// multiple duplicates
+	{
+		slice := NewIntSliceV(1, 2, 2, 3, 3)
+		uniq := slice.Uniq()
+		assert.Equal(t, NewIntSliceV(1, 2, 3), uniq)
+		assert.Equal(t, NewIntSliceV(1, 2, 2, 3, 3, 4), slice.Append(4))
+		assert.Equal(t, NewIntSliceV(1, 2, 3), uniq)
+	}
+
+	// no duplicates
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		uniq := slice.Uniq()
+		assert.Equal(t, NewIntSliceV(1, 2, 3), uniq)
+		assert.Equal(t, NewIntSliceV(1, 2, 3, 4), slice.Append(4))
+		assert.Equal(t, NewIntSliceV(1, 2, 3), uniq)
+	}
+}

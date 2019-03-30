@@ -624,3 +624,33 @@ func (p *IntSlice) TakeWhere(sel func(O) bool) (other Slice) {
 	}
 	return new
 }
+
+// Uniq returns a new Slice with all non uniq elements removed while preserving element order.
+func (p *IntSlice) Uniq() (new Slice) {
+	if p == nil || len(*p) <= 1 {
+		return p.Copy()
+	}
+	m := NewIntMapBool()
+	slice := NewIntSliceV()
+	for i := 0; i < len(*p); i++ {
+		if ok := m.Set((*p)[i], true); ok {
+			slice.Append((*p)[i])
+		}
+	}
+	return slice
+}
+
+// UniqBang modifies the underlying slice to remove all non uniq elements while preserving element order.
+func (p *IntSlice) UniqBang() (new Slice) {
+	if p == nil || len(*p) <= 1 {
+		return p.Copy()
+	}
+	m := NewIntMapBool()
+	slice := NewIntSliceV()
+	for i := 0; i < len(*p); i++ {
+		if ok := m.Set((*p)[i], true); ok {
+			slice.Append((*p)[i])
+		}
+	}
+	return slice
+}
