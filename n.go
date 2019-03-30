@@ -6,12 +6,16 @@
 //
 // Conventions used across n types and pkgs
 //
-// • In order to deal with Golang's decision to not support function overloading n makes use
-// of a variety of prefix/suffix capital letters to indicate different function varieties. The
-// function that contains no suffix is known as the base function.
+// • In order to deal with Golang's decision to not support function overloading or special
+// characters in their function names n makes use of a variety of prefix/suffix capital
+// letters to indicate different function varieties. The function that contains no suffix
+// is known as the base function.
 //
 // • Function names suffixed with 'E' indicates the function is a corollary to the function
 // without the 'E' but returns an Error while the base function does not.
+//
+// • Function names suffixed with 'M' indicates the function is a corollary to the function
+// without the 'M' but modifies the underlying n type directly.
 //
 // • Function names suffixed with 'S' indicates the function is a corollary to the function
 // without the 'S' but either accepts a slice as input or returns a Slice.

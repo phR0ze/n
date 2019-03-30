@@ -500,12 +500,12 @@ func (p *IntSlice) SetE(i int, elem interface{}) (Slice, error) {
 	return p, err
 }
 
-// Single simply reports true if there is only one element in the slice
+// Single reports true if there is only one element in this Slice.
 func (p *IntSlice) Single() bool {
 	return len(*p) == 1
 }
 
-// Slice provides a Ruby like slice function for Slice allowing for positive and negative notation.
+// Slice returns a range of elements from this Slice. Allows for negative notation.
 // Expects nothing, in which case everything is included, or two indices i and j, in which case
 // an inclusive behavior is used such that Slice(0, -1) includes index -1 as opposed to Go's
 // exclusive behavior. Out of bounds indices will be moved within bounds.
@@ -527,7 +527,7 @@ func (p *IntSlice) Slice(indices ...int) Slice {
 	return NewIntSlice((*p)[i:j])
 }
 
-// Sort the underlying slice and return a pointer for chaining.
+// Sort this Slice and returns a reference for chaining.
 func (p *IntSlice) Sort() Slice {
 	if p == nil || len(*p) < 2 {
 		return p
@@ -536,7 +536,7 @@ func (p *IntSlice) Sort() Slice {
 	return p
 }
 
-// SortReverse sorts the underlying slice in reverse and return a pointer for chaining.
+// SortReverse sorts this Slice in reverse and returns a reference for chaining.
 func (p *IntSlice) SortReverse() Slice {
 	if p == nil || len(*p) < 2 {
 		return p
@@ -545,8 +545,7 @@ func (p *IntSlice) SortReverse() Slice {
 	return p
 }
 
-// Swap elements in the underlying slice. Implements the sort.Interface.
-// Takes advantage of underlying slice's sort.Interface implementations if they exist.
+// Swap elements in this Slice.
 func (p *IntSlice) Swap(i, j int) {
 	if p == nil || len(*p) < 2 || i < 0 || j < 0 || i >= len(*p) || j >= len(*p) {
 		return
@@ -554,18 +553,18 @@ func (p *IntSlice) Swap(i, j int) {
 	(*p)[i], (*p)[j] = (*p)[j], (*p)[i]
 }
 
-// Take deletes a range of elements and returns them as a new slice.
+// Take removes a range of elements from this Slice and returns them as a new Slice.
 // Expects nothing, in which case everything is taken, or two indices i and j, in which case
 // positive and negative notation is supported and uses an inclusive behavior such that
-// DropAt(0, -1) includes index -1 as opposed to Go's exclusive behavior. Out of bounds indices
+// Take(0, -1) includes index -1 as opposed to Go's exclusive behavior. Out of bounds indices
 // will be moved within bounds.
-func (p *IntSlice) Take(indices ...int) (other Slice) {
-	other = p.Copy(indices...)
+func (p *IntSlice) Take(indices ...int) (new Slice) {
+	new = p.Copy(indices...)
 	p.Drop(indices...)
 	return
 }
 
-// TakeAt deletes the elemement at the given index location and returns it as an Object.
+// TakeAt removes the elemement at the given index location from this Slice and returns it as an Object.
 // Allows for negative notation.
 func (p *IntSlice) TakeAt(i int) (elem *Object) {
 	elem = p.At(i)
@@ -573,56 +572,56 @@ func (p *IntSlice) TakeAt(i int) (elem *Object) {
 	return
 }
 
-// TakeFirst deletes the first element and returns it as an Object.
+// TakeFirst removes the first element from this Slice and returns it as an Object.
 func (p *IntSlice) TakeFirst() (elem *Object) {
 	elem = p.First()
 	p.DropFirst()
 	return
 }
 
-// TakeFirstN deletes the first n elements and returns them as a new slice.
-func (p *IntSlice) TakeFirstN(n int) (other Slice) {
+// TakeFirstN removes the first n elements from this Slice and returns them as a new Slice.
+func (p *IntSlice) TakeFirstN(n int) (new Slice) {
 	if n == 0 {
 		return NewIntSliceV()
 	}
-	other = p.Copy(0, abs(n)-1)
+	new = p.Copy(0, abs(n)-1)
 	p.DropFirstN(n)
 	return
 }
 
-// TakeLast deletes the last element and returns it as an Object.
+// TakeLast removes the last element from this Slice and returns it as an Object.
 func (p *IntSlice) TakeLast() (elem *Object) {
 	elem = p.Last()
 	p.DropLast()
 	return
 }
 
-// TakeLastN deletes the last n elements and returns them as a new slice.
-func (p *IntSlice) TakeLastN(n int) (other Slice) {
+// TakeLastN removes the last n elements from this Slice and returns them as a new slice.
+func (p *IntSlice) TakeLastN(n int) (new Slice) {
 	if n == 0 {
 		return NewIntSliceV()
 	}
-	other = p.Copy(absNeg(n), -1)
+	new = p.Copy(absNeg(n), -1)
 	p.DropLastN(n)
 	return
 }
 
-// TakeWhere deletes the elements from the Slice and creates a new slice with the elements that match the lambda expression.
-func (p *IntSlice) TakeWhere(sel func(O) bool) (other Slice) {
-	new := NewIntSliceV()
+// TakeWhere removes the elements from this Slice that match the lambda selector and returns them as a new slice.
+func (p *IntSlice) TakeWhere(sel func(O) bool) (new Slice) {
+	slice := NewIntSliceV()
 	if p == nil || len(*p) == 0 {
-		return new
+		return slice
 	}
 	l := len(*p)
 	for i := 0; i < l; i++ {
 		if sel((*p)[i]) {
-			*new = append(*new, (*p)[i])
+			*slice = append(*slice, (*p)[i])
 			p.DropAt(i)
 			l--
 			i--
 		}
 	}
-	return new
+	return slice
 }
 
 // Uniq returns a new Slice with all non uniq elements removed while preserving element order.
@@ -640,8 +639,8 @@ func (p *IntSlice) Uniq() (new Slice) {
 	return slice
 }
 
-// UniqBang modifies the underlying slice to remove all non uniq elements while preserving element order.
-func (p *IntSlice) UniqBang() (new Slice) {
+// UniqM modifies this Slice to remove all non uniq elements while preserving element order.
+func (p *IntSlice) UniqM() (new Slice) {
 	if p == nil || len(*p) <= 1 {
 		return p.Copy()
 	}

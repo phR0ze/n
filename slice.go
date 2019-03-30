@@ -10,7 +10,9 @@ import (
 )
 
 // Slice provides a generic way to work with slice types providing convenience methods
-// on par with other rapid development languages.
+// on par with other rapid development languages. 'this Slice' refers to the current slice
+// instance being operated on.  'new Slice' refers to a copy of the slice based on a new
+// underlying Array.
 type Slice interface {
 	Any(elems ...interface{}) bool         // Any tests if the slice is not empty or optionally if it contains any of the given variadic elements.
 	AnyS(other interface{}) bool           // AnyS tests if the slice contains any of the other slice's elements.
@@ -20,7 +22,7 @@ type Slice interface {
 	At(i int) (elem *Object)               // At returns the element at the given index location. Allows for negative notation.
 	Clear() Slice                          // Clear the underlying slice, returns Slice for chaining.
 	Concat(other interface{}) Slice        // Concat appends the other slice using variadic expansion and returns Slice for chaining.
-	Copy(indices ...int) (other Slice)     // Copy performs a deep copy such that modifications to the copy will not affect the original.
+	Copy(indices ...int) (new Slice)       // Copy performs a deep copy such that modifications to the copy will not affect the original.
 	Count(elem interface{}) (cnt int)      // Count the number of elements equal the given element.
 	CountWhere(sel func(O) bool) (cnt int) // CountWhere the number of elements that match the lambda expression.
 	Drop(indices ...int) Slice             // Drop deletes a range of elements and returns the rest of the elements in the slice.
@@ -45,29 +47,30 @@ type Slice interface {
 	LastN(n int) Slice                      // LastN returns the last n elements in the slice as a Slice.
 	Len() int                               // Len returns the number of elements in the slice.
 	Less(i, j int) bool                     // Less returns true if the element indexed by i is less than the element indexed by j.
-	Map(sel func(O) O) (other Slice)        // Map projects the slice into a new form by executing the lambda against all elements.
+	Map(sel func(O) O) (new Slice)          // Map projects the slice into a new form by executing the lambda against all elements.
 	//MapF(sel func(O) O) (other Slice)            // Map projects the slice into a new form by executing the lambda against all elements then calls Flatten.
 	Nil() bool                                   // Nil tests if the slice is nil.
 	O() interface{}                              // O returns the underlying data structure.
 	Pair() (first, second *Object)               // Pair simply returns the first and second slice elements as Object.
 	Prepend(elem interface{}) Slice              // Prepend the given element at the begining of the slice.
 	Reverse() Slice                              // Reverse reverses the order of the elements in the slice and returns a reference for chaining.
-	Select(sel func(O) bool) (other Slice)       // Select creates a new slice with the elements that match the lambda expression.
+	Select(sel func(O) bool) (new Slice)         // Select creates a new slice with the elements that match the lambda expression.
 	Set(i int, elem interface{}) Slice           // Set the element at the given index location to the given element. Allows for negative notation.
 	SetE(i int, elem interface{}) (Slice, error) // Set the element at the given index location to the given element. Allows for negative notation.
-	Single() bool                                // Single simply reports true if there is only one element in the slice
-	Slice(indices ...int) Slice                  // Slice provides a Ruby like slice function allowing for positive and negative notation.
-	Sort() Slice                                 // Sort the underlying slice and return a pointer for chaining.
-	SortReverse() Slice                          // SortReverse sorts the underlying slice in reverse and return a pointer for chaining.
-	Swap(i, j int)                               // Swap elements in the underlying slice.
-	Take(indices ...int) (other Slice)           // Take deletes a range of elements and returns them as a new slice.
-	TakeAt(i int) (elem *Object)                 // TakeAt deletes the elemement at the given index location and returns it as an Object.
-	TakeFirst() (elem *Object)                   // TakeFirst deletes the first element and returns it as an Object.
-	TakeFirstN(n int) (other Slice)              // TakeFirstN deletes the first n elements and returns them as a new slice.
-	TakeLast() (elem *Object)                    // TakeLast deletes the last element and returns it as an Object.
-	TakeLastN(n int) (other Slice)               // TakeLastN deletes the last n elements and returns them as a new slice.
-	TakeWhere(sel func(O) bool) (other Slice)    // TakeWhere deletes the elements from the Slice and creates a new slice with the elements that match the lambda expression.
-	Uniq() Slice                                 // Uniq removes all elements that are not uniq.
+	Single() bool                                // Single reports true if there is only one element in this Slice.
+	Slice(indices ...int) Slice                  // Slice returns a range of elements from this Slice. Allows for negative notation.
+	Sort() Slice                                 // Sort this Slice and returns a reference for chaining.
+	SortReverse() Slice                          // SortReverse sorts this Slice in reverse and returns a reference for chaining.
+	Swap(i, j int)                               // Swap elements in this Slice.
+	Take(indices ...int) (new Slice)             // Take removes a range of elements from this Slice and returns them as a new Slice.
+	TakeAt(i int) (elem *Object)                 // TakeAt removes the elemement at the given index location from this Slice and returns it as an Object.
+	TakeFirst() (elem *Object)                   // TakeFirst removes the first element from this Slice and returns it as an Object.
+	TakeFirstN(n int) (new Slice)                // TakeFirstN removes the first n elements from this Slice and returns them as a new Slice.
+	TakeLast() (elem *Object)                    // TakeLast removes the last element from this Slice and returns it as an Object.
+	TakeLastN(n int) (new Slice)                 // TakeLastN removes the last n elements from this Slice and returns them as a new Slice.
+	TakeWhere(sel func(O) bool) (new Slice)      // TakeWhere removes the elements from this Slice that match the lambda selector and returns them as a new Slice.
+	Uniq() Slice                                 // Uniq returns a new Slice with all non uniq elements removed while preserving element order.
+	UniqM() Slice                                // UniqM modifies this Slice to remove all non uniq elements while preserving element order.
 }
 
 // NSlice provides a generic way to work with slice types providing convenience methods
