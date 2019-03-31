@@ -441,7 +441,7 @@ func (p *IntSlice) Pair() (first, second *Object) {
 	return
 }
 
-// Prepend the given element at the begining of the slice.
+// Prepend the given element at the begining of the slice and returns a reference for chaining.
 func (p *IntSlice) Prepend(elem interface{}) Slice {
 	return p.Insert(0, elem)
 }
@@ -466,17 +466,17 @@ func (p *IntSlice) ReverseM() Slice {
 }
 
 // Select creates a new slice with the elements that match the lambda expression.
-func (p *IntSlice) Select(sel func(O) bool) (other Slice) {
-	new := NewIntSliceV()
+func (p *IntSlice) Select(sel func(O) bool) (new Slice) {
+	slice := NewIntSliceV()
 	if p == nil || len(*p) == 0 {
-		return new
+		return slice
 	}
 	for i := 0; i < len(*p); i++ {
 		if sel((*p)[i]) {
-			*new = append(*new, (*p)[i])
+			*slice = append(*slice, (*p)[i])
 		}
 	}
-	return new
+	return slice
 }
 
 // Set the element at the given index location to the given element. Allows for negative notation.

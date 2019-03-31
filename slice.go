@@ -52,7 +52,7 @@ type Slice interface {
 	Nil() bool                                   // Nil tests if the slice is nil.
 	O() interface{}                              // O returns the underlying data structure.
 	Pair() (first, second *Object)               // Pair simply returns the first and second slice elements as Object.
-	Prepend(elem interface{}) Slice              // Prepend the given element at the begining of the slice.
+	Prepend(elem interface{}) Slice              // Prepend the given element at the begining of the slice and returns a reference for chaining.
 	Reverse() (new Slice)                        // Reverse returns a new Slice with the order of the elements reversed.
 	ReverseM() Slice                             // ReverseM modifies this Slice reversing the order of the elements and returns a reference for chaining.
 	Select(sel func(O) bool) (new Slice)         // Select creates a new slice with the elements that match the lambda expression.
