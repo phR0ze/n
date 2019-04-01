@@ -23,8 +23,8 @@
 // • Function names suffixed with 'V' indicates the function is a corollary to the function
 // without the 'V' but accepts variadic input.
 //
-// • Function names suffixed with 'Where' indicates the function is a corollary to the function
-// without the 'Where' but accepts a lambda expression.
+// • Function names suffixed with 'W' indicates the function is a corollary to the function
+// without the 'W' but accepts a lambda expression.
 //
 // • Documentation should be thorough and relied upon for guidance as, for a love of brevity,
 // some functions use single capital letters frequently to indicate types. 'O' is being used to
@@ -47,8 +47,8 @@ import (
 // O is an alias for interface{} used in lambda expresssions for brevity.
 type O interface{}
 
-// BoolEx avoids the gastly 4 line monstrosity that it is when used in lambda expression
-func BoolEx(exp bool) bool {
+// ExB avoids the gastly 4 line monstrosity that it is when used in lambda expression
+func ExB(exp bool) bool {
 	if exp {
 		return true
 	}

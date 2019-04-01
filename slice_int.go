@@ -29,7 +29,7 @@ func NewIntSliceV(elems ...int) *IntSlice {
 	return &new
 }
 
-// Any tests if the slice is not empty or optionally if it contains
+// Any tests if this Slice is not empty or optionally if it contains
 // any of the given Variadic elements. Incompatible types will return false.
 func (p *IntSlice) Any(elems ...interface{}) bool {
 	if p == nil || len(*p) == 0 {
@@ -54,27 +54,37 @@ func (p *IntSlice) Any(elems ...interface{}) bool {
 	return false
 }
 
-// AnyS tests if the slice contains any of the other slice's elements.
+// AnyS tests if this Slice contains any of the given Slice's elements.
 // Incompatible types will return false.
-func (p *IntSlice) AnyS(other interface{}) bool {
+// Supports IntSlice, *IntSlice, []int or *[]int
+func (p *IntSlice) AnyS(slice interface{}) bool {
 	if p == nil || len(*p) == 0 {
 		return false
 	}
-	if elems, ok := other.([]int); ok {
-		for i := range elems {
-			for j := range *p {
-				if (*p)[j] == elems[i] {
-					return true
-				}
+	var elems []int
+	switch x := slice.(type) {
+	case []int:
+		elems = x
+	case *[]int:
+		elems = *x
+	case IntSlice:
+		elems = x
+	case *IntSlice:
+		elems = (*x)
+	}
+	for i := range elems {
+		for j := range *p {
+			if (*p)[j] == elems[i] {
+				return true
 			}
 		}
 	}
 	return false
 }
 
-// AnyWhere tests if the slice contains any that match the lambda selector.
-func (p *IntSlice) AnyWhere(sel func(O) bool) bool {
-	return p.CountWhere(sel) != 0
+// AnyW tests if this Slice contains any that match the lambda selector.
+func (p *IntSlice) AnyW(sel func(O) bool) bool {
+	return p.CountW(sel) != 0
 }
 
 // Append an element to the end of the Slice and returns the Slice for chaining
@@ -123,12 +133,13 @@ func (p *IntSlice) Clear() Slice {
 }
 
 // Concat returns a new Slice by appending the given Slice to this Slice using variadic expansion.
+// Supports IntSlice, *IntSlice, []int or *[]int
 func (p *IntSlice) Concat(slice interface{}) (new Slice) {
 	return p.Copy().ConcatM(slice)
 }
 
 // ConcatM modifies this Slice by appending the given Slice using variadic expansion and returns a reference for chaining.
-// Supports Slice, IntSlice, *IntSlice, []int or *[]int
+// Supports IntSlice, *IntSlice, []int or *[]int
 func (p *IntSlice) ConcatM(slice interface{}) Slice {
 	if p == nil {
 		p = NewIntSliceV()
@@ -173,13 +184,13 @@ func (p *IntSlice) Copy(indices ...int) (new Slice) {
 // Count the number of elements equal the given element.
 func (p *IntSlice) Count(elem interface{}) (cnt int) {
 	if y, ok := elem.(int); ok {
-		cnt = p.CountWhere(func(x O) bool { return BoolEx(x.(int) == y) })
+		cnt = p.CountW(func(x O) bool { return ExB(x.(int) == y) })
 	}
 	return
 }
 
-// CountWhere the number of elements that match the lambda expression.
-func (p *IntSlice) CountWhere(sel func(O) bool) (cnt int) {
+// CountW the number of elements that match the lambda expression.
+func (p *IntSlice) CountW(sel func(O) bool) (cnt int) {
 	if p == nil || len(*p) == 0 {
 		return
 	}
@@ -249,9 +260,9 @@ func (p *IntSlice) DropLastN(n int) Slice {
 	return p.Drop(absNeg(n), -1)
 }
 
-// DropWhere deletes the elements where the lambda returns true. Returns the Slice for chaining.
-// The slice is updated instantly when lambda expression is evaluated not after DropWhere is called.
-func (p *IntSlice) DropWhere(sel func(O) bool) Slice {
+// DropW deletes the elements where the lambda returns true. Returns the Slice for chaining.
+// The slice is updated instantly when lambda expression is evaluated not after DropW is called.
+func (p *IntSlice) DropW(sel func(O) bool) Slice {
 	if p == nil || len(*p) == 0 {
 		return p
 	}
@@ -660,13 +671,15 @@ func (p *IntSlice) TakeW(sel func(O) bool) (new Slice) {
 }
 
 // Union returns a new Slice by joining uniq elements from this Slice with uniq elements from the given Slice while preserving order.
-func (p *IntSlice) Union(slice Slice) (new Slice) {
-	return p
+// Supports IntSlice, *IntSlice, []int or *[]int
+func (p *IntSlice) Union(slice interface{}) (new Slice) {
+	return p.Copy().UnionM(slice)
 }
 
 // UnionM modifies this Slice by joining uniq elements from this Slice with uniq elements from the given Slice while preserving order.
-func (p *IntSlice) UnionM(slice Slice) Slice {
-	return p.Concat(slice).UniqM()
+// Supports IntSlice, *IntSlice, []int or *[]int
+func (p *IntSlice) UnionM(slice interface{}) Slice {
+	return p.ConcatM(slice).UniqM()
 }
 
 // Uniq returns a new Slice with all non uniq elements removed while preserving element order.

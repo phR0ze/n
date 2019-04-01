@@ -201,21 +201,53 @@ func ExampleIntSlice_AnyS() {
 
 func TestIntSlice_AnyS(t *testing.T) {
 	// nil
-	var nilSlice *NSlice
-	assert.False(t, nilSlice.AnyS([]int{1}))
+	{
+		var slice *IntSlice
+		assert.False(t, slice.AnyS([]int{1}))
+		assert.False(t, NewIntSliceV(1).AnyS(nil))
+	}
 
-	// int
-	assert.True(t, NewIntSliceV(1, 2, 3).AnyS([]int{1}))
-	assert.True(t, NewIntSliceV(1, 2, 3).AnyS([]int{4, 3}))
-	assert.False(t, NewIntSliceV(1, 2, 3).AnyS([]int{4, 5}))
+	// []int
+	{
+		assert.True(t, NewIntSliceV(1, 2, 3).AnyS([]int{1}))
+		assert.True(t, NewIntSliceV(1, 2, 3).AnyS([]int{4, 3}))
+		assert.False(t, NewIntSliceV(1, 2, 3).AnyS([]int{4, 5}))
+	}
 
-	// invalid
+	// *[]int
+	{
+		assert.True(t, NewIntSliceV(1, 2, 3).AnyS(&([]int{1})))
+		assert.True(t, NewIntSliceV(1, 2, 3).AnyS(&([]int{4, 3})))
+		assert.False(t, NewIntSliceV(1, 2, 3).AnyS(&([]int{4, 5})))
+	}
+
+	// Slice
+	{
+		assert.True(t, NewIntSliceV(1, 2, 3).AnyS(Slice(NewIntSliceV(1))))
+		assert.True(t, NewIntSliceV(1, 2, 3).AnyS(Slice(NewIntSliceV(4, 3))))
+		assert.False(t, NewIntSliceV(1, 2, 3).AnyS(Slice(NewIntSliceV(4, 5))))
+	}
+
+	// IntSlice
+	{
+		assert.True(t, NewIntSliceV(1, 2, 3).AnyS(*NewIntSliceV(1)))
+		assert.True(t, NewIntSliceV(1, 2, 3).AnyS(*NewIntSliceV(4, 3)))
+		assert.False(t, NewIntSliceV(1, 2, 3).AnyS(*NewIntSliceV(4, 5)))
+	}
+
+	// *IntSlice
+	{
+		assert.True(t, NewIntSliceV(1, 2, 3).AnyS(NewIntSliceV(1)))
+		assert.True(t, NewIntSliceV(1, 2, 3).AnyS(NewIntSliceV(4, 3)))
+		assert.False(t, NewIntSliceV(1, 2, 3).AnyS(NewIntSliceV(4, 5)))
+	}
+	// invalid types
 	assert.False(t, NewIntSliceV(1, 2).AnyS([]string{"2"}))
 }
 
-// AnyWhere
+// AnyW
 //--------------------------------------------------------------------------------------------------
-func BenchmarkIntSlice_AnyWhere_Go(t *testing.B) {
+func BenchmarkIntSlice_AnyW_Go(t *testing.B) {
 	ints := Range(0, nines5)
 	for i := range ints {
 		if i == nines4 {
@@ -224,35 +256,35 @@ func BenchmarkIntSlice_AnyWhere_Go(t *testing.B) {
 	}
 }
 
-func BenchmarkIntSlice_AnyWhere_Slice(t *testing.B) {
+func BenchmarkIntSlice_AnyW_Slice(t *testing.B) {
 	src := Range(0, nines5)
-	NewIntSlice(src).AnyWhere(func(x O) bool {
-		return BoolEx(x.(int) == nines4)
+	NewIntSlice(src).AnyW(func(x O) bool {
+		return ExB(x.(int) == nines4)
 	})
 }
 
-func ExampleIntSlice_AnyWhere() {
+func ExampleIntSlice_AnyW() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.AnyWhere(func(x O) bool {
-		return BoolEx(x.(int) == 2)
+	fmt.Println(slice.AnyW(func(x O) bool {
+		return ExB(x.(int) == 2)
 	}))
 	// Output: true
 }
 
-func TestIntSlice_AnyWhere(t *testing.T) {
+func TestIntSlice_AnyW(t *testing.T) {
 
 	// empty
 	var slice *IntSlice
-	assert.False(t, slice.AnyWhere(func(x O) bool { return BoolEx(x.(int) > 0) }))
-	assert.False(t, NewIntSliceV().AnyWhere(func(x O) bool { return BoolEx(x.(int) > 0) }))
+	assert.False(t, slice.AnyW(func(x O) bool { return ExB(x.(int) > 0) }))
+	assert.False(t, NewIntSliceV().AnyW(func(x O) bool { return ExB(x.(int) > 0) }))
 
 	// single
-	assert.True(t, NewIntSliceV(2).AnyWhere(func(x O) bool { return BoolEx(x.(int) > 0) }))
+	assert.True(t, NewIntSliceV(2).AnyW(func(x O) bool { return ExB(x.(int) > 0) }))
 
-	assert.True(t, NewIntSliceV(1, 2).AnyWhere(func(x O) bool { return BoolEx(x.(int) == 2) }))
-	assert.True(t, NewIntSliceV(1, 2).AnyWhere(func(x O) bool { return BoolEx(x.(int)%2 == 0) }))
-	assert.False(t, NewIntSliceV(2, 4).AnyWhere(func(x O) bool { return BoolEx(x.(int)%2 != 0) }))
-	assert.True(t, NewIntSliceV(1, 2, 3).AnyWhere(func(x O) bool { return BoolEx(x.(int) == 4 || x.(int) == 3) }))
+	assert.True(t, NewIntSliceV(1, 2).AnyW(func(x O) bool { return ExB(x.(int) == 2) }))
+	assert.True(t, NewIntSliceV(1, 2).AnyW(func(x O) bool { return ExB(x.(int)%2 == 0) }))
+	assert.False(t, NewIntSliceV(2, 4).AnyW(func(x O) bool { return ExB(x.(int)%2 != 0) }))
+	assert.True(t, NewIntSliceV(1, 2, 3).AnyW(func(x O) bool { return ExB(x.(int) == 4 || x.(int) == 3) }))
 }
 
 // Append
@@ -772,9 +804,9 @@ func TestIntSlice_Count(t *testing.T) {
 	assert.Equal(t, 1, NewIntSliceV(1, 2, 3).Count(3))
 }
 
-// CountWhere
+// CountW
 //--------------------------------------------------------------------------------------------------
-func BenchmarkIntSlice_CountWhere_Go(t *testing.B) {
+func BenchmarkIntSlice_CountW_Go(t *testing.B) {
 	ints := Range(0, nines5)
 	for i := range ints {
 		if i == nines4 {
@@ -783,33 +815,33 @@ func BenchmarkIntSlice_CountWhere_Go(t *testing.B) {
 	}
 }
 
-func BenchmarkIntSlice_CountWhere_Slice(t *testing.B) {
+func BenchmarkIntSlice_CountW_Slice(t *testing.B) {
 	src := Range(0, nines5)
-	NewIntSlice(src).CountWhere(func(x O) bool {
-		return BoolEx(x.(int) == nines4)
+	NewIntSlice(src).CountW(func(x O) bool {
+		return ExB(x.(int) == nines4)
 	})
 }
 
-func ExampleIntSlice_CountWhere() {
+func ExampleIntSlice_CountW() {
 	slice := NewIntSliceV(1, 2, 2)
-	fmt.Println(slice.CountWhere(func(x O) bool {
-		return BoolEx(x.(int) == 2)
+	fmt.Println(slice.CountW(func(x O) bool {
+		return ExB(x.(int) == 2)
 	}))
 	// Output: 2
 }
 
-func TestIntSlice_CountWhere(t *testing.T) {
+func TestIntSlice_CountW(t *testing.T) {
 
 	// empty
 	var slice *IntSlice
-	assert.Equal(t, 0, slice.CountWhere(func(x O) bool { return BoolEx(x.(int) > 0) }))
-	assert.Equal(t, 0, NewIntSliceV().CountWhere(func(x O) bool { return BoolEx(x.(int) > 0) }))
+	assert.Equal(t, 0, slice.CountW(func(x O) bool { return ExB(x.(int) > 0) }))
+	assert.Equal(t, 0, NewIntSliceV().CountW(func(x O) bool { return ExB(x.(int) > 0) }))
 
-	assert.Equal(t, 1, NewIntSliceV(2, 3).CountWhere(func(x O) bool { return BoolEx(x.(int) > 2) }))
-	assert.Equal(t, 1, NewIntSliceV(1, 2).CountWhere(func(x O) bool { return BoolEx(x.(int) == 2) }))
-	assert.Equal(t, 2, NewIntSliceV(1, 2, 3, 4, 5).CountWhere(func(x O) bool { return BoolEx(x.(int)%2 == 0) }))
-	assert.Equal(t, 3, NewIntSliceV(1, 2, 3, 4, 5).CountWhere(func(x O) bool { return BoolEx(x.(int)%2 != 0) }))
-	assert.Equal(t, 1, NewIntSliceV(1, 2, 3).CountWhere(func(x O) bool { return BoolEx(x.(int) == 4 || x.(int) == 3) }))
+	assert.Equal(t, 1, NewIntSliceV(2, 3).CountW(func(x O) bool { return ExB(x.(int) > 2) }))
+	assert.Equal(t, 1, NewIntSliceV(1, 2).CountW(func(x O) bool { return ExB(x.(int) == 2) }))
+	assert.Equal(t, 2, NewIntSliceV(1, 2, 3, 4, 5).CountW(func(x O) bool { return ExB(x.(int)%2 == 0) }))
+	assert.Equal(t, 3, NewIntSliceV(1, 2, 3, 4, 5).CountW(func(x O) bool { return ExB(x.(int)%2 != 0) }))
+	assert.Equal(t, 1, NewIntSliceV(1, 2, 3).CountW(func(x O) bool { return ExB(x.(int) == 4 || x.(int) == 3) }))
 }
 
 // Drop
@@ -1125,9 +1157,9 @@ func TestIntSlice_DropLastN(t *testing.T) {
 	assert.Equal(t, NewIntSliceV(), NewIntSliceV(1, 2, 3).DropLastN(4))
 }
 
-// DropWhere
+// DropW
 //--------------------------------------------------------------------------------------------------
-func BenchmarkIntSlice_DropWhere_Go(t *testing.B) {
+func BenchmarkIntSlice_DropW_Go(t *testing.B) {
 	ints := Range(0, nines5)
 	l := len(ints)
 	for i := 0; i < l; i++ {
@@ -1143,28 +1175,28 @@ func BenchmarkIntSlice_DropWhere_Go(t *testing.B) {
 	}
 }
 
-func BenchmarkIntSlice_DropWhere_Slice(t *testing.B) {
+func BenchmarkIntSlice_DropW_Slice(t *testing.B) {
 	slice := NewIntSlice(Range(0, nines5))
-	slice.DropWhere(func(x O) bool {
-		return BoolEx(x.(int)%2 == 0)
+	slice.DropW(func(x O) bool {
+		return ExB(x.(int)%2 == 0)
 	}).O()
 }
 
-func ExampleIntSlice_DropWhere() {
+func ExampleIntSlice_DropW() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.DropWhere(func(x O) bool {
-		return BoolEx(x.(int)%2 == 0)
+	fmt.Println(slice.DropW(func(x O) bool {
+		return ExB(x.(int)%2 == 0)
 	}).O())
 	// Output: [1 3]
 }
 
-func TestIntSlice_DropWhere(t *testing.T) {
+func TestIntSlice_DropW(t *testing.T) {
 
 	// drop all odd values
 	{
 		slice := NewIntSliceV(1, 2, 3, 4, 5, 6, 7, 8, 9)
-		slice.DropWhere(func(x O) bool {
-			return BoolEx(x.(int)%2 != 0)
+		slice.DropW(func(x O) bool {
+			return ExB(x.(int)%2 != 0)
 		})
 		assert.Equal(t, NewIntSliceV(2, 4, 6, 8), slice)
 	}
@@ -1172,8 +1204,8 @@ func TestIntSlice_DropWhere(t *testing.T) {
 	// drop all even values
 	{
 		slice := NewIntSliceV(1, 2, 3, 4, 5, 6, 7, 8, 9)
-		slice.DropWhere(func(x O) bool {
-			return BoolEx(x.(int)%2 == 0)
+		slice.DropW(func(x O) bool {
+			return ExB(x.(int)%2 == 0)
 		})
 		assert.Equal(t, NewIntSliceV(1, 3, 5, 7, 9), slice)
 	}
@@ -1989,7 +2021,7 @@ func BenchmarkIntSlice_Select_Go(t *testing.B) {
 func BenchmarkIntSlice_Select_Slice(t *testing.B) {
 	slice := NewIntSlice(Range(0, nines6))
 	slice.Select(func(x O) bool {
-		return BoolEx(x.(int)%2 == 0)
+		return ExB(x.(int)%2 == 0)
 	}).O()
 
 }
@@ -1997,7 +2029,7 @@ func BenchmarkIntSlice_Select_Slice(t *testing.B) {
 func ExampleIntSlice_Select() {
 	slice := NewIntSliceV(1, 2, 3)
 	fmt.Println(slice.Select(func(x O) bool {
-		return BoolEx(x.(int) == 2 || x.(int) == 3)
+		return ExB(x.(int) == 2 || x.(int) == 3)
 	}).O())
 	// Output: [2 3]
 }
@@ -2008,7 +2040,7 @@ func TestIntSlice_Select(t *testing.T) {
 	{
 		slice := NewIntSliceV(1, 2, 3, 4, 5, 6, 7, 8, 9)
 		new := slice.Select(func(x O) bool {
-			return BoolEx(x.(int)%2 != 0)
+			return ExB(x.(int)%2 != 0)
 		})
 		slice.DropFirst()
 		assert.Equal(t, NewIntSliceV(2, 3, 4, 5, 6, 7, 8, 9), slice)
@@ -2019,7 +2051,7 @@ func TestIntSlice_Select(t *testing.T) {
 	{
 		slice := NewIntSliceV(1, 2, 3, 4, 5, 6, 7, 8, 9)
 		new := slice.Select(func(x O) bool {
-			return BoolEx(x.(int)%2 == 0)
+			return ExB(x.(int)%2 == 0)
 		})
 		slice.DropAt(1)
 		assert.Equal(t, NewIntSliceV(1, 3, 4, 5, 6, 7, 8, 9), slice)
@@ -2847,13 +2879,13 @@ func BenchmarkIntSlice_TakeW_Go(t *testing.B) {
 
 func BenchmarkIntSlice_TakeW_Slice(t *testing.B) {
 	slice := NewIntSlice(Range(0, nines5))
-	slice.TakeW(func(x O) bool { return BoolEx(x.(int)%2 == 0) }).O()
+	slice.TakeW(func(x O) bool { return ExB(x.(int)%2 == 0) }).O()
 }
 
 func ExampleIntSlice_TakeW() {
 	slice := NewIntSliceV(1, 2, 3)
 	fmt.Println(slice.TakeW(func(x O) bool {
-		return BoolEx(x.(int)%2 == 0)
+		return ExB(x.(int)%2 == 0)
 	}).O())
 	// Output: [2]
 }
@@ -2863,7 +2895,7 @@ func TestIntSlice_TakeW(t *testing.T) {
 	// drop all odd values
 	{
 		slice := NewIntSliceV(1, 2, 3, 4, 5, 6, 7, 8, 9)
-		new := slice.TakeW(func(x O) bool { return BoolEx(x.(int)%2 != 0) })
+		new := slice.TakeW(func(x O) bool { return ExB(x.(int)%2 != 0) })
 		assert.Equal(t, NewIntSliceV(2, 4, 6, 8), slice)
 		assert.Equal(t, NewIntSliceV(1, 3, 5, 7, 9), new)
 	}
@@ -2871,7 +2903,7 @@ func TestIntSlice_TakeW(t *testing.T) {
 	// drop all even values
 	{
 		slice := NewIntSliceV(1, 2, 3, 4, 5, 6, 7, 8, 9)
-		new := slice.TakeW(func(x O) bool { return BoolEx(x.(int)%2 == 0) })
+		new := slice.TakeW(func(x O) bool { return ExB(x.(int)%2 == 0) })
 		assert.Equal(t, NewIntSliceV(1, 3, 5, 7, 9), slice)
 		assert.Equal(t, NewIntSliceV(2, 4, 6, 8), new)
 	}
