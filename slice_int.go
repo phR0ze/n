@@ -122,13 +122,26 @@ func (p *IntSlice) Clear() Slice {
 	return p
 }
 
-// Concat appends the other slice using variadic expansion and returns Slice for chaining
-func (p *IntSlice) Concat(other interface{}) Slice {
+// Concat returns a new Slice by appending the given Slice to this Slice using variadic expansion.
+func (p *IntSlice) Concat(slice interface{}) (new Slice) {
+	return p.Copy().ConcatM(slice)
+}
+
+// ConcatM modifies this Slice by appending the given Slice using variadic expansion and returns a reference for chaining.
+// Supports Slice, IntSlice, *IntSlice, []int or *[]int
+func (p *IntSlice) ConcatM(slice interface{}) Slice {
 	if p == nil {
 		p = NewIntSliceV()
 	}
-	if x, ok := other.([]int); ok {
+	switch x := slice.(type) {
+	case []int:
 		*p = append(*p, x...)
+	case *[]int:
+		*p = append(*p, (*x)...)
+	case IntSlice:
+		*p = append(*p, x...)
+	case *IntSlice:
+		*p = append(*p, (*x)...)
 	}
 	return p
 }
@@ -441,6 +454,23 @@ func (p *IntSlice) Pair() (first, second *Object) {
 	return
 }
 
+// Pop removes the last element from this Slice and returns it as an Object.
+func (p *IntSlice) Pop() (elem *Object) {
+	elem = p.Last()
+	p.DropLast()
+	return
+}
+
+// PopN removes the last n elements from this Slice and returns them as a new slice.
+func (p *IntSlice) PopN(n int) (new Slice) {
+	if n == 0 {
+		return NewIntSliceV()
+	}
+	new = p.Copy(absNeg(n), -1)
+	p.DropLastN(n)
+	return
+}
+
 // Prepend the given element at the begining of the slice and returns a reference for chaining.
 func (p *IntSlice) Prepend(elem interface{}) Slice {
 	return p.Insert(0, elem)
@@ -504,6 +534,23 @@ func (p *IntSlice) SetE(i int, elem interface{}) (Slice, error) {
 		err = errors.Errorf("can't set type '%T' in '%T'", elem, p)
 	}
 	return p, err
+}
+
+// Shift removes the first element from this Slice and returns it as an Object.
+func (p *IntSlice) Shift() (elem *Object) {
+	elem = p.First()
+	p.DropFirst()
+	return
+}
+
+// ShiftN removes the first n elements from this Slice and returns them as a new Slice.
+func (p *IntSlice) ShiftN(n int) (new Slice) {
+	if n == 0 {
+		return NewIntSliceV()
+	}
+	new = p.Copy(0, abs(n)-1)
+	p.DropFirstN(n)
+	return
 }
 
 // Single reports true if there is only one element in this Slice.
@@ -594,42 +641,8 @@ func (p *IntSlice) TakeAt(i int) (elem *Object) {
 	return
 }
 
-// TakeFirst removes the first element from this Slice and returns it as an Object.
-func (p *IntSlice) TakeFirst() (elem *Object) {
-	elem = p.First()
-	p.DropFirst()
-	return
-}
-
-// TakeFirstN removes the first n elements from this Slice and returns them as a new Slice.
-func (p *IntSlice) TakeFirstN(n int) (new Slice) {
-	if n == 0 {
-		return NewIntSliceV()
-	}
-	new = p.Copy(0, abs(n)-1)
-	p.DropFirstN(n)
-	return
-}
-
-// TakeLast removes the last element from this Slice and returns it as an Object.
-func (p *IntSlice) TakeLast() (elem *Object) {
-	elem = p.Last()
-	p.DropLast()
-	return
-}
-
-// TakeLastN removes the last n elements from this Slice and returns them as a new slice.
-func (p *IntSlice) TakeLastN(n int) (new Slice) {
-	if n == 0 {
-		return NewIntSliceV()
-	}
-	new = p.Copy(absNeg(n), -1)
-	p.DropLastN(n)
-	return
-}
-
-// TakeWhere removes the elements from this Slice that match the lambda selector and returns them as a new slice.
-func (p *IntSlice) TakeWhere(sel func(O) bool) (new Slice) {
+// TakeW removes the elements from this Slice that match the lambda selector and returns them as a new slice.
+func (p *IntSlice) TakeW(sel func(O) bool) (new Slice) {
 	slice := NewIntSliceV()
 	if p == nil || len(*p) == 0 {
 		return slice
@@ -644,6 +657,16 @@ func (p *IntSlice) TakeWhere(sel func(O) bool) (new Slice) {
 		}
 	}
 	return slice
+}
+
+// Union returns a new Slice by joining uniq elements from this Slice with uniq elements from the given Slice while preserving order.
+func (p *IntSlice) Union(slice Slice) (new Slice) {
+	return p
+}
+
+// UnionM modifies this Slice by joining uniq elements from this Slice with uniq elements from the given Slice while preserving order.
+func (p *IntSlice) UnionM(slice Slice) Slice {
+	return p.Concat(slice).UniqM()
 }
 
 // Uniq returns a new Slice with all non uniq elements removed while preserving element order.
