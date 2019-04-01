@@ -27,7 +27,7 @@ func BenchmarkNewIntSlice_Slice(t *testing.B) {
 
 func ExampleNewIntSlice() {
 	slice := NewIntSlice([]int{1, 2, 3})
-	fmt.Println(slice.O())
+	fmt.Println(slice)
 	// Output: [1 2 3]
 }
 
@@ -65,13 +65,13 @@ func BenchmarkNewIntSliceV_Slice(t *testing.B) {
 
 func ExampleNewIntSliceV_empty() {
 	slice := NewIntSliceV()
-	fmt.Println(slice.O())
+	fmt.Println(slice)
 	// Output: []
 }
 
 func ExampleNewIntSliceV_variadic() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.O())
+	fmt.Println(slice)
 	// Output: [1 2 3]
 }
 
@@ -305,7 +305,7 @@ func BenchmarkIntSlice_Append_Slice(t *testing.B) {
 
 func ExampleIntSlice_Append() {
 	slice := NewIntSliceV(1).Append(2).Append(3)
-	fmt.Println(slice.O())
+	fmt.Println(slice)
 	// Output: [1 2 3]
 }
 
@@ -396,7 +396,7 @@ func BenchmarkIntSlice_AppendV_Slice(t *testing.B) {
 
 func ExampleIntSlice_AppendV() {
 	slice := NewIntSliceV(1).AppendV(2, 3)
-	fmt.Println(slice.O())
+	fmt.Println(slice)
 	// Output: [1 2 3]
 }
 
@@ -435,7 +435,7 @@ func BenchmarkIntSlice_At_Slice(t *testing.B) {
 
 func ExampleIntSlice_At() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.At(2).O())
+	fmt.Println(slice.At(2))
 	// Output: 3
 }
 
@@ -474,7 +474,7 @@ func TestIntSlice_At(t *testing.T) {
 
 func ExampleIntSlice_Clear() {
 	slice := NewIntSliceV(1).Concat([]int{2, 3})
-	fmt.Println(slice.Clear().O())
+	fmt.Println(slice.Clear())
 	// Output: []
 }
 
@@ -520,7 +520,7 @@ func BenchmarkIntSlice_Concat_Slice(t *testing.B) {
 
 func ExampleIntSlice_Concat() {
 	slice := NewIntSliceV(1).Concat([]int{2, 3})
-	fmt.Println(slice.O())
+	fmt.Println(slice)
 	// Output: [1 2 3]
 }
 
@@ -598,7 +598,7 @@ func BenchmarkIntSlice_ConcatM_Slice(t *testing.B) {
 
 func ExampleIntSlice_ConcatM() {
 	slice := NewIntSliceV(1).ConcatM([]int{2, 3})
-	fmt.Println(slice.O())
+	fmt.Println(slice)
 	// Output: [1 2 3]
 }
 
@@ -667,7 +667,7 @@ func BenchmarkIntSlice_Copy_Slice(t *testing.B) {
 
 func ExampleIntSlice_Copy() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.Copy().O())
+	fmt.Println(slice.Copy())
 	// Output: [1 2 3]
 }
 
@@ -684,11 +684,11 @@ func TestIntSlice_Copy(t *testing.T) {
 	{
 		original := NewIntSliceV(1, 2, 3)
 		result := original.Copy(0, -1)
-		assert.Equal(t, []int{1, 2, 3}, original.O())
-		assert.Equal(t, []int{1, 2, 3}, result.O())
+		assert.Equal(t, NewIntSliceV(1, 2, 3), original)
+		assert.Equal(t, NewIntSliceV(1, 2, 3), result)
 		result.Set(0, 0)
-		assert.Equal(t, []int{1, 2, 3}, original.O())
-		assert.Equal(t, []int{0, 2, 3}, result.O())
+		assert.Equal(t, NewIntSliceV(1, 2, 3), original)
+		assert.Equal(t, NewIntSliceV(0, 2, 3), result)
 	}
 
 	// copy full array
@@ -868,7 +868,7 @@ func BenchmarkIntSlice_Drop_Slice(t *testing.B) {
 
 func ExampleIntSlice_Drop() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.Drop(0, 1).O())
+	fmt.Println(slice.Drop(0, 1))
 	// Output: [3]
 }
 
@@ -944,7 +944,7 @@ func BenchmarkIntSlice_DropAt_Slice(t *testing.B) {
 
 func ExampleIntSlice_DropAt() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.DropAt(1).O())
+	fmt.Println(slice.DropAt(1))
 	// Output: [1 3]
 }
 
@@ -1000,7 +1000,7 @@ func BenchmarkIntSlice_DropFirst_Slice(t *testing.B) {
 
 func ExampleIntSlice_DropFirst() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.DropFirst().O())
+	fmt.Println(slice.DropFirst())
 	// Output: [2 3]
 }
 
@@ -1040,7 +1040,7 @@ func BenchmarkIntSlice_DropFirstN_Slice(t *testing.B) {
 
 func ExampleIntSlice_DropFirstN() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.DropFirstN(2).O())
+	fmt.Println(slice.DropFirstN(2))
 	// Output: [3]
 }
 
@@ -1089,7 +1089,7 @@ func BenchmarkIntSlice_DropLast_Slice(t *testing.B) {
 
 func ExampleIntSlice_DropLast() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.DropLast().O())
+	fmt.Println(slice.DropLast())
 	// Output: [1 2]
 }
 
@@ -1129,7 +1129,7 @@ func BenchmarkIntSlice_DropLastN_Slice(t *testing.B) {
 
 func ExampleIntSlice_DropLastN() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.DropLastN(2).O())
+	fmt.Println(slice.DropLastN(2))
 	// Output: [1]
 }
 
@@ -1179,14 +1179,14 @@ func BenchmarkIntSlice_DropW_Slice(t *testing.B) {
 	slice := NewIntSlice(Range(0, nines5))
 	slice.DropW(func(x O) bool {
 		return ExB(x.(int)%2 == 0)
-	}).O()
+	})
 }
 
 func ExampleIntSlice_DropW() {
 	slice := NewIntSliceV(1, 2, 3)
 	fmt.Println(slice.DropW(func(x O) bool {
 		return ExB(x.(int)%2 == 0)
-	}).O())
+	}))
 	// Output: [1 3]
 }
 
@@ -1345,7 +1345,7 @@ func BenchmarkIntSlice_First_Slice(t *testing.B) {
 
 func ExampleIntSlice_First() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.First().O())
+	fmt.Println(slice.First())
 	// Output: 1
 }
 
@@ -1373,7 +1373,7 @@ func BenchmarkIntSlice_FirstN_Slice(t *testing.B) {
 
 func ExampleIntSlice_FirstN() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.FirstN(2).O())
+	fmt.Println(slice.FirstN(2))
 	// Output: [1 2]
 }
 
@@ -1461,7 +1461,7 @@ func BenchmarkIntSlice_Insert_Slice(t *testing.B) {
 
 func ExampleIntSlice_Insert() {
 	slice := NewIntSliceV(1, 3)
-	fmt.Println(slice.Insert(1, 2).O())
+	fmt.Println(slice.Insert(1, 2))
 	// Output: [1 2 3]
 }
 
@@ -1531,7 +1531,7 @@ func BenchmarkIntSlice_Join_Slice(t *testing.B) {
 
 func ExampleIntSlice_Join() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.Join().O())
+	fmt.Println(slice.Join())
 	// Output: 1,2,3
 }
 
@@ -1571,7 +1571,7 @@ func BenchmarkIntSlice_Last_Slice(t *testing.B) {
 
 func ExampleIntSlice_Last() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.Last().O())
+	fmt.Println(slice.Last())
 	// Output: 3
 }
 
@@ -1599,7 +1599,7 @@ func BenchmarkIntSlice_LastN_Slice(t *testing.B) {
 
 func ExampleIntSlice_LastN() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.LastN(2).O())
+	fmt.Println(slice.LastN(2))
 	// Output: [2 3]
 }
 
@@ -1712,13 +1712,13 @@ func TestIntSlice_Nil(t *testing.T) {
 // O
 //--------------------------------------------------------------------------------------------------
 func ExampleIntSlice_O() {
-	fmt.Println(NewIntSliceV(1, 2, 3).O())
+	fmt.Println(NewIntSliceV(1, 2, 3))
 	// Output: [1 2 3]
 }
 
 func TestIntSlice_O(t *testing.T) {
 	assert.Equal(t, []int{}, NewIntSliceV().O())
-	assert.Equal(t, []int{1, 2, 3}, NewIntSliceV(1, 2, 3).O())
+	assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 2, 3))
 }
 
 // Pair
@@ -1727,7 +1727,7 @@ func TestIntSlice_O(t *testing.T) {
 func ExampleIntSlice_Pair() {
 	slice := NewIntSliceV(1, 2)
 	first, second := slice.Pair()
-	fmt.Println(first.O(), second.O())
+	fmt.Println(first, second)
 	// Output: 1 2
 }
 
@@ -1773,7 +1773,7 @@ func BenchmarkIntSlice_Pop_Slice(t *testing.B) {
 
 func ExampleIntSlice_Pop() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.Pop().O())
+	fmt.Println(slice.Pop())
 	// Output: 3
 }
 
@@ -1817,7 +1817,7 @@ func BenchmarkIntSlice_PopN_Slice(t *testing.B) {
 
 func ExampleIntSlice_PopN() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.PopN(2).O())
+	fmt.Println(slice.PopN(2))
 	// Output: [2 3]
 }
 
@@ -1885,7 +1885,7 @@ func BenchmarkIntSlice_Prepend_Slice(t *testing.B) {
 
 func ExampleIntSlice_Prepend() {
 	slice := NewIntSliceV(2, 3)
-	fmt.Println(slice.Prepend(1).O())
+	fmt.Println(slice.Prepend(1))
 	// Output: [1 2 3]
 }
 
@@ -1922,7 +1922,7 @@ func BenchmarkIntSlice_Reverse_Slice(t *testing.B) {
 
 func ExampleIntSlice_Reverse() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.Reverse().O())
+	fmt.Println(slice.Reverse())
 	// Output: [3 2 1]
 }
 
@@ -1972,7 +1972,7 @@ func BenchmarkIntSlice_ReverseM_Slice(t *testing.B) {
 
 func ExampleIntSlice_ReverseM() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.ReverseM().O())
+	fmt.Println(slice.ReverseM())
 	// Output: [3 2 1]
 }
 
@@ -2022,7 +2022,7 @@ func BenchmarkIntSlice_Select_Slice(t *testing.B) {
 	slice := NewIntSlice(Range(0, nines6))
 	slice.Select(func(x O) bool {
 		return ExB(x.(int)%2 == 0)
-	}).O()
+	})
 
 }
 
@@ -2030,7 +2030,7 @@ func ExampleIntSlice_Select() {
 	slice := NewIntSliceV(1, 2, 3)
 	fmt.Println(slice.Select(func(x O) bool {
 		return ExB(x.(int) == 2 || x.(int) == 3)
-	}).O())
+	}))
 	// Output: [2 3]
 }
 
@@ -2077,7 +2077,7 @@ func BenchmarkIntSlice_Set_Slice(t *testing.B) {
 
 func ExampleIntSlice_Set() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.Set(0, 0).O())
+	fmt.Println(slice.Set(0, 0))
 	// Output: [0 2 3]
 }
 
@@ -2136,7 +2136,7 @@ func BenchmarkIntSlice_Slice_Slice(t *testing.B) {
 
 func ExampleIntSlice_Slice() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.Slice(1, -1).O())
+	fmt.Println(slice.Slice(1, -1))
 	// Output: [2 3]
 }
 
@@ -2153,8 +2153,8 @@ func TestIntSlice_Slice(t *testing.T) {
 	{
 		original := NewIntSliceV(1, 2, 3)
 		result := original.Slice(0, -1).Set(0, 0)
-		assert.Equal(t, []int{0, 2, 3}, original.O())
-		assert.Equal(t, []int{0, 2, 3}, result.O())
+		assert.Equal(t, NewIntSliceV(0, 2, 3), original)
+		assert.Equal(t, NewIntSliceV(0, 2, 3), result)
 	}
 
 	// slice full array
@@ -2243,7 +2243,7 @@ func BenchmarkIntSlice_Sort_Slice(t *testing.B) {
 
 func ExampleIntSlice_Sort() {
 	slice := NewIntSliceV(2, 3, 1)
-	fmt.Println(slice.Sort().O())
+	fmt.Println(slice.Sort())
 	// Output: [1 2 3]
 }
 
@@ -2283,7 +2283,7 @@ func BenchmarkIntSlice_SortM_Slice(t *testing.B) {
 
 func ExampleIntSlice_SortM() {
 	slice := NewIntSliceV(2, 3, 1)
-	fmt.Println(slice.SortM().O())
+	fmt.Println(slice.SortM())
 	// Output: [1 2 3]
 }
 
@@ -2323,7 +2323,7 @@ func BenchmarkIntSlice_SortReverse_Slice(t *testing.B) {
 
 func ExampleIntSlice_SortReverse() {
 	slice := NewIntSliceV(2, 3, 1)
-	fmt.Println(slice.SortReverse().O())
+	fmt.Println(slice.SortReverse())
 	// Output: [3 2 1]
 }
 
@@ -2363,11 +2363,51 @@ func BenchmarkIntSlice_SortReverseM_Slice(t *testing.B) {
 
 func ExampleIntSlice_SortReverseM() {
 	slice := NewIntSliceV(2, 3, 1)
-	fmt.Println(slice.SortReverseM().O())
+	fmt.Println(slice.SortReverseM())
 	// Output: [3 2 1]
 }
 
 func TestIntSlice_SortReverseM(t *testing.T) {
+
+	// empty
+	assert.Equal(t, NewIntSliceV(), NewIntSliceV().SortReverse())
+
+	// pos
+	{
+		slice := NewIntSliceV(5, 3, 2, 4, 1)
+		sorted := slice.SortReverseM()
+		assert.Equal(t, NewIntSliceV(5, 4, 3, 2, 1, 6), sorted.Append(6))
+		assert.Equal(t, NewIntSliceV(5, 4, 3, 2, 1, 6), slice)
+	}
+
+	// neg
+	{
+		slice := NewIntSliceV(5, 3, -2, 4, -1)
+		sorted := slice.SortReverseM()
+		assert.Equal(t, NewIntSliceV(5, 4, 3, -1, -2, 6), sorted.Append(6))
+		assert.Equal(t, NewIntSliceV(5, 4, 3, -1, -2, 6), slice)
+	}
+}
+
+// String
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_String_Go(t *testing.B) {
+	ints := Range(0, nines6)
+	_ = fmt.Sprintf("%v", ints)
+}
+
+func BenchmarkIntSlice_Stringj_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines6))
+	_ = slice.String()
+}
+
+func ExampleIntSlice_String() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice)
+	// Output: [1 2 3]
+}
+
+func TestIntSlice_String(t *testing.T) {
 
 	// empty
 	assert.Equal(t, NewIntSliceV(), NewIntSliceV().SortReverse())
@@ -2413,7 +2453,7 @@ func ExampleIntSlice_Swap() {
 	slice := NewIntSliceV(2, 3, 1)
 	slice.Swap(0, 2)
 	slice.Swap(1, 2)
-	fmt.Println(slice.O())
+	fmt.Println(slice)
 	// Output: [1 2 3]
 }
 
@@ -2471,7 +2511,7 @@ func BenchmarkIntSlice_Take_Slice(t *testing.B) {
 
 func ExampleIntSlice_Take() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.Take(0, 1).O())
+	fmt.Println(slice.Take(0, 1))
 	// Output: [1 2]
 }
 
@@ -2658,7 +2698,7 @@ func BenchmarkIntSlice_TakeAt_Slice(t *testing.B) {
 
 func ExampleIntSlice_TakeAt() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.TakeAt(1).O())
+	fmt.Println(slice.TakeAt(1))
 	// Output: 2
 }
 
@@ -2758,7 +2798,7 @@ func BenchmarkIntSlice_TakeFirst_Slice(t *testing.B) {
 
 func ExampleIntSlice_TakeFirst() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.Shift().O())
+	fmt.Println(slice.Shift())
 	// Output: 1
 }
 
@@ -2802,7 +2842,7 @@ func BenchmarkIntSlice_TakeFirstN_Slice(t *testing.B) {
 
 func ExampleIntSlice_TakeFirstN() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.ShiftN(2).O())
+	fmt.Println(slice.ShiftN(2))
 	// Output: [1 2]
 }
 
@@ -2879,14 +2919,14 @@ func BenchmarkIntSlice_TakeW_Go(t *testing.B) {
 
 func BenchmarkIntSlice_TakeW_Slice(t *testing.B) {
 	slice := NewIntSlice(Range(0, nines5))
-	slice.TakeW(func(x O) bool { return ExB(x.(int)%2 == 0) }).O()
+	slice.TakeW(func(x O) bool { return ExB(x.(int)%2 == 0) })
 }
 
 func ExampleIntSlice_TakeW() {
 	slice := NewIntSliceV(1, 2, 3)
 	fmt.Println(slice.TakeW(func(x O) bool {
 		return ExB(x.(int)%2 == 0)
-	}).O())
+	}))
 	// Output: [2]
 }
 
@@ -2927,7 +2967,7 @@ func BenchmarkIntSlice_Uniq_Slice(t *testing.B) {
 
 func ExampleIntSlice_Uniq() {
 	slice := NewIntSliceV(1, 2, 3, 3)
-	fmt.Println(slice.Uniq().O())
+	fmt.Println(slice.Uniq())
 	// Output: [1 2 3]
 }
 
@@ -2994,7 +3034,7 @@ func BenchmarkIntSlice_UniqM_Slice(t *testing.B) {
 
 func ExampleIntSlice_UniqM() {
 	slice := NewIntSliceV(1, 2, 3, 3)
-	fmt.Println(slice.UniqM().O())
+	fmt.Println(slice.UniqM())
 	// Output: [1 2 3]
 }
 

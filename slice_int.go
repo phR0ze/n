@@ -1,6 +1,7 @@
 package n
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 
@@ -623,6 +624,20 @@ func (p *IntSlice) SortReverseM() Slice {
 	}
 	sort.Sort(sort.Reverse(p))
 	return p
+}
+
+// Returns a string representation of this Slice, implements Stringer inteface
+func (p *IntSlice) String() string {
+	var builder strings.Builder
+	builder.WriteString("[")
+	for i := 0; i < len(*p); i++ {
+		builder.WriteString(fmt.Sprintf("%d", (*p)[i]))
+		if i+1 < len(*p) {
+			builder.WriteString(" ")
+		}
+	}
+	builder.WriteString("]")
+	return builder.String()
 }
 
 // Swap elements in this Slice.

@@ -1,6 +1,7 @@
 package n
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/phR0ze/cast"
@@ -100,7 +101,7 @@ func (p Object) Less(other interface{}) bool {
 	return false
 }
 
-// Numerable interface methods
+// Object interface methods
 //--------------------------------------------------------------------------------------------------
 
 // O returns the underlying data structure as is
@@ -117,6 +118,14 @@ func (p *Object) Nil() bool {
 		return true
 	}
 	return false
+}
+
+// String returns a string representation of the Object, implements Stringer interface.
+func (p *Object) String() string {
+	if p == nil {
+		return "nil"
+	}
+	return fmt.Sprintf("%v", p.O())
 }
 
 // Bool related
