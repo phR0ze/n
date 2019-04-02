@@ -332,6 +332,33 @@ func (p *IntSlice) EachIE(action func(int, O) error) (Slice, error) {
 	return p, err
 }
 
+// EachIR calls the given function once for each element in the slice, passing the index and element in
+// as a parameter. Returns a reference to the slice
+func (p *IntSlice) EachIR(action func(int, O)) Slice {
+	if p == nil {
+		return p
+	}
+	for i := len(*p) - 1; i >= 0; i-- {
+		action(i, (*p)[i])
+	}
+	return p
+}
+
+// EachIRE calls the given function once for each element in the slice, passing the index and element in
+// as a parameter. Returns a reference to the slice and any error from the user function.
+func (p *IntSlice) EachIRE(action func(int, O) error) (Slice, error) {
+	var err error
+	if p == nil {
+		return p, err
+	}
+	for i := len(*p) - 1; i >= 0; i-- {
+		if err = action(i, (*p)[i]); err != nil {
+			return p, err
+		}
+	}
+	return p, err
+}
+
 // EachR calls the given function once for each element in the slice in reverse,
 // passing that element in as a parameter. Returns a reference to the slice
 func (p *IntSlice) EachR(action func(O)) Slice {
