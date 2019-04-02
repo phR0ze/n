@@ -37,14 +37,17 @@ type Slice interface {
 	EachE(action func(O) error) (Slice, error)        // EachE calls the given function once for each element in the slice, passing that element in
 	EachI(action func(int, O)) Slice                  // EachI calls the given function once for each element in the slice, passing the index and element in
 	EachIE(action func(int, O) error) (Slice, error)  // EachIE calls the given function once for each element in the slice, passing the index and element in
-	EachIR(action func(int, O)) Slice                 // EachIR calls the given function once for each element in the slice in reverse, passing that element in
-	EachIRE(action func(int, O) error) (Slice, error) // EachIRE calls the given function once for each element in the slice in reverse, passing that element in
 	EachR(action func(O)) Slice                       // EachR calls the given function once for each element in the slice in reverse, passing that element in
 	EachRE(action func(O) error) (Slice, error)       // EachRE calls the given function once for each element in the slice in reverse, passing that element in
+	EachRI(action func(int, O)) Slice                 // EachRI calls the given function once for each element in the slice in reverse, passing that element in
+	EachRIE(action func(int, O) error) (Slice, error) // EachRIE calls the given function once for each element in the slice in reverse, passing that element in
 	Empty() bool                                      // Empty tests if the slice is empty.
 	First() (elem *Object)                            // First returns the first element in the slice as Object
 	FirstN(n int) Slice                               // FirstN returns the first n elements in the slice as a Slice
-	//Flatten() Slice                              // Flatten
+	Flatten() (new Slice)                             // Flatten returns a new Slice that is one-dimensional flatting of this Slice
+	FlattenM() Slice                                  // FlattenM modifies this Slice performing a n-diemensional flattening
+	//FlattenN() (new Slice)                            // FlattenN returns a new Slice that is n-dimensional flatting of this Slice
+	//FlattenNM() Slice                                 // FlattenNM modifies this Slice performing a n-dimensional flattening
 	Index(elem interface{}) (loc int)       // Index returns the index of the first element in the slice where element == elem
 	Insert(i int, elem interface{}) Slice   // Insert the given element before the element with the given index.
 	Join(separator ...string) (str *Object) // Join converts each element into a string then joins them together using the given separator or comma

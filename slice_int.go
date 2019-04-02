@@ -332,33 +332,6 @@ func (p *IntSlice) EachIE(action func(int, O) error) (Slice, error) {
 	return p, err
 }
 
-// EachIR calls the given function once for each element in the slice, passing the index and element in
-// as a parameter. Returns a reference to the slice
-func (p *IntSlice) EachIR(action func(int, O)) Slice {
-	if p == nil {
-		return p
-	}
-	for i := len(*p) - 1; i >= 0; i-- {
-		action(i, (*p)[i])
-	}
-	return p
-}
-
-// EachIRE calls the given function once for each element in the slice, passing the index and element in
-// as a parameter. Returns a reference to the slice and any error from the user function.
-func (p *IntSlice) EachIRE(action func(int, O) error) (Slice, error) {
-	var err error
-	if p == nil {
-		return p, err
-	}
-	for i := len(*p) - 1; i >= 0; i-- {
-		if err = action(i, (*p)[i]); err != nil {
-			return p, err
-		}
-	}
-	return p, err
-}
-
 // EachR calls the given function once for each element in the slice in reverse,
 // passing that element in as a parameter. Returns a reference to the slice
 func (p *IntSlice) EachR(action func(O)) Slice {
@@ -386,6 +359,33 @@ func (p *IntSlice) EachRE(action func(O) error) (Slice, error) {
 	return p, err
 }
 
+// EachRI calls the given function once for each element in the slice, passing the index and element in
+// as a parameter. Returns a reference to the slice
+func (p *IntSlice) EachRI(action func(int, O)) Slice {
+	if p == nil {
+		return p
+	}
+	for i := len(*p) - 1; i >= 0; i-- {
+		action(i, (*p)[i])
+	}
+	return p
+}
+
+// EachRIE calls the given function once for each element in the slice, passing the index and element in
+// as a parameter. Returns a reference to the slice and any error from the user function.
+func (p *IntSlice) EachRIE(action func(int, O) error) (Slice, error) {
+	var err error
+	if p == nil {
+		return p, err
+	}
+	for i := len(*p) - 1; i >= 0; i-- {
+		if err = action(i, (*p)[i]); err != nil {
+			return p, err
+		}
+	}
+	return p, err
+}
+
 // Empty tests if the slice is empty.
 func (p *IntSlice) Empty() bool {
 	if p == nil || len(*p) == 0 {
@@ -405,6 +405,20 @@ func (p *IntSlice) First() (elem *Object) {
 // that as many as can be will be returned up until the request is satisfied.
 func (p *IntSlice) FirstN(n int) Slice {
 	return p.Slice(0, abs(n)-1)
+}
+
+// Flatten returns a new Slice that is one-dimensional flatting of this Slice
+func (p *IntSlice) Flatten() (new Slice) {
+	// if p == nil || len(*p) == 0 {
+	// 	return p.Copy()
+	// }
+	// return p.Copy().ReverseM()
+	return p
+}
+
+// FlattenM modifies this Slice performing a n-diemensional flattening
+func (p *IntSlice) FlattenM() Slice {
+	return p
 }
 
 // Index returns the index of the first element in the slice where element == elem

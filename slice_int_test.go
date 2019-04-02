@@ -1415,108 +1415,6 @@ func TestIntSlice_EachIE(t *testing.T) {
 	}
 }
 
-// EachIR
-//--------------------------------------------------------------------------------------------------
-func BenchmarkIntSlice_EachIR_Go(t *testing.B) {
-	action := func(x interface{}) {
-		assert.IsType(t, 0, x)
-	}
-	for i := range Range(0, nines6) {
-		action(i)
-	}
-}
-
-func BenchmarkIntSlice_EachIR_Slice(t *testing.B) {
-	NewIntSlice(Range(0, nines6)).EachIR(func(i int, x O) {
-		assert.IsType(t, 0, x)
-	})
-}
-
-func ExampleIntSlice_EachIR() {
-	NewIntSliceV(1, 2, 3).EachIR(func(i int, x O) {
-		fmt.Printf("%v:%v", i, x)
-	})
-	// Output: 2:31:20:1
-}
-
-func TestIntSlice_EachIR(t *testing.T) {
-
-	// nil or empty
-	{
-		var slice *IntSlice
-		slice.EachIR(func(i int, x O) {})
-	}
-
-	// Loop through
-	{
-		results := []int{}
-		NewIntSliceV(1, 2, 3).EachIR(func(i int, x O) {
-			results = append(results, x.(int))
-		})
-		assert.Equal(t, []int{3, 2, 1}, results)
-	}
-}
-
-// EachIRE
-//--------------------------------------------------------------------------------------------------
-func BenchmarkIntSlice_EachIRE_Go(t *testing.B) {
-	action := func(x interface{}) {
-		assert.IsType(t, 0, x)
-	}
-	for i := range Range(0, nines6) {
-		action(i)
-	}
-}
-
-func BenchmarkIntSlice_EachIRE_Slice(t *testing.B) {
-	NewIntSlice(Range(0, nines6)).EachIRE(func(i int, x O) error {
-		assert.IsType(t, 0, x)
-		return nil
-	})
-}
-
-func ExampleIntSlice_EachIRE() {
-	NewIntSliceV(1, 2, 3).EachIRE(func(i int, x O) error {
-		fmt.Printf("%v:%v", i, x)
-		return nil
-	})
-	// Output: 2:31:20:1
-}
-
-func TestIntSlice_EachIRE(t *testing.T) {
-
-	// nil or empty
-	{
-		var slice *IntSlice
-		slice.EachIRE(func(i int, x O) error {
-			return nil
-		})
-	}
-
-	// Loop through
-	{
-		results := []int{}
-		NewIntSliceV(1, 2, 3).EachIRE(func(i int, x O) error {
-			results = append(results, x.(int))
-			return nil
-		})
-		assert.Equal(t, []int{3, 2, 1}, results)
-	}
-
-	// Break early with error
-	{
-		results := []int{}
-		NewIntSliceV(1, 2, 3).EachIRE(func(i int, x O) error {
-			if i == 0 {
-				return ErrBreak
-			}
-			results = append(results, x.(int))
-			return nil
-		})
-		assert.Equal(t, []int{3, 2}, results)
-	}
-}
-
 // EachR
 //--------------------------------------------------------------------------------------------------
 func BenchmarkIntSlice_EachR_Go(t *testing.B) {
@@ -1610,6 +1508,108 @@ func TestIntSlice_EachRE(t *testing.T) {
 		results := []int{}
 		NewIntSliceV(1, 2, 3).EachRE(func(x O) error {
 			if x.(int) == 1 {
+				return ErrBreak
+			}
+			results = append(results, x.(int))
+			return nil
+		})
+		assert.Equal(t, []int{3, 2}, results)
+	}
+}
+
+// EachRI
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_EachRI_Go(t *testing.B) {
+	action := func(x interface{}) {
+		assert.IsType(t, 0, x)
+	}
+	for i := range Range(0, nines6) {
+		action(i)
+	}
+}
+
+func BenchmarkIntSlice_EachRI_Slice(t *testing.B) {
+	NewIntSlice(Range(0, nines6)).EachRI(func(i int, x O) {
+		assert.IsType(t, 0, x)
+	})
+}
+
+func ExampleIntSlice_EachRI() {
+	NewIntSliceV(1, 2, 3).EachRI(func(i int, x O) {
+		fmt.Printf("%v:%v", i, x)
+	})
+	// Output: 2:31:20:1
+}
+
+func TestIntSlice_EachRI(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *IntSlice
+		slice.EachRI(func(i int, x O) {})
+	}
+
+	// Loop through
+	{
+		results := []int{}
+		NewIntSliceV(1, 2, 3).EachRI(func(i int, x O) {
+			results = append(results, x.(int))
+		})
+		assert.Equal(t, []int{3, 2, 1}, results)
+	}
+}
+
+// EachRIE
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_EachRIE_Go(t *testing.B) {
+	action := func(x interface{}) {
+		assert.IsType(t, 0, x)
+	}
+	for i := range Range(0, nines6) {
+		action(i)
+	}
+}
+
+func BenchmarkIntSlice_EachRIE_Slice(t *testing.B) {
+	NewIntSlice(Range(0, nines6)).EachRIE(func(i int, x O) error {
+		assert.IsType(t, 0, x)
+		return nil
+	})
+}
+
+func ExampleIntSlice_EachRIE() {
+	NewIntSliceV(1, 2, 3).EachRIE(func(i int, x O) error {
+		fmt.Printf("%v:%v", i, x)
+		return nil
+	})
+	// Output: 2:31:20:1
+}
+
+func TestIntSlice_EachRIE(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *IntSlice
+		slice.EachRIE(func(i int, x O) error {
+			return nil
+		})
+	}
+
+	// Loop through
+	{
+		results := []int{}
+		NewIntSliceV(1, 2, 3).EachRIE(func(i int, x O) error {
+			results = append(results, x.(int))
+			return nil
+		})
+		assert.Equal(t, []int{3, 2, 1}, results)
+	}
+
+	// Break early with error
+	{
+		results := []int{}
+		NewIntSliceV(1, 2, 3).EachRIE(func(i int, x O) error {
+			if i == 0 {
 				return ErrBreak
 			}
 			results = append(results, x.(int))
