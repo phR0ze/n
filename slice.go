@@ -14,32 +14,34 @@ import (
 // instance being operated on.  'new Slice' refers to a copy of the slice based on a new
 // underlying Array.
 type Slice interface {
-	Any(elems ...interface{}) bool        // Any tests if this Slice is not empty or optionally if it contains any of the given variadic elements.
-	AnyS(slice interface{}) bool          // AnyS tests if this Slice contains any of the given Slice's elements.
-	AnyW(sel func(O) bool) bool           // AnyW tests if this Slice contains any that match the lambda selector.
-	Append(elem interface{}) Slice        // Append an element to the end of the Slice and returns the Slice for chaining.
-	AppendV(elems ...interface{}) Slice   // AppendV appends the variadic elements to the end of the Slice and returns the Slice for chaining.
-	At(i int) (elem *Object)              // At returns the element at the given index location. Allows for negative notation.
-	Clear() Slice                         // Clear the underlying slice, returns Slice for chaining.
-	Concat(slice interface{}) (new Slice) // Concat returns a new Slice by appending the given Slice to this Slice using variadic expansion.
-	ConcatM(slice interface{}) Slice      // ConcatM modifies this Slice by appending the given Slice using variadic expansion and returns a reference for chaining.
-	Copy(indices ...int) (new Slice)      // Copy returns a new Slice with the element copied from this Slice.
-	Count(elem interface{}) (cnt int)     // Count the number of elements equal the given element.
-	CountW(sel func(O) bool) (cnt int)    // CountW the number of elements that match the lambda expression.
-	Drop(indices ...int) Slice            // Drop deletes a range of elements and returns the rest of the elements in the slice.
-	DropAt(i int) Slice                   // DropAt deletes the element at the given index location. Allows for negative notation.
-	DropFirst() Slice                     // DropFirst deletes the first element and returns the rest of the elements in the slice.
-	DropFirstN(n int) Slice               // DropFirstN deletes the first n elements and returns the rest of the elements in the slice.
-	DropLast() Slice                      // DropLast deletes the last element and returns the rest of the elements in the slice.
-	DropLastN(n int) Slice                // DropLastN deletes the last n elements and returns the rest of the elements in the slice.
-	DropW(sel func(O) bool) Slice         // DropW deletes the elements where the lambda returns true. Returns the Slice for chaining.
-	Each(action func(O)) Slice            // Each calls the given function once for each element in the slice, passing that element in
-	//EachReverse(action func(O)) Slice                 // EachReverse calls the given function once for each element in the slice in reverse, passing that element in
-	EachE(action func(O) error) (Slice, error) // EachE calls the given function once for each element in the slice, passing that element in
-	//EachReverseE(action func(O) error) (Slice, error) // EachReverseE calls the given function once for each element in the slice in reverse, passing that element in
-	Empty() bool           // Empty tests if the slice is empty.
-	First() (elem *Object) // First returns the first element in the slice as Object
-	FirstN(n int) Slice    // FirstN returns the first n elements in the slice as a Slice
+	Any(elems ...interface{}) bool                   // Any tests if this Slice is not empty or optionally if it contains any of the given variadic elements.
+	AnyS(slice interface{}) bool                     // AnyS tests if this Slice contains any of the given Slice's elements.
+	AnyW(sel func(O) bool) bool                      // AnyW tests if this Slice contains any that match the lambda selector.
+	Append(elem interface{}) Slice                   // Append an element to the end of the Slice and returns the Slice for chaining.
+	AppendV(elems ...interface{}) Slice              // AppendV appends the variadic elements to the end of the Slice and returns the Slice for chaining.
+	At(i int) (elem *Object)                         // At returns the element at the given index location. Allows for negative notation.
+	Clear() Slice                                    // Clear the underlying slice, returns Slice for chaining.
+	Concat(slice interface{}) (new Slice)            // Concat returns a new Slice by appending the given Slice to this Slice using variadic expansion.
+	ConcatM(slice interface{}) Slice                 // ConcatM modifies this Slice by appending the given Slice using variadic expansion and returns a reference for chaining.
+	Copy(indices ...int) (new Slice)                 // Copy returns a new Slice with the element copied from this Slice.
+	Count(elem interface{}) (cnt int)                // Count the number of elements equal the given element.
+	CountW(sel func(O) bool) (cnt int)               // CountW the number of elements that match the lambda expression.
+	Drop(indices ...int) Slice                       // Drop deletes a range of elements and returns the rest of the elements in the slice.
+	DropAt(i int) Slice                              // DropAt deletes the element at the given index location. Allows for negative notation.
+	DropFirst() Slice                                // DropFirst deletes the first element and returns the rest of the elements in the slice.
+	DropFirstN(n int) Slice                          // DropFirstN deletes the first n elements and returns the rest of the elements in the slice.
+	DropLast() Slice                                 // DropLast deletes the last element and returns the rest of the elements in the slice.
+	DropLastN(n int) Slice                           // DropLastN deletes the last n elements and returns the rest of the elements in the slice.
+	DropW(sel func(O) bool) Slice                    // DropW deletes the elements where the lambda returns true. Returns the Slice for chaining.
+	Each(action func(O)) Slice                       // Each calls the given function once for each element in the slice, passing that element in
+	EachE(action func(O) error) (Slice, error)       // EachE calls the given function once for each element in the slice, passing that element in
+	EachI(action func(int, O)) Slice                 // EachI calls the given function once for each element in the slice, passing the index and element in
+	EachIE(action func(int, O) error) (Slice, error) // EachIE calls the given function once for each element in the slice, passing the index and element in
+	EachR(action func(O)) Slice                      // EachR calls the given function once for each element in the slice in reverse, passing that element in
+	EachRE(action func(O) error) (Slice, error)      // EachRE calls the given function once for each element in the slice in reverse, passing that element in
+	Empty() bool                                     // Empty tests if the slice is empty.
+	First() (elem *Object)                           // First returns the first element in the slice as Object
+	FirstN(n int) Slice                              // FirstN returns the first n elements in the slice as a Slice
 	//Flatten() Slice                              // Flatten
 	Index(elem interface{}) (loc int)       // Index returns the index of the first element in the slice where element == elem
 	Insert(i int, elem interface{}) Slice   // Insert the given element before the element with the given index.

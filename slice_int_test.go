@@ -1243,16 +1243,14 @@ func TestIntSlice_Each(t *testing.T) {
 		slice.Each(func(x O) {})
 	}
 
-	NewIntSliceV(1, 2, 3).Each(func(x O) {
-		switch x {
-		case 1:
-			assert.Equal(t, 1, x)
-		case 2:
-			assert.Equal(t, 2, x)
-		case 3:
-			assert.Equal(t, 3, x)
-		}
-	})
+	// Loop through
+	{
+		results := []int{}
+		NewIntSliceV(1, 2, 3).Each(func(x O) {
+			results = append(results, x.(int))
+		})
+		assert.Equal(t, []int{1, 2, 3}, results)
+	}
 }
 
 // EachE
@@ -1267,8 +1265,9 @@ func BenchmarkIntSlice_EachE_Go(t *testing.B) {
 }
 
 func BenchmarkIntSlice_EachE_Slice(t *testing.B) {
-	NewIntSlice(Range(0, nines6)).Each(func(x O) {
+	NewIntSlice(Range(0, nines6)).EachE(func(x O) error {
 		assert.IsType(t, 0, x)
+		return nil
 	})
 }
 
@@ -1290,17 +1289,232 @@ func TestIntSlice_EachE(t *testing.T) {
 		})
 	}
 
-	NewIntSliceV(1, 2, 3).EachE(func(x O) error {
-		switch x {
-		case 1:
-			assert.Equal(t, 1, x)
-		case 2:
-			assert.Equal(t, 2, x)
-		case 3:
-			assert.Equal(t, 3, x)
-		}
+	// Loop through
+	{
+		results := []int{}
+		NewIntSliceV(1, 2, 3).EachE(func(x O) error {
+			results = append(results, x.(int))
+			return nil
+		})
+		assert.Equal(t, []int{1, 2, 3}, results)
+	}
+
+	// Break early with error
+	{
+		results := []int{}
+		NewIntSliceV(1, 2, 3).EachE(func(x O) error {
+			if x.(int) == 3 {
+				return ErrBreak
+			}
+			results = append(results, x.(int))
+			return nil
+		})
+		assert.Equal(t, []int{1, 2}, results)
+	}
+}
+
+// EachI
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_EachI_Go(t *testing.B) {
+	action := func(x interface{}) {
+		assert.IsType(t, 0, x)
+	}
+	for i := range Range(0, nines6) {
+		action(i)
+	}
+}
+
+func BenchmarkIntSlice_EachI_Slice(t *testing.B) {
+	NewIntSlice(Range(0, nines6)).EachI(func(i int, x O) {
+		assert.IsType(t, 0, x)
+	})
+}
+
+func ExampleIntSlice_EachI() {
+	NewIntSliceV(1, 2, 3).EachI(func(i int, x O) {
+		fmt.Printf("%v:%v", i, x)
+	})
+	// Output: 0:11:22:3
+}
+
+func TestIntSlice_EachI(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *IntSlice
+		slice.EachI(func(i int, x O) {})
+	}
+
+	// Loop through
+	{
+		results := []int{}
+		NewIntSliceV(1, 2, 3).EachI(func(i int, x O) {
+			results = append(results, x.(int))
+		})
+		assert.Equal(t, []int{1, 2, 3}, results)
+	}
+}
+
+// EachIE
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_EachIE_Go(t *testing.B) {
+	action := func(x interface{}) {
+		assert.IsType(t, 0, x)
+	}
+	for i := range Range(0, nines6) {
+		action(i)
+	}
+}
+
+func BenchmarkIntSlice_EachIE_Slice(t *testing.B) {
+	NewIntSlice(Range(0, nines6)).EachIE(func(i int, x O) error {
+		assert.IsType(t, 0, x)
 		return nil
 	})
+}
+
+func ExampleIntSlice_EachIE() {
+	NewIntSliceV(1, 2, 3).EachIE(func(i int, x O) error {
+		fmt.Printf("%v:%v", i, x)
+		return nil
+	})
+	// Output: 0:11:22:3
+}
+
+func TestIntSlice_EachIE(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *IntSlice
+		slice.EachIE(func(i int, x O) error {
+			return nil
+		})
+	}
+
+	// Loop through
+	{
+		results := []int{}
+		NewIntSliceV(1, 2, 3).EachIE(func(i int, x O) error {
+			results = append(results, x.(int))
+			return nil
+		})
+		assert.Equal(t, []int{1, 2, 3}, results)
+	}
+
+	// Break early with error
+	{
+		results := []int{}
+		NewIntSliceV(1, 2, 3).EachIE(func(i int, x O) error {
+			if i == 2 {
+				return ErrBreak
+			}
+			results = append(results, x.(int))
+			return nil
+		})
+		assert.Equal(t, []int{1, 2}, results)
+	}
+}
+
+// EachR
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_EachR_Go(t *testing.B) {
+	action := func(x interface{}) {
+		assert.IsType(t, 0, x)
+	}
+	for i := range Range(0, nines6) {
+		action(i)
+	}
+}
+
+func BenchmarkIntSlice_EachR_Slice(t *testing.B) {
+	NewIntSlice(Range(0, nines6)).EachR(func(x O) {
+		assert.IsType(t, 0, x)
+	})
+}
+
+func ExampleIntSlice_EachR() {
+	NewIntSliceV(1, 2, 3).EachR(func(x O) {
+		fmt.Printf("%v", x)
+	})
+	// Output: 321
+}
+
+func TestIntSlice_EachR(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *IntSlice
+		slice.EachR(func(x O) {})
+	}
+
+	// Loop through
+	{
+		results := []int{}
+		NewIntSliceV(1, 2, 3).EachR(func(x O) {
+			results = append(results, x.(int))
+		})
+		assert.Equal(t, []int{3, 2, 1}, results)
+	}
+}
+
+// EachRE
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_EachRE_Go(t *testing.B) {
+	action := func(x interface{}) {
+		assert.IsType(t, 0, x)
+	}
+	for i := range Range(0, nines6) {
+		action(i)
+	}
+}
+
+func BenchmarkIntSlice_EachRE_Slice(t *testing.B) {
+	NewIntSlice(Range(0, nines6)).EachRE(func(x O) error {
+		assert.IsType(t, 0, x)
+		return nil
+	})
+}
+
+func ExampleIntSlice_EachRE() {
+	NewIntSliceV(1, 2, 3).EachRE(func(x O) error {
+		fmt.Printf("%v", x)
+		return nil
+	})
+	// Output: 321
+}
+
+func TestIntSlice_EachRE(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *IntSlice
+		slice.EachRE(func(x O) error {
+			return nil
+		})
+	}
+
+	// Loop through
+	{
+		results := []int{}
+		NewIntSliceV(1, 2, 3).EachRE(func(x O) error {
+			results = append(results, x.(int))
+			return nil
+		})
+		assert.Equal(t, []int{3, 2, 1}, results)
+	}
+
+	// Break early with error
+	{
+		results := []int{}
+		NewIntSliceV(1, 2, 3).EachRE(func(x O) error {
+			if x.(int) == 1 {
+				return ErrBreak
+			}
+			results = append(results, x.(int))
+			return nil
+		})
+		assert.Equal(t, []int{3, 2}, results)
+	}
 }
 
 // Empty

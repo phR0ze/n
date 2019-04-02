@@ -305,6 +305,60 @@ func (p *IntSlice) EachE(action func(O) error) (Slice, error) {
 	return p, err
 }
 
+// EachI calls the given function once for each element in the slice, passing the index and element in
+// as a parameter. Returns a reference to the slice
+func (p *IntSlice) EachI(action func(int, O)) Slice {
+	if p == nil {
+		return p
+	}
+	for i := 0; i < len(*p); i++ {
+		action(i, (*p)[i])
+	}
+	return p
+}
+
+// EachIE calls the given function once for each element in the slice, passing the index and element in
+// as a parameter. Returns a reference to the slice and any error from the user function.
+func (p *IntSlice) EachIE(action func(int, O) error) (Slice, error) {
+	var err error
+	if p == nil {
+		return p, err
+	}
+	for i := 0; i < len(*p); i++ {
+		if err = action(i, (*p)[i]); err != nil {
+			return p, err
+		}
+	}
+	return p, err
+}
+
+// EachR calls the given function once for each element in the slice in reverse,
+// passing that element in as a parameter. Returns a reference to the slice
+func (p *IntSlice) EachR(action func(O)) Slice {
+	if p == nil {
+		return p
+	}
+	for i := len(*p) - 1; i >= 0; i-- {
+		action((*p)[i])
+	}
+	return p
+}
+
+// EachRE calls the given function once for each element in the slice in reverse, passing that
+// element in as a parameter. Returns a reference to the slice and any error from the user function.
+func (p *IntSlice) EachRE(action func(O) error) (Slice, error) {
+	var err error
+	if p == nil {
+		return p, err
+	}
+	for i := len(*p) - 1; i >= 0; i-- {
+		if err = action((*p)[i]); err != nil {
+			return p, err
+		}
+	}
+	return p, err
+}
+
 // Empty tests if the slice is empty.
 func (p *IntSlice) Empty() bool {
 	if p == nil || len(*p) == 0 {

@@ -36,6 +36,7 @@ package n
 
 import (
 	"bytes"
+	"errors"
 	"reflect"
 	"strconv"
 	"strings"
@@ -46,6 +47,9 @@ import (
 
 // O is an alias for interface{} used in lambda expresssions for brevity.
 type O interface{}
+
+// ErrBreak is a brevity helper for breaking out of lambda loops
+var ErrBreak = errors.New("break")
 
 // ExB avoids the gastly 4 line monstrosity that it is when used in lambda expression
 func ExB(exp bool) bool {
