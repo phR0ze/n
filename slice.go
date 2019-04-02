@@ -17,74 +17,68 @@ type Slice interface {
 	Any(elems ...interface{}) bool                    // Any tests if this Slice is not empty or optionally if it contains any of the given variadic elements.
 	AnyS(slice interface{}) bool                      // AnyS tests if this Slice contains any of the given Slice's elements.
 	AnyW(sel func(O) bool) bool                       // AnyW tests if this Slice contains any that match the lambda selector.
-	Append(elem interface{}) Slice                    // Append an element to the end of the Slice and returns the Slice for chaining.
-	AppendV(elems ...interface{}) Slice               // AppendV appends the variadic elements to the end of the Slice and returns the Slice for chaining.
+	Append(elem interface{}) Slice                    // Append an element to the end of this Slice and returns a reference to this Slice.
+	AppendV(elems ...interface{}) Slice               // AppendV appends the variadic elements to the end of this Slice and returns a reference to this Slice.
 	At(i int) (elem *Object)                          // At returns the element at the given index location. Allows for negative notation.
-	Clear() Slice                                     // Clear the underlying slice, returns Slice for chaining.
+	Clear() Slice                                     // Clear modifies this Slice to clear out all elements and returns a reference to this Slice.
 	Concat(slice interface{}) (new Slice)             // Concat returns a new Slice by appending the given Slice to this Slice using variadic expansion.
-	ConcatM(slice interface{}) Slice                  // ConcatM modifies this Slice by appending the given Slice using variadic expansion and returns a reference for chaining.
-	Copy(indices ...int) (new Slice)                  // Copy returns a new Slice with the element copied from this Slice.
-	Count(elem interface{}) (cnt int)                 // Count the number of elements equal the given element.
-	CountW(sel func(O) bool) (cnt int)                // CountW the number of elements that match the lambda expression.
-	Drop(indices ...int) Slice                        // Drop deletes a range of elements and returns the rest of the elements in the slice.
-	DropAt(i int) Slice                               // DropAt deletes the element at the given index location. Allows for negative notation.
-	DropFirst() Slice                                 // DropFirst deletes the first element and returns the rest of the elements in the slice.
-	DropFirstN(n int) Slice                           // DropFirstN deletes the first n elements and returns the rest of the elements in the slice.
-	DropLast() Slice                                  // DropLast deletes the last element and returns the rest of the elements in the slice.
-	DropLastN(n int) Slice                            // DropLastN deletes the last n elements and returns the rest of the elements in the slice.
-	DropW(sel func(O) bool) Slice                     // DropW deletes the elements where the lambda returns true. Returns the Slice for chaining.
-	Each(action func(O)) Slice                        // Each calls the given function once for each element in the slice, passing that element in
-	EachE(action func(O) error) (Slice, error)        // EachE calls the given function once for each element in the slice, passing that element in
-	EachI(action func(int, O)) Slice                  // EachI calls the given function once for each element in the slice, passing the index and element in
-	EachIE(action func(int, O) error) (Slice, error)  // EachIE calls the given function once for each element in the slice, passing the index and element in
-	EachR(action func(O)) Slice                       // EachR calls the given function once for each element in the slice in reverse, passing that element in
-	EachRE(action func(O) error) (Slice, error)       // EachRE calls the given function once for each element in the slice in reverse, passing that element in
-	EachRI(action func(int, O)) Slice                 // EachRI calls the given function once for each element in the slice in reverse, passing that element in
-	EachRIE(action func(int, O) error) (Slice, error) // EachRIE calls the given function once for each element in the slice in reverse, passing that element in
-	Empty() bool                                      // Empty tests if the slice is empty.
-	First() (elem *Object)                            // First returns the first element in the slice as Object
-	FirstN(n int) Slice                               // FirstN returns the first n elements in the slice as a Slice
-	Flatten() (new Slice)                             // Flatten returns a new Slice that is one-dimensional flatting of this Slice
-	FlattenM() Slice                                  // FlattenM modifies this Slice performing a n-diemensional flattening
-	//FlattenN() (new Slice)                            // FlattenN returns a new Slice that is n-dimensional flatting of this Slice
-	//FlattenNM() Slice                                 // FlattenNM modifies this Slice performing a n-dimensional flattening
-	Index(elem interface{}) (loc int)       // Index returns the index of the first element in the slice where element == elem
-	Insert(i int, elem interface{}) Slice   // Insert the given element before the element with the given index.
-	Join(separator ...string) (str *Object) // Join converts each element into a string then joins them together using the given separator or comma
-	Last() (elem *Object)                   // Last returns the last element in the slice as Object.
-	LastN(n int) Slice                      // LastN returns the last n elements in the slice as a Slice.
-	Len() int                               // Len returns the number of elements in the slice.
-	Less(i, j int) bool                     // Less returns true if the element indexed by i is less than the element indexed by j.
-	Map(sel func(O) O) (new Slice)          // Map projects the slice into a new form by executing the lambda against all elements.
-	//MapF(sel func(O) O) (other Slice)            // Map projects the slice into a new form by executing the lambda against all elements then calls Flatten.
-	Nil() bool                                   // Nil tests if the slice is nil.
-	O() interface{}                              // O returns the underlying data structure.
-	Pair() (first, second *Object)               // Pair simply returns the first and second slice elements as Object.
-	Pop() (elem *Object)                         // Pop removes the last element from this Slice and returns it as an Object.
-	PopN(n int) (new Slice)                      // PopN removes the last n elements from this Slice and returns them as a new Slice.
-	Prepend(elem interface{}) Slice              // Prepend the given element at the begining of the slice and returns a reference for chaining.
-	Reverse() (new Slice)                        // Reverse returns a new Slice with the order of the elements reversed.
-	ReverseM() Slice                             // ReverseM modifies this Slice reversing the order of the elements and returns a reference for chaining.
-	Select(sel func(O) bool) (new Slice)         // Select creates a new slice with the elements that match the lambda expression.
-	Set(i int, elem interface{}) Slice           // Set the element at the given index location to the given element. Allows for negative notation.
-	SetE(i int, elem interface{}) (Slice, error) // Set the element at the given index location to the given element. Allows for negative notation.
-	Shift() (elem *Object)                       // Shift removes the first element from this Slice and returns it as an Object.
-	ShiftN(n int) (new Slice)                    // ShiftN removes the first n elements from this Slice and returns them as a new Slice.
-	Single() bool                                // Single reports true if there is only one element in this Slice.
-	Slice(indices ...int) Slice                  // Slice returns a range of elements from this Slice. Allows for negative notation.
-	Sort() (new Slice)                           // Sort returns a new Slice with sorted elements.
-	SortM() Slice                                // SortM modifies this Slice sorting the elements and returns a reference for chaining.
-	SortReverse() (new Slice)                    // SortReverse returns a new Slice sorting the elements in reverse.
-	SortReverseM() Slice                         // SortReverseM modifies this Slice sorting the elements in reverse and returns a reference for chaining.
-	String() string                              // Returns a string representation of this Slice, implements Stringer inteface
-	Swap(i, j int)                               // Swap elements in this Slice.
-	Take(indices ...int) (new Slice)             // Take removes a range of elements from this Slice and returns them as a new Slice.
-	TakeAt(i int) (elem *Object)                 // TakeAt removes the elemement at the given index location from this Slice and returns it as an Object.
-	TakeW(sel func(O) bool) (new Slice)          // TakeW removes the elements from this Slice that match the lambda selector and returns them as a new Slice.
-	Union(slice interface{}) (new Slice)         // Union returns a new Slice by joining uniq elements from this Slice with uniq elements from the given Slice while preserving order.
-	UnionM(slice interface{}) Slice              // UnionM modifies this Slice by joining uniq elements from this Slice with uniq elements from the given Slice while preserving order.
-	Uniq() (new Slice)                           // Uniq returns a new Slice with all non uniq elements removed while preserving element order.
-	UniqM() Slice                                // UniqM modifies this Slice to remove all non uniq elements while preserving element order.
+	ConcatM(slice interface{}) Slice                  // ConcatM modifies this Slice by appending the given Slice using variadic expansion and returns a reference to this Slice.
+	Copy(indices ...int) (new Slice)                  // Copy returns a new Slice with the indicated range of elements copied from this Slice.
+	Count(elem interface{}) (cnt int)                 // Count the number of elements in this Slice equal to the given element.
+	CountW(sel func(O) bool) (cnt int)                // CountW counts the number of elements in this Slice that match the lambda selector.
+	Drop(indices ...int) Slice                        // Drop modifies this Slice to delete the indicated range of elements and returns a referece to this Slice.
+	DropAt(i int) Slice                               // DropAt modifies this Slice to delete the element at the given index location. Allows for negative notation.
+	DropFirst() Slice                                 // DropFirst modifies this Slice to delete the first element and returns a reference to this Slice.
+	DropFirstN(n int) Slice                           // DropFirstN modifies this Slice to delete the first n elements and returns a reference to this Slice.
+	DropLast() Slice                                  // DropLast modifies this Slice to delete the last element and returns a reference to this Slice.
+	DropLastN(n int) Slice                            // DropLastN modifies thi Slice to delete the last n elements and returns a reference to this Slice.
+	DropW(sel func(O) bool) Slice                     // DropW modifies this Slice to delete the elements that match the lambda selector and returns a reference to this Slice.
+	Each(action func(O)) Slice                        // Each calls the given lambda once for each element in this Slice, passing in that element
+	EachE(action func(O) error) (Slice, error)        // EachE calls the given lambda once for each element in this Slice, passing in that element
+	EachI(action func(int, O)) Slice                  // EachI calls the given lambda once for each element in this Slice, passing in the index and element
+	EachIE(action func(int, O) error) (Slice, error)  // EachIE calls the given lambda once for each element in this Slice, passing in the index and element
+	EachR(action func(O)) Slice                       // EachR calls the given lambda once for each element in this Slice in reverse, passing in that element
+	EachRE(action func(O) error) (Slice, error)       // EachRE calls the given lambda once for each element in this Slice in reverse, passing in that element
+	EachRI(action func(int, O)) Slice                 // EachRI calls the given lambda once for each element in this Slice in reverse, passing in that element
+	EachRIE(action func(int, O) error) (Slice, error) // EachRIE calls the given lambda once for each element in this Slice in reverse, passing in that element
+	Empty() bool                                      // Empty tests if this Slice is empty.
+	First() (elem *Object)                            // First returns the first element in this Slice as Object.
+	FirstN(n int) Slice                               // FirstN returns the first n elements in this slice as a Slice reference to the original.
+	Index(elem interface{}) (loc int)                 // Index returns the index of the first element in this Slice where element == elem
+	Insert(i int, elem interface{}) Slice             // Insert modifies this Slice to insert the given element before the element with the given index.
+	Join(separator ...string) (str *Object)           // Join converts each element into a string then joins them together using the given separator or comma by default.
+	Last() (elem *Object)                             // Last returns the last element in this Slice as an Object.
+	LastN(n int) Slice                                // LastN returns the last n elements in this Slice as a Slice reference to the original.
+	Len() int                                         // Len returns the number of elements in this Slice.
+	Less(i, j int) bool                               // Less returns true if the element indexed by i is less than the element indexed by j.
+	Nil() bool                                        // Nil tests if this Slice is nil.
+	O() interface{}                                   // O returns the underlying data structure as is.
+	Pair() (first, second *Object)                    // Pair simply returns the first and second Slice elements as Objects.
+	Pop() (elem *Object)                              // Pop modifies this Slice to remove the last element and returns the removed element as an Object.
+	PopN(n int) (new Slice)                           // PopN modifies this Slice to remove the last n elements and returns the removed elements as a new Slice.
+	Prepend(elem interface{}) Slice                   // Prepend modifies this Slice to add the given element at the begining and returns a reference to this Slice.
+	Reverse() (new Slice)                             // Reverse returns a new Slice with the order of the elements reversed.
+	ReverseM() Slice                                  // ReverseM modifies this Slice reversing the order of the elements and returns a reference to this Slice.
+	Select(sel func(O) bool) (new Slice)              // Select creates a new slice with the elements that match the lambda selector.
+	Set(i int, elem interface{}) Slice                // Set the element at the given index location to the given element. Allows for negative notation.
+	SetE(i int, elem interface{}) (Slice, error)      // Set the element at the given index location to the given element. Allows for negative notation.
+	Shift() (elem *Object)                            // Shift modifies this Slice to remove the first element and returns the removed element as an Object.
+	ShiftN(n int) (new Slice)                         // ShiftN modifies this Slice to remove the first n elements and returns the removed elements as a new Slice.
+	Single() bool                                     // Single reports true if there is only one element in this Slice.
+	Slice(indices ...int) Slice                       // Slice returns a range of elements from this Slice as a Slice reference to the original. Allows for negative notation.
+	Sort() (new Slice)                                // Sort returns a new Slice with sorted elements.
+	SortM() Slice                                     // SortM modifies this Slice sorting the elements and returns a reference to this Slice.
+	SortReverse() (new Slice)                         // SortReverse returns a new Slice sorting the elements in reverse.
+	SortReverseM() Slice                              // SortReverseM modifies this Slice sorting the elements in reverse and returns a reference to this Slice.
+	String() string                                   // Returns a string representation of this Slice, implements the Stringer interface
+	Swap(i, j int)                                    // Swap modifies this Slice swapping the indicated elements.
+	Take(indices ...int) (new Slice)                  // Take modifies this Slice removing the indicated range of elements from this Slice and returning them as a new Slice.
+	TakeAt(i int) (elem *Object)                      // TakeAt modifies this Slice removing the elemement at the given index location and returns the removed element as an Object.
+	TakeW(sel func(O) bool) (new Slice)               // TakeW modifies this Slice removing the elements that match the lambda selector and returns them as a new Slice.
+	Union(slice interface{}) (new Slice)              // Union returns a new Slice by joining uniq elements from this Slice with uniq elements from the given Slice while preserving order.
+	UnionM(slice interface{}) Slice                   // UnionM modifies this Slice by joining uniq elements from this Slice with uniq elements from the given Slice while preserving order.
+	Uniq() (new Slice)                                // Uniq returns a new Slice with all non uniq elements removed while preserving element order.
+	UniqM() Slice                                     // UniqM modifies this Slice to remove all non uniq elements while preserving element order.
 }
 
 // NSlice provides a generic way to work with slice types providing convenience methods
