@@ -159,10 +159,10 @@ func (p *IntSlice) ConcatM(slice interface{}) Slice {
 }
 
 // Copy returns a new Slice with the indicated range of elements copied from this Slice.
-// Expects nothing, in which case everything is copied, or two
-// indices i and j, in which case positive and negative notation is supported and
-// uses an inclusive behavior such that Slice(0, -1) includes index -1 as opposed
-// to Go's exclusive  behavior. Out of bounds indices will be moved within bounds.
+// Expects nothing, in which case everything is copied, or two indices i and j, in which
+// case positive and negative notation is supported and uses an inclusive behavior such
+// that Slice(0, -1) includes index -1 as opposed to Go's exclusive behavior. Out of
+// bounds indices will be moved within bounds.
 //
 // An empty Slice is returned if indicies are mutually exclusive or nothing can be returned.
 func (p *IntSlice) Copy(indices ...int) (new Slice) {
@@ -204,10 +204,9 @@ func (p *IntSlice) CountW(sel func(O) bool) (cnt int) {
 }
 
 // Drop modifies this Slice to delete the indicated range of elements and returns a referece to this Slice.
-// Expects nothing, in which case everything is dropped, or two indices i and j, in which case
-// positive and negative notation is supported and uses an inclusive behavior such that
-// DropAt(0, -1) includes index -1 as opposed to Go's exclusive behavior. Out of bounds indices
-// will be moved within bounds.
+// Expects nothing, in which case everything is dropped, or two indices i and j, in which case positive and
+// negative notation is supported and uses an inclusive behavior such that DropAt(0, -1) includes index -1
+// as opposed to Go's exclusive behavior. Out of bounds indices will be moved within bounds.
 func (p *IntSlice) Drop(indices ...int) Slice {
 	if p == nil || len(*p) == 0 {
 		return p
@@ -291,7 +290,7 @@ func (p *IntSlice) Each(action func(O)) Slice {
 }
 
 // EachE calls the given lambda once for each element in this Slice, passing in that element
-// as a parameter. Returns a reference to the slice and any error from the user function.
+// as a parameter. Returns a reference to this Slice and any error from the lambda.
 func (p *IntSlice) EachE(action func(O) error) (Slice, error) {
 	var err error
 	if p == nil {
@@ -306,7 +305,7 @@ func (p *IntSlice) EachE(action func(O) error) (Slice, error) {
 }
 
 // EachI calls the given lambda once for each element in this Slice, passing in the index and element
-// as a parameter. Returns a reference to the slice
+// as a parameter. Returns a reference to this Slice
 func (p *IntSlice) EachI(action func(int, O)) Slice {
 	if p == nil {
 		return p
@@ -318,7 +317,7 @@ func (p *IntSlice) EachI(action func(int, O)) Slice {
 }
 
 // EachIE calls the given lambda once for each element in this Slice, passing in the index and element
-// as a parameter. Returns a reference to the slice and any error from the user function.
+// as a parameter. Returns a reference to this Slice and any error from the lambda.
 func (p *IntSlice) EachIE(action func(int, O) error) (Slice, error) {
 	var err error
 	if p == nil {
@@ -333,7 +332,7 @@ func (p *IntSlice) EachIE(action func(int, O) error) (Slice, error) {
 }
 
 // EachR calls the given lambda once for each element in this Slice in reverse, passing in that element
-// passing that element in as a parameter. Returns a reference to the slice
+// as a parameter. Returns a reference to this Slice
 func (p *IntSlice) EachR(action func(O)) Slice {
 	if p == nil {
 		return p
@@ -345,7 +344,7 @@ func (p *IntSlice) EachR(action func(O)) Slice {
 }
 
 // EachRE calls the given lambda once for each element in this Slice in reverse, passing in that element
-// element in as a parameter. Returns a reference to the slice and any error from the user function.
+// as a parameter. Returns a reference to this Slice and any error from the lambda.
 func (p *IntSlice) EachRE(action func(O) error) (Slice, error) {
 	var err error
 	if p == nil {
@@ -360,7 +359,7 @@ func (p *IntSlice) EachRE(action func(O) error) (Slice, error) {
 }
 
 // EachRI calls the given lambda once for each element in this Slice in reverse, passing in that element
-// as a parameter. Returns a reference to the slice
+// as a parameter. Returns a reference to this Slice
 func (p *IntSlice) EachRI(action func(int, O)) Slice {
 	if p == nil {
 		return p
@@ -372,7 +371,7 @@ func (p *IntSlice) EachRI(action func(int, O)) Slice {
 }
 
 // EachRIE calls the given lambda once for each element in this Slice in reverse, passing in that element
-// as a parameter. Returns a reference to the slice and any error from the user function.
+// as a parameter. Returns a reference to this Slice and any error from the lambda.
 func (p *IntSlice) EachRIE(action func(int, O) error) (Slice, error) {
 	var err error
 	if p == nil {
@@ -586,14 +585,14 @@ func (p *IntSlice) Select(sel func(O) bool) (new Slice) {
 }
 
 // Set the element at the given index location to the given element. Allows for negative notation.
-// Returns the slice for chaining and swallows any errors if out of bounds or elem is the wrong type
+// Returns a reference to this Slice and swallows any errors.
 func (p *IntSlice) Set(i int, elem interface{}) Slice {
 	slice, _ := p.SetE(i, elem)
 	return slice
 }
 
 // SetE the element at the given index location to the given element. Allows for negative notation.
-// Returns the slice for chaining and an error if out of bounds or elem is the wrong type
+// Returns a referenct to this Slice and an error if out of bounds or elem is the wrong type.
 func (p *IntSlice) SetE(i int, elem interface{}) (Slice, error) {
 	var err error
 	if p == nil {
@@ -635,9 +634,9 @@ func (p *IntSlice) Single() bool {
 }
 
 // Slice returns a range of elements from this Slice as a Slice reference to the original. Allows for negative notation.
-// Expects nothing, in which case everything is included, or two indices i and j, in which case
-// an inclusive behavior is used such that Slice(0, -1) includes index -1 as opposed to Go's
-// exclusive behavior. Out of bounds indices will be moved within bounds.
+// Expects nothing, in which case everything is included, or two indices i and j, in which case an inclusive behavior
+// is used such that Slice(0, -1) includes index -1 as opposed to Go's exclusive behavior. Out of bounds indices will
+// be moved within bounds.
 //
 // An empty Slice is returned if indicies are mutually exclusive or nothing can be returned.
 //
@@ -713,10 +712,9 @@ func (p *IntSlice) Swap(i, j int) {
 }
 
 // Take modifies this Slice removing the indicated range of elements from this Slice and returning them as a new Slice.
-// Expects nothing, in which case everything is taken, or two indices i and j, in which case
-// positive and negative notation is supported and uses an inclusive behavior such that
-// Take(0, -1) includes index -1 as opposed to Go's exclusive behavior. Out of bounds indices
-// will be moved within bounds.
+// Expects nothing, in which case everything is taken, or two indices i and j, in which case positive and negative
+// notation is supported and uses an inclusive behavior such that Take(0, -1) includes index -1 as opposed to Go's
+// exclusive behavior. Out of bounds indices will be moved within bounds.
 func (p *IntSlice) Take(indices ...int) (new Slice) {
 	new = p.Copy(indices...)
 	p.Drop(indices...)

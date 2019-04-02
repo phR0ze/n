@@ -1,37 +1,41 @@
 // Package n provides many Go types with convenience functions reminiscent of Ruby or C#.
 //
 // n was created to reduce the friction I had adopting Go as my primary language of choice by
-// reducing coding verbosity required by Go via code reuse. The n types wrapp various Go
+// reducing coding verbosity required by Go via code reuse. The n types wrap various Go
 // types to provide this functionality.
 //
 // Conventions used across n types and pkgs
 //
 // • In order to deal with Golang's decision to not support function overloading or special
 // characters in their function names n makes use of a variety of prefix/suffix capital
-// letters to indicate different function varieties. The function that contains no suffix
-// is known as the base function.
+// letters to indicate different function varieties. The function/method that contains no
+// suffix is known as the base function/method.
 //
-// • Function names suffixed with 'E' indicates the function is a corollary to the function
+// • Function names suffixed with 'E' indicates the function is a variation to the function
 // without the 'E' but returns an Error while the base function does not.
 //
-// • Function names suffixed with 'M' indicates the function is a corollary to the function
-// without the 'M' but modifies the underlying n type directly.
+// • Function names suffixed with 'M' indicates the function is a variation to the function
+// without the 'M' but modifies the n type directly rather than a copy.
 //
-// • Function names suffixed with 'S' indicates the function is a corollary to the function
-// without the 'S' but either accepts a slice as input or returns a Slice.
+// • Function names suffixed with 'R' indicates the function is a variation to the function
+// without the 'R' but reverses the order of operations.
 //
-// • Function names suffixed with 'V' indicates the function is a corollary to the function
+// • Function names suffixed with 'S' indicates the function is a variation to the function
+// without the 'S' but either accepts a Slice as input or returns a Slice.
+//
+// • Function names suffixed with 'V' indicates the function is a variation to the function
+// • Function names suffixed with 'V' indicates the function is a variation to the function
 // without the 'V' but accepts variadic input.
 //
-// • Function names suffixed with 'W' indicates the function is a corollary to the function
-// without the 'W' but accepts a lambda expression.
+// • Function names suffixed with 'W' indicates the function is a variation to the function
+// without the 'W' but accepts a lambda expression as input.
 //
 // • Documentation should be thorough and relied upon for guidance as, for a love of brevity,
-// some functions use single capital letters frequently to indicate types. 'O' is being used to
+// some functions use single capital letters only to indicate types. 'O' is being used to
 // indicate the interface{} type or to export the underlying Go type as an interface{}. 'S' is
-// used to refer to slice types, 'M' refers to map types. 'A' refers to string types and
-// combinations may be used to indicate complex types. The documentation will always call out
-// what exactly they mean, but the function name may be cryptic until understood.
+// used to refer to slice types, 'M' refers to map types, 'A' refers to string types, 'I' ints
+// types and combinations may be used to indicate complex types. The documentation will always
+// call out what exactly they mean, but the function name may be cryptic until understood.
 package n
 
 import (
@@ -51,7 +55,8 @@ type O interface{}
 // ErrBreak is a brevity helper for breaking out of lambda loops
 var ErrBreak = errors.New("break")
 
-// ExB avoids the gastly 4 line monstrosity that it is when used in lambda expression
+// ExB avoids Go's gastly 4 line monstrosity required to implement this providing
+// instead a single clean line of code for lambdas.
 func ExB(exp bool) bool {
 	if exp {
 		return true
