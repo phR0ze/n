@@ -2408,6 +2408,82 @@ func TestIntSlice_Set(t *testing.T) {
 	// Test out of bounds
 	{
 		assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 2, 3).Set(5, 1))
+	}
+
+	// Test wrong type
+	{
+		assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 2, 3).Set(5, "1"))
+	}
+}
+
+// SetE
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_SetE_Go(t *testing.B) {
+	ints := Range(0, nines6)
+	for i := 0; i < len(ints); i++ {
+		ints[i] = 0
+	}
+}
+
+func BenchmarkIntSlice_SetE_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines6))
+	for i := 0; i < slice.Len(); i++ {
+		slice.SetE(i, 0)
+	}
+}
+
+func ExampleIntSlice_SetE() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.SetE(0, 0))
+	// Output: [0 2 3] <nil>
+}
+
+func TestIntSlice_SetE(t *testing.T) {
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		result, err := slice.SetE(0, 0)
+		assert.Nil(t, err)
+		assert.Equal(t, NewIntSliceV(0, 2, 3), slice)
+		assert.Equal(t, NewIntSliceV(0, 2, 3), result)
+	}
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		result, err := slice.SetE(1, 0)
+		assert.Nil(t, err)
+		assert.Equal(t, NewIntSliceV(1, 0, 3), slice)
+		assert.Equal(t, NewIntSliceV(1, 0, 3), result)
+	}
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		result, err := slice.SetE(2, 0)
+		assert.Nil(t, err)
+		assert.Equal(t, NewIntSliceV(1, 2, 0), slice)
+		assert.Equal(t, NewIntSliceV(1, 2, 0), result)
+	}
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		result, err := slice.SetE(-3, 0)
+		assert.Nil(t, err)
+		assert.Equal(t, NewIntSliceV(0, 2, 3), slice)
+		assert.Equal(t, NewIntSliceV(0, 2, 3), result)
+	}
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		result, err := slice.SetE(-2, 0)
+		assert.Nil(t, err)
+		assert.Equal(t, NewIntSliceV(1, 0, 3), slice)
+		assert.Equal(t, NewIntSliceV(1, 0, 3), result)
+	}
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		result, err := slice.SetE(-1, 0)
+		assert.Nil(t, err)
+		assert.Equal(t, NewIntSliceV(1, 2, 0), slice)
+		assert.Equal(t, NewIntSliceV(1, 2, 0), result)
+	}
+
+	// Test out of bounds
+	{
 		slice, err := NewIntSliceV(1, 2, 3).SetE(5, 1)
 		assert.NotNil(t, slice)
 		assert.NotNil(t, err)
@@ -2415,7 +2491,6 @@ func TestIntSlice_Set(t *testing.T) {
 
 	// Test wrong type
 	{
-		assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 2, 3).Set(5, "1"))
 		slice, err := NewIntSliceV(1, 2, 3).SetE(5, "1")
 		assert.NotNil(t, slice)
 		assert.NotNil(t, err)

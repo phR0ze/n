@@ -592,7 +592,7 @@ func (p *IntSlice) Set(i int, elem interface{}) Slice {
 }
 
 // SetE the element at the given index location to the given element. Allows for negative notation.
-// Returns a referenct to this Slice and an error if out of bounds or elem is the wrong type.
+// Returns a referenc to this Slice and an error if out of bounds or elem is the wrong type.
 func (p *IntSlice) SetE(i int, elem interface{}) (Slice, error) {
 	var err error
 	if p == nil {
