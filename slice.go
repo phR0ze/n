@@ -81,6 +81,62 @@ type Slice interface {
 	UniqM() Slice                                     // UniqM modifies this Slice to remove all non uniq elements while preserving element order.
 }
 
+// NewSlice provides a generic way to work with Slice types. It does this by wrapping Go types
+// directly for optimized types thus avoiding reflection processing overhead and making a plethora
+// of Slice methods available. Non optimized types will fall back on reflection to generically
+// handle the type incurring the full 10x reflection processing overhead.
+//
+// Optimized: []int
+func NewSlice(obj interface{}) (new Slice) {
+	switch x := obj.(type) {
+	case []int:
+		return NewIntSlice(x)
+	case *[]int:
+		return NewIntSlice(*x)
+	default:
+		//return NewRefectionSlice(obj)
+		return nil
+	}
+}
+
+// NewSliceV creates a new Slice encapsulating the given variadic elements in a new Slice of
+// that type using type assertion for optimized types. Non optimized types will fall back
+// on reflection to generically handle the type incurring the full 10x reflection processing
+// overhead. In the case where nothing is given a new *RefSlice will be returned.
+//
+// Optimized: []int
+func NewSliceV(elems ...interface{}) (new Slice) {
+
+	// // Return NSlice.Nil if nothing given
+	// if len(items) == 0 {
+	// 	return
+	// }
+
+	// // Create new slice from the type of the first non Invalid element
+	// var slice *reflect.Value
+	// for i := 0; i < len(items); i++ {
+
+	// 	// Create target slice from first Valid element
+	// 	if slice == nil && reflect.ValueOf(items[i]).IsValid() {
+	// 		typ := reflect.SliceOf(reflect.TypeOf(items[i]))
+	// 		v := reflect.MakeSlice(typ, 0, 10)
+	// 		slice = &v
+	// 	}
+
+	// 	// Append item to slice
+	// 	if slice != nil {
+	// 		item := reflect.ValueOf(items[i])
+	// 		*slice = reflect.Append(*slice, item)
+	// 	}
+	// }
+	// if slice != nil {
+	// 	n.o = slice.Interface()
+	// 	n.len = slice.Len()
+	// }
+	// return
+	return nil
+}
+
 // NSlice provides a generic way to work with slice types providing convenience methods
 // on par with other rapid development languages.
 //
@@ -90,7 +146,7 @@ type NSlice struct {
 	len int         // slice length
 }
 
-// NewSlice creates a new NSlice by simply storing slice 'obj' directly to avoid using reflection
+// OldSlice creates a new NSlice by simply storing slice 'obj' directly to avoid using reflection
 // processing at a 10x overhead savings. Non slice 'obj' are encapsulated in a new slice of
 // that type using reflection, thus incurring the standard 10x overhead.
 //
@@ -99,7 +155,7 @@ type NSlice struct {
 // set later with the given type when an n.AppendX method is called.
 //
 // Cost: ~0x - 10x
-func NewSlice(obj interface{}) (n *NSlice) {
+func OldSlice(obj interface{}) (n *NSlice) {
 	n = &NSlice{}
 	v := reflect.ValueOf(obj)
 
@@ -119,7 +175,7 @@ func NewSlice(obj interface{}) (n *NSlice) {
 
 	// Convert []interface to slice of elem type
 	case interfaceSliceType:
-		n = NewSliceV(x...)
+		n = OldSliceV(x...)
 
 	// Slice of distinct type can be used directly
 	case k == reflect.Slice:
@@ -133,12 +189,12 @@ func NewSlice(obj interface{}) (n *NSlice) {
 	return
 }
 
-// NewSliceV creates a new NSlice encapsulating the given variadic elements in a new slice of
+// OldSliceV creates a new NSlice encapsulating the given variadic elements in a new slice of
 // that type. Thi call incurs the full 10x reflection overhead. For large slice params use
 // the Slice() func instead.
 //
 // Cost: ~10x
-func NewSliceV(items ...interface{}) (n *NSlice) {
+func OldSliceV(items ...interface{}) (n *NSlice) {
 	n = &NSlice{}
 
 	// Return NSlice.Nil if nothing given
