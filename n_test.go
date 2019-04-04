@@ -1591,7 +1591,7 @@ func rangeObject(min, max int) []Object {
 	return result
 }
 
-func rangeNObject(min, max int) []interface{} {
+func rangeInterObject(min, max int) []interface{} {
 	result := make([]interface{}, max-min+1)
 	for i := range result {
 		result[i] = Object{min + i}

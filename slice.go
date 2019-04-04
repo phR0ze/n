@@ -229,7 +229,7 @@ func OldSliceV(items ...interface{}) (n *NSlice) {
 // create a new empty slice of the given type or element type if a slice/array
 // want to return a new *NSlice so that we can use this in the AppendX functions
 // to defer creating an underlying slice type until we have an actual type to work with.
-func newEmptySlice(items interface{}) (n *NSlice) {
+func oldEmptySlice(items interface{}) (n *NSlice) {
 	n = &NSlice{}
 	v := reflect.ValueOf(items)
 	typ := reflect.TypeOf([]interface{}{})
@@ -429,9 +429,9 @@ func (p *NSlice) AnyS(obj interface{}) (result bool) {
 func (p *NSlice) Append(item interface{}) *NSlice {
 	if p.Nil() {
 		if p == nil {
-			p = newEmptySlice(item)
+			p = oldEmptySlice(item)
 		} else {
-			*p = *(newEmptySlice(item))
+			*p = *(oldEmptySlice(item))
 		}
 	}
 	ok := false
@@ -489,9 +489,9 @@ func (p *NSlice) AppendV(items ...interface{}) *NSlice {
 func (p *NSlice) AppendS(items interface{}) *NSlice {
 	if p.Nil() {
 		if p == nil {
-			p = newEmptySlice(items)
+			p = oldEmptySlice(items)
 		} else {
-			*p = *(newEmptySlice(items))
+			*p = *(oldEmptySlice(items))
 		}
 	}
 	ok := false
@@ -560,7 +560,7 @@ func (p *NSlice) At(i int) (obj *Object) {
 // Cost: constant
 func (p *NSlice) Clear() *NSlice {
 	if !p.Nil() {
-		*p = *(newEmptySlice(p.o))
+		*p = *(oldEmptySlice(p.o))
 	}
 	return p
 }
@@ -583,7 +583,7 @@ func (p *NSlice) Copy(indices ...int) (result *NSlice) {
 		result = &NSlice{}
 		return
 	}
-	result = newEmptySlice(p.o)
+	result = oldEmptySlice(p.o)
 	if p.len == 0 || len(indices) == 1 {
 		return
 	}
@@ -719,7 +719,7 @@ func (p *NSlice) DropFirst() *NSlice {
 		}
 		p.len -= n
 	} else {
-		*p = *(newEmptySlice(p.o))
+		*p = *(oldEmptySlice(p.o))
 	}
 	return p
 }
@@ -752,7 +752,7 @@ func (p *NSlice) DropFirstN(n int) *NSlice {
 		}
 		p.len -= n
 	} else {
-		*p = *(newEmptySlice(p.o))
+		*p = *(oldEmptySlice(p.o))
 	}
 	return p
 }
@@ -783,7 +783,7 @@ func (p *NSlice) DropLast() *NSlice {
 		}
 		p.len -= n
 	} else {
-		*p = *(newEmptySlice(p.o))
+		*p = *(oldEmptySlice(p.o))
 	}
 	return p
 }
@@ -816,7 +816,7 @@ func (p *NSlice) DropLastN(n int) *NSlice {
 		}
 		p.len -= n
 	} else {
-		*p = *(newEmptySlice(p.o))
+		*p = *(oldEmptySlice(p.o))
 	}
 	return p
 }
@@ -1219,7 +1219,7 @@ func (p *NSlice) Slice(i, j int) (result *NSlice) {
 		result = &NSlice{}
 		return
 	}
-	result = newEmptySlice(p.o)
+	result = oldEmptySlice(p.o)
 	if p.len == 0 {
 		return
 	}
