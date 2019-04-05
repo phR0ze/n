@@ -283,12 +283,13 @@ func (p *RefSlice) ConcatM(slice interface{}) Slice {
 //
 // An empty Slice is returned if indicies are mutually exclusive or nothing can be returned.
 func (p *RefSlice) Copy(indices ...int) (new Slice) {
-	if p.Nil() || p.Len() == 0 {
+	l := p.Len()
+	if p.Nil() || l == 0 {
 		return NewRefSliceV()
 	}
 
 	// Handle index manipulation
-	i, j, err := absIndices(p.Len(), indices...)
+	i, j, err := absIndices(l, indices...)
 	if err != nil {
 		return NewRefSliceV()
 	}
@@ -326,19 +327,20 @@ func (p *RefSlice) CountW(sel func(O) bool) (cnt int) {
 // negative notation is supported and uses an inclusive behavior such that DropAt(0, -1) includes index -1
 // as opposed to Go's exclusive behavior. Out of bounds indices will be moved within bounds.
 func (p *RefSlice) Drop(indices ...int) Slice {
-	if p == nil || p.Len() == 0 {
+	l := p.Len()
+	if p == nil || l == 0 {
 		return p
 	}
 
 	// Handle index manipulation
-	i, j, err := absIndices(p.Len(), indices...)
+	i, j, err := absIndices(l, indices...)
 	if err != nil {
 		return p
 	}
 
 	// Execute
 	n := j - i
-	if i+n < p.Len() {
+	if i+n < l {
 		*p.v = reflect.AppendSlice(p.v.Slice(0, i), p.v.Slice(i+n, p.v.Len()))
 	} else {
 		*p.v = p.v.Slice(0, i)
@@ -520,6 +522,9 @@ func (p *RefSlice) First() (elem *Object) {
 // FirstN returns the first n elements in this slice as a Slice reference to the original.
 // Best effort is used such that as many as can be will be returned up until the request is satisfied.
 func (p *RefSlice) FirstN(n int) Slice {
+	if n == 0 {
+		return NewRefSliceV()
+	}
 	return p.Slice(0, abs(n)-1)
 }
 
@@ -544,11 +549,12 @@ func (p *RefSlice) Index(elem interface{}) (loc int) {
 // of -1 will insert the element at the end of the slice. Slice is returned for chaining. Invalid
 // index locations will not change the slice.
 func (p *RefSlice) Insert(i int, elem interface{}) Slice {
-	if p.Nil() || p.Len() == 0 {
+	l := p.Len()
+	if p.Nil() || l == 0 {
 		return p.Append(elem)
 	}
 	j := i
-	if j = absIndex(p.Len(), j); j == -1 {
+	if j = absIndex(l, j); j == -1 {
 		return p
 	}
 	if i < 0 {
@@ -564,7 +570,7 @@ func (p *RefSlice) Insert(i int, elem interface{}) Slice {
 			*p.v = reflect.Append(*p.v, x)
 			reflect.Copy(p.v.Slice(1, p.v.Len()), p.v.Slice(0, p.v.Len()-1))
 			p.v.Index(0).Set(x)
-		} else if j < p.Len() {
+		} else if j < l {
 			*p.v = reflect.Append(*p.v, x)
 			reflect.Copy(p.v.Slice(j+1, p.v.Len()), p.v.Slice(j, p.v.Len()))
 			p.v.Index(j).Set(x)
@@ -606,6 +612,9 @@ func (p *RefSlice) Last() (elem *Object) {
 // LastN returns the last n elements in this Slice as a Slice reference to the original.
 // Best effort is used such that as many as can be will be returned up until the request is satisfied.
 func (p *RefSlice) LastN(n int) Slice {
+	if n == 0 {
+		return NewRefSliceV()
+	}
 	return p.Slice(absNeg(n), -1)
 }
 
@@ -619,10 +628,12 @@ func (p *RefSlice) Len() int {
 
 // Less returns true if the element indexed by i is less than the element indexed by j.
 func (p *RefSlice) Less(i, j int) bool {
-	// 	if p == nil || len(*p) < 2 || i < 0 || j < 0 || i >= len(*p) || j >= len(*p) {
-	// 		return false
-	// 	}
-	// 	return (*p)[i] < (*p)[j]
+	// l := p.Len()
+	// if p.Nil() || l < 2 || i < 0 || j < 0 || i >= l || j >= l {
+	// 	return false
+	// }
+	// return reflect.DeepEqual(p.v.Index(i), p.v.Index(j))
+	// reflect.Swapper(p.v.Interface())(i, j)
 	return false
 }
 
@@ -768,12 +779,13 @@ func (p *RefSlice) Single() bool {
 //
 // e.g. NewRefSliceV(1,2,3).Slice(0, -1) == [1,2,3] && NewRefSliceV(1,2,3).Slice(1,2) == [2,3]
 func (p *RefSlice) Slice(indices ...int) Slice {
-	if p.Nil() || p.Len() == 0 {
+	l := p.Len()
+	if p.Nil() || l == 0 {
 		return NewRefSliceV()
 	}
 
 	// Handle index manipulation
-	i, j, err := absIndices(p.Len(), indices...)
+	i, j, err := absIndices(l, indices...)
 	if err != nil {
 		return NewRefSliceV()
 	}
@@ -817,11 +829,12 @@ func (p *RefSlice) SortReverseM() Slice {
 
 // Returns a string representation of this Slice, implements the Stringer interface
 func (p *RefSlice) String() string {
+	l := p.Len()
 	var builder strings.Builder
 	builder.WriteString("[")
-	for i := 0; i < p.Len(); i++ {
+	for i := 0; i < l; i++ {
 		builder.WriteString(fmt.Sprintf("%d", p.v.Index(i).Interface()))
-		if i+1 < p.Len() {
+		if i+1 < l {
 			builder.WriteString(" ")
 		}
 	}
@@ -831,10 +844,11 @@ func (p *RefSlice) String() string {
 
 // Swap modifies this Slice swapping the indicated elements.
 func (p *RefSlice) Swap(i, j int) {
-	// 	if p == nil || len(*p) < 2 || i < 0 || j < 0 || i >= len(*p) || j >= len(*p) {
-	// 		return
-	// 	}
-	// 	(*p)[i], (*p)[j] = (*p)[j], (*p)[i]
+	l := p.Len()
+	if p.Nil() || l < 2 || i < 0 || j < 0 || i >= l || j >= l {
+		return
+	}
+	reflect.Swapper(p.v.Interface())(i, j)
 }
 
 // Take modifies this Slice removing the indicated range of elements from this Slice and returning them as a new Slice.
