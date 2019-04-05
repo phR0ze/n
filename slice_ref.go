@@ -505,17 +505,16 @@ func (p *RefSlice) EachRIE(action func(int, O) error) (Slice, error) {
 
 // Empty tests if this Slice is empty.
 func (p *RefSlice) Empty() bool {
-	// 	if p == nil || len(*p) == 0 {
-	// 		return true
-	// 	}
+	if p.Nil() || p.Len() == 0 {
+		return true
+	}
 	return false
 }
 
 // First returns the first element in this Slice as Object.
 // Object.Nil() == true will be returned when there are no elements in the slice.
 func (p *RefSlice) First() (elem *Object) {
-	// 	elem = p.At(0)
-	return
+	return p.At(0)
 }
 
 // FirstN returns the first n elements in this slice as a Slice reference to the original.
@@ -545,29 +544,34 @@ func (p *RefSlice) Index(elem interface{}) (loc int) {
 // of -1 will insert the element at the end of the slice. Slice is returned for chaining. Invalid
 // index locations will not change the slice.
 func (p *RefSlice) Insert(i int, elem interface{}) Slice {
-	// 	if p == nil || len(*p) == 0 {
-	// 		return p.Append(elem)
-	// 	}
-	// 	j := i
-	// 	if j = absIndex(len(*p), j); j == -1 {
-	// 		return p
-	// 	}
-	// 	if i < 0 {
-	// 		j++
-	// 	}
+	if p.Nil() || p.Len() == 0 {
+		return p.Append(elem)
+	}
+	j := i
+	if j = absIndex(p.Len(), j); j == -1 {
+		return p
+	}
+	if i < 0 {
+		j++
+	}
 
-	// 	// Insert the item before j if pos and after j if neg
-	// 	if x, ok := elem.(int); ok {
-	// 		if j == 0 {
-	// 			*p = append([]int{x}, (*p)...)
-	// 		} else if j < len(*p) {
-	// 			*p = append(*p, x)
-	// 			copy((*p)[j+1:], (*p)[j:])
-	// 			(*p)[j] = x
-	// 		} else {
-	// 			*p = append(*p, x)
-	// 		}
-	// 	}
+	// Insert the item before j if pos and after j if neg
+	x := reflect.ValueOf(elem)
+	if p.v.Type().Elem() != x.Type() {
+		panic(fmt.Sprintf("can't insert type '%v' into '%v'", x.Type(), p.v.Type()))
+	} else {
+		if j == 0 {
+			*p.v = reflect.Append(*p.v, x)
+			reflect.Copy(p.v.Slice(1, p.v.Len()), p.v.Slice(0, p.v.Len()-1))
+			p.v.Index(0).Set(x)
+		} else if j < p.Len() {
+			*p.v = reflect.Append(*p.v, x)
+			reflect.Copy(p.v.Slice(j+1, p.v.Len()), p.v.Slice(j, p.v.Len()))
+			p.v.Index(j).Set(x)
+		} else {
+			*p.v = reflect.Append(*p.v, x)
+		}
+	}
 	return p
 }
 
@@ -596,8 +600,7 @@ func (p *RefSlice) Join(separator ...string) (str *Object) {
 // Last returns the last element in this Slice as an Object.
 // Object.Nil() == true will be returned if there are no elements in the slice.
 func (p *RefSlice) Last() (elem *Object) {
-	// 	elem = p.At(-1)
-	return
+	return p.At(-1)
 }
 
 // LastN returns the last n elements in this Slice as a Slice reference to the original.
@@ -765,18 +768,17 @@ func (p *RefSlice) Single() bool {
 //
 // e.g. NewRefSliceV(1,2,3).Slice(0, -1) == [1,2,3] && NewRefSliceV(1,2,3).Slice(1,2) == [2,3]
 func (p *RefSlice) Slice(indices ...int) Slice {
-	// 	if p == nil || len(*p) == 0 {
-	// 		return NewRefSliceV()
-	// 	}
+	if p.Nil() || p.Len() == 0 {
+		return NewRefSliceV()
+	}
 
-	// 	// Handle index manipulation
-	// 	i, j, err := absIndices(len(*p), indices...)
-	// 	if err != nil {
-	// 		return NewRefSliceV()
-	// 	}
+	// Handle index manipulation
+	i, j, err := absIndices(p.Len(), indices...)
+	if err != nil {
+		return NewRefSliceV()
+	}
 
-	//return NewRefSlice((*p)[i:j])
-	return nil
+	return NewRefSlice(p.v.Slice(i, j).Interface())
 }
 
 // Sort returns a new Slice with sorted elements.

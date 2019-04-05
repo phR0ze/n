@@ -396,8 +396,7 @@ func (p *IntSlice) Empty() bool {
 // First returns the first element in this Slice as Object.
 // Object.Nil() == true will be returned when there are no elements in the slice.
 func (p *IntSlice) First() (elem *Object) {
-	elem = p.At(0)
-	return
+	return p.At(0)
 }
 
 // FirstN returns the first n elements in this slice as a Slice reference to the original.
@@ -481,8 +480,7 @@ func (p *IntSlice) Join(separator ...string) (str *Object) {
 // Last returns the last element in this Slice as an Object.
 // Object.Nil() == true will be returned if there are no elements in the slice.
 func (p *IntSlice) Last() (elem *Object) {
-	elem = p.At(-1)
-	return
+	return p.At(-1)
 }
 
 // LastN returns the last n elements in this Slice as a Slice reference to the original.
