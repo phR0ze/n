@@ -359,7 +359,7 @@ func (p *RefSlice) DropFirst() Slice {
 
 // DropFirstN modifies this Slice to delete the first n elements and returns a reference to this Slice.
 func (p *RefSlice) DropFirstN(n int) Slice {
-	if p.Len() == 0 {
+	if n == 0 {
 		return p
 	}
 	return p.Drop(0, abs(n)-1)
@@ -372,7 +372,7 @@ func (p *RefSlice) DropLast() Slice {
 
 // DropLastN modifies thi Slice to delete the last n elements and returns a reference to this Slice.
 func (p *RefSlice) DropLastN(n int) Slice {
-	if p.Len() == 0 {
+	if n == 0 {
 		return p
 	}
 	return p.Drop(absNeg(n), -1)
@@ -398,12 +398,12 @@ func (p *RefSlice) DropW(sel func(O) bool) Slice {
 // Each calls the given lambda once for each element in this Slice, passing in that element
 // as a parameter. Returns a reference to this Slice
 func (p *RefSlice) Each(action func(O)) Slice {
-	// 	if p == nil {
-	// 		return p
-	// 	}
-	// 	for i := 0; i < len(*p); i++ {
-	// 		action((*p)[i])
-	// 	}
+	if p.Nil() {
+		return p
+	}
+	for i := 0; i < p.Len(); i++ {
+		action(p.v.Index(i).Interface())
+	}
 	return p
 }
 
@@ -411,14 +411,14 @@ func (p *RefSlice) Each(action func(O)) Slice {
 // as a parameter. Returns a reference to this Slice and any error from the lambda.
 func (p *RefSlice) EachE(action func(O) error) (Slice, error) {
 	var err error
-	// 	if p == nil {
-	// 		return p, err
-	// 	}
-	// 	for i := 0; i < len(*p); i++ {
-	// 		if err = action((*p)[i]); err != nil {
-	// 			return p, err
-	// 		}
-	// 	}
+	if p.Nil() {
+		return p, err
+	}
+	for i := 0; i < p.Len(); i++ {
+		if err = action(p.v.Index(i).Interface()); err != nil {
+			return p, err
+		}
+	}
 	return p, err
 }
 

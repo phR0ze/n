@@ -403,6 +403,9 @@ func (p *IntSlice) First() (elem *Object) {
 // FirstN returns the first n elements in this slice as a Slice reference to the original.
 // Best effort is used such that as many as can be will be returned up until the request is satisfied.
 func (p *IntSlice) FirstN(n int) Slice {
+	if n == 0 {
+		return NewIntSliceV()
+	}
 	return p.Slice(0, abs(n)-1)
 }
 
@@ -485,6 +488,9 @@ func (p *IntSlice) Last() (elem *Object) {
 // LastN returns the last n elements in this Slice as a Slice reference to the original.
 // Best effort is used such that as many as can be will be returned up until the request is satisfied.
 func (p *IntSlice) LastN(n int) Slice {
+	if n == 0 {
+		return NewIntSliceV()
+	}
 	return p.Slice(absNeg(n), -1)
 }
 
