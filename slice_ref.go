@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 // RefSlice implements the Slice interface providing a generic way to work with slice types
@@ -196,7 +198,7 @@ func (p *RefSlice) Append(elem interface{}) Slice {
 	}
 	x := reflect.ValueOf(elem)
 	if p.v.Type().Elem() != x.Type() {
-		panic(fmt.Sprintf("can't append type '%v' to '%v'", p.v.Type().Elem(), x.Type()))
+		panic(fmt.Sprintf("can't append type '%v' to '%v'", x.Type(), p.v.Type()))
 	} else {
 		*p.v = reflect.Append(*p.v, x)
 	}
@@ -205,35 +207,43 @@ func (p *RefSlice) Append(elem interface{}) Slice {
 
 // AppendV appends the variadic elements to the end of this Slice and returns a reference to this Slice.
 func (p *RefSlice) AppendV(elems ...interface{}) Slice {
-	// 	if p == nil {
-	// 		p = NewRefSliceV()
-	// 	}
-	// 	for _, elem := range elems {
-	// 		p.Append(elem)
-	// 	}
+	if p.Nil() {
+		if p == nil {
+			p = newEmptySlice(elems)
+		} else {
+			*p = *(newEmptySlice(elems))
+		}
+	}
+	for _, elem := range elems {
+		p.Append(elem)
+	}
 	return p
 }
 
 // At returns the element at the given index location. Allows for negative notation.
 func (p *RefSlice) At(i int) (elem *Object) {
-	// 	elem = &Object{}
-	// 	if p == nil {
-	// 		return
-	// 	}
-	// 	if i = absIndex(len(*p), i); i == -1 {
-	// 		return
-	// 	}
-	// 	elem.o = (*p)[i]
+	elem = &Object{}
+	if p.Nil() {
+		return
+	}
+	if i = absIndex(p.Len(), i); i == -1 {
+		return
+	}
+	elem.o = p.v.Index(i).Interface()
 	return
 }
 
 // Clear modifies this Slice to clear out all elements and returns a reference to this Slice.
 func (p *RefSlice) Clear() Slice {
-	// 	if p == nil {
-	// 		p = NewRefSliceV()
-	// 	} else {
-	// 		p.Drop()
-	// 	}
+	if p.Nil() {
+		if p == nil {
+			p = NewRefSliceV()
+		} else {
+			*p = *NewRefSliceV()
+		}
+	} else {
+		p.Drop()
+	}
 	return p
 }
 
@@ -246,19 +256,22 @@ func (p *RefSlice) Concat(slice interface{}) (new Slice) {
 // ConcatM modifies this Slice by appending the given Slice using variadic expansion and returns a reference to this Slice.
 // Supports RefSlice, *RefSlice, []int or *[]int
 func (p *RefSlice) ConcatM(slice interface{}) Slice {
-	// 	if p == nil {
-	// 		p = NewRefSliceV()
-	// 	}
-	// 	switch x := slice.(type) {
-	// 	case []int:
-	// 		*p = append(*p, x...)
-	// 	case *[]int:
-	// 		*p = append(*p, (*x)...)
-	// 	case RefSlice:
-	// 		*p = append(*p, x...)
-	// 	case *RefSlice:
-	// 		*p = append(*p, (*x)...)
-	// 	}
+	if p.Nil() {
+		if p == nil {
+			p = newEmptySlice(slice)
+		} else {
+			*p = *(newEmptySlice(slice))
+		}
+	}
+	x := reflect.ValueOf(slice)
+	if x.Kind() != reflect.Slice {
+		panic(fmt.Sprintf("can't concat non slice type '%v' with '%v'", x.Type(), p.v.Type()))
+	}
+	if p.v.Type() != x.Type() {
+		panic(fmt.Sprintf("can't concat type '%v' with '%v'", x.Type().Elem(), p.v.Type()))
+	} else {
+		*p.v = reflect.AppendSlice(*p.v, x)
+	}
 	return p
 }
 
@@ -270,21 +283,21 @@ func (p *RefSlice) ConcatM(slice interface{}) Slice {
 //
 // An empty Slice is returned if indicies are mutually exclusive or nothing can be returned.
 func (p *RefSlice) Copy(indices ...int) (new Slice) {
-	// 	if p == nil || len(*p) == 0 {
-	// 		return NewRefSliceV()
-	// 	}
+	if p.Nil() || p.Len() == 0 {
+		return NewRefSliceV()
+	}
 
-	// 	// Handle index manipulation
-	// 	i, j, err := absIndices(len(*p), indices...)
-	// 	if err != nil {
-	// 		return NewRefSliceV()
-	// 	}
+	// Handle index manipulation
+	i, j, err := absIndices(p.Len(), indices...)
+	if err != nil {
+		return NewRefSliceV()
+	}
 
-	// 	// Copy elements over to new Slice
-	// 	x := make([]int, j-i, j-i)
-	// 	copy(x, (*p)[i:j])
-	//return NewRefSlice(x)
-	return newEmptySlice(indices)
+	// Copy elements over to new Slice
+	x := reflect.MakeSlice(p.v.Type(), j-i, j-i)
+	reflect.Copy(x, p.v.Slice(i, j))
+	new = &RefSlice{v: &x, k: x.Kind()}
+	return
 }
 
 // Count the number of elements in this Slice equal to the given element.
@@ -313,23 +326,23 @@ func (p *RefSlice) CountW(sel func(O) bool) (cnt int) {
 // negative notation is supported and uses an inclusive behavior such that DropAt(0, -1) includes index -1
 // as opposed to Go's exclusive behavior. Out of bounds indices will be moved within bounds.
 func (p *RefSlice) Drop(indices ...int) Slice {
-	// 	if p == nil || len(*p) == 0 {
-	// 		return p
-	// 	}
+	if p == nil || p.Len() == 0 {
+		return p
+	}
 
-	// 	// Handle index manipulation
-	// 	i, j, err := absIndices(len(*p), indices...)
-	// 	if err != nil {
-	// 		return p
-	// 	}
+	// Handle index manipulation
+	i, j, err := absIndices(p.Len(), indices...)
+	if err != nil {
+		return p
+	}
 
-	// 	// Execute
-	// 	n := j - i
-	// 	if i+n < len(*p) {
-	// 		*p = append((*p)[:i], (*p)[i+n:]...)
-	// 	} else {
-	// 		*p = (*p)[:i]
-	// 	}
+	// Execute
+	n := j - i
+	if i+n < p.Len() {
+		*p.v = reflect.AppendSlice(p.v.Slice(0, i), p.v.Slice(i+n, p.v.Len()))
+	} else {
+		*p.v = p.v.Slice(0, i)
+	}
 	return p
 }
 
@@ -704,19 +717,20 @@ func (p *RefSlice) Set(i int, elem interface{}) Slice {
 // Returns a referenc to this Slice and an error if out of bounds or elem is the wrong type.
 func (p *RefSlice) SetE(i int, elem interface{}) (Slice, error) {
 	var err error
-	// 	if p == nil {
-	// 		return p, err
-	// 	}
-	// 	if i = absIndex(len(*p), i); i == -1 {
-	// 		err = errors.Errorf("slice assignment is out of bounds")
-	// 		return p, err
-	// 	}
+	if p.Nil() {
+		return p, err
+	}
+	if i = absIndex(p.Len(), i); i == -1 {
+		err = errors.Errorf("slice assignment is out of bounds")
+		return p, err
+	}
 
-	// 	if x, ok := elem.(int); ok {
-	// 		(*p)[i] = x
-	// 	} else {
-	// 		err = errors.Errorf("can't set type '%T' in '%T'", elem, p)
-	// 	}
+	x := reflect.ValueOf(elem)
+	if p.v.Type().Elem() != x.Type() {
+		err = errors.Errorf("can't set type '%v' in '%v'", x.Type(), p.v.Type())
+	} else {
+		p.v.Index(i).Set(x)
+	}
 	return p, err
 }
 
