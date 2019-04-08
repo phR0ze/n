@@ -1822,9 +1822,9 @@ func TestIntSlice_Insert(t *testing.T) {
 
 	// error cases
 	{
-		var slice *NSlice
-		assert.True(t, slice.Insert(0, 0).Nil())
-		assert.Equal(t, (*NSlice)(nil), slice.Insert(0, 0))
+		var slice *IntSlice
+		assert.False(t, slice.Insert(0, 0).Nil())
+		assert.Equal(t, NewIntSliceV(0), slice.Insert(0, 0))
 		assert.Equal(t, NewIntSliceV(0, 1), NewIntSliceV(0, 1).Insert(-10, 1))
 		assert.Equal(t, NewIntSliceV(0, 1), NewIntSliceV(0, 1).Insert(10, 1))
 		assert.Equal(t, NewIntSliceV(0, 1), NewIntSliceV(0, 1).Insert(2, 1))
