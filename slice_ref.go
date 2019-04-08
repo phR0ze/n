@@ -283,15 +283,14 @@ func (p *RefSlice) ConcatM(slice interface{}) Slice {
 //
 // An empty Slice is returned if indicies are mutually exclusive or nothing can be returned.
 func (p *RefSlice) Copy(indices ...int) (new Slice) {
-	l := p.Len()
-	if p.Nil() || l == 0 {
+	if p.Nil() {
 		return NewRefSliceV()
 	}
 
 	// Handle index manipulation
-	i, j, err := absIndices(l, indices...)
+	i, j, err := absIndices(p.Len(), indices...)
 	if err != nil {
-		return NewRefSliceV()
+		return newEmptySlice(p.O())
 	}
 
 	// Copy elements over to new Slice
@@ -522,8 +521,11 @@ func (p *RefSlice) First() (elem *Object) {
 // FirstN returns the first n elements in this slice as a Slice reference to the original.
 // Best effort is used such that as many as can be will be returned up until the request is satisfied.
 func (p *RefSlice) FirstN(n int) Slice {
-	if n == 0 {
+	if p.Nil() {
 		return NewRefSliceV()
+	}
+	if n == 0 {
+		return newEmptySlice(p.O())
 	}
 	return p.Slice(0, abs(n)-1)
 }
@@ -612,8 +614,11 @@ func (p *RefSlice) Last() (elem *Object) {
 // LastN returns the last n elements in this Slice as a Slice reference to the original.
 // Best effort is used such that as many as can be will be returned up until the request is satisfied.
 func (p *RefSlice) LastN(n int) Slice {
-	if n == 0 {
+	if p.Nil() {
 		return NewRefSliceV()
+	}
+	if n == 0 {
+		return newEmptySlice(p.O())
 	}
 	return p.Slice(absNeg(n), -1)
 }
@@ -677,11 +682,14 @@ func (p *RefSlice) Pop() (elem *Object) {
 
 // PopN modifies this Slice to remove the last n elements and returns the removed elements as a new Slice.
 func (p *RefSlice) PopN(n int) (new Slice) {
-	// 	if n == 0 {
-	// 		return NewRefSliceV()
-	// 	}
-	// 	new = p.Copy(absNeg(n), -1)
-	// 	p.DropLastN(n)
+	if p.Nil() {
+		return NewRefSliceV()
+	}
+	if n == 0 {
+		return newEmptySlice(p.O())
+	}
+	new = p.Copy(absNeg(n), -1)
+	p.DropLastN(n)
 	return
 }
 
@@ -753,18 +761,21 @@ func (p *RefSlice) SetE(i int, elem interface{}) (Slice, error) {
 
 // Shift modifies this Slice to remove the first element and returns the removed element as an Object.
 func (p *RefSlice) Shift() (elem *Object) {
-	// 	elem = p.First()
-	// 	p.DropFirst()
+	elem = p.First()
+	p.DropFirst()
 	return
 }
 
 // ShiftN modifies this Slice to remove the first n elements and returns the removed elements as a new Slice.
 func (p *RefSlice) ShiftN(n int) (new Slice) {
-	// 	if n == 0 {
-	// 		return NewRefSliceV()
-	// 	}
-	// 	new = p.Copy(0, abs(n)-1)
-	// 	p.DropFirstN(n)
+	if p.Nil() {
+		return NewRefSliceV()
+	}
+	if n == 0 {
+		return newEmptySlice(p.O())
+	}
+	new = p.Copy(0, abs(n)-1)
+	p.DropFirstN(n)
 	return
 }
 
@@ -866,8 +877,8 @@ func (p *RefSlice) Take(indices ...int) (new Slice) {
 // TakeAt modifies this Slice removing the elemement at the given index location and returns the removed element as an Object.
 // Allows for negative notation.
 func (p *RefSlice) TakeAt(i int) (elem *Object) {
-	// 	elem = p.At(i)
-	// 	p.DropAt(i)
+	elem = p.At(i)
+	p.DropAt(i)
 	return
 }
 
