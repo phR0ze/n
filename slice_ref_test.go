@@ -2738,85 +2738,85 @@ func TestRefSlice_Shift(t *testing.T) {
 	}
 }
 
-// // ShiftN
-// //--------------------------------------------------------------------------------------------------
-// func BenchmarkRefSlice_ShiftN_Normal(t *testing.B) {
-// 	ints := Range(0, nines7)
-// 	for len(ints) > 10 {
-// 		ints = ints[10:]
-// 	}
-// }
+// ShiftN
+//--------------------------------------------------------------------------------------------------
+func BenchmarkRefSlice_ShiftN_Normal(t *testing.B) {
+	ints := Range(0, nines7)
+	for len(ints) > 10 {
+		ints = ints[10:]
+	}
+}
 
-// func BenchmarkRefSlice_ShiftN_Optimized(t *testing.B) {
-// 	slice := NewIntSlice(Range(0, nines7))
-// 	for slice.Len() > 0 {
-// 		slice.ShiftN(10)
-// 	}
-// }
+func BenchmarkRefSlice_ShiftN_Optimized(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines7))
+	for slice.Len() > 0 {
+		slice.ShiftN(10)
+	}
+}
 
-// func BenchmarkRefSlice_ShiftN_Reflect(t *testing.B) {
-// 	slice := NewRefSlice(Range(0, nines7))
-// 	for slice.Len() > 0 {
-// 		slice.ShiftN(10)
-// 	}
-// }
+func BenchmarkRefSlice_ShiftN_Reflect(t *testing.B) {
+	slice := NewRefSlice(Range(0, nines7))
+	for slice.Len() > 0 {
+		slice.ShiftN(10)
+	}
+}
 
-// func ExampleRefSlice_ShiftN() {
-// 	slice := NewRefSliceV(1, 2, 3)
-// 	fmt.Println(slice.ShiftN(2).O())
-// 	// Output: [1 2]
-// }
+func ExampleRefSlice_ShiftN() {
+	slice := NewRefSliceV(1, 2, 3)
+	fmt.Println(slice.ShiftN(2).O())
+	// Output: [1 2]
+}
 
-// func TestRefSlice_ShiftN(t *testing.T) {
+func TestRefSlice_ShiftN(t *testing.T) {
 
-// 	// nil or empty
-// 	{
-// 		var slice *IntSlice
-// 		assert.Equal(t, NewIntSliceV(), slice.ShiftN(1))
-// 	}
+	// nil or empty
+	{
+		var slice *RefSlice
+		assert.Equal(t, NewRefSliceV(), slice.ShiftN(1))
+	}
 
-// 	// negative value
-// 	{
-// 		slice := NewIntSliceV(1, 2, 3)
-// 		assert.Equal(t, NewIntSliceV(1), slice.ShiftN(-1))
-// 		assert.Equal(t, NewIntSliceV(2, 3), slice)
-// 	}
+	// negative value
+	{
+		slice := NewRefSliceV(1, 2, 3)
+		assert.Equal(t, []int{1}, slice.ShiftN(-1).O())
+		assert.Equal(t, []int{2, 3}, slice.O())
+	}
 
-// 	// take none
-// 	{
-// 		slice := NewIntSliceV(1, 2, 3)
-// 		assert.Equal(t, NewIntSliceV(), slice.ShiftN(0))
-// 		assert.Equal(t, NewIntSliceV(1, 2, 3), slice)
-// 	}
+	// take none
+	{
+		slice := NewRefSliceV(1, 2, 3)
+		assert.Equal(t, []int{}, slice.ShiftN(0).O())
+		assert.Equal(t, []int{1, 2, 3}, slice.O())
+	}
 
-// 	// take 1
-// 	{
-// 		slice := NewIntSliceV(1, 2, 3)
-// 		assert.Equal(t, NewIntSliceV(1), slice.ShiftN(1))
-// 		assert.Equal(t, NewIntSliceV(2, 3), slice)
-// 	}
+	// take 1
+	{
+		slice := NewRefSliceV(1, 2, 3)
+		assert.Equal(t, []int{1}, slice.ShiftN(1).O())
+		assert.Equal(t, []int{2, 3}, slice.O())
+	}
 
-// 	// take 2
-// 	{
-// 		slice := NewIntSliceV(1, 2, 3)
-// 		assert.Equal(t, NewIntSliceV(1, 2), slice.ShiftN(2))
-// 		assert.Equal(t, NewIntSliceV(3), slice)
-// 	}
+	// take 2
+	{
+		slice := NewRefSliceV(1, 2, 3)
+		assert.Equal(t, []int{1, 2}, slice.ShiftN(2).O())
+		assert.Equal(t, []int{3}, slice.O())
+	}
 
-// 	// take 3
-// 	{
-// 		slice := NewIntSliceV(1, 2, 3)
-// 		assert.Equal(t, NewIntSliceV(1, 2, 3), slice.ShiftN(3))
-// 		assert.Equal(t, NewIntSliceV(), slice)
-// 	}
+	// take 3
+	{
+		slice := NewRefSliceV(1, 2, 3)
+		assert.Equal(t, []int{1, 2, 3}, slice.ShiftN(3).O())
+		assert.Equal(t, []int{}, slice.O())
+	}
 
-// 	// take beyond
-// 	{
-// 		slice := NewIntSliceV(1, 2, 3)
-// 		assert.Equal(t, NewIntSliceV(1, 2, 3), slice.ShiftN(4))
-// 		assert.Equal(t, NewIntSliceV(), slice)
-// 	}
-// }
+	// take beyond
+	{
+		slice := NewRefSliceV(1, 2, 3)
+		assert.Equal(t, []int{1, 2, 3}, slice.ShiftN(4).O())
+		assert.Equal(t, []int{}, slice.O())
+	}
+}
 
 // Single
 //--------------------------------------------------------------------------------------------------
