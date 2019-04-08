@@ -782,15 +782,14 @@ func (p *RefSlice) Single() bool {
 //
 // e.g. NewRefSliceV(1,2,3).Slice(0, -1) == [1,2,3] && NewRefSliceV(1,2,3).Slice(1,2) == [2,3]
 func (p *RefSlice) Slice(indices ...int) Slice {
-	l := p.Len()
-	if p.Nil() || l == 0 {
+	if p.Nil() {
 		return NewRefSliceV()
 	}
 
 	// Handle index manipulation
-	i, j, err := absIndices(l, indices...)
+	i, j, err := absIndices(p.Len(), indices...)
 	if err != nil {
-		return NewRefSliceV()
+		return newEmptySlice(p.O())
 	}
 
 	return NewRefSlice(p.v.Slice(i, j).Interface())
