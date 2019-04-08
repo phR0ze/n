@@ -632,8 +632,10 @@ func (p *RefSlice) Less(i, j int) bool {
 	// if p.Nil() || l < 2 || i < 0 || j < 0 || i >= l || j >= l {
 	// 	return false
 	// }
-	// return reflect.DeepEqual(p.v.Index(i), p.v.Index(j))
-	// reflect.Swapper(p.v.Interface())(i, j)
+	// x, y := p.v.Index(i).Interface(), p.v.Index(j).Interface()
+	// if x < y {
+	// 	return true
+	// }
 	return false
 }
 
@@ -655,13 +657,14 @@ func (p *RefSlice) O() interface{} {
 
 // Pair simply returns the first and second Slice elements as Objects
 func (p *RefSlice) Pair() (first, second *Object) {
-	// 	first, second = &Object{}, &Object{}
-	// 	if len(*p) > 0 {
-	// 		first = p.At(0)
-	// 	}
-	// 	if len(*p) > 1 {
-	// 		second = p.At(1)
-	// 	}
+	l := p.Len()
+	first, second = &Object{}, &Object{}
+	if l > 0 {
+		first = p.At(0)
+	}
+	if l > 1 {
+		second = p.At(1)
+	}
 	return
 }
 
@@ -856,8 +859,8 @@ func (p *RefSlice) Swap(i, j int) {
 // notation is supported and uses an inclusive behavior such that Take(0, -1) includes index -1 as opposed to Go's
 // exclusive behavior. Out of bounds indices will be moved within bounds.
 func (p *RefSlice) Take(indices ...int) (new Slice) {
-	// 	new = p.Copy(indices...)
-	// 	p.Drop(indices...)
+	new = p.Copy(indices...)
+	p.Drop(indices...)
 	return
 }
 
