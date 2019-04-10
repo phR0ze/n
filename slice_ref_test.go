@@ -340,6 +340,55 @@ func TestRefSlice_AnyS(t *testing.T) {
 	assert.False(t, NewRefSliceV(Object{1}, Object{2}).AnyS([]Object{{4}, {5}}))
 }
 
+// AnyW
+//--------------------------------------------------------------------------------------------------
+func BenchmarkRefSlice_AnyW_Go(t *testing.B) {
+	ints := Range(0, nines5)
+	for i := range ints {
+		if i == nines4 {
+			break
+		}
+	}
+}
+
+func BenchmarkRefSlice_AnyW_Optimized(t *testing.B) {
+	src := Range(0, nines5)
+	NewIntSlice(src).AnyW(func(x O) bool {
+		return ExB(x.(int) == nines4)
+	})
+}
+
+func BenchmarkRefSlice_AnyW_Reflect(t *testing.B) {
+	src := Range(0, nines5)
+	NewRefSlice(src).AnyW(func(x O) bool {
+		return ExB(x.(int) == nines4)
+	})
+}
+
+func ExampleRefSlice_AnyW() {
+	slice := NewRefSliceV(1, 2, 3)
+	fmt.Println(slice.AnyW(func(x O) bool {
+		return ExB(x.(int) == 2)
+	}))
+	// Output: true
+}
+
+func TestRefSlice_AnyW(t *testing.T) {
+
+	// empty
+	var slice *RefSlice
+	assert.False(t, slice.AnyW(func(x O) bool { return ExB(x.(int) > 0) }))
+	assert.False(t, NewRefSliceV().AnyW(func(x O) bool { return ExB(x.(int) > 0) }))
+
+	// single
+	assert.True(t, NewRefSliceV(2).AnyW(func(x O) bool { return ExB(x.(int) > 0) }))
+
+	assert.True(t, NewRefSliceV(1, 2).AnyW(func(x O) bool { return ExB(x.(int) == 2) }))
+	assert.True(t, NewRefSliceV(1, 2).AnyW(func(x O) bool { return ExB(x.(int)%2 == 0) }))
+	assert.False(t, NewRefSliceV(2, 4).AnyW(func(x O) bool { return ExB(x.(int)%2 != 0) }))
+	assert.True(t, NewRefSliceV(1, 2, 3).AnyW(func(x O) bool { return ExB(x.(int) == 4 || x.(int) == 3) }))
+}
+
 // Append
 //--------------------------------------------------------------------------------------------------
 func BenchmarkRefSlice_Append_Normal(t *testing.B) {
@@ -754,6 +803,154 @@ func TestQSlice_Clear(t *testing.T) {
 	}
 }
 
+// Concat
+//--------------------------------------------------------------------------------------------------
+func BenchmarkRefSlice_Concat_Normal10(t *testing.B) {
+	dest := []int{}
+	src := Range(0, nines6)
+	j := 0
+	for i := 10; i < len(src); i += 10 {
+		dest = append(dest, (src[j:i])...)
+		j = i
+	}
+}
+
+func BenchmarkRefSlice_Concat_Normal100(t *testing.B) {
+	dest := []int{}
+	src := Range(0, nines6)
+	j := 0
+	for i := 100; i < len(src); i += 100 {
+		dest = append(dest, (src[j:i])...)
+		j = i
+	}
+}
+
+func BenchmarkRefSlice_Concat_Optimized19(t *testing.B) {
+	dest := NewIntSliceV()
+	src := Range(0, nines6)
+	j := 0
+	for i := 10; i < len(src); i += 10 {
+		dest.Concat(src[j:i])
+		j = i
+	}
+}
+
+func BenchmarkRefSlice_Concat_Optimized100(t *testing.B) {
+	dest := NewIntSliceV()
+	src := Range(0, nines6)
+	j := 0
+	for i := 100; i < len(src); i += 100 {
+		dest.Concat(src[j:i])
+		j = i
+	}
+}
+
+func BenchmarkRefSlice_Concat_Reflect10(t *testing.B) {
+	dest := NewRefSliceV()
+	src := rangeInterObject(0, nines6)
+	j := 0
+	for i := 10; i < len(src); i += 10 {
+		dest.Concat(src[j:i])
+		j = i
+	}
+}
+
+func BenchmarkRefSlice_Concat_Reflect100(t *testing.B) {
+	dest := NewRefSliceV()
+	src := rangeInterObject(0, nines6)
+	j := 0
+	for i := 100; i < len(src); i += 100 {
+		dest.Concat(src[j:i])
+		j = i
+	}
+}
+
+func ExampleRefSlice_Concat() {
+	slice := NewRefSliceV(1).Concat([]int{2, 3})
+	fmt.Println(slice.O())
+	// Output: [1 2 3]
+}
+
+func TestRefSlice_Concat(t *testing.T) {
+
+	// nil
+	{
+		var slice *RefSlice
+		assert.Equal(t, []int{1, 2}, slice.Concat([]int{1, 2}).O())
+		assert.Equal(t, (*RefSlice)(nil), slice)
+	}
+
+	// Append many ints
+	{
+		n := NewRefSliceV(1)
+		assert.Equal(t, []int{1, 2, 3}, n.Concat([]int{2, 3}).O())
+	}
+
+	// Append many strings
+	{
+		{
+			n := NewRefSliceV()
+			assert.Equal(t, 0, n.Len())
+			assert.Equal(t, []string{"1", "2", "3"}, n.Concat([]string{"1", "2", "3"}).O())
+			assert.Equal(t, 0, n.Len())
+		}
+		{
+			n := NewRefSlice([]string{"1"})
+			assert.Equal(t, 1, n.Len())
+			assert.Equal(t, []string{"1", "2", "3"}, n.Concat([]string{"2", "3"}).O())
+			assert.Equal(t, 1, n.Len())
+		}
+	}
+
+	// Append to a slice of custom type
+	{
+		n := NewRefSlice([]Object{{"3"}})
+		assert.Equal(t, []Object{{"3"}, {"1"}}, n.Concat([]Object{{"1"}}).O())
+		assert.Equal(t, []Object{{"3"}, {"2"}, {"4"}}, n.Concat([]Object{{"2"}, {"4"}}).O())
+	}
+
+	// Append to a slice of map
+	{
+		n := NewRefSliceV(map[string]string{"1": "one"})
+		expected := []map[string]string{
+			{"1": "one"},
+			{"2": "two"},
+		}
+		assert.Equal(t, expected, n.Concat([]map[string]string{{"2": "two"}}).O())
+	}
+
+	// Test all supported types
+	{
+		// bool
+		{
+			n := NewRefSliceV(true)
+			assert.Equal(t, []bool{true, false}, n.Concat([]bool{false}).O())
+			assert.Equal(t, 1, n.Len())
+		}
+
+		// int
+		{
+			n := NewRefSliceV(0)
+			assert.Equal(t, []int{0, 1}, n.Concat([]int{1}).O())
+			assert.Equal(t, 1, n.Len())
+		}
+
+		// string
+		{
+			n := NewRefSliceV("0")
+			assert.Equal(t, []string{"0", "1"}, n.Concat([]string{"1"}).O())
+			assert.Equal(t, 1, n.Len())
+		}
+
+		// Append to a slice of custom type i.e. reflection
+		{
+			n := NewRefSlice([]Object{{"3"}})
+			assert.Equal(t, []Object{{"3"}, {"1"}}, n.Concat([]Object{{"1"}}).O())
+			assert.Equal(t, 1, n.Len())
+		}
+	}
+}
+
 // ConcatM
 //--------------------------------------------------------------------------------------------------
 func BenchmarkRefSlice_ConcatM_Normal10(t *testing.B) {
@@ -1087,6 +1284,87 @@ func TestRefSlice_Copy(t *testing.T) {
 	}
 }
 
+// Count
+//--------------------------------------------------------------------------------------------------
+func BenchmarkRefSlice_Count_Go(t *testing.B) {
+	ints := Range(0, nines5)
+	for i := range ints {
+		if i == nines4 {
+			break
+		}
+	}
+}
+
+func BenchmarkRefSlice_Count_Optimized(t *testing.B) {
+	src := Range(0, nines5)
+	NewIntSlice(src).Count(nines4)
+}
+
+func BenchmarkRefSlice_Count_Reflect(t *testing.B) {
+	src := Range(0, nines5)
+	NewRefSlice(src).Count(nines4)
+}
+
+func ExampleRefSlice_Count() {
+	slice := NewRefSliceV(1, 2, 2)
+	fmt.Println(slice.Count(2))
+	// Output: 2
+}
+
+func TestRefSlice_Count(t *testing.T) {
+
+	// empty
+	var slice *RefSlice
+	assert.Equal(t, 0, slice.Count(0))
+	assert.Equal(t, 0, NewRefSliceV().Count(0))
+
+	assert.Equal(t, 1, NewRefSliceV(2, 3).Count(2))
+	assert.Equal(t, 2, NewRefSliceV(1, 2, 2).Count(2))
+	assert.Equal(t, 4, NewRefSliceV(4, 4, 3, 4, 4).Count(4))
+	assert.Equal(t, 3, NewRefSliceV(3, 2, 3, 3, 5).Count(3))
+	assert.Equal(t, 1, NewRefSliceV(1, 2, 3).Count(3))
+}
+
+// CountW
+//--------------------------------------------------------------------------------------------------
+func BenchmarkRefSlice_CountW_Go(t *testing.B) {
+	ints := Range(0, nines5)
+	for i := range ints {
+		if i == nines4 {
+			break
+		}
+	}
+}
+
+func BenchmarkRefSlice_CountW_Slice(t *testing.B) {
+	src := Range(0, nines5)
+	NewRefSlice(src).CountW(func(x O) bool {
+		return ExB(x.(int) == nines4)
+	})
+}
+
+func ExampleRefSlice_CountW() {
+	slice := NewRefSliceV(1, 2, 2)
+	fmt.Println(slice.CountW(func(x O) bool {
+		return ExB(x.(int) == 2)
+	}))
+	// Output: 2
+}
+
+func TestRefSlice_CountW(t *testing.T) {
+
+	// empty
+	var slice *RefSlice
+	assert.Equal(t, 0, slice.CountW(func(x O) bool { return ExB(x.(int) > 0) }))
+	assert.Equal(t, 0, NewRefSliceV().CountW(func(x O) bool { return ExB(x.(int) > 0) }))
+
+	assert.Equal(t, 1, NewRefSliceV(2, 3).CountW(func(x O) bool { return ExB(x.(int) > 2) }))
+	assert.Equal(t, 1, NewRefSliceV(1, 2).CountW(func(x O) bool { return ExB(x.(int) == 2) }))
+	assert.Equal(t, 2, NewRefSliceV(1, 2, 3, 4, 5).CountW(func(x O) bool { return ExB(x.(int)%2 == 0) }))
+	assert.Equal(t, 3, NewRefSliceV(1, 2, 3, 4, 5).CountW(func(x O) bool { return ExB(x.(int)%2 != 0) }))
+	assert.Equal(t, 1, NewRefSliceV(1, 2, 3).CountW(func(x O) bool { return ExB(x.(int) == 4 || x.(int) == 3) }))
+}
+
 // Drop
 //--------------------------------------------------------------------------------------------------
 func BenchmarkRefSlice_Drop_Go(t *testing.B) {
@@ -1210,6 +1488,78 @@ func TestRefSlice_Drop(t *testing.T) {
 		assert.Equal(t, []Object{{1}, {2}, {3}}, NewRefSlice([]Object{{1}, {2}, {3}, {4}}).Drop(3, 4).O())
 		assert.Equal(t, []Object{{2}, {3}, {4}}, NewRefSlice([]Object{{1}, {2}, {3}, {4}}).Drop(-5, 0).O())
 	}
+}
+
+// DropAt
+//--------------------------------------------------------------------------------------------------
+func BenchmarkRefSlice_DropAt_Go(t *testing.B) {
+	ints := Range(0, nines5)
+	index := Range(0, nines5)
+	for i := range index {
+		if i+1 < len(ints) {
+			ints = append(ints[:i], ints[i+1:]...)
+		} else if i >= 0 && i < len(ints) {
+			ints = ints[:i]
+		}
+	}
+}
+
+func BenchmarkRefSlice_DropAt_Optimized(t *testing.B) {
+	src := Range(0, nines5)
+	index := Range(0, nines5)
+	slice := NewIntSlice(src)
+	for i := range index {
+		slice.DropAt(i)
+	}
+}
+
+func BenchmarkRefSlice_DropAt_Reflect(t *testing.B) {
+	src := Range(0, nines5)
+	index := Range(0, nines5)
+	slice := NewRefSlice(src)
+	for i := range index {
+		slice.DropAt(i)
+	}
+}
+
+func ExampleRefSlice_DropAt() {
+	slice := NewRefSliceV(1, 2, 3)
+	fmt.Println(slice.DropAt(1))
+	// Output: [1 3]
+}
+
+func TestRefSlice_DropAt(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *RefSlice
+		assert.Equal(t, (*RefSlice)(nil), slice.DropAt(0))
+	}
+
+	// drop all and more
+	{
+		slice := NewRefSliceV(0, 1, 2)
+		assert.Equal(t, []int{0, 1}, slice.DropAt(-1).O())
+		assert.Equal(t, []int{0}, slice.DropAt(-1).O())
+		assert.Equal(t, []int{}, slice.DropAt(-1).O())
+		assert.Equal(t, []int{}, slice.DropAt(-1).O())
+	}
+
+	// drop invalid
+	assert.Equal(t, []int{0, 1, 2}, NewRefSliceV(0, 1, 2).DropAt(3).O())
+	assert.Equal(t, []int{0, 1, 2}, NewRefSliceV(0, 1, 2).DropAt(-4).O())
+
+	// drop last
+	assert.Equal(t, []int{0, 1}, NewRefSliceV(0, 1, 2).DropAt(2).O())
+	assert.Equal(t, []int{0, 1}, NewRefSliceV(0, 1, 2).DropAt(-1).O())
+
+	// drop middle
+	assert.Equal(t, []int{0, 2}, NewRefSliceV(0, 1, 2).DropAt(1).O())
+	assert.Equal(t, []int{0, 2}, NewRefSliceV(0, 1, 2).DropAt(-2).O())
+
+	// drop first
+	assert.Equal(t, []int{1, 2}, NewRefSliceV(0, 1, 2).DropAt(0).O())
+	assert.Equal(t, []int{1, 2}, NewRefSliceV(0, 1, 2).DropAt(-3).O())
 }
 
 // DropFirst
@@ -1859,6 +2209,351 @@ func TestRefSlice_EachE(t *testing.T) {
 			}
 			return nil
 		})
+	}
+}
+
+// EachI
+//--------------------------------------------------------------------------------------------------
+func BenchmarkRefSlice_EachI_Go(t *testing.B) {
+	action := func(x interface{}) {
+		assert.IsType(t, 0, x)
+	}
+	for i := range Range(0, nines6) {
+		action(i)
+	}
+}
+
+func BenchmarkRefSlice_EachI_Optimized(t *testing.B) {
+	NewIntSlice(Range(0, nines6)).EachI(func(i int, x O) {
+		assert.IsType(t, 0, x)
+	})
+}
+
+func BenchmarkRefSlice_EachI_Reflect(t *testing.B) {
+	NewRefSlice(Range(0, nines6)).EachI(func(i int, x O) {
+		assert.IsType(t, 0, x)
+	})
+}
+
+func ExampleRefSlice_EachI() {
+	NewRefSliceV(1, 2, 3).EachI(func(i int, x O) {
+		fmt.Printf("%v:%v", i, x)
+	})
+	// Output: 0:11:22:3
+}
+
+func TestRefSlice_EachI(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *RefSlice
+		slice.EachI(func(i int, x O) {})
+	}
+
+	// Loop through
+	{
+		results := []int{}
+		NewRefSliceV(1, 2, 3).EachI(func(i int, x O) {
+			results = append(results, x.(int))
+		})
+		assert.Equal(t, []int{1, 2, 3}, results)
+	}
+}
+
+// EachIE
+//--------------------------------------------------------------------------------------------------
+func BenchmarkRefSlice_EachIE_Go(t *testing.B) {
+	action := func(x interface{}) {
+		assert.IsType(t, 0, x)
+	}
+	for i := range Range(0, nines6) {
+		action(i)
+	}
+}
+
+func BenchmarkRefSlice_EachIE_Optimized(t *testing.B) {
+	NewIntSlice(Range(0, nines6)).EachIE(func(i int, x O) error {
+		assert.IsType(t, 0, x)
+		return nil
+	})
+}
+
+func BenchmarkRefSlice_EachIE_Reflect(t *testing.B) {
+	NewRefSlice(Range(0, nines6)).EachIE(func(i int, x O) error {
+		assert.IsType(t, 0, x)
+		return nil
+	})
+}
+
+func ExampleRefSlice_EachIE() {
+	NewRefSliceV(1, 2, 3).EachIE(func(i int, x O) error {
+		fmt.Printf("%v:%v", i, x)
+		return nil
+	})
+	// Output: 0:11:22:3
+}
+
+func TestRefSlice_EachIE(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *RefSlice
+		slice.EachIE(func(i int, x O) error {
+			return nil
+		})
+	}
+
+	// Loop through
+	{
+		results := []int{}
+		NewRefSliceV(1, 2, 3).EachIE(func(i int, x O) error {
+			results = append(results, x.(int))
+			return nil
+		})
+		assert.Equal(t, []int{1, 2, 3}, results)
+	}
+
+	// Break early with error
+	{
+		results := []int{}
+		NewRefSliceV(1, 2, 3).EachIE(func(i int, x O) error {
+			if i == 2 {
+				return ErrBreak
+			}
+			results = append(results, x.(int))
+			return nil
+		})
+		assert.Equal(t, []int{1, 2}, results)
+	}
+}
+
+// EachR
+//--------------------------------------------------------------------------------------------------
+func BenchmarkRefSlice_EachR_Go(t *testing.B) {
+	action := func(x interface{}) {
+		assert.IsType(t, 0, x)
+	}
+	for i := range Range(0, nines6) {
+		action(i)
+	}
+}
+
+func BenchmarkRefSlice_EachR_Optimized(t *testing.B) {
+	NewIntSlice(Range(0, nines6)).EachR(func(x O) {
+		assert.IsType(t, 0, x)
+	})
+}
+
+func BenchmarkRefSlice_EachR_Reflect(t *testing.B) {
+	NewRefSlice(Range(0, nines6)).EachR(func(x O) {
+		assert.IsType(t, 0, x)
+	})
+}
+
+func ExampleRefSlice_EachR() {
+	NewRefSliceV(1, 2, 3).EachR(func(x O) {
+		fmt.Printf("%v", x)
+	})
+	// Output: 321
+}
+
+func TestRefSlice_EachR(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *RefSlice
+		slice.EachR(func(x O) {})
+	}
+
+	// Loop through
+	{
+		results := []int{}
+		NewRefSliceV(1, 2, 3).EachR(func(x O) {
+			results = append(results, x.(int))
+		})
+		assert.Equal(t, []int{3, 2, 1}, results)
+	}
+}
+
+// EachRE
+//--------------------------------------------------------------------------------------------------
+func BenchmarkRefSlice_EachRE_Go(t *testing.B) {
+	action := func(x interface{}) {
+		assert.IsType(t, 0, x)
+	}
+	for i := range Range(0, nines6) {
+		action(i)
+	}
+}
+
+func BenchmarkRefSlice_EachRE_Optimized(t *testing.B) {
+	NewIntSlice(Range(0, nines6)).EachRE(func(x O) error {
+		assert.IsType(t, 0, x)
+		return nil
+	})
+}
+
+func BenchmarkRefSlice_EachRE_Reflect(t *testing.B) {
+	NewRefSlice(Range(0, nines6)).EachRE(func(x O) error {
+		assert.IsType(t, 0, x)
+		return nil
+	})
+}
+
+func ExampleRefSlice_EachRE() {
+	NewRefSliceV(1, 2, 3).EachRE(func(x O) error {
+		fmt.Printf("%v", x)
+		return nil
+	})
+	// Output: 321
+}
+
+func TestRefSlice_EachRE(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *RefSlice
+		slice.EachRE(func(x O) error {
+			return nil
+		})
+	}
+
+	// Loop through
+	{
+		results := []int{}
+		NewRefSliceV(1, 2, 3).EachRE(func(x O) error {
+			results = append(results, x.(int))
+			return nil
+		})
+		assert.Equal(t, []int{3, 2, 1}, results)
+	}
+
+	// Break early with error
+	{
+		results := []int{}
+		NewRefSliceV(1, 2, 3).EachRE(func(x O) error {
+			if x.(int) == 1 {
+				return ErrBreak
+			}
+			results = append(results, x.(int))
+			return nil
+		})
+		assert.Equal(t, []int{3, 2}, results)
+	}
+}
+
+// EachRI
+//--------------------------------------------------------------------------------------------------
+func BenchmarkRefSlice_EachRI_Go(t *testing.B) {
+	action := func(x interface{}) {
+		assert.IsType(t, 0, x)
+	}
+	for i := range Range(0, nines6) {
+		action(i)
+	}
+}
+
+func BenchmarkRefSlice_EachRI_Reflect(t *testing.B) {
+	NewIntSlice(Range(0, nines6)).EachRI(func(i int, x O) {
+		assert.IsType(t, 0, x)
+	})
+}
+
+func BenchmarkRefSlice_EachRI_Optimized(t *testing.B) {
+	NewRefSlice(Range(0, nines6)).EachRI(func(i int, x O) {
+		assert.IsType(t, 0, x)
+	})
+}
+
+func ExampleRefSlice_EachRI() {
+	NewRefSliceV(1, 2, 3).EachRI(func(i int, x O) {
+		fmt.Printf("%v:%v", i, x)
+	})
+	// Output: 2:31:20:1
+}
+
+func TestRefSlice_EachRI(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *RefSlice
+		slice.EachRI(func(i int, x O) {})
+	}
+
+	// Loop through
+	{
+		results := []int{}
+		NewRefSliceV(1, 2, 3).EachRI(func(i int, x O) {
+			results = append(results, x.(int))
+		})
+		assert.Equal(t, []int{3, 2, 1}, results)
+	}
+}
+
+// EachRIE
+//--------------------------------------------------------------------------------------------------
+func BenchmarkRefSlice_EachRIE_Go(t *testing.B) {
+	action := func(x interface{}) {
+		assert.IsType(t, 0, x)
+	}
+	for i := range Range(0, nines6) {
+		action(i)
+	}
+}
+
+func BenchmarkRefSlice_EachRIE_Reflect(t *testing.B) {
+	NewRefSlice(Range(0, nines6)).EachRIE(func(i int, x O) error {
+		assert.IsType(t, 0, x)
+		return nil
+	})
+}
+
+func BenchmarkRefSlice_EachRIE_Optimized(t *testing.B) {
+	NewRefSlice(Range(0, nines6)).EachRIE(func(i int, x O) error {
+		assert.IsType(t, 0, x)
+		return nil
+	})
+}
+
+func ExampleRefSlice_EachRIE() {
+	NewRefSliceV(1, 2, 3).EachRIE(func(i int, x O) error {
+		fmt.Printf("%v:%v", i, x)
+		return nil
+	})
+	// Output: 2:31:20:1
+}
+
+func TestRefSlice_EachRIE(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *RefSlice
+		slice.EachRIE(func(i int, x O) error {
+			return nil
+		})
+	}
+
+	// Loop through
+	{
+		results := []int{}
+		NewRefSliceV(1, 2, 3).EachRIE(func(i int, x O) error {
+			results = append(results, x.(int))
+			return nil
+		})
+		assert.Equal(t, []int{3, 2, 1}, results)
+	}
+
+	// Break early with error
+	{
+		results := []int{}
+		NewRefSliceV(1, 2, 3).EachRIE(func(i int, x O) error {
+			if i == 0 {
+				return ErrBreak
+			}
+			results = append(results, x.(int))
+			return nil
+		})
+		assert.Equal(t, []int{3, 2}, results)
 	}
 }
 

@@ -302,22 +302,32 @@ func (p *RefSlice) Copy(indices ...int) (new Slice) {
 
 // Count the number of elements in this Slice equal to the given element.
 func (p *RefSlice) Count(elem interface{}) (cnt int) {
-	// 	if y, ok := elem.(int); ok {
-	// 		cnt = p.CountW(func(x O) bool { return ExB(x.(int) == y) })
-	// 	}
+	l := p.Len()
+	if p.Nil() || l == 0 {
+		return
+	}
+	x := reflect.ValueOf(elem)
+	if p.v.Type().Elem() == x.Type() {
+		for i := 0; i < l; i++ {
+			if p.v.Index(i).Interface() == x.Interface() {
+				cnt++
+			}
+		}
+	}
 	return
 }
 
 // CountW counts the number of elements in this Slice that match the lambda selector.
 func (p *RefSlice) CountW(sel func(O) bool) (cnt int) {
-	// 	if p == nil || len(*p) == 0 {
-	// 		return
-	// 	}
-	// 	for i := 0; i < len(*p); i++ {
-	// 		if sel((*p)[i]) {
-	// 			cnt++
-	// 		}
-	// 	}
+	l := p.Len()
+	if p.Nil() || l == 0 {
+		return
+	}
+	for i := 0; i < l; i++ {
+		if sel(p.v.Index(i).Interface()) {
+			cnt++
+		}
+	}
 	return
 }
 
@@ -382,17 +392,18 @@ func (p *RefSlice) DropLastN(n int) Slice {
 // DropW modifies this Slice to delete the elements that match the lambda selector and returns a reference to this Slice.
 // The slice is updated instantly when lambda expression is evaluated not after DropW completes.
 func (p *RefSlice) DropW(sel func(O) bool) Slice {
-	// 	if p == nil || len(*p) == 0 {
-	// 		return p
-	// 	}
-	// 	l := len(*p)
-	// 	for i := 0; i < l; i++ {
-	// 		if sel((*p)[i]) {
-	// 			p.DropAt(i)
-	// 			l--
-	// 			i--
-	// 		}
-	// 	}
+	l := p.Len()
+	if p.Nil() || l == 0 {
+		return p
+	}
+
+	for i := 0; i < l; i++ {
+		if sel(p.v.Index(i).Interface()) {
+			p.DropAt(i)
+			l--
+			i--
+		}
+	}
 	return p
 }
 
@@ -426,12 +437,12 @@ func (p *RefSlice) EachE(action func(O) error) (Slice, error) {
 // EachI calls the given lambda once for each element in this Slice, passing in the index and element
 // as a parameter. Returns a reference to this Slice
 func (p *RefSlice) EachI(action func(int, O)) Slice {
-	// 	if p == nil {
-	// 		return p
-	// 	}
-	// 	for i := 0; i < len(*p); i++ {
-	// 		action(i, (*p)[i])
-	// 	}
+	if p.Nil() {
+		return p
+	}
+	for i := 0; i < p.Len(); i++ {
+		action(i, p.v.Index(i).Interface())
+	}
 	return p
 }
 
@@ -439,26 +450,26 @@ func (p *RefSlice) EachI(action func(int, O)) Slice {
 // as a parameter. Returns a reference to this Slice and any error from the lambda.
 func (p *RefSlice) EachIE(action func(int, O) error) (Slice, error) {
 	var err error
-	// 	if p == nil {
-	// 		return p, err
-	// 	}
-	// 	for i := 0; i < len(*p); i++ {
-	// 		if err = action(i, (*p)[i]); err != nil {
-	// 			return p, err
-	// 		}
-	// 	}
+	if p.Nil() {
+		return p, err
+	}
+	for i := 0; i < p.Len(); i++ {
+		if err = action(i, p.v.Index(i).Interface()); err != nil {
+			return p, err
+		}
+	}
 	return p, err
 }
 
 // EachR calls the given lambda once for each element in this Slice in reverse, passing in that element
 // as a parameter. Returns a reference to this Slice
 func (p *RefSlice) EachR(action func(O)) Slice {
-	// 	if p == nil {
-	// 		return p
-	// 	}
-	// 	for i := len(*p) - 1; i >= 0; i-- {
-	// 		action((*p)[i])
-	// 	}
+	if p.Nil() {
+		return p
+	}
+	for i := p.Len() - 1; i >= 0; i-- {
+		action(p.v.Index(i).Interface())
+	}
 	return p
 }
 
@@ -466,26 +477,26 @@ func (p *RefSlice) EachR(action func(O)) Slice {
 // as a parameter. Returns a reference to this Slice and any error from the lambda.
 func (p *RefSlice) EachRE(action func(O) error) (Slice, error) {
 	var err error
-	// 	if p == nil {
-	// 		return p, err
-	// 	}
-	// 	for i := len(*p) - 1; i >= 0; i-- {
-	// 		if err = action((*p)[i]); err != nil {
-	// 			return p, err
-	// 		}
-	// 	}
+	if p.Nil() {
+		return p, err
+	}
+	for i := p.Len() - 1; i >= 0; i-- {
+		if err = action(p.v.Index(i).Interface()); err != nil {
+			return p, err
+		}
+	}
 	return p, err
 }
 
 // EachRI calls the given lambda once for each element in this Slice in reverse, passing in that element
 // as a parameter. Returns a reference to this Slice
 func (p *RefSlice) EachRI(action func(int, O)) Slice {
-	// 	if p == nil {
-	// 		return p
-	// 	}
-	// 	for i := len(*p) - 1; i >= 0; i-- {
-	// 		action(i, (*p)[i])
-	// 	}
+	if p.Nil() {
+		return p
+	}
+	for i := p.Len() - 1; i >= 0; i-- {
+		action(i, p.v.Index(i).Interface())
+	}
 	return p
 }
 
@@ -493,14 +504,14 @@ func (p *RefSlice) EachRI(action func(int, O)) Slice {
 // as a parameter. Returns a reference to this Slice and any error from the lambda.
 func (p *RefSlice) EachRIE(action func(int, O) error) (Slice, error) {
 	var err error
-	// 	if p == nil {
-	// 		return p, err
-	// 	}
-	// 	for i := len(*p) - 1; i >= 0; i-- {
-	// 		if err = action(i, (*p)[i]); err != nil {
-	// 			return p, err
-	// 		}
-	// 	}
+	if p.Nil() {
+		return p, err
+	}
+	for i := p.Len() - 1; i >= 0; i-- {
+		if err = action(i, p.v.Index(i).Interface()); err != nil {
+			return p, err
+		}
+	}
 	return p, err
 }
 
