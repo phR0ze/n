@@ -2,6 +2,7 @@ package n
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -2708,6 +2709,47 @@ func TestRefSlice_FirstN(t *testing.T) {
 	}
 }
 
+// Index
+//--------------------------------------------------------------------------------------------------
+func BenchmarkRefSlice_Index_Go(t *testing.B) {
+	ints := Range(0, nines5)
+	for i := range ints {
+		if ints[i] == nines4 {
+			break
+		}
+	}
+}
+
+func BenchmarkRefSlice_Index_Optimized(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines5))
+	slice.Index(nines4)
+}
+
+func BenchmarkRefSlice_Index_Reflect(t *testing.B) {
+	slice := NewRefSlice(Range(0, nines5))
+	slice.Index(nines4)
+}
+
+func ExampleRefSlice_Index() {
+	slice := NewRefSliceV(1, 2, 3)
+	fmt.Println(slice.Index(2))
+	// Output: 1
+}
+
+func TestRefSlice_Index(t *testing.T) {
+
+	// empty
+	var slice *RefSlice
+	assert.Equal(t, -1, slice.Index(2))
+	assert.Equal(t, -1, NewRefSliceV().Index(1))
+
+	assert.Equal(t, 0, NewRefSliceV(1, 2, 3).Index(1))
+	assert.Equal(t, 1, NewRefSliceV(1, 2, 3).Index(2))
+	assert.Equal(t, 2, NewRefSliceV(1, 2, 3).Index(3))
+	assert.Equal(t, -1, NewRefSliceV(1, 2, 3).Index(4))
+	assert.Equal(t, -1, NewRefSliceV(1, 2, 3).Index(5))
+}
+
 // Insert
 //--------------------------------------------------------------------------------------------------
 func BenchmarkRefSlice_Insert_Normal(t *testing.B) {
@@ -2845,6 +2887,49 @@ func TestRefSlice_Insert_wrongType(t *testing.T) {
 		assert.Equal(t, "can't insert type 'string' into '[]int'", err)
 	}()
 	slice.Insert(0, "2")
+}
+
+// Join
+//--------------------------------------------------------------------------------------------------
+func BenchmarkRefSlice_Join_Go(t *testing.B) {
+	ints := Range(0, nines4)
+	strs := []string{}
+	for i := 0; i < len(ints); i++ {
+		strs = append(strs, fmt.Sprintf("%v", ints[i]))
+	}
+	strings.Join(strs, ",")
+}
+
+func BenchmarkRefSlice_Join_Optimized(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines4))
+	slice.Join()
+}
+
+func BenchmarkRefSlice_Join_Reflect(t *testing.B) {
+	slice := NewRefSlice(Range(0, nines4))
+	slice.Join()
+}
+
+func ExampleRefSlice_Join() {
+	slice := NewRefSliceV(1, 2, 3)
+	fmt.Println(slice.Join())
+	// Output: 1,2,3
+}
+
+func TestRefSlice_Join(t *testing.T) {
+	// nil
+	{
+		var slice *RefSlice
+		assert.Equal(t, &Object{""}, slice.Join())
+	}
+
+	// empty
+	{
+		assert.Equal(t, &Object{""}, NewRefSliceV().Join())
+	}
+
+	assert.Equal(t, "1,2,3", NewRefSliceV(1, 2, 3).Join().O())
+	assert.Equal(t, "1.2.3", NewRefSliceV(1, 2, 3).Join(".").O())
 }
 
 // Last
@@ -3129,6 +3214,130 @@ func TestRefSlice_Pair(t *testing.T) {
 	}
 }
 
+// Pop
+//--------------------------------------------------------------------------------------------------
+func BenchmarkRefSlice_Pop_Go(t *testing.B) {
+	ints := Range(0, nines7)
+	for len(ints) > 1 {
+		ints = ints[1:]
+	}
+}
+
+func BenchmarkRefSlice_Pop_Optimized(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines7))
+	for slice.Len() > 0 {
+		slice.Pop()
+	}
+}
+
+func BenchmarkRefSlice_Pop_Reflect(t *testing.B) {
+	slice := NewRefSlice(Range(0, nines7))
+	for slice.Len() > 0 {
+		slice.Pop()
+	}
+}
+
+func ExampleRefSlice_Pop() {
+	slice := NewRefSliceV(1, 2, 3)
+	fmt.Println(slice.Pop())
+	// Output: 3
+}
+
+func TestRefSlice_Pop(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *RefSlice
+		assert.Equal(t, &Object{nil}, slice.Pop())
+	}
+
+	// take all one at a time
+	{
+		slice := NewRefSliceV(1, 2, 3)
+		assert.Equal(t, &Object{3}, slice.Pop())
+		assert.Equal(t, []int{1, 2}, slice.O())
+		assert.Equal(t, &Object{2}, slice.Pop())
+		assert.Equal(t, []int{1}, slice.O())
+		assert.Equal(t, &Object{1}, slice.Pop())
+		assert.Equal(t, []int{}, slice.O())
+		assert.Equal(t, &Object{nil}, slice.Pop())
+		assert.Equal(t, []int{}, slice.O())
+	}
+}
+
+// PopN
+//--------------------------------------------------------------------------------------------------
+func BenchmarkRefSlice_PopN_Go(t *testing.B) {
+	ints := Range(0, nines7)
+	for len(ints) > 10 {
+		ints = ints[10:]
+	}
+}
+
+func BenchmarkRefSlice_PopN_Optimized(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines7))
+	for slice.Len() > 0 {
+		slice.PopN(10)
+	}
+}
+
+func BenchmarkRefSlice_PopN_Reflect(t *testing.B) {
+	slice := NewRefSlice(Range(0, nines7))
+	for slice.Len() > 0 {
+		slice.PopN(10)
+	}
+}
+
+func ExampleRefSlice_PopN() {
+	slice := NewRefSliceV(1, 2, 3)
+	fmt.Println(slice.PopN(2))
+	// Output: [2 3]
+}
+
+func TestRefSlice_PopN(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *RefSlice
+		assert.Equal(t, NewRefSliceV(), slice.PopN(1))
+	}
+
+	// take none
+	{
+		slice := NewRefSliceV(1, 2, 3)
+		assert.Equal(t, []int{}, slice.PopN(0).O())
+		assert.Equal(t, []int{1, 2, 3}, slice.O())
+	}
+
+	// take 1
+	{
+		slice := NewRefSliceV(1, 2, 3)
+		assert.Equal(t, []int{3}, slice.PopN(1).O())
+		assert.Equal(t, []int{1, 2}, slice.O())
+	}
+
+	// take 2
+	{
+		slice := NewRefSliceV(1, 2, 3)
+		assert.Equal(t, []int{2, 3}, slice.PopN(2).O())
+		assert.Equal(t, []int{1}, slice.O())
+	}
+
+	// take 3
+	{
+		slice := NewRefSliceV(1, 2, 3)
+		assert.Equal(t, []int{1, 2, 3}, slice.PopN(3).O())
+		assert.Equal(t, []int{}, slice.O())
+	}
+
+	// take beyond
+	{
+		slice := NewRefSliceV(1, 2, 3)
+		assert.Equal(t, []int{1, 2, 3}, slice.PopN(4).O())
+		assert.Equal(t, []int{}, slice.O())
+	}
+}
+
 // Prepend
 //--------------------------------------------------------------------------------------------------
 func BenchmarkRefSlice_Prepend_Normal(t *testing.B) {
@@ -3196,6 +3405,175 @@ func TestRefSlice_Prepend(t *testing.T) {
 			assert.False(t, slice.Prepend(Object{0}).Nil())
 			assert.Equal(t, []Object{{0}}, slice.Prepend(Object{0}).O())
 		}
+	}
+}
+
+// Reverse
+//--------------------------------------------------------------------------------------------------
+func BenchmarkRefSlice_Reverse_Go(t *testing.B) {
+	ints := Range(0, nines6)
+	for i, j := 0, len(ints)-1; i < j; i, j = i+1, j-1 {
+		ints[i], ints[j] = ints[j], ints[i]
+	}
+}
+
+func BenchmarkRefSlice_Reverse_Optimized(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines6))
+	slice.Reverse()
+}
+
+func BenchmarkRefSlice_Reverse_Reflect(t *testing.B) {
+	slice := NewRefSlice(Range(0, nines6))
+	slice.Reverse()
+}
+
+func ExampleRefSlice_Reverse() {
+	slice := NewRefSliceV(1, 2, 3)
+	fmt.Println(slice.Reverse())
+	// Output: [3 2 1]
+}
+
+func TestRefSlice_Reverse(t *testing.T) {
+
+	// nil
+	{
+		var slice *RefSlice
+		assert.Equal(t, NewRefSliceV(), slice.Reverse())
+	}
+
+	// empty
+	{
+		assert.Equal(t, nil, NewRefSliceV().Reverse().O())
+	}
+
+	// pos
+	{
+		slice := NewRefSliceV(3, 2, 1)
+		reversed := slice.Reverse()
+		assert.Equal(t, []int{3, 2, 1, 4}, slice.Append(4).O())
+		assert.Equal(t, []int{1, 2, 3}, reversed.O())
+	}
+
+	// neg
+	{
+		slice := NewRefSliceV(2, 3, -2, -3)
+		reversed := slice.Reverse()
+		assert.Equal(t, []int{2, 3, -2, -3, 4}, slice.Append(4).O())
+		assert.Equal(t, []int{-3, -2, 3, 2}, reversed.O())
+	}
+}
+
+// ReverseM
+//--------------------------------------------------------------------------------------------------
+func BenchmarkRefSlice_ReverseM_Go(t *testing.B) {
+	ints := Range(0, nines6)
+	for i, j := 0, len(ints)-1; i < j; i, j = i+1, j-1 {
+		ints[i], ints[j] = ints[j], ints[i]
+	}
+}
+
+func BenchmarkRefSlice_ReverseM_Slice(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines6))
+	slice.ReverseM()
+}
+
+func BenchmarkRefSlice_ReverseM_Reflect(t *testing.B) {
+	slice := NewRefSlice(Range(0, nines6))
+	slice.ReverseM()
+}
+
+func ExampleRefSlice_ReverseM() {
+	slice := NewRefSliceV(1, 2, 3)
+	fmt.Println(slice.ReverseM())
+	// Output: [3 2 1]
+}
+
+func TestRefSlice_ReverseM(t *testing.T) {
+
+	// nil
+	{
+		var slice *RefSlice
+		assert.Equal(t, nil, slice.ReverseM().O())
+	}
+
+	// empty
+	{
+		assert.Equal(t, nil, NewRefSliceV().ReverseM().O())
+	}
+
+	// pos
+	{
+		slice := NewRefSliceV(3, 2, 1)
+		reversed := slice.ReverseM()
+		assert.Equal(t, []int{1, 2, 3, 4}, slice.Append(4).O())
+		assert.Equal(t, []int{1, 2, 3, 4}, reversed.O())
+	}
+
+	// neg
+	{
+		slice := NewRefSliceV(2, 3, -2, -3)
+		reversed := slice.ReverseM()
+		assert.Equal(t, []int{-3, -2, 3, 2, 4}, slice.Append(4).O())
+		assert.Equal(t, []int{-3, -2, 3, 2, 4}, reversed.O())
+	}
+}
+
+// Select
+//--------------------------------------------------------------------------------------------------
+func BenchmarkRefSlice_Select_Go(t *testing.B) {
+	even := []int{}
+	ints := Range(0, nines6)
+	for i := 0; i < len(ints); i++ {
+		if ints[i]%2 == 0 {
+			even = append(even, ints[i])
+		}
+	}
+}
+
+func BenchmarkRefSlice_Select_Optimized(t *testing.B) {
+	slice := NewIntSlice(Range(0, nines6))
+	slice.Select(func(x O) bool {
+		return ExB(x.(int)%2 == 0)
+	})
+}
+
+func BenchmarkRefSlice_Select_Reflect(t *testing.B) {
+	slice := NewRefSlice(Range(0, nines6))
+	slice.Select(func(x O) bool {
+		return ExB(x.(int)%2 == 0)
+	})
+}
+
+func ExampleRefSlice_Select() {
+	slice := NewRefSliceV(1, 2, 3)
+	fmt.Println(slice.Select(func(x O) bool {
+		return ExB(x.(int) == 2 || x.(int) == 3)
+	}))
+	// Output: [2 3]
+}
+
+func TestRefSlice_Select(t *testing.T) {
+
+	// Select all odd values
+	{
+		slice := NewRefSliceV(1, 2, 3, 4, 5, 6, 7, 8, 9)
+		new := slice.Select(func(x O) bool {
+			return ExB(x.(int)%2 != 0)
+		})
+		slice.DropFirst()
+		assert.Equal(t, []int{2, 3, 4, 5, 6, 7, 8, 9}, slice.O())
+		assert.Equal(t, []int{1, 3, 5, 7, 9}, new.O())
+	}
+
+	// Select all even values
+	{
+		slice := NewRefSliceV(1, 2, 3, 4, 5, 6, 7, 8, 9)
+		new := slice.Select(func(x O) bool {
+			return ExB(x.(int)%2 == 0)
+		})
+		slice.DropAt(1)
+		assert.Equal(t, []int{1, 3, 4, 5, 6, 7, 8, 9}, slice.O())
+		assert.Equal(t, []int{2, 4, 6, 8}, new.O())
 	}
 }
 

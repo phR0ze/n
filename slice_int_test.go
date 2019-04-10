@@ -2305,12 +2305,12 @@ func TestIntSlice_ReverseM(t *testing.T) {
 	// nil
 	{
 		var slice *IntSlice
-		assert.Equal(t, NewIntSliceV(), slice.Reverse())
+		assert.Equal(t, (*IntSlice)(nil), slice.ReverseM())
 	}
 
 	// empty
 	{
-		assert.Equal(t, NewIntSliceV(), NewIntSliceV().Reverse())
+		assert.Equal(t, NewIntSliceV(), NewIntSliceV().ReverseM())
 	}
 
 	// pos
@@ -2347,7 +2347,6 @@ func BenchmarkIntSlice_Select_Slice(t *testing.B) {
 	slice.Select(func(x O) bool {
 		return ExB(x.(int)%2 == 0)
 	})
-
 }
 
 func ExampleIntSlice_Select() {

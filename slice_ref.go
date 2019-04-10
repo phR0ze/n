@@ -544,15 +544,16 @@ func (p *RefSlice) FirstN(n int) Slice {
 // Index returns the index of the first element in this Slice where element == elem
 // Returns a -1 if the element was not not found.
 func (p *RefSlice) Index(elem interface{}) (loc int) {
-	// 	loc = -1
-	// 	if p == nil || len(*p) == 0 {
-	// 		return
-	// 	}
-	// 	for i := 0; i < len(*p); i++ {
-	// 		if elem == (*p)[i] {
-	// 			return i
-	// 		}
-	// 	}
+	loc = -1
+	l := p.Len()
+	if p.Nil() || l == 0 {
+		return
+	}
+	for i := 0; i < l; i++ {
+		if elem == p.v.Index(i).Interface() {
+			return i
+		}
+	}
 	return
 }
 
@@ -596,23 +597,24 @@ func (p *RefSlice) Insert(i int, elem interface{}) Slice {
 
 // Join converts each element into a string then joins them together using the given separator or comma by default.
 func (p *RefSlice) Join(separator ...string) (str *Object) {
-	// 	if p == nil || len(*p) == 0 {
-	// 		str = &Object{""}
-	// 		return
-	// 	}
-	// 	sep := ","
-	// 	if len(separator) > 0 {
-	// 		sep = separator[0]
-	// 	}
+	l := p.Len()
+	if p.Nil() || l == 0 {
+		str = &Object{""}
+		return
+	}
+	sep := ","
+	if len(separator) > 0 {
+		sep = separator[0]
+	}
 
-	// 	var builder strings.Builder
-	// 	for i := 0; i < len(*p); i++ {
-	// 		builder.WriteString((&Object{(*p)[i]}).ToString())
-	// 		if i+1 < len(*p) {
-	// 			builder.WriteString(sep)
-	// 		}
-	// 	}
-	// 	str = &Object{builder.String()}
+	var builder strings.Builder
+	for i := 0; i < l; i++ {
+		builder.WriteString((&Object{p.v.Index(i).Interface()}).ToString())
+		if i+1 < l {
+			builder.WriteString(sep)
+		}
+	}
+	str = &Object{builder.String()}
 	return
 }
 
@@ -686,8 +688,8 @@ func (p *RefSlice) Pair() (first, second *Object) {
 
 // Pop modifies this Slice to remove the last element and returns the removed element as an Object.
 func (p *RefSlice) Pop() (elem *Object) {
-	// 	elem = p.Last()
-	// 	p.DropLast()
+	elem = p.Last()
+	p.DropLast()
 	return
 }
 
@@ -711,34 +713,37 @@ func (p *RefSlice) Prepend(elem interface{}) Slice {
 
 // Reverse returns a new Slice with the order of the elements reversed.
 func (p *RefSlice) Reverse() (new Slice) {
-	// 	if p == nil || len(*p) < 2 {
-	// 		return p.Copy()
-	// 	}
+	if p.Nil() || p.Len() < 2 {
+		return p.Copy()
+	}
 	return p.Copy().ReverseM()
 }
 
 // ReverseM modifies this Slice reversing the order of the elements and returns a reference to this Slice.
 func (p *RefSlice) ReverseM() Slice {
-	// 	if p == nil || len(*p) == 0 {
-	// 		return p
-	// 	}
-	// 	for i, j := 0, len(*p)-1; i < j; i, j = i+1, j-1 {
-	// 		p.Swap(i, j)
-	// 	}
+	l := p.Len()
+	if p.Nil() || l == 0 {
+		return p
+	}
+	for i, j := 0, l-1; i < j; i, j = i+1, j-1 {
+		p.Swap(i, j)
+	}
 	return p
 }
 
 // Select creates a new slice with the elements that match the lambda selector.
 func (p *RefSlice) Select(sel func(O) bool) (new Slice) {
+	l := p.Len()
 	slice := NewRefSliceV()
-	// 	if p == nil || len(*p) == 0 {
-	// 		return slice
-	// 	}
-	// 	for i := 0; i < len(*p); i++ {
-	// 		if sel((*p)[i]) {
-	// 			*slice = append(*slice, (*p)[i])
-	// 		}
-	// 	}
+	if p.Nil() || l == 0 {
+		return slice
+	}
+	for i := 0; i < l; i++ {
+		obj := p.v.Index(i).Interface()
+		if sel(obj) {
+			slice.Append(obj)
+		}
+	}
 	return slice
 }
 
