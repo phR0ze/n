@@ -241,7 +241,11 @@ func TestIntSlice_AnyS(t *testing.T) {
 		assert.True(t, NewIntSliceV(1, 2, 3).AnyS(NewIntSliceV(4, 3)))
 		assert.False(t, NewIntSliceV(1, 2, 3).AnyS(NewIntSliceV(4, 5)))
 	}
+
 	// invalid types
+	assert.False(t, NewIntSliceV(1, 2).AnyS(nil))
+	assert.False(t, NewIntSliceV(1, 2).AnyS((*[]int)(nil)))
+	assert.False(t, NewIntSliceV(1, 2).AnyS((*IntSlice)(nil)))
 	assert.False(t, NewIntSliceV(1, 2).AnyS([]string{"2"}))
 }
 
@@ -572,6 +576,12 @@ func TestIntSlice_Concat(t *testing.T) {
 		assert.Equal(t, NewIntSliceV(1, 2), slice.Append(2))
 		assert.Equal(t, NewIntSliceV(1, 2, 3), concated)
 	}
+
+	// nils
+	{
+		assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1, 2).Concat((*[]int)(nil)))
+		assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1, 2).Concat((*IntSlice)(nil)))
+	}
 }
 
 // ConcatM
@@ -649,6 +659,12 @@ func TestIntSlice_ConcatM(t *testing.T) {
 		concated := slice.ConcatM(Slice(NewIntSliceV(2, 3)))
 		assert.Equal(t, NewIntSliceV(1, 2, 3, 4), slice.Append(4))
 		assert.Equal(t, NewIntSliceV(1, 2, 3, 4), concated)
+	}
+
+	// nils
+	{
+		assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1, 2).ConcatM((*[]int)(nil)))
+		assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1, 2).ConcatM((*IntSlice)(nil)))
 	}
 }
 
@@ -3409,6 +3425,12 @@ func TestIntSlice_Union(t *testing.T) {
 		assert.Equal(t, NewIntSliceV(1, 2, 3, 4, 5), union)
 		assert.Equal(t, NewIntSliceV(1, 2, 3), slice)
 	}
+
+	// nils
+	{
+		assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1, 2).Union((*[]int)(nil)))
+		assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1, 2).Union((*IntSlice)(nil)))
+	}
 }
 
 // UnionM
@@ -3472,6 +3494,12 @@ func TestIntSlice_UnionM(t *testing.T) {
 		union := slice.UnionM([]int{4, 5})
 		assert.Equal(t, NewIntSliceV(1, 2, 3, 4, 5), union)
 		assert.Equal(t, NewIntSliceV(1, 2, 3, 4, 5), slice)
+	}
+
+	// nils
+	{
+		assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1, 2).UnionM((*[]int)(nil)))
+		assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1, 2).UnionM((*IntSlice)(nil)))
 	}
 }
 

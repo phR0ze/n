@@ -161,7 +161,7 @@ func (p *RefSlice) Any(elems ...interface{}) bool {
 
 // AnyS tests if this Slice contains any of the given Slice's elements.
 // Incompatible types will return false.
-// Supports RefSlice, *RefSlice, []int or *[]int
+// Supports RefSlice, *RefSlice, Slice and Go types
 func (p *RefSlice) AnyS(slice interface{}) bool {
 
 	// No elements
@@ -169,11 +169,31 @@ func (p *RefSlice) AnyS(slice interface{}) bool {
 		return false
 	}
 
-	x := reflect.ValueOf(slice)
-	if p.v.Type() == x.Type() {
-		for i := 0; i < x.Len(); i++ {
+	// Handle supported types
+	var v reflect.Value
+	if x, ok := slice.(RefSlice); ok {
+		if !x.Nil() {
+			v = *(x.v)
+		}
+	} else if x, ok := slice.(*RefSlice); ok {
+		if !x.Nil() {
+			v = *(x.v)
+		}
+	} else if x, ok := slice.(Slice); ok {
+		if !x.Nil() {
+			v = reflect.ValueOf(x.O())
+		}
+	} else {
+		v = reflect.ValueOf(slice)
+	}
+	if !v.IsValid() {
+		return false
+	}
+
+	if p.v.Type() == v.Type() {
+		for i := 0; i < v.Len(); i++ {
 			for j := 0; j < p.v.Len(); j++ {
-				if p.v.Index(j).Interface() == x.Index(i).Interface() {
+				if p.v.Index(j).Interface() == v.Index(i).Interface() {
 					return true
 				}
 			}
@@ -256,21 +276,42 @@ func (p *RefSlice) Concat(slice interface{}) (new Slice) {
 // ConcatM modifies this Slice by appending the given Slice using variadic expansion and returns a reference to this Slice.
 // Supports RefSlice, *RefSlice, []int or *[]int
 func (p *RefSlice) ConcatM(slice interface{}) Slice {
+
+	// Handle supported types
+	var v reflect.Value
+	if x, ok := slice.(RefSlice); ok {
+		if !x.Nil() {
+			v = *(x.v)
+		}
+	} else if x, ok := slice.(*RefSlice); ok {
+		if !x.Nil() {
+			v = *(x.v)
+		}
+	} else if x, ok := slice.(Slice); ok {
+		if !x.Nil() {
+			v = reflect.ValueOf(x.O())
+		}
+	} else {
+		v = reflect.ValueOf(slice)
+	}
+	if !v.IsValid() {
+		return p
+	}
+
+	// Nothing in this slice so return new slice from given
 	if p.Nil() {
 		if p == nil {
-			p = newEmptySlice(slice)
+			p = newEmptySlice(v.Interface())
 		} else {
-			*p = *(newEmptySlice(slice))
+			*p = *(newEmptySlice(v.Interface()))
 		}
 	}
-	x := reflect.ValueOf(slice)
-	if x.Kind() != reflect.Slice {
-		panic(fmt.Sprintf("can't concat non slice type '%v' with '%v'", x.Type(), p.v.Type()))
-	}
-	if p.v.Type() != x.Type() {
-		panic(fmt.Sprintf("can't concat type '%v' with '%v'", x.Type().Elem(), p.v.Type()))
+
+	// Concat the two slices
+	if p.v.Type() != v.Type() {
+		panic(fmt.Sprintf("can't concat type '%v' with '%v'", v.Type(), p.v.Type()))
 	} else {
-		*p.v = reflect.AppendSlice(*p.v, x)
+		*p.v = reflect.AppendSlice(*p.v, v)
 	}
 	return p
 }

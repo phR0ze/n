@@ -67,11 +67,15 @@ func (p *IntSlice) AnyS(slice interface{}) bool {
 	case []int:
 		elems = x
 	case *[]int:
-		elems = *x
+		if x != nil {
+			elems = *x
+		}
 	case IntSlice:
 		elems = x
 	case *IntSlice:
-		elems = (*x)
+		if x != nil {
+			elems = (*x)
+		}
 	}
 	for i := range elems {
 		for j := range *p {
@@ -149,11 +153,15 @@ func (p *IntSlice) ConcatM(slice interface{}) Slice {
 	case []int:
 		*p = append(*p, x...)
 	case *[]int:
-		*p = append(*p, (*x)...)
+		if x != nil {
+			*p = append(*p, (*x)...)
+		}
 	case IntSlice:
 		*p = append(*p, x...)
 	case *IntSlice:
-		*p = append(*p, (*x)...)
+		if x != nil {
+			*p = append(*p, (*x)...)
+		}
 	}
 	return p
 }

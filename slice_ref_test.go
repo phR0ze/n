@@ -339,6 +339,20 @@ func TestRefSlice_AnyS(t *testing.T) {
 	assert.True(t, NewRefSliceV(Object{1}, Object{2}).AnyS([]Object{{2}}))
 	assert.True(t, NewRefSliceV(Object{1}, Object{2}).AnyS([]Object{{4}, {2}}))
 	assert.False(t, NewRefSliceV(Object{1}, Object{2}).AnyS([]Object{{4}, {5}}))
+
+	// NewRefSliceV
+	assert.True(t, NewRefSliceV(1, 2).AnyS(NewRefSliceV(1, 3)))
+	assert.False(t, NewRefSliceV(1, 2).AnyS(NewRefSliceV(4, 3)))
+
+	// NewIntSliceV
+	assert.True(t, NewRefSliceV(1, 2).AnyS(NewIntSliceV(1, 3)))
+	assert.False(t, NewRefSliceV(1, 2).AnyS(NewIntSliceV(4, 3)))
+
+	// nils
+	assert.False(t, NewRefSliceV(1, 2).AnyS(nil))
+	assert.False(t, NewRefSliceV(1, 2).AnyS((*[]int)(nil)))
+	assert.False(t, NewRefSliceV(1, 2).AnyS((*IntSlice)(nil)))
+	assert.False(t, NewRefSliceV(1, 2).AnyS((*RefSlice)(nil)))
 }
 
 // AnyW
@@ -950,6 +964,12 @@ func TestRefSlice_Concat(t *testing.T) {
 			assert.Equal(t, 1, n.Len())
 		}
 	}
+
+	// nils
+	{
+		assert.Equal(t, []int{1, 2}, NewIntSliceV(1, 2).Concat((*[]int)(nil)).O())
+		assert.Equal(t, []int{1, 2}, NewIntSliceV(1, 2).Concat((*IntSlice)(nil)).O())
+	}
 }
 
 // ConcatM
@@ -1097,6 +1117,33 @@ func TestRefSlice_ConcatM(t *testing.T) {
 			assert.Equal(t, []Object{{"3"}, {"1"}}, n.ConcatM([]Object{{"1"}}).O())
 			assert.Equal(t, 2, n.Len())
 		}
+
+		// NewIntSliceV
+		{
+			n := NewRefSliceV(0)
+			assert.Equal(t, []int{0, 1}, n.ConcatM(NewIntSliceV(1)).O())
+			assert.Equal(t, 2, n.Len())
+		}
+
+		// NewRefSliceV
+		{
+			n := NewRefSliceV(0)
+			assert.Equal(t, []int{0, 1}, n.ConcatM(NewRefSliceV(1)).O())
+			assert.Equal(t, 2, n.Len())
+		}
+
+		// NewRefSlice
+		{
+			n := NewRefSliceV(0)
+			assert.Equal(t, []int{0, 1}, n.ConcatM(NewRefSlice([]int{1})).O())
+			assert.Equal(t, 2, n.Len())
+		}
+
+		// nils
+		{
+			assert.Equal(t, []int{1, 2}, NewIntSliceV(1, 2).ConcatM((*[]int)(nil)).O())
+			assert.Equal(t, []int{1, 2}, NewIntSliceV(1, 2).ConcatM((*IntSlice)(nil)).O())
+		}
 	}
 }
 
@@ -1104,7 +1151,7 @@ func TestRefSlice_ConcatM_notASliceType(t *testing.T) {
 	slice := NewRefSliceV(1)
 	defer func() {
 		err := recover()
-		assert.Equal(t, "can't concat non slice type 'string' with '[]int'", err)
+		assert.Equal(t, "can't concat type 'string' with '[]int'", err)
 	}()
 	slice.ConcatM("2")
 }
@@ -1113,7 +1160,7 @@ func TestRefSlice_ConcatM_wrongType(t *testing.T) {
 	slice := NewRefSliceV(1)
 	defer func() {
 		err := recover()
-		assert.Equal(t, "can't concat type 'string' with '[]int'", err)
+		assert.Equal(t, "can't concat type '[]string' with '[]int'", err)
 	}()
 	slice.ConcatM([]string{"2"})
 }
@@ -4670,6 +4717,134 @@ func TestRefSlice_TakeW(t *testing.T) {
 		assert.Equal(t, []int{2, 4, 6, 8}, new.O())
 	}
 }
+
+// // Union
+// //--------------------------------------------------------------------------------------------------
+// func BenchmarkRefSlice_Union_Go(t *testing.B) {
+// 	// ints := Range(0, nines7)
+// 	// for len(ints) > 10 {
+// 	// 	ints = ints[10:]
+// 	// }
+// }
+
+// func BenchmarkRefSlice_Union_Slice(t *testing.B) {
+// 	// slice := NewRefSlice(Range(0, nines7))
+// 	// for slice.Len() > 0 {
+// 	// 	slice.PopN(10)
+// 	// }
+// }
+
+// func ExampleRefSlice_Union() {
+// 	slice := NewRefSliceV(1, 2)
+// 	fmt.Println(slice.Union([]int{2, 3}))
+// 	// Output: [1 2 3]
+// }
+
+// func TestRefSlice_Union(t *testing.T) {
+
+// 	// nil or empty
+// 	{
+// 		var slice *RefSlice
+// 		assert.Equal(t, NewRefSliceV(1, 2), slice.Union(NewRefSliceV(1, 2)))
+// 		assert.Equal(t, NewRefSliceV(1, 2), slice.Union([]int{1, 2}))
+// 	}
+
+// 	// size of one
+// 	{
+// 		slice := NewRefSliceV(1)
+// 		union := slice.Union([]int{1, 2, 3})
+// 		assert.Equal(t, NewRefSliceV(1, 2, 3), union)
+// 		assert.Equal(t, NewRefSliceV(1), slice)
+// 	}
+
+// 	// one duplicate
+// 	{
+// 		slice := NewRefSliceV(1, 1)
+// 		union := slice.Union(NewRefSliceV(2, 3))
+// 		assert.Equal(t, NewRefSliceV(1, 2, 3), union)
+// 		assert.Equal(t, NewRefSliceV(1, 1), slice)
+// 	}
+
+// 	// multiple duplicates
+// 	{
+// 		slice := NewRefSliceV(1, 2, 2, 3, 3)
+// 		union := slice.Union([]int{1, 2, 3})
+// 		assert.Equal(t, NewRefSliceV(1, 2, 3), union)
+// 		assert.Equal(t, NewRefSliceV(1, 2, 2, 3, 3), slice)
+// 	}
+
+// 	// no duplicates
+// 	{
+// 		slice := NewRefSliceV(1, 2, 3)
+// 		union := slice.Union([]int{4, 5})
+// 		assert.Equal(t, NewRefSliceV(1, 2, 3, 4, 5), union)
+// 		assert.Equal(t, NewRefSliceV(1, 2, 3), slice)
+// 	}
+// }
+
+// // UnionM
+// //--------------------------------------------------------------------------------------------------
+// func BenchmarkRefSlice_UnionM_Go(t *testing.B) {
+// 	// ints := Range(0, nines7)
+// 	// for len(ints) > 10 {
+// 	// 	ints = ints[10:]
+// 	// }
+// }
+
+// func BenchmarkRefSlice_UnionM_Slice(t *testing.B) {
+// 	// slice := NewRefSlice(Range(0, nines7))
+// 	// for slice.Len() > 0 {
+// 	// 	slice.PopN(10)
+// 	// }
+// }
+
+// func ExampleRefSlice_UnionM() {
+// 	slice := NewRefSliceV(1, 2)
+// 	fmt.Println(slice.UnionM([]int{2, 3}))
+// 	// Output: [1 2 3]
+// }
+
+// func TestRefSlice_UnionM(t *testing.T) {
+
+// 	// nil or empty
+// 	{
+// 		var slice *RefSlice
+// 		assert.Equal(t, NewRefSliceV(1, 2), slice.UnionM(NewRefSliceV(1, 2)))
+// 		assert.Equal(t, (*RefSlice)(nil), slice)
+// 	}
+
+// 	// size of one
+// 	{
+// 		slice := NewRefSliceV(1)
+// 		union := slice.UnionM([]int{1, 2, 3})
+// 		assert.Equal(t, NewRefSliceV(1, 2, 3), union)
+// 		assert.Equal(t, NewRefSliceV(1, 2, 3), slice)
+// 	}
+
+// 	// one duplicate
+// 	{
+// 		slice := NewRefSliceV(1, 1)
+// 		union := slice.UnionM(NewRefSliceV(2, 3))
+// 		assert.Equal(t, NewRefSliceV(1, 2, 3), union)
+// 		assert.Equal(t, NewRefSliceV(1, 2, 3), slice)
+// 	}
+
+// 	// multiple duplicates
+// 	{
+// 		slice := NewRefSliceV(1, 2, 2, 3, 3)
+// 		union := slice.UnionM([]int{1, 2, 3})
+// 		assert.Equal(t, NewRefSliceV(1, 2, 3), union)
+// 		assert.Equal(t, NewRefSliceV(1, 2, 3), slice)
+// 	}
+
+// 	// no duplicates
+// 	{
+// 		slice := NewRefSliceV(1, 2, 3)
+// 		union := slice.UnionM([]int{4, 5})
+// 		assert.Equal(t, NewRefSliceV(1, 2, 3, 4, 5), union)
+// 		assert.Equal(t, NewRefSliceV(1, 2, 3, 4, 5), slice)
+// 	}
+// }
 
 // Uniq
 //--------------------------------------------------------------------------------------------------
