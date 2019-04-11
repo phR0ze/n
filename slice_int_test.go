@@ -3347,6 +3347,134 @@ func TestIntSlice_TakeW(t *testing.T) {
 	}
 }
 
+// Union
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_Union_Go(t *testing.B) {
+	// ints := Range(0, nines7)
+	// for len(ints) > 10 {
+	// 	ints = ints[10:]
+	// }
+}
+
+func BenchmarkIntSlice_Union_Slice(t *testing.B) {
+	// slice := NewIntSlice(Range(0, nines7))
+	// for slice.Len() > 0 {
+	// 	slice.PopN(10)
+	// }
+}
+
+func ExampleIntSlice_Union() {
+	slice := NewIntSliceV(1, 2)
+	fmt.Println(slice.Union([]int{2, 3}))
+	// Output: [1 2 3]
+}
+
+func TestIntSlice_Union(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *IntSlice
+		assert.Equal(t, NewIntSliceV(1, 2), slice.Union(NewIntSliceV(1, 2)))
+		assert.Equal(t, NewIntSliceV(1, 2), slice.Union([]int{1, 2}))
+	}
+
+	// size of one
+	{
+		slice := NewIntSliceV(1)
+		union := slice.Union([]int{1, 2, 3})
+		assert.Equal(t, NewIntSliceV(1, 2, 3), union)
+		assert.Equal(t, NewIntSliceV(1), slice)
+	}
+
+	// one duplicate
+	{
+		slice := NewIntSliceV(1, 1)
+		union := slice.Union(NewIntSliceV(2, 3))
+		assert.Equal(t, NewIntSliceV(1, 2, 3), union)
+		assert.Equal(t, NewIntSliceV(1, 1), slice)
+	}
+
+	// multiple duplicates
+	{
+		slice := NewIntSliceV(1, 2, 2, 3, 3)
+		union := slice.Union([]int{1, 2, 3})
+		assert.Equal(t, NewIntSliceV(1, 2, 3), union)
+		assert.Equal(t, NewIntSliceV(1, 2, 2, 3, 3), slice)
+	}
+
+	// no duplicates
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		union := slice.Union([]int{4, 5})
+		assert.Equal(t, NewIntSliceV(1, 2, 3, 4, 5), union)
+		assert.Equal(t, NewIntSliceV(1, 2, 3), slice)
+	}
+}
+
+// UnionM
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_UnionM_Go(t *testing.B) {
+	// ints := Range(0, nines7)
+	// for len(ints) > 10 {
+	// 	ints = ints[10:]
+	// }
+}
+
+func BenchmarkIntSlice_UnionM_Slice(t *testing.B) {
+	// slice := NewIntSlice(Range(0, nines7))
+	// for slice.Len() > 0 {
+	// 	slice.PopN(10)
+	// }
+}
+
+func ExampleIntSlice_UnionM() {
+	slice := NewIntSliceV(1, 2)
+	fmt.Println(slice.UnionM([]int{2, 3}))
+	// Output: [1 2 3]
+}
+
+func TestIntSlice_UnionM(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *IntSlice
+		assert.Equal(t, NewIntSliceV(1, 2), slice.UnionM(NewIntSliceV(1, 2)))
+		assert.Equal(t, (*IntSlice)(nil), slice)
+	}
+
+	// size of one
+	{
+		slice := NewIntSliceV(1)
+		union := slice.UnionM([]int{1, 2, 3})
+		assert.Equal(t, NewIntSliceV(1, 2, 3), union)
+		assert.Equal(t, NewIntSliceV(1, 2, 3), slice)
+	}
+
+	// one duplicate
+	{
+		slice := NewIntSliceV(1, 1)
+		union := slice.UnionM(NewIntSliceV(2, 3))
+		assert.Equal(t, NewIntSliceV(1, 2, 3), union)
+		assert.Equal(t, NewIntSliceV(1, 2, 3), slice)
+	}
+
+	// multiple duplicates
+	{
+		slice := NewIntSliceV(1, 2, 2, 3, 3)
+		union := slice.UnionM([]int{1, 2, 3})
+		assert.Equal(t, NewIntSliceV(1, 2, 3), union)
+		assert.Equal(t, NewIntSliceV(1, 2, 3), slice)
+	}
+
+	// no duplicates
+	{
+		slice := NewIntSliceV(1, 2, 3)
+		union := slice.UnionM([]int{4, 5})
+		assert.Equal(t, NewIntSliceV(1, 2, 3, 4, 5), union)
+		assert.Equal(t, NewIntSliceV(1, 2, 3, 4, 5), slice)
+	}
+}
+
 // Uniq
 //--------------------------------------------------------------------------------------------------
 func BenchmarkIntSlice_Uniq_Go(t *testing.B) {
