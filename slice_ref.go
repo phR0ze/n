@@ -900,19 +900,20 @@ func (p *RefSlice) TakeAt(i int) (elem *Object) {
 
 // TakeW modifies this Slice removing the elements that match the lambda selector and returns them as a new Slice.
 func (p *RefSlice) TakeW(sel func(O) bool) (new Slice) {
+	l := p.Len()
 	slice := NewRefSliceV()
-	// 	if p == nil || len(*p) == 0 {
-	// 		return slice
-	// 	}
-	// 	l := len(*p)
-	// 	for i := 0; i < l; i++ {
-	// 		if sel((*p)[i]) {
-	// 			*slice = append(*slice, (*p)[i])
-	// 			p.DropAt(i)
-	// 			l--
-	// 			i--
-	// 		}
-	// 	}
+	if p.Nil() || l == 0 {
+		return slice
+	}
+	for i := 0; i < l; i++ {
+		obj := p.v.Index(i).Interface()
+		if sel(obj) {
+			slice.Append(obj)
+			p.DropAt(i)
+			l--
+			i--
+		}
+	}
 	return slice
 }
 
@@ -931,33 +932,43 @@ func (p *RefSlice) UnionM(slice interface{}) Slice {
 // Uniq returns a new Slice with all non uniq elements removed while preserving element order.
 // Cost for this call vs the UniqM is roughly the same, this one is appending that one dropping.
 func (p *RefSlice) Uniq() (new Slice) {
-	// 	if p == nil || len(*p) < 2 {
-	// 		return p.Copy()
-	// 	}
-	// 	m := NewIntMapBool()
+	l := p.Len()
+	if p.Nil() || l < 2 {
+		return p.Copy()
+	}
 	slice := NewRefSliceV()
-	// 	for i := 0; i < len(*p); i++ {
-	// 		if ok := m.Set((*p)[i], true); ok {
-	// 			slice.Append((*p)[i])
-	// 		}
-	// 	}
+	v := reflect.ValueOf(true)
+	typ := reflect.MapOf(p.v.Type().Elem(), v.Type())
+	m := reflect.MakeMap(typ)
+	for i := 0; i < l; i++ {
+		k := p.v.Index(i)
+		if ok := m.MapIndex(k); ok == (reflect.Value{}) {
+			m.SetMapIndex(k, v)
+			slice.Append(k.Interface())
+		}
+	}
 	return slice
 }
 
 // UniqM modifies this Slice to remove all non uniq elements while preserving element order.
 // Cost for this call vs the Uniq is roughly the same, this one is dropping that one appending.
 func (p *RefSlice) UniqM() Slice {
-	// 	if p == nil || len(*p) < 2 {
-	// 		return p
-	// 	}
-	// 	m := NewIntMapBool()
-	// 	l := len(*p)
-	// 	for i := 0; i < l; i++ {
-	// 		if ok := m.Set((*p)[i], true); !ok {
-	// 			p.DropAt(i)
-	// 			l--
-	// 			i--
-	// 		}
-	// 	}
+	l := p.Len()
+	if p.Nil() || l < 2 {
+		return p
+	}
+	v := reflect.ValueOf(true)
+	typ := reflect.MapOf(p.v.Type().Elem(), v.Type())
+	m := reflect.MakeMap(typ)
+	for i := 0; i < l; i++ {
+		k := p.v.Index(i)
+		if ok := m.MapIndex(k); ok == (reflect.Value{}) {
+			m.SetMapIndex(k, v)
+		} else {
+			p.DropAt(i)
+			l--
+			i--
+		}
+	}
 	return p
 }

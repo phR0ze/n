@@ -268,6 +268,19 @@ func Pwd() (pwd string) {
 	return
 }
 
+// ReadFile returns the entire file as a string
+func ReadFile(target string) (result string, err error) {
+	if target, err = Abs(target); err != nil {
+		return
+	}
+
+	var fileBytes []byte
+	if fileBytes, err = ioutil.ReadFile(target); err == nil {
+		result = string(fileBytes)
+	}
+	return
+}
+
 // ReadLines returns a new slice of string representing lines
 func ReadLines(target string) (result []string, err error) {
 	if target, err = Abs(target); err != nil {

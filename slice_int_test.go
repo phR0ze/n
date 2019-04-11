@@ -2911,7 +2911,7 @@ func BenchmarkIntSlice_String_Go(t *testing.B) {
 	_ = fmt.Sprintf("%v", ints)
 }
 
-func BenchmarkIntSlice_Stringj_Slice(t *testing.B) {
+func BenchmarkIntSlice_String_Slice(t *testing.B) {
 	slice := NewIntSlice(Range(0, nines6))
 	_ = slice.String()
 }
@@ -2925,22 +2925,22 @@ func ExampleIntSlice_String() {
 func TestIntSlice_String(t *testing.T) {
 
 	// empty
-	assert.Equal(t, NewIntSliceV(), NewIntSliceV().SortReverse())
+	assert.Equal(t, "[]", NewIntSliceV().String())
 
 	// pos
 	{
 		slice := NewIntSliceV(5, 3, 2, 4, 1)
 		sorted := slice.SortReverseM()
-		assert.Equal(t, NewIntSliceV(5, 4, 3, 2, 1, 6), sorted.Append(6))
-		assert.Equal(t, NewIntSliceV(5, 4, 3, 2, 1, 6), slice)
+		assert.Equal(t, "[5 4 3 2 1 6]", sorted.Append(6).String())
+		assert.Equal(t, "[5 4 3 2 1 6]", slice.String())
 	}
 
 	// neg
 	{
 		slice := NewIntSliceV(5, 3, -2, 4, -1)
 		sorted := slice.SortReverseM()
-		assert.Equal(t, NewIntSliceV(5, 4, 3, -1, -2, 6), sorted.Append(6))
-		assert.Equal(t, NewIntSliceV(5, 4, 3, -1, -2, 6), slice)
+		assert.Equal(t, "[5 4 3 -1 -2 6]", sorted.Append(6).String())
+		assert.Equal(t, "[5 4 3 -1 -2 6]", slice.String())
 	}
 }
 
@@ -3330,7 +3330,7 @@ func ExampleIntSlice_TakeW() {
 
 func TestIntSlice_TakeW(t *testing.T) {
 
-	// drop all odd values
+	// take all odd values
 	{
 		slice := NewIntSliceV(1, 2, 3, 4, 5, 6, 7, 8, 9)
 		new := slice.TakeW(func(x O) bool { return ExB(x.(int)%2 != 0) })
@@ -3338,7 +3338,7 @@ func TestIntSlice_TakeW(t *testing.T) {
 		assert.Equal(t, NewIntSliceV(1, 3, 5, 7, 9), new)
 	}
 
-	// drop all even values
+	// take all even values
 	{
 		slice := NewIntSliceV(1, 2, 3, 4, 5, 6, 7, 8, 9)
 		new := slice.TakeW(func(x O) bool { return ExB(x.(int)%2 == 0) })
