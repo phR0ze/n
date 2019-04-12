@@ -161,7 +161,7 @@ func (p *RefSlice) Any(elems ...interface{}) bool {
 
 // AnyS tests if this Slice contains any of the given Slice's elements.
 // Incompatible types will return false.
-// Supports RefSlice, *RefSlice, Slice and Go types
+// Supports RefSlice, *RefSlice, Slice and Go slice types
 func (p *RefSlice) AnyS(slice interface{}) bool {
 
 	// No elements
@@ -274,7 +274,7 @@ func (p *RefSlice) Concat(slice interface{}) (new Slice) {
 }
 
 // ConcatM modifies this Slice by appending the given Slice using variadic expansion and returns a reference to this Slice.
-// Supports RefSlice, *RefSlice, []int or *[]int
+// Supports RefSlice, *RefSlice, Slice and Go slice types
 func (p *RefSlice) ConcatM(slice interface{}) Slice {
 
 	// Handle supported types
@@ -582,6 +582,11 @@ func (p *RefSlice) FirstN(n int) Slice {
 	return p.Slice(0, abs(n)-1)
 }
 
+// Generic returns true if the underlying implementation is a RefSlice
+func (p *RefSlice) Generic() bool {
+	return true
+}
+
 // Index returns the index of the first element in this Slice where element == elem
 // Returns a -1 if the element was not not found.
 func (p *RefSlice) Index(elem interface{}) (loc int) {
@@ -686,16 +691,20 @@ func (p *RefSlice) Len() int {
 }
 
 // Less returns true if the element indexed by i is less than the element indexed by j.
+// Supports optimized Slice types or Go types that can be converted into an optimized Slice type.
 func (p *RefSlice) Less(i, j int) bool {
-	// l := p.Len()
-	// if p.Nil() || l < 2 || i < 0 || j < 0 || i >= l || j >= l {
-	// 	return false
-	// }
-	// x, y := p.v.Index(i).Interface(), p.v.Index(j).Interface()
-	// if x < y {
-	// 	return true
-	// }
-	return false
+	l := p.Len()
+	if p.Nil() || l < 2 || i < 0 || j < 0 || i >= l || j >= l {
+		return false
+	}
+
+	// Handle supported types
+	slice := NewSlice(p.v.Interface())
+	if !slice.Generic() {
+		return slice.Less(i, j)
+	}
+
+	panic(fmt.Sprintf("unsupported comparable type '%v'", p.v.Type()))
 }
 
 // Nil tests if this Slice is nil
@@ -864,36 +873,58 @@ func (p *RefSlice) Slice(indices ...int) Slice {
 }
 
 // Sort returns a new Slice with sorted elements.
+// Supports optimized Slice types or Go types that can be converted into an optimized Slice type.
 func (p *RefSlice) Sort() (new Slice) {
-	// 	if p == nil || len(*p) < 2 {
-	// 		return p.Copy()
-	// 	}
+	if p.Nil() || p.Len() < 2 {
+		return p.Copy()
+	}
 	return p.Copy().SortM()
 }
 
 // SortM modifies this Slice sorting the elements and returns a reference to this Slice.
+// Supports optimized Slice types or Go types that can be converted into an optimized Slice type.
 func (p *RefSlice) SortM() Slice {
-	// 	if p == nil || len(*p) < 2 {
-	// 		return p
-	// 	}
-	// sort.Sort(p)
+	if p.Nil() || p.Len() < 2 {
+		return p
+	}
+
+	// Handle supported types
+	slice := NewSlice(p.v.Interface())
+	if !slice.Generic() {
+		slice.SortM()
+		*p = *NewRefSlice(slice.O())
+	} else {
+		panic(fmt.Sprintf("unsupported comparable type '%v'", p.v.Type()))
+	}
+
 	return p
 }
 
 // SortReverse returns a new Slice sorting the elements in reverse.
+// Supports optimized Slice types or Go types that can be converted into an optimized Slice type.
 func (p *RefSlice) SortReverse() (new Slice) {
-	// 	if p == nil || len(*p) < 2 {
-	// 		return p.Copy()
-	// 	}
+	if p.Nil() || p.Len() < 2 {
+		return p.Copy()
+	}
 	return p.Copy().SortReverseM()
 }
 
 // SortReverseM modifies this Slice sorting the elements in reverse and returns a reference to this Slice.
+// Supports optimized Slice types or Go types that can be converted into an optimized Slice type.
 func (p *RefSlice) SortReverseM() Slice {
-	// 	if p == nil || len(*p) < 2 {
-	// 		return p
-	// 	}
-	// 	sort.Sort(sort.Reverse(p))
+	if p.Nil() || p.Len() < 2 {
+		return p
+	}
+
+	// Handle supported types
+	slice := NewSlice(p.v.Interface())
+	if !slice.Generic() {
+		slice.SortReverseM()
+		*p = *NewRefSlice(slice.O())
+	} else {
+		panic(fmt.Sprintf("unsupported comparable type '%v'", p.v.Type()))
+	}
+
 	return p
 }
 
@@ -959,13 +990,13 @@ func (p *RefSlice) TakeW(sel func(O) bool) (new Slice) {
 }
 
 // Union returns a new Slice by joining uniq elements from this Slice with uniq elements from the given Slice while preserving order.
-// Supports RefSlice, *RefSlice, []int or *[]int
+// Supports RefSlice, *RefSlice, Slice and Go slice types
 func (p *RefSlice) Union(slice interface{}) (new Slice) {
 	return p.Copy().UnionM(slice)
 }
 
 // UnionM modifies this Slice by joining uniq elements from this Slice with uniq elements from the given Slice while preserving order.
-// Supports RefSlice, *RefSlice, []int or *[]int
+// Supports RefSlice, *RefSlice, Slice and Go slice types
 func (p *RefSlice) UnionM(slice interface{}) Slice {
 	return p.ConcatM(slice).UniqM()
 }

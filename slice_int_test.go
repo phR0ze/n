@@ -1740,6 +1740,14 @@ func TestIntSlice_FirstN(t *testing.T) {
 	assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1, 2, 3).FirstN(2))
 }
 
+// Generic
+//--------------------------------------------------------------------------------------------------
+func ExampleIntSlice_Generic() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.Generic())
+	// Output: false
+}
+
 // Index
 //--------------------------------------------------------------------------------------------------
 func BenchmarkIntSlice_Index_Go(t *testing.B) {

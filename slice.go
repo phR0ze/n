@@ -40,6 +40,7 @@ type Slice interface {
 	Empty() bool                                      // Empty tests if this Slice is empty.
 	First() (elem *Object)                            // First returns the first element in this Slice as Object.
 	FirstN(n int) Slice                               // FirstN returns the first n elements in this slice as a Slice reference to the original.
+	Generic() bool                                    // Generic returns true if the underlying implementation is a RefSlice
 	Index(elem interface{}) (loc int)                 // Index returns the index of the first element in this Slice where element == elem
 	Insert(i int, elem interface{}) Slice             // Insert modifies this Slice to insert the given element before the element with the given index.
 	Join(separator ...string) (str *Object)           // Join converts each element into a string then joins them together using the given separator or comma by default.
@@ -90,8 +91,7 @@ func NewSlice(obj interface{}) (new Slice) {
 	case *[]int:
 		return NewIntSlice(*x)
 	default:
-		//return NewRefectionSlice(obj)
-		return nil
+		return NewRefSlice(obj)
 	}
 }
 

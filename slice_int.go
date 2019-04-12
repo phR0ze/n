@@ -416,6 +416,11 @@ func (p *IntSlice) FirstN(n int) Slice {
 	return p.Slice(0, abs(n)-1)
 }
 
+// Generic returns true if the underlying implementation is a RefSlice
+func (p *IntSlice) Generic() bool {
+	return false
+}
+
 // Index returns the index of the first element in this Slice where element == elem
 // Returns a -1 if the element was not not found.
 func (p *IntSlice) Index(elem interface{}) (loc int) {

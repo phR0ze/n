@@ -2,6 +2,7 @@ package n
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"testing"
 
@@ -2756,6 +2757,14 @@ func TestRefSlice_FirstN(t *testing.T) {
 	}
 }
 
+// Generic
+//--------------------------------------------------------------------------------------------------
+func ExampleRefSlice_Generic() {
+	slice := NewRefSliceV(1, 2, 3)
+	fmt.Println(slice.Generic())
+	// Output: true
+}
+
 // Index
 //--------------------------------------------------------------------------------------------------
 func BenchmarkRefSlice_Index_Go(t *testing.B) {
@@ -3107,8 +3116,8 @@ func TestRefSlice_Len(t *testing.T) {
 	assert.Equal(t, 1, NewRefSliceV().Append("2").Len())
 }
 
-// // Less
-// //--------------------------------------------------------------------------------------------------
+// Less
+//--------------------------------------------------------------------------------------------------
 // func BenchmarkRefSlice_Less_Go(t *testing.B) {
 // 	ints := Range(0, nines6)
 // 	for i := 0; i < len(ints); i++ {
@@ -3136,53 +3145,52 @@ func TestRefSlice_Len(t *testing.T) {
 // 	}
 // }
 
-// func ExampleRefSlice_Less() {
-// 	slice := NewRefSliceV(2, 3, 1)
-// 	fmt.Println(slice.Sort().O())
-// 	// Output: [1 2 3]
-// }
+func ExampleRefSlice_Less() {
+	slice := NewRefSliceV(2, 3, 1)
+	fmt.Println(slice.Sort().O())
+	// Output: [1 2 3]
+}
 
-// func TestRefSlice_Less(t *testing.T) {
+func TestRefSlice_Less(t *testing.T) {
 
-// 	// invalid cases
-// 	{
-// 		var slice *RefSlice
-// 		assert.False(t, slice.Less(0, 0))
+	// invalid cases
+	{
+		var slice *RefSlice
+		assert.False(t, slice.Less(0, 0))
+		slice = NewRefSliceV()
+		assert.False(t, slice.Less(0, 0))
+		assert.False(t, slice.Less(1, 2))
+		assert.False(t, slice.Less(-1, 2))
+		assert.False(t, slice.Less(1, -2))
+	}
 
-// 		slice = NewRefSliceV()
-// 		assert.False(t, slice.Less(0, 0))
-// 		assert.False(t, slice.Less(1, 2))
-// 		assert.False(t, slice.Less(-1, 2))
-// 		assert.False(t, slice.Less(1, -2))
-// 	}
+	// // bool
+	// {
+	// 	assert.Equal(t, false, NewRefSliceV(true, false, true).Less(0, 1))
+	// 	assert.Equal(t, true, NewRefSliceV(true, false, true).Less(1, 0))
+	// }
 
-// 	// bool
-// 	{
-// 		assert.Equal(t, false, NewRefSliceV(true, false, true).Less(0, 1))
-// 		assert.Equal(t, true, NewRefSliceV(true, false, true).Less(1, 0))
-// 	}
+	// int
+	{
+		assert.Equal(t, true, NewRefSliceV(0, 1, 2).Less(0, 1))
+		assert.Equal(t, false, NewRefSliceV(0, 1, 2).Less(1, 0))
+		assert.Equal(t, true, NewRefSliceV(0, 1, 2).Less(1, 2))
+	}
 
-// 	// int
-// 	{
-// 		assert.Equal(t, true, NewRefSliceV(0, 1, 2).Less(0, 1))
-// 		assert.Equal(t, false, NewRefSliceV(0, 1, 2).Less(1, 0))
-// 		assert.Equal(t, true, NewRefSliceV(0, 1, 2).Less(1, 2))
-// 	}
+	// // string
+	// {
+	// 	assert.Equal(t, true, NewRefSliceV("0", "1", "2").Less(0, 1))
+	// 	assert.Equal(t, false, NewRefSliceV("0", "1", "2").Less(1, 0))
+	// 	assert.Equal(t, true, NewRefSliceV("0", "1", "2").Less(1, 2))
+	// }
 
-// 	// string
-// 	{
-// 		assert.Equal(t, true, NewRefSliceV("0", "1", "2").Less(0, 1))
-// 		assert.Equal(t, false, NewRefSliceV("0", "1", "2").Less(1, 0))
-// 		assert.Equal(t, true, NewRefSliceV("0", "1", "2").Less(1, 2))
-// 	}
-
-// 	// custom
-// 	{
-// 		assert.Equal(t, true, NewRefSlice([]Object{{0}, {1}, {2}}).Less(0, 1))
-// 		assert.Equal(t, false, NewRefSlice([]Object{{0}, {1}, {2}}).Less(1, 0))
-// 		assert.Equal(t, true, NewRefSlice([]Object{{0}, {1}, {2}}).Less(1, 2))
-// 	}
-// }
+	// // custom
+	// {
+	// 	assert.Equal(t, true, NewRefSlice([]Object{{0}, {1}, {2}}).Less(0, 1))
+	// 	assert.Equal(t, false, NewRefSlice([]Object{{0}, {1}, {2}}).Less(1, 0))
+	// 	assert.Equal(t, true, NewRefSlice([]Object{{0}, {1}, {2}}).Less(1, 2))
+	// }
+}
 
 // Nil
 //--------------------------------------------------------------------------------------------------
@@ -4149,6 +4157,166 @@ func TestRefSlice_String(t *testing.T) {
 	assert.Equal(t, "[]", NewRefSliceV().String())
 	assert.Equal(t, "[5 4 3 2 1]", NewRefSliceV(5, 4, 3, 2, 1).String())
 	assert.Equal(t, "[5 4 3 2 1 6]", NewRefSliceV(5, 4, 3, 2, 1).Append(6).String())
+}
+
+// Sort
+//--------------------------------------------------------------------------------------------------
+func BenchmarkRefSlice_Sort_Go(t *testing.B) {
+	ints := Range(0, nines6)
+	sort.Sort(sort.IntSlice(ints))
+}
+
+func BenchmarkRefSlice_Sort_Slice(t *testing.B) {
+	slice := NewRefSlice(Range(0, nines6))
+	slice.Sort()
+}
+
+func ExampleRefSlice_Sort() {
+	slice := NewRefSliceV(2, 3, 1)
+	fmt.Println(slice.Sort())
+	// Output: [1 2 3]
+}
+
+func TestRefSlice_Sort(t *testing.T) {
+
+	// empty
+	assert.Equal(t, NewRefSliceV(), NewRefSliceV().Sort())
+
+	// pos
+	{
+		slice := NewRefSliceV(5, 3, 2, 4, 1)
+		sorted := slice.Sort()
+		assert.Equal(t, []int{1, 2, 3, 4, 5, 6}, sorted.Append(6).O())
+		assert.Equal(t, []int{5, 3, 2, 4, 1}, slice.O())
+	}
+
+	// neg
+	{
+		slice := NewRefSliceV(5, 3, -2, 4, -1)
+		sorted := slice.Sort()
+		assert.Equal(t, []int{-2, -1, 3, 4, 5, 6}, sorted.Append(6).O())
+		assert.Equal(t, []int{5, 3, -2, 4, -1}, slice.O())
+	}
+}
+
+// SortM
+//--------------------------------------------------------------------------------------------------
+func BenchmarkRefSlice_SortM_Go(t *testing.B) {
+	ints := Range(0, nines6)
+	sort.Sort(sort.IntSlice(ints))
+}
+
+func BenchmarkRefSlice_SortM_Slice(t *testing.B) {
+	slice := NewRefSlice(Range(0, nines6))
+	slice.SortM()
+}
+
+func ExampleRefSlice_SortM() {
+	slice := NewRefSliceV(2, 3, 1)
+	fmt.Println(slice.SortM())
+	// Output: [1 2 3]
+}
+
+func TestRefSlice_SortM(t *testing.T) {
+
+	// empty
+	assert.Equal(t, NewRefSliceV(), NewRefSliceV().SortM())
+
+	// pos
+	{
+		slice := NewRefSliceV(5, 3, 2, 4, 1)
+		sorted := slice.SortM()
+		assert.Equal(t, []int{1, 2, 3, 4, 5, 6}, sorted.Append(6).O())
+		assert.Equal(t, []int{1, 2, 3, 4, 5, 6}, slice.O())
+	}
+
+	// neg
+	{
+		slice := NewRefSliceV(5, 3, -2, 4, -1)
+		sorted := slice.SortM()
+		assert.Equal(t, []int{-2, -1, 3, 4, 5, 6}, sorted.Append(6).O())
+		assert.Equal(t, []int{-2, -1, 3, 4, 5, 6}, slice.O())
+	}
+}
+
+// SortReverse
+//--------------------------------------------------------------------------------------------------
+func BenchmarkRefSlice_SortReverse_Go(t *testing.B) {
+	ints := Range(0, nines6)
+	sort.Sort(sort.Reverse(sort.IntSlice(ints)))
+}
+
+func BenchmarkRefSlice_SortReverse_Slice(t *testing.B) {
+	slice := NewRefSlice(Range(0, nines6))
+	slice.SortReverse()
+}
+
+func ExampleRefSlice_SortReverse() {
+	slice := NewRefSliceV(2, 3, 1)
+	fmt.Println(slice.SortReverse())
+	// Output: [3 2 1]
+}
+
+func TestRefSlice_SortReverse(t *testing.T) {
+
+	// empty
+	assert.Equal(t, NewRefSliceV(), NewRefSliceV().SortReverse())
+
+	// pos
+	{
+		slice := NewRefSliceV(5, 3, 2, 4, 1)
+		sorted := slice.SortReverse()
+		assert.Equal(t, []int{5, 4, 3, 2, 1, 6}, sorted.Append(6).O())
+		assert.Equal(t, []int{5, 3, 2, 4, 1}, slice.O())
+	}
+
+	// neg
+	{
+		slice := NewRefSliceV(5, 3, -2, 4, -1)
+		sorted := slice.SortReverse()
+		assert.Equal(t, []int{5, 4, 3, -1, -2, 6}, sorted.Append(6).O())
+		assert.Equal(t, []int{5, 3, -2, 4, -1}, slice.O())
+	}
+}
+
+// SortReverseM
+//--------------------------------------------------------------------------------------------------
+func BenchmarkRefSlice_SortReverseM_Go(t *testing.B) {
+	ints := Range(0, nines6)
+	sort.Sort(sort.Reverse(sort.IntSlice(ints)))
+}
+
+func BenchmarkRefSlice_SortReverseM_Slice(t *testing.B) {
+	slice := NewRefSlice(Range(0, nines6))
+	slice.SortReverseM()
+}
+
+func ExampleRefSlice_SortReverseM() {
+	slice := NewRefSliceV(2, 3, 1)
+	fmt.Println(slice.SortReverseM())
+	// Output: [3 2 1]
+}
+
+func TestRefSlice_SortReverseM(t *testing.T) {
+
+	// empty
+	assert.Equal(t, NewRefSliceV(), NewRefSliceV().SortReverse())
+
+	// pos
+	{
+		slice := NewRefSliceV(5, 3, 2, 4, 1)
+		sorted := slice.SortReverseM()
+		assert.Equal(t, []int{5, 4, 3, 2, 1, 6}, sorted.Append(6).O())
+		assert.Equal(t, []int{5, 4, 3, 2, 1, 6}, slice.O())
+	}
+
+	// neg
+	{
+		slice := NewRefSliceV(5, 3, -2, 4, -1)
+		sorted := slice.SortReverseM()
+		assert.Equal(t, []int{5, 4, 3, -1, -2, 6}, sorted.Append(6).O())
+		assert.Equal(t, []int{5, 4, 3, -1, -2, 6}, slice.O())
+	}
 }
 
 // Swap
