@@ -732,7 +732,7 @@ func TestRefSlice_At(t *testing.T) {
 	// nil
 	{
 		var nilSlice *RefSlice
-		assert.Equal(t, &Object{nil}, nilSlice.At(0))
+		assert.Equal(t, Obj(nil), nilSlice.At(0))
 	}
 
 	// strings
@@ -771,7 +771,7 @@ func TestQSlice_Clear(t *testing.T) {
 	// nil
 	{
 		var nilSlice *RefSlice
-		assert.Equal(t, &Object{nil}, nilSlice.At(0))
+		assert.Equal(t, Obj(nil), nilSlice.At(0))
 	}
 
 	// bool
@@ -2660,7 +2660,7 @@ func ExampleRefSlice_First() {
 func TestRefSlice_First(t *testing.T) {
 	// invalid
 	{
-		assert.Equal(t, &Object{nil}, NewRefSliceV().First())
+		assert.Equal(t, Obj(nil), NewRefSliceV().First())
 	}
 
 	// bool
@@ -2671,9 +2671,9 @@ func TestRefSlice_First(t *testing.T) {
 
 	// int
 	{
-		assert.Equal(t, &Object{2}, NewRefSliceV(2, 3).First())
-		assert.Equal(t, &Object{3}, NewRefSliceV(3, 2).First())
-		assert.Equal(t, &Object{1}, NewRefSliceV(1, 3, 2).First())
+		assert.Equal(t, Obj(2), NewRefSliceV(2, 3).First())
+		assert.Equal(t, Obj(3), NewRefSliceV(3, 2).First())
+		assert.Equal(t, Obj(1), NewRefSliceV(1, 3, 2).First())
 	}
 
 	// string
@@ -2976,12 +2976,12 @@ func TestRefSlice_Join(t *testing.T) {
 	// nil
 	{
 		var slice *RefSlice
-		assert.Equal(t, &Object{""}, slice.Join())
+		assert.Equal(t, Obj(""), slice.Join())
 	}
 
 	// empty
 	{
-		assert.Equal(t, &Object{""}, NewRefSliceV().Join())
+		assert.Equal(t, Obj(""), NewRefSliceV().Join())
 	}
 
 	assert.Equal(t, "1,2,3", NewRefSliceV(1, 2, 3).Join().O())
@@ -3023,14 +3023,14 @@ func TestRefSlice_Last(t *testing.T) {
 
 	// invalid
 	{
-		assert.Equal(t, &Object{nil}, NewRefSliceV().Last())
+		assert.Equal(t, Obj(nil), NewRefSliceV().Last())
 	}
 
 	// int
 	{
-		assert.Equal(t, &Object{3}, NewRefSliceV(2, 3).Last())
-		assert.Equal(t, &Object{2}, NewRefSliceV(3, 2).Last())
-		assert.Equal(t, &Object{2}, NewRefSliceV(1, 3, 2).Last())
+		assert.Equal(t, Obj(3), NewRefSliceV(2, 3).Last())
+		assert.Equal(t, Obj(2), NewRefSliceV(3, 2).Last())
+		assert.Equal(t, Obj(2), NewRefSliceV(1, 3, 2).Last())
 	}
 
 	// object
@@ -3225,22 +3225,22 @@ func TestRefSlice_Pair(t *testing.T) {
 		// two values
 		{
 			first, second := NewRefSliceV(1, 2).Pair()
-			assert.Equal(t, &Object{1}, first)
-			assert.Equal(t, &Object{2}, second)
+			assert.Equal(t, Obj(1), first)
+			assert.Equal(t, Obj(2), second)
 		}
 
 		// one value
 		{
 			first, second := NewRefSliceV(1).Pair()
-			assert.Equal(t, &Object{1}, first)
-			assert.Equal(t, &Object{nil}, second)
+			assert.Equal(t, Obj(1), first)
+			assert.Equal(t, Obj(nil), second)
 		}
 
 		// no values
 		{
 			first, second := NewRefSliceV().Pair()
-			assert.Equal(t, &Object{nil}, first)
-			assert.Equal(t, &Object{nil}, second)
+			assert.Equal(t, Obj(nil), first)
+			assert.Equal(t, Obj(nil), second)
 		}
 	}
 
@@ -3257,14 +3257,14 @@ func TestRefSlice_Pair(t *testing.T) {
 		{
 			first, second := NewRefSlice([]Object{{1}}).Pair()
 			assert.Equal(t, &Object{Object{1}}, first)
-			assert.Equal(t, &Object{nil}, second)
+			assert.Equal(t, Obj(nil), second)
 		}
 
 		// no values
 		{
 			first, second := NewRefSliceV().Pair()
-			assert.Equal(t, &Object{nil}, first)
-			assert.Equal(t, &Object{nil}, second)
+			assert.Equal(t, Obj(nil), first)
+			assert.Equal(t, Obj(nil), second)
 		}
 	}
 }
@@ -3303,19 +3303,19 @@ func TestRefSlice_Pop(t *testing.T) {
 	// nil or empty
 	{
 		var slice *RefSlice
-		assert.Equal(t, &Object{nil}, slice.Pop())
+		assert.Equal(t, Obj(nil), slice.Pop())
 	}
 
 	// take all one at a time
 	{
 		slice := NewRefSliceV(1, 2, 3)
-		assert.Equal(t, &Object{3}, slice.Pop())
+		assert.Equal(t, Obj(3), slice.Pop())
 		assert.Equal(t, []int{1, 2}, slice.O())
-		assert.Equal(t, &Object{2}, slice.Pop())
+		assert.Equal(t, Obj(2), slice.Pop())
 		assert.Equal(t, []int{1}, slice.O())
-		assert.Equal(t, &Object{1}, slice.Pop())
+		assert.Equal(t, Obj(1), slice.Pop())
 		assert.Equal(t, []int{}, slice.O())
-		assert.Equal(t, &Object{nil}, slice.Pop())
+		assert.Equal(t, Obj(nil), slice.Pop())
 		assert.Equal(t, []int{}, slice.O())
 	}
 }
@@ -3836,19 +3836,19 @@ func TestRefSlice_Shift(t *testing.T) {
 	// nil or empty
 	{
 		var slice *IntSlice
-		assert.Equal(t, &Object{nil}, slice.Shift())
+		assert.Equal(t, Obj(nil), slice.Shift())
 	}
 
 	// take all and beyond
 	{
 		slice := NewRefSliceV(1, 2, 3)
-		assert.Equal(t, &Object{1}, slice.Shift())
+		assert.Equal(t, Obj(1), slice.Shift())
 		assert.Equal(t, []int{2, 3}, slice.O())
-		assert.Equal(t, &Object{2}, slice.Shift())
+		assert.Equal(t, Obj(2), slice.Shift())
 		assert.Equal(t, []int{3}, slice.O())
-		assert.Equal(t, &Object{3}, slice.Shift())
+		assert.Equal(t, Obj(3), slice.Shift())
 		assert.Equal(t, []int{}, slice.O())
-		assert.Equal(t, &Object{nil}, slice.Shift())
+		assert.Equal(t, Obj(nil), slice.Shift())
 		assert.Equal(t, []int{}, slice.O())
 	}
 
@@ -3861,7 +3861,7 @@ func TestRefSlice_Shift(t *testing.T) {
 		assert.Equal(t, []Object{{3}}, slice.O())
 		assert.Equal(t, &Object{Object{3}}, slice.Shift())
 		assert.Equal(t, []Object{}, slice.O())
-		assert.Equal(t, &Object{nil}, slice.Shift())
+		assert.Equal(t, Obj(nil), slice.Shift())
 		assert.Equal(t, []Object{}, slice.O())
 	}
 }
@@ -4652,12 +4652,12 @@ func TestRefSlice_TakeAt(t *testing.T) {
 		{
 			slice := NewRefSliceV(0, 1, 2)
 			obj := slice.TakeAt(-1)
-			assert.Equal(t, &Object{2}, obj)
+			assert.Equal(t, Obj(2), obj)
 			assert.Equal(t, []int{0, 1}, slice.O())
 			assert.Equal(t, 2, slice.Len())
 
 			obj = slice.TakeAt(-1)
-			assert.Equal(t, &Object{1}, obj)
+			assert.Equal(t, Obj(1), obj)
 			assert.Equal(t, []int{0}, slice.O())
 			assert.Equal(t, 1, slice.Len())
 
@@ -4668,7 +4668,7 @@ func TestRefSlice_TakeAt(t *testing.T) {
 
 			// delete nothing
 			obj = slice.TakeAt(-1)
-			assert.Equal(t, &Object{nil}, obj)
+			assert.Equal(t, Obj(nil), obj)
 			assert.Equal(t, []int{}, slice.O())
 			assert.Equal(t, 0, slice.Len())
 		}
@@ -4677,7 +4677,7 @@ func TestRefSlice_TakeAt(t *testing.T) {
 		{
 			slice := NewRefSliceV(0, 1, 2)
 			obj := slice.TakeAt(3)
-			assert.Equal(t, &Object{nil}, obj)
+			assert.Equal(t, Obj(nil), obj)
 			assert.Equal(t, []int{0, 1, 2}, slice.O())
 			assert.Equal(t, 3, slice.Len())
 		}
@@ -4686,7 +4686,7 @@ func TestRefSlice_TakeAt(t *testing.T) {
 		{
 			slice := NewRefSliceV(0, 1, 2)
 			obj := slice.TakeAt(2)
-			assert.Equal(t, &Object{2}, obj)
+			assert.Equal(t, Obj(2), obj)
 			assert.Equal(t, []int{0, 1}, slice.O())
 			assert.Equal(t, 2, slice.Len())
 		}
@@ -4695,7 +4695,7 @@ func TestRefSlice_TakeAt(t *testing.T) {
 		{
 			slice := NewRefSliceV(0, 1, 2)
 			obj := slice.TakeAt(1)
-			assert.Equal(t, &Object{1}, obj)
+			assert.Equal(t, Obj(1), obj)
 			assert.Equal(t, []int{0, 2}, slice.O())
 			assert.Equal(t, 2, slice.Len())
 		}
@@ -4713,7 +4713,7 @@ func TestRefSlice_TakeAt(t *testing.T) {
 		{
 			slice := NewRefSliceV(0, 1, 2)
 			obj := slice.TakeAt(-4)
-			assert.Equal(t, &Object{nil}, obj)
+			assert.Equal(t, Obj(nil), obj)
 			assert.Equal(t, []int{0, 1, 2}, slice.O())
 			assert.Equal(t, 3, slice.Len())
 		}
@@ -4722,7 +4722,7 @@ func TestRefSlice_TakeAt(t *testing.T) {
 		{
 			slice := NewRefSliceV(0, 1, 2)
 			obj := slice.TakeAt(-1)
-			assert.Equal(t, &Object{2}, obj)
+			assert.Equal(t, Obj(2), obj)
 			assert.Equal(t, []int{0, 1}, slice.O())
 			assert.Equal(t, 2, slice.Len())
 		}
@@ -4731,7 +4731,7 @@ func TestRefSlice_TakeAt(t *testing.T) {
 		{
 			slice := NewRefSliceV(0, 1, 2)
 			obj := slice.TakeAt(-2)
-			assert.Equal(t, &Object{1}, obj)
+			assert.Equal(t, Obj(1), obj)
 			assert.Equal(t, []int{0, 2}, slice.O())
 			assert.Equal(t, 2, slice.Len())
 		}
@@ -4759,7 +4759,7 @@ func TestRefSlice_TakeAt(t *testing.T) {
 
 			// delete nothing
 			obj = slice.TakeAt(-1)
-			assert.Equal(t, &Object{nil}, obj)
+			assert.Equal(t, Obj(nil), obj)
 			assert.Equal(t, []Object{}, slice.O())
 			assert.Equal(t, 0, slice.Len())
 		}
@@ -4768,7 +4768,7 @@ func TestRefSlice_TakeAt(t *testing.T) {
 		{
 			slice := NewRefSlice([]Object{{0}, {1}, {2}})
 			obj := slice.TakeAt(3)
-			assert.Equal(t, &Object{nil}, obj)
+			assert.Equal(t, Obj(nil), obj)
 			assert.Equal(t, []Object{{0}, {1}, {2}}, slice.O())
 			assert.Equal(t, 3, slice.Len())
 		}
@@ -4804,7 +4804,7 @@ func TestRefSlice_TakeAt(t *testing.T) {
 		{
 			slice := NewRefSlice([]Object{{0}, {1}, {2}})
 			obj := slice.TakeAt(-4)
-			assert.Equal(t, &Object{nil}, obj)
+			assert.Equal(t, Obj(nil), obj)
 			assert.Equal(t, []Object{{0}, {1}, {2}}, slice.O())
 			assert.Equal(t, 3, slice.Len())
 		}
