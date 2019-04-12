@@ -13,33 +13,35 @@ package n
 // 	ReGraphicalOnly = regexp.MustCompile(`[^[:graph:]]+`)
 // )
 
-// // QStr implementes the Numerable Interface and integrates with other numerable types.
-// // It provides a plethora of convenience methods to work with string types.
-// type QStr struct {
-// 	v string
-// }
+// Str implementes the Numerable Interface and integrates with other numerable types.
+// It provides a plethora of convenience methods to work with string types.
 
-// // A instantiates a new QStr optionally seeding it with the given value
-// // which may be of any type and will be converted to a string.
-// func A(str interface{}) (result *QStr) {
-// 	switch x := str.(type) {
-// 	case *QStr:
-// 		result = x
-// 	case string:
-// 		result = &QStr{v: x}
-// 	case rune:
-// 		result = &QStr{v: string(x)}
-// 	case []rune:
-// 		result = &QStr{v: string(x)}
-// 	case []byte:
-// 		result = &QStr{v: string(x)}
-// 	case int:
-// 		result = &QStr{v: strconv.Itoa(x)}
-// 	default:
-// 		result = &QStr{v: fmt.Sprintf("%v", x)}
-// 	}
-// 	return
-// }
+// Str wraps the Go string to include convenience methods on par with other
+// rapid development languages.
+type Str string
+
+// A is an alias to NewStr
+func A(str interface{}) *Str {
+	return NewStr(str)
+}
+
+// NewStr creates a new *Str which will never be nil
+func NewStr(str interface{}) *Str {
+	var new Str
+	switch x := str.(type) {
+	case Str:
+		new = x
+	case *Str:
+		new = *x
+	case rune:
+		new = Str(x)
+	case []rune:
+		new = Str(x)
+	default:
+		new = Str(Obj(str).ToString())
+	}
+	return &new
+}
 
 // // Type returns the identifier for this numerable type.
 // // Implements the numerable interface.

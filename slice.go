@@ -78,12 +78,17 @@ type Slice interface {
 	UniqM() Slice                                     // UniqM modifies this Slice to remove all non uniq elements while preserving element order.
 }
 
+// S is an alias for NewSlice
+func S(obj interface{}) (new Slice) {
+	return NewSlice(obj)
+}
+
 // NewSlice provides a generic way to work with Slice types. It does this by wrapping Go types
 // directly for optimized types thus avoiding reflection processing overhead and making a plethora
 // of Slice methods available. Non optimized types will fall back on reflection to generically
 // handle the type incurring the full 10x reflection processing overhead.
 //
-// Optimized: []int
+// Optimized: []int, []string
 func NewSlice(obj interface{}) (new Slice) {
 	switch x := obj.(type) {
 	case []int:
@@ -99,12 +104,17 @@ func NewSlice(obj interface{}) (new Slice) {
 	}
 }
 
+// SV is an alias for NewSliceV
+func SV(obj ...interface{}) (new Slice) {
+	return NewSliceV(obj)
+}
+
 // NewSliceV creates a new Slice encapsulating the given variadic elements in a new Slice of
 // that type using type assertion for optimized types. Non optimized types will fall back
 // on reflection to generically handle the type incurring the full 10x reflection processing
 // overhead. In the case where nothing is given a new *RefSlice will be returned.
 //
-// Optimized: []int
+// Optimized: []int, []string
 func NewSliceV(elems ...interface{}) (new Slice) {
 	if len(elems) == 0 {
 		new = NewRefSliceV(elems...)
