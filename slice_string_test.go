@@ -252,7 +252,7 @@ func TestStringSlice_AnyS(t *testing.T) {
 func BenchmarkStringSlice_AnyW_Go(t *testing.B) {
 	src := RangeStr(nines5)
 	for _, x := range src {
-		if i == nines4 {
+		if x == string(nines4) {
 			break
 		}
 	}
@@ -261,14 +261,14 @@ func BenchmarkStringSlice_AnyW_Go(t *testing.B) {
 func BenchmarkStringSlice_AnyW_Slice(t *testing.B) {
 	src := RangeStr(nines5)
 	NewStringSlice(src).AnyW(func(x O) bool {
-		return ExB(x.(int) == nines4)
+		return ExB(x.(string) == string(nines4))
 	})
 }
 
 func ExampleStringSlice_AnyW() {
 	slice := NewStringSliceV("1", "2", "3")
 	fmt.Println(slice.AnyW(func(x O) bool {
-		return ExB(x.(int) == 2)
+		return ExB(x.(string) == "2")
 	}))
 	// Output: true
 }
@@ -277,16 +277,13 @@ func TestStringSlice_AnyW(t *testing.T) {
 
 	// empty
 	var slice *StringSlice
-	assert.False(t, slice.AnyW(func(x O) bool { return ExB(x.(int) > 0) }))
-	assert.False(t, NewStringSliceV().AnyW(func(x O) bool { return ExB(x.(int) > 0) }))
+	assert.False(t, slice.AnyW(func(x O) bool { return ExB(x.(string) > "0") }))
+	assert.False(t, NewStringSliceV().AnyW(func(x O) bool { return ExB(x.(string) > "0") }))
 
 	// single
-	assert.True(t, NewStringSliceV(2).AnyW(func(x O) bool { return ExB(x.(int) > 0) }))
-
-	assert.True(t, NewStringSliceV("1", "2").AnyW(func(x O) bool { return ExB(x.(int) == 2) }))
-	assert.True(t, NewStringSliceV("1", "2").AnyW(func(x O) bool { return ExB(x.(int)%2 == 0) }))
-	assert.False(t, NewStringSliceV(2, 4).AnyW(func(x O) bool { return ExB(x.(int)%2 != 0) }))
-	assert.True(t, NewStringSliceV("1", "2", "3").AnyW(func(x O) bool { return ExB(x.(int) == 4 || x.(int) == 3) }))
+	assert.True(t, NewStringSliceV("2").AnyW(func(x O) bool { return ExB(x.(string) > "0") }))
+	assert.True(t, NewStringSliceV("1", "2").AnyW(func(x O) bool { return ExB(x.(string) == "2") }))
+	assert.True(t, NewStringSliceV("1", "2", "3").AnyW(func(x O) bool { return ExB(x.(string) == "4" || x.(string) == "3") }))
 }
 
 // // Append
@@ -430,7 +427,7 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 	src := RangeStr(nines6)
 // 	slice := NewStringSlice(src)
 // 	for _, i := range src {
-// 		_, ok := (slice.At(i).O()).(int)
+// 		_, ok := (slice.At(i).O()).(string)
 // 		assert.True(t, ok)
 // 	}
 // }
@@ -739,11 +736,11 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 		slice := NewStringSliceV("1", "2", "3", "4")
 // 		assert.Equal(t, NewStringSliceV(4), slice.Copy(-1, -1))
 // 		assert.Equal(t, NewStringSliceV(3), slice.Copy(-2, -2))
-// 		assert.Equal(t, NewStringSliceV(2), slice.Copy(-3, -3))
+// 		assert.Equal(t, NewStringSliceV("2"), slice.Copy(-3, -3))
 // 		assert.Equal(t, NewStringSliceV("1"), slice.Copy(0, 0))
 // 		assert.Equal(t, NewStringSliceV("1"), slice.Copy(-4, -4))
-// 		assert.Equal(t, NewStringSliceV(2), slice.Copy(1, 1))
-// 		assert.Equal(t, NewStringSliceV(2), slice.Copy(1, -3))
+// 		assert.Equal(t, NewStringSliceV("2"), slice.Copy(1, 1))
+// 		assert.Equal(t, NewStringSliceV("2"), slice.Copy(1, -3))
 // 		assert.Equal(t, NewStringSliceV(3), slice.Copy(2, 2))
 // 		assert.Equal(t, NewStringSliceV(3), slice.Copy(2, -2))
 // 		assert.Equal(t, NewStringSliceV(4), slice.Copy(3, 3))
@@ -832,14 +829,14 @@ func TestStringSlice_AnyW(t *testing.T) {
 // func BenchmarkStringSlice_CountW_Slice(t *testing.B) {
 // 	src := RangeStr(nines5)
 // 	NewStringSlice(src).CountW(func(x O) bool {
-// 		return ExB(x.(int) == nines4)
+// 		return ExB(x.(string) == nines4)
 // 	})
 // }
 
 // func ExampleStringSlice_CountW() {
 // 	slice := NewStringSliceV(1, 2, 2)
 // 	fmt.Println(slice.CountW(func(x O) bool {
-// 		return ExB(x.(int) == 2)
+// 		return ExB(x.(string) == "2")
 // 	}))
 // 	// Output: 2
 // }
@@ -848,14 +845,14 @@ func TestStringSlice_AnyW(t *testing.T) {
 
 // 	// empty
 // 	var slice *StringSlice
-// 	assert.Equal(t, 0, slice.CountW(func(x O) bool { return ExB(x.(int) > 0) }))
-// 	assert.Equal(t, 0, NewStringSliceV().CountW(func(x O) bool { return ExB(x.(int) > 0) }))
+// 	assert.Equal(t, 0, slice.CountW(func(x O) bool { return ExB(x.(string) > 0) }))
+// 	assert.Equal(t, 0, NewStringSliceV().CountW(func(x O) bool { return ExB(x.(string) > 0) }))
 
-// 	assert.Equal(t, 1, NewStringSliceV("2", "3").CountW(func(x O) bool { return ExB(x.(int) > 2) }))
-// 	assert.Equal(t, 1, NewStringSliceV("1", "2").CountW(func(x O) bool { return ExB(x.(int) == 2) }))
-// 	assert.Equal(t, 2, NewStringSliceV(1, 2, 3, 4, 5).CountW(func(x O) bool { return ExB(x.(int)%2 == 0) }))
-// 	assert.Equal(t, 3, NewStringSliceV(1, 2, 3, 4, 5).CountW(func(x O) bool { return ExB(x.(int)%2 != 0) }))
-// 	assert.Equal(t, 1, NewStringSliceV("1", "2", "3").CountW(func(x O) bool { return ExB(x.(int) == 4 || x.(int) == 3) }))
+// 	assert.Equal(t, 1, NewStringSliceV("2", "3").CountW(func(x O) bool { return ExB(x.(string) > 2) }))
+// 	assert.Equal(t, 1, NewStringSliceV("1", "2").CountW(func(x O) bool { return ExB(x.(string) == "2") }))
+// 	assert.Equal(t, 2, NewStringSliceV(1, 2, 3, 4, 5).CountW(func(x O) bool { return ExB(x.(string)%2 == 0) }))
+// 	assert.Equal(t, 3, NewStringSliceV(1, 2, 3, 4, 5).CountW(func(x O) bool { return ExB(x.(string)%2 != 0) }))
+// 	assert.Equal(t, 1, NewStringSliceV("1", "2", "3").CountW(func(x O) bool { return ExB(x.(string) == "4" || x.(string) == "3") }))
 // }
 
 // // Drop
@@ -1192,14 +1189,14 @@ func TestStringSlice_AnyW(t *testing.T) {
 // func BenchmarkStringSlice_DropW_Slice(t *testing.B) {
 // 	slice := NewStringSlice(RangeStr(nines5))
 // 	slice.DropW(func(x O) bool {
-// 		return ExB(x.(int)%2 == 0)
+// 		return ExB(x.(string)%2 == 0)
 // 	})
 // }
 
 // func ExampleStringSlice_DropW() {
 // 	slice := NewStringSliceV("1", "2", "3")
 // 	fmt.Println(slice.DropW(func(x O) bool {
-// 		return ExB(x.(int)%2 == 0)
+// 		return ExB(x.(string)%2 == 0)
 // 	}))
 // 	// Output: [1 3]
 // }
@@ -1210,7 +1207,7 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 	{
 // 		slice := NewStringSliceV(1, 2, 3, 4, 5, 6, 7, 8, 9)
 // 		slice.DropW(func(x O) bool {
-// 			return ExB(x.(int)%2 != 0)
+// 			return ExB(x.(string)%2 != 0)
 // 		})
 // 		assert.Equal(t, NewStringSliceV(2, 4, 6, 8), slice)
 // 	}
@@ -1219,7 +1216,7 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 	{
 // 		slice := NewStringSliceV(1, 2, 3, 4, 5, 6, 7, 8, 9)
 // 		slice.DropW(func(x O) bool {
-// 			return ExB(x.(int)%2 == 0)
+// 			return ExB(x.(string)%2 == 0)
 // 		})
 // 		assert.Equal(t, NewStringSliceV(1, 3, 5, 7, 9), slice)
 // 	}
@@ -1261,7 +1258,7 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 	{
 // 		results := []string{}
 // 		NewStringSliceV("1", "2", "3").Each(func(x O) {
-// 			results = append(results, x.(int))
+// 			results = append(results, x.(string))
 // 		})
 // 		assert.Equal(t, []string{1, 2, 3}, results)
 // 	}
@@ -1307,7 +1304,7 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 	{
 // 		results := []string{}
 // 		NewStringSliceV("1", "2", "3").EachE(func(x O) error {
-// 			results = append(results, x.(int))
+// 			results = append(results, x.(string))
 // 			return nil
 // 		})
 // 		assert.Equal(t, []string{1, 2, 3}, results)
@@ -1317,10 +1314,10 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 	{
 // 		results := []string{}
 // 		NewStringSliceV("1", "2", "3").EachE(func(x O) error {
-// 			if x.(int) == 3 {
+// 			if x.(string) == "3" {
 // 				return ErrBreak
 // 			}
-// 			results = append(results, x.(int))
+// 			results = append(results, x.(string))
 // 			return nil
 // 		})
 // 		assert.Equal(t, []string{"1", "2"}, results)
@@ -1363,7 +1360,7 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 	{
 // 		results := []string{}
 // 		NewStringSliceV("1", "2", "3").EachI(func(i int, x O) {
-// 			results = append(results, x.(int))
+// 			results = append(results, x.(string))
 // 		})
 // 		assert.Equal(t, []string{1, 2, 3}, results)
 // 	}
@@ -1409,7 +1406,7 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 	{
 // 		results := []string{}
 // 		NewStringSliceV("1", "2", "3").EachIE(func(i int, x O) error {
-// 			results = append(results, x.(int))
+// 			results = append(results, x.(string))
 // 			return nil
 // 		})
 // 		assert.Equal(t, []string{1, 2, 3}, results)
@@ -1419,10 +1416,10 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 	{
 // 		results := []string{}
 // 		NewStringSliceV("1", "2", "3").EachIE(func(i int, x O) error {
-// 			if i == 2 {
+// 			if i == "2" {
 // 				return ErrBreak
 // 			}
-// 			results = append(results, x.(int))
+// 			results = append(results, x.(string))
 // 			return nil
 // 		})
 // 		assert.Equal(t, []string{"1", "2"}, results)
@@ -1465,7 +1462,7 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 	{
 // 		results := []string{}
 // 		NewStringSliceV("1", "2", "3").EachR(func(x O) {
-// 			results = append(results, x.(int))
+// 			results = append(results, x.(string))
 // 		})
 // 		assert.Equal(t, []string{3, 2, 1}, results)
 // 	}
@@ -1511,7 +1508,7 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 	{
 // 		results := []string{}
 // 		NewStringSliceV("1", "2", "3").EachRE(func(x O) error {
-// 			results = append(results, x.(int))
+// 			results = append(results, x.(string))
 // 			return nil
 // 		})
 // 		assert.Equal(t, []string{3, 2, 1}, results)
@@ -1521,10 +1518,10 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 	{
 // 		results := []string{}
 // 		NewStringSliceV("1", "2", "3").EachRE(func(x O) error {
-// 			if x.(int) == 1 {
+// 			if x.(string) == 1 {
 // 				return ErrBreak
 // 			}
-// 			results = append(results, x.(int))
+// 			results = append(results, x.(string))
 // 			return nil
 // 		})
 // 		assert.Equal(t, []string{3, 2}, results)
@@ -1567,7 +1564,7 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 	{
 // 		results := []string{}
 // 		NewStringSliceV("1", "2", "3").EachRI(func(i int, x O) {
-// 			results = append(results, x.(int))
+// 			results = append(results, x.(string))
 // 		})
 // 		assert.Equal(t, []string{3, 2, 1}, results)
 // 	}
@@ -1613,7 +1610,7 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 	{
 // 		results := []string{}
 // 		NewStringSliceV("1", "2", "3").EachRIE(func(i int, x O) error {
-// 			results = append(results, x.(int))
+// 			results = append(results, x.(string))
 // 			return nil
 // 		})
 // 		assert.Equal(t, []string{3, 2, 1}, results)
@@ -1626,7 +1623,7 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 			if i == 0 {
 // 				return ErrBreak
 // 			}
-// 			results = append(results, x.(int))
+// 			results = append(results, x.(string))
 // 			return nil
 // 		})
 // 		assert.Equal(t, []string{3, 2}, results)
@@ -1819,7 +1816,7 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 	// prepend
 // 	{
 // 		slice := NewStringSliceV()
-// 		assert.Equal(t, NewStringSliceV(2), slice.Insert(0, 2))
+// 		assert.Equal(t, NewStringSliceV("2"), slice.Insert(0, 2))
 // 		assert.Equal(t, NewStringSliceV("1", "2"), slice.Insert("0", "1"))
 // 		assert.Equal(t, NewStringSliceV("0", "1", "2"), slice.Insert(0, 0))
 // 	}
@@ -2240,7 +2237,7 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 	// happy path
 // 	{
 // 		slice := NewStringSliceV()
-// 		assert.Equal(t, NewStringSliceV(2), slice.Prepend(2))
+// 		assert.Equal(t, NewStringSliceV("2"), slice.Prepend(2))
 // 		assert.Equal(t, NewStringSliceV("1", "2"), slice.Prepend(1))
 // 		assert.Equal(t, NewStringSliceV("0", "1", "2"), slice.Prepend(0))
 // 	}
@@ -2367,14 +2364,14 @@ func TestStringSlice_AnyW(t *testing.T) {
 // func BenchmarkStringSlice_Select_Slice(t *testing.B) {
 // 	slice := NewStringSlice(RangeStr(nines6))
 // 	slice.Select(func(x O) bool {
-// 		return ExB(x.(int)%2 == 0)
+// 		return ExB(x.(string)%2 == 0)
 // 	})
 // }
 
 // func ExampleStringSlice_Select() {
 // 	slice := NewStringSliceV("1", "2", "3")
 // 	fmt.Println(slice.Select(func(x O) bool {
-// 		return ExB(x.(int) == 2 || x.(int) == 3)
+// 		return ExB(x.(string) == "2" || x.(string) == "3")
 // 	}))
 // 	// Output: [2 3]
 // }
@@ -2385,7 +2382,7 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 	{
 // 		slice := NewStringSliceV(1, 2, 3, 4, 5, 6, 7, 8, 9)
 // 		new := slice.Select(func(x O) bool {
-// 			return ExB(x.(int)%2 != 0)
+// 			return ExB(x.(string)%2 != 0)
 // 		})
 // 		slice.DropFirst()
 // 		assert.Equal(t, NewStringSliceV(2, 3, 4, 5, 6, 7, 8, 9), slice)
@@ -2396,7 +2393,7 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 	{
 // 		slice := NewStringSliceV(1, 2, 3, 4, 5, 6, 7, 8, 9)
 // 		new := slice.Select(func(x O) bool {
-// 			return ExB(x.(int)%2 == 0)
+// 			return ExB(x.(string)%2 == 0)
 // 		})
 // 		slice.DropAt(1)
 // 		assert.Equal(t, NewStringSliceV(1, 3, 4, 5, 6, 7, 8, 9), slice)
@@ -2723,11 +2720,11 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 		slice := NewStringSliceV("1", "2", "3", "4")
 // 		assert.Equal(t, NewStringSliceV(4), slice.Slice(-1, -1))
 // 		assert.Equal(t, NewStringSliceV(3), slice.Slice(-2, -2))
-// 		assert.Equal(t, NewStringSliceV(2), slice.Slice(-3, -3))
+// 		assert.Equal(t, NewStringSliceV("2"), slice.Slice(-3, -3))
 // 		assert.Equal(t, NewStringSliceV("1"), slice.Slice(0, 0))
 // 		assert.Equal(t, NewStringSliceV("1"), slice.Slice(-4, -4))
-// 		assert.Equal(t, NewStringSliceV(2), slice.Slice(1, 1))
-// 		assert.Equal(t, NewStringSliceV(2), slice.Slice(1, -3))
+// 		assert.Equal(t, NewStringSliceV("2"), slice.Slice(1, 1))
+// 		assert.Equal(t, NewStringSliceV("2"), slice.Slice(1, -3))
 // 		assert.Equal(t, NewStringSliceV(3), slice.Slice(2, 2))
 // 		assert.Equal(t, NewStringSliceV(3), slice.Slice(2, -2))
 // 		assert.Equal(t, NewStringSliceV(4), slice.Slice(3, 3))
@@ -3078,7 +3075,7 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 		}
 // 		{
 // 			slice := NewStringSliceV("1", "2", "3", "4")
-// 			assert.Equal(t, NewStringSliceV(2), slice.Take(1, 1))
+// 			assert.Equal(t, NewStringSliceV("2"), slice.Take(1, 1))
 // 			assert.Equal(t, NewStringSliceV(1, 3, 4), slice)
 // 		}
 // 		{
@@ -3103,7 +3100,7 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 		}
 // 		{
 // 			slice := NewStringSliceV("1", "2", "3", "4")
-// 			assert.Equal(t, NewStringSliceV(2), slice.Take(-3, -3))
+// 			assert.Equal(t, NewStringSliceV("2"), slice.Take(-3, -3))
 // 			assert.Equal(t, NewStringSliceV(1, 3, 4), slice)
 // 		}
 // 		{
@@ -3339,13 +3336,13 @@ func TestStringSlice_AnyW(t *testing.T) {
 
 // func BenchmarkStringSlice_TakeW_Slice(t *testing.B) {
 // 	slice := NewStringSlice(RangeStr(nines5))
-// 	slice.TakeW(func(x O) bool { return ExB(x.(int)%2 == 0) })
+// 	slice.TakeW(func(x O) bool { return ExB(x.(string)%2 == 0) })
 // }
 
 // func ExampleStringSlice_TakeW() {
 // 	slice := NewStringSliceV("1", "2", "3")
 // 	fmt.Println(slice.TakeW(func(x O) bool {
-// 		return ExB(x.(int)%2 == 0)
+// 		return ExB(x.(string)%2 == 0)
 // 	}))
 // 	// Output: [2]
 // }
@@ -3355,7 +3352,7 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 	// take all odd values
 // 	{
 // 		slice := NewStringSliceV(1, 2, 3, 4, 5, 6, 7, 8, 9)
-// 		new := slice.TakeW(func(x O) bool { return ExB(x.(int)%2 != 0) })
+// 		new := slice.TakeW(func(x O) bool { return ExB(x.(string)%2 != 0) })
 // 		assert.Equal(t, NewStringSliceV(2, 4, 6, 8), slice)
 // 		assert.Equal(t, NewStringSliceV(1, 3, 5, 7, 9), new)
 // 	}
@@ -3363,7 +3360,7 @@ func TestStringSlice_AnyW(t *testing.T) {
 // 	// take all even values
 // 	{
 // 		slice := NewStringSliceV(1, 2, 3, 4, 5, 6, 7, 8, 9)
-// 		new := slice.TakeW(func(x O) bool { return ExB(x.(int)%2 == 0) })
+// 		new := slice.TakeW(func(x O) bool { return ExB(x.(string)%2 == 0) })
 // 		assert.Equal(t, NewStringSliceV(1, 3, 5, 7, 9), slice)
 // 		assert.Equal(t, NewStringSliceV(2, 4, 6, 8), new)
 // 	}
