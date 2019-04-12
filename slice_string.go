@@ -705,7 +705,7 @@ func (p *StringSlice) SortReverseM() Slice {
 	return p
 }
 
-// Returns a string representation of this Slice, implements the Stringer interface
+// String returns a string representation of this Slice, implements the Stringer interface
 func (p *StringSlice) String() string {
 	var builder strings.Builder
 	builder.WriteString("[")

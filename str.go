@@ -1,20 +1,21 @@
 package n
 
-// import (
-// 	"fmt"
-// 	"regexp"
-// 	"strconv"
-// 	"strings"
-// 	"unicode"
-// )
+import (
+	// 	"fmt"
+	// 	"regexp"
+	// 	"strconv"
+	// 	"strings"
+	// 	"unicode"
+
+	"strings"
+
+	"github.com/pkg/errors"
+)
 
 // var (
 // 	// ReGraphicalOnly is a regex to filter on graphical runes only
 // 	ReGraphicalOnly = regexp.MustCompile(`[^[:graph:]]+`)
 // )
-
-// Str implementes the Numerable Interface and integrates with other numerable types.
-// It provides a plethora of convenience methods to work with string types.
 
 // Str wraps the Go string to include convenience methods on par with other
 // rapid development languages.
@@ -43,58 +44,36 @@ func NewStr(str interface{}) *Str {
 	return &new
 }
 
-// // Type returns the identifier for this numerable type.
-// // Implements the numerable interface.
-// func (q *QStr) Type() QType {
-// 	return QStrType
-// }
+// A exports the Str as a Go string
+func (p *Str) A() string {
+	if p == nil {
+		return ""
+	}
+	return string(*p)
+}
 
-// // O returns the underlying data structure
-// // Implements the numerable interface.
-// func (q *QStr) O() interface{} {
-// 	return q.v
-// }
+// AsciiOnly bool
+// Equal(str *Str) bool
+// Clear() *Str
+// Concat(str *Str) *Str
 
-// // A exports the QStr as an external string
-// func (q *QStr) A() string {
-// 	return q.v
-// }
+// All checks if all the given strs are contained in this string
+func (p *Str) All(strs []string) bool {
+	return p.AllV(strs...)
+}
 
-// // B exports the QStr as an external []byte
-// func (q *QStr) B() []byte {
-// 	return []byte(q.v)
-// }
-
-// // Q casts the QStr as a Numerable
-// func (q *QStr) Q() Numerable {
-// 	return Numerable(q)
-// }
-
-// // At returns the rune at the given index location. Allows for negative notation
-// func (q *QStr) At(i int) rune {
-// 	if i < 0 {
-// 		i = len(q.v) + i
-// 	}
-// 	if i >= 0 && i < len(q.v) {
-// 		return rune(q.v[i])
-// 	}
-// 	panic("Index out of QStr bounds")
-// }
-
-// // Contains checks if the given target is contained in this string
-// func (q *QStr) Contains(target string) bool {
-// 	return strings.Contains(q.v, target)
-// }
-
-// // ContainsAll checks if all the given targets are contained in this string
-// func (q *QStr) ContainsAll(targets ...string) bool {
-// 	for i := range targets {
-// 		if !strings.Contains(q.v, targets[i]) {
-// 			return false
-// 		}
-// 	}
-// 	return true
-// }
+// AllV checks if all the given variadic strs are contained in this string
+func (p *Str) AllV(strs ...string) bool {
+	if p == nil {
+		return false
+	}
+	for i := range strs {
+		if !strings.Contains(string(*p), strs[i]) {
+			return false
+		}
+	}
+	return true
+}
 
 // // ContainsAny checks if any of the targets are contained in this string
 // func (q *QStr) ContainsAny(targets ...string) bool {
@@ -105,6 +84,85 @@ func NewStr(str interface{}) *Str {
 // 	}
 // 	return false
 // }
+
+// At returns the element at the given index location. Allows for negative notation.
+func (p *Str) At(i int) rune {
+	r, _ := p.AtE(i)
+	return r
+}
+
+// AtE returns the element at the given index location. Allows for negative notation.
+func (p *Str) AtE(i int) (r rune, err error) {
+	if p == nil {
+		err = errors.Errorf("Str is nil")
+		return
+	}
+	if i = absIndex(len(*p), i); i == -1 {
+		err = errors.Errorf("index out of Str bounds")
+		return
+	}
+	r = rune(string(*p)[i])
+	return
+}
+
+// B exports the Str as a Go []byte
+func (p *Str) B() []byte {
+	if p == nil {
+		return []byte("")
+	}
+	return []byte(*p)
+}
+
+// Contains checks if the given str is contained in this Str
+func (p *Str) Contains(str string) bool {
+	if p == nil {
+		return false
+	}
+	return strings.Contains(string(*p), str)
+}
+
+// func ContainsAny(s, chars string) bool
+// func ContainsRune(s string, r rune) bool
+// func Count(s, substr string) int
+// func EqualFold(s, t string) bool
+// func Fields(s string) []string
+// func FieldsFunc(s string, f func(rune) bool) []string
+// func HasPrefix(s, prefix string) bool
+// func HasSuffix(s, suffix string) bool
+// func Index(s, substr string) int
+// func IndexAny(s, chars string) int
+// func IndexByte(s string, c byte) int
+// func IndexFunc(s string, f func(rune) bool) int
+// func IndexRune(s string, r rune) int
+// func Join(a []string, sep string) string
+// func LastIndex(s, substr string) int
+// func LastIndexAny(s, chars string) int
+// func LastIndexByte(s string, c byte) int
+// func LastIndexFunc(s string, f func(rune) bool) int
+// func Map(mapping func(rune) rune, s string) string
+// func Repeat(s string, count int) string
+// func Replace(s, old, new string, n int) string
+// func ReplaceAll(s, old, new string) string
+// func Split(s, sep string) []string
+// func SplitAfter(s, sep string) []string
+// func SplitAfterN(s, sep string, n int) []string
+// func SplitN(s, sep string, n int) []string
+// func Title(s string) string
+// func ToLower(s string) string
+// func ToLowerSpecial(c unicode.SpecialCase, s string) string
+// func ToTitle(s string) string
+// func ToTitleSpecial(c unicode.SpecialCase, s string) string
+// func ToUpper(s string) string
+// func ToUpperSpecial(c unicode.SpecialCase, s string) string
+// func Trim(s string, cutset string) string
+// func TrimFunc(s string, f func(rune) bool) string
+// func TrimLeft(s string, cutset string) string
+// func TrimLeftFunc(s string, f func(rune) bool) string
+// func TrimPrefix(s, prefix string) string
+// func TrimRight(s string, cutset string) string
+// func TrimRightFunc(s string, f func(rune) bool) string
+// func TrimSpace(s string) string
+// func TrimSuffix(s, suffix string) string
 
 // // Empty returns true if the pointer is nil, string is empty or whitespace only
 // func (q *QStr) Empty() bool {
@@ -154,6 +212,14 @@ func NewStr(str interface{}) *Str {
 // 	}
 // 	return false
 // }
+
+// O returns the underlying data structure as is
+func (p *Str) O() interface{} {
+	if p == nil {
+		return ""
+	}
+	return string(*p)
+}
 
 // // Replace wraps strings.Replace and allows for chaining and defaults
 // func (q *QStr) Replace(old, new string, ns ...int) *QStr {
@@ -217,6 +283,11 @@ func NewStr(str interface{}) *Str {
 // 	// }
 // 	return
 // }
+
+// String returns a string representation of this Slice, implements the Stringer interface
+func (p *Str) String() string {
+	return p.A()
+}
 
 // // // ToASCII with given string
 // // func (q *strN) ToASCII() *strN {
