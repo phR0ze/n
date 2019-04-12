@@ -480,7 +480,7 @@ func (p *StringSlice) Join(separator ...string) (str *Object) {
 
 	var builder strings.Builder
 	for i := 0; i < len(*p); i++ {
-		builder.WriteString((&Object{(*p)[i]}).ToString())
+		builder.WriteString(Obj((*p)[i]).ToString())
 		if i+1 < len(*p) {
 			builder.WriteString(sep)
 		}

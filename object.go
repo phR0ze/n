@@ -13,6 +13,11 @@ type Object struct {
 	o interface{} // value
 }
 
+// Obj creates a new Object from the given obj appending the Object methods
+func Obj(obj interface{}) *Object {
+	return &Object{obj}
+}
+
 // // sort.Interface methods
 // //--------------------------------------------------------------------------------------------------
 // type ObjectSlice []Object

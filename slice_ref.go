@@ -655,7 +655,7 @@ func (p *RefSlice) Join(separator ...string) (str *Object) {
 
 	var builder strings.Builder
 	for i := 0; i < l; i++ {
-		builder.WriteString((&Object{p.v.Index(i).Interface()}).ToString())
+		builder.WriteString(Obj(p.v.Index(i).Interface()).ToString())
 		if i+1 < l {
 			builder.WriteString(sep)
 		}
