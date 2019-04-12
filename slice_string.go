@@ -1,7 +1,6 @@
 package n
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 
@@ -711,7 +710,7 @@ func (p *StringSlice) String() string {
 	var builder strings.Builder
 	builder.WriteString("[")
 	for i := 0; i < len(*p); i++ {
-		builder.WriteString(fmt.Sprintf("%d", (*p)[i]))
+		builder.WriteString((*p)[i])
 		if i+1 < len(*p) {
 			builder.WriteString(" ")
 		}
