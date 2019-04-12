@@ -79,6 +79,32 @@ func TestStr_AllV(t *testing.T) {
 	assert.False(t, A("test").AllV("bob", "est"))
 }
 
+// Any
+//--------------------------------------------------------------------------------------------------
+func ExampleStr_Any() {
+	fmt.Println(A("foobar").Any([]string{"foo"}))
+	// Output: true
+}
+
+func TestStr_Any(t *testing.T) {
+	assert.True(t, A("test").Any([]string{"tes", "est"}))
+	assert.True(t, A("test").Any([]string{"bob", "est"}))
+	assert.False(t, A("test").Any([]string{"bob", "foo"}))
+}
+
+// AnyV
+//--------------------------------------------------------------------------------------------------
+func ExampleStr_AnyV() {
+	fmt.Println(A("foobar").AnyV("foo"))
+	// Output: true
+}
+
+func TestStr_AnyV(t *testing.T) {
+	assert.True(t, A("test").AnyV("tes", "est"))
+	assert.True(t, A("test").AnyV("bob", "est"))
+	assert.False(t, A("test").AnyV("bob", "foo"))
+}
+
 // At
 //--------------------------------------------------------------------------------------------------
 func TestStr_At(t *testing.T) {
@@ -149,12 +175,6 @@ func TestStr_Contains(t *testing.T) {
 	assert.True(t, A("test").Contains("tes"))
 	assert.False(t, A("test").Contains("bob"))
 }
-
-// func TestStr_ContainsAny(t *testing.T) {
-// 	assert.True(t, A("test").ContainsAny("tes"))
-// 	assert.True(t, A("test").ContainsAny("f", "t"))
-// 	assert.False(t, A("test").ContainsAny("f", "b"))
-// }
 
 // func TestStr_Empty(t *testing.T) {
 // 	var empty *Str

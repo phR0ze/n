@@ -57,12 +57,12 @@ func (p *Str) A() string {
 // Clear() *Str
 // Concat(str *Str) *Str
 
-// All checks if all the given strs are contained in this string
+// All checks if all the given strs are contained in this Str
 func (p *Str) All(strs []string) bool {
 	return p.AllV(strs...)
 }
 
-// AllV checks if all the given variadic strs are contained in this string
+// AllV checks if all the given variadic strs are contained in this Str
 func (p *Str) AllV(strs ...string) bool {
 	if p == nil {
 		return false
@@ -75,15 +75,23 @@ func (p *Str) AllV(strs ...string) bool {
 	return true
 }
 
-// // ContainsAny checks if any of the targets are contained in this string
-// func (q *QStr) ContainsAny(targets ...string) bool {
-// 	for i := range targets {
-// 		if strings.Contains(q.v, targets[i]) {
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
+// Any checks if any of the given strs are contained in this Str
+func (p *Str) Any(strs []string) bool {
+	return p.AnyV(strs...)
+}
+
+// AnyV checks if any of the given variadic strs are contained in this Str
+func (p *Str) AnyV(strs ...string) bool {
+	if p == nil {
+		return false
+	}
+	for i := range strs {
+		if strings.Contains(string(*p), strs[i]) {
+			return true
+		}
+	}
+	return false
+}
 
 // At returns the element at the given index location. Allows for negative notation.
 func (p *Str) At(i int) rune {
