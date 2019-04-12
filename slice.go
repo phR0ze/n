@@ -102,35 +102,27 @@ func NewSlice(obj interface{}) (new Slice) {
 //
 // Optimized: []int
 func NewSliceV(elems ...interface{}) (new Slice) {
-
-	// // Return NSlice.Nil if nothing given
-	// if len(items) == 0 {
-	// 	return
-	// }
-
-	// // Create new slice from the type of the first non Invalid element
-	// var slice *reflect.Value
-	// for i := 0; i < len(items); i++ {
-
-	// 	// Create target slice from first Valid element
-	// 	if slice == nil && reflect.ValueOf(items[i]).IsValid() {
-	// 		typ := reflect.SliceOf(reflect.TypeOf(items[i]))
-	// 		v := reflect.MakeSlice(typ, 0, 10)
-	// 		slice = &v
-	// 	}
-
-	// 	// Append item to slice
-	// 	if slice != nil {
-	// 		item := reflect.ValueOf(items[i])
-	// 		*slice = reflect.Append(*slice, item)
-	// 	}
-	// }
-	// if slice != nil {
-	// 	n.o = slice.Interface()
-	// 	n.len = slice.Len()
-	// }
-	// return
-	return nil
+	if len(elems) == 0 {
+		new = NewRefSliceV(elems...)
+	} else {
+		switch elems[0].(type) {
+		case int:
+			var slice []int
+			for _, x := range elems {
+				slice = append(slice, x.(int))
+			}
+			new = NewIntSlice(slice)
+		case *int:
+			var slice []int
+			for _, x := range elems {
+				slice = append(slice, *(x.(*int)))
+			}
+			new = NewIntSlice(slice)
+		default:
+			new = NewRefSliceV(elems...)
+		}
+	}
+	return
 }
 
 // simply pass positive values through and convert negative to positive

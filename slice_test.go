@@ -6,6 +6,25 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestSlice_NewSlice(t *testing.T) {
+
+	// int
+	{
+		assert.Equal(t, NewIntSliceV(1, 2, 3), NewSlice([]int{1, 2, 3}))
+		assert.Equal(t, NewIntSliceV(1, 2, 3), NewSlice(&([]int{1, 2, 3})))
+	}
+}
+
+func TestSlice_NewSliceV(t *testing.T) {
+
+	// int
+	{
+		one, two := 1, 2
+		assert.Equal(t, NewIntSliceV(1, 2, 3), NewSliceV(1, 2, 3))
+		assert.Equal(t, NewIntSliceV(1, 2), NewSliceV(&one, &two))
+	}
+}
+
 func TestSlice_absIndex(t *testing.T) {
 	//             -4,-3,-2,-1
 	//              0, 1, 2, 3
