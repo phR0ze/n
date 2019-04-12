@@ -90,6 +90,10 @@ func NewSlice(obj interface{}) (new Slice) {
 		return NewIntSlice(x)
 	case *[]int:
 		return NewIntSlice(*x)
+	case []string:
+		return NewStringSlice(x)
+	case *[]string:
+		return NewStringSlice(*x)
 	default:
 		return NewRefSlice(obj)
 	}
@@ -118,6 +122,19 @@ func NewSliceV(elems ...interface{}) (new Slice) {
 				slice = append(slice, *(x.(*int)))
 			}
 			new = NewIntSlice(slice)
+		case string:
+			var slice []string
+			for _, x := range elems {
+				slice = append(slice, x.(string))
+			}
+			new = NewStringSlice(slice)
+		case *string:
+			var slice []string
+			for _, x := range elems {
+				slice = append(slice, *(x.(*string)))
+			}
+			new = NewStringSlice(slice)
+
 		default:
 			new = NewRefSliceV(elems...)
 		}

@@ -13,6 +13,12 @@ func TestSlice_NewSlice(t *testing.T) {
 		assert.Equal(t, NewIntSliceV(1, 2, 3), NewSlice([]int{1, 2, 3}))
 		assert.Equal(t, NewIntSliceV(1, 2, 3), NewSlice(&([]int{1, 2, 3})))
 	}
+
+	// string
+	{
+		assert.Equal(t, NewStringSliceV("1", "2", "3"), NewSlice([]string{"1", "2", "3"}))
+		assert.Equal(t, NewStringSliceV("1", "2", "3"), NewSlice(&([]string{"1", "2", "3"})))
+	}
 }
 
 func TestSlice_NewSliceV(t *testing.T) {
@@ -22,6 +28,13 @@ func TestSlice_NewSliceV(t *testing.T) {
 		one, two := 1, 2
 		assert.Equal(t, NewIntSliceV(1, 2, 3), NewSliceV(1, 2, 3))
 		assert.Equal(t, NewIntSliceV(1, 2), NewSliceV(&one, &two))
+	}
+
+	// string
+	{
+		one, two := "1", "2"
+		assert.Equal(t, NewStringSliceV("1", "2", "3"), NewSliceV("1", "2", "3"))
+		assert.Equal(t, NewStringSliceV("1", "2"), NewSliceV(&one, &two))
 	}
 }
 
