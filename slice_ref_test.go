@@ -3220,6 +3220,13 @@ func ExampleRefSlice_Pair() {
 
 func TestRefSlice_Pair(t *testing.T) {
 
+	// nil
+	{
+		first, second := (*RefSlice)(nil).Pair()
+		assert.Equal(t, Obj(nil), first)
+		assert.Equal(t, Obj(nil), second)
+	}
+
 	// int
 	{
 		// two values
@@ -4154,6 +4161,7 @@ func ExampleRefSlice_String() {
 
 func TestRefSlice_String(t *testing.T) {
 
+	assert.Equal(t, "[]", (*RefSlice)(nil).String())
 	assert.Equal(t, "[]", NewRefSliceV().String())
 	assert.Equal(t, "[5 4 3 2 1]", NewRefSliceV(5, 4, 3, 2, 1).String())
 	assert.Equal(t, "[5 4 3 2 1 6]", NewRefSliceV(5, 4, 3, 2, 1).Append(6).String())

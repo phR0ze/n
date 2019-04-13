@@ -105,8 +105,47 @@ func TestStr_AnyV(t *testing.T) {
 	assert.False(t, A("test").AnyV("bob", "foo"))
 }
 
+// Ascii
+//--------------------------------------------------------------------------------------------------
+func ExampleStr_Ascii() {
+	fmt.Println(A("2�gspu�data").Ascii().A())
+	// Output: 2 gspu data
+}
+
+func TestStr_Ascii(t *testing.T) {
+	assert.Equal(t, A("2 gspu data gspm data"), A("2�gspu�data�gspm�data").Ascii())
+}
+
+// AsciiA
+//--------------------------------------------------------------------------------------------------
+func ExampleStr_AsciiA() {
+	fmt.Println(A("2�gspu�data").AsciiA())
+	// Output: 2 gspu data
+}
+
+func TestStr_AsciiA(t *testing.T) {
+	assert.Equal(t, "2 gspu data gspm data", A("2�gspu�data�gspm�data").AsciiA())
+}
+
+// AsciiOnly
+//--------------------------------------------------------------------------------------------------
+func ExampleStr_AsciiOnly() {
+	fmt.Println(A("foo").AsciiOnly())
+	// Output: true
+}
+
+func TestStr_AsciiOnly(t *testing.T) {
+	assert.Equal(t, true, A("foobar").AsciiOnly())
+	assert.Equal(t, false, A("2�gspu�data�gspm�data").AsciiOnly())
+}
+
 // At
 //--------------------------------------------------------------------------------------------------
+func ExampleStr_At() {
+	fmt.Println(A("foobar").At(-1))
+	// Output: 114
+}
+
 func TestStr_At(t *testing.T) {
 	q := A("test")
 	assert.Equal(t, 't', q.At(0))
@@ -117,11 +156,16 @@ func TestStr_At(t *testing.T) {
 	assert.Equal(t, 's', q.At(-2))
 	assert.Equal(t, 'e', q.At(-3))
 	assert.Equal(t, 't', q.At(-4))
-	assert.Equal(t, int32(0), q.At(5))
+	assert.Equal(t, rune(0), q.At(5))
 }
 
 // AtE
 //--------------------------------------------------------------------------------------------------
+func ExampleStr_AtE() {
+	fmt.Println(A("foobar").AtE(-1))
+	// Output: 114 <nil>
+}
+
 func TestStr_AtE(t *testing.T) {
 	q := A("test")
 	r, err := q.AtE(0)
@@ -137,15 +181,75 @@ func TestStr_AtE(t *testing.T) {
 	assert.Nil(t, err)
 
 	r, err = q.AtE(5)
-	assert.Equal(t, int32(0), r)
+	assert.Equal(t, rune(0), r)
 	assert.Equal(t, "index out of Str bounds", err.Error())
 
 	// nil
 	{
 		r, err := (*Str)(nil).AtE(2)
-		assert.Equal(t, int32(0), r)
+		assert.Equal(t, rune(0), r)
 		assert.Equal(t, "Str is nil", err.Error())
 	}
+}
+
+// AtA
+//--------------------------------------------------------------------------------------------------
+func ExampleStr_AtA() {
+	fmt.Println(A("foobar").AtA(-1))
+	// Output: r
+}
+
+func TestStr_AtA(t *testing.T) {
+	q := A("test")
+	assert.Equal(t, "t", q.AtA(0))
+	assert.Equal(t, "e", q.AtA(1))
+	assert.Equal(t, "s", q.AtA(2))
+	assert.Equal(t, "t", q.AtA(3))
+	assert.Equal(t, "t", q.AtA(-1))
+	assert.Equal(t, "s", q.AtA(-2))
+	assert.Equal(t, "e", q.AtA(-3))
+	assert.Equal(t, "t", q.AtA(-4))
+	assert.Equal(t, "", q.AtA(5))
+}
+
+// AtAE
+//--------------------------------------------------------------------------------------------------
+func ExampleStr_AtAE() {
+	fmt.Println(A("foobar").AtAE(-1))
+	// Output: r <nil>
+}
+
+func TestStr_AtAE(t *testing.T) {
+	q := A("test")
+	r, err := q.AtAE(0)
+	assert.Nil(t, err)
+	assert.Equal(t, "t", r)
+
+	r, err = q.AtAE(1)
+	assert.Equal(t, "e", r)
+	assert.Nil(t, err)
+
+	r, err = q.AtAE(2)
+	assert.Equal(t, "s", r)
+	assert.Nil(t, err)
+
+	r, err = q.AtAE(5)
+	assert.Equal(t, "", r)
+	assert.Equal(t, "index out of Str bounds", err.Error())
+
+	// nil
+	{
+		r, err := (*Str)(nil).AtAE(2)
+		assert.Equal(t, "", r)
+		assert.Equal(t, "Str is nil", err.Error())
+	}
+}
+
+// B
+//--------------------------------------------------------------------------------------------------
+func ExampleStr_B() {
+	fmt.Println(A("foobar").B())
+	// Output: [102 111 111 98 97 114]
 }
 
 func TestStr_B(t *testing.T) {
@@ -171,9 +275,52 @@ func TestStr_B(t *testing.T) {
 	}
 }
 
+// Clear
+//--------------------------------------------------------------------------------------------------
+func ExampleStr_Clear() {
+	fmt.Println(A("foobar").Clear())
+	// Output:
+}
+
+func TestStr_Clear(t *testing.T) {
+	assert.Equal(t, A(""), (*Str)(nil).Clear())
+	assert.Equal(t, A(""), A("test").Clear())
+}
+
+// Contains
+//--------------------------------------------------------------------------------------------------
+func ExampleStr_Contains() {
+	fmt.Println(A("foobar").Contains("foo"))
+	// Output: true
+}
+
 func TestStr_Contains(t *testing.T) {
 	assert.True(t, A("test").Contains("tes"))
 	assert.False(t, A("test").Contains("bob"))
+}
+
+// ContainsAny
+//--------------------------------------------------------------------------------------------------
+func ExampleStr_ContainsAny() {
+	fmt.Println(A("foobar").ContainsAny("bob"))
+	// Output: true
+}
+
+func TestStr_ContainsAny(t *testing.T) {
+	assert.True(t, A("test").ContainsAny("tes"))
+	assert.False(t, A("test").ContainsAny("bob"))
+}
+
+// ContainsRune
+//--------------------------------------------------------------------------------------------------
+func ExampleStr_ContainsRune() {
+	fmt.Println(A("foobar").ContainsRune('b'))
+	// Output: true
+}
+
+func TestStr_ContainsRune(t *testing.T) {
+	assert.True(t, A("test").ContainsRune('t'))
+	assert.False(t, A("test").ContainsRune('b'))
 }
 
 // func TestStr_Empty(t *testing.T) {
@@ -276,10 +423,6 @@ func TestStr_Contains(t *testing.T) {
 // // 	assert.Equal(t, "    ", A("    bob").SpaceLeft())
 // // 	assert.Equal(t, "\n", A("\nbob").SpaceLeft())
 // // 	assert.Equal(t, "\t", A("\tbob").SpaceLeft())
-// // }
-
-// // func TestToASCII(t *testing.T) {
-// // 	assert.Equal(t, "2 gspu data gspm data", A("2�gspu�data�gspm�data").ToASCII().A())
 // // }
 
 // // func TestStrTrimPrefix(t *testing.T) {

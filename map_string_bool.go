@@ -16,7 +16,7 @@ func NewStringMapBool(m ...map[string]bool) *StringMapBool {
 	return &new
 }
 
-// Any tests if the map is not empty or optionally if it contains any of the given keys.
+// Any tests if this Map is not empty or optionally if it contains any of the given variadic keys.
 func (p *StringMapBool) Any(keys ...interface{}) bool {
 	if p == nil || len(*p) == 0 {
 		return false
@@ -31,10 +31,18 @@ func (p *StringMapBool) Any(keys ...interface{}) bool {
 	return false
 }
 
-// Set the value with the given key. Returns true if the key was not yet in the map.
+// Len returns the number of elements in this Map.
+func (p *StringMapBool) Len() int {
+	if p == nil {
+		return 0
+	}
+	return len(*p)
+}
+
+// Set the value for the given key to the given val. Returns true if the key did not yet exists in this Map.
 func (p *StringMapBool) Set(key, val interface{}) bool {
 	if p == nil {
-		p = NewStringMapBool()
+		return false
 	}
 	k, okk := key.(string)
 	v, okv := val.(bool)

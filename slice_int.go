@@ -537,6 +537,9 @@ func (p *IntSlice) O() interface{} {
 // Pair simply returns the first and second Slice elements as Objects
 func (p *IntSlice) Pair() (first, second *Object) {
 	first, second = &Object{}, &Object{}
+	if p == nil {
+		return
+	}
 	if len(*p) > 0 {
 		first = p.At(0)
 	}
@@ -710,10 +713,12 @@ func (p *IntSlice) SortReverseM() Slice {
 func (p *IntSlice) String() string {
 	var builder strings.Builder
 	builder.WriteString("[")
-	for i := 0; i < len(*p); i++ {
-		builder.WriteString(fmt.Sprintf("%d", (*p)[i]))
-		if i+1 < len(*p) {
-			builder.WriteString(" ")
+	if p != nil {
+		for i := 0; i < len(*p); i++ {
+			builder.WriteString(fmt.Sprintf("%d", (*p)[i]))
+			if i+1 < len(*p) {
+				builder.WriteString(" ")
+			}
 		}
 	}
 	builder.WriteString("]")

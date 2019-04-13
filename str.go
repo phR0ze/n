@@ -7,15 +7,16 @@ import (
 	// 	"strings"
 	// 	"unicode"
 
+	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
 )
 
-// var (
-// 	// ReGraphicalOnly is a regex to filter on graphical runes only
-// 	ReGraphicalOnly = regexp.MustCompile(`[^[:graph:]]+`)
-// )
+var (
+	// ReGraphicalOnly is a regex to filter on graphical runes only
+	ReGraphicalOnly = regexp.MustCompile(`[^[:graph:]]+`)
+)
 
 // Str wraps the Go string to include convenience methods on par with other
 // rapid development languages.
@@ -51,11 +52,6 @@ func (p *Str) A() string {
 	}
 	return string(*p)
 }
-
-// AsciiOnly bool
-// Equal(str *Str) bool
-// Clear() *Str
-// Concat(str *Str) *Str
 
 // All checks if all the given strs are contained in this Str
 func (p *Str) All(strs []string) bool {
@@ -93,6 +89,30 @@ func (p *Str) AnyV(strs ...string) bool {
 	return false
 }
 
+// Ascii converts the string to pure ASCII
+func (p *Str) Ascii() *Str {
+	if p == nil {
+		return A("")
+	}
+	return A(ReGraphicalOnly.ReplaceAllString(string(*p), " "))
+}
+
+// AsciiA converts the string to pure ASCII
+func (p *Str) AsciiA() string {
+	if p == nil {
+		return ""
+	}
+	return ReGraphicalOnly.ReplaceAllString(string(*p), " ")
+}
+
+// AsciiOnly checks to see if this is an ASCII only string
+func (p *Str) AsciiOnly() bool {
+	if p == nil {
+		return true
+	}
+	return len(*p) == len(ReGraphicalOnly.ReplaceAllString(string(*p), ""))
+}
+
 // At returns the element at the given index location. Allows for negative notation.
 func (p *Str) At(i int) rune {
 	r, _ := p.AtE(i)
@@ -113,6 +133,23 @@ func (p *Str) AtE(i int) (r rune, err error) {
 	return
 }
 
+// AtA returns the element at the given index location. Allows for negative notation.
+func (p *Str) AtA(i int) string {
+	str, _ := p.AtAE(i)
+	return str
+}
+
+// AtAE returns the element at the given index location. Allows for negative notation.
+func (p *Str) AtAE(i int) (str string, err error) {
+	r, e := p.AtE(i)
+	str = string(r)
+	if r == int32(0) {
+		str = ""
+	}
+	err = e
+	return
+}
+
 // B exports the Str as a Go []byte
 func (p *Str) B() []byte {
 	if p == nil {
@@ -120,6 +157,20 @@ func (p *Str) B() []byte {
 	}
 	return []byte(*p)
 }
+
+// Clear makes this an empty string
+func (p *Str) Clear() *Str {
+	if p == nil {
+		return A("")
+	}
+	*p = ""
+	return p
+}
+
+// Concat concatenates the strings together
+// func (p *Str) Concat() *Str {
+// 	return p
+// }
 
 // Contains checks if the given str is contained in this Str
 func (p *Str) Contains(str string) bool {
@@ -129,9 +180,24 @@ func (p *Str) Contains(str string) bool {
 	return strings.Contains(string(*p), str)
 }
 
-// func ContainsAny(s, chars string) bool
-// func ContainsRune(s string, r rune) bool
+// ContainsAny checks if any of the given charts exist in this Str
+func (p *Str) ContainsAny(chars string) bool {
+	if p == nil {
+		return false
+	}
+	return strings.ContainsAny(string(*p), chars)
+}
+
+// ContainsRune checks if the given rune exists in this Str
+func (p *Str) ContainsRune(r rune) bool {
+	if p == nil {
+		return false
+	}
+	return strings.ContainsRune(string(*p), r)
+}
+
 // func Count(s, substr string) int
+// Equal(str *Str) bool
 // func EqualFold(s, t string) bool
 // func Fields(s string) []string
 // func FieldsFunc(s string, f func(rune) bool) []string
@@ -296,11 +362,6 @@ func (p *Str) O() interface{} {
 func (p *Str) String() string {
 	return p.A()
 }
-
-// // // ToASCII with given string
-// // func (q *strN) ToASCII() *strN {
-// // 	return A(ReGraphicalOnly.ReplaceAllString(q.v, " "))
-// // }
 
 // // // TrimPrefix trims the given prefix off the string
 // // func (q *strN) TrimPrefix(prefix string) *strN {

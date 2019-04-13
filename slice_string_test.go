@@ -2069,6 +2069,13 @@ func ExampleStringSlice_Pair() {
 
 func TestStringSlice_Pair(t *testing.T) {
 
+	// nil
+	{
+		first, second := (*StringSlice)(nil).Pair()
+		assert.Equal(t, Obj(nil), first)
+		assert.Equal(t, Obj(nil), second)
+	}
+
 	// two values
 	{
 		first, second := NewStringSliceV("1", "2").Pair()
@@ -2935,6 +2942,8 @@ func ExampleStringSlice_String() {
 }
 
 func TestStringSlice_String(t *testing.T) {
+	// nil
+	assert.Equal(t, "[]", (*StringSlice)(nil).String())
 
 	// empty
 	assert.Equal(t, "[]", NewStringSliceV().String())

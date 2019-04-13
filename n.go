@@ -2,14 +2,19 @@
 //
 // n was created to reduce the friction I had adopting Go as my primary language of choice by
 // reducing coding verbosity required by Go via code reuse. The n types wrap various Go
-// types to provide this functionality.
+// types to provide this functionality. The intent is at a minimum to create n types that
+// support YAML primitive scalars (Null, String, Integer, Boolean, Float, Timestamp), lists
+// of the scalar types and maps of the scalar types.
 //
 // Conventions used across n types and pkgs
 //
 // • In order to deal with Golang's decision to not support function overloading or special
 // characters in their function names n makes use of a variety of prefix/suffix capital
-// letters to indicate different function varieties. The function/method that contains no
+// letters to indicate different function variations. The function/method that contains no
 // suffix is known as the base function/method.
+//
+// • Function names suffixed with 'A' indicates the function is a variation to the function
+// without the 'A' but either accepts a string as input or returns a string.
 //
 // • Function names suffixed with 'E' indicates the function is a variation to the function
 // without the 'E' but returns an Error while the base function does not.

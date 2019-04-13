@@ -1,7 +1,75 @@
 package n
 
-// QMap is a Numerable map
-type QMap struct {
+// Map provides a generic way to work with map types providing convenience methods
+// on par with other rapid development languages. 'this Map' refers to the current map
+// instance being operated on.  'new Map' refers to a copy of the map.
+type Map interface {
+	Any(keys ...interface{}) bool // Any tests if this Map is not empty or optionally if it contains any of the given variadic keys.
+	// AnyS(slice interface{}) bool                      // AnyS tests if this Map contains any of the given Slice's elements.
+	// AnyW(sel func(O) bool) bool                       // AnyW tests if this Map contains any that match the lambda selector.
+	// Append(elem interface{}) Slice                    // Append an element to the end of this Map and returns a reference to this Map.
+	// AppendV(elems ...interface{}) Slice               // AppendV appends the variadic elements to the end of this Map and returns a reference to this Map.
+	// At(i int) (elem *Object)                          // At returns the element at the given index location. Allows for negative notation.
+	// Clear() Slice                                     // Clear modifies this Map to clear out all elements and returns a reference to this Map.
+	// Concat(slice interface{}) (new Slice)             // Concat returns a new Slice by appending the given Slice to this Map using variadic expansion.
+	// ConcatM(slice interface{}) Slice                  // ConcatM modifies this Map by appending the given Slice using variadic expansion and returns a reference to this Map.
+	// Copy(indices ...int) (new Slice)                  // Copy returns a new Slice with the indicated range of elements copied from this Map.
+	// Count(elem interface{}) (cnt int)                 // Count the number of elements in this Map equal to the given element.
+	// CountW(sel func(O) bool) (cnt int)                // CountW counts the number of elements in this Map that match the lambda selector.
+	// Drop(indices ...int) Slice                        // Drop modifies this Map to delete the indicated range of elements and returns a referece to this Map.
+	// DropAt(i int) Slice                               // DropAt modifies this Map to delete the element at the given index location. Allows for negative notation.
+	// DropFirst() Slice                                 // DropFirst modifies this Map to delete the first element and returns a reference to this Map.
+	// DropFirstN(n int) Slice                           // DropFirstN modifies this Map to delete the first n elements and returns a reference to this Map.
+	// DropLast() Slice                                  // DropLast modifies this Map to delete the last element and returns a reference to this Map.
+	// DropLastN(n int) Slice                            // DropLastN modifies thi Slice to delete the last n elements and returns a reference to this Map.
+	// DropW(sel func(O) bool) Slice                     // DropW modifies this Map to delete the elements that match the lambda selector and returns a reference to this Map.
+	// Each(action func(O)) Slice                        // Each calls the given lambda once for each element in this Map, passing in that element
+	// EachE(action func(O) error) (Slice, error)        // EachE calls the given lambda once for each element in this Map, passing in that element
+	// EachI(action func(int, O)) Slice                  // EachI calls the given lambda once for each element in this Map, passing in the index and element
+	// EachIE(action func(int, O) error) (Slice, error)  // EachIE calls the given lambda once for each element in this Map, passing in the index and element
+	// EachR(action func(O)) Slice                       // EachR calls the given lambda once for each element in this Map in reverse, passing in that element
+	// EachRE(action func(O) error) (Slice, error)       // EachRE calls the given lambda once for each element in this Map in reverse, passing in that element
+	// EachRI(action func(int, O)) Slice                 // EachRI calls the given lambda once for each element in this Map in reverse, passing in that element
+	// EachRIE(action func(int, O) error) (Slice, error) // EachRIE calls the given lambda once for each element in this Map in reverse, passing in that element
+	// Empty() bool                                      // Empty tests if this Map is empty.
+	// First() (elem *Object)                            // First returns the first element in this Map as Object.
+	// FirstN(n int) Slice                               // FirstN returns the first n elements in this Map as a Slice reference to the original.
+	// Generic() bool                                    // Generic returns true if the underlying implementation is a RefSlice
+	// Index(elem interface{}) (loc int)                 // Index returns the index of the first element in this Map where element == elem
+	// Insert(i int, elem interface{}) Slice             // Insert modifies this Map to insert the given element before the element with the given index.
+	// Join(separator ...string) (str *Object)           // Join converts each element into a string then joins them together using the given separator or comma by default.
+	// Last() (elem *Object)                             // Last returns the last element in this Map as an Object.
+	// LastN(n int) Slice                                // LastN returns the last n elements in this Map as a Slice reference to the original.
+	Len() int // Len returns the number of elements in this Map.
+	// Less(i, j int) bool                               // Less returns true if the element indexed by i is less than the element indexed by j.
+	// Nil() bool                                        // Nil tests if this Map is nil.
+	// O() interface{}                                   // O returns the underlying data structure as is.
+	// Pair() (first, second *Object)                    // Pair simply returns the first and second Slice elements as Objects.
+	// Pop() (elem *Object)                              // Pop modifies this Map to remove the last element and returns the removed element as an Object.
+	// PopN(n int) (new Map)                           // PopN modifies this Map to remove the last n elements and returns the removed elements as a new Map.
+	// Prepend(elem interface{}) Slice                   // Prepend modifies this Map to add the given element at the begining and returns a reference to this Map.
+	// Reverse() (new Map)                             // Reverse returns a new Map with the order of the elements reversed.
+	// ReverseM() Slice                                  // ReverseM modifies this Map reversing the order of the elements and returns a reference to this Map.
+	// Select(sel func(O) bool) (new Map)              // Select creates a new Map with the elements that match the lambda selector.
+	Set(key, val interface{}) bool // Set the value for the given key to the given val. Returns true if the key did not yet exists in this Map.
+	// SetE(i int, elem interface{}) (Slice, error)      // Set the element at the given index location to the given element. Allows for negative notation.
+	// Shift() (elem *Object)                            // Shift modifies this Map to remove the first element and returns the removed element as an Object.
+	// ShiftN(n int) (new Map)                         // ShiftN modifies this Map to remove the first n elements and returns the removed elements as a new Map.
+	// Single() bool                                     // Single reports true if there is only one element in this Map.
+	// Slice(indices ...int) Slice                       // Slice returns a range of elements from this Map as a Slice reference to the original. Allows for negative notation.
+	// Sort() (new Map)                                // Sort returns a new Map with sorted elements.
+	// SortM() Slice                                     // SortM modifies this Map sorting the elements and returns a reference to this Map.
+	// SortReverse() (new Map)                         // SortReverse returns a new Map sorting the elements in reverse.
+	// SortReverseM() Slice                              // SortReverseM modifies this Map sorting the elements in reverse and returns a reference to this Map.
+	// String() string                                   // Returns a string representation of this Map, implements the Stringer interface
+	// Swap(i, j int)                                    // Swap modifies this Map swapping the indicated elements.
+	// Take(indices ...int) (new Map)                  // Take modifies this Map removing the indicated range of elements from this Map and returning them as a new Map.
+	// TakeAt(i int) (elem *Object)                      // TakeAt modifies this Map removing the elemement at the given index location and returns the removed element as an Object.
+	// TakeW(sel func(O) bool) (new Map)               // TakeW modifies this Map removing the elements that match the lambda selector and returns them as a new Map.
+	// Union(slice interface{}) (new Map)              // Union returns a new Map by joining uniq elements from this Map with uniq elements from the given Slice while preserving order.
+	// UnionM(slice interface{}) Slice                   // UnionM modifies this Map by joining uniq elements from this Map with uniq elements from the given Slice while preserving order.
+	// Uniq() (new Map)                                // Uniq returns a new Map with all non uniq elements removed while preserving element order.
+	// UniqM() Slice                                     // UniqM modifies this Map to remove all non uniq elements while preserving element order.
 }
 
 // // Any checks if the numerable has anything in it
