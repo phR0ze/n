@@ -12,14 +12,14 @@ import (
 // NewStringSlice
 //--------------------------------------------------------------------------------------------------
 func BenchmarkNewStringSlice_Go(t *testing.B) {
-	src := RangeStr(nines6)
+	src := RangeString(nines6)
 	for i := 0; i < len(src); i += 10 {
 		_ = []string{src[i], src[i] + string(1), src[i] + string(2), src[i] + string(3), src[i] + string(4), src[i] + string(5), src[i] + string(6), src[i] + string(7), src[i] + string(8), src[i] + string(9)}
 	}
 }
 
 func BenchmarkNewStringSlice_Slice(t *testing.B) {
-	src := RangeStr(nines6)
+	src := RangeString(nines6)
 	for i := 0; i < len(src); i += 10 {
 		_ = NewStringSlice([]string{src[i], src[i] + string(1), src[i] + string(2), src[i] + string(3), src[i] + string(4), src[i] + string(5), src[i] + string(6), src[i] + string(7), src[i] + string(8), src[i] + string(9)})
 	}
@@ -50,14 +50,14 @@ func TestStringSlice_NewStringSlice(t *testing.T) {
 // NewStringSliceV
 //--------------------------------------------------------------------------------------------------
 func BenchmarkNewStringSliceV_Go(t *testing.B) {
-	src := RangeStr(nines6)
+	src := RangeString(nines6)
 	for i := 0; i < len(src); i += 10 {
 		_ = append([]string{}, src[i], src[i]+string(1), src[i]+string(2), src[i]+string(3), src[i]+string(4), src[i]+string(5), src[i]+string(6), src[i]+string(7), src[i]+string(8), src[i]+string(9))
 	}
 }
 
 func BenchmarkNewStringSliceV_Slice(t *testing.B) {
-	src := RangeStr(nines6)
+	src := RangeString(nines6)
 	for i := 0; i < len(src); i += 10 {
 		_ = NewStringSliceV(src[i], src[i]+string(1), src[i]+string(2), src[i]+string(3), src[i]+string(4), src[i]+string(5), src[i]+string(6), src[i]+string(7), src[i]+string(8), src[i]+string(9))
 	}
@@ -107,14 +107,14 @@ func BenchmarkStringSlice_Any_Go(t *testing.B) {
 	}
 
 	// test here
-	src := RangeStr(nines4)
+	src := RangeString(nines4)
 	for _, x := range src {
 		any(src, []string{x})
 	}
 }
 
 func BenchmarkStringSlice_Any_Slice(t *testing.B) {
-	src := RangeStr(nines4)
+	src := RangeString(nines4)
 	slice := NewStringSlice(src)
 	for i := range src {
 		slice.Any(i)
@@ -179,14 +179,14 @@ func BenchmarkStringSlice_AnyS_Go(t *testing.B) {
 	}
 
 	// test here
-	src := RangeStr(nines4)
+	src := RangeString(nines4)
 	for _, x := range src {
 		any(src, []string{x})
 	}
 }
 
 func BenchmarkStringSlice_AnyS_Slice(t *testing.B) {
-	src := RangeStr(nines4)
+	src := RangeString(nines4)
 	slice := NewStringSlice(src)
 	for _, x := range src {
 		slice.Any([]string{x})
@@ -252,7 +252,7 @@ func TestStringSlice_AnyS(t *testing.T) {
 // AnyW
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_AnyW_Go(t *testing.B) {
-	src := RangeStr(nines5)
+	src := RangeString(nines5)
 	for _, x := range src {
 		if x == string(nines4) {
 			break
@@ -261,7 +261,7 @@ func BenchmarkStringSlice_AnyW_Go(t *testing.B) {
 }
 
 func BenchmarkStringSlice_AnyW_Slice(t *testing.B) {
-	src := RangeStr(nines5)
+	src := RangeString(nines5)
 	NewStringSlice(src).AnyW(func(x O) bool {
 		return ExB(x.(string) == string(nines4))
 	})
@@ -292,14 +292,14 @@ func TestStringSlice_AnyW(t *testing.T) {
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Append_Go(t *testing.B) {
 	src := []string{}
-	for _, i := range RangeStr(nines6) {
+	for _, i := range RangeString(nines6) {
 		src = append(src, i)
 	}
 }
 
 func BenchmarkStringSlice_Append_Slice(t *testing.B) {
 	slice := NewStringSliceV()
-	for _, i := range RangeStr(nines6) {
+	for _, i := range RangeString(nines6) {
 		slice.Append(i)
 	}
 }
@@ -386,7 +386,7 @@ func TestStringSlice_Append(t *testing.T) {
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_AppendV_Go(t *testing.B) {
 	src := []string{}
-	src = append(src, RangeStr(nines6)...)
+	src = append(src, RangeString(nines6)...)
 }
 
 func BenchmarkStringSlice_AppendV_Slice(t *testing.B) {
@@ -419,14 +419,14 @@ func TestStringSlice_AppendV(t *testing.T) {
 // At
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_At_Go(t *testing.B) {
-	src := RangeStr(nines6)
+	src := RangeString(nines6)
 	for _, x := range src {
 		assert.IsType(t, 0, x)
 	}
 }
 
 func BenchmarkStringSlice_At_Slice(t *testing.B) {
-	src := RangeStr(nines6)
+	src := RangeString(nines6)
 	slice := NewStringSlice(src)
 	for i := 0; i < len(src); i++ {
 		_, ok := (slice.At(i).O()).(string)
@@ -500,7 +500,7 @@ func TestStringSlice_Clear(t *testing.T) {
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Concat_Go(t *testing.B) {
 	dest := []string{}
-	src := RangeStr(nines6)
+	src := RangeString(nines6)
 	j := 0
 	for i := 10; i < len(src); i += 10 {
 		dest = append(dest, (src[j:i])...)
@@ -510,7 +510,7 @@ func BenchmarkStringSlice_Concat_Go(t *testing.B) {
 
 func BenchmarkStringSlice_Concat_Slice(t *testing.B) {
 	dest := NewStringSliceV()
-	src := RangeStr(nines6)
+	src := RangeString(nines6)
 	j := 0
 	for i := 10; i < len(src); i += 10 {
 		dest.Concat(src[j:i])
@@ -584,7 +584,7 @@ func TestStringSlice_Concat(t *testing.T) {
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_ConcatM_Go(t *testing.B) {
 	dest := []string{}
-	src := RangeStr(nines6)
+	src := RangeString(nines6)
 	j := 0
 	for i := 10; i < len(src); i += 10 {
 		dest = append(dest, (src[j:i])...)
@@ -594,7 +594,7 @@ func BenchmarkStringSlice_ConcatM_Go(t *testing.B) {
 
 func BenchmarkStringSlice_ConcatM_Slice(t *testing.B) {
 	dest := NewStringSliceV()
-	src := RangeStr(nines6)
+	src := RangeString(nines6)
 	j := 0
 	for i := 10; i < len(src); i += 10 {
 		dest.ConcatM(src[j:i])
@@ -667,13 +667,13 @@ func TestStringSlice_ConcatM(t *testing.T) {
 // Copy
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Copy_Go(t *testing.B) {
-	src := RangeStr(nines6)
+	src := RangeString(nines6)
 	dst := make([]string, len(src), len(src))
 	copy(dst, src)
 }
 
 func BenchmarkStringSlice_Copy_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines6))
+	slice := NewStringSlice(RangeString(nines6))
 	slice.Copy()
 }
 
@@ -783,7 +783,7 @@ func TestStringSlice_Copy(t *testing.T) {
 // Count
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Count_Go(t *testing.B) {
-	src := RangeStr(nines5)
+	src := RangeString(nines5)
 	for _, x := range src {
 		if x == string(nines4) {
 			break
@@ -792,7 +792,7 @@ func BenchmarkStringSlice_Count_Go(t *testing.B) {
 }
 
 func BenchmarkStringSlice_Count_Slice(t *testing.B) {
-	src := RangeStr(nines5)
+	src := RangeString(nines5)
 	NewStringSlice(src).Count(nines4)
 }
 
@@ -819,7 +819,7 @@ func TestStringSlice_Count(t *testing.T) {
 // CountW
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_CountW_Go(t *testing.B) {
-	src := RangeStr(nines5)
+	src := RangeString(nines5)
 	for _, x := range src {
 		if x == string(nines4) {
 			break
@@ -828,7 +828,7 @@ func BenchmarkStringSlice_CountW_Go(t *testing.B) {
 }
 
 func BenchmarkStringSlice_CountW_Slice(t *testing.B) {
-	src := RangeStr(nines5)
+	src := RangeString(nines5)
 	NewStringSlice(src).CountW(func(x O) bool {
 		return ExB(x.(string) == string(nines4))
 	})
@@ -857,7 +857,7 @@ func TestStringSlice_CountW(t *testing.T) {
 // Drop
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Drop_Go(t *testing.B) {
-	src := RangeStr(nines7)
+	src := RangeString(nines7)
 	for len(src) > 11 {
 		i := 1
 		n := 10
@@ -870,7 +870,7 @@ func BenchmarkStringSlice_Drop_Go(t *testing.B) {
 }
 
 func BenchmarkStringSlice_Drop_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines7))
+	slice := NewStringSlice(RangeString(nines7))
 	for slice.Len() > 1 {
 		slice.Drop(1, 10)
 	}
@@ -932,7 +932,7 @@ func TestStringSlice_Drop(t *testing.T) {
 // DropAt
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_DropAt_Go(t *testing.B) {
-	src := RangeStr(nines5)
+	src := RangeString(nines5)
 	index := Range(0, nines5)
 	for i := range index {
 		if i+1 < len(src) {
@@ -945,7 +945,7 @@ func BenchmarkStringSlice_DropAt_Go(t *testing.B) {
 
 func BenchmarkStringSlice_DropAt_Slice(t *testing.B) {
 	index := Range(0, nines5)
-	slice := NewStringSlice(RangeStr(nines5))
+	slice := NewStringSlice(RangeString(nines5))
 	for i := range index {
 		slice.DropAt(i)
 	}
@@ -994,14 +994,14 @@ func TestStringSlice_DropAt(t *testing.T) {
 // DropFirst
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_DropFirst_Go(t *testing.B) {
-	src := RangeStr(nines7)
+	src := RangeString(nines7)
 	for len(src) > 1 {
 		src = src[1:]
 	}
 }
 
 func BenchmarkStringSlice_DropFirst_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines7))
+	slice := NewStringSlice(RangeString(nines7))
 	for slice.Len() > 0 {
 		slice.DropFirst()
 	}
@@ -1034,14 +1034,14 @@ func TestStringSlice_DropFirst(t *testing.T) {
 // DropFirstN
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_DropFirstN_Go(t *testing.B) {
-	src := RangeStr(nines7)
+	src := RangeString(nines7)
 	for len(src) > 10 {
 		src = src[10:]
 	}
 }
 
 func BenchmarkStringSlice_DropFirstN_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines7))
+	slice := NewStringSlice(RangeString(nines7))
 	for slice.Len() > 0 {
 		slice.DropFirstN(10)
 	}
@@ -1083,14 +1083,14 @@ func TestStringSlice_DropFirstN(t *testing.T) {
 // DropLast
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_DropLast_Go(t *testing.B) {
-	src := RangeStr(nines7)
+	src := RangeString(nines7)
 	for len(src) > 1 {
 		src = src[1:]
 	}
 }
 
 func BenchmarkStringSlice_DropLast_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines7))
+	slice := NewStringSlice(RangeString(nines7))
 	for slice.Len() > 0 {
 		slice.DropLast()
 	}
@@ -1123,14 +1123,14 @@ func TestStringSlice_DropLast(t *testing.T) {
 // DropLastN
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_DropLastN_Go(t *testing.B) {
-	src := RangeStr(nines7)
+	src := RangeString(nines7)
 	for len(src) > 10 {
 		src = src[10:]
 	}
 }
 
 func BenchmarkStringSlice_DropLastN_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines7))
+	slice := NewStringSlice(RangeString(nines7))
 	for slice.Len() > 0 {
 		slice.DropLastN(10)
 	}
@@ -1169,7 +1169,7 @@ func TestStringSlice_DropLastN(t *testing.T) {
 // DropW
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_DropW_Go(t *testing.B) {
-	src := RangeStr(nines5)
+	src := RangeString(nines5)
 	l := len(src)
 	for i := 0; i < l; i++ {
 		if Obj(src[i]).ToInt()%2 == 0 {
@@ -1185,7 +1185,7 @@ func BenchmarkStringSlice_DropW_Go(t *testing.B) {
 }
 
 func BenchmarkStringSlice_DropW_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines5))
+	slice := NewStringSlice(RangeString(nines5))
 	slice.DropW(func(x O) bool {
 		return ExB(Obj(x).ToInt()%2 == 0)
 	})
@@ -1226,13 +1226,13 @@ func BenchmarkStringSlice_Each_Go(t *testing.B) {
 	action := func(x interface{}) {
 		assert.IsType(t, "", x)
 	}
-	for _, x := range RangeStr(nines6) {
+	for _, x := range RangeString(nines6) {
 		action(x)
 	}
 }
 
 func BenchmarkStringSlice_Each_Slice(t *testing.B) {
-	NewStringSlice(RangeStr(nines6)).Each(func(x O) {
+	NewStringSlice(RangeString(nines6)).Each(func(x O) {
 		assert.IsType(t, "", x)
 	})
 }
@@ -1268,13 +1268,13 @@ func BenchmarkStringSlice_EachE_Go(t *testing.B) {
 	action := func(x interface{}) {
 		assert.IsType(t, "0", x)
 	}
-	for _, x := range RangeStr(nines6) {
+	for _, x := range RangeString(nines6) {
 		action(x)
 	}
 }
 
 func BenchmarkStringSlice_EachE_Slice(t *testing.B) {
-	NewStringSlice(RangeStr(nines6)).EachE(func(x O) error {
+	NewStringSlice(RangeString(nines6)).EachE(func(x O) error {
 		assert.IsType(t, "", x)
 		return nil
 	})
@@ -1328,13 +1328,13 @@ func BenchmarkStringSlice_EachI_Go(t *testing.B) {
 	action := func(x interface{}) {
 		assert.IsType(t, "", x)
 	}
-	for _, x := range RangeStr(nines6) {
+	for _, x := range RangeString(nines6) {
 		action(x)
 	}
 }
 
 func BenchmarkStringSlice_EachI_Slice(t *testing.B) {
-	NewStringSlice(RangeStr(nines6)).EachI(func(i int, x O) {
+	NewStringSlice(RangeString(nines6)).EachI(func(i int, x O) {
 		assert.IsType(t, "", x)
 	})
 }
@@ -1370,13 +1370,13 @@ func BenchmarkStringSlice_EachIE_Go(t *testing.B) {
 	action := func(x interface{}) {
 		assert.IsType(t, "", x)
 	}
-	for _, x := range RangeStr(nines6) {
+	for _, x := range RangeString(nines6) {
 		action(x)
 	}
 }
 
 func BenchmarkStringSlice_EachIE_Slice(t *testing.B) {
-	NewStringSlice(RangeStr(nines6)).EachIE(func(i int, x O) error {
+	NewStringSlice(RangeString(nines6)).EachIE(func(i int, x O) error {
 		assert.IsType(t, "", x)
 		return nil
 	})
@@ -1430,13 +1430,13 @@ func BenchmarkStringSlice_EachR_Go(t *testing.B) {
 	action := func(x interface{}) {
 		assert.IsType(t, "", x)
 	}
-	for _, x := range RangeStr(nines6) {
+	for _, x := range RangeString(nines6) {
 		action(x)
 	}
 }
 
 func BenchmarkStringSlice_EachR_Slice(t *testing.B) {
-	NewStringSlice(RangeStr(nines6)).EachR(func(x O) {
+	NewStringSlice(RangeString(nines6)).EachR(func(x O) {
 		assert.IsType(t, "", x)
 	})
 }
@@ -1472,13 +1472,13 @@ func BenchmarkStringSlice_EachRE_Go(t *testing.B) {
 	action := func(x interface{}) {
 		assert.IsType(t, "", x)
 	}
-	for _, x := range RangeStr(nines6) {
+	for _, x := range RangeString(nines6) {
 		action(x)
 	}
 }
 
 func BenchmarkStringSlice_EachRE_Slice(t *testing.B) {
-	NewStringSlice(RangeStr(nines6)).EachRE(func(x O) error {
+	NewStringSlice(RangeString(nines6)).EachRE(func(x O) error {
 		assert.IsType(t, "", x)
 		return nil
 	})
@@ -1532,13 +1532,13 @@ func BenchmarkStringSlice_EachRI_Go(t *testing.B) {
 	action := func(x interface{}) {
 		assert.IsType(t, "", x)
 	}
-	for _, x := range RangeStr(nines6) {
+	for _, x := range RangeString(nines6) {
 		action(x)
 	}
 }
 
 func BenchmarkStringSlice_EachRI_Slice(t *testing.B) {
-	NewStringSlice(RangeStr(nines6)).EachRI(func(i int, x O) {
+	NewStringSlice(RangeString(nines6)).EachRI(func(i int, x O) {
 		assert.IsType(t, "", x)
 	})
 }
@@ -1574,13 +1574,13 @@ func BenchmarkStringSlice_EachRIE_Go(t *testing.B) {
 	action := func(x interface{}) {
 		assert.IsType(t, "", x)
 	}
-	for _, x := range RangeStr(nines6) {
+	for _, x := range RangeString(nines6) {
 		action(x)
 	}
 }
 
 func BenchmarkStringSlice_EachRIE_Slice(t *testing.B) {
-	NewStringSlice(RangeStr(nines6)).EachRIE(func(i int, x O) error {
+	NewStringSlice(RangeString(nines6)).EachRIE(func(i int, x O) error {
 		assert.IsType(t, "", x)
 		return nil
 	})
@@ -1653,7 +1653,7 @@ func TestStringSlice_Empty(t *testing.T) {
 // First
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_First_Go(t *testing.B) {
-	src := RangeStr(nines7)
+	src := RangeString(nines7)
 	for len(src) > 1 {
 		_ = src[0]
 		src = src[1:]
@@ -1661,7 +1661,7 @@ func BenchmarkStringSlice_First_Go(t *testing.B) {
 }
 
 func BenchmarkStringSlice_First_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines7))
+	slice := NewStringSlice(RangeString(nines7))
 	for slice.Len() > 0 {
 		slice.First()
 		slice.DropFirst()
@@ -1687,12 +1687,12 @@ func TestStringSlice_First(t *testing.T) {
 // FirstN
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_FirstN_Go(t *testing.B) {
-	src := RangeStr(nines7)
+	src := RangeString(nines7)
 	_ = src[0:10]
 }
 
 func BenchmarkStringSlice_FirstN_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines7))
+	slice := NewStringSlice(RangeString(nines7))
 	slice.FirstN(10)
 }
 
@@ -1744,7 +1744,7 @@ func ExampleStringSlice_Generic() {
 // Index
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Index_Go(t *testing.B) {
-	for _, x := range RangeStr(nines5) {
+	for _, x := range RangeString(nines5) {
 		if x == string(nines4) {
 			break
 		}
@@ -1752,7 +1752,7 @@ func BenchmarkStringSlice_Index_Go(t *testing.B) {
 }
 
 func BenchmarkStringSlice_Index_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines5))
+	slice := NewStringSlice(RangeString(nines5))
 	slice.Index(nines4)
 }
 
@@ -1780,7 +1780,7 @@ func TestStringSlice_Index(t *testing.T) {
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Insert_Go(t *testing.B) {
 	src := []string{}
-	for _, x := range RangeStr(nines6) {
+	for _, x := range RangeString(nines6) {
 		src = append(src, x)
 		copy(src[1:], src[1:])
 		src[0] = x
@@ -1789,7 +1789,7 @@ func BenchmarkStringSlice_Insert_Go(t *testing.B) {
 
 func BenchmarkStringSlice_Insert_Slice(t *testing.B) {
 	slice := NewStringSliceV()
-	for x := range RangeStr(nines6) {
+	for x := range RangeString(nines6) {
 		slice.Insert(0, x)
 	}
 }
@@ -1851,12 +1851,12 @@ func TestStringSlice_Insert(t *testing.T) {
 // Join
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Join_Go(t *testing.B) {
-	src := RangeStr(nines4)
+	src := RangeString(nines4)
 	strings.Join(src, ",")
 }
 
 func BenchmarkStringSlice_Join_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines4))
+	slice := NewStringSlice(RangeString(nines4))
 	slice.Join()
 }
 
@@ -1885,7 +1885,7 @@ func TestStringSlice_Join(t *testing.T) {
 // Last
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Last_Go(t *testing.B) {
-	src := RangeStr(nines7)
+	src := RangeString(nines7)
 	for len(src) > 1 {
 		_ = src[len(src)-1]
 		src = src[:len(src)-1]
@@ -1893,7 +1893,7 @@ func BenchmarkStringSlice_Last_Go(t *testing.B) {
 }
 
 func BenchmarkStringSlice_Last_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines7))
+	slice := NewStringSlice(RangeString(nines7))
 	for slice.Len() > 0 {
 		slice.Last()
 		slice.DropLast()
@@ -1919,12 +1919,12 @@ func TestStringSlice_Last(t *testing.T) {
 // LastN
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_LastN_Go(t *testing.B) {
-	src := RangeStr(nines7)
+	src := RangeString(nines7)
 	_ = src[0:10]
 }
 
 func BenchmarkStringSlice_LastN_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines7))
+	slice := NewStringSlice(RangeString(nines7))
 	slice.LastN(10)
 }
 
@@ -1987,7 +1987,7 @@ func TestStringSlice_Len(t *testing.T) {
 // Less
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Less_Go(t *testing.B) {
-	src := RangeStr(nines6)
+	src := RangeString(nines6)
 	for i := 0; i < len(src); i++ {
 		if i+1 < len(src) {
 			_ = src[i] < src[i+1]
@@ -1996,7 +1996,7 @@ func BenchmarkStringSlice_Less_Go(t *testing.B) {
 }
 
 func BenchmarkStringSlice_Less_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines6))
+	slice := NewStringSlice(RangeString(nines6))
 	for i := 0; i < slice.Len(); i++ {
 		if i+1 < slice.Len() {
 			slice.Less(i, i+1)
@@ -2101,14 +2101,14 @@ func TestStringSlice_Pair(t *testing.T) {
 // Pop
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Pop_Go(t *testing.B) {
-	src := RangeStr(nines7)
+	src := RangeString(nines7)
 	for len(src) > 1 {
 		src = src[1:]
 	}
 }
 
 func BenchmarkStringSlice_Pop_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines7))
+	slice := NewStringSlice(RangeString(nines7))
 	for slice.Len() > 0 {
 		slice.Pop()
 	}
@@ -2145,14 +2145,14 @@ func TestStringSlice_Pop(t *testing.T) {
 // PopN
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_PopN_Go(t *testing.B) {
-	src := RangeStr(nines7)
+	src := RangeString(nines7)
 	for len(src) > 10 {
 		src = src[10:]
 	}
 }
 
 func BenchmarkStringSlice_PopN_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines7))
+	slice := NewStringSlice(RangeString(nines7))
 	for slice.Len() > 0 {
 		slice.PopN(10)
 	}
@@ -2212,7 +2212,7 @@ func TestStringSlice_PopN(t *testing.T) {
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Prepend_Go(t *testing.B) {
 	src := []string{}
-	for _, x := range RangeStr(nines6) {
+	for _, x := range RangeString(nines6) {
 		src = append(src, x)
 		copy(src[1:], src[1:])
 		src[0] = x
@@ -2221,7 +2221,7 @@ func BenchmarkStringSlice_Prepend_Go(t *testing.B) {
 
 func BenchmarkStringSlice_Prepend_Slice(t *testing.B) {
 	slice := NewStringSliceV()
-	for _, x := range RangeStr(nines6) {
+	for _, x := range RangeString(nines6) {
 		slice.Prepend(x)
 	}
 }
@@ -2252,14 +2252,14 @@ func TestStringSlice_Prepend(t *testing.T) {
 // Reverse
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Reverse_Go(t *testing.B) {
-	src := RangeStr(nines6)
+	src := RangeString(nines6)
 	for i, j := 0, len(src)-1; i < j; i, j = i+1, j-1 {
 		src[i], src[j] = src[j], src[i]
 	}
 }
 
 func BenchmarkStringSlice_Reverse_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines6))
+	slice := NewStringSlice(RangeString(nines6))
 	slice.Reverse()
 }
 
@@ -2302,14 +2302,14 @@ func TestStringSlice_Reverse(t *testing.T) {
 // ReverseM
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_ReverseM_Go(t *testing.B) {
-	src := RangeStr(nines6)
+	src := RangeString(nines6)
 	for i, j := 0, len(src)-1; i < j; i, j = i+1, j-1 {
 		src[i], src[j] = src[j], src[i]
 	}
 }
 
 func BenchmarkStringSlice_ReverseM_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines6))
+	slice := NewStringSlice(RangeString(nines6))
 	slice.ReverseM()
 }
 
@@ -2353,7 +2353,7 @@ func TestStringSlice_ReverseM(t *testing.T) {
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Select_Go(t *testing.B) {
 	even := []string{}
-	src := RangeStr(nines6)
+	src := RangeString(nines6)
 	for i := 0; i < len(src); i++ {
 		if Obj(src[i]).ToInt()%2 == 0 {
 			even = append(even, src[i])
@@ -2362,7 +2362,7 @@ func BenchmarkStringSlice_Select_Go(t *testing.B) {
 }
 
 func BenchmarkStringSlice_Select_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines6))
+	slice := NewStringSlice(RangeString(nines6))
 	slice.Select(func(x O) bool {
 		return ExB(Obj(x).ToInt()%2 == 0)
 	})
@@ -2404,14 +2404,14 @@ func TestStringSlice_Select(t *testing.T) {
 // Set
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Set_Go(t *testing.B) {
-	src := RangeStr(nines6)
+	src := RangeString(nines6)
 	for i := 0; i < len(src); i++ {
 		src[i] = "0"
 	}
 }
 
 func BenchmarkStringSlice_Set_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines6))
+	slice := NewStringSlice(RangeString(nines6))
 	for i := 0; i < slice.Len(); i++ {
 		slice.Set(i, "0")
 	}
@@ -2445,14 +2445,14 @@ func TestStringSlice_Set(t *testing.T) {
 // SetE
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_SetE_Go(t *testing.B) {
-	src := RangeStr(nines6)
+	src := RangeString(nines6)
 	for i := 0; i < len(src); i++ {
 		src[i] = "0"
 	}
 }
 
 func BenchmarkStringSlice_SetE_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines6))
+	slice := NewStringSlice(RangeString(nines6))
 	for i := 0; i < slice.Len(); i++ {
 		slice.SetE(i, "0")
 	}
@@ -2526,14 +2526,14 @@ func TestStringSlice_SetE(t *testing.T) {
 // Shift
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Shift_Go(t *testing.B) {
-	src := RangeStr(nines7)
+	src := RangeString(nines7)
 	for len(src) > 1 {
 		src = src[1:]
 	}
 }
 
 func BenchmarkStringSlice_Shift_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines7))
+	slice := NewStringSlice(RangeString(nines7))
 	for slice.Len() > 0 {
 		slice.Shift()
 	}
@@ -2570,14 +2570,14 @@ func TestStringSlice_Shift(t *testing.T) {
 // ShiftN
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_ShiftN_Go(t *testing.B) {
-	src := RangeStr(nines7)
+	src := RangeString(nines7)
 	for len(src) > 10 {
 		src = src[10:]
 	}
 }
 
 func BenchmarkStringSlice_ShiftN_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines7))
+	slice := NewStringSlice(RangeString(nines7))
 	for slice.Len() > 0 {
 		slice.ShiftN(10)
 	}
@@ -2659,12 +2659,12 @@ func TestStringSlice_Single(t *testing.T) {
 // Slice
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Slice_Go(t *testing.B) {
-	src := RangeStr(nines7)
+	src := RangeString(nines7)
 	_ = src[0:len(src)]
 }
 
 func BenchmarkStringSlice_Slice_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines7))
+	slice := NewStringSlice(RangeString(nines7))
 	slice.Slice(0, -1)
 }
 
@@ -2766,12 +2766,12 @@ func TestStringSlice_Slice(t *testing.T) {
 // Sort
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Sort_Go(t *testing.B) {
-	src := RangeStr(nines6)
+	src := RangeString(nines6)
 	sort.Sort(sort.StringSlice(src))
 }
 
 func BenchmarkStringSlice_Sort_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines6))
+	slice := NewStringSlice(RangeString(nines6))
 	slice.Sort()
 }
 
@@ -2806,12 +2806,12 @@ func TestStringSlice_Sort(t *testing.T) {
 // SortM
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_SortM_Go(t *testing.B) {
-	src := RangeStr(nines6)
+	src := RangeString(nines6)
 	sort.Sort(sort.StringSlice(src))
 }
 
 func BenchmarkStringSlice_SortM_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines6))
+	slice := NewStringSlice(RangeString(nines6))
 	slice.SortM()
 }
 
@@ -2846,12 +2846,12 @@ func TestStringSlice_SortM(t *testing.T) {
 // SortReverse
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_SortReverse_Go(t *testing.B) {
-	src := RangeStr(nines6)
+	src := RangeString(nines6)
 	sort.Sort(sort.Reverse(sort.StringSlice(src)))
 }
 
 func BenchmarkStringSlice_SortReverse_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines6))
+	slice := NewStringSlice(RangeString(nines6))
 	slice.SortReverse()
 }
 
@@ -2886,12 +2886,12 @@ func TestStringSlice_SortReverse(t *testing.T) {
 // SortReverseM
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_SortReverseM_Go(t *testing.B) {
-	src := RangeStr(nines6)
+	src := RangeString(nines6)
 	sort.Sort(sort.Reverse(sort.StringSlice(src)))
 }
 
 func BenchmarkStringSlice_SortReverseM_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines6))
+	slice := NewStringSlice(RangeString(nines6))
 	slice.SortReverseM()
 }
 
@@ -2926,12 +2926,12 @@ func TestStringSlice_SortReverseM(t *testing.T) {
 // String
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_String_Go(t *testing.B) {
-	src := RangeStr(nines6)
+	src := RangeString(nines6)
 	_ = fmt.Sprintf("%v", src)
 }
 
 func BenchmarkStringSlice_String_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines6))
+	slice := NewStringSlice(RangeString(nines6))
 	_ = slice.String()
 }
 
@@ -2968,7 +2968,7 @@ func TestStringSlice_String(t *testing.T) {
 // Swap
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Swap_Go(t *testing.B) {
-	src := RangeStr(nines6)
+	src := RangeString(nines6)
 	for i := 0; i < len(src); i++ {
 		if i+1 < len(src) {
 			src[i], src[i+1] = src[i+1], src[i]
@@ -2977,7 +2977,7 @@ func BenchmarkStringSlice_Swap_Go(t *testing.B) {
 }
 
 func BenchmarkStringSlice_Swap_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines6))
+	slice := NewStringSlice(RangeString(nines6))
 	for i := 0; i < slice.Len(); i++ {
 		if i+1 < slice.Len() {
 			slice.Swap(i, i+1)
@@ -3026,7 +3026,7 @@ func TestStringSlice_Swap(t *testing.T) {
 // Take
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Take_Go(t *testing.B) {
-	src := RangeStr(nines7)
+	src := RangeString(nines7)
 	for len(src) > 11 {
 		i := 1
 		n := 10
@@ -3039,7 +3039,7 @@ func BenchmarkStringSlice_Take_Go(t *testing.B) {
 }
 
 func BenchmarkStringSlice_Take_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines7))
+	slice := NewStringSlice(RangeString(nines7))
 	for slice.Len() > 1 {
 		slice.Take(1, 10)
 	}
@@ -3212,8 +3212,8 @@ func TestStringSlice_Take(t *testing.T) {
 // TakeAt
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_TakeAt_Go(t *testing.B) {
-	src := RangeStr(nines5)
-	index := RangeStr(nines5)
+	src := RangeString(nines5)
+	index := RangeString(nines5)
 	for i := range index {
 		if i+1 < len(src) {
 			src = append(src[:i], src[i+1:]...)
@@ -3224,8 +3224,8 @@ func BenchmarkStringSlice_TakeAt_Go(t *testing.B) {
 }
 
 func BenchmarkStringSlice_TakeAt_Slice(t *testing.B) {
-	src := RangeStr(nines5)
-	index := RangeStr(nines5)
+	src := RangeString(nines5)
+	index := RangeString(nines5)
 	slice := NewStringSlice(src)
 	for i := range index {
 		slice.TakeAt(i)
@@ -3320,7 +3320,7 @@ func TestStringSlice_TakeAt(t *testing.T) {
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_TakeW_Go(t *testing.B) {
 	new := []string{}
-	src := RangeStr(nines5)
+	src := RangeString(nines5)
 	l := len(src)
 	for i := 0; i < l; i++ {
 		if Obj(src[i]).ToInt()%2 == 0 {
@@ -3337,7 +3337,7 @@ func BenchmarkStringSlice_TakeW_Go(t *testing.B) {
 }
 
 func BenchmarkStringSlice_TakeW_Slice(t *testing.B) {
-	slice := NewStringSlice(RangeStr(nines5))
+	slice := NewStringSlice(RangeString(nines5))
 	slice.TakeW(func(x O) bool { return ExB(Obj(x).ToInt()%2 == 0) })
 }
 
@@ -3642,7 +3642,7 @@ func TestStringSlice_UniqM(t *testing.T) {
 	}
 }
 
-func RangeStr(size int) (new []string) {
+func RangeString(size int) (new []string) {
 	for _, x := range Range(0, size) {
 		new = append(new, string(x))
 	}
