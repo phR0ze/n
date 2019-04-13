@@ -16,6 +16,56 @@ type bob struct {
 	o interface{}
 }
 
+func TestIndirect(t *testing.T) {
+	//assert.Equal(t, nil, Indirect(nil))
+
+	// bool
+	{
+		var test bool
+		assert.Equal(t, true, Indirect(true))
+		assert.Equal(t, false, Indirect(&test))
+		assert.Equal(t, false, Indirect((*bool)(nil)))
+	}
+
+	// int
+	{
+		var test int
+		assert.Equal(t, 1, Indirect(1))
+		assert.Equal(t, 0, Indirect(&test))
+		assert.Equal(t, 0, Indirect((*int)(nil)))
+	}
+
+	// rune
+	{
+		var test rune
+		assert.Equal(t, 'r', Indirect('r'))
+		assert.Equal(t, rune(0), Indirect(&test))
+		assert.Equal(t, rune(0), Indirect((*rune)(nil)))
+	}
+
+	// []rune
+	{
+		assert.Equal(t, []rune{'t', 'e', 's', 't'}, Indirect([]rune{'t', 'e', 's', 't'}))
+		assert.Equal(t, []rune{'t', 'e', 's', 't'}, Indirect(&[]rune{'t', 'e', 's', 't'}))
+		assert.Equal(t, []rune{}, Indirect((*[]rune)(nil)))
+	}
+
+	// string
+	{
+		var test string
+		assert.Equal(t, "test", Indirect("test"))
+		assert.Equal(t, "", Indirect(&test))
+		assert.Equal(t, "", Indirect((*string)(nil)))
+	}
+
+	// []string
+	{
+		assert.Equal(t, []string{"test"}, Indirect([]string{"test"}))
+		assert.Equal(t, []string{"test"}, Indirect(&[]string{"test"}))
+		assert.Equal(t, []string{}, Indirect((*[]string)(nil)))
+	}
+}
+
 func TestMergeMap(t *testing.T) {
 	{
 		assert.Equal(t, map[string]interface{}{}, MergeMap(nil, nil))
