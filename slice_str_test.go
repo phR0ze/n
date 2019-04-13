@@ -12,7 +12,7 @@ package n
 // // NewStrSlice
 // //--------------------------------------------------------------------------------------------------
 // func BenchmarkNewStrSlice_Go(t *testing.B) {
-// 	src := RangeStr(nines6)
+// 	src := RangeString(nines6)
 // 	for i := 0; i < len(src); i += 10 {
 // 		_ = []string{src[i], src[i] + string(1), src[i] + string(2), src[i] + string(3), src[i] + string(4), src[i] + string(5), src[i] + string(6), src[i] + string(7), src[i] + string(8), src[i] + string(9)}
 // 	}
@@ -21,7 +21,7 @@ package n
 // func BenchmarkNewStrSlice_Slice(t *testing.B) {
 // 	src := RangeStr(nines6)
 // 	for i := 0; i < len(src); i += 10 {
-// 		_ = NewStrSlice([]string{src[i], src[i] + string(1), src[i] + string(2), src[i] + string(3), src[i] + string(4), src[i] + string(5), src[i] + string(6), src[i] + string(7), src[i] + string(8), src[i] + string(9)})
+// 		_ = NewStrSlice([]Str{src[i], src[i] + string(1), src[i] + string(2), src[i] + string(3), src[i] + string(4), src[i] + string(5), src[i] + string(6), src[i] + string(7), src[i] + string(8), src[i] + string(9)})
 // 	}
 // }
 
