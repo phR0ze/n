@@ -299,6 +299,10 @@ func TestToBool(t *testing.T) {
 
 	// bool
 	{
+		var test bool
+		assert.Equal(t, true, ToBool(true))
+		assert.Equal(t, false, ToBool(&test))
+		assert.Equal(t, false, ToBool((*bool)(nil)))
 	}
 
 	// int
@@ -412,6 +416,244 @@ func ExampleToBoolE() {
 }
 
 func TestToBoolE(t *testing.T) {
+
+	// invalid
+	{
+		val, err := ToBoolE(nil)
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE(&Object{})
+		assert.Equal(t, "unable to cast type *n.Object to bool", err.Error())
+		assert.Equal(t, false, val)
+	}
+
+	// bool
+	{
+		var test bool
+		val, err := ToBoolE(true)
+		assert.Nil(t, err)
+		assert.Equal(t, true, val)
+
+		val, err = ToBoolE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE((*bool)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+	}
+
+	// int
+	{
+		var test int
+		val, err := ToBoolE(1)
+		assert.Nil(t, err)
+		assert.Equal(t, true, val)
+
+		val, err = ToBoolE(0)
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE((*int)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+	}
+
+	// int8
+	{
+		var test int8
+		val, err := ToBoolE(int8(3))
+		assert.Nil(t, err)
+		assert.Equal(t, true, val)
+
+		val, err = ToBoolE(int8(0))
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE((*int8)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+	}
+
+	// int16
+	{
+		var test int16
+		val, err := ToBoolE(int16(3))
+		assert.Nil(t, err)
+		assert.Equal(t, true, val)
+
+		val, err = ToBoolE(int16(0))
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE((*int16)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+	}
+
+	// int32
+	{
+		var test int32
+		val, err := ToBoolE(int32(3))
+		assert.Nil(t, err)
+		assert.Equal(t, true, val)
+
+		val, err = ToBoolE(int32(0))
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE((*int32)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+	}
+
+	// int64
+	{
+		var test int64
+		val, err := ToBoolE(int64(3))
+		assert.Nil(t, err)
+		assert.Equal(t, true, val)
+
+		val, err = ToBoolE(int64(0))
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE((*int64)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+	}
+
+	// string
+	{
+		assert.Equal(t, true, ToBool("1"))
+		assert.Equal(t, true, ToBool("true"))
+		assert.Equal(t, true, ToBool("TRUE"))
+		assert.Equal(t, false, ToBool("0"))
+		assert.Equal(t, false, ToBool("false"))
+		assert.Equal(t, false, ToBool("FALSE"))
+		assert.Equal(t, false, ToBool(""))
+	}
+
+	// uint
+	{
+		var test uint
+		val, err := ToBoolE(uint(1))
+		assert.Nil(t, err)
+		assert.Equal(t, true, val)
+
+		val, err = ToBoolE(0)
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE((*uint)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+	}
+
+	// uint8
+	{
+		var test uint8
+		val, err := ToBoolE(uint8(3))
+		assert.Nil(t, err)
+		assert.Equal(t, true, val)
+
+		val, err = ToBoolE(uint8(0))
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE((*uint8)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+	}
+
+	// uint16
+	{
+		var test uint16
+		val, err := ToBoolE(uint16(3))
+		assert.Nil(t, err)
+		assert.Equal(t, true, val)
+
+		val, err = ToBoolE(uint16(0))
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE((*uint16)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+	}
+
+	// uint32
+	{
+		var test uint32
+		val, err := ToBoolE(uint32(3))
+		assert.Nil(t, err)
+		assert.Equal(t, true, val)
+
+		val, err = ToBoolE(uint32(0))
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE((*uint32)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+	}
+
+	// uint64
+	{
+		var test uint64
+		val, err := ToBoolE(uint64(3))
+		assert.Nil(t, err)
+		assert.Equal(t, true, val)
+
+		val, err = ToBoolE(uint64(0))
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE((*uint64)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+	}
 }
 
 // String
