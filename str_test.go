@@ -1,59 +1,59 @@
 package n
 
-// import (
-// 	"fmt"
-// 	"testing"
+import (
+	"fmt"
+	"testing"
 
-// 	"github.com/stretchr/testify/assert"
-// )
+	"github.com/stretchr/testify/assert"
+)
 
-// // A
-// //--------------------------------------------------------------------------------------------------
-// func ExampleA() {
-// 	str := A("test")
-// 	fmt.Println(str)
-// 	// Output: test
-// }
+// A
+//--------------------------------------------------------------------------------------------------
+func ExampleA() {
+	str := A("test")
+	fmt.Println(str)
+	// Output: test
+}
 
-// func TestStr_A(t *testing.T) {
-// 	// Str
-// 	{
-// 		assert.Equal(t, "test", A(A("test")).A())
-// 	}
+func TestStr_A(t *testing.T) {
+	assert.Equal(t, "test", A("test").A())
+}
 
-// 	// string
-// 	{
-// 		assert.Equal(t, "test", A("test").A())
-// 	}
+// NewStr
+//--------------------------------------------------------------------------------------------------
+func ExampleNewStr() {
+	str := NewStr("test")
+	fmt.Println(str)
+	// Output: test
+}
 
-// 	// runes
-// 	{
-// 		assert.Equal(t, "b", A('b').A())
-// 		assert.Equal(t, "test", A([]rune("test")).A())
-// 	}
+func TestStr_NewStr(t *testing.T) {
+	// Str
+	{
+		assert.Equal(t, "test", A(A("test")).A())
+	}
 
-// 	// bytes
-// 	{
-// 		assert.Equal(t, "test", A([]byte{0x74, 0x65, 0x73, 0x74}).A())
-// 	}
+	// string
+	{
+		assert.Equal(t, "test", A("test").A())
+	}
 
-// 	// ints
-// 	{
-// 		assert.Equal(t, "10", A(10).A())
-// 	}
-// }
+	// runes
+	{
+		assert.Equal(t, "b", A('b').A())
+		assert.Equal(t, "test", A([]rune("test")).A())
+	}
 
-// // NewStr
-// //--------------------------------------------------------------------------------------------------
-// func ExampleNewStr() {
-// 	str := NewStr("test")
-// 	fmt.Println(str)
-// 	// Output: test
-// }
+	// bytes
+	{
+		assert.Equal(t, "test", A([]byte{0x74, 0x65, 0x73, 0x74}).A())
+	}
 
-// func TestStr_NewStr(t *testing.T) {
-// 	assert.Equal(t, "test", NewStr("test").A())
-// }
+	// ints
+	{
+		assert.Equal(t, "10", A(10).A())
+	}
+}
 
 // // All
 // //--------------------------------------------------------------------------------------------------
