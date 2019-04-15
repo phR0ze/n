@@ -1,6 +1,7 @@
 package n
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"testing"
@@ -165,12 +166,36 @@ func TestIndirect(t *testing.T) {
 		assert.Equal(t, []string{}, Indirect((*[]string)(nil)))
 	}
 
+	// template.CSS
+	{
+		var test template.CSS
+		assert.Equal(t, "test", string(Indirect(template.CSS("test")).(template.CSS)))
+		assert.Equal(t, "", string(Indirect(&test).(template.CSS)))
+		assert.Equal(t, "", string(Indirect((*template.CSS)(nil)).(template.CSS)))
+	}
+
 	// template.HTML
 	{
 		var test template.HTML
 		assert.Equal(t, "test", string(Indirect(template.HTML("test")).(template.HTML)))
 		assert.Equal(t, "", string(Indirect(&test).(template.HTML)))
 		assert.Equal(t, "", string(Indirect((*template.HTML)(nil)).(template.HTML)))
+	}
+
+	// template.HTMLAttr
+	{
+		var test template.HTMLAttr
+		assert.Equal(t, "test", string(Indirect(template.HTMLAttr("test")).(template.HTMLAttr)))
+		assert.Equal(t, "", string(Indirect(&test).(template.HTMLAttr)))
+		assert.Equal(t, "", string(Indirect((*template.HTMLAttr)(nil)).(template.HTMLAttr)))
+	}
+
+	// template.JS
+	{
+		var test template.JS
+		assert.Equal(t, "test", string(Indirect(template.JS("test")).(template.JS)))
+		assert.Equal(t, "", string(Indirect(&test).(template.JS)))
+		assert.Equal(t, "", string(Indirect((*template.JS)(nil)).(template.JS)))
 	}
 
 	// template.URL
@@ -257,6 +282,138 @@ func TestIndirect(t *testing.T) {
 	}
 }
 
+// Bool
+//--------------------------------------------------------------------------------------------------
+func ExampleToBool() {
+	fmt.Println(ToBool(1))
+	// Output: true
+}
+
+func TestToBool(t *testing.T) {
+
+	// invalid
+	{
+		assert.Equal(t, false, ToBool(nil))
+		assert.Equal(t, false, ToBool(&Object{}))
+	}
+
+	// bool
+	{
+	}
+
+	// int
+	{
+		var test int
+		assert.Equal(t, true, ToBool(1))
+		assert.Equal(t, false, ToBool(0))
+		assert.Equal(t, false, ToBool(&test))
+		assert.Equal(t, false, ToBool((*int)(nil)))
+	}
+
+	// int8
+	{
+		var test int8
+		assert.Equal(t, true, ToBool(int8(3)))
+		assert.Equal(t, false, ToBool(int8(0)))
+		assert.Equal(t, false, ToBool(&test))
+		assert.Equal(t, false, ToBool((*int8)(nil)))
+	}
+
+	// int16
+	{
+		var test int16
+		assert.Equal(t, true, ToBool(int16(3)))
+		assert.Equal(t, false, ToBool(int16(0)))
+		assert.Equal(t, false, ToBool(&test))
+		assert.Equal(t, false, ToBool((*int16)(nil)))
+	}
+
+	// int32
+	{
+		var test int32
+		assert.Equal(t, true, ToBool(int32(3)))
+		assert.Equal(t, false, ToBool(int32(0)))
+		assert.Equal(t, false, ToBool(&test))
+		assert.Equal(t, false, ToBool((*int32)(nil)))
+	}
+
+	// int64
+	{
+		var test int64
+		assert.Equal(t, true, ToBool(int64(3)))
+		assert.Equal(t, false, ToBool(int64(0)))
+		assert.Equal(t, false, ToBool(&test))
+		assert.Equal(t, false, ToBool((*int64)(nil)))
+	}
+
+	// string
+	{
+		assert.Equal(t, true, ToBool("1"))
+		assert.Equal(t, true, ToBool("true"))
+		assert.Equal(t, true, ToBool("TRUE"))
+		assert.Equal(t, false, ToBool("0"))
+		assert.Equal(t, false, ToBool("false"))
+		assert.Equal(t, false, ToBool("FALSE"))
+		assert.Equal(t, false, ToBool(""))
+	}
+
+	// uint
+	{
+		var test uint
+		assert.Equal(t, true, ToBool(uint(1)))
+		assert.Equal(t, false, ToBool(uint(0)))
+		assert.Equal(t, false, ToBool(&test))
+		assert.Equal(t, false, ToBool((*uint)(nil)))
+	}
+
+	// uint8
+	{
+		var test uint8
+		assert.Equal(t, true, ToBool(uint8(3)))
+		assert.Equal(t, false, ToBool(uint8(0)))
+		assert.Equal(t, false, ToBool(&test))
+		assert.Equal(t, false, ToBool((*uint8)(nil)))
+	}
+
+	// uint16
+	{
+		var test uint16
+		assert.Equal(t, true, ToBool(uint16(3)))
+		assert.Equal(t, false, ToBool(uint16(0)))
+		assert.Equal(t, false, ToBool(&test))
+		assert.Equal(t, false, ToBool((*uint16)(nil)))
+	}
+
+	// uint32
+	{
+		var test uint32
+		assert.Equal(t, true, ToBool(uint32(3)))
+		assert.Equal(t, false, ToBool(uint32(0)))
+		assert.Equal(t, false, ToBool(&test))
+		assert.Equal(t, false, ToBool((*uint32)(nil)))
+	}
+
+	// uint64
+	{
+		var test uint64
+		assert.Equal(t, true, ToBool(uint64(3)))
+		assert.Equal(t, false, ToBool(uint64(0)))
+		assert.Equal(t, false, ToBool(&test))
+		assert.Equal(t, false, ToBool((*uint64)(nil)))
+	}
+
+}
+
+// BoolE
+//--------------------------------------------------------------------------------------------------
+func ExampleToBoolE() {
+	fmt.Println(ToBoolE(1))
+	// Output: true <nil>
+}
+
+func TestToBoolE(t *testing.T) {
+}
+
 // String
 //--------------------------------------------------------------------------------------------------
 func ExampleToString() {
@@ -281,6 +438,11 @@ func TestToString(t *testing.T) {
 		assert.Equal(t, "test", ToString([]byte{0x74, 0x65, 0x73, 0x74}))
 		assert.Equal(t, "test", ToString(&[]byte{0x74, 0x65, 0x73, 0x74}))
 		assert.Equal(t, "", ToString((*[]byte)(nil)))
+	}
+
+	// error
+	{
+		assert.Equal(t, "test", ToString(errors.New("test")))
 	}
 
 	// float32
@@ -353,12 +515,36 @@ func TestToString(t *testing.T) {
 		assert.Equal(t, "", ToString(nil))
 	}
 
+	// template.CSS
+	{
+		var test template.CSS
+		assert.Equal(t, "test", ToString(template.CSS("test")))
+		assert.Equal(t, "", ToString(&test))
+		assert.Equal(t, "", ToString((*template.CSS)(nil)))
+	}
+
 	// template.HTML
 	{
 		var test template.HTML
 		assert.Equal(t, "test", ToString(template.HTML("test")))
 		assert.Equal(t, "", ToString(&test))
 		assert.Equal(t, "", ToString((*template.HTML)(nil)))
+	}
+
+	// template.HTMLAttr
+	{
+		var test template.HTMLAttr
+		assert.Equal(t, "test", ToString(template.HTMLAttr("test")))
+		assert.Equal(t, "", ToString(&test))
+		assert.Equal(t, "", ToString((*template.HTMLAttr)(nil)))
+	}
+
+	// template.JS
+	{
+		var test template.JS
+		assert.Equal(t, "test", ToString(template.JS("test")))
+		assert.Equal(t, "", ToString(&test))
+		assert.Equal(t, "", ToString((*template.JS)(nil)))
 	}
 
 	// template.URL
@@ -369,6 +555,46 @@ func TestToString(t *testing.T) {
 		assert.Equal(t, "", ToString((*template.URL)(nil)))
 	}
 
+	// uint
+	{
+		var test uint
+		assert.Equal(t, "3", ToString(uint(3)))
+		assert.Equal(t, "0", ToString(&test))
+		assert.Equal(t, "0", ToString((*uint)(nil)))
+	}
+
+	// uint8
+	{
+		var test uint8
+		assert.Equal(t, "3", ToString(uint8(3)))
+		assert.Equal(t, "0", ToString(&test))
+		assert.Equal(t, "0", ToString((*uint8)(nil)))
+	}
+
+	// uint16
+	{
+		var test uint16
+		assert.Equal(t, "3", ToString(uint16(3)))
+		assert.Equal(t, "0", ToString(&test))
+		assert.Equal(t, "0", ToString((*uint16)(nil)))
+	}
+
+	// uint32
+	{
+		var test uint32
+		assert.Equal(t, "3", ToString(uint32(3)))
+		assert.Equal(t, "0", ToString(&test))
+		assert.Equal(t, "0", ToString((*uint32)(nil)))
+	}
+
+	// uint64
+	{
+		var test uint64
+		assert.Equal(t, "3", ToString(uint64(3)))
+		assert.Equal(t, "0", ToString(&test))
+		assert.Equal(t, "0", ToString((*uint64)(nil)))
+	}
+
 	// uints
 	{
 		assert.Equal(t, "7", ToString(uint(7)))
@@ -377,15 +603,4 @@ func TestToString(t *testing.T) {
 		assert.Equal(t, "7", ToString(uint32(7)))
 		assert.Equal(t, "7", ToString(uint64(7)))
 	}
-
-	// {[]byte("one time"), "one time", false},
-	// {"one more time", "one more time", false},
-	// {template.HTML("one time"), "one time", false},
-	// {template.URL("http://somehost.foo"), "http://somehost.foo", false},
-	// {template.JS("(1+2)"), "(1+2)", false},
-	// {template.CSS("a"), "a", false},
-	// {template.HTMLAttr("a"), "a", false},
-	// // errors
-	// {testing.T{}, "", true},
-	// {key, "", true},
 }
