@@ -9,6 +9,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Methods on both pointer and non-pointer
+//--------------------------------------------------------------------------------------------------
+func TestStringSlice_Methods(t *testing.T) {
+	pointer := NewStringSliceV("0")
+	assert.Equal(t, []string{"0"}, pointer.O())
+
+	slice := *pointer
+	assert.Equal(t, []string{}, slice.DropAt(0).O())
+	assert.Equal(t, []string{}, slice.O())
+}
+
 // NewStringSlice
 //--------------------------------------------------------------------------------------------------
 func BenchmarkNewStringSlice_Go(t *testing.B) {

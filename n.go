@@ -45,7 +45,6 @@ package n
 
 import (
 	"errors"
-	"reflect"
 )
 
 // Lambda convenience type/functions
@@ -66,59 +65,8 @@ func ExB(exp bool) bool {
 	return false
 }
 
-// Reflection convenience type/functions
+// Reflection casting convenience type/functions
 //--------------------------------------------------------------------------------------------------
-
-// Indirect dereferences the interface if needed returning a non-pointer type
-func Indirect(obj interface{}) interface{} {
-	switch x := obj.(type) {
-	case bool:
-		return x
-	case *bool:
-		if x == nil {
-			return false
-		}
-		return *x
-	case int:
-		return x
-	case *int:
-		if x == nil {
-			return 0
-		}
-		return *x
-	case rune:
-		return x
-	case *rune:
-		if x == nil {
-			return rune(0)
-		}
-		return *x
-	case []rune:
-		return x
-	case *[]rune:
-		if x == nil {
-			return []rune{}
-		}
-		return *x
-	case string:
-		return x
-	case *string:
-		if x == nil {
-			return ""
-		}
-		return *x
-	case []string:
-		return x
-	case *[]string:
-		if x == nil {
-			return []string{}
-		}
-		return *x
-
-	default:
-		return reflect.Indirect(reflect.ValueOf(obj)).Interface()
-	}
-}
 
 // Misc convenience type/functions
 //--------------------------------------------------------------------------------------------------

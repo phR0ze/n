@@ -1,5 +1,9 @@
 package n
 
+import (
+	"regexp"
+)
+
 // import (
 // 	"regexp"
 // 	"sort"
@@ -8,53 +12,56 @@ package n
 // 	"github.com/pkg/errors"
 // )
 
-// var (
-// 	// ReGraphicalOnly is a regex to filter on graphical runes only
-// 	ReGraphicalOnly = regexp.MustCompile(`[^[:graph:]]+`)
-// )
+var (
+	// ReGraphicalOnly is a regex to filter on graphical runes only
+	ReGraphicalOnly = regexp.MustCompile(`[^[:graph:]]+`)
+)
 
-// // Str wraps the Go string and implements the Slice interface providing
-// // convenience methods on par with other rapid development languages.
-// type Str string
+// Str wraps the Go string and implements the Slice interface providing
+// convenience methods on par with other rapid development languages.
+type Str string
 
-// // A is an alias to NewStr for brevity
-// func A(str interface{}) *Str {
-// 	return NewStr(str)
-// }
+// A is an alias to NewStr for brevity
+func A(str interface{}) *Str {
+	return NewStr(str)
+}
 
-// // NewStr creates a new *Str which will never be nil
-// func NewStr(str interface{}) *Str {
-// 	var new Str
-// 	switch x := str.(type) {
-// 	case Str:
-// 		new = x
-// 	case *Str:
-// 		if x != nil {
-// 			new = *x
-// 		}
-// 	case rune:
-// 		new = Str(x)
-// 	case []rune:
-// 		new = Str(x)
-// 	default:
-// 		new = Str(Obj(str).ToString())
-// 	}
-// 	return &new
-// }
+// NewStr creates a new *Str which will never be nil
+// Supports: string, *string, rune, *rune, []rune, *[]rune, []string, *string
+func NewStr(str interface{}) *Str {
+	var new Str
+	switch x := str.(type) {
+	case Str, *Str:
+		new = Indirect(x).(Str)
+	case string, *string:
+		new = Str(Indirect(x).(string))
+	case []byte, *[]byte:
+		new = Str(Indirect(x).([]byte))
+	case rune, *rune:
+		new = Str(Indirect(x).(rune))
+	case []rune, *[]rune:
+		new = Str(Indirect(x).([]rune))
+	case []string, *[]string:
+		//new.ConcatM(Indirect(x).([]string))
+	default:
+		new = Str(Obj(str).ToString())
+	}
+	return &new
+}
 
-// // NewStrV creates a new *Str from the given variadic elements. Returned *Str
-// // will never be nil.
-// func NewStrV(elems ...interface{}) *Str {
-// 	var new Str
-// 	for i := range elems {
-// 		new.Append(elems[i])
-// 	}
-// 	return &new
-// }
+// NewStrV creates a new *Str from the given variadic elements. Returned *Str
+// will never be nil.
+func NewStrV(elems ...interface{}) *Str {
+	var new Str
+	// for i := range elems {
+	// 	new.Append(elems[i])
+	// }
+	return &new
+}
 
 // // Any tests if this Slice is not empty or optionally if it contains
 // // any of the given variadic elements. Incompatible types will return false.
-// // Supports: string, Str, *Str, rune, []rune as a string, []byte as string
+// // Supports: Str, *Str, string, *string, rune, []rune as a string, []byte as string
 // func (p *Str) Any(elems ...interface{}) bool {
 // 	if p == nil || len(*p) == 0 {
 // 		return false
@@ -68,28 +75,24 @@ package n
 // 	// Looking for something specific returns false if incompatible type
 // 	for i := range elems {
 // 		switch x := elems[i].(type) {
-// 		case string:
-// 			if strings.Contains(string(*p), x) {
+// 		case Str, *Str:
+// 			if strings.Contains(string(*p), string(Indirect(x).(Str))) {
 // 				return true
 // 			}
-// 		case Str:
-// 			if strings.Contains(string(*p), string(x)) {
+// 		case string, *string:
+// 			if strings.Contains(string(*p), Indirect(x).(string)) {
 // 				return true
 // 			}
-// 		case *Str:
-// 			if x != nil && strings.Contains(string(*p), string(*x)) {
+// 		case rune, *rune:
+// 			if strings.ContainsRune(string(*p), Indirect(x).(rune)) {
 // 				return true
 // 			}
-// 		case rune:
-// 			if strings.ContainsRune(string(*p), x) {
+// 		case []rune, *[]rune:
+// 			if strings.Contains(string(*p), string(Indirect(x).([]rune))) {
 // 				return true
 // 			}
-// 		case []rune:
-// 			if strings.Contains(string(*p), string(x)) {
-// 				return true
-// 			}
-// 		case []byte:
-// 			if strings.Contains(string(*p), string(x)) {
+// 		case []byte, *[]byte:
+// 			if strings.Contains(string(*p), string(Indirect(x).([]byte))) {
 // 				return true
 // 			}
 // 		}
@@ -99,38 +102,46 @@ package n
 
 // // AnyS tests if this Slice contains any of the given Slice's elements.
 // // Incompatible types will return false.
-// // Supports: []string, *[]string, []rune, *[]rune, []Str, []*Str
+// // Supports: []Str, *[]Str, []string, *[]string
 // func (p *Str) AnyS(slice interface{}) bool {
 // 	if p == nil || len(*p) == 0 {
 // 		return false
 // 	}
-// 	switch obj := slice.(type) {
-// 	case []string, *[]string:
-// 		var x []string
-// 		if y, ok := slice.(*[]string); ok {
-// 			x = *y
-// 		} else {
-// 			x = slice.([]string)
+// 	var slice Slice
+// 	switch x := slice.(type) {
+// 	case []Str, *[]Str:
+// 		y := Indirect(x).([]Str)
+// 		for i := range y {
+// 			if strings.Contains(string(*p), string(y[i])) {
+// 				return true
+// 			}
 // 		}
-// 		for i := range x {
-// 			if strings.Contains(string(*p), x[i]) {
+// 	case []string, *[]string:
+// 		y := Indirect(x).([]string)
+// 		for i := range y {
+// 			if strings.Contains(string(*p), y[i]) {
 // 				return true
 // 			}
 // 		}
 
-// 	case []string:
-// 		for i := range x {
-// 			if strings.Contains(string(*p), x[i]) {
-// 				return true
-// 			}
-// 		}
-// 	case *[]string:
-// 		if x != nil {
-// 			for i := range *x {
-// 				if strings.Contains(string(*p), (*x)[i]) {
-// 					return true
-// 				}
-// 			}
+// 		// case []string:
+// 		// 	for i := range x {
+// 		// 		if strings.Contains(string(*p), x[i]) {
+// 		// 			return true
+// 		// 		}
+// 		// 	}
+// 		// case *[]string:
+// 		// 	if x != nil {
+// 		// 		for i := range *x {
+// 		// 			if strings.Contains(string(*p), (*x)[i]) {
+// 		// 				return true
+// 		// 			}
+// 		// 		}
+// 		// 	}
+// 	}
+// 	for i := 0; i < slice.Len(); i++ {
+// 		if strings.Contains(string(*p), slice.At(i).O()) {
+// 			return true
 // 		}
 // 	}
 // 	return false
@@ -196,20 +207,20 @@ package n
 // 	if p == nil {
 // 		p = NewStrV()
 // 	}
-// 	switch x := slice.(type) {
-// 	case []string:
-// 		*p = append(*p, x...)
-// 	case *[]string:
-// 		if x != nil {
-// 			*p = append(*p, (*x)...)
-// 		}
-// 	case Str:
-// 		*p = append(*p, x...)
-// 	case *Str:
-// 		if x != nil {
-// 			*p = append(*p, (*x)...)
-// 		}
-// 	}
+// 	// switch x := slice.(type) {
+// 	// case []string:
+// 	// 	*p = append(*p, x...)
+// 	// case *[]string:
+// 	// 	if x != nil {
+// 	// 		*p = append(*p, (*x)...)
+// 	// 	}
+// 	// case Str:
+// 	// 	*p = append(*p, x...)
+// 	// case *Str:
+// 	// 	if x != nil {
+// 	// 		*p = append(*p, (*x)...)
+// 	// 	}
+// 	// }
 // 	return p
 // }
 
@@ -222,19 +233,19 @@ package n
 // // An empty Slice is returned if indicies are mutually exclusive or nothing can be returned.
 // func (p *Str) Copy(indices ...int) (new Slice) {
 // 	if p == nil || len(*p) == 0 {
-// 		return NewStrV()
+// 		return A("")
 // 	}
 
 // 	// Handle index manipulation
 // 	i, j, err := absIndices(len(*p), indices...)
 // 	if err != nil {
-// 		return NewStrV()
+// 		return A("")
 // 	}
 
 // 	// Copy elements over to new Slice
-// 	x := make([]string, j-i, j-i)
-// 	copy(x, (*p)[i:j])
-// 	return NewStr(x)
+// 	x := make([]rune, j-i, j-i)
+// 	copy(x, []rune(*p)[i:j])
+// 	return A(x)
 // }
 
 // // Count the number of elements in this Slice equal to the given element.
@@ -550,8 +561,9 @@ package n
 // 		return NewStrV()
 // 	}
 // 	return p.Slice(absNeg(n), -1)
+// }
 
-// Len returns the number of elements in this Slice
+// // Len returns the number of elements in this Slice
 // func (p *Str) Len() int {
 // 	if p == nil {
 // 		return 0
@@ -757,18 +769,10 @@ package n
 
 // // String returns a string representation of this Slice, implements the Stringer interface
 // func (p *Str) String() string {
-// 	var builder strings.Builder
-// 	builder.WriteString("[")
-// 	if p != nil {
-// 		for i := 0; i < len(*p); i++ {
-// 			builder.WriteString((*p)[i])
-// 			if i+1 < len(*p) {
-// 				builder.WriteString(" ")
-// 			}
-// 		}
+// 	if p == nil {
+// 		return ""
 // 	}
-// 	builder.WriteString("]")
-// 	return builder.String()
+// 	return string(*p)
 // }
 
 // // Swap modifies this Slice swapping the indicated elements.
@@ -1031,30 +1035,6 @@ package n
 // // 	return strings.ContainsRune(string(*p), r)
 // // }
 
-// // // Copy returns a new Str with the indicated range of runes copied from this Str.
-// // // Expects nothing, in which case everything is copied, or two indices i and j, in which
-// // // case positive and negative notation is supported and uses an inclusive behavior such
-// // // that Slice(0, -1) includes index -1 as opposed to Go's exclusive behavior. Out of
-// // // bounds indices will be moved within bounds.
-// // //
-// // // An empty Str is returned if indicies are mutually exclusive or nothing can be returned.
-// // func (p *Str) Copy(indices ...int) (new *Str) {
-// // 	if p == nil || len(*p) == 0 {
-// // 		return A("")
-// // 	}
-
-// // 	// Handle index manipulation
-// // 	i, j, err := absIndices(len(*p), indices...)
-// // 	if err != nil {
-// // 		return A("")
-// // 	}
-
-// // 	// Copy elements over to new Slice
-// // 	x := make([]rune, j-i, j-i)
-// // 	copy(x, []rune(*p)[i:j])
-// // 	return A(x)
-// // }
-
 // // // func Count(s, substr string) int
 // // // Equal(str *Str) bool
 // // // func EqualFold(s, t string) bool
@@ -1216,11 +1196,6 @@ package n
 // // // 	// }
 // // // 	return
 // // // }
-
-// // // String returns a string representation of this Slice, implements the Stringer interface
-// // func (p *Str) String() string {
-// // 	return p.A()
-// // }
 
 // // // // // TrimPrefix trims the given prefix off the string
 // // // // func (q *strN) TrimPrefix(prefix string) *strN {

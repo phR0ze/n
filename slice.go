@@ -91,14 +91,10 @@ func S(obj interface{}) (new Slice) {
 // Optimized: []int, []string
 func NewSlice(obj interface{}) (new Slice) {
 	switch x := obj.(type) {
-	case []int:
-		return NewIntSlice(x)
-	case *[]int:
-		return NewIntSlice(*x)
-	case []string:
-		return NewStringSlice(x)
-	case *[]string:
-		return NewStringSlice(*x)
+	case []int, *[]int:
+		return NewIntSlice(Indirect(x).([]int))
+	case []string, *[]string:
+		return NewStringSlice(Indirect(x).([]string))
 	default:
 		return NewRefSlice(obj)
 	}

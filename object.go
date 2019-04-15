@@ -227,8 +227,7 @@ func (p *Object) ToUint64E() (uint64, error) {
 
 // ToString casts an interface to a string type.
 func (p *Object) ToString() string {
-	v, _ := cast.ToStringE(p.o)
-	return v
+	return ToString(p.o)
 }
 
 // ToStringE casts an interface to a string type.

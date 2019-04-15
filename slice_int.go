@@ -64,18 +64,10 @@ func (p *IntSlice) AnyS(slice interface{}) bool {
 	}
 	var elems []int
 	switch x := slice.(type) {
-	case []int:
-		elems = x
-	case *[]int:
-		if x != nil {
-			elems = *x
-		}
-	case IntSlice:
-		elems = x
-	case *IntSlice:
-		if x != nil {
-			elems = (*x)
-		}
+	case []int, *[]int:
+		elems = Indirect(x).([]int)
+	case IntSlice, *IntSlice:
+		elems = Indirect(x).(IntSlice)
 	}
 	for i := range elems {
 		for j := range *p {
@@ -150,18 +142,10 @@ func (p *IntSlice) ConcatM(slice interface{}) Slice {
 		p = NewIntSliceV()
 	}
 	switch x := slice.(type) {
-	case []int:
-		*p = append(*p, x...)
-	case *[]int:
-		if x != nil {
-			*p = append(*p, (*x)...)
-		}
-	case IntSlice:
-		*p = append(*p, x...)
-	case *IntSlice:
-		if x != nil {
-			*p = append(*p, (*x)...)
-		}
+	case []int, *[]int:
+		*p = append(*p, Indirect(x).([]int)...)
+	case IntSlice, *IntSlice:
+		*p = append(*p, Indirect(x).(IntSlice)...)
 	}
 	return p
 }
