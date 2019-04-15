@@ -2,6 +2,7 @@ package n
 
 import (
 	"fmt"
+	"html/template"
 	"reflect"
 	"strconv"
 )
@@ -150,6 +151,20 @@ func Indirect(obj interface{}) interface{} {
 			return []string{}
 		}
 		return *x
+	case template.HTML:
+		return x
+	case *template.HTML:
+		if x == nil {
+			return template.HTML("")
+		}
+		return *x
+	case template.URL:
+		return x
+	case *template.URL:
+		if x == nil {
+			return template.URL("")
+		}
+		return *x
 	case uint:
 		return x
 	case *uint:
@@ -251,10 +266,10 @@ func ToString(obj interface{}) string {
 		return strconv.FormatInt(int64(Indirect(x).(int32)), 10)
 	case int64, *int64:
 		return strconv.FormatInt(Indirect(x).(int64), 10)
-	// case template.HTML:
-	// 	return string(s)
-	// case template.URL:
-	// 	return string(s)
+	case template.HTML, *template.HTML:
+		return string(Indirect(x).(template.HTML))
+	case template.URL, *template.URL:
+		return string(Indirect(x).(template.URL))
 	// case template.JS:
 	// 	return string(s)
 	// case template.CSS:

@@ -2,6 +2,7 @@ package n
 
 import (
 	"fmt"
+	"html/template"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -162,6 +163,22 @@ func TestIndirect(t *testing.T) {
 		assert.Equal(t, []string{"test"}, Indirect([]string{"test"}))
 		assert.Equal(t, []string{"test"}, Indirect(&[]string{"test"}))
 		assert.Equal(t, []string{}, Indirect((*[]string)(nil)))
+	}
+
+	// template.HTML
+	{
+		var test template.HTML
+		assert.Equal(t, "test", string(Indirect(template.HTML("test")).(template.HTML)))
+		assert.Equal(t, "", string(Indirect(&test).(template.HTML)))
+		assert.Equal(t, "", string(Indirect((*template.HTML)(nil)).(template.HTML)))
+	}
+
+	// template.URL
+	{
+		var test template.URL
+		assert.Equal(t, "test", string(Indirect(template.URL("test")).(template.URL)))
+		assert.Equal(t, "", string(Indirect(&test).(template.URL)))
+		assert.Equal(t, "", string(Indirect((*template.URL)(nil)).(template.URL)))
 	}
 
 	// uint
@@ -334,6 +351,22 @@ func TestToString(t *testing.T) {
 	// nil
 	{
 		assert.Equal(t, "", ToString(nil))
+	}
+
+	// template.HTML
+	{
+		var test template.HTML
+		assert.Equal(t, "test", ToString(template.HTML("test")))
+		assert.Equal(t, "", ToString(&test))
+		assert.Equal(t, "", ToString((*template.HTML)(nil)))
+	}
+
+	// template.URL
+	{
+		var test template.URL
+		assert.Equal(t, "test", ToString(template.URL("test")))
+		assert.Equal(t, "", ToString(&test))
+		assert.Equal(t, "", ToString((*template.URL)(nil)))
 	}
 
 	// uints
