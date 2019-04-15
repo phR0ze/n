@@ -28,6 +28,11 @@ func ExampleNewStr() {
 }
 
 func TestStr_NewStr(t *testing.T) {
+	// nil
+	{
+		assert.Equal(t, "", NewStr(nil).A())
+	}
+
 	// Str
 	{
 		assert.Equal(t, "test", A(A("test")).A())
@@ -36,6 +41,7 @@ func TestStr_NewStr(t *testing.T) {
 	// string
 	{
 		assert.Equal(t, "test", A("test").A())
+		assert.Equal(t, "test1", A([]string{"test", "1"}).O())
 	}
 
 	// runes
@@ -52,6 +58,363 @@ func TestStr_NewStr(t *testing.T) {
 	// ints
 	{
 		assert.Equal(t, "10", A(10).A())
+	}
+}
+
+// Any
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_Any_Go(t *testing.B) {
+	any := func(list []string, x []string) bool {
+		for i := range x {
+			for j := range list {
+				if list[j] == x[i] {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
+	// test here
+	src := RangeString(nines4)
+	for _, x := range src {
+		any(src, []string{x})
+	}
+}
+
+func BenchmarkStr_Any_Slice(t *testing.B) {
+	src := RangeString(nines4)
+	slice := NewStr(src)
+	for i := range src {
+		slice.Any(i)
+	}
+}
+
+func ExampleStr_Any_empty() {
+	slice := NewStrV()
+	fmt.Println(slice.Any())
+	// Output: false
+}
+
+func ExampleStr_Any_notEmpty() {
+	slice := NewStrV("1", "2", "3")
+	fmt.Println(slice.Any())
+	// Output: true
+}
+
+func ExampleStr_Any_contains() {
+	slice := NewStrV("1", "2", "3")
+	fmt.Println(slice.Any("1"))
+	// Output: true
+}
+
+func ExampleStr_Any_containsAny() {
+	slice := NewStrV("1", "2", "3")
+	fmt.Println(slice.Any("0", "1"))
+	// Output: true
+}
+
+func TestStr_Any(t *testing.T) {
+
+	// empty
+	var nilSlice *Str
+	assert.False(t, nilSlice.Any())
+	assert.False(t, NewStrV().Any())
+
+	// single
+	assert.True(t, NewStrV("2").Any())
+
+	// invalid
+	assert.False(t, NewStrV("12").Any(Object{"2"}))
+
+	assert.True(t, NewStrV("123").Any("2"))
+	assert.False(t, NewStrV("123").Any(4))
+	assert.True(t, NewStrV("123").Any(4, "3"))
+	assert.False(t, NewStrV("123").Any(4, 5))
+}
+
+// AnyS
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_AnyS_Go(t *testing.B) {
+	any := func(list []string, x []string) bool {
+		for i := range x {
+			for j := range list {
+				if list[j] == x[i] {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
+	// test here
+	src := RangeString(nines4)
+	for _, x := range src {
+		any(src, []string{x})
+	}
+}
+
+func BenchmarkStr_AnyS_Slice(t *testing.B) {
+	src := RangeString(nines4)
+	slice := NewStr(src)
+	for _, x := range src {
+		slice.Any([]string{x})
+	}
+}
+
+func ExampleStr_AnyS() {
+	slice := NewStrV("1", "2", "3")
+	fmt.Println(slice.AnyS([]string{"0", "1"}))
+	// Output: true
+}
+
+func TestStr_AnyS(t *testing.T) {
+	// nil
+	{
+		var slice *Str
+		assert.False(t, slice.AnyS([]string{"1"}))
+		assert.False(t, NewStrV("1").AnyS(nil))
+	}
+
+	// []string
+	{
+		assert.True(t, NewStrV("123").AnyS([]string{"1"}))
+		assert.True(t, NewStrV("123").AnyS([]string{"4", "3"}))
+		assert.False(t, NewStrV("123").AnyS([]string{"4", "5"}))
+	}
+
+	// *[]string
+	{
+		assert.True(t, NewStrV("123").AnyS(&([]string{"1"})))
+		assert.True(t, NewStrV("123").AnyS(&([]string{"4", "3"})))
+		assert.False(t, NewStrV("123").AnyS(&([]string{"4", "5"})))
+	}
+
+	// Slice
+	{
+		assert.True(t, NewStrV("123").AnyS(NewStringSliceV("1")))
+		assert.True(t, NewStrV("123").AnyS(NewStringSliceV("4", "3")))
+		assert.False(t, NewStrV("123").AnyS(NewStringSliceV("4", "5")))
+	}
+
+	// Str
+	{
+		assert.True(t, NewStrV("123").AnyS([]Str{Str("1"), Str("2")}))
+		assert.True(t, NewStrV("123").AnyS(&[]Str{Str("1"), Str("2")}))
+		assert.False(t, NewStrV("123").AnyS([]Str{Str("4"), Str("5")}))
+	}
+
+	// invalid types
+	assert.False(t, NewStrV("1", "2").AnyS(nil))
+	assert.False(t, NewStrV("1", "2").AnyS((*[]string)(nil)))
+	assert.False(t, NewStrV("1", "2").AnyS((*Str)(nil)))
+	assert.False(t, NewStrV("1", "2").AnyS([]int{2}))
+}
+
+// AnyW
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_AnyW_Go(t *testing.B) {
+	src := RangeString(nines5)
+	for _, x := range src {
+		if x == string(nines4) {
+			break
+		}
+	}
+}
+
+func BenchmarkStr_AnyW_Slice(t *testing.B) {
+	src := RangeString(nines5)
+	NewStr(src).AnyW(func(x O) bool {
+		return ExB(x.(string) == string(nines4))
+	})
+}
+
+func ExampleStr_AnyW() {
+	slice := NewStr("123")
+	fmt.Println(slice.AnyW(func(x O) bool {
+		return ExB(x.(rune) == '2')
+	}))
+	// Output: true
+}
+
+func TestStr_AnyW(t *testing.T) {
+
+	// empty
+	var slice *Str
+	assert.False(t, slice.AnyW(func(x O) bool { return ExB(x.(rune) > '0') }))
+	assert.False(t, NewStrV().AnyW(func(x O) bool { return ExB(x.(rune) > '0') }))
+
+	// single
+	assert.True(t, NewStr("2").AnyW(func(x O) bool { return ExB(x.(rune) > '0') }))
+	assert.True(t, NewStr("12").AnyW(func(x O) bool { return ExB(x.(rune) == '2') }))
+	assert.True(t, NewStr("123").AnyW(func(x O) bool { return ExB(x.(rune) == '4' || x.(rune) == '3') }))
+}
+
+// Concat
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_Concat_Go(t *testing.B) {
+	dest := []string{}
+	src := RangeString(nines6)
+	j := 0
+	for i := 10; i < len(src); i += 10 {
+		dest = append(dest, (src[j:i])...)
+		j = i
+	}
+}
+
+func BenchmarkStr_Concat_Slice(t *testing.B) {
+	dest := NewStrV()
+	src := RangeString(nines6)
+	j := 0
+	for i := 10; i < len(src); i += 10 {
+		dest.Concat(src[j:i])
+		j = i
+	}
+}
+
+func ExampleStr_Concat() {
+	slice := NewStrV("1").Concat([]string{"2", "3"})
+	fmt.Println(slice)
+	// Output: 123
+}
+
+func TestStr_Concat(t *testing.T) {
+
+	// nil
+	{
+		var slice *Str
+		assert.Equal(t, "12", slice.Concat([]string{"1", "2"}).O())
+		assert.Equal(t, "12", NewStrV("1", "2").Concat(nil).O())
+	}
+
+	// []string
+	{
+		slice := NewStrV("1")
+		concated := slice.Concat([]string{"2", "3"})
+		assert.Equal(t, "12", slice.Append("2").O())
+		assert.Equal(t, "123", concated.O())
+	}
+
+	// *[]string
+	{
+		slice := NewStrV("1")
+		concated := slice.Concat(&([]string{"2", "3"}))
+		assert.Equal(t, "12", slice.Append("2").O())
+		assert.Equal(t, "123", concated.O())
+	}
+
+	// *Str
+	{
+		slice := NewStrV("1")
+		concated := slice.Concat(NewStrV("2", "3"))
+		assert.Equal(t, "12", slice.Append("2").O())
+		assert.Equal(t, "123", concated.O())
+	}
+
+	// Str
+	{
+		slice := NewStrV("1")
+		concated := slice.Concat(*NewStrV("2", "3"))
+		assert.Equal(t, "12", slice.Append("2").O())
+		assert.Equal(t, "123", concated.O())
+	}
+
+	// Slice
+	{
+		slice := NewStrV("1")
+		concated := slice.Concat(Slice(NewStrV("2", "3")))
+		assert.Equal(t, "12", slice.Append("2").O())
+		assert.Equal(t, "123", concated.O())
+	}
+
+	// nils
+	{
+		assert.Equal(t, "12", NewStrV("1", "2").Concat((*[]string)(nil)).O())
+		assert.Equal(t, "12", NewStrV("1", "2").Concat((*Str)(nil)).O())
+	}
+}
+
+// ConcatM
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_ConcatM_Go(t *testing.B) {
+	dest := []string{}
+	src := RangeString(nines6)
+	j := 0
+	for i := 10; i < len(src); i += 10 {
+		dest = append(dest, (src[j:i])...)
+		j = i
+	}
+}
+
+func BenchmarkStr_ConcatM_Slice(t *testing.B) {
+	dest := NewStrV()
+	src := RangeString(nines6)
+	j := 0
+	for i := 10; i < len(src); i += 10 {
+		dest.ConcatM(src[j:i])
+		j = i
+	}
+}
+
+func ExampleStr_ConcatM() {
+	slice := NewStrV("1").ConcatM([]string{"2", "3"})
+	fmt.Println(slice)
+	// Output: 123
+}
+
+func TestStr_ConcatM(t *testing.T) {
+
+	// nil
+	{
+		var slice *Str
+		assert.Equal(t, NewStrV("12"), slice.ConcatM([]string{"1", "2"}))
+		assert.Equal(t, NewStrV("12"), NewStrV("1", "2").ConcatM(nil))
+	}
+
+	// []string
+	{
+		slice := NewStrV("1")
+		concated := slice.ConcatM([]string{"2", "3"})
+		assert.Equal(t, NewStrV("1234"), slice.Append("4"))
+		assert.Equal(t, NewStrV("1234"), concated)
+	}
+
+	// *[]string
+	{
+		slice := NewStrV("1")
+		concated := slice.ConcatM(&([]string{"2", "3"}))
+		assert.Equal(t, NewStrV("1234"), slice.Append("4"))
+		assert.Equal(t, NewStrV("1234"), concated)
+	}
+
+	// *Str
+	{
+		slice := NewStrV("1")
+		concated := slice.ConcatM(NewStrV("2", "3"))
+		assert.Equal(t, NewStrV("1234"), slice.Append("4"))
+		assert.Equal(t, NewStrV("1234"), concated)
+	}
+
+	// Str
+	{
+		slice := NewStrV("1")
+		concated := slice.ConcatM(*NewStrV("2", "3"))
+		assert.Equal(t, NewStrV("1", "2", "3", "4"), slice.Append("4"))
+		assert.Equal(t, NewStrV("1", "2", "3", "4"), concated)
+	}
+
+	// Slice
+	{
+		slice := NewStrV("1")
+		concated := slice.ConcatM(Slice(NewStrV("2", "3")))
+		assert.Equal(t, NewStrV("1", "2", "3", "4"), slice.Append("4"))
+		assert.Equal(t, NewStrV("1", "2", "3", "4"), concated)
+	}
+
+	// nils
+	{
+		assert.Equal(t, NewStrV("1", "2"), NewStrV("1", "2").ConcatM((*[]string)(nil)))
+		assert.Equal(t, NewStrV("1", "2"), NewStrV("1", "2").ConcatM((*Str)(nil)))
 	}
 }
 
@@ -332,7 +695,7 @@ func TestStr_NewStr(t *testing.T) {
 // }
 
 // func BenchmarkStr_Copy_Str(t *testing.B) {
-// 	slice := NewStringSlice(RangeString(nines6))
+// 	slice := NewStr(RangeString(nines6))
 // 	slice.Copy()
 // }
 
@@ -371,8 +734,8 @@ func TestStr_NewStr(t *testing.T) {
 // 		assert.Equal(t, A("1"), A("1").Copy())
 // 		assert.Equal(t, A("1", "2", "3"), A("1", "2", "3").Copy())
 // 		assert.Equal(t, A("1", "2", "3"), A("1", "2", "3").Copy(0, -1))
-// 		assert.Equal(t, NewStringSlice([]string{"1", "2", "3"}), NewStringSlice([]string{"1", "2", "3"}).Copy())
-// 		assert.Equal(t, NewStringSlice([]string{"1", "2", "3"}), NewStringSlice([]string{"1", "2", "3"}).Copy(0, -1))
+// 		assert.Equal(t, NewStr([]string{"1", "2", "3"}), NewStr([]string{"1", "2", "3"}).Copy())
+// 		assert.Equal(t, NewStr([]string{"1", "2", "3"}), NewStr([]string{"1", "2", "3"}).Copy(0, -1))
 // 	}
 
 // 	// out of bounds should be moved in

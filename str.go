@@ -25,6 +25,7 @@ func A(str interface{}) *Str {
 func NewStr(str interface{}) *Str {
 	var new Str
 	switch x := str.(type) {
+	case nil:
 	case Str, *Str:
 		new = Indirect(x).(Str)
 	case string, *string:
@@ -36,7 +37,7 @@ func NewStr(str interface{}) *Str {
 	case []rune, *[]rune:
 		new = Str(Indirect(x).([]rune))
 	case []string, *[]string:
-		//new.ConcatM(Indirect(x).([]string))
+		new.ConcatM(Indirect(x).([]string))
 	default:
 		new = Str(Obj(str).ToString())
 	}
@@ -47,9 +48,9 @@ func NewStr(str interface{}) *Str {
 // will never be nil.
 func NewStrV(elems ...interface{}) *Str {
 	var new Str
-	// for i := range elems {
-	// 	new.Append(elems[i])
-	// }
+	for i := range elems {
+		new.Append(elems[i])
+	}
 	return &new
 }
 
@@ -109,43 +110,36 @@ func (p *Str) AnyS(slice interface{}) bool {
 	if p == nil || len(*p) == 0 {
 		return false
 	}
-	// var slice Slice
-	// switch x := slice.(type) {
-	// case []Str, *[]Str:
-	// 	y := Indirect(x).([]Str)
-	// 	for i := range y {
-	// 		if strings.Contains(string(*p), string(y[i])) {
-	// 			return true
-	// 		}
-	// 	}
-	// case []string, *[]string:
-	// 	y := Indirect(x).([]string)
-	// 	for i := range y {
-	// 		if strings.Contains(string(*p), y[i]) {
-	// 			return true
-	// 		}
-	// 	}
-
-	// 	// case []string:
-	// 	// 	for i := range x {
-	// 	// 		if strings.Contains(string(*p), x[i]) {
-	// 	// 			return true
-	// 	// 		}
-	// 	// 	}
-	// 	// case *[]string:
-	// 	// 	if x != nil {
-	// 	// 		for i := range *x {
-	// 	// 			if strings.Contains(string(*p), (*x)[i]) {
-	// 	// 				return true
-	// 	// 			}
-	// 	// 		}
-	// 	// 	}
-	// }
-	// for i := 0; i < slice.Len(); i++ {
-	// 	if strings.Contains(string(*p), slice.At(i).O()) {
-	// 		return true
-	// 	}
-	// }
+	switch x := slice.(type) {
+	case []Str, *[]Str:
+		y := Indirect(x).([]Str)
+		for i := range y {
+			if strings.Contains(string(*p), string(y[i])) {
+				return true
+			}
+		}
+	case []string, *[]string:
+		y := Indirect(x).([]string)
+		for i := range y {
+			if strings.Contains(string(*p), y[i]) {
+				return true
+			}
+		}
+	case StringSlice, *StringSlice:
+		y := Indirect(x).(StringSlice)
+		for i := 0; i < y.Len(); i++ {
+			if strings.Contains(string(*p), y.At(i).A()) {
+				return true
+			}
+		}
+	case []rune, *[]rune:
+		y := Indirect(x).([]rune)
+		for i := range y {
+			if strings.ContainsRune(string(*p), y[i]) {
+				return true
+			}
+		}
+	}
 	return false
 }
 
@@ -157,7 +151,7 @@ func (p *Str) AnyW(sel func(O) bool) bool {
 // Append an element to the end of this Slice and returns a reference to this Slice.
 func (p *Str) Append(elem interface{}) Slice {
 	if p == nil {
-		p = NewStrV()
+		p = NewStr("")
 	}
 	*p = Str(string(*p) + string(*NewStr(elem)))
 	return p
@@ -209,20 +203,18 @@ func (p *Str) ConcatM(slice interface{}) Slice {
 	if p == nil {
 		p = NewStrV()
 	}
-	// switch x := slice.(type) {
-	// case []string:
-	// 	*p = append(*p, x...)
-	// case *[]string:
-	// 	if x != nil {
-	// 		*p = append(*p, (*x)...)
-	// 	}
-	// case Str:
-	// 	*p = append(*p, x...)
-	// case *Str:
-	// 	if x != nil {
-	// 		*p = append(*p, (*x)...)
-	// 	}
-	// }
+	var builder strings.Builder
+	builder.WriteString(string(*p))
+	switch x := slice.(type) {
+	case Str, *Str:
+		builder.WriteString(string(Indirect(x).(Str)))
+	case []string, *[]string:
+		y := Indirect(x).([]string)
+		for i := range y {
+			builder.WriteString(y[i])
+		}
+	}
+	*p = Str(builder.String())
 	return p
 }
 
@@ -264,7 +256,7 @@ func (p *Str) CountW(sel func(O) bool) (cnt int) {
 		return
 	}
 	for i := 0; i < len(*p); i++ {
-		if sel((*p)[i]) {
+		if sel(rune((*p)[i])) {
 			cnt++
 		}
 	}

@@ -225,6 +225,11 @@ func (p *Object) ToUint64E() (uint64, error) {
 // String related
 //--------------------------------------------------------------------------------------------------
 
+// A is an alias for ToString
+func (p *Object) A() string {
+	return ToString(p.o)
+}
+
 // ToString casts an interface to a string type.
 func (p *Object) ToString() string {
 	return ToString(p.o)
