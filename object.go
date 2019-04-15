@@ -50,13 +50,13 @@ func (p *Object) String() string {
 
 // ToBool casts an interface to a bool type.
 func (p *Object) ToBool() bool {
-	v, _ := cast.ToBoolE(p.o)
+	v, _ := ToBoolE(p.o)
 	return v
 }
 
 // ToBoolE casts an interface to a bool type.
 func (p *Object) ToBoolE() (bool, error) {
-	return cast.ToBoolE(p.o)
+	return ToBoolE(p.o)
 }
 
 // Time related
