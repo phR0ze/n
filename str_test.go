@@ -250,6 +250,140 @@ func TestStr_AnyW(t *testing.T) {
 	assert.True(t, NewStr("123").AnyW(func(x O) bool { return ExB(x.(rune) == '4' || x.(rune) == '3') }))
 }
 
+// Append
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_Append_Go(t *testing.B) {
+	src := []string{}
+	for _, i := range RangeString(nines6) {
+		src = append(src, i)
+	}
+}
+
+func BenchmarkStr_Append_Slice(t *testing.B) {
+	slice := NewStrV()
+	for _, i := range RangeString(nines6) {
+		slice.Append(i)
+	}
+}
+
+func ExampleStr_Append() {
+	slice := NewStrV("1").Append("2").Append("3")
+	fmt.Println(slice)
+	// Output: 123
+}
+
+func TestStr_Append(t *testing.T) {
+
+	// nil
+	{
+		var nilSlice *Str
+		assert.Equal(t, NewStr("0"), nilSlice.Append("0"))
+		assert.Equal(t, (*Str)(nil), nilSlice)
+	}
+
+	// Append one back to back
+	{
+		var slice *Str
+		assert.Equal(t, true, slice.Nil())
+		slice = NewStrV()
+		assert.Equal(t, 0, slice.Len())
+		assert.Equal(t, false, slice.Nil())
+
+		// First append invokes 10x reflect overhead because the slice is nil
+		slice.Append("1")
+		assert.Equal(t, 1, slice.Len())
+		assert.Equal(t, "1", slice.O())
+
+		// Second append another which will be 2x at most
+		slice.Append("2")
+		assert.Equal(t, 2, slice.Len())
+		assert.Equal(t, "12", slice.O())
+		assert.Equal(t, NewStrV("12"), slice)
+	}
+
+	// Start with just appending without chaining
+	{
+		slice := NewStrV()
+		assert.Equal(t, 0, slice.Len())
+		slice.Append("1")
+		assert.Equal(t, "1", slice.O())
+		slice.Append("2")
+		assert.Equal(t, "12", slice.O())
+	}
+
+	// Start with nil not chained
+	{
+		slice := NewStrV()
+		assert.Equal(t, 0, slice.Len())
+		slice.Append("1").Append("2").Append("3")
+		assert.Equal(t, 3, slice.Len())
+		assert.Equal(t, "123", slice.O())
+	}
+
+	// Start with nil chained
+	{
+		slice := NewStrV().Append("1").Append("2")
+		assert.Equal(t, 2, slice.Len())
+		assert.Equal(t, "12", slice.O())
+	}
+
+	// Start with non nil
+	{
+		slice := NewStrV("1").Append("2").Append("3")
+		assert.Equal(t, 3, slice.Len())
+		assert.Equal(t, "123", slice.O())
+		assert.Equal(t, NewStrV("123"), slice)
+	}
+
+	// Use append result directly
+	{
+		slice := NewStrV("1")
+		assert.Equal(t, 1, slice.Len())
+		assert.Equal(t, "12", slice.Append("2").O())
+		assert.Equal(t, NewStrV("12"), slice)
+	}
+}
+
+// AppendV
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_AppendV_Go(t *testing.B) {
+	src := []string{}
+	src = append(src, RangeString(nines6)...)
+}
+
+func BenchmarkStr_AppendV_Slice(t *testing.B) {
+	n := NewStrV()
+	new := rangeO(0, nines6)
+	n.AppendV(new...)
+}
+
+func ExampleStr_AppendV() {
+	slice := NewStrV("1").AppendV("2", "3")
+	fmt.Println(slice)
+	// Output: 123
+}
+
+func TestStr_AppendV(t *testing.T) {
+
+	// nil
+	{
+		var nilSlice *Str
+		assert.Equal(t, NewStrV("12"), nilSlice.AppendV("1", "2"))
+	}
+
+	// other types
+	{
+		assert.Equal(t, NewStrV("1test4"), NewStrV("1").AppendV([]byte{0x74, 0x65, 0x73, 0x74}).AppendV("4"))
+		assert.Equal(t, NewStrV("1234"), NewStrV("1").AppendV([]rune{'2', '3'}).AppendV("4"))
+	}
+
+	// many
+	{
+		assert.Equal(t, NewStrV("123"), NewStrV("1").AppendV("2", "3"))
+		assert.Equal(t, NewStrV("12345"), NewStrV("1").AppendV("2", "3").AppendV("4", "5"))
+	}
+}
+
 // Concat
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStr_Concat_Go(t *testing.B) {
