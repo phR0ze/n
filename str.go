@@ -4,6 +4,8 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 var (
@@ -153,7 +155,7 @@ func (p *Str) AnyW(sel func(O) bool) bool {
 // Supports: string, *string, rune, *rune, []rune, *[]rune, []byte, *[]byte, []string, *string
 func (p *Str) Append(elem interface{}) Slice {
 	if p == nil {
-		p = NewStr("")
+		p = NewStrV()
 	}
 	*p = Str(string(*p) + string(*NewStr(elem)))
 	return p
@@ -230,19 +232,19 @@ func (p *Str) ConcatM(slice interface{}) Slice {
 // An empty Slice is returned if indicies are mutually exclusive or nothing can be returned.
 func (p *Str) Copy(indices ...int) (new Slice) {
 	if p == nil || len(*p) == 0 {
-		return A("")
+		return NewStrV()
 	}
 
 	// Handle index manipulation
 	i, j, err := absIndices(len(*p), indices...)
 	if err != nil {
-		return A("")
+		return NewStrV()
 	}
 
 	// Copy elements over to new Slice
 	x := make([]rune, j-i, j-i)
 	copy(x, []rune(*p)[i:j])
-	return A(x)
+	return NewStr(x)
 }
 
 // Count the number of elements in this Slice equal to the given element.
@@ -272,22 +274,22 @@ func (p *Str) CountW(sel func(O) bool) (cnt int) {
 // as opposed to Go's exclusive behavior. Out of bounds indices will be moved within bounds.
 func (p *Str) Drop(indices ...int) Slice {
 	if p == nil || len(*p) == 0 {
+		return NewStrV()
+	}
+
+	// Handle index manipulation
+	i, j, err := absIndices(len(*p), indices...)
+	if err != nil {
 		return p
 	}
 
-	// // Handle index manipulation
-	// i, j, err := absIndices(len(*p), indices...)
-	// if err != nil {
-	// 	return p
-	// }
-
-	// // Execute
-	// n := j - i
-	// if i+n < len(*p) {
-	// 	*p = append((*p)[:i], (*p)[i+n:]...)
-	// } else {
-	// 	*p = (*p)[:i]
-	// }
+	// Execute
+	n := j - i
+	if i+n < len(*p) {
+		//*p = append((*p)[:i], (*p)[i+n:]...)
+	} else {
+		*p = (*p)[:i]
+	}
 	return p
 }
 
@@ -671,18 +673,19 @@ func (p *Str) Set(i int, elem interface{}) Slice {
 func (p *Str) SetE(i int, elem interface{}) (Slice, error) {
 	var err error
 	if p == nil {
+		return NewStrV(), err
+	}
+	if i = absIndex(len(*p), i); i == -1 {
+		err = errors.Errorf("slice assignment is out of bounds")
 		return p, err
 	}
-	// if i = absIndex(len(*p), i); i == -1 {
-	// 	err = errors.Errorf("slice assignment is out of bounds")
-	// 	return p, err
-	// }
 
-	// if x, ok := elem.(string); ok {
-	// 	(*p)[i] = x
-	// } else {
-	// 	err = errors.Errorf("can't set type '%T' in '%T'", elem, p)
-	// }
+	y := []rune(*NewStr(elem))
+	if len(y) > 0 {
+		x := []rune(*p)
+		x[i] = y[0]
+		*p = Str(x)
+	}
 	return p, err
 }
 

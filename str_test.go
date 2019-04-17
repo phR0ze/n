@@ -444,6 +444,34 @@ func TestStr_At(t *testing.T) {
 	}
 }
 
+// Clear
+//--------------------------------------------------------------------------------------------------
+func ExampleStr_Clear() {
+	slice := NewStrV("1").Concat([]string{"2", "3"})
+	fmt.Println(slice.Clear())
+	// Output:
+}
+
+func TestStr_Clear(t *testing.T) {
+
+	// nil
+	{
+		var slice *Str
+		assert.Equal(t, NewStrV(), slice.Clear())
+		assert.Equal(t, (*Str)(nil), slice)
+	}
+
+	// int
+	{
+		slice := NewStrV("1", "2", "3", "4")
+		assert.Equal(t, "1234", slice.A())
+		assert.Equal(t, NewStrV(), slice.Clear())
+		assert.Equal(t, NewStrV(), slice.Clear())
+		assert.Equal(t, NewStrV(), slice)
+		assert.Equal(t, "", slice.A())
+	}
+}
+
 // Concat
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStr_Concat_Go(t *testing.B) {
@@ -609,6 +637,122 @@ func TestStr_ConcatM(t *testing.T) {
 	{
 		assert.Equal(t, NewStrV("1", "2"), NewStrV("1", "2").ConcatM((*[]string)(nil)))
 		assert.Equal(t, NewStrV("1", "2"), NewStrV("1", "2").ConcatM((*Str)(nil)))
+	}
+}
+
+// Copy
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_Copy_Go(t *testing.B) {
+	src := RangeString(nines6)
+	dst := make([]string, len(src), len(src))
+	copy(dst, src)
+}
+
+func BenchmarkStr_Copy_Slice(t *testing.B) {
+	slice := NewStr(RangeString(nines6))
+	slice.Copy()
+}
+
+func ExampleStr_Copy() {
+	slice := NewStrV("1", "2", "3")
+	fmt.Println(slice.Copy())
+	// Output: 123
+}
+
+func TestStr_Copy(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *Str
+		assert.Equal(t, NewStrV(), slice.Copy(0, -1))
+		assert.Equal(t, NewStrV(), NewStrV("0").Clear().Copy(0, -1))
+	}
+
+	// Test that the original is NOT modified when the slice is modified
+	{
+		original := NewStrV("1", "2", "3")
+		result := original.Copy(0, -1)
+		assert.Equal(t, NewStrV("1", "2", "3"), original)
+		assert.Equal(t, NewStrV("1", "2", "3"), result)
+		result.Set(0, "0")
+		assert.Equal(t, NewStrV("1", "2", "3"), original)
+		assert.Equal(t, NewStrV("0", "2", "3"), result)
+	}
+
+	// copy full array
+	{
+		assert.Equal(t, NewStrV(), NewStrV().Copy())
+		assert.Equal(t, NewStrV(), NewStrV().Copy(0, -1))
+		assert.Equal(t, NewStrV(), NewStrV().Copy(0, 1))
+		assert.Equal(t, NewStrV(), NewStrV().Copy(0, 5))
+		assert.Equal(t, NewStrV("1"), NewStrV("1").Copy())
+		assert.Equal(t, NewStrV("1", "2", "3"), NewStrV("1", "2", "3").Copy())
+		assert.Equal(t, NewStrV("1", "2", "3"), NewStrV("1", "2", "3").Copy(0, -1))
+		assert.Equal(t, "123", NewStr([]string{"1", "2", "3"}).Copy().A())
+		assert.Equal(t, "123", NewStr([]string{"1", "2", "3"}).Copy(0, -1).A())
+	}
+
+	// out of bounds should be moved in
+	{
+		assert.Equal(t, NewStrV("1"), NewStrV("1").Copy(0, 2))
+		assert.Equal(t, NewStrV("1", "2", "3"), NewStrV("1", "2", "3").Copy(-6, 6))
+	}
+
+	// mutually exclusive
+	{
+		slice := NewStrV("1", "2", "3", "4")
+		assert.Equal(t, NewStrV(), slice.Copy(2, -3))
+		assert.Equal(t, NewStrV(), slice.Copy(0, -5))
+		assert.Equal(t, NewStrV(), slice.Copy(4, -1))
+		assert.Equal(t, NewStrV(), slice.Copy(6, -1))
+		assert.Equal(t, NewStrV(), slice.Copy(3, -2))
+	}
+
+	// singles
+	{
+		slice := NewStrV("1", "2", "3", "4")
+		assert.Equal(t, NewStrV("4"), slice.Copy(-1, -1))
+		assert.Equal(t, NewStrV("3"), slice.Copy(-2, -2))
+		assert.Equal(t, NewStrV("2"), slice.Copy(-3, -3))
+		assert.Equal(t, NewStrV("1"), slice.Copy(0, 0))
+		assert.Equal(t, NewStrV("1"), slice.Copy(-4, -4))
+		assert.Equal(t, NewStrV("2"), slice.Copy(1, 1))
+		assert.Equal(t, NewStrV("2"), slice.Copy(1, -3))
+		assert.Equal(t, NewStrV("3"), slice.Copy(2, 2))
+		assert.Equal(t, NewStrV("3"), slice.Copy(2, -2))
+		assert.Equal(t, NewStrV("4"), slice.Copy(3, 3))
+		assert.Equal(t, NewStrV("4"), slice.Copy(3, -1))
+	}
+
+	// grab all but first
+	{
+		assert.Equal(t, NewStrV("2", "3"), NewStrV("1", "2", "3").Copy(1, -1))
+		assert.Equal(t, NewStrV("2", "3"), NewStrV("1", "2", "3").Copy(1, 2))
+		assert.Equal(t, NewStrV("2", "3"), NewStrV("1", "2", "3").Copy(-2, -1))
+		assert.Equal(t, NewStrV("2", "3"), NewStrV("1", "2", "3").Copy(-2, 2))
+	}
+
+	// grab all but last
+	{
+		assert.Equal(t, NewStrV("1", "2"), NewStrV("1", "2", "3").Copy(0, -2))
+		assert.Equal(t, NewStrV("1", "2"), NewStrV("1", "2", "3").Copy(-3, -2))
+		assert.Equal(t, NewStrV("1", "2"), NewStrV("1", "2", "3").Copy(-3, 1))
+		assert.Equal(t, NewStrV("1", "2"), NewStrV("1", "2", "3").Copy(0, 1))
+	}
+
+	// grab middle
+	{
+		assert.Equal(t, NewStrV("2", "3"), NewStrV("1", "2", "3", "4").Copy(1, -2))
+		assert.Equal(t, NewStrV("2", "3"), NewStrV("1", "2", "3", "4").Copy(-3, -2))
+		assert.Equal(t, NewStrV("2", "3"), NewStrV("1", "2", "3", "4").Copy(-3, 2))
+		assert.Equal(t, NewStrV("2", "3"), NewStrV("1", "2", "3", "4").Copy(1, 2))
+	}
+
+	// random
+	{
+		assert.Equal(t, NewStrV("1"), NewStrV("1", "2", "3").Copy(0, -3))
+		assert.Equal(t, NewStrV("2", "3"), NewStrV("1", "2", "3").Copy(1, 2))
+		assert.Equal(t, NewStrV("1", "2", "3"), NewStrV("1", "2", "3").Copy(0, 2))
 	}
 }
 

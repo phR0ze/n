@@ -137,7 +137,7 @@ func Indirect(obj interface{}) interface{} {
 		return x
 	case *Str:
 		if x == nil {
-			return *NewStr("")
+			return *NewStrV()
 		}
 		return *x
 	// rune is a int32 which is already defined
