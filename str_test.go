@@ -409,7 +409,7 @@ func BenchmarkStr_At_Slice(t *testing.B) {
 }
 
 func ExampleStr_At() {
-	fmt.Println(NewStrV("123").At(2).ToString())
+	fmt.Println(NewStrV("123").At(2).A())
 	// Output: 3
 }
 
@@ -424,13 +424,13 @@ func TestStr_At(t *testing.T) {
 	// src
 	{
 		slice := NewStrV("1", "2", "3", "4")
-		assert.Equal(t, "4", slice.At(-1).String())
-		assert.Equal(t, "3", slice.At(-2).String())
-		assert.Equal(t, "2", slice.At(-3).String())
-		assert.Equal(t, "1", slice.At(0).String())
-		assert.Equal(t, "2", slice.At(1).String())
-		assert.Equal(t, "3", slice.At(2).String())
-		assert.Equal(t, "4", slice.At(3).String())
+		assert.Equal(t, "4", slice.At(-1).A())
+		assert.Equal(t, "3", slice.At(-2).A())
+		assert.Equal(t, "2", slice.At(-3).A())
+		assert.Equal(t, "1", slice.At(0).A())
+		assert.Equal(t, "2", slice.At(1).A())
+		assert.Equal(t, "3", slice.At(2).A())
+		assert.Equal(t, "4", slice.At(3).A())
 		assert.Equal(t, Char(52), slice.At(3).O())
 	}
 

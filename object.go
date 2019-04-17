@@ -36,12 +36,17 @@ func (p *Object) Nil() bool {
 	return false
 }
 
+// A is an alias to String for brevity
+func (p *Object) A() string {
+	return p.String()
+}
+
 // String returns a string representation of the Object, implements Stringer interface.
 func (p *Object) String() string {
 	if p == nil {
-		return "nil"
+		return ""
 	}
-	return p.ToString()
+	return ToString(p.o)
 }
 
 // Bool related
@@ -224,14 +229,9 @@ func (p *Object) ToUint64E() (uint64, error) {
 // String related
 //--------------------------------------------------------------------------------------------------
 
-// A is an alias for ToString
-func (p *Object) A() string {
-	return ToString(p.o)
-}
-
 // ToString casts an interface to a string type.
 func (p *Object) ToString() string {
-	return ToString(p.o)
+	return p.String()
 }
 
 // ToStringE casts an interface to a string type.
