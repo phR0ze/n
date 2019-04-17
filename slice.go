@@ -67,7 +67,8 @@ type Slice interface {
 	SortM() Slice                                     // SortM modifies this Slice sorting the elements and returns a reference to this Slice.
 	SortReverse() (new Slice)                         // SortReverse returns a new Slice sorting the elements in reverse.
 	SortReverseM() Slice                              // SortReverseM modifies this Slice sorting the elements in reverse and returns a reference to this Slice.
-	String() string                                   // Returns a string representation of this Slice, implements the Stringer interface
+	A() string                                        // A is an alias to String for brevity
+	String() string                                   // String returns a string representation of this Slice, implements the Stringer interface
 	Swap(i, j int)                                    // Swap modifies this Slice swapping the indicated elements.
 	Take(indices ...int) (new Slice)                  // Take modifies this Slice removing the indicated range of elements from this Slice and returning them as a new Slice.
 	TakeAt(i int) (elem *Object)                      // TakeAt modifies this Slice removing the elemement at the given index location and returns the removed element as an Object.

@@ -29,6 +29,11 @@ func NewStringSliceV(elems ...string) *StringSlice {
 	return &new
 }
 
+// A is an alias to String for brevity
+func (p *StringSlice) A() string {
+	return p.String()
+}
+
 // Any tests if this Slice is not empty or optionally if it contains
 // any of the given variadic elements. Incompatible types will return false.
 func (p *StringSlice) Any(elems ...interface{}) bool {

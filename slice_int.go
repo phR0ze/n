@@ -30,6 +30,11 @@ func NewIntSliceV(elems ...int) *IntSlice {
 	return &new
 }
 
+// A is an alias to String for brevity
+func (p *IntSlice) A() string {
+	return p.String()
+}
+
 // Any tests if this Slice is not empty or optionally if it contains
 // any of the given variadic elements. Incompatible types will return false.
 func (p *IntSlice) Any(elems ...interface{}) bool {

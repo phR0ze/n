@@ -129,6 +129,11 @@ func newEmptySlice(elems interface{}) (new *RefSlice) {
 	return
 }
 
+// A is an alias to String for brevity
+func (p *RefSlice) A() string {
+	return p.String()
+}
+
 // Any tests if this Slice is not empty or optionally if it contains
 // any of the given variadic elements. Incompatible types will return false.
 func (p *RefSlice) Any(elems ...interface{}) bool {
