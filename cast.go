@@ -21,6 +21,14 @@ func Indirect(obj interface{}) interface{} {
 			return false
 		}
 		return *x
+	// byte is just a uint8
+	// case byte:
+	// 	return x
+	// case *byte:
+	// 	if x == nil {
+	// 		return byte(0)
+	// 	}
+	// 	return *x
 	// []byte is just a uint8[] which is defined later
 	// case []byte:
 	// 	return x
@@ -29,6 +37,13 @@ func Indirect(obj interface{}) interface{} {
 	// 		return []byte{}
 	// 	}
 	// 	return *x
+	case Char:
+		return x
+	case *Char:
+		if x == nil {
+			return *NewChar("")
+		}
+		return *x
 	case float32:
 		return x
 	case *float32:
@@ -317,6 +332,9 @@ func ToString(obj interface{}) string {
 		return strconv.FormatBool(Indirect(x).(bool))
 	case []byte, *[]byte:
 		return string(Indirect(x).([]byte))
+	case Char, *Char:
+		c := Indirect(x).(Char)
+		return c.String()
 	case error:
 		return x.Error()
 	case float32, *float32:

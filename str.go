@@ -16,15 +16,15 @@ var (
 type Str string
 
 // A is an alias to NewStr for brevity
-func A(str interface{}) *Str {
-	return NewStr(str)
+func A(obj interface{}) *Str {
+	return NewStr(obj)
 }
 
 // NewStr creates a new *Str which will never be nil
-// Supports: string, *string, rune, *rune, []rune, *[]rune, []string, *string
-func NewStr(str interface{}) *Str {
+// Supports: string, *string, rune, *rune, []rune, *[]rune, []byte, *[]byte, []string, *string
+func NewStr(obj interface{}) *Str {
 	var new Str
-	switch x := str.(type) {
+	switch x := obj.(type) {
 	case nil:
 	case Str, *Str:
 		new = Indirect(x).(Str)
@@ -39,13 +39,14 @@ func NewStr(str interface{}) *Str {
 	case []string, *[]string:
 		new.ConcatM(Indirect(x).([]string))
 	default:
-		new = Str(Obj(str).ToString())
+		new = Str(Obj(obj).ToString())
 	}
 	return &new
 }
 
 // NewStrV creates a new *Str from the given variadic elements. Returned *Str
 // will never be nil.
+// Supports: string, *string, rune, *rune
 func NewStrV(elems ...interface{}) *Str {
 	var new Str
 	for i := range elems {
@@ -149,6 +150,7 @@ func (p *Str) AnyW(sel func(O) bool) bool {
 }
 
 // Append an element to the end of this Slice and returns a reference to this Slice.
+// Supports: string, *string, rune, *rune, []rune, *[]rune, []byte, *[]byte, []string, *string
 func (p *Str) Append(elem interface{}) Slice {
 	if p == nil {
 		p = NewStr("")
@@ -158,6 +160,7 @@ func (p *Str) Append(elem interface{}) Slice {
 }
 
 // AppendV appends the variadic elements to the end of this Slice and returns a reference to this Slice.
+// Supports: string, *string, rune, *rune, []rune, *[]rune, []byte, *[]byte, []string, *string
 func (p *Str) AppendV(elems ...interface{}) Slice {
 	if p == nil {
 		p = NewStrV()
@@ -177,7 +180,7 @@ func (p *Str) At(i int) (elem *Object) {
 	if i = absIndex(len(*p), i); i == -1 {
 		return
 	}
-	elem.o = (*p)[i]
+	elem.o = Char((*p)[i])
 	return
 }
 

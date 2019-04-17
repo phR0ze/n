@@ -1,7 +1,6 @@
 package n
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/phR0ze/cast"
@@ -42,7 +41,7 @@ func (p *Object) String() string {
 	if p == nil {
 		return "nil"
 	}
-	return fmt.Sprintf("%v", p.O())
+	return p.ToString()
 }
 
 // Bool related

@@ -342,6 +342,12 @@ func TestStr_Append(t *testing.T) {
 		assert.Equal(t, "12", slice.Append("2").O())
 		assert.Equal(t, NewStrV("12"), slice)
 	}
+
+	// other types
+	{
+		assert.Equal(t, "1test4", NewStrV("1").Append([]byte{0x74, 0x65, 0x73, 0x74}).Append("4").O())
+		assert.Equal(t, "1234", NewStrV("1").Append([]rune{'2', '3'}).Append("4").O())
+	}
 }
 
 // AppendV
@@ -381,6 +387,60 @@ func TestStr_AppendV(t *testing.T) {
 	{
 		assert.Equal(t, NewStrV("123"), NewStrV("1").AppendV("2", "3"))
 		assert.Equal(t, NewStrV("12345"), NewStrV("1").AppendV("2", "3").AppendV("4", "5"))
+	}
+}
+
+// At
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_At_Go(t *testing.B) {
+	src := RangeString(nines6)
+	for _, x := range src {
+		assert.IsType(t, 0, x)
+	}
+}
+
+func BenchmarkStr_At_Slice(t *testing.B) {
+	src := RangeString(nines6)
+	slice := NewStr(src)
+	for i := 0; i < len(src); i++ {
+		_, ok := (slice.At(i).O()).(string)
+		assert.True(t, ok)
+	}
+}
+
+func ExampleStr_At() {
+	fmt.Println(NewStrV("123").At(2).ToString())
+	// Output: 3
+}
+
+func TestStr_At(t *testing.T) {
+
+	// nil
+	{
+		var nilSlice *Str
+		assert.Equal(t, Obj(nil), nilSlice.At(0))
+	}
+
+	// src
+	{
+		slice := NewStrV("1", "2", "3", "4")
+		assert.Equal(t, "4", slice.At(-1).String())
+		assert.Equal(t, "3", slice.At(-2).String())
+		assert.Equal(t, "2", slice.At(-3).String())
+		assert.Equal(t, "1", slice.At(0).String())
+		assert.Equal(t, "2", slice.At(1).String())
+		assert.Equal(t, "3", slice.At(2).String())
+		assert.Equal(t, "4", slice.At(3).String())
+		assert.Equal(t, Char(52), slice.At(3).O())
+	}
+
+	// index out of bounds
+	{
+		slice := NewStrV("1")
+		assert.Equal(t, &Object{}, slice.At(3))
+		assert.Equal(t, nil, slice.At(3).O())
+		assert.Equal(t, &Object{}, slice.At(-3))
+		assert.Equal(t, nil, slice.At(-3).O())
 	}
 }
 
