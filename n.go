@@ -47,7 +47,7 @@ import (
 	"errors"
 )
 
-// Lambda convenience type/functions
+// Misc convenience type/functions
 //--------------------------------------------------------------------------------------------------
 
 // O is an alias for interface{} used in lambda expresssions for brevity.
@@ -65,12 +65,6 @@ func ExB(exp bool) bool {
 	return false
 }
 
-// Reflection casting convenience type/functions
-//--------------------------------------------------------------------------------------------------
-
-// Misc convenience type/functions
-//--------------------------------------------------------------------------------------------------
-
 // Range creates slice of the given range of numbers inclusive
 func Range(min, max int) []int {
 	result := make([]int, max-min+1)
@@ -80,25 +74,38 @@ func Range(min, max int) []int {
 	return result
 }
 
-// SetValueOrDefault sets the value of the given string 'target' to the
-// given 'value' if value is not empty else 'defaulty' and returns the value as well
-func SetValueOrDefault(target *string, value, defaulty string) string {
-	if value != "" {
-		*target = value
-	} else {
-		*target = defaulty
+// SetOnTrue provides a simple means of only updating the result if the exp is true
+func SetOnTrue(result *bool, exp bool) {
+	if exp {
+		*result = true
 	}
-
-	return *target
 }
 
-// SetValueIfEmpty sets the value of the given string to the other if not empty
-// and returns the target as well.
-func SetValueIfEmpty(target *string, value string) string {
-	if *target == "" {
-		*target = value
+// SetOnFalse provides a simple means of only updating the result if the exp is false
+func SetOnFalse(result *bool, exp bool) {
+	if !exp {
+		*result = false
 	}
-	return *target
+}
+
+// SetOrDefault sets the value of 'this' string to the given 'value' if 'value'
+// is not empty else sets 'this' string to the 'defaulty' value and returns 'this' string.
+func SetOrDefault(this *string, value, defaulty string) string {
+	if value != "" {
+		*this = value
+	} else {
+		*this = defaulty
+	}
+
+	return *this
+}
+
+// SetIfEmpty sets the value of 'this' string to the given 'value' if not empty and returns 'this' string.
+func SetIfEmpty(this *string, value string) string {
+	if *this == "" {
+		*this = value
+	}
+	return *this
 }
 
 // ValueOrDefault returns the value or defaulty if the value is empty

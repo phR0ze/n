@@ -134,13 +134,13 @@ func TestSetValueOrDefault(t *testing.T) {
 	// Test default set
 	{
 		target := ""
-		assert.Equal(t, "test", SetValueOrDefault(&target, "", "test"))
+		assert.Equal(t, "test", SetOrDefault(&target, "", "test"))
 	}
 
 	// Test value set
 	{
 		target := ""
-		SetValueOrDefault(&target, "foo", "test")
+		SetOrDefault(&target, "foo", "test")
 		assert.Equal(t, "foo", target)
 	}
 }
@@ -149,14 +149,14 @@ func TestSetIfEmpty(t *testing.T) {
 	// Test empty
 	{
 		target := ""
-		SetValueIfEmpty(&target, "test")
+		SetIfEmpty(&target, "test")
 		assert.Equal(t, "test", target)
 	}
 
 	// Not empty
 	{
 		target := "foo"
-		assert.Equal(t, "foo", SetValueIfEmpty(&target, "test"))
+		assert.Equal(t, "foo", SetIfEmpty(&target, "test"))
 	}
 }
 
