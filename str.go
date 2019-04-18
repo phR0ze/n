@@ -23,7 +23,7 @@ func A(obj interface{}) *Str {
 }
 
 // NewStr creates a new *Str which will never be nil
-// Supports: string, *string, rune, *rune, []rune, *[]rune, []byte, *[]byte, []string, *string
+// Supports: Str *Str, string *string, []byte *[]byte, rune *rune, []rune *[]rune, []string *[]string ...
 func NewStr(obj interface{}) *Str {
 	var new Str
 	switch x := obj.(type) {
@@ -65,9 +65,119 @@ func (p *Str) A() string {
 	return string(*p)
 }
 
+// C exports the Str as a Char
+func (p *Str) C() *Char {
+	return NewChar(p)
+}
+
+// All tests if this Slice contains all of the given variadic elements.
+// Incompatible types will return false.
+// Supports: Str *Str, string *string, rune []rune as a string, []byte as string
+func (p *Str) All(elems ...interface{}) bool {
+	if p == nil || len(*p) == 0 || len(elems) == 0 {
+		return false
+	}
+	result := true
+	for i := range elems {
+		if !strings.Contains(string(*p), NewStr(elems[i]).A()) {
+			return false
+		}
+	}
+	return result
+}
+
+// AllS tests if this Slice contains all of the given Slice's elements.
+// Incompatible types will return false.
+// Supports: []Str *[]Str, []string *[]string, StringSlice *StringSlice, []rune *[]rune as chars, []byte *[]byte as chars
+func (p *Str) AllS(slice interface{}) bool {
+	if p == nil || len(*p) == 0 {
+		return false
+	}
+	result := true
+	switch x := slice.(type) {
+	case []Str, *[]Str:
+		y := Indirect(x).([]Str)
+		if len(y) == 0 {
+			return false
+		}
+		for i := range y {
+			if !strings.Contains(string(*p), string(y[i])) {
+				return false
+			}
+		}
+	case []string, *[]string:
+		y := Indirect(x).([]string)
+		if len(y) == 0 {
+			return false
+		}
+		for i := range y {
+			if !strings.Contains(string(*p), y[i]) {
+				return false
+			}
+		}
+	case StringSlice, *StringSlice:
+		y := Indirect(x).(StringSlice)
+		if len(y) == 0 {
+			return false
+		}
+		for i := 0; i < y.Len(); i++ {
+			if !strings.Contains(string(*p), y.At(i).A()) {
+				return false
+			}
+		}
+	case []byte, *[]byte:
+		y := Indirect(x).([]byte)
+		if len(y) == 0 {
+			return false
+		}
+		for i := range y {
+			if !strings.ContainsRune(string(*p), rune(y[i])) {
+				return false
+			}
+		}
+	case []rune, *[]rune:
+		y := Indirect(x).([]rune)
+		if len(y) == 0 {
+			return false
+		}
+		for i := range y {
+			if !strings.ContainsRune(string(*p), y[i]) {
+				return false
+			}
+		}
+	default:
+		result = false
+	}
+	return result
+}
+
+// // // Ascii converts the string to pure ASCII
+// // func (p *Str) Ascii() *Str {
+// // 	if p == nil {
+// // 		return A("")
+// // 	}
+// // 	return A(ReGraphicalOnly.ReplaceAllString(string(*p), " "))
+// // }
+
+// // // AsciiA converts the string to pure ASCII
+// // func (p *Str) AsciiA() string {
+// // 	if p == nil {
+// // 		return ""
+// // 	}
+// // 	return ReGraphicalOnly.ReplaceAllString(string(*p), " ")
+// // }
+
+// // // AsciiOnly checks to see if this is an ASCII only string
+// // func (p *Str) AsciiOnly() bool {
+// // 	if p == nil {
+// // 		return true
+// // 	}
+// // 	return len(*p) == len(ReGraphicalOnly.ReplaceAllString(string(*p), ""))
+// // }
+
 // Any tests if this Slice is not empty or optionally if it contains
 // any of the given variadic elements. Incompatible types will return false.
-// Supports: Str, *Str, string, *string, rune, []rune as a string, []byte as string
+// Supports: Str *Str, string *string, rune []rune as a string, []byte as string...
 func (p *Str) Any(elems ...interface{}) bool {
 	if p == nil || len(*p) == 0 {
 		return false
@@ -80,27 +190,8 @@ func (p *Str) Any(elems ...interface{}) bool {
 
 	// Looking for something specific returns false if incompatible type
 	for i := range elems {
-		switch x := elems[i].(type) {
-		case Str, *Str:
-			if strings.Contains(string(*p), string(Indirect(x).(Str))) {
-				return true
-			}
-		case string, *string:
-			if strings.Contains(string(*p), Indirect(x).(string)) {
-				return true
-			}
-		case rune, *rune:
-			if strings.ContainsRune(string(*p), Indirect(x).(rune)) {
-				return true
-			}
-		case []rune, *[]rune:
-			if strings.Contains(string(*p), string(Indirect(x).([]rune))) {
-				return true
-			}
-		case []byte, *[]byte:
-			if strings.Contains(string(*p), string(Indirect(x).([]byte))) {
-				return true
-			}
+		if strings.Contains(string(*p), NewStr(elems[i]).A()) {
+			return true
 		}
 	}
 	return false
@@ -108,7 +199,7 @@ func (p *Str) Any(elems ...interface{}) bool {
 
 // AnyS tests if this Slice contains any of the given Slice's elements.
 // Incompatible types will return false.
-// Supports: []Str, *[]Str, []string, *[]string
+// Supports: []Str *[]Str, []string *[]string, StringSlice *StringSlice, []rune *[]rune as chars, []byte *[]byte as chars
 func (p *Str) AnyS(slice interface{}) bool {
 	if p == nil || len(*p) == 0 {
 		return false
@@ -135,6 +226,13 @@ func (p *Str) AnyS(slice interface{}) bool {
 				return true
 			}
 		}
+	case []byte, *[]byte:
+		y := Indirect(x).([]byte)
+		for i := range y {
+			if strings.ContainsRune(string(*p), rune(y[i])) {
+				return true
+			}
+		}
 	case []rune, *[]rune:
 		y := Indirect(x).([]rune)
 		for i := range y {
@@ -152,7 +250,7 @@ func (p *Str) AnyW(sel func(O) bool) bool {
 }
 
 // Append an element to the end of this Slice and returns a reference to this Slice.
-// Supports: string, *string, rune, *rune, []rune, *[]rune, []byte, *[]byte, []string, *string
+// Supports: Str *Str, string *string, []byte *[]byte, rune *rune, []rune *[]rune, []string *[]string ...
 func (p *Str) Append(elem interface{}) Slice {
 	if p == nil {
 		p = NewStrV()
@@ -162,7 +260,7 @@ func (p *Str) Append(elem interface{}) Slice {
 }
 
 // AppendV appends the variadic elements to the end of this Slice and returns a reference to this Slice.
-// Supports: string, *string, rune, *rune, []rune, *[]rune, []byte, *[]byte, []string, *string
+// Supports: Str *Str, string *string, []byte *[]byte, rune *rune, []rune *[]rune, []string *[]string ...
 func (p *Str) AppendV(elems ...interface{}) Slice {
 	if p == nil {
 		p = NewStrV()
@@ -185,6 +283,43 @@ func (p *Str) At(i int) (elem *Object) {
 	elem.o = Char((*p)[i])
 	return
 }
+
+// // // At returns the element at the given index location. Allows for negative notation.
+// // func (p *Str) At(i int) rune {
+// // 	r, _ := p.AtE(i)
+// // 	return r
+// // }
+
+// // // AtE returns the element at the given index location. Allows for negative notation.
+// // func (p *Str) AtE(i int) (r rune, err error) {
+// // 	if p == nil {
+// // 		err = errors.Errorf("Str is nil")
+// // 		return
+// // 	}
+// // 	if i = absIndex(len(*p), i); i == -1 {
+// // 		err = errors.Errorf("index out of Str bounds")
+// // 		return
+// // 	}
+// // 	r = rune(string(*p)[i])
+// // 	return
+// // }
+
+// // // AtA returns the element at the given index location. Allows for negative notation.
+// // func (p *Str) AtA(i int) string {
+// // 	str, _ := p.AtAE(i)
+// // 	return str
+// // }
+
+// // // AtAE returns the element at the given index location. Allows for negative notation.
+// // func (p *Str) AtAE(i int) (str string, err error) {
+// // 	r, e := p.AtE(i)
+// // 	str = string(r)
+// // 	if r == int32(0) {
+// // 		str = ""
+// // 	}
+// // 	err = e
+// // 	return
+// // }
 
 // Clear modifies this Slice to clear out all elements and returns a reference to this Slice.
 func (p *Str) Clear() Slice {
@@ -247,11 +382,35 @@ func (p *Str) Copy(indices ...int) (new Slice) {
 	return NewStr(x)
 }
 
-// Count the number of elements in this Slice equal to the given element.
+// Count counts the number of non-overlapping instances of substr in this string.
+// Supports: Str, *Str, string, *string, rune, []rune as a string, []byte as string
 func (p *Str) Count(elem interface{}) (cnt int) {
-	if y, ok := elem.(string); ok {
-		cnt = p.CountW(func(x O) bool { return ExB(x.(string) == y) })
+	if p == nil || len(*p) == 0 || elem == nil {
+		return
 	}
+	// switch x := elem.(type) {
+	// case Str, *Str:
+	// 	strings.Index()
+	// 	if strings.Contains(string(*p), string(Indirect(x).(Str))) {
+	// 		return true
+	// 	}
+	// case string, *string:
+	// 	if strings.Contains(string(*p), Indirect(x).(string)) {
+	// 		return true
+	// 	}
+	// case rune, *rune:
+	// 	if strings.ContainsRune(string(*p), Indirect(x).(rune)) {
+	// 		return true
+	// 	}
+	// case []rune, *[]rune:
+	// 	if strings.Contains(string(*p), string(Indirect(x).([]rune))) {
+	// 		return true
+	// 	}
+	// case []byte, *[]byte:
+	// 	if strings.Contains(string(*p), string(Indirect(x).([]byte))) {
+	// 		return true
+	// 	}
+	// }
 	return
 }
 
@@ -865,103 +1024,6 @@ func (p *Str) UniqM() Slice {
 	return p
 }
 
-// // // All checks if all the given strs are contained in this Str
-// // func (p *Str) All(strs []string) bool {
-// // 	return p.AllV(strs...)
-// // }
-
-// // // AllV checks if all the given variadic strs are contained in this Str
-// // func (p *Str) AllV(strs ...string) bool {
-// // 	if p == nil {
-// // 		return false
-// // 	}
-// // 	for i := range strs {
-// // 		if !strings.Contains(string(*p), strs[i]) {
-// // 			return false
-// // 		}
-// // 	}
-// // 	return true
-// // }
-
-// // // Any checks if any of the given strs are contained in this Str
-// // func (p *Str) Any(strs []string) bool {
-// // 	return p.AnyV(strs...)
-// // }
-
-// // // AnyV checks if any of the given variadic strs are contained in this Str
-// // func (p *Str) AnyV(strs ...string) bool {
-// // 	if p == nil {
-// // 		return false
-// // 	}
-// // 	for i := range strs {
-// // 		if strings.Contains(string(*p), strs[i]) {
-// // 			return true
-// // 		}
-// // 	}
-// // 	return false
-// // }
-
-// // // Ascii converts the string to pure ASCII
-// // func (p *Str) Ascii() *Str {
-// // 	if p == nil {
-// // 		return A("")
-// // 	}
-// // 	return A(ReGraphicalOnly.ReplaceAllString(string(*p), " "))
-// // }
-
-// // // AsciiA converts the string to pure ASCII
-// // func (p *Str) AsciiA() string {
-// // 	if p == nil {
-// // 		return ""
-// // 	}
-// // 	return ReGraphicalOnly.ReplaceAllString(string(*p), " ")
-// // }
-
-// // // AsciiOnly checks to see if this is an ASCII only string
-// // func (p *Str) AsciiOnly() bool {
-// // 	if p == nil {
-// // 		return true
-// // 	}
-// // 	return len(*p) == len(ReGraphicalOnly.ReplaceAllString(string(*p), ""))
-// // }
-
-// // // At returns the element at the given index location. Allows for negative notation.
-// // func (p *Str) At(i int) rune {
-// // 	r, _ := p.AtE(i)
-// // 	return r
-// // }
-
-// // // AtE returns the element at the given index location. Allows for negative notation.
-// // func (p *Str) AtE(i int) (r rune, err error) {
-// // 	if p == nil {
-// // 		err = errors.Errorf("Str is nil")
-// // 		return
-// // 	}
-// // 	if i = absIndex(len(*p), i); i == -1 {
-// // 		err = errors.Errorf("index out of Str bounds")
-// // 		return
-// // 	}
-// // 	r = rune(string(*p)[i])
-// // 	return
-// // }
-
-// // // AtA returns the element at the given index location. Allows for negative notation.
-// // func (p *Str) AtA(i int) string {
-// // 	str, _ := p.AtAE(i)
-// // 	return str
-// // }
-
-// // // AtAE returns the element at the given index location. Allows for negative notation.
-// // func (p *Str) AtAE(i int) (str string, err error) {
-// // 	r, e := p.AtE(i)
-// // 	str = string(r)
-// // 	if r == int32(0) {
-// // 		str = ""
-// // 	}
-// // 	err = e
-// // 	return
-// // }
-
 // // // B exports the Str as a Go []byte
 // // func (p *Str) B() []byte {
 // // 	if p == nil {
@@ -1026,48 +1088,6 @@ func (p *Str) UniqM() Slice {
 // // 	}
 // // 	return strings.ContainsRune(string(*p), r)
 // // }
-
-// // // func Count(s, substr string) int
-// // // Equal(str *Str) bool
-// // // func EqualFold(s, t string) bool
-// // // func Fields(s string) []string
-// // // func FieldsFunc(s string, f func(rune) bool) []string
-// // // func HasPrefix(s, prefix string) bool
-// // // func HasSuffix(s, suffix string) bool
-// // // func Index(s, substr string) int
-// // // func IndexAny(s, chars string) int
-// // // func IndexByte(s string, c byte) int
-// // // func IndexFunc(s string, f func(rune) bool) int
-// // // func IndexRune(s string, r rune) int
-// // // func Join(a []string, sep string) string
-// // // func LastIndex(s, substr string) int
-// // // func LastIndexAny(s, chars string) int
-// // // func LastIndexByte(s string, c byte) int
-// // // func LastIndexFunc(s string, f func(rune) bool) int
-// // // func Map(mapping func(rune) rune, s string) string
-// // // func Repeat(s string, count int) string
-// // // func Replace(s, old, new string, n int) string
-// // // func ReplaceAll(s, old, new string) string
-// // // func Split(s, sep string) []string
-// // // func SplitAfter(s, sep string) []string
-// // // func SplitAfterN(s, sep string, n int) []string
-// // // func SplitN(s, sep string, n int) []string
-// // // func Title(s string) string
-// // // func ToLower(s string) string
-// // // func ToLowerSpecial(c unicode.SpecialCase, s string) string
-// // // func ToTitle(s string) string
-// // // func ToTitleSpecial(c unicode.SpecialCase, s string) string
-// // // func ToUpper(s string) string
-// // // func ToUpperSpecial(c unicode.SpecialCase, s string) string
-// // // func Trim(s string, cutset string) string
-// // // func TrimFunc(s string, f func(rune) bool) string
-// // // func TrimLeft(s string, cutset string) string
-// // // func TrimLeftFunc(s string, f func(rune) bool) string
-// // // func TrimPrefix(s, prefix string) string
-// // // func TrimRight(s string, cutset string) string
-// // // func TrimRightFunc(s string, f func(rune) bool) string
-// // // func TrimSpace(s string) string
-// // // func TrimSuffix(s, suffix string) string
 
 // // // // Empty returns true if the pointer is nil, string is empty or whitespace only
 // // // func (q *QStr) Empty() bool {

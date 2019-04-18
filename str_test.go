@@ -7,18 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// A
-//--------------------------------------------------------------------------------------------------
-func ExampleA() {
-	str := A("test")
-	fmt.Println(str)
-	// Output: test
-}
-
-func TestStr_A(t *testing.T) {
-	assert.Equal(t, "test", A("test").A())
-}
-
 // NewStr
 //--------------------------------------------------------------------------------------------------
 func ExampleNewStr() {
@@ -59,6 +47,178 @@ func TestStr_NewStr(t *testing.T) {
 	{
 		assert.Equal(t, "10", A(10).A())
 	}
+}
+
+// A
+//--------------------------------------------------------------------------------------------------
+func ExampleA() {
+	str := A("test")
+	fmt.Println(str)
+	// Output: test
+}
+
+func TestStr_A(t *testing.T) {
+	assert.Equal(t, "test", A("test").A())
+}
+
+// All
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_All_Go(t *testing.B) {
+	// All := func(list []string, x []string) bool {
+	// 	for i := range x {
+	// 		for j := range list {
+	// 			if list[j] == x[i] {
+	// 				return true
+	// 			}
+	// 		}
+	// 	}
+	// 	return false
+	// }
+
+	// // test here
+	// src := RangeString(nines4)
+	// for _, x := range src {
+	// 	All(src, []string{x})
+	// }
+}
+
+func BenchmarkStr_All_Slice(t *testing.B) {
+	// src := RangeString(nines4)
+	// slice := NewStr(src)
+	// for i := range src {
+	// 	slice.All(i)
+	// }
+}
+
+func ExampleStr_All_contains() {
+	slice := NewStrV("1", "2", "3")
+	fmt.Println(slice.All("1", "2"))
+	// Output: true
+}
+
+func TestStr_All(t *testing.T) {
+
+	// empty
+	var nilSlice *Str
+	assert.False(t, nilSlice.All())
+	assert.False(t, NewStrV().All())
+
+	// single
+	assert.True(t, NewStrV("2").All("2"))
+
+	// invalid
+	assert.False(t, NewStrV("12").All(Object{"2"}))
+
+	assert.True(t, NewStrV("123").All("2"))
+	assert.False(t, NewStrV("123").All(4))
+	assert.True(t, NewStrV("123").All("2", "3"))
+	assert.False(t, NewStrV("123").All(4, 5))
+}
+
+// AllS
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_AllS_Go(t *testing.B) {
+	// any := func(list []string, x []string) bool {
+	// 	for i := range x {
+	// 		for j := range list {
+	// 			if list[j] == x[i] {
+	// 				return true
+	// 			}
+	// 		}
+	// 	}
+	// 	return false
+	// }
+
+	// // test here
+	// src := RangeString(nines4)
+	// for _, x := range src {
+	// 	any(src, []string{x})
+	// }
+}
+
+func BenchmarkStr_AllS_Slice(t *testing.B) {
+	// src := RangeString(nines4)
+	// slice := NewStr(src)
+	// for _, x := range src {
+	// 	slice.Any([]string{x})
+	// }
+}
+
+func ExampleStr_AllS() {
+	slice := NewStrV("1", "2", "3")
+	fmt.Println(slice.AllS([]string{"1", "2", "3"}))
+	// Output: true
+}
+
+func TestStr_AllS(t *testing.T) {
+	// nil
+	{
+		var slice *Str
+		assert.False(t, slice.AllS([]string{"1"}))
+		assert.False(t, NewStrV("1").AllS(nil))
+	}
+
+	// []rune
+	{
+		assert.True(t, NewStrV("123").AllS([]rune{'1'}))
+		assert.True(t, NewStrV("123").AllS([]rune{'2', '3'}))
+		assert.False(t, NewStrV("123").AllS([]rune{'1', '5'}))
+	}
+
+	// *[]rune
+	{
+		assert.True(t, NewStrV("123").AllS(&([]rune{'1'})))
+		assert.True(t, NewStrV("123").AllS(&([]rune{'2', '3'})))
+		assert.False(t, NewStrV("123").AllS(&([]rune{'1', '5'})))
+	}
+
+	// []byte
+	{
+		assert.True(t, NewStrV("test").AllS([]byte{0x74}))
+		assert.True(t, NewStrV("test").AllS([]byte{0x74, 0x65}))
+		assert.False(t, NewStrV("tbob").AllS([]byte{0x74, 0x65}))
+	}
+
+	// *[]byte
+	{
+		assert.True(t, NewStrV("test").AllS(&[]byte{0x74}))
+		assert.True(t, NewStrV("test").AllS(&[]byte{0x74, 0x65}))
+		assert.False(t, NewStrV("tbob").AllS(&[]byte{0x74, 0x65}))
+	}
+
+	// []string
+	{
+		assert.True(t, NewStrV("123").AllS([]string{"1"}))
+		assert.True(t, NewStrV("123").AllS([]string{"2", "3"}))
+		assert.False(t, NewStrV("123").AllS([]string{"1", "5"}))
+	}
+
+	// *[]string
+	{
+		assert.True(t, NewStrV("123").AllS(&([]string{"1"})))
+		assert.True(t, NewStrV("123").AllS(&([]string{"2", "3"})))
+		assert.False(t, NewStrV("123").AllS(&([]string{"1", "5"})))
+	}
+
+	// StringSlice
+	{
+		assert.True(t, NewStrV("123").AllS(NewStringSliceV("1")))
+		assert.True(t, NewStrV("123").AllS(NewStringSliceV("2", "3")))
+		assert.False(t, NewStrV("123").AllS(NewStringSliceV("1", "5")))
+	}
+
+	// Str
+	{
+		assert.True(t, NewStrV("123").AllS([]Str{Str("1"), Str("2")}))
+		assert.True(t, NewStrV("123").AllS(&[]Str{Str("1"), Str("2")}))
+		assert.False(t, NewStrV("123").AllS([]Str{Str("1"), Str("5")}))
+	}
+
+	// invalid types
+	assert.False(t, NewStrV("1", "2").AllS(nil))
+	assert.False(t, NewStrV("1", "2").AllS((*[]string)(nil)))
+	assert.False(t, NewStrV("1", "2").AllS((*Str)(nil)))
+	assert.False(t, NewStrV("1", "2").AllS([]int{2}))
 }
 
 // Any
@@ -176,6 +336,34 @@ func TestStr_AnyS(t *testing.T) {
 		assert.False(t, NewStrV("1").AnyS(nil))
 	}
 
+	// []rune
+	{
+		assert.True(t, NewStrV("123").AnyS([]rune{'1'}))
+		assert.True(t, NewStrV("123").AnyS([]rune{'4', '3'}))
+		assert.False(t, NewStrV("123").AnyS([]rune{'4', '5'}))
+	}
+
+	// *[]rune
+	{
+		assert.True(t, NewStrV("123").AnyS(&([]rune{'1'})))
+		assert.True(t, NewStrV("123").AnyS(&([]rune{'4', '3'})))
+		assert.False(t, NewStrV("123").AnyS(&([]rune{'4', '5'})))
+	}
+
+	// []byte
+	{
+		assert.True(t, NewStrV("test").AnyS([]byte{0x74}))
+		assert.True(t, NewStrV("bobe").AnyS([]byte{0x74, 0x65}))
+		assert.False(t, NewStrV("bob").AnyS([]byte{0x74, 0x65}))
+	}
+
+	// *[]byte
+	{
+		assert.True(t, NewStrV("test").AnyS(&[]byte{0x74}))
+		assert.True(t, NewStrV("bobe").AnyS(&[]byte{0x74, 0x65}))
+		assert.False(t, NewStrV("bob").AnyS(&[]byte{0x74, 0x65}))
+	}
+
 	// []string
 	{
 		assert.True(t, NewStrV("123").AnyS([]string{"1"}))
@@ -190,7 +378,7 @@ func TestStr_AnyS(t *testing.T) {
 		assert.False(t, NewStrV("123").AnyS(&([]string{"4", "5"})))
 	}
 
-	// Slice
+	// StringSlice
 	{
 		assert.True(t, NewStrV("123").AnyS(NewStringSliceV("1")))
 		assert.True(t, NewStrV("123").AnyS(NewStringSliceV("4", "3")))
@@ -755,6 +943,80 @@ func TestStr_Copy(t *testing.T) {
 		assert.Equal(t, NewStrV("1", "2", "3"), NewStrV("1", "2", "3").Copy(0, 2))
 	}
 }
+
+// // Count
+// //--------------------------------------------------------------------------------------------------
+// func BenchmarkStr_Count_Go(t *testing.B) {
+// 	src := RangeString(nines5)
+// 	for _, x := range src {
+// 		if x == string(nines4) {
+// 			break
+// 		}
+// 	}
+// }
+
+// func BenchmarkStr_Count_Slice(t *testing.B) {
+// 	src := RangeString(nines5)
+// 	NewStr(src).Count(nines4)
+// }
+
+// func ExampleStr_Count() {
+// 	slice := NewStrV("1", "2", "2")
+// 	fmt.Println(slice.Count("2"))
+// 	// Output: 2
+// }
+
+// func TestStr_Count(t *testing.T) {
+
+// 	// empty
+// 	var slice *Str
+// 	assert.Equal(t, 0, slice.Count(0))
+// 	assert.Equal(t, 0, NewStrV().Count(0))
+
+// 	assert.Equal(t, 1, NewStrV("2", "3").Count("2"))
+// 	assert.Equal(t, 2, NewStrV("1", "2", "2").Count("2"))
+// 	assert.Equal(t, 4, NewStrV("4", "4", "3", "4", "4").Count("4"))
+// 	assert.Equal(t, 3, NewStrV("3", "2", "3", "3", "5").Count("3"))
+// 	assert.Equal(t, 1, NewStrV("1", "2", "3").Count("3"))
+// }
+
+// // CountW
+// //--------------------------------------------------------------------------------------------------
+// func BenchmarkStr_CountW_Go(t *testing.B) {
+// 	src := RangeString(nines5)
+// 	for _, x := range src {
+// 		if x == string(nines4) {
+// 			break
+// 		}
+// 	}
+// }
+
+// func BenchmarkStr_CountW_Slice(t *testing.B) {
+// 	src := RangeString(nines5)
+// 	NewStr(src).CountW(func(x O) bool {
+// 		return ExB(x.(string) == string(nines4))
+// 	})
+// }
+
+// func ExampleStr_CountW() {
+// 	slice := NewStrV("1", "2", "2")
+// 	fmt.Println(slice.CountW(func(x O) bool {
+// 		return ExB(x.(string) == "2")
+// 	}))
+// 	// Output: 2
+// }
+
+// func TestStr_CountW(t *testing.T) {
+
+// 	// empty
+// 	var slice *Str
+// 	assert.Equal(t, 0, slice.CountW(func(x O) bool { return ExB(x.(string) > "0") }))
+// 	assert.Equal(t, 0, NewStrV().CountW(func(x O) bool { return ExB(x.(string) > "0") }))
+
+// 	assert.Equal(t, 1, NewStrV("2", "3").CountW(func(x O) bool { return ExB(x.(string) > "2") }))
+// 	assert.Equal(t, 1, NewStrV("1", "2").CountW(func(x O) bool { return ExB(x.(string) == "2") }))
+// 	assert.Equal(t, 1, NewStrV("1", "2", "3").CountW(func(x O) bool { return ExB(x.(string) == "4" || x.(string) == "3") }))
+// }
 
 // // All
 // //--------------------------------------------------------------------------------------------------
