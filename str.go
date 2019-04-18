@@ -65,11 +65,6 @@ func (p *Str) A() string {
 	return string(*p)
 }
 
-// C exports the Str as a Char
-func (p *Str) C() *Char {
-	return NewChar(p)
-}
-
 // All tests if this Slice contains all of the given variadic elements.
 // Incompatible types will return false.
 // Supports: Str *Str, string *string, rune []rune as a string, []byte as string
@@ -150,30 +145,6 @@ func (p *Str) AllS(slice interface{}) bool {
 	}
 	return result
 }
-
-// // // Ascii converts the string to pure ASCII
-// // func (p *Str) Ascii() *Str {
-// // 	if p == nil {
-// // 		return A("")
-// // 	}
-// // 	return A(ReGraphicalOnly.ReplaceAllString(string(*p), " "))
-// // }
-
-// // // AsciiA converts the string to pure ASCII
-// // func (p *Str) AsciiA() string {
-// // 	if p == nil {
-// // 		return ""
-// // 	}
-// // 	return ReGraphicalOnly.ReplaceAllString(string(*p), " ")
-// // }
-
-// // // AsciiOnly checks to see if this is an ASCII only string
-// // func (p *Str) AsciiOnly() bool {
-// // 	if p == nil {
-// // 		return true
-// // 	}
-// // 	return len(*p) == len(ReGraphicalOnly.ReplaceAllString(string(*p), ""))
-// // }
 
 // Any tests if this Slice is not empty or optionally if it contains
 // any of the given variadic elements. Incompatible types will return false.
@@ -271,6 +242,30 @@ func (p *Str) AppendV(elems ...interface{}) Slice {
 	return p
 }
 
+// Ascii converts the string to pure ASCII
+func (p *Str) Ascii() *Str {
+	if p == nil {
+		return A("")
+	}
+	return A(ReGraphicalOnly.ReplaceAllString(string(*p), " "))
+}
+
+// AsciiA converts the string to pure ASCII
+func (p *Str) AsciiA() string {
+	if p == nil {
+		return ""
+	}
+	return ReGraphicalOnly.ReplaceAllString(string(*p), " ")
+}
+
+// AsciiOnly checks to see if this is an ASCII only string
+func (p *Str) AsciiOnly() bool {
+	if p == nil {
+		return true
+	}
+	return len(*p) == len(ReGraphicalOnly.ReplaceAllString(string(*p), ""))
+}
+
 // At returns the element at the given index location. Allows for negative notation.
 func (p *Str) At(i int) (elem *Object) {
 	elem = &Object{}
@@ -284,42 +279,18 @@ func (p *Str) At(i int) (elem *Object) {
 	return
 }
 
-// // // At returns the element at the given index location. Allows for negative notation.
-// // func (p *Str) At(i int) rune {
-// // 	r, _ := p.AtE(i)
-// // 	return r
-// // }
+// B exports the Str as a Go []byte
+func (p *Str) B() []byte {
+	if p == nil {
+		return []byte{}
+	}
+	return []byte(*p)
+}
 
-// // // AtE returns the element at the given index location. Allows for negative notation.
-// // func (p *Str) AtE(i int) (r rune, err error) {
-// // 	if p == nil {
-// // 		err = errors.Errorf("Str is nil")
-// // 		return
-// // 	}
-// // 	if i = absIndex(len(*p), i); i == -1 {
-// // 		err = errors.Errorf("index out of Str bounds")
-// // 		return
-// // 	}
-// // 	r = rune(string(*p)[i])
-// // 	return
-// // }
-
-// // // AtA returns the element at the given index location. Allows for negative notation.
-// // func (p *Str) AtA(i int) string {
-// // 	str, _ := p.AtAE(i)
-// // 	return str
-// // }
-
-// // // AtAE returns the element at the given index location. Allows for negative notation.
-// // func (p *Str) AtAE(i int) (str string, err error) {
-// // 	r, e := p.AtE(i)
-// // 	str = string(r)
-// // 	if r == int32(0) {
-// // 		str = ""
-// // 	}
-// // 	err = e
-// // 	return
-// // }
+// C exports the Str as a Char
+func (p *Str) C() *Char {
+	return NewChar(p)
+}
 
 // Clear modifies this Slice to clear out all elements and returns a reference to this Slice.
 func (p *Str) Clear() Slice {
@@ -335,6 +306,11 @@ func (p *Str) Clear() Slice {
 // Supports Str, *Str, []string or *[]string
 func (p *Str) Concat(slice interface{}) (new Slice) {
 	return p.Copy().ConcatM(slice)
+}
+
+// ConcatA calls Concat and returns it as a string for brevity
+func (p *Str) ConcatA(str interface{}) string {
+	return p.Concat(str).A()
 }
 
 // ConcatM modifies this Slice by appending the given Slice using variadic expansion and returns a reference to this Slice.
@@ -380,6 +356,11 @@ func (p *Str) Copy(indices ...int) (new Slice) {
 	x := make([]rune, j-i, j-i)
 	copy(x, []rune(*p)[i:j])
 	return NewStr(x)
+}
+
+// CopyA calls Copy and returns it as a string for brevity
+func (p *Str) CopyA(indices ...int) (new string) {
+	return p.Copy(indices...).A()
 }
 
 // Count counts the number of non-overlapping instances of substr in this string.
@@ -787,6 +768,11 @@ func (p *Str) Prepend(elem interface{}) Slice {
 	return p.Insert(0, elem)
 }
 
+// R exports the Str as a rune
+func (p *Str) R() rune {
+	return NewChar(p).R()
+}
+
 // Reverse returns a new Slice with the order of the elements reversed.
 func (p *Str) Reverse() (new Slice) {
 	if p == nil || len(*p) < 2 {
@@ -1023,33 +1009,6 @@ func (p *Str) UniqM() Slice {
 	}
 	return p
 }
-
-// // // B exports the Str as a Go []byte
-// // func (p *Str) B() []byte {
-// // 	if p == nil {
-// // 		return []byte("")
-// // 	}
-// // 	return []byte(*p)
-// // }
-
-// // // Clear makes this an empty string
-// // func (p *Str) Clear() *Str {
-// // 	if p == nil {
-// // 		return A("")
-// // 	}
-// // 	*p = ""
-// // 	return p
-// // }
-
-// // // Concat returns a new Str by appending the given Str to this Str.
-// // func (p *Str) Concat(str interface{}) *Str {
-// // 	return nil
-// // }
-
-// // // ConcatA returns a new Str by appending the given Str to this Str.
-// // func (p *Str) ConcatA(str interface{}) string {
-// // 	return ""
-// // }
 
 // // // ConcatM modifies this Str by appending the given string and returns a reference to this Str.
 // // func (p *Str) ConcatM(str interface{}) *Str {

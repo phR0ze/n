@@ -10,7 +10,7 @@ type Char rune
 // 	return NewChar(obj)
 // }
 
-// NewChar creates a new chart from the given obj
+// NewChar creates a new chart from the given obj. Will always be non nil.
 // Supports: string, *string, rune, *rune, byte, *byte
 func NewChar(obj interface{}) *Char {
 	str := ""
@@ -53,6 +53,14 @@ func (p *Char) Nil() bool {
 		return true
 	}
 	return false
+}
+
+// R exports the Char as a rune
+func (p *Char) R() rune {
+	if p == nil {
+		return rune(0)
+	}
+	return rune(*p)
 }
 
 // String returns a string representation of the Object, implements Stringer interface.

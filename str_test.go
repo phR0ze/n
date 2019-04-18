@@ -578,6 +578,40 @@ func TestStr_AppendV(t *testing.T) {
 	}
 }
 
+// Ascii
+//--------------------------------------------------------------------------------------------------
+func ExampleStr_Ascii() {
+	fmt.Println(A("2�gspu�data").Ascii().A())
+	// Output: 2 gspu data
+}
+
+func TestStr_Ascii(t *testing.T) {
+	assert.Equal(t, A("2 gspu data gspm data"), A("2�gspu�data�gspm�data").Ascii())
+}
+
+// AsciiA
+//--------------------------------------------------------------------------------------------------
+func ExampleStr_AsciiA() {
+	fmt.Println(A("2�gspu�data").AsciiA())
+	// Output: 2 gspu data
+}
+
+func TestStr_AsciiA(t *testing.T) {
+	assert.Equal(t, "2 gspu data gspm data", A("2�gspu�data�gspm�data").AsciiA())
+}
+
+// AsciiOnly
+//--------------------------------------------------------------------------------------------------
+func ExampleStr_AsciiOnly() {
+	fmt.Println(A("foo").AsciiOnly())
+	// Output: true
+}
+
+func TestStr_AsciiOnly(t *testing.T) {
+	assert.Equal(t, true, A("foobar").AsciiOnly())
+	assert.Equal(t, false, A("2�gspu�data�gspm�data").AsciiOnly())
+}
+
 // At
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStr_At_Go(t *testing.B) {
@@ -629,6 +663,36 @@ func TestStr_At(t *testing.T) {
 		assert.Equal(t, nil, slice.At(3).O())
 		assert.Equal(t, &Object{}, slice.At(-3))
 		assert.Equal(t, nil, slice.At(-3).O())
+	}
+}
+
+// B
+//--------------------------------------------------------------------------------------------------
+func ExampleStr_B() {
+	fmt.Println(A("foobar").B())
+	// Output: [102 111 111 98 97 114]
+}
+
+func TestStr_B(t *testing.T) {
+	// string
+	{
+		assert.Equal(t, []byte{0x74, 0x65, 0x73, 0x74}, A("test").B())
+	}
+
+	// runes
+	{
+		assert.Equal(t, []byte{0x74}, A('t').B())
+		assert.Equal(t, []byte{0x74, 0x65, 0x73, 0x74}, A([]rune("test")).B())
+	}
+
+	// bytes
+	{
+		assert.Equal(t, []byte{0x74, 0x65, 0x73, 0x74}, A([]byte("test")).B())
+	}
+
+	// ints
+	{
+		assert.Equal(t, []byte{0x31, 0x30}, A(10).B())
 	}
 }
 
@@ -1016,226 +1080,6 @@ func TestStr_Copy(t *testing.T) {
 // 	assert.Equal(t, 1, NewStrV("2", "3").CountW(func(x O) bool { return ExB(x.(string) > "2") }))
 // 	assert.Equal(t, 1, NewStrV("1", "2").CountW(func(x O) bool { return ExB(x.(string) == "2") }))
 // 	assert.Equal(t, 1, NewStrV("1", "2", "3").CountW(func(x O) bool { return ExB(x.(string) == "4" || x.(string) == "3") }))
-// }
-
-// // All
-// //--------------------------------------------------------------------------------------------------
-// func ExampleStr_All() {
-// 	fmt.Println(A("foobar").All([]string{"foo"}))
-// 	// Output: true
-// }
-
-// func TestStr_All(t *testing.T) {
-// 	assert.True(t, A("test").All([]string{"tes", "est"}))
-// 	assert.False(t, A("test").All([]string{"bob", "est"}))
-// }
-
-// // AllV
-// //--------------------------------------------------------------------------------------------------
-// func ExampleStr_AllV() {
-// 	fmt.Println(A("foobar").AllV("foo"))
-// 	// Output: true
-// }
-
-// func TestStr_AllV(t *testing.T) {
-// 	assert.True(t, A("test").AllV("tes", "est"))
-// 	assert.False(t, A("test").AllV("bob", "est"))
-// }
-
-// // Any
-// //--------------------------------------------------------------------------------------------------
-// func ExampleStr_Any() {
-// 	fmt.Println(A("foobar").Any([]string{"foo"}))
-// 	// Output: true
-// }
-
-// func TestStr_Any(t *testing.T) {
-// 	assert.True(t, A("test").Any([]string{"tes", "est"}))
-// 	assert.True(t, A("test").Any([]string{"bob", "est"}))
-// 	assert.False(t, A("test").Any([]string{"bob", "foo"}))
-// }
-
-// // AnyV
-// //--------------------------------------------------------------------------------------------------
-// func ExampleStr_AnyV() {
-// 	fmt.Println(A("foobar").AnyV("foo"))
-// 	// Output: true
-// }
-
-// func TestStr_AnyV(t *testing.T) {
-// 	assert.True(t, A("test").AnyV("tes", "est"))
-// 	assert.True(t, A("test").AnyV("bob", "est"))
-// 	assert.False(t, A("test").AnyV("bob", "foo"))
-// }
-
-// // Ascii
-// //--------------------------------------------------------------------------------------------------
-// func ExampleStr_Ascii() {
-// 	fmt.Println(A("2�gspu�data").Ascii().A())
-// 	// Output: 2 gspu data
-// }
-
-// func TestStr_Ascii(t *testing.T) {
-// 	assert.Equal(t, A("2 gspu data gspm data"), A("2�gspu�data�gspm�data").Ascii())
-// }
-
-// // AsciiA
-// //--------------------------------------------------------------------------------------------------
-// func ExampleStr_AsciiA() {
-// 	fmt.Println(A("2�gspu�data").AsciiA())
-// 	// Output: 2 gspu data
-// }
-
-// func TestStr_AsciiA(t *testing.T) {
-// 	assert.Equal(t, "2 gspu data gspm data", A("2�gspu�data�gspm�data").AsciiA())
-// }
-
-// // AsciiOnly
-// //--------------------------------------------------------------------------------------------------
-// func ExampleStr_AsciiOnly() {
-// 	fmt.Println(A("foo").AsciiOnly())
-// 	// Output: true
-// }
-
-// func TestStr_AsciiOnly(t *testing.T) {
-// 	assert.Equal(t, true, A("foobar").AsciiOnly())
-// 	assert.Equal(t, false, A("2�gspu�data�gspm�data").AsciiOnly())
-// }
-
-// // At
-// //--------------------------------------------------------------------------------------------------
-// func ExampleStr_At() {
-// 	fmt.Println(A("foobar").At(-1))
-// 	// Output: 114
-// }
-
-// func TestStr_At(t *testing.T) {
-// 	q := A("test")
-// 	assert.Equal(t, 't', q.At(0))
-// 	assert.Equal(t, 'e', q.At(1))
-// 	assert.Equal(t, 's', q.At(2))
-// 	assert.Equal(t, 't', q.At(3))
-// 	assert.Equal(t, 't', q.At(-1))
-// 	assert.Equal(t, 's', q.At(-2))
-// 	assert.Equal(t, 'e', q.At(-3))
-// 	assert.Equal(t, 't', q.At(-4))
-// 	assert.Equal(t, rune(0), q.At(5))
-// }
-
-// // AtE
-// //--------------------------------------------------------------------------------------------------
-// func ExampleStr_AtE() {
-// 	fmt.Println(A("foobar").AtE(-1))
-// 	// Output: 114 <nil>
-// }
-
-// func TestStr_AtE(t *testing.T) {
-// 	q := A("test")
-// 	r, err := q.AtE(0)
-// 	assert.Nil(t, err)
-// 	assert.Equal(t, 't', r)
-
-// 	r, err = q.AtE(1)
-// 	assert.Equal(t, 'e', r)
-// 	assert.Nil(t, err)
-
-// 	r, err = q.AtE(2)
-// 	assert.Equal(t, 's', r)
-// 	assert.Nil(t, err)
-
-// 	r, err = q.AtE(5)
-// 	assert.Equal(t, rune(0), r)
-// 	assert.Equal(t, "index out of Str bounds", err.Error())
-
-// 	// nil
-// 	{
-// 		r, err := (*Str)(nil).AtE(2)
-// 		assert.Equal(t, rune(0), r)
-// 		assert.Equal(t, "Str is nil", err.Error())
-// 	}
-// }
-
-// // AtA
-// //--------------------------------------------------------------------------------------------------
-// func ExampleStr_AtA() {
-// 	fmt.Println(A("foobar").AtA(-1))
-// 	// Output: r
-// }
-
-// func TestStr_AtA(t *testing.T) {
-// 	q := A("test")
-// 	assert.Equal(t, "t", q.AtA(0))
-// 	assert.Equal(t, "e", q.AtA(1))
-// 	assert.Equal(t, "s", q.AtA(2))
-// 	assert.Equal(t, "t", q.AtA(3))
-// 	assert.Equal(t, "t", q.AtA(-1))
-// 	assert.Equal(t, "s", q.AtA(-2))
-// 	assert.Equal(t, "e", q.AtA(-3))
-// 	assert.Equal(t, "t", q.AtA(-4))
-// 	assert.Equal(t, "", q.AtA(5))
-// }
-
-// // AtAE
-// //--------------------------------------------------------------------------------------------------
-// func ExampleStr_AtAE() {
-// 	fmt.Println(A("foobar").AtAE(-1))
-// 	// Output: r <nil>
-// }
-
-// func TestStr_AtAE(t *testing.T) {
-// 	q := A("test")
-// 	r, err := q.AtAE(0)
-// 	assert.Nil(t, err)
-// 	assert.Equal(t, "t", r)
-
-// 	r, err = q.AtAE(1)
-// 	assert.Equal(t, "e", r)
-// 	assert.Nil(t, err)
-
-// 	r, err = q.AtAE(2)
-// 	assert.Equal(t, "s", r)
-// 	assert.Nil(t, err)
-
-// 	r, err = q.AtAE(5)
-// 	assert.Equal(t, "", r)
-// 	assert.Equal(t, "index out of Str bounds", err.Error())
-
-// 	// nil
-// 	{
-// 		r, err := (*Str)(nil).AtAE(2)
-// 		assert.Equal(t, "", r)
-// 		assert.Equal(t, "Str is nil", err.Error())
-// 	}
-// }
-
-// // B
-// //--------------------------------------------------------------------------------------------------
-// func ExampleStr_B() {
-// 	fmt.Println(A("foobar").B())
-// 	// Output: [102 111 111 98 97 114]
-// }
-
-// func TestStr_B(t *testing.T) {
-// 	// string
-// 	{
-// 		assert.Equal(t, []byte{0x74, 0x65, 0x73, 0x74}, A("test").B())
-// 	}
-
-// 	// runes
-// 	{
-// 		assert.Equal(t, []byte{0x74}, A('t').B())
-// 		assert.Equal(t, []byte{0x74, 0x65, 0x73, 0x74}, A([]rune("test")).B())
-// 	}
-
-// 	// bytes
-// 	{
-// 		assert.Equal(t, []byte{0x74, 0x65, 0x73, 0x74}, A([]byte("test")).B())
-// 	}
-
-// 	// ints
-// 	{
-// 		assert.Equal(t, []byte{0x31, 0x30}, A(10).B())
-// 	}
 // }
 
 // // Clear
