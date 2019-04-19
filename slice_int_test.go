@@ -156,7 +156,7 @@ func TestIntSlice_Any(t *testing.T) {
 	assert.True(t, NewIntSliceV(2).Any())
 
 	// invalid
-	assert.False(t, NewIntSliceV(1, 2).Any(Object{2}))
+	assert.False(t, NewIntSliceV(1, 2).Any(TestObj{2}))
 
 	assert.True(t, NewIntSliceV(1, 2, 3).Any(2))
 	assert.False(t, NewIntSliceV(1, 2, 3).Any(4))
@@ -164,6 +164,7 @@ func TestIntSlice_Any(t *testing.T) {
 	assert.False(t, NewIntSliceV(1, 2, 3).Any(4, 5))
 
 	// conversion
+	assert.True(t, NewIntSliceV(1, 2).Any(Object{2}))
 	assert.True(t, NewIntSliceV(1, 2, 3).Any(int8(2)))
 	assert.True(t, NewIntSliceV(1, 2, 3).Any(int16(2)))
 	assert.True(t, NewIntSliceV(1, 2, 3).Any(int32(2)))

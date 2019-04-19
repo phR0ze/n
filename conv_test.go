@@ -9,6 +9,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type TestObj struct {
+	o interface{}
+}
+
 // Indirect
 //--------------------------------------------------------------------------------------------------
 func ExampleIndirect() {
@@ -24,269 +28,354 @@ func TestIndirect(t *testing.T) {
 	}
 
 	// bool
+	//-----------------------------------------
 	{
 		var test bool
 		assert.Equal(t, true, Indirect(true))
 		assert.Equal(t, false, Indirect(&test))
 		assert.Equal(t, false, Indirect((*bool)(nil)))
+
+		// []bool
+		assert.Equal(t, []bool{true}, Indirect([]bool{true}))
+		assert.Equal(t, []bool{true}, Indirect(&[]bool{true}))
+		assert.Equal(t, []*bool{&test}, Indirect(&[]*bool{&test}))
 	}
 
 	// byte
+	//-----------------------------------------
 	{
 		var test byte
 		assert.Equal(t, byte(3), Indirect(byte(3)))
 		assert.Equal(t, byte(0), Indirect(&test))
 		assert.Equal(t, byte(0), Indirect((*byte)(nil)))
-	}
 
-	// []byte
-	{
+		// []byte
 		assert.Equal(t, "test", string(Indirect([]byte{0x74, 0x65, 0x73, 0x74}).([]byte)))
 		assert.Equal(t, "test", string(Indirect(&[]byte{0x74, 0x65, 0x73, 0x74}).([]byte)))
 		assert.Equal(t, "", string(Indirect((*[]byte)(nil)).([]byte)))
+		assert.Equal(t, []*byte{&test}, Indirect(&[]*byte{&test}))
 	}
 
 	// float32
+	//-----------------------------------------
 	{
 		var test float32
 		assert.Equal(t, float32(7.22), Indirect(float32(7.22)))
 		assert.Equal(t, float32(0), Indirect(&test))
 		assert.Equal(t, float32(0), Indirect((*float32)(nil)))
+
+		// []float32
+		assert.Equal(t, []float32{1.2}, Indirect([]float32{1.2}))
+		assert.Equal(t, []float32{1.2}, Indirect(&[]float32{1.2}))
+		assert.Equal(t, []*float32{&test}, Indirect(&[]*float32{&test}))
 	}
 
 	// float64
+	//-----------------------------------------
 	{
 		var test float64
 		assert.Equal(t, float64(7.22), Indirect(float64(7.22)))
 		assert.Equal(t, float64(0), Indirect(&test))
 		assert.Equal(t, float64(0), Indirect((*float64)(nil)))
+
+		// []float64
+		assert.Equal(t, []float64{1.2}, Indirect([]float64{1.2}))
+		assert.Equal(t, []float64{1.2}, Indirect(&[]float64{1.2}))
+		assert.Equal(t, []*float64{&test}, Indirect(&[]*float64{&test}))
 	}
 
 	// int
+	//-----------------------------------------
 	{
 		var test int
 		assert.Equal(t, 1, Indirect(1))
 		assert.Equal(t, 0, Indirect(&test))
 		assert.Equal(t, 0, Indirect((*int)(nil)))
+
+		// []int
+		assert.Equal(t, []int{1, 2, 3}, Indirect([]int{1, 2, 3}))
+		assert.Equal(t, []int{1, 2, 3}, Indirect(&[]int{1, 2, 3}))
+		assert.Equal(t, []int{}, Indirect((*[]int)(nil)))
+		assert.Equal(t, []*int{}, Indirect((*[]*int)(nil)))
+		assert.Equal(t, []*int{&test}, Indirect(&[]*int{&test}))
 	}
 
 	// int8
+	//-----------------------------------------
 	{
 		var test int8
 		assert.Equal(t, int8(3), Indirect(int8(3)))
 		assert.Equal(t, int8(0), Indirect(&test))
 		assert.Equal(t, int8(0), Indirect((*int8)(nil)))
+
+		// []int8
+		assert.Equal(t, []int8{1, 2, 3}, Indirect([]int8{1, 2, 3}))
+		assert.Equal(t, []int8{1, 2, 3}, Indirect(&[]int8{1, 2, 3}))
+		assert.Equal(t, []int8{}, Indirect((*[]int8)(nil)))
+		assert.Equal(t, []*int8{}, Indirect((*[]*int8)(nil)))
+		assert.Equal(t, []*int8{&test}, Indirect(&[]*int8{&test}))
 	}
 
 	// int16
+	//-----------------------------------------
 	{
 		var test int16
 		assert.Equal(t, int16(3), Indirect(int16(3)))
 		assert.Equal(t, int16(0), Indirect(&test))
 		assert.Equal(t, int16(0), Indirect((*int16)(nil)))
+
+		// []int16
+		assert.Equal(t, []int16{1, 2, 3}, Indirect([]int16{1, 2, 3}))
+		assert.Equal(t, []int16{1, 2, 3}, Indirect(&[]int16{1, 2, 3}))
+		assert.Equal(t, []int16{}, Indirect((*[]int16)(nil)))
+		assert.Equal(t, []*int16{}, Indirect((*[]*int16)(nil)))
+		assert.Equal(t, []*int16{&test}, Indirect(&[]*int16{&test}))
 	}
 
 	// int32
+	//-----------------------------------------
 	{
 		var test int32
 		assert.Equal(t, int32(3), Indirect(int32(3)))
 		assert.Equal(t, int32(0), Indirect(&test))
 		assert.Equal(t, int32(0), Indirect((*int32)(nil)))
+
+		// []int32
+		assert.Equal(t, []int32{1, 2, 3}, Indirect([]int32{1, 2, 3}))
+		assert.Equal(t, []int32{1, 2, 3}, Indirect(&[]int32{1, 2, 3}))
+		assert.Equal(t, []int32{}, Indirect((*[]int32)(nil)))
+		assert.Equal(t, []*int32{}, Indirect((*[]*int32)(nil)))
+		assert.Equal(t, []*int32{&test}, Indirect(&[]*int32{&test}))
 	}
 
 	// int64
+	//-----------------------------------------
 	{
 		var test int64
 		assert.Equal(t, int64(3), Indirect(int64(3)))
 		assert.Equal(t, int64(0), Indirect(&test))
 		assert.Equal(t, int64(0), Indirect((*int64)(nil)))
-	}
 
-	// []int
-	{
-		assert.Equal(t, []int{1, 2, 3}, Indirect([]int{1, 2, 3}))
-		assert.Equal(t, []int{1, 2, 3}, Indirect(&[]int{1, 2, 3}))
-		assert.Equal(t, []int{}, Indirect((*[]int)(nil)))
-	}
-
-	// []int8
-	{
-		assert.Equal(t, []int8{1, 2, 3}, Indirect([]int8{1, 2, 3}))
-		assert.Equal(t, []int8{1, 2, 3}, Indirect(&[]int8{1, 2, 3}))
-		assert.Equal(t, []int8{}, Indirect((*[]int8)(nil)))
-	}
-
-	// []int16
-	{
-		assert.Equal(t, []int16{1, 2, 3}, Indirect([]int16{1, 2, 3}))
-		assert.Equal(t, []int16{1, 2, 3}, Indirect(&[]int16{1, 2, 3}))
-		assert.Equal(t, []int16{}, Indirect((*[]int16)(nil)))
-	}
-
-	// []int32
-	{
-		assert.Equal(t, []int32{1, 2, 3}, Indirect([]int32{1, 2, 3}))
-		assert.Equal(t, []int32{1, 2, 3}, Indirect(&[]int32{1, 2, 3}))
-		assert.Equal(t, []int32{}, Indirect((*[]int32)(nil)))
-	}
-
-	// []int64
-	{
+		// []int64
 		assert.Equal(t, []int64{1, 2, 3}, Indirect([]int64{1, 2, 3}))
 		assert.Equal(t, []int64{1, 2, 3}, Indirect(&[]int64{1, 2, 3}))
 		assert.Equal(t, []int64{}, Indirect((*[]int64)(nil)))
+		assert.Equal(t, []*int64{}, Indirect((*[]*int64)(nil)))
+		assert.Equal(t, []*int64{&test}, Indirect(&[]*int64{&test}))
+	}
+
+	// Object
+	//-----------------------------------------
+	{
+		assert.Equal(t, Object{3}, Indirect(Object{3}))
+		assert.Equal(t, Object{3}, Indirect(&Object{3}))
+		assert.Equal(t, Object{}, Indirect((*Object)(nil)))
+
+		// []Object
+		assert.Equal(t, []Object{{1}, {2}, {3}}, Indirect([]Object{{1}, {2}, {3}}))
+		assert.Equal(t, []Object{{1}, {2}, {3}}, Indirect(&[]Object{{1}, {2}, {3}}))
+		assert.Equal(t, []Object{}, Indirect((*[]Object)(nil)))
+		assert.Equal(t, []*Object{}, Indirect((*[]*Object)(nil)))
+		assert.Equal(t, []*Object{&Object{}}, Indirect(&[]*Object{&Object{}}))
 	}
 
 	// rune
+	//-----------------------------------------
 	{
 		var test rune
 		assert.Equal(t, 'r', Indirect('r'))
 		assert.Equal(t, rune(0), Indirect(&test))
 		assert.Equal(t, rune(0), Indirect((*rune)(nil)))
-	}
 
-	// []rune
-	{
+		// []rune
 		assert.Equal(t, []rune{'t', 'e', 's', 't'}, Indirect([]rune{'t', 'e', 's', 't'}))
 		assert.Equal(t, []rune{'t', 'e', 's', 't'}, Indirect(&[]rune{'t', 'e', 's', 't'}))
 		assert.Equal(t, []rune{}, Indirect((*[]rune)(nil)))
 	}
 
 	// Str
+	//-----------------------------------------
 	{
 		assert.Equal(t, *A("test"), Indirect(*A("test")))
 		assert.Equal(t, *A("test"), Indirect(A("test")))
 		assert.Equal(t, *A(""), Indirect((*Str)(nil)))
+
+		// []Str
+		assert.Equal(t, []Str{{1}, {2}, {3}}, Indirect([]Str{{1}, {2}, {3}}))
+		assert.Equal(t, []Str{{1}, {2}, {3}}, Indirect(&[]Str{{1}, {2}, {3}}))
+		assert.Equal(t, []Str{}, Indirect((*[]Str)(nil)))
+		assert.Equal(t, []*Str{}, Indirect((*[]*Str)(nil)))
+		assert.Equal(t, []*Str{&Str{}}, Indirect(&[]*Str{&Str{}}))
 	}
 
 	// string
+	//-----------------------------------------
 	{
 		var test string
 		assert.Equal(t, "test", Indirect("test"))
 		assert.Equal(t, "", Indirect(&test))
 		assert.Equal(t, "", Indirect((*string)(nil)))
-	}
 
-	// []string
-	{
+		// []string
 		assert.Equal(t, []string{"test"}, Indirect([]string{"test"}))
 		assert.Equal(t, []string{"test"}, Indirect(&[]string{"test"}))
 		assert.Equal(t, []string{}, Indirect((*[]string)(nil)))
+		assert.Equal(t, []*string{}, Indirect((*[]*string)(nil)))
 	}
 
 	// template.CSS
+	//-----------------------------------------
 	{
 		var test template.CSS
 		assert.Equal(t, "test", string(Indirect(template.CSS("test")).(template.CSS)))
 		assert.Equal(t, "", string(Indirect(&test).(template.CSS)))
 		assert.Equal(t, "", string(Indirect((*template.CSS)(nil)).(template.CSS)))
+
+		// []template.CSS
+		assert.Equal(t, []template.CSS{"test"}, Indirect([]template.CSS{"test"}))
+		assert.Equal(t, []template.CSS{"test"}, Indirect(&[]template.CSS{"test"}))
+		assert.Equal(t, []template.CSS{}, Indirect((*[]template.CSS)(nil)))
+		assert.Equal(t, []*template.CSS{}, Indirect((*[]*template.CSS)(nil)))
 	}
 
 	// template.HTML
+	//-----------------------------------------
 	{
 		var test template.HTML
 		assert.Equal(t, "test", string(Indirect(template.HTML("test")).(template.HTML)))
 		assert.Equal(t, "", string(Indirect(&test).(template.HTML)))
 		assert.Equal(t, "", string(Indirect((*template.HTML)(nil)).(template.HTML)))
+
+		// []template.HTML
+		assert.Equal(t, []template.HTML{"test"}, Indirect([]template.HTML{"test"}))
+		assert.Equal(t, []template.HTML{"test"}, Indirect(&[]template.HTML{"test"}))
+		assert.Equal(t, []template.HTML{}, Indirect((*[]template.HTML)(nil)))
+		assert.Equal(t, []*template.HTML{}, Indirect((*[]*template.HTML)(nil)))
 	}
 
 	// template.HTMLAttr
+	//-----------------------------------------
 	{
 		var test template.HTMLAttr
 		assert.Equal(t, "test", string(Indirect(template.HTMLAttr("test")).(template.HTMLAttr)))
 		assert.Equal(t, "", string(Indirect(&test).(template.HTMLAttr)))
 		assert.Equal(t, "", string(Indirect((*template.HTMLAttr)(nil)).(template.HTMLAttr)))
+
+		// []template.HTMLAttr
+		assert.Equal(t, []template.HTMLAttr{"test"}, Indirect([]template.HTMLAttr{"test"}))
+		assert.Equal(t, []template.HTMLAttr{"test"}, Indirect(&[]template.HTMLAttr{"test"}))
+		assert.Equal(t, []template.HTMLAttr{}, Indirect((*[]template.HTMLAttr)(nil)))
+		assert.Equal(t, []*template.HTMLAttr{}, Indirect((*[]*template.HTMLAttr)(nil)))
 	}
 
 	// template.JS
+	//-----------------------------------------
 	{
 		var test template.JS
 		assert.Equal(t, "test", string(Indirect(template.JS("test")).(template.JS)))
 		assert.Equal(t, "", string(Indirect(&test).(template.JS)))
 		assert.Equal(t, "", string(Indirect((*template.JS)(nil)).(template.JS)))
+
+		// []template.JS
+		assert.Equal(t, []template.JS{"test"}, Indirect([]template.JS{"test"}))
+		assert.Equal(t, []template.JS{"test"}, Indirect(&[]template.JS{"test"}))
+		assert.Equal(t, []template.JS{}, Indirect((*[]template.JS)(nil)))
+		assert.Equal(t, []*template.JS{}, Indirect((*[]*template.JS)(nil)))
 	}
 
 	// template.URL
+	//-----------------------------------------
 	{
 		var test template.URL
 		assert.Equal(t, "test", string(Indirect(template.URL("test")).(template.URL)))
 		assert.Equal(t, "", string(Indirect(&test).(template.URL)))
 		assert.Equal(t, "", string(Indirect((*template.URL)(nil)).(template.URL)))
+
+		// []template.URL
+		assert.Equal(t, []template.URL{"test"}, Indirect([]template.URL{"test"}))
+		assert.Equal(t, []template.URL{"test"}, Indirect(&[]template.URL{"test"}))
+		assert.Equal(t, []template.URL{}, Indirect((*[]template.URL)(nil)))
+		assert.Equal(t, []*template.URL{}, Indirect((*[]*template.URL)(nil)))
 	}
 
 	// uint
+	//-----------------------------------------
 	{
 		var test uint
 		assert.Equal(t, uint(1), Indirect(uint(1)))
 		assert.Equal(t, uint(0), Indirect(&test))
 		assert.Equal(t, uint(0), Indirect((*uint)(nil)))
+
+		// []uint
+		assert.Equal(t, []uint{1, 2, 3}, Indirect([]uint{1, 2, 3}))
+		assert.Equal(t, []uint{1, 2, 3}, Indirect(&[]uint{1, 2, 3}))
+		assert.Equal(t, []uint{}, Indirect((*[]uint)(nil)))
+		assert.Equal(t, []*uint{}, Indirect((*[]*uint)(nil)))
+		assert.Equal(t, []*uint{&test}, Indirect(&[]*uint{&test}))
 	}
 
 	// uint8
+	//-----------------------------------------
 	{
 		var test uint8
 		assert.Equal(t, uint8(3), Indirect(uint8(3)))
 		assert.Equal(t, uint8(0), Indirect(&test))
 		assert.Equal(t, uint8(0), Indirect((*uint8)(nil)))
+
+		// []uint8
+		assert.Equal(t, []uint8{1, 2, 3}, Indirect([]uint8{1, 2, 3}))
+		assert.Equal(t, []uint8{1, 2, 3}, Indirect(&[]uint8{1, 2, 3}))
+		assert.Equal(t, []uint8{}, Indirect((*[]uint8)(nil)))
+		assert.Equal(t, []*uint8{}, Indirect((*[]*uint8)(nil)))
+		assert.Equal(t, []*uint8{&test}, Indirect(&[]*uint8{&test}))
 	}
 
 	// uint16
+	//-----------------------------------------
 	{
 		var test uint16
 		assert.Equal(t, uint16(3), Indirect(uint16(3)))
 		assert.Equal(t, uint16(0), Indirect(&test))
 		assert.Equal(t, uint16(0), Indirect((*uint16)(nil)))
+
+		// []uint16
+		assert.Equal(t, []uint16{1, 2, 3}, Indirect([]uint16{1, 2, 3}))
+		assert.Equal(t, []uint16{1, 2, 3}, Indirect(&[]uint16{1, 2, 3}))
+		assert.Equal(t, []uint16{}, Indirect((*[]uint16)(nil)))
+		assert.Equal(t, []*uint16{}, Indirect((*[]*uint16)(nil)))
+		assert.Equal(t, []*uint16{&test}, Indirect(&[]*uint16{&test}))
 	}
 
 	// uint32
+	//-----------------------------------------
 	{
 		var test uint32
 		assert.Equal(t, uint32(3), Indirect(uint32(3)))
 		assert.Equal(t, uint32(0), Indirect(&test))
 		assert.Equal(t, uint32(0), Indirect((*uint32)(nil)))
+
+		// []uint32
+		assert.Equal(t, []uint32{1, 2, 3}, Indirect([]uint32{1, 2, 3}))
+		assert.Equal(t, []uint32{1, 2, 3}, Indirect(&[]uint32{1, 2, 3}))
+		assert.Equal(t, []uint32{}, Indirect((*[]uint32)(nil)))
+		assert.Equal(t, []*uint32{}, Indirect((*[]*uint32)(nil)))
+		assert.Equal(t, []*uint32{&test}, Indirect(&[]*uint32{&test}))
 	}
 
 	// uint64
+	//-----------------------------------------
 	{
 		var test uint64
 		assert.Equal(t, uint64(3), Indirect(uint64(3)))
 		assert.Equal(t, uint64(0), Indirect(&test))
 		assert.Equal(t, uint64(0), Indirect((*uint64)(nil)))
-	}
 
-	// []uint
-	{
-		assert.Equal(t, []uint{1, 2, 3}, Indirect([]uint{1, 2, 3}))
-		assert.Equal(t, []uint{1, 2, 3}, Indirect(&[]uint{1, 2, 3}))
-		assert.Equal(t, []uint{}, Indirect((*[]uint)(nil)))
-	}
-
-	// []uint8
-	{
-		assert.Equal(t, []uint8{1, 2, 3}, Indirect([]uint8{1, 2, 3}))
-		assert.Equal(t, []uint8{1, 2, 3}, Indirect(&[]uint8{1, 2, 3}))
-		assert.Equal(t, []uint8{}, Indirect((*[]uint8)(nil)))
-	}
-
-	// []uint16
-	{
-		assert.Equal(t, []uint16{1, 2, 3}, Indirect([]uint16{1, 2, 3}))
-		assert.Equal(t, []uint16{1, 2, 3}, Indirect(&[]uint16{1, 2, 3}))
-		assert.Equal(t, []uint16{}, Indirect((*[]uint16)(nil)))
-	}
-
-	// []uint32
-	{
-		assert.Equal(t, []uint32{1, 2, 3}, Indirect([]uint32{1, 2, 3}))
-		assert.Equal(t, []uint32{1, 2, 3}, Indirect(&[]uint32{1, 2, 3}))
-		assert.Equal(t, []uint32{}, Indirect((*[]uint32)(nil)))
-	}
-
-	// []uint64
-	{
+		// []uint64
 		assert.Equal(t, []uint64{1, 2, 3}, Indirect([]uint64{1, 2, 3}))
 		assert.Equal(t, []uint64{1, 2, 3}, Indirect(&[]uint64{1, 2, 3}))
 		assert.Equal(t, []uint64{}, Indirect((*[]uint64)(nil)))
+		assert.Equal(t, []*uint64{}, Indirect((*[]*uint64)(nil)))
+		assert.Equal(t, []*uint64{&test}, Indirect(&[]*uint64{&test}))
 	}
 }
 
@@ -367,6 +456,14 @@ func TestToBool(t *testing.T) {
 		assert.Equal(t, false, ToBool((*int64)(nil)))
 	}
 
+	// int
+	{
+		assert.Equal(t, true, ToBool(Object{1}))
+		assert.Equal(t, false, ToBool(Object{0}))
+		assert.Equal(t, true, ToBool(&Object{1}))
+		assert.Equal(t, false, ToBool((*Object)(nil)))
+	}
+
 	// string
 	{
 		assert.Equal(t, true, ToBool("1"))
@@ -440,8 +537,8 @@ func TestToBoolE(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, false, val)
 
-		val, err = ToBoolE(&Object{})
-		assert.Equal(t, "unable to cast type n.Object to bool", err.Error())
+		val, err = ToBoolE(&TestObj{})
+		assert.Equal(t, "unable to convert type n.TestObj to bool", err.Error())
 		assert.Equal(t, false, val)
 	}
 
@@ -561,6 +658,25 @@ func TestToBoolE(t *testing.T) {
 		assert.Equal(t, false, val)
 	}
 
+	// Object
+	{
+		val, err := ToBoolE(Object{1})
+		assert.Nil(t, err)
+		assert.Equal(t, true, val)
+
+		val, err = ToBoolE(Object{0})
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE(&Object{})
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+
+		val, err = ToBoolE((*Object)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, false, val)
+	}
+
 	// string
 	{
 		assert.Equal(t, true, ToBool("1"))
@@ -673,6 +789,135 @@ func TestToBoolE(t *testing.T) {
 	}
 }
 
+// ToInt
+//--------------------------------------------------------------------------------------------------
+func ExampleToInt() {
+	fmt.Println(ToInt("3"))
+	// Output: 3
+}
+
+func TestToInt(t *testing.T) {
+
+	// invalid
+	{
+		assert.Equal(t, 0, ToInt(nil))
+		assert.Equal(t, 0, ToInt(&Object{}))
+	}
+
+	// bool
+	{
+		var test bool
+		assert.Equal(t, 0, ToInt(&test))
+		assert.Equal(t, 1, ToInt(true))
+		assert.Equal(t, 0, ToInt((*bool)(nil)))
+	}
+
+	// int
+	{
+		var test int
+		assert.Equal(t, 0, ToInt(&test))
+		assert.Equal(t, 3, ToInt(3))
+		assert.Equal(t, 0, ToInt(0))
+		assert.Equal(t, 0, ToInt((*int)(nil)))
+	}
+
+	// int8
+	{
+		var test int8
+		assert.Equal(t, 0, ToInt(&test))
+		assert.Equal(t, 3, ToInt(int8(3)))
+		assert.Equal(t, 0, ToInt(0))
+		assert.Equal(t, 0, ToInt((*int8)(nil)))
+	}
+
+	// int16
+	{
+		var test int16
+		assert.Equal(t, 0, ToInt(&test))
+		assert.Equal(t, 3, ToInt(int16(3)))
+		assert.Equal(t, 0, ToInt(0))
+		assert.Equal(t, 0, ToInt((*int16)(nil)))
+	}
+
+	// int32
+	{
+		var test int32
+		assert.Equal(t, 0, ToInt(&test))
+		assert.Equal(t, 3, ToInt(int32(3)))
+		assert.Equal(t, 0, ToInt(0))
+		assert.Equal(t, 0, ToInt((*int32)(nil)))
+	}
+
+	// int64
+	{
+		var test int64
+		assert.Equal(t, 0, ToInt(&test))
+		assert.Equal(t, 3, ToInt(int64(3)))
+		assert.Equal(t, 0, ToInt(0))
+		assert.Equal(t, 0, ToInt((*int64)(nil)))
+	}
+
+	// string
+	{
+		var test string
+		assert.Equal(t, 0, ToInt(&test))
+		assert.Equal(t, 3, ToInt("3"))
+		assert.Equal(t, 0, ToInt(0))
+		assert.Equal(t, 0, ToInt((*string)(nil)))
+		assert.Equal(t, 0, ToInt("0"))
+		assert.Equal(t, 1, ToInt("true"))
+		assert.Equal(t, 1, ToInt("TRUE"))
+		assert.Equal(t, 0, ToInt("false"))
+		assert.Equal(t, 0, ToInt("FALSE"))
+		assert.Equal(t, 0, ToInt("bob"))
+	}
+
+	// uint
+	{
+		var test uint
+		assert.Equal(t, 0, ToInt(&test))
+		assert.Equal(t, 3, ToInt(uint(3)))
+		assert.Equal(t, 0, ToInt(0))
+		assert.Equal(t, 0, ToInt((*uint)(nil)))
+	}
+
+	// uint8
+	{
+		var test uint8
+		assert.Equal(t, 0, ToInt(&test))
+		assert.Equal(t, 3, ToInt(uint8(3)))
+		assert.Equal(t, 0, ToInt(0))
+		assert.Equal(t, 0, ToInt((*uint8)(nil)))
+	}
+
+	// uint16
+	{
+		var test uint16
+		assert.Equal(t, 0, ToInt(&test))
+		assert.Equal(t, 3, ToInt(uint16(3)))
+		assert.Equal(t, 0, ToInt(0))
+		assert.Equal(t, 0, ToInt((*uint16)(nil)))
+	}
+
+	// uint32
+	{
+		var test uint32
+		assert.Equal(t, 0, ToInt(&test))
+		assert.Equal(t, 3, ToInt(uint32(3)))
+		assert.Equal(t, 0, ToInt(0))
+		assert.Equal(t, 0, ToInt((*uint32)(nil)))
+	}
+
+	// uint64
+	{
+		var test uint64
+		assert.Equal(t, 0, ToInt(&test))
+		assert.Equal(t, 3, ToInt(uint64(3)))
+		assert.Equal(t, 0, ToInt(0))
+		assert.Equal(t, 0, ToInt((*uint64)(nil)))
+	}
+}
+
 // ToIntE
 //--------------------------------------------------------------------------------------------------
 func ExampleToIntE() {
@@ -688,8 +933,8 @@ func TestToIntE(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, 0, val)
 
-		val, err = ToIntE(&Object{})
-		assert.Equal(t, "unable to cast type n.Object to int", err.Error())
+		val, err = ToIntE(&TestObj{})
+		assert.Equal(t, "unable to convert type n.TestObj to int", err.Error())
 		assert.Equal(t, 0, val)
 	}
 
@@ -805,6 +1050,25 @@ func TestToIntE(t *testing.T) {
 		assert.Equal(t, 0, val)
 
 		val, err = ToIntE((*int64)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+	}
+
+	// Object
+	{
+		val, err := ToIntE(Object{3})
+		assert.Nil(t, err)
+		assert.Equal(t, 3, val)
+
+		val, err = ToIntE(Object{0})
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		val, err = ToIntE(&Object{})
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		val, err = ToIntE((*Object)(nil))
 		assert.Nil(t, err)
 		assert.Equal(t, 0, val)
 	}
@@ -947,6 +1211,322 @@ func TestToIntE(t *testing.T) {
 		val, err = ToIntE((*uint64)(nil))
 		assert.Nil(t, err)
 		assert.Equal(t, 0, val)
+	}
+}
+
+// ToIntSliceE
+//--------------------------------------------------------------------------------------------------
+func ExampleToIntSliceE() {
+	fmt.Println(ToIntSliceE("1"))
+	// Output: [1] <nil>
+}
+
+func TestToIntSliceE(t *testing.T) {
+
+	// invalid
+	{
+		val, err := ToIntSliceE(nil)
+		assert.Nil(t, err)
+		assert.Equal(t, []int{}, val)
+
+		val, err = ToIntSliceE(&TestObj{})
+		assert.Equal(t, "unable to convert type n.TestObj to []int", err.Error())
+		assert.Equal(t, []int{}, val)
+	}
+
+	// bool
+	{
+		val, err := ToIntSliceE(true)
+		assert.Nil(t, err)
+		assert.Equal(t, []int{1}, val)
+
+		var test bool
+		val, err = ToIntSliceE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		val, err = ToIntSliceE((*bool)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+	}
+
+	// []bool
+	{
+		val, err := ToIntSliceE([]bool{true, false})
+		assert.Nil(t, err)
+		assert.Equal(t, []int{1, 0}, val)
+
+		val, err = ToIntSliceE(&[]bool{true, false})
+		assert.Nil(t, err)
+		assert.Equal(t, []int{1, 0}, val)
+
+		one, two := true, false
+		val, err = ToIntSliceE(&[]*bool{&one, &two})
+		assert.Nil(t, err)
+		assert.Equal(t, []int{1, 0}, val)
+
+		val, err = ToIntSliceE((*[]bool)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{}, val)
+	}
+
+	// int
+	{
+		val, err := ToIntSliceE(3)
+		assert.Nil(t, err)
+		assert.Equal(t, []int{3}, val)
+
+		val, err = ToIntSliceE(0)
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		var test int
+		val, err = ToIntSliceE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		val, err = ToIntSliceE((*int)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+	}
+
+	// int8
+	{
+		val, err := ToIntSliceE(int8(3))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{3}, val)
+
+		val, err = ToIntSliceE(int8(0))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		var test int8
+		val, err = ToIntSliceE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		val, err = ToIntSliceE((*int8)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+	}
+
+	// int16
+	{
+		val, err := ToIntSliceE(int16(3))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{3}, val)
+
+		val, err = ToIntSliceE(int16(0))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		var test int16
+		val, err = ToIntSliceE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		val, err = ToIntSliceE((*int16)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+	}
+
+	// int32
+	{
+		val, err := ToIntSliceE(int32(3))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{3}, val)
+
+		val, err = ToIntSliceE(int32(0))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		var test int32
+		val, err = ToIntSliceE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		val, err = ToIntSliceE((*int32)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+	}
+
+	// int64
+	{
+		val, err := ToIntSliceE(int64(3))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{3}, val)
+
+		val, err = ToIntSliceE(int64(0))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		var test int64
+		val, err = ToIntSliceE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		val, err = ToIntSliceE((*int64)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+	}
+
+	// Object
+	{
+		val, err := ToIntSliceE(Object{3})
+		assert.Nil(t, err)
+		assert.Equal(t, []int{3}, val)
+
+		val, err = ToIntSliceE(Object{0})
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		val, err = ToIntSliceE(&Object{})
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		val, err = ToIntSliceE((*Object)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+	}
+
+	// string
+	{
+		val, err := ToIntSliceE("true")
+		assert.Nil(t, err)
+		assert.Equal(t, []int{1}, val)
+
+		val, err = ToIntSliceE("TRUE")
+		assert.Nil(t, err)
+		assert.Equal(t, []int{1}, val)
+
+		val, err = ToIntSliceE("false")
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		val, err = ToIntSliceE("FALSE")
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		val, err = ToIntSliceE("bob")
+		assert.NotNil(t, err)
+		assert.Equal(t, []int{}, val)
+
+		val, err = ToIntSliceE("3")
+		assert.Nil(t, err)
+		assert.Equal(t, []int{3}, val)
+
+		val, err = ToIntSliceE("0")
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		var test string
+		val, err = ToIntSliceE(&test)
+		assert.NotNil(t, err)
+		assert.Equal(t, []int{}, val)
+
+		val, err = ToIntSliceE((*string)(nil))
+		assert.NotNil(t, err)
+		assert.Equal(t, []int{}, val)
+	}
+
+	// uint
+	{
+		val, err := ToIntSliceE(uint(3))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{3}, val)
+
+		val, err = ToIntSliceE(0)
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		var test uint
+		val, err = ToIntSliceE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		val, err = ToIntSliceE((*uint)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+	}
+
+	// uint8
+	{
+		val, err := ToIntSliceE(uint8(3))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{3}, val)
+
+		val, err = ToIntSliceE(uint8(0))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		var test uint8
+		val, err = ToIntSliceE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		val, err = ToIntSliceE((*uint8)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+	}
+
+	// uint16
+	{
+		val, err := ToIntSliceE(uint16(3))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{3}, val)
+
+		val, err = ToIntSliceE(uint16(0))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		var test uint16
+		val, err = ToIntSliceE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		val, err = ToIntSliceE((*uint16)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+	}
+
+	// uint32
+	{
+		val, err := ToIntSliceE(uint32(3))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{3}, val)
+
+		val, err = ToIntSliceE(uint32(0))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		var test uint32
+		val, err = ToIntSliceE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		val, err = ToIntSliceE((*uint32)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+	}
+
+	// uint64
+	{
+		val, err := ToIntSliceE(uint64(3))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{3}, val)
+
+		val, err = ToIntSliceE(uint64(0))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		var test uint64
+		val, err = ToIntSliceE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
+
+		val, err = ToIntSliceE((*uint64)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, []int{0}, val)
 	}
 }
 
