@@ -302,7 +302,7 @@ func (p *Str) Clear() Slice {
 	return p
 }
 
-// Concat returns a new Slice by appending the given Slice to this Slice using variadic expansion.
+// Concat returns a new Slice by appending the given Slice to this Slice.
 // Supports Str, *Str, []string or *[]string
 func (p *Str) Concat(slice interface{}) (new Slice) {
 	return p.Copy().ConcatM(slice)
@@ -313,7 +313,7 @@ func (p *Str) ConcatA(str interface{}) string {
 	return p.Concat(str).A()
 }
 
-// ConcatM modifies this Slice by appending the given Slice using variadic expansion and returns a reference to this Slice.
+// ConcatM modifies this Slice by appending the given and returns a reference to this Slice.
 // Supports Str, *Str, []string or *[]string
 func (p *Str) ConcatM(slice interface{}) Slice {
 	if p == nil {
@@ -332,6 +332,36 @@ func (p *Str) ConcatM(slice interface{}) Slice {
 	}
 	*p = Str(builder.String())
 	return p
+}
+
+// Contains checks if the given str is contained in this Str.
+//
+// Pass through for strings.Contains
+func (p *Str) Contains(str string) bool {
+	if p == nil {
+		return false
+	}
+	return strings.Contains(string(*p), str)
+}
+
+// ContainsAny checks if any of the given charts exist in this Str.
+//
+// Pass through for strings.ContainsAny
+func (p *Str) ContainsAny(chars string) bool {
+	if p == nil {
+		return false
+	}
+	return strings.ContainsAny(string(*p), chars)
+}
+
+// ContainsRune checks if the given rune exists in this Str.
+//
+// Pass through for strings.ContainsRune
+func (p *Str) ContainsRune(r rune) bool {
+	if p == nil {
+		return false
+	}
+	return strings.ContainsRune(string(*p), r)
 }
 
 // Copy returns a new Slice with the indicated range of elements copied from this Slice.
@@ -364,35 +394,14 @@ func (p *Str) CopyA(indices ...int) (new string) {
 }
 
 // Count counts the number of non-overlapping instances of substr in this string.
-// Supports: Str, *Str, string, *string, rune, []rune as a string, []byte as string
+// Supports: Str, *Str, string, *string, rune, []rune as a string, []byte as string.
+//
+// Pass through for strings.Count
 func (p *Str) Count(elem interface{}) (cnt int) {
 	if p == nil || len(*p) == 0 || elem == nil {
 		return
 	}
-	// switch x := elem.(type) {
-	// case Str, *Str:
-	// 	strings.Index()
-	// 	if strings.Contains(string(*p), string(Indirect(x).(Str))) {
-	// 		return true
-	// 	}
-	// case string, *string:
-	// 	if strings.Contains(string(*p), Indirect(x).(string)) {
-	// 		return true
-	// 	}
-	// case rune, *rune:
-	// 	if strings.ContainsRune(string(*p), Indirect(x).(rune)) {
-	// 		return true
-	// 	}
-	// case []rune, *[]rune:
-	// 	if strings.Contains(string(*p), string(Indirect(x).([]rune))) {
-	// 		return true
-	// 	}
-	// case []byte, *[]byte:
-	// 	if strings.Contains(string(*p), string(Indirect(x).([]byte))) {
-	// 		return true
-	// 	}
-	// }
-	return
+	return strings.Count(string(*p), string(*NewStr(elem)))
 }
 
 // CountW counts the number of elements in this Slice that match the lambda selector.
@@ -401,7 +410,7 @@ func (p *Str) CountW(sel func(O) bool) (cnt int) {
 		return
 	}
 	for i := 0; i < len(*p); i++ {
-		if sel(rune((*p)[i])) {
+		if sel(Char((*p)[i])) {
 			cnt++
 		}
 	}
@@ -426,7 +435,7 @@ func (p *Str) Drop(indices ...int) Slice {
 	// Execute
 	n := j - i
 	if i+n < len(*p) {
-		//*p = append((*p)[:i], (*p)[i+n:]...)
+		*p = Str(append([]rune(*p)[:i], []rune(*p)[i+n:]...))
 	} else {
 		*p = (*p)[:i]
 	}
@@ -473,7 +482,7 @@ func (p *Str) DropW(sel func(O) bool) Slice {
 	}
 	l := len(*p)
 	for i := 0; i < l; i++ {
-		if sel((*p)[i]) {
+		if sel(Char((*p)[i])) {
 			p.DropAt(i)
 			l--
 			i--
@@ -1009,44 +1018,6 @@ func (p *Str) UniqM() Slice {
 	}
 	return p
 }
-
-// // // ConcatM modifies this Str by appending the given string and returns a reference to this Str.
-// // func (p *Str) ConcatM(str interface{}) *Str {
-// // 	if p == nil {
-// // 		return A(str)
-// // 	}
-// // 	*p = Str(string(*p) + string(*A(str)))
-// // 	return p
-// // }
-
-// // // ConcatMA modifies this Str by appending the given string and returns a reference to this Str.
-// // func (p *Str) ConcatMA(str interface{}) *Str {
-// // 	return nil
-// // }
-
-// // // Contains checks if the given str is contained in this Str
-// // func (p *Str) Contains(str string) bool {
-// // 	if p == nil {
-// // 		return false
-// // 	}
-// // 	return strings.Contains(string(*p), str)
-// // }
-
-// // // ContainsAny checks if any of the given charts exist in this Str
-// // func (p *Str) ContainsAny(chars string) bool {
-// // 	if p == nil {
-// // 		return false
-// // 	}
-// // 	return strings.ContainsAny(string(*p), chars)
-// // }
-
-// // // ContainsRune checks if the given rune exists in this Str
-// // func (p *Str) ContainsRune(r rune) bool {
-// // 	if p == nil {
-// // 		return false
-// // 	}
-// // 	return strings.ContainsRune(string(*p), r)
-// // }
 
 // // // // Empty returns true if the pointer is nil, string is empty or whitespace only
 // // // func (q *QStr) Empty() bool {
