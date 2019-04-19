@@ -162,6 +162,17 @@ func TestIntSlice_Any(t *testing.T) {
 	assert.False(t, NewIntSliceV(1, 2, 3).Any(4))
 	assert.True(t, NewIntSliceV(1, 2, 3).Any(4, 3))
 	assert.False(t, NewIntSliceV(1, 2, 3).Any(4, 5))
+
+	// conversion
+	assert.True(t, NewIntSliceV(1, 2, 3).Any(int8(2)))
+	assert.True(t, NewIntSliceV(1, 2, 3).Any(int16(2)))
+	assert.True(t, NewIntSliceV(1, 2, 3).Any(int32(2)))
+	assert.True(t, NewIntSliceV(1, 2, 3).Any(int64(2)))
+	assert.True(t, NewIntSliceV(1, 2, 3).Any(uint8(2)))
+	assert.True(t, NewIntSliceV(1, 2, 3).Any(uint16(2)))
+	assert.True(t, NewIntSliceV(1, 2, 3).Any(uint32(2)))
+	assert.True(t, NewIntSliceV(1, 2, 3).Any(uint64(2)))
+	assert.True(t, NewIntSliceV(1, 2, 3).Any(uint64(2)))
 }
 
 // AnyS

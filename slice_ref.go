@@ -608,10 +608,11 @@ func (p *RefSlice) Index(elem interface{}) (loc int) {
 	return
 }
 
-// Insert modifies this Slice to insert the given element before the element with the given index.
+// Insert modifies this Slice to insert the given element(s) before the element with the given index.
 // Negative indices count backwards from the end of the slice, where -1 is the last element. If a
 // negative index is used, the given element will be inserted after that element, so using an index
-// of -1 will insert the element at the end of the slice. Slice is returned for chaining. Invalid
+// of -1 will insert the element at the end of the slice. If a Slice is given all elements will be
+// inserted starting from the beging until the end. Slice is returned for chaining. Invalid
 // index locations will not change the slice.
 func (p *RefSlice) Insert(i int, elem interface{}) Slice {
 	l := p.Len()

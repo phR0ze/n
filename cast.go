@@ -278,50 +278,156 @@ func Indirect(obj interface{}) interface{} {
 	}
 }
 
-// Cast functions
+// Convert functions
 //--------------------------------------------------------------------------------------------------
 
-// ToBool casts an interface to a bool type.
+// ToBool converts an interface to a bool type.
 func ToBool(obj interface{}) bool {
 	val, _ := ToBoolE(obj)
 	return val
 }
 
-// ToBoolE casts an interface to a bool type.
+// ToBoolE converts an interface to a bool type.
 func ToBoolE(obj interface{}) (val bool, err error) {
-	switch x := obj.(type) {
+	o := Indirect(obj)
+
+	switch x := o.(type) {
 	case nil:
-	case bool, *bool:
-		val = Indirect(x).(bool)
-	case int, *int:
-		val = Indirect(x).(int) != 0
-	case int8, *int8:
-		val = Indirect(x).(int8) != 0
-	case int16, *int16:
-		val = Indirect(x).(int16) != 0
-	case int32, *int32:
-		val = Indirect(x).(int32) != 0
-	case int64, *int64:
-		val = Indirect(x).(int64) != 0
-	case string, *string:
-		val, err = strconv.ParseBool(Indirect(x).(string))
-	case uint, *uint:
-		val = Indirect(x).(uint) != 0
-	case uint8, *uint8:
-		val = Indirect(x).(uint8) != 0
-	case uint16, *uint16:
-		val = Indirect(x).(uint16) != 0
-	case uint32, *uint32:
-		val = Indirect(x).(uint32) != 0
-	case uint64, *uint64:
-		val = Indirect(x).(uint64) != 0
+	case bool:
+		val = x
+	case int:
+		val = x != 0
+	case int8:
+		val = x != 0
+	case int16:
+		val = x != 0
+	case int32:
+		val = x != 0
+	case int64:
+		val = x != 0
+	case string:
+		if val, err = strconv.ParseBool(x); err != nil {
+			err = errors.Wrapf(err, "failed to convert string to bool")
+		}
+	case uint:
+		val = x != 0
+	case uint8:
+		val = x != 0
+	case uint16:
+		val = x != 0
+	case uint32:
+		val = x != 0
+	case uint64:
+		val = x != 0
 	default:
 		err = errors.Errorf("unable to cast type %T to bool", x)
 	}
 	return
 }
 
-// ToString casts an interface to a string type.
+// ToInt convert an interface to an int type.
+func ToInt(obj interface{}) int {
+	x, _ := ToIntE(obj)
+	return x
+}
+
+// ToIntE convert an interface to an int type.
+func ToIntE(obj interface{}) (val int, err error) {
+	o := Indirect(obj)
+
+	switch x := o.(type) {
+	case nil:
+	case bool:
+		if x {
+			val = 1
+		}
+	case int:
+		val = x
+	case int8:
+		val = int(x)
+	case int16:
+		val = int(x)
+	case int32:
+		val = int(x)
+	case int64:
+		val = int(x)
+	case uint:
+		val = int(x)
+	case uint64:
+		val = int(x)
+	case uint32:
+		val = int(x)
+	case uint16:
+		val = int(x)
+	case uint8:
+		val = int(x)
+	case float32:
+		val = int(x)
+	case float64:
+		val = int(x)
+	case string:
+		var v int64
+		if v, err = strconv.ParseInt(x, 0, 0); err != nil {
+			err = errors.Wrapf(err, "failed to convert string to int")
+
+			// Also convert true|false|TRUE|FALSE
+			if b, e := strconv.ParseBool(x); e == nil {
+				err = nil
+				if b {
+					val = 1
+				}
+			}
+		} else {
+			val = int(v)
+		}
+	default:
+		err = fmt.Errorf("unable to cast type %T to int", x)
+	}
+	return
+}
+
+// ToIntSlice convert an interface to a []int type.
+func ToIntSlice(obj interface{}) []int {
+	x, _ := ToIntSliceE(obj)
+	if x == nil {
+		return []int{}
+	}
+	return x
+}
+
+// ToIntSliceE convert an interface to a []int type.
+func ToIntSliceE(obj interface{}) (val []int, err error) {
+	o := Indirect(obj)
+
+	switch x := o.(type) {
+	case nil:
+		val = []int{}
+	case []int:
+		val = x
+	case IntSlice:
+		val = x
+	}
+
+	// kind := reflect.TypeOf(i).Kind()
+	// switch kind {
+	// case reflect.Slice, reflect.Array:
+	// 	s := reflect.ValueOf(i)
+	// 	a := make([]int, s.Len())
+	// 	for j := 0; j < s.Len(); j++ {
+	// 		val, err := ToIntE(s.Index(j).Interface())
+	// 		if err != nil {
+	// 			return []int{}, fmt.Errorf("unable to cast %#v of type %T to []int", i, i)
+	// 		}
+	// 		a[j] = val
+	// 	}
+	// 	return a, nil
+	// default:
+	// 	return []int{}, fmt.Errorf("unable to cast %#v of type %T to []int", i, i)
+	// }
+	return
+}
+
+// ToString convert an interface to a string type.
 func ToString(obj interface{}) string {
 	o := Indirect(obj)
 
@@ -384,58 +490,5 @@ func ToString(obj interface{}) string {
 		return x.(fmt.Stringer).String()
 	default:
 		return fmt.Sprintf("%v", obj)
-	}
-}
-
-// ToInt casts an interface to an int type.
-func ToInt(obj interface{}) int {
-	x, _ := ToIntE(obj)
-	return x
-}
-
-// ToIntE casts an interface to an int type.
-func ToIntE(obj interface{}) (int, error) {
-	o := Indirect(obj)
-
-	switch x := o.(type) {
-	case int:
-		return x, nil
-	case int8:
-		return int(x), nil
-	case int16:
-		return int(x), nil
-	case int32:
-		return int(x), nil
-	case int64:
-		return int(x), nil
-	case uint:
-		return int(x), nil
-	case uint64:
-		return int(x), nil
-	case uint32:
-		return int(x), nil
-	case uint16:
-		return int(x), nil
-	case uint8:
-		return int(x), nil
-	case float64:
-		return int(x), nil
-	case float32:
-		return int(x), nil
-	case string:
-		v, err := strconv.ParseInt(x, 0, 0)
-		if err == nil {
-			return int(v), nil
-		}
-		return 0, fmt.Errorf("unable to cast type %T to int", obj)
-	case bool:
-		if x {
-			return 1, nil
-		}
-		return 0, nil
-	case nil:
-		return 0, nil
-	default:
-		return 0, fmt.Errorf("unable to cast type %T to int", obj)
 	}
 }

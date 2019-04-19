@@ -31,6 +31,14 @@ func TestIndirect(t *testing.T) {
 		assert.Equal(t, false, Indirect((*bool)(nil)))
 	}
 
+	// byte
+	{
+		var test byte
+		assert.Equal(t, byte(3), Indirect(byte(3)))
+		assert.Equal(t, byte(0), Indirect(&test))
+		assert.Equal(t, byte(0), Indirect((*byte)(nil)))
+	}
+
 	// []byte
 	{
 		assert.Equal(t, "test", string(Indirect([]byte{0x74, 0x65, 0x73, 0x74}).([]byte)))
@@ -282,7 +290,7 @@ func TestIndirect(t *testing.T) {
 	}
 }
 
-// Bool
+// ToBool
 //--------------------------------------------------------------------------------------------------
 func ExampleToBool() {
 	fmt.Println(ToBool(1))
@@ -303,6 +311,15 @@ func TestToBool(t *testing.T) {
 		assert.Equal(t, true, ToBool(true))
 		assert.Equal(t, false, ToBool(&test))
 		assert.Equal(t, false, ToBool((*bool)(nil)))
+	}
+
+	// byte
+	{
+		var test byte
+		assert.Equal(t, true, ToBool(byte(3)))
+		assert.Equal(t, false, ToBool(byte(0)))
+		assert.Equal(t, false, ToBool(&test))
+		assert.Equal(t, false, ToBool((*byte)(nil)))
 	}
 
 	// int
@@ -408,7 +425,7 @@ func TestToBool(t *testing.T) {
 
 }
 
-// BoolE
+// ToBoolE
 //--------------------------------------------------------------------------------------------------
 func ExampleToBoolE() {
 	fmt.Println(ToBoolE(1))
@@ -424,7 +441,7 @@ func TestToBoolE(t *testing.T) {
 		assert.Equal(t, false, val)
 
 		val, err = ToBoolE(&Object{})
-		assert.Equal(t, "unable to cast type *n.Object to bool", err.Error())
+		assert.Equal(t, "unable to cast type n.Object to bool", err.Error())
 		assert.Equal(t, false, val)
 	}
 
@@ -653,6 +670,283 @@ func TestToBoolE(t *testing.T) {
 		val, err = ToBoolE((*uint64)(nil))
 		assert.Nil(t, err)
 		assert.Equal(t, false, val)
+	}
+}
+
+// ToIntE
+//--------------------------------------------------------------------------------------------------
+func ExampleToIntE() {
+	fmt.Println(ToIntE("1"))
+	// Output: 1 <nil>
+}
+
+func TestToIntE(t *testing.T) {
+
+	// invalid
+	{
+		val, err := ToIntE(nil)
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		val, err = ToIntE(&Object{})
+		assert.Equal(t, "unable to cast type n.Object to int", err.Error())
+		assert.Equal(t, 0, val)
+	}
+
+	// bool
+	{
+		val, err := ToIntE(true)
+		assert.Nil(t, err)
+		assert.Equal(t, 1, val)
+
+		var test bool
+		val, err = ToIntE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		val, err = ToIntE((*bool)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+	}
+
+	// int
+	{
+		val, err := ToIntE(3)
+		assert.Nil(t, err)
+		assert.Equal(t, 3, val)
+
+		val, err = ToIntE(0)
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		var test int
+		val, err = ToIntE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		val, err = ToIntE((*int)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+	}
+
+	// int8
+	{
+		val, err := ToIntE(int8(3))
+		assert.Nil(t, err)
+		assert.Equal(t, 3, val)
+
+		val, err = ToIntE(int8(0))
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		var test int8
+		val, err = ToIntE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		val, err = ToIntE((*int8)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+	}
+
+	// int16
+	{
+		val, err := ToIntE(int16(3))
+		assert.Nil(t, err)
+		assert.Equal(t, 3, val)
+
+		val, err = ToIntE(int16(0))
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		var test int16
+		val, err = ToIntE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		val, err = ToIntE((*int16)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+	}
+
+	// int32
+	{
+		val, err := ToIntE(int32(3))
+		assert.Nil(t, err)
+		assert.Equal(t, 3, val)
+
+		val, err = ToIntE(int32(0))
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		var test int32
+		val, err = ToIntE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		val, err = ToIntE((*int32)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+	}
+
+	// int64
+	{
+		val, err := ToIntE(int64(3))
+		assert.Nil(t, err)
+		assert.Equal(t, 3, val)
+
+		val, err = ToIntE(int64(0))
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		var test int64
+		val, err = ToIntE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		val, err = ToIntE((*int64)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+	}
+
+	// string
+	{
+		val, err := ToIntE("true")
+		assert.Nil(t, err)
+		assert.Equal(t, 1, val)
+
+		val, err = ToIntE("TRUE")
+		assert.Nil(t, err)
+		assert.Equal(t, 1, val)
+
+		val, err = ToIntE("false")
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		val, err = ToIntE("FALSE")
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		val, err = ToIntE("bob")
+		assert.NotNil(t, err)
+		assert.Equal(t, 0, val)
+
+		val, err = ToIntE("3")
+		assert.Nil(t, err)
+		assert.Equal(t, 3, val)
+
+		val, err = ToIntE("0")
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		var test string
+		val, err = ToIntE(&test)
+		assert.NotNil(t, err)
+		assert.Equal(t, 0, val)
+
+		val, err = ToIntE((*string)(nil))
+		assert.NotNil(t, err)
+		assert.Equal(t, 0, val)
+	}
+
+	// uint
+	{
+		val, err := ToIntE(uint(3))
+		assert.Nil(t, err)
+		assert.Equal(t, 3, val)
+
+		val, err = ToIntE(0)
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		var test uint
+		val, err = ToIntE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		val, err = ToIntE((*uint)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+	}
+
+	// uint8
+	{
+		val, err := ToIntE(uint8(3))
+		assert.Nil(t, err)
+		assert.Equal(t, 3, val)
+
+		val, err = ToIntE(uint8(0))
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		var test uint8
+		val, err = ToIntE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		val, err = ToIntE((*uint8)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+	}
+
+	// uint16
+	{
+		val, err := ToIntE(uint16(3))
+		assert.Nil(t, err)
+		assert.Equal(t, 3, val)
+
+		val, err = ToIntE(uint16(0))
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		var test uint16
+		val, err = ToIntE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		val, err = ToIntE((*uint16)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+	}
+
+	// uint32
+	{
+		val, err := ToIntE(uint32(3))
+		assert.Nil(t, err)
+		assert.Equal(t, 3, val)
+
+		val, err = ToIntE(uint32(0))
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		var test uint32
+		val, err = ToIntE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		val, err = ToIntE((*uint32)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+	}
+
+	// uint64
+	{
+		val, err := ToIntE(uint64(3))
+		assert.Nil(t, err)
+		assert.Equal(t, 3, val)
+
+		val, err = ToIntE(uint64(0))
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		var test uint64
+		val, err = ToIntE(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
+
+		val, err = ToIntE((*uint64)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, 0, val)
 	}
 }
 

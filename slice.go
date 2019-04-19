@@ -42,7 +42,7 @@ type Slice interface {
 	FirstN(n int) Slice                               // FirstN returns the first n elements in this slice as a Slice reference to the original.
 	Generic() bool                                    // Generic returns true if the underlying implementation is a RefSlice
 	Index(elem interface{}) (loc int)                 // Index returns the index of the first element in this Slice where element == elem
-	Insert(i int, elem interface{}) Slice             // Insert modifies this Slice to insert the given element before the element with the given index.
+	Insert(i int, elem interface{}) Slice             // Insert modifies this Slice to insert the given element(s) before the element with the given index.
 	Join(separator ...string) (str *Object)           // Join converts each element into a string then joins them together using the given separator or comma by default.
 	Last() (elem *Object)                             // Last returns the last element in this Slice as an Object.
 	LastN(n int) Slice                                // LastN returns the last n elements in this Slice as a Slice reference to the original.

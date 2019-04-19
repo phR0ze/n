@@ -15,20 +15,21 @@ type Char rune
 func NewChar(obj interface{}) *Char {
 	str := ""
 	var new Char
-	switch x := obj.(type) {
+	o := Indirect(obj)
+	switch x := o.(type) {
 	case nil:
-	case Str, *Str:
-		str = string(Indirect(x).(Str))
-	case string, *string:
-		str = Indirect(x).(string)
-	case byte, *byte:
-		str = string(Indirect(x).(byte))
-	case []byte, *[]byte:
-		str = string(Indirect(x).([]byte))
-	case rune, *rune:
-		str = string(Indirect(x).(rune))
+	case Str:
+		str = string(x)
+	case string:
+		str = x
+	case byte:
+		str = string(x)
+	case []byte:
+		str = string(x)
+	case rune:
+		str = string(x)
 	default:
-		str = ToString(obj)
+		str = ToString(o)
 	}
 	if len(str) > 0 {
 		new = Char(str[0])

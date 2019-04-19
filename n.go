@@ -74,17 +74,17 @@ func Range(min, max int) []int {
 	return result
 }
 
-// SetOnTrue provides a simple means of only updating the result if the exp is true
-func SetOnTrue(result *bool, exp bool) {
+// SetOnTrue provides a simple means of only updating the result to the 'value' if the exp is true
+func SetOnTrue(result *bool, value, exp bool) {
 	if exp {
-		*result = true
+		*result = value
 	}
 }
 
-// SetOnFalse provides a simple means of only updating the result if the exp is false
-func SetOnFalse(result *bool, exp bool) {
+// SetOnFalse provides a simple means of only updating the result to the 'value' if the exp is false
+func SetOnFalse(result *bool, value, exp bool) {
 	if !exp {
-		*result = false
+		*result = value
 	}
 }
 

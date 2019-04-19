@@ -13,9 +13,9 @@ var (
 	ReGraphicalOnly = regexp.MustCompile(`[^[:graph:]]+`)
 )
 
-// Str wraps the Go string and implements the Slice interface providing
+// Str wraps the Go []rune and implements the Slice interface providing
 // convenience methods on par with other rapid development languages.
-type Str string
+type Str []rune
 
 // A is an alias to NewStr for brevity
 func A(obj interface{}) *Str {
@@ -25,32 +25,37 @@ func A(obj interface{}) *Str {
 // NewStr creates a new *Str which will never be nil
 // Supports: Str *Str, string *string, []byte *[]byte, rune *rune, []rune *[]rune, []string *[]string ...
 func NewStr(obj interface{}) *Str {
-	var new Str
-	switch x := obj.(type) {
+	new := Str{}
+	o := Indirect(obj)
+	switch x := o.(type) {
 	case nil:
-	case Str, *Str:
-		new = Indirect(x).(Str)
-	case string, *string:
-		new = Str(Indirect(x).(string))
-	case []byte, *[]byte:
-		new = Str(Indirect(x).([]byte))
-	case rune, *rune:
-		new = Str(Indirect(x).(rune))
-	case []rune, *[]rune:
-		new = Str(Indirect(x).([]rune))
-	case []string, *[]string:
-		new.ConcatM(Indirect(x).([]string))
+	case Str:
+		new = x
+	case string:
+		new = Str(x)
+	case byte:
+		new = Str(string(x))
+	case []byte:
+		new = Str(string(x))
+	case rune:
+		new = append(new, x)
+	case []rune:
+		new = Str(x)
+	case []string:
+		for i := range x {
+			new = append(new, []rune(x[i])...)
+		}
 	default:
-		new = Str(Obj(obj).ToString())
+		new = Str(ToString(o))
 	}
 	return &new
 }
 
 // NewStrV creates a new *Str from the given variadic elements. Returned *Str
 // will never be nil.
-// Supports: string, *string, rune, *rune
+// Supports: Str *Str, string *string, []byte *[]byte, rune *rune, []rune *[]rune, []string *[]string ...
 func NewStrV(elems ...interface{}) *Str {
-	var new Str
+	new := Str{}
 	for i := range elems {
 		new.Append(elems[i])
 	}
@@ -72,9 +77,10 @@ func (p *Str) All(elems ...interface{}) bool {
 	if p == nil || len(*p) == 0 || len(elems) == 0 {
 		return false
 	}
+	str := p.A()
 	result := true
 	for i := range elems {
-		if !strings.Contains(string(*p), NewStr(elems[i]).A()) {
+		if !strings.Contains(str, NewStr(elems[i]).A()) {
 			return false
 		}
 	}
@@ -88,55 +94,42 @@ func (p *Str) AllS(slice interface{}) bool {
 	if p == nil || len(*p) == 0 {
 		return false
 	}
+	str := p.A()
 	result := true
-	switch x := slice.(type) {
-	case []Str, *[]Str:
-		y := Indirect(x).([]Str)
-		if len(y) == 0 {
-			return false
-		}
-		for i := range y {
-			if !strings.Contains(string(*p), string(y[i])) {
+	o := Indirect(slice)
+	switch x := o.(type) {
+	case []Str:
+		SetOnTrue(&result, false, len(x) == 0)
+		for i := range x {
+			if !strings.Contains(str, string(x[i])) {
 				return false
 			}
 		}
-	case []string, *[]string:
-		y := Indirect(x).([]string)
-		if len(y) == 0 {
-			return false
-		}
-		for i := range y {
-			if !strings.Contains(string(*p), y[i]) {
+	case []string:
+		SetOnTrue(&result, false, len(x) == 0)
+		for i := range x {
+			if !strings.Contains(str, x[i]) {
 				return false
 			}
 		}
-	case StringSlice, *StringSlice:
-		y := Indirect(x).(StringSlice)
-		if len(y) == 0 {
-			return false
-		}
-		for i := 0; i < y.Len(); i++ {
-			if !strings.Contains(string(*p), y.At(i).A()) {
+	case StringSlice:
+		SetOnTrue(&result, false, len(x) == 0)
+		for i := 0; i < x.Len(); i++ {
+			if !strings.Contains(str, x.At(i).A()) {
 				return false
 			}
 		}
-	case []byte, *[]byte:
-		y := Indirect(x).([]byte)
-		if len(y) == 0 {
-			return false
-		}
-		for i := range y {
-			if !strings.ContainsRune(string(*p), rune(y[i])) {
+	case []byte:
+		SetOnTrue(&result, false, len(x) == 0)
+		for i := range x {
+			if !strings.ContainsRune(str, rune(x[i])) {
 				return false
 			}
 		}
-	case []rune, *[]rune:
-		y := Indirect(x).([]rune)
-		if len(y) == 0 {
-			return false
-		}
-		for i := range y {
-			if !strings.ContainsRune(string(*p), y[i]) {
+	case []rune:
+		SetOnTrue(&result, false, len(x) == 0)
+		for i := range x {
+			if !strings.ContainsRune(str, x[i]) {
 				return false
 			}
 		}
@@ -160,8 +153,9 @@ func (p *Str) Any(elems ...interface{}) bool {
 	}
 
 	// Looking for something specific returns false if incompatible type
+	str := p.A()
 	for i := range elems {
-		if strings.Contains(string(*p), NewStr(elems[i]).A()) {
+		if strings.Contains(str, NewStr(elems[i]).A()) {
 			return true
 		}
 	}
@@ -175,39 +169,36 @@ func (p *Str) AnyS(slice interface{}) bool {
 	if p == nil || len(*p) == 0 {
 		return false
 	}
-	switch x := slice.(type) {
-	case []Str, *[]Str:
-		y := Indirect(x).([]Str)
-		for i := range y {
-			if strings.Contains(string(*p), string(y[i])) {
+	str := p.A()
+	o := Indirect(slice)
+	switch x := o.(type) {
+	case []Str:
+		for i := range x {
+			if strings.Contains(str, string(x[i])) {
 				return true
 			}
 		}
-	case []string, *[]string:
-		y := Indirect(x).([]string)
-		for i := range y {
-			if strings.Contains(string(*p), y[i]) {
+	case []string:
+		for i := range x {
+			if strings.Contains(str, x[i]) {
 				return true
 			}
 		}
-	case StringSlice, *StringSlice:
-		y := Indirect(x).(StringSlice)
-		for i := 0; i < y.Len(); i++ {
-			if strings.Contains(string(*p), y.At(i).A()) {
+	case StringSlice:
+		for i := 0; i < x.Len(); i++ {
+			if strings.Contains(str, x.At(i).A()) {
 				return true
 			}
 		}
-	case []byte, *[]byte:
-		y := Indirect(x).([]byte)
-		for i := range y {
-			if strings.ContainsRune(string(*p), rune(y[i])) {
+	case []byte:
+		for i := range x {
+			if strings.ContainsRune(str, rune(x[i])) {
 				return true
 			}
 		}
-	case []rune, *[]rune:
-		y := Indirect(x).([]rune)
-		for i := range y {
-			if strings.ContainsRune(string(*p), y[i]) {
+	case []rune:
+		for i := range x {
+			if strings.ContainsRune(str, x[i]) {
 				return true
 			}
 		}
@@ -226,7 +217,7 @@ func (p *Str) Append(elem interface{}) Slice {
 	if p == nil {
 		p = NewStrV()
 	}
-	*p = Str(string(*p) + string(*NewStr(elem)))
+	*p = append(*p, (*NewStr(elem))...)
 	return p
 }
 
@@ -237,7 +228,7 @@ func (p *Str) AppendV(elems ...interface{}) Slice {
 		p = NewStrV()
 	}
 	for _, elem := range elems {
-		p.Append(elem)
+		*p = append(*p, (*NewStr(elem))...)
 	}
 	return p
 }
@@ -284,7 +275,7 @@ func (p *Str) B() []byte {
 	if p == nil {
 		return []byte{}
 	}
-	return []byte(*p)
+	return []byte(string(*p))
 }
 
 // C exports the Str as a Char
@@ -314,23 +305,12 @@ func (p *Str) ConcatA(str interface{}) string {
 }
 
 // ConcatM modifies this Slice by appending the given and returns a reference to this Slice.
-// Supports Str, *Str, []string or *[]string
+// Supports: Str *Str, string *string, []byte *[]byte, rune *rune, []rune *[]rune, []string *[]string ...
 func (p *Str) ConcatM(slice interface{}) Slice {
 	if p == nil {
 		p = NewStrV()
 	}
-	var builder strings.Builder
-	builder.WriteString(string(*p))
-	switch x := slice.(type) {
-	case Str, *Str:
-		builder.WriteString(string(Indirect(x).(Str)))
-	case []string, *[]string:
-		y := Indirect(x).([]string)
-		for i := range y {
-			builder.WriteString(y[i])
-		}
-	}
-	*p = Str(builder.String())
+	*p = append(*p, (*NewStr(slice))...)
 	return p
 }
 
@@ -344,7 +324,7 @@ func (p *Str) Contains(str string) bool {
 	return strings.Contains(string(*p), str)
 }
 
-// ContainsAny checks if any of the given charts exist in this Str.
+// ContainsAny checks if any of the given chars exist in this Str.
 //
 // Pass through for strings.ContainsAny
 func (p *Str) ContainsAny(chars string) bool {
@@ -409,7 +389,7 @@ func (p *Str) CountW(sel func(O) bool) (cnt int) {
 	if p == nil || len(*p) == 0 {
 		return
 	}
-	for i := 0; i < len(*p); i++ {
+	for i := range *p {
 		if sel(Char((*p)[i])) {
 			cnt++
 		}
@@ -435,7 +415,7 @@ func (p *Str) Drop(indices ...int) Slice {
 	// Execute
 	n := j - i
 	if i+n < len(*p) {
-		*p = Str(append([]rune(*p)[:i], []rune(*p)[i+n:]...))
+		*p = append((*p)[:i], (*p)[i+n:]...)
 	} else {
 		*p = (*p)[:i]
 	}
@@ -497,8 +477,8 @@ func (p *Str) Each(action func(O)) Slice {
 	if p == nil {
 		return p
 	}
-	for i := 0; i < len(*p); i++ {
-		action((*p)[i])
+	for i := range *p {
+		action(Char((*p)[i]))
 	}
 	return p
 }
@@ -510,8 +490,8 @@ func (p *Str) EachE(action func(O) error) (Slice, error) {
 	if p == nil {
 		return p, err
 	}
-	for i := 0; i < len(*p); i++ {
-		if err = action((*p)[i]); err != nil {
+	for i := range *p {
+		if err = action(Char((*p)[i])); err != nil {
 			return p, err
 		}
 	}
@@ -524,8 +504,8 @@ func (p *Str) EachI(action func(int, O)) Slice {
 	if p == nil {
 		return p
 	}
-	for i := 0; i < len(*p); i++ {
-		action(i, (*p)[i])
+	for i := range *p {
+		action(i, Char((*p)[i]))
 	}
 	return p
 }
@@ -537,8 +517,8 @@ func (p *Str) EachIE(action func(int, O) error) (Slice, error) {
 	if p == nil {
 		return p, err
 	}
-	for i := 0; i < len(*p); i++ {
-		if err = action(i, (*p)[i]); err != nil {
+	for i := range *p {
+		if err = action(i, Char((*p)[i])); err != nil {
 			return p, err
 		}
 	}
@@ -552,7 +532,7 @@ func (p *Str) EachR(action func(O)) Slice {
 		return p
 	}
 	for i := len(*p) - 1; i >= 0; i-- {
-		action((*p)[i])
+		action(Char((*p)[i]))
 	}
 	return p
 }
@@ -565,7 +545,7 @@ func (p *Str) EachRE(action func(O) error) (Slice, error) {
 		return p, err
 	}
 	for i := len(*p) - 1; i >= 0; i-- {
-		if err = action((*p)[i]); err != nil {
+		if err = action(Char((*p)[i])); err != nil {
 			return p, err
 		}
 	}
@@ -579,7 +559,7 @@ func (p *Str) EachRI(action func(int, O)) Slice {
 		return p
 	}
 	for i := len(*p) - 1; i >= 0; i-- {
-		action(i, (*p)[i])
+		action(i, Char((*p)[i]))
 	}
 	return p
 }
@@ -592,7 +572,7 @@ func (p *Str) EachRIE(action func(int, O) error) (Slice, error) {
 		return p, err
 	}
 	for i := len(*p) - 1; i >= 0; i-- {
-		if err = action(i, (*p)[i]); err != nil {
+		if err = action(i, Char((*p)[i])); err != nil {
 			return p, err
 		}
 	}
@@ -634,7 +614,7 @@ func (p *Str) Index(elem interface{}) (loc int) {
 	if p == nil || len(*p) == 0 {
 		return
 	}
-	for i := 0; i < len(*p); i++ {
+	for i := range *p {
 		if elem == (*p)[i] {
 			return i
 		}
@@ -834,11 +814,9 @@ func (p *Str) SetE(i int, elem interface{}) (Slice, error) {
 		return p, err
 	}
 
-	y := []rune(*NewStr(elem))
-	if len(y) > 0 {
-		x := []rune(*p)
-		x[i] = y[0]
-		*p = Str(x)
+	y := NewStr(elem)
+	if len(*y) > 0 {
+		(*p)[i] = (*y)[0]
 	}
 	return p, err
 }
@@ -862,7 +840,7 @@ func (p *Str) ShiftN(n int) (new Slice) {
 
 // Single reports true if there is only one element in this Slice.
 func (p *Str) Single() bool {
-	return len(*p) == 1
+	return p.Len() == 1
 }
 
 // Slice returns a range of elements from this Slice as a Slice reference to the original. Allows for negative notation.
@@ -934,7 +912,7 @@ func (p *Str) Swap(i, j int) {
 	if p == nil || len(*p) < 2 || i < 0 || j < 0 || i >= len(*p) || j >= len(*p) {
 		return
 	}
-	//(*p)[i], (*p)[j] = (*p)[j], (*p)[i]
+	(*p)[i], (*p)[j] = (*p)[j], (*p)[i]
 }
 
 // Take modifies this Slice removing the indicated range of elements from this Slice and returning them as a new Slice.
@@ -961,15 +939,15 @@ func (p *Str) TakeW(sel func(O) bool) (new Slice) {
 	if p == nil || len(*p) == 0 {
 		return slice
 	}
-	// l := len(*p)
-	// for i := 0; i < l; i++ {
-	// 	if sel((*p)[i]) {
-	// 		*slice = append(*slice, (*p)[i])
-	// 		p.DropAt(i)
-	// 		l--
-	// 		i--
-	// 	}
-	// }
+	l := len(*p)
+	for i := 0; i < l; i++ {
+		if sel(Char((*p)[i])) {
+			*slice = append(*slice, (*p)[i])
+			p.DropAt(i)
+			l--
+			i--
+		}
+	}
 	return slice
 }
 
@@ -991,9 +969,9 @@ func (p *Str) Uniq() (new Slice) {
 	if p == nil || len(*p) < 2 {
 		return p.Copy()
 	}
-	m := NewStringMapBool()
+	m := NewRuneMapBool()
 	slice := NewStrV()
-	for i := 0; i < len(*p); i++ {
+	for i := range *p {
 		if ok := m.Set((*p)[i], true); ok {
 			slice.Append((*p)[i])
 		}
@@ -1009,7 +987,7 @@ func (p *Str) UniqM() Slice {
 	}
 	m := NewStringMapBool()
 	l := len(*p)
-	for i := 0; i < l; i++ {
+	for i := range *p {
 		if ok := m.Set((*p)[i], true); !ok {
 			p.DropAt(i)
 			l--
