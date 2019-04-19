@@ -68,17 +68,12 @@ func (p *IntSlice) AnyS(slice interface{}) bool {
 	if p == nil || len(*p) == 0 {
 		return false
 	}
-	var elems []int
-	switch x := slice.(type) {
-	case []int, *[]int:
-		elems = Indirect(x).([]int)
-	case IntSlice, *IntSlice:
-		elems = Indirect(x).(IntSlice)
-	}
-	for i := range elems {
-		for j := range *p {
-			if (*p)[j] == elems[i] {
-				return true
+	if elems, err := ToIntSliceE(slice); err == nil {
+		for i := range elems {
+			for j := range *p {
+				if (*p)[j] == elems[i] {
+					return true
+				}
 			}
 		}
 	}
@@ -95,7 +90,7 @@ func (p *IntSlice) Append(elem interface{}) Slice {
 	if p == nil {
 		p = NewIntSliceV()
 	}
-	if x, ok := elem.(int); ok {
+	if x, err := ToIntE(elem); err == nil {
 		*p = append(*p, x)
 	}
 	return p
@@ -107,7 +102,9 @@ func (p *IntSlice) AppendV(elems ...interface{}) Slice {
 		p = NewIntSliceV()
 	}
 	for _, elem := range elems {
-		p.Append(elem)
+		if x, err := ToIntE(elem); err == nil {
+			*p = append(*p, x)
+		}
 	}
 	return p
 }
@@ -147,11 +144,8 @@ func (p *IntSlice) ConcatM(slice interface{}) Slice {
 	if p == nil {
 		p = NewIntSliceV()
 	}
-	switch x := slice.(type) {
-	case []int, *[]int:
-		*p = append(*p, Indirect(x).([]int)...)
-	case IntSlice, *IntSlice:
-		*p = append(*p, Indirect(x).(IntSlice)...)
+	if elems, err := ToIntSliceE(slice); err == nil {
+		*p = append(*p, elems...)
 	}
 	return p
 }
@@ -193,7 +187,7 @@ func (p *IntSlice) CountW(sel func(O) bool) (cnt int) {
 	if p == nil || len(*p) == 0 {
 		return
 	}
-	for i := 0; i < len(*p); i++ {
+	for i := range *p {
 		if sel((*p)[i]) {
 			cnt++
 		}
@@ -281,7 +275,7 @@ func (p *IntSlice) Each(action func(O)) Slice {
 	if p == nil {
 		return p
 	}
-	for i := 0; i < len(*p); i++ {
+	for i := range *p {
 		action((*p)[i])
 	}
 	return p
@@ -294,7 +288,7 @@ func (p *IntSlice) EachE(action func(O) error) (Slice, error) {
 	if p == nil {
 		return p, err
 	}
-	for i := 0; i < len(*p); i++ {
+	for i := range *p {
 		if err = action((*p)[i]); err != nil {
 			return p, err
 		}
@@ -308,7 +302,7 @@ func (p *IntSlice) EachI(action func(int, O)) Slice {
 	if p == nil {
 		return p
 	}
-	for i := 0; i < len(*p); i++ {
+	for i := range *p {
 		action(i, (*p)[i])
 	}
 	return p
@@ -321,7 +315,7 @@ func (p *IntSlice) EachIE(action func(int, O) error) (Slice, error) {
 	if p == nil {
 		return p, err
 	}
-	for i := 0; i < len(*p); i++ {
+	for i := range *p {
 		if err = action(i, (*p)[i]); err != nil {
 			return p, err
 		}
@@ -418,15 +412,17 @@ func (p *IntSlice) Index(elem interface{}) (loc int) {
 	if p == nil || len(*p) == 0 {
 		return
 	}
-	for i := 0; i < len(*p); i++ {
-		if elem == (*p)[i] {
-			return i
+	if x, err := ToIntE(elem); err == nil {
+		for i := range *p {
+			if (*p)[i] == x {
+				return i
+			}
 		}
 	}
 	return
 }
 
-// Insert modifies this Slice to insert the given element(s) before the element with the given index.
+// Insert modifies this Slice to insert the given element before the element with the given index.
 // Negative indices count backwards from the end of the slice, where -1 is the last element. If a
 // negative index is used, the given element will be inserted after that element, so using an index
 // of -1 will insert the element at the end of the slice. If a Slice is given all elements will be
@@ -445,7 +441,7 @@ func (p *IntSlice) Insert(i int, elem interface{}) Slice {
 	}
 
 	// Insert the item before j if pos and after j if neg
-	if x, ok := elem.(int); ok {
+	if x, err := ToIntE(elem); err == nil {
 		if j == 0 {
 			*p = append([]int{x}, (*p)...)
 		} else if j < len(*p) {
@@ -454,6 +450,39 @@ func (p *IntSlice) Insert(i int, elem interface{}) Slice {
 			(*p)[j] = x
 		} else {
 			*p = append(*p, x)
+		}
+	}
+	return p
+}
+
+// InsertS modifies this Slice to insert the given elements before the element with the given index.
+// Negative indices count backwards from the end of the slice, where -1 is the last element. If a
+// negative index is used, the given element will be inserted after that element, so using an index
+// of -1 will insert the element at the end of the slice. If a Slice is given all elements will be
+// inserted starting from the beging until the end. Slice is returned for chaining. Invalid
+// index locations will not change the slice.
+func (p *IntSlice) InsertS(i int, slice interface{}) Slice {
+	if p == nil || len(*p) == 0 {
+		return p.ConcatM(slice)
+	}
+	j := i
+	if j = absIndex(len(*p), j); j == -1 {
+		return p
+	}
+	if i < 0 {
+		j++
+	}
+
+	// Insert the item before j if pos and after j if neg
+	if elems, err := ToIntSliceE(slice); err == nil {
+		if j == 0 {
+			*p = append(elems, (*p)...)
+		} else if j < len(*p) {
+			// *p = append(*p, elems...)
+			// copy((*p)[j+1:], (*p)[j:])
+			// (*p)[j] = x
+		} else {
+			*p = append(*p, elems...)
 		}
 	}
 	return p
@@ -471,7 +500,7 @@ func (p *IntSlice) Join(separator ...string) (str *Object) {
 	}
 
 	var builder strings.Builder
-	for i := 0; i < len(*p); i++ {
+	for i := range *p {
 		builder.WriteString(Obj((*p)[i]).ToString())
 		if i+1 < len(*p) {
 			builder.WriteString(sep)
@@ -587,7 +616,7 @@ func (p *IntSlice) Select(sel func(O) bool) (new Slice) {
 	if p == nil || len(*p) == 0 {
 		return slice
 	}
-	for i := 0; i < len(*p); i++ {
+	for i := range *p {
 		if sel((*p)[i]) {
 			*slice = append(*slice, (*p)[i])
 		}
@@ -705,7 +734,7 @@ func (p *IntSlice) String() string {
 	var builder strings.Builder
 	builder.WriteString("[")
 	if p != nil {
-		for i := 0; i < len(*p); i++ {
+		for i := range *p {
 			builder.WriteString(fmt.Sprintf("%d", (*p)[i]))
 			if i+1 < len(*p) {
 				builder.WriteString(" ")
@@ -780,7 +809,7 @@ func (p *IntSlice) Uniq() (new Slice) {
 	}
 	m := NewIntMapBool()
 	slice := NewIntSliceV()
-	for i := 0; i < len(*p); i++ {
+	for i := range *p {
 		if ok := m.Set((*p)[i], true); ok {
 			slice.Append((*p)[i])
 		}

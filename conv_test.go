@@ -191,6 +191,8 @@ func TestIndirect(t *testing.T) {
 		assert.Equal(t, []rune{'t', 'e', 's', 't'}, Indirect([]rune{'t', 'e', 's', 't'}))
 		assert.Equal(t, []rune{'t', 'e', 's', 't'}, Indirect(&[]rune{'t', 'e', 's', 't'}))
 		assert.Equal(t, []rune{}, Indirect((*[]rune)(nil)))
+		assert.Equal(t, []*rune{}, Indirect((*[]*rune)(nil)))
+		assert.Equal(t, []*rune{&test}, Indirect(&[]*rune{&test}))
 	}
 
 	// Str

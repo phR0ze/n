@@ -692,6 +692,8 @@ func ToIntE(obj interface{}) (val int, err error) {
 		if x {
 			val = 1
 		}
+	case Char:
+		val, err = ToIntE(x.A())
 	case float32:
 		val = int(x)
 	case float64:

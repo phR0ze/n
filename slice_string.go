@@ -191,7 +191,7 @@ func (p *StringSlice) CountW(sel func(O) bool) (cnt int) {
 	if p == nil || len(*p) == 0 {
 		return
 	}
-	for i := 0; i < len(*p); i++ {
+	for i := range *p {
 		if sel((*p)[i]) {
 			cnt++
 		}
@@ -279,7 +279,7 @@ func (p *StringSlice) Each(action func(O)) Slice {
 	if p == nil {
 		return p
 	}
-	for i := 0; i < len(*p); i++ {
+	for i := range *p {
 		action((*p)[i])
 	}
 	return p
@@ -292,7 +292,7 @@ func (p *StringSlice) EachE(action func(O) error) (Slice, error) {
 	if p == nil {
 		return p, err
 	}
-	for i := 0; i < len(*p); i++ {
+	for i := range *p {
 		if err = action((*p)[i]); err != nil {
 			return p, err
 		}
@@ -306,7 +306,7 @@ func (p *StringSlice) EachI(action func(int, O)) Slice {
 	if p == nil {
 		return p
 	}
-	for i := 0; i < len(*p); i++ {
+	for i := range *p {
 		action(i, (*p)[i])
 	}
 	return p
@@ -319,7 +319,7 @@ func (p *StringSlice) EachIE(action func(int, O) error) (Slice, error) {
 	if p == nil {
 		return p, err
 	}
-	for i := 0; i < len(*p); i++ {
+	for i := range *p {
 		if err = action(i, (*p)[i]); err != nil {
 			return p, err
 		}
@@ -416,7 +416,7 @@ func (p *StringSlice) Index(elem interface{}) (loc int) {
 	if p == nil || len(*p) == 0 {
 		return
 	}
-	for i := 0; i < len(*p); i++ {
+	for i := range *p {
 		if elem == (*p)[i] {
 			return i
 		}
@@ -424,7 +424,7 @@ func (p *StringSlice) Index(elem interface{}) (loc int) {
 	return
 }
 
-// Insert modifies this Slice to insert the given element(s) before the element with the given index.
+// Insert modifies this Slice to insert the given element before the element with the given index.
 // Negative indices count backwards from the end of the slice, where -1 is the last element. If a
 // negative index is used, the given element will be inserted after that element, so using an index
 // of -1 will insert the element at the end of the slice. If a Slice is given all elements will be
@@ -457,6 +457,39 @@ func (p *StringSlice) Insert(i int, elem interface{}) Slice {
 	return p
 }
 
+// InsertS modifies this Slice to insert the given elements before the element with the given index.
+// Negative indices count backwards from the end of the slice, where -1 is the last element. If a
+// negative index is used, the given element will be inserted after that element, so using an index
+// of -1 will insert the element at the end of the slice. If a Slice is given all elements will be
+// inserted starting from the beging until the end. Slice is returned for chaining. Invalid
+// index locations will not change the slice.
+func (p *StringSlice) InsertS(i int, slice interface{}) Slice {
+	if p == nil || len(*p) == 0 {
+		return p.ConcatM(slice)
+	}
+	j := i
+	if j = absIndex(len(*p), j); j == -1 {
+		return p
+	}
+	if i < 0 {
+		j++
+	}
+
+	// // Insert the item before j if pos and after j if neg
+	// if x, ok := elem.(string); ok {
+	// 	if j == 0 {
+	// 		*p = append([]string{x}, (*p)...)
+	// 	} else if j < len(*p) {
+	// 		*p = append(*p, x)
+	// 		copy((*p)[j+1:], (*p)[j:])
+	// 		(*p)[j] = x
+	// 	} else {
+	// 		*p = append(*p, x)
+	// 	}
+	// }
+	return p
+}
+
 // Join converts each element into a string then joins them together using the given separator or comma by default.
 func (p *StringSlice) Join(separator ...string) (str *Object) {
 	if p == nil || len(*p) == 0 {
@@ -469,7 +502,7 @@ func (p *StringSlice) Join(separator ...string) (str *Object) {
 	}
 
 	var builder strings.Builder
-	for i := 0; i < len(*p); i++ {
+	for i := range *p {
 		builder.WriteString(Obj((*p)[i]).ToString())
 		if i+1 < len(*p) {
 			builder.WriteString(sep)
@@ -585,7 +618,7 @@ func (p *StringSlice) Select(sel func(O) bool) (new Slice) {
 	if p == nil || len(*p) == 0 {
 		return slice
 	}
-	for i := 0; i < len(*p); i++ {
+	for i := range *p {
 		if sel((*p)[i]) {
 			*slice = append(*slice, (*p)[i])
 		}
@@ -703,7 +736,7 @@ func (p *StringSlice) String() string {
 	var builder strings.Builder
 	builder.WriteString("[")
 	if p != nil {
-		for i := 0; i < len(*p); i++ {
+		for i := range *p {
 			builder.WriteString((*p)[i])
 			if i+1 < len(*p) {
 				builder.WriteString(" ")
@@ -778,7 +811,7 @@ func (p *StringSlice) Uniq() (new Slice) {
 	}
 	m := NewStringMapBool()
 	slice := NewStringSliceV()
-	for i := 0; i < len(*p); i++ {
+	for i := range *p {
 		if ok := m.Set((*p)[i], true); ok {
 			slice.Append((*p)[i])
 		}

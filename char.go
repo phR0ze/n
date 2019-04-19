@@ -40,6 +40,11 @@ func NewChar(obj interface{}) *Char {
 // Object interface methods
 //--------------------------------------------------------------------------------------------------
 
+// A is an alias of String for brevity
+func (p *Char) A() string {
+	return p.String()
+}
+
 // O returns the underlying data structure as is
 func (p *Char) O() interface{} {
 	if p == nil {

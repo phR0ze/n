@@ -654,6 +654,38 @@ func (p *Str) Insert(i int, elem interface{}) Slice {
 	return p
 }
 
+// InsertS modifies this Slice to insert the given elements before the element with the given index.
+// Negative indices count backwards from the end of the slice, where -1 is the last element. If a
+// negative index is used, the given element will be inserted after that element, so using an index
+// of -1 will insert the element at the end of the slice. Slice is returned for chaining. Invalid
+// index locations will not change the slice.
+func (p *Str) InsertS(i int, slice interface{}) Slice {
+	if p == nil || len(*p) == 0 {
+		return p.ConcatM(slice)
+	}
+	// j := i
+	// if j = absIndex(len(*p), j); j == -1 {
+	// 	return p
+	// }
+	// if i < 0 {
+	// 	j++
+	// }
+
+	// // Insert the item before j if pos and after j if neg
+	// if x, ok := elem.(string); ok {
+	// 	if j == 0 {
+	// 		*p = append([]string{x}, (*p)...)
+	// 	} else if j < len(*p) {
+	// 		*p = append(*p, x)
+	// 		copy((*p)[j+1:], (*p)[j:])
+	// 		(*p)[j] = x
+	// 	} else {
+	// 		*p = append(*p, x)
+	// 	}
+	// }
+	return p
+}
+
 // Join converts each element into a string then joins them together using the given separator or comma by default.
 func (p *Str) Join(separator ...string) (str *Object) {
 	if p == nil || len(*p) == 0 {

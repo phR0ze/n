@@ -67,7 +67,7 @@ func NewRefSliceV(elems ...interface{}) (new *RefSlice) {
 
 	// Create new slice from the type of the first non Invalid element
 	var slice *reflect.Value
-	for i := 0; i < len(elems); i++ {
+	for i := range elems {
 
 		// Create target slice from first Valid element
 		if slice == nil && reflect.ValueOf(elems[i]).IsValid() {
@@ -149,7 +149,7 @@ func (p *RefSlice) Any(elems ...interface{}) bool {
 	}
 
 	// Looking for something specific returns false if incompatible type
-	for i := 0; i < len(elems); i++ {
+	for i := range elems {
 		x := reflect.ValueOf(elems[i])
 		if p.v.Type().Elem() != x.Type() {
 			break
@@ -608,7 +608,7 @@ func (p *RefSlice) Index(elem interface{}) (loc int) {
 	return
 }
 
-// Insert modifies this Slice to insert the given element(s) before the element with the given index.
+// Insert modifies this Slice to insert the given element before the element with the given index.
 // Negative indices count backwards from the end of the slice, where -1 is the last element. If a
 // negative index is used, the given element will be inserted after that element, so using an index
 // of -1 will insert the element at the end of the slice. If a Slice is given all elements will be
@@ -644,6 +644,45 @@ func (p *RefSlice) Insert(i int, elem interface{}) Slice {
 			*p.v = reflect.Append(*p.v, x)
 		}
 	}
+	return p
+}
+
+// InsertS modifies this Slice to insert the given elements before the element with the given index.
+// Negative indices count backwards from the end of the slice, where -1 is the last element. If a
+// negative index is used, the given element will be inserted after that element, so using an index
+// of -1 will insert the element at the end of the slice. If a Slice is given all elements will be
+// inserted starting from the beging until the end. Slice is returned for chaining. Invalid
+// index locations will not change the slice.
+func (p *RefSlice) InsertS(i int, slice interface{}) Slice {
+	l := p.Len()
+	if p.Nil() || l == 0 {
+		return p.ConcatM(slice)
+	}
+	j := i
+	if j = absIndex(l, j); j == -1 {
+		return p
+	}
+	if i < 0 {
+		j++
+	}
+
+	// // Insert the item before j if pos and after j if neg
+	// x := reflect.ValueOf(elem)
+	// if p.v.Type().Elem() != x.Type() {
+	// 	panic(fmt.Sprintf("can't insert type '%v' into '%v'", x.Type(), p.v.Type()))
+	// } else {
+	// 	if j == 0 {
+	// 		*p.v = reflect.Append(*p.v, x)
+	// 		reflect.Copy(p.v.Slice(1, p.v.Len()), p.v.Slice(0, p.v.Len()-1))
+	// 		p.v.Index(0).Set(x)
+	// 	} else if j < l {
+	// 		*p.v = reflect.Append(*p.v, x)
+	// 		reflect.Copy(p.v.Slice(j+1, p.v.Len()), p.v.Slice(j, p.v.Len()))
+	// 		p.v.Index(j).Set(x)
+	// 	} else {
+	// 		*p.v = reflect.Append(*p.v, x)
+	// 	}
+	// }
 	return p
 }
 
