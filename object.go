@@ -118,13 +118,13 @@ func (p *Object) ToFloat64E() (float64, error) {
 
 // ToInt casts an interface to an int type.
 func (p *Object) ToInt() int {
-	v, _ := cast.ToIntE(p.o)
+	v, _ := ToIntE(p.o)
 	return v
 }
 
 // ToIntE casts an interface to an int type.
 func (p *Object) ToIntE() (int, error) {
-	return cast.ToIntE(p.o)
+	return ToIntE(p.o)
 }
 
 // ToInt8 casts an interface to an int8 type.

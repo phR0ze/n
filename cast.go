@@ -323,56 +323,57 @@ func ToBoolE(obj interface{}) (val bool, err error) {
 
 // ToString casts an interface to a string type.
 func ToString(obj interface{}) string {
-	switch x := obj.(type) {
+	o := Indirect(obj)
+
+	switch x := o.(type) {
 	case nil:
 		return ""
-	case string, *string:
-		return Indirect(x).(string)
-	case bool, *bool:
-		return strconv.FormatBool(Indirect(x).(bool))
-	case []byte, *[]byte:
-		return string(Indirect(x).([]byte))
-	case Char, *Char:
-		c := Indirect(x).(Char)
-		return c.String()
+	case string:
+		return x
+	case bool:
+		return strconv.FormatBool(x)
+	case []byte:
+		return string(x)
+	case Char:
+		return x.String()
 	case error:
 		return x.Error()
-	case float32, *float32:
-		return strconv.FormatFloat(float64(Indirect(x).(float32)), 'f', -1, 32)
-	case float64, *float64:
-		return strconv.FormatFloat(Indirect(x).(float64), 'f', -1, 64)
-	case int, *int:
-		return strconv.FormatInt(int64(Indirect(x).(int)), 10)
-	case int8, *int8:
-		return strconv.FormatInt(int64(Indirect(x).(int8)), 10)
-	case int16, *int16:
-		return strconv.FormatInt(int64(Indirect(x).(int16)), 10)
-	case int32, *int32:
-		return strconv.FormatInt(int64(Indirect(x).(int32)), 10)
-	case int64, *int64:
-		return strconv.FormatInt(Indirect(x).(int64), 10)
-	case template.CSS, *template.CSS:
-		return string(Indirect(x).(template.CSS))
-	case template.HTML, *template.HTML:
-		return string(Indirect(x).(template.HTML))
-	case template.HTMLAttr, *template.HTMLAttr:
-		return string(Indirect(x).(template.HTMLAttr))
-	case template.JS, *template.JS:
-		return string(Indirect(x).(template.JS))
-	case template.URL, *template.URL:
-		return string(Indirect(x).(template.URL))
-	case []rune, *[]rune:
-		return string(Indirect(x).([]rune))
-	case uint, *uint:
-		return strconv.FormatInt(int64(Indirect(x).(uint)), 10)
-	case uint8, *uint8:
-		return strconv.FormatInt(int64(Indirect(x).(uint8)), 10)
-	case uint16, *uint16:
-		return strconv.FormatInt(int64(Indirect(x).(uint16)), 10)
-	case uint32, *uint32:
-		return strconv.FormatInt(int64(Indirect(x).(uint32)), 10)
-	case uint64, *uint64:
-		return strconv.FormatInt(int64(Indirect(x).(uint64)), 10)
+	case float32:
+		return strconv.FormatFloat(float64(x), 'f', -1, 32)
+	case float64:
+		return strconv.FormatFloat(x, 'f', -1, 64)
+	case int:
+		return strconv.FormatInt(int64(x), 10)
+	case int8:
+		return strconv.FormatInt(int64(x), 10)
+	case int16:
+		return strconv.FormatInt(int64(x), 10)
+	case int32:
+		return strconv.FormatInt(int64(x), 10)
+	case int64:
+		return strconv.FormatInt(x, 10)
+	case template.CSS:
+		return string(x)
+	case template.HTML:
+		return string(x)
+	case template.HTMLAttr:
+		return string(x)
+	case template.JS:
+		return string(x)
+	case template.URL:
+		return string(x)
+	case []rune:
+		return string(x)
+	case uint:
+		return strconv.FormatInt(int64(x), 10)
+	case uint8:
+		return strconv.FormatInt(int64(x), 10)
+	case uint16:
+		return strconv.FormatInt(int64(x), 10)
+	case uint32:
+		return strconv.FormatInt(int64(x), 10)
+	case uint64:
+		return strconv.FormatInt(int64(x), 10)
 	case fmt.Stringer, *fmt.Stringer:
 		if x, ok := x.(*fmt.Stringer); ok {
 			if x == nil {
@@ -383,5 +384,58 @@ func ToString(obj interface{}) string {
 		return x.(fmt.Stringer).String()
 	default:
 		return fmt.Sprintf("%v", obj)
+	}
+}
+
+// ToInt casts an interface to an int type.
+func ToInt(obj interface{}) int {
+	x, _ := ToIntE(obj)
+	return x
+}
+
+// ToIntE casts an interface to an int type.
+func ToIntE(obj interface{}) (int, error) {
+	o := Indirect(obj)
+
+	switch x := o.(type) {
+	case int:
+		return x, nil
+	case int8:
+		return int(x), nil
+	case int16:
+		return int(x), nil
+	case int32:
+		return int(x), nil
+	case int64:
+		return int(x), nil
+	case uint:
+		return int(x), nil
+	case uint64:
+		return int(x), nil
+	case uint32:
+		return int(x), nil
+	case uint16:
+		return int(x), nil
+	case uint8:
+		return int(x), nil
+	case float64:
+		return int(x), nil
+	case float32:
+		return int(x), nil
+	case string:
+		v, err := strconv.ParseInt(x, 0, 0)
+		if err == nil {
+			return int(v), nil
+		}
+		return 0, fmt.Errorf("unable to cast type %T to int", obj)
+	case bool:
+		if x {
+			return 1, nil
+		}
+		return 0, nil
+	case nil:
+		return 0, nil
+	default:
+		return 0, fmt.Errorf("unable to cast type %T to int", obj)
 	}
 }

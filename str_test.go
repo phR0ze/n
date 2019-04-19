@@ -1430,6 +1430,60 @@ func TestStr_DropLastN(t *testing.T) {
 	assert.Equal(t, NewStrV(), NewStrV("1", "2", "3").DropLastN(4))
 }
 
+// DropW
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_DropW_Go(t *testing.B) {
+	src := RangeString(nines5)
+	l := len(src)
+	for i := 0; i < l; i++ {
+		if Obj(src[i]).ToInt()%2 == 0 {
+			if i+1 < l {
+				src = append(src[:i], src[i+1:]...)
+			} else if i >= 0 && i < l {
+				src = src[:i]
+			}
+			l--
+			i--
+		}
+	}
+}
+
+func BenchmarkStr_DropW_Slice(t *testing.B) {
+	slice := NewStr(RangeString(nines5))
+	slice.DropW(func(x O) bool {
+		return ExB(Obj(x).ToInt()%2 == 0)
+	})
+}
+
+func ExampleStr_DropW() {
+	slice := NewStrV("1", "2", "3")
+	fmt.Println(slice.DropW(func(x O) bool {
+		return ExB(Obj(x).ToInt()%2 == 0)
+	}))
+	// Output: [1 3]
+}
+
+func TestStr_DropW(t *testing.T) {
+
+	// drop all odd values
+	{
+		slice := NewStrV("1", "2", "3", "4", "5", "6", "7", "8", "9")
+		slice.DropW(func(x O) bool {
+			return ExB(ToInt(x)%2 != 0)
+		})
+		assert.Equal(t, "2468", slice.A())
+	}
+
+	// drop all even values
+	{
+		slice := NewStrV("1", "2", "3", "4", "5", "6", "7", "8", "9")
+		slice.DropW(func(x O) bool {
+			return ExB(ToInt(x)%2 == 0)
+		})
+		assert.Equal(t, "13579", slice.A())
+	}
+}
+
 // // func TestStr_Empty(t *testing.T) {
 // // 	var empty *Str
 // // 	assert.True(t, A("").Empty())
