@@ -346,6 +346,20 @@ func WriteFile(target string, data []byte, perms ...uint32) (err error) {
 	return
 }
 
+// WriteFileA is a pass through to ioutil.WriteFile with default permissions
+func WriteFileA(target string, data string, perms ...uint32) (err error) {
+	if target, err = Abs(target); err != nil {
+		return
+	}
+
+	perm := os.FileMode(0644)
+	if len(perms) > 0 {
+		perm = os.FileMode(perms[0])
+	}
+	err = ioutil.WriteFile(target, []byte(data), perm)
+	return
+}
+
 // WriteStream reads from the io.Reader and writes to the given file using io.Copy
 // thus never filling memory i.e. streaming.  dest will be overwritten if it exists.
 func WriteStream(reader io.Reader, dest string, perms ...uint32) (err error) {
