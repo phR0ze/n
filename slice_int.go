@@ -432,6 +432,8 @@ func (p *IntSlice) Insert(i int, elem interface{}) Slice {
 	if p == nil || len(*p) == 0 {
 		return p.Append(elem)
 	}
+
+	// Insert the item before j if pos and after j if neg
 	j := i
 	if j = absIndex(len(*p), j); j == -1 {
 		return p
@@ -439,15 +441,13 @@ func (p *IntSlice) Insert(i int, elem interface{}) Slice {
 	if i < 0 {
 		j++
 	}
-
-	// Insert the item before j if pos and after j if neg
 	if x, err := ToIntE(elem); err == nil {
 		if j == 0 {
 			*p = append([]int{x}, (*p)...)
 		} else if j < len(*p) {
-			*p = append(*p, x)
-			copy((*p)[j+1:], (*p)[j:])
-			(*p)[j] = x
+			*p = append(*p, x)         // ensures enough space exists
+			copy((*p)[j+1:], (*p)[j:]) // shifts right elements drop added
+			(*p)[j] = x                // set new in locations vacated
 		} else {
 			*p = append(*p, x)
 		}
@@ -465,6 +465,8 @@ func (p *IntSlice) InsertS(i int, slice interface{}) Slice {
 	if p == nil || len(*p) == 0 {
 		return p.ConcatM(slice)
 	}
+
+	// Insert the item before j if pos and after j if neg
 	j := i
 	if j = absIndex(len(*p), j); j == -1 {
 		return p
@@ -472,15 +474,13 @@ func (p *IntSlice) InsertS(i int, slice interface{}) Slice {
 	if i < 0 {
 		j++
 	}
-
-	// Insert the item before j if pos and after j if neg
 	if elems, err := ToIntSliceE(slice); err == nil {
 		if j == 0 {
 			*p = append(elems, (*p)...)
 		} else if j < len(*p) {
-			// *p = append(*p, elems...)
-			// copy((*p)[j+1:], (*p)[j:])
-			// (*p)[j] = x
+			*p = append(*p, elems...)           // ensures enough space exists
+			copy((*p)[j+len(elems):], (*p)[j:]) // shifts right elements drop added
+			copy((*p)[j:], elems)               // set new in locations vacated
 		} else {
 			*p = append(*p, elems...)
 		}
@@ -501,7 +501,7 @@ func (p *IntSlice) Join(separator ...string) (str *Object) {
 
 	var builder strings.Builder
 	for i := range *p {
-		builder.WriteString(Obj((*p)[i]).ToString())
+		builder.WriteString(ToString((*p)[i]))
 		if i+1 < len(*p) {
 			builder.WriteString(sep)
 		}
@@ -643,10 +643,10 @@ func (p *IntSlice) SetE(i int, elem interface{}) (Slice, error) {
 		return p, err
 	}
 
-	if x, ok := elem.(int); ok {
+	if x, err := ToIntE(elem); err == nil {
 		(*p)[i] = x
 	} else {
-		err = errors.Errorf("can't set type '%T' in '%T'", elem, p)
+		err = errors.Wrapf(err, "can't set type '%T' in '%T'", elem, p)
 	}
 	return p, err
 }

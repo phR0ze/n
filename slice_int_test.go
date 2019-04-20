@@ -1902,6 +1902,90 @@ func TestIntSlice_Insert(t *testing.T) {
 		assert.Equal(t, NewIntSliceV(0, 1), NewIntSliceV(0, 1).Insert(2, 1))
 		assert.Equal(t, NewIntSliceV(0, 1), NewIntSliceV(0, 1).Insert(-3, 1))
 	}
+
+	// Conversion
+	{
+		assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 3).Insert(1, Object{2}))
+		assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 3).Insert(1, "2"))
+		assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(2, 3).Insert(0, true))
+		assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 2).Insert(-1, Char('3')))
+	}
+}
+
+// InsertS
+//--------------------------------------------------------------------------------------------------
+func BenchmarkIntSlice_InsertS_Go(t *testing.B) {
+	ints := []int{}
+	for i := range Range(0, nines6) {
+		ints = append(ints, i)
+		copy(ints[1:], ints[1:])
+		ints[0] = i
+	}
+}
+
+func BenchmarkIntSlice_InsertS_Slice(t *testing.B) {
+	slice := NewIntSliceV()
+	for i := range Range(0, nines6) {
+		slice.InsertS(0, i)
+	}
+}
+
+func ExampleIntSlice_InsertS() {
+	slice := NewIntSliceV(1, 4)
+	fmt.Println(slice.InsertS(1, []int{2, 3}))
+	// Output: [1 2 3 4]
+}
+
+func TestIntSlice_InsertS(t *testing.T) {
+
+	// append
+	{
+		slice := NewIntSliceV()
+		assert.Equal(t, NewIntSliceV(0), slice.InsertS(-1, []int{0}))
+		assert.Equal(t, NewIntSliceV(0, 1), slice.InsertS(-1, []int{1}))
+		assert.Equal(t, NewIntSliceV(0, 1, 2), slice.InsertS(-1, []int{2}))
+	}
+
+	// prepend
+	{
+		slice := NewIntSliceV()
+		assert.Equal(t, NewIntSliceV(2), slice.InsertS(0, []int{2}))
+		assert.Equal(t, NewIntSliceV(1, 2), slice.InsertS(0, []int{1}))
+		assert.Equal(t, NewIntSliceV(0, 1, 2), slice.InsertS(0, []int{0}))
+	}
+
+	// middle pos
+	{
+		slice := NewIntSliceV(0, 5)
+		assert.Equal(t, NewIntSliceV(0, 1, 2, 5), slice.InsertS(1, []int{1, 2}))
+		assert.Equal(t, NewIntSliceV(0, 1, 2, 3, 4, 5), slice.InsertS(3, []int{3, 4}))
+	}
+
+	// middle neg
+	{
+		slice := NewIntSliceV(0, 5)
+		assert.Equal(t, NewIntSliceV(0, 1, 2, 5), slice.InsertS(-2, []int{1, 2}))
+		assert.Equal(t, NewIntSliceV(0, 1, 2, 3, 4, 5), slice.InsertS(-2, []int{3, 4}))
+	}
+
+	// error cases
+	{
+		var slice *IntSlice
+		assert.False(t, slice.InsertS(0, 0).Nil())
+		assert.Equal(t, NewIntSliceV(0), slice.InsertS(0, 0))
+		assert.Equal(t, NewIntSliceV(0, 1), NewIntSliceV(0, 1).InsertS(-10, 1))
+		assert.Equal(t, NewIntSliceV(0, 1), NewIntSliceV(0, 1).InsertS(10, 1))
+		assert.Equal(t, NewIntSliceV(0, 1), NewIntSliceV(0, 1).InsertS(2, 1))
+		assert.Equal(t, NewIntSliceV(0, 1), NewIntSliceV(0, 1).InsertS(-3, 1))
+	}
+
+	// Conversion
+	{
+		assert.Equal(t, NewIntSliceV(1, 2, 3, 4), NewIntSliceV(1, 4).InsertS(1, []Object{{2}, {3}}))
+		assert.Equal(t, NewIntSliceV(1, 2, 3, 4), NewIntSliceV(1, 4).InsertS(1, []string{"2", "3"}))
+		assert.Equal(t, NewIntSliceV(0, 1, 2, 3), NewIntSliceV(2, 3).InsertS(0, []bool{false, true}))
+		assert.Equal(t, NewIntSliceV(1, 2, 3, 4), NewIntSliceV(1, 2).InsertS(-1, []Char{'3', '4'}))
+	}
 }
 
 // Join
@@ -2499,6 +2583,14 @@ func TestIntSlice_Set(t *testing.T) {
 	// Test wrong type
 	{
 		assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 2, 3).Set(5, "1"))
+	}
+
+	// Conversion
+	{
+		assert.Equal(t, NewIntSliceV(0, 2, 0), NewIntSliceV(0, 0, 0).Set(1, Object{2}))
+		assert.Equal(t, NewIntSliceV(0, 2, 0), NewIntSliceV(0, 0, 0).Set(1, "2"))
+		assert.Equal(t, NewIntSliceV(1, 0, 0), NewIntSliceV(0, 0, 0).Set(0, true))
+		assert.Equal(t, NewIntSliceV(0, 0, 3), NewIntSliceV(0, 0, 0).Set(-1, Char('3')))
 	}
 }
 
@@ -3496,6 +3588,14 @@ func TestIntSlice_Union(t *testing.T) {
 	{
 		assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1, 2).Union((*[]int)(nil)))
 		assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1, 2).Union((*IntSlice)(nil)))
+	}
+
+	// Conversion
+	{
+		assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1, 2).Union([]Object{{1}, {2}}))
+		assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 2).Union([]string{"2", "3"}))
+		assert.Equal(t, NewIntSliceV(1, 2, 0), NewIntSliceV(1, 2).Union([]bool{true, false}))
+		assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 2).Union([]Char{'3', '2'}))
 	}
 }
 

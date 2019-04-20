@@ -772,6 +772,19 @@ func ToIntSliceE(obj interface{}) (val []int, err error) {
 			val = append(val, ToInt(x[i]))
 		}
 
+	// Char
+	//----------------------------------------------------------------------------------------------
+	case Char:
+		val = []int{ToInt(x)}
+	case []Char:
+		for i := range x {
+			val = append(val, ToInt(x[i]))
+		}
+	case []*Char:
+		for i := range x {
+			val = append(val, ToInt(x[i]))
+		}
+
 	// float32
 	//----------------------------------------------------------------------------------------------
 	case float32:

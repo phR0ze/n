@@ -619,6 +619,8 @@ func (p *RefSlice) Insert(i int, elem interface{}) Slice {
 	if p.Nil() || l == 0 {
 		return p.Append(elem)
 	}
+
+	// Insert the item before j if pos and after j if neg
 	j := i
 	if j = absIndex(l, j); j == -1 {
 		return p
@@ -626,8 +628,6 @@ func (p *RefSlice) Insert(i int, elem interface{}) Slice {
 	if i < 0 {
 		j++
 	}
-
-	// Insert the item before j if pos and after j if neg
 	x := reflect.ValueOf(elem)
 	if p.v.Type().Elem() != x.Type() {
 		panic(fmt.Sprintf("can't insert type '%v' into '%v'", x.Type(), p.v.Type()))
@@ -658,6 +658,8 @@ func (p *RefSlice) InsertS(i int, slice interface{}) Slice {
 	if p.Nil() || l == 0 {
 		return p.ConcatM(slice)
 	}
+
+	// // Insert the item before j if pos and after j if neg
 	j := i
 	if j = absIndex(l, j); j == -1 {
 		return p
@@ -665,8 +667,6 @@ func (p *RefSlice) InsertS(i int, slice interface{}) Slice {
 	if i < 0 {
 		j++
 	}
-
-	// // Insert the item before j if pos and after j if neg
 	// x := reflect.ValueOf(elem)
 	// if p.v.Type().Elem() != x.Type() {
 	// 	panic(fmt.Sprintf("can't insert type '%v' into '%v'", x.Type(), p.v.Type()))

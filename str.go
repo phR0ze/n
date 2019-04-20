@@ -631,6 +631,8 @@ func (p *Str) Insert(i int, elem interface{}) Slice {
 	if p == nil || len(*p) == 0 {
 		return p.Append(elem)
 	}
+
+	// // Insert the item before j if pos and after j if neg
 	// j := i
 	// if j = absIndex(len(*p), j); j == -1 {
 	// 	return p
@@ -638,8 +640,6 @@ func (p *Str) Insert(i int, elem interface{}) Slice {
 	// if i < 0 {
 	// 	j++
 	// }
-
-	// // Insert the item before j if pos and after j if neg
 	// if x, ok := elem.(string); ok {
 	// 	if j == 0 {
 	// 		*p = append([]string{x}, (*p)...)
@@ -663,6 +663,8 @@ func (p *Str) InsertS(i int, slice interface{}) Slice {
 	if p == nil || len(*p) == 0 {
 		return p.ConcatM(slice)
 	}
+
+	// // Insert the item before j if pos and after j if neg
 	// j := i
 	// if j = absIndex(len(*p), j); j == -1 {
 	// 	return p
@@ -670,8 +672,6 @@ func (p *Str) InsertS(i int, slice interface{}) Slice {
 	// if i < 0 {
 	// 	j++
 	// }
-
-	// // Insert the item before j if pos and after j if neg
 	// if x, ok := elem.(string); ok {
 	// 	if j == 0 {
 	// 		*p = append([]string{x}, (*p)...)
