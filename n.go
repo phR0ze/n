@@ -18,7 +18,7 @@
 //
 // • Function names suffixed with 'E' indicates the function is a variation to the function
 // without the 'E' but returns an Error while the base function does not.
-//
+
 // • Function names suffixed with 'M' indicates the function is a variation to the function
 // without the 'M' but modifies the n type directly rather than a copy.
 //
@@ -36,11 +36,12 @@
 // without the 'W' but accepts a lambda expression as input.
 //
 // • Documentation should be thorough and relied upon for guidance as, for a love of brevity,
-// some functions use single capital letters only to indicate types. 'O' is being used to
-// indicate the interface{} type or to export the underlying Go type as an interface{}. 'S' is
-// used to refer to slice types, 'M' refers to map types, 'A' refers to string types, 'I' ints
-// types and combinations may be used to indicate complex types. The documentation will always
-// call out what exactly they mean, but the function name may be cryptic until understood.
+// some functions use single capital letters only to indicate types. 'G' is being used to
+// export the underlying Go type. O' is being used to indicate the interface{} type or to
+// export the underlying Go type as an interface{}. 'S' is used to refer to slice types, 'M'
+// refers to map types, 'A' refers to string types, 'I' ints types and combinations may be
+// used to indicate complex types. The documentation will always call out what exactly they
+// mean, but the function name may be cryptic until understood.
 package n
 
 import (

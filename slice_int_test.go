@@ -1792,6 +1792,18 @@ func TestIntSlice_FirstN(t *testing.T) {
 	assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1, 2, 3).FirstN(2))
 }
 
+// G
+//--------------------------------------------------------------------------------------------------
+func ExampleIntSlice_G() {
+	fmt.Println(NewIntSliceV(1, 2, 3).G())
+	// Output: [1 2 3]
+}
+
+func TestIntSlice_G(t *testing.T) {
+	assert.IsType(t, []int{}, NewIntSliceV().G())
+	assert.IsType(t, []int{1, 2, 3}, NewIntSlice([]Object{{1}, {2}, {3}}).G())
+}
+
 // Generic
 //--------------------------------------------------------------------------------------------------
 func ExampleIntSlice_Generic() {

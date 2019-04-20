@@ -1238,47 +1238,47 @@ func TestToIntSliceE(t *testing.T) {
 	{
 		val, err := ToIntSliceE(nil)
 		assert.Nil(t, err)
-		assert.Equal(t, []int{}, val)
+		assert.Equal(t, &IntSlice{}, val)
 
 		val, err = ToIntSliceE(&TestObj{})
 		assert.Equal(t, "unable to convert type n.TestObj to []int", err.Error())
-		assert.Equal(t, []int{}, val)
+		assert.Equal(t, &IntSlice{}, val)
 	}
 
 	// bool
 	{
 		val, err := ToIntSliceE(true)
 		assert.Nil(t, err)
-		assert.Equal(t, []int{1}, val)
+		assert.Equal(t, &IntSlice{1}, val)
 
 		var test bool
 		val, err = ToIntSliceE(&test)
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		val, err = ToIntSliceE((*bool)(nil))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 	}
 
 	// []bool
 	{
 		val, err := ToIntSliceE([]bool{true, false})
 		assert.Nil(t, err)
-		assert.Equal(t, []int{1, 0}, val)
+		assert.Equal(t, &IntSlice{1, 0}, val)
 
 		val, err = ToIntSliceE(&[]bool{true, false})
 		assert.Nil(t, err)
-		assert.Equal(t, []int{1, 0}, val)
+		assert.Equal(t, &IntSlice{1, 0}, val)
 
 		one, two := true, false
 		val, err = ToIntSliceE(&[]*bool{&one, &two})
 		assert.Nil(t, err)
-		assert.Equal(t, []int{1, 0}, val)
+		assert.Equal(t, &IntSlice{1, 0}, val)
 
 		val, err = ToIntSliceE((*[]bool)(nil))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{}, val)
+		assert.Equal(t, &IntSlice{}, val)
 	}
 
 	// interface
@@ -1286,270 +1286,270 @@ func TestToIntSliceE(t *testing.T) {
 	{
 		val, err := ToIntSliceE([]interface{}{1, 2, 3})
 		assert.Nil(t, err)
-		assert.Equal(t, []int{1, 2, 3}, val)
+		assert.Equal(t, &IntSlice{1, 2, 3}, val)
 
 		val, err = ToIntSliceE(&[]interface{}{1, 2, 3})
 		assert.Nil(t, err)
-		assert.Equal(t, []int{1, 2, 3}, val)
+		assert.Equal(t, &IntSlice{1, 2, 3}, val)
 	}
 
 	// int
 	{
 		val, err := ToIntSliceE(3)
 		assert.Nil(t, err)
-		assert.Equal(t, []int{3}, val)
+		assert.Equal(t, &IntSlice{3}, val)
 
 		val, err = ToIntSliceE(0)
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		var test int
 		val, err = ToIntSliceE(&test)
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		val, err = ToIntSliceE((*int)(nil))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 	}
 
 	// int8
 	{
 		val, err := ToIntSliceE(int8(3))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{3}, val)
+		assert.Equal(t, &IntSlice{3}, val)
 
 		val, err = ToIntSliceE(int8(0))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		var test int8
 		val, err = ToIntSliceE(&test)
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		val, err = ToIntSliceE((*int8)(nil))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 	}
 
 	// int16
 	{
 		val, err := ToIntSliceE(int16(3))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{3}, val)
+		assert.Equal(t, &IntSlice{3}, val)
 
 		val, err = ToIntSliceE(int16(0))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		var test int16
 		val, err = ToIntSliceE(&test)
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		val, err = ToIntSliceE((*int16)(nil))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 	}
 
 	// int32
 	{
 		val, err := ToIntSliceE(int32(3))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{3}, val)
+		assert.Equal(t, &IntSlice{3}, val)
 
 		val, err = ToIntSliceE(int32(0))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		var test int32
 		val, err = ToIntSliceE(&test)
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		val, err = ToIntSliceE((*int32)(nil))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 	}
 
 	// int64
 	{
 		val, err := ToIntSliceE(int64(3))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{3}, val)
+		assert.Equal(t, &IntSlice{3}, val)
 
 		val, err = ToIntSliceE(int64(0))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		var test int64
 		val, err = ToIntSliceE(&test)
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		val, err = ToIntSliceE((*int64)(nil))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 	}
 
 	// Object
 	{
 		val, err := ToIntSliceE(Object{3})
 		assert.Nil(t, err)
-		assert.Equal(t, []int{3}, val)
+		assert.Equal(t, &IntSlice{3}, val)
 
 		val, err = ToIntSliceE(Object{0})
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		val, err = ToIntSliceE(&Object{})
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		val, err = ToIntSliceE((*Object)(nil))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 	}
 
 	// string
 	{
 		val, err := ToIntSliceE("true")
 		assert.Nil(t, err)
-		assert.Equal(t, []int{1}, val)
+		assert.Equal(t, &IntSlice{1}, val)
 
 		val, err = ToIntSliceE("TRUE")
 		assert.Nil(t, err)
-		assert.Equal(t, []int{1}, val)
+		assert.Equal(t, &IntSlice{1}, val)
 
 		val, err = ToIntSliceE("false")
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		val, err = ToIntSliceE("FALSE")
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		val, err = ToIntSliceE("bob")
 		assert.NotNil(t, err)
-		assert.Equal(t, []int{}, val)
+		assert.Equal(t, &IntSlice{}, val)
 
 		val, err = ToIntSliceE("3")
 		assert.Nil(t, err)
-		assert.Equal(t, []int{3}, val)
+		assert.Equal(t, &IntSlice{3}, val)
 
 		val, err = ToIntSliceE("0")
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		var test string
 		val, err = ToIntSliceE(&test)
 		assert.NotNil(t, err)
-		assert.Equal(t, []int{}, val)
+		assert.Equal(t, &IntSlice{}, val)
 
 		val, err = ToIntSliceE((*string)(nil))
 		assert.NotNil(t, err)
-		assert.Equal(t, []int{}, val)
+		assert.Equal(t, &IntSlice{}, val)
 	}
 
 	// uint
 	{
 		val, err := ToIntSliceE(uint(3))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{3}, val)
+		assert.Equal(t, &IntSlice{3}, val)
 
 		val, err = ToIntSliceE(0)
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		var test uint
 		val, err = ToIntSliceE(&test)
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		val, err = ToIntSliceE((*uint)(nil))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 	}
 
 	// uint8
 	{
 		val, err := ToIntSliceE(uint8(3))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{3}, val)
+		assert.Equal(t, &IntSlice{3}, val)
 
 		val, err = ToIntSliceE(uint8(0))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		var test uint8
 		val, err = ToIntSliceE(&test)
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		val, err = ToIntSliceE((*uint8)(nil))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 	}
 
 	// uint16
 	{
 		val, err := ToIntSliceE(uint16(3))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{3}, val)
+		assert.Equal(t, &IntSlice{3}, val)
 
 		val, err = ToIntSliceE(uint16(0))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		var test uint16
 		val, err = ToIntSliceE(&test)
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		val, err = ToIntSliceE((*uint16)(nil))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 	}
 
 	// uint32
 	{
 		val, err := ToIntSliceE(uint32(3))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{3}, val)
+		assert.Equal(t, &IntSlice{3}, val)
 
 		val, err = ToIntSliceE(uint32(0))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		var test uint32
 		val, err = ToIntSliceE(&test)
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		val, err = ToIntSliceE((*uint32)(nil))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 	}
 
 	// uint64
 	{
 		val, err := ToIntSliceE(uint64(3))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{3}, val)
+		assert.Equal(t, &IntSlice{3}, val)
 
 		val, err = ToIntSliceE(uint64(0))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		var test uint64
 		val, err = ToIntSliceE(&test)
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 
 		val, err = ToIntSliceE((*uint64)(nil))
 		assert.Nil(t, err)
-		assert.Equal(t, []int{0}, val)
+		assert.Equal(t, &IntSlice{0}, val)
 	}
 }
 

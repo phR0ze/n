@@ -759,18 +759,18 @@ func ToIntE(obj interface{}) (val int, err error) {
 	return
 }
 
-// ToIntSlice convert an interface to a []int type.
-func ToIntSlice(obj interface{}) []int {
+// ToIntSlice convert an interface to a IntSlice type which will never be nil
+func ToIntSlice(obj interface{}) *IntSlice {
 	x, _ := ToIntSliceE(obj)
 	if x == nil {
-		return []int{}
+		return &IntSlice{}
 	}
 	return x
 }
 
-// ToIntSliceE convert an interface to a []int type.
-func ToIntSliceE(obj interface{}) (val []int, err error) {
-	val = []int{}
+// ToIntSliceE convert an interface to a IntSlice type.
+func ToIntSliceE(obj interface{}) (val *IntSlice, err error) {
+	val = &IntSlice{}
 	o := Indirect(obj)
 
 	// Optimized types
@@ -780,53 +780,53 @@ func ToIntSliceE(obj interface{}) (val []int, err error) {
 	// bool
 	//----------------------------------------------------------------------------------------------
 	case bool:
-		val = []int{ToInt(x)}
+		*val = append(*val, ToInt(x))
 	case []bool:
 		for i := range x {
-			val = append(val, ToInt(x[i]))
+			*val = append(*val, ToInt(x[i]))
 		}
 	case []*bool:
 		for i := range x {
-			val = append(val, ToInt(x[i]))
+			*val = append(*val, ToInt(x[i]))
 		}
 
 	// Char
 	//----------------------------------------------------------------------------------------------
 	case Char:
-		val = []int{ToInt(x)}
+		*val = append(*val, ToInt(x))
 	case []Char:
 		for i := range x {
-			val = append(val, ToInt(x[i]))
+			*val = append(*val, ToInt(x[i]))
 		}
 	case []*Char:
 		for i := range x {
-			val = append(val, ToInt(x[i]))
+			*val = append(*val, ToInt(x[i]))
 		}
 
 	// float32
 	//----------------------------------------------------------------------------------------------
 	case float32:
-		val = []int{int(x)}
+		*val = append(*val, int(x))
 	case []float32:
 		for i := range x {
-			val = append(val, int(x[i]))
+			*val = append(*val, int(x[i]))
 		}
 	case []*float32:
 		for i := range x {
-			val = append(val, ToInt(x[i]))
+			*val = append(*val, ToInt(x[i]))
 		}
 
 	// float64
 	//----------------------------------------------------------------------------------------------
 	case float64:
-		val = []int{int(x)}
+		*val = append(*val, int(x))
 	case []float64:
 		for i := range x {
-			val = append(val, int(x[i]))
+			*val = append(*val, int(x[i]))
 		}
 	case []*float64:
 		for i := range x {
-			val = append(val, ToInt(x[i]))
+			*val = append(*val, ToInt(x[i]))
 		}
 
 	// interface
@@ -834,7 +834,7 @@ func ToIntSliceE(obj interface{}) (val []int, err error) {
 	case []interface{}:
 		for i := range x {
 			if v, e := ToIntE(x[i]); e == nil {
-				val = append(val, v)
+				*val = append(*val, v)
 			} else {
 				err = errors.WithMessagef(e, "unable to convert %T to []int", x)
 			}
@@ -843,78 +843,79 @@ func ToIntSliceE(obj interface{}) (val []int, err error) {
 	// int
 	//----------------------------------------------------------------------------------------------
 	case int:
-		val = []int{int(x)}
+		*val = append(*val, x)
 	case []int:
-		val = x
+		v := IntSlice(x)
+		val = &v
 	case []*int:
 		for i := range x {
-			val = append(val, ToInt(x[i]))
+			*val = append(*val, ToInt(x[i]))
 		}
 
 	// int8
 	//----------------------------------------------------------------------------------------------
 	case int8:
-		val = []int{int(x)}
+		*val = append(*val, int(x))
 	case []int8:
 		for i := range x {
-			val = append(val, int(x[i]))
+			*val = append(*val, int(x[i]))
 		}
 	case []*int8:
 		for i := range x {
-			val = append(val, ToInt(x[i]))
+			*val = append(*val, ToInt(x[i]))
 		}
 
 	// int16
 	//----------------------------------------------------------------------------------------------
 	case int16:
-		val = []int{int(x)}
+		*val = append(*val, int(x))
 	case []int16:
 		for i := range x {
-			val = append(val, int(x[i]))
+			*val = append(*val, int(x[i]))
 		}
 	case []*int16:
 		for i := range x {
-			val = append(val, ToInt(x[i]))
+			*val = append(*val, ToInt(x[i]))
 		}
 
 	// int32
 	//----------------------------------------------------------------------------------------------
 	case int32:
-		val = []int{int(x)}
+		*val = append(*val, int(x))
 	case []int32:
 		for i := range x {
-			val = append(val, int(x[i]))
+			*val = append(*val, int(x[i]))
 		}
 	case []*int32:
 		for i := range x {
-			val = append(val, ToInt(x[i]))
+			*val = append(*val, ToInt(x[i]))
 		}
 
 	// int64
 	//----------------------------------------------------------------------------------------------
 	case int64:
-		val = []int{int(x)}
+		*val = append(*val, int(x))
 	case []int64:
 		for i := range x {
-			val = append(val, int(x[i]))
+			*val = append(*val, int(x[i]))
 		}
 	case []*int64:
 		for i := range x {
-			val = append(val, ToInt(x[i]))
+			*val = append(*val, ToInt(x[i]))
 		}
 
 	// IntSlice
 	//----------------------------------------------------------------------------------------------
 	case IntSlice:
-		val = x
+		val = &x
 	case []IntSlice:
 		for i := range x {
-			val = append(val, x[i]...)
+			*val = append(*val, x[i]...)
 		}
 	case []*IntSlice:
 		for i := range x {
 			if x[i] != nil {
-				val = append(val, *x[i]...)
+				*val = append(*val, *x[i]...)
 			}
 		}
 
@@ -924,12 +925,12 @@ func ToIntSliceE(obj interface{}) (val []int, err error) {
 		if v, e := x.ToIntE(); e != nil {
 			err = fmt.Errorf("unable to convert type Object to []int")
 		} else {
-			val = []int{v}
+			*val = append(*val, v)
 		}
 	case []Object:
 		for i := range x {
 			if v, e := x[i].ToIntE(); e == nil {
-				val = append(val, v)
+				*val = append(*val, v)
 			} else {
 				err = fmt.Errorf("unable to convert type %T to []int", x[i].O())
 				return
@@ -938,7 +939,7 @@ func ToIntSliceE(obj interface{}) (val []int, err error) {
 	case []*Object:
 		for i := range x {
 			if v, e := x[i].ToIntE(); e == nil {
-				val = append(val, v)
+				*val = append(*val, v)
 			} else {
 				err = fmt.Errorf("unable to convert type %T to []int", x[i].O())
 				return
@@ -951,12 +952,12 @@ func ToIntSliceE(obj interface{}) (val []int, err error) {
 		if v, e := ToIntE(x); e != nil {
 			err = fmt.Errorf("unable to convert type string to []int")
 		} else {
-			val = []int{v}
+			*val = append(*val, v)
 		}
 	case []string:
 		for i := range x {
 			if v, e := ToIntE(x[i]); e == nil {
-				val = append(val, v)
+				*val = append(*val, v)
 			} else {
 				err = fmt.Errorf("unable to convert type string to []int")
 				return
@@ -965,7 +966,7 @@ func ToIntSliceE(obj interface{}) (val []int, err error) {
 	case []*string:
 		for i := range x {
 			if v, e := ToIntE(x[i]); e == nil {
-				val = append(val, v)
+				*val = append(*val, v)
 			} else {
 				err = fmt.Errorf("unable to convert type *string to []int")
 				return
@@ -975,67 +976,67 @@ func ToIntSliceE(obj interface{}) (val []int, err error) {
 	// uint
 	//----------------------------------------------------------------------------------------------
 	case uint:
-		val = []int{int(x)}
+		*val = append(*val, int(x))
 	case []uint:
 		for i := range x {
-			val = append(val, int(x[i]))
+			*val = append(*val, int(x[i]))
 		}
 	case []*uint:
 		for i := range x {
-			val = append(val, ToInt(x[i]))
+			*val = append(*val, ToInt(x[i]))
 		}
 
 	// uint8
 	//----------------------------------------------------------------------------------------------
 	case uint8:
-		val = []int{int(x)}
+		*val = append(*val, int(x))
 	case []uint8:
 		for i := range x {
-			val = append(val, int(x[i]))
+			*val = append(*val, int(x[i]))
 		}
 	case []*uint8:
 		for i := range x {
-			val = append(val, ToInt(x[i]))
+			*val = append(*val, ToInt(x[i]))
 		}
 
 	// uint16
 	//----------------------------------------------------------------------------------------------
 	case uint16:
-		val = []int{int(x)}
+		*val = append(*val, int(x))
 	case []uint16:
 		for i := range x {
-			val = append(val, int(x[i]))
+			*val = append(*val, int(x[i]))
 		}
 	case []*uint16:
 		for i := range x {
-			val = append(val, ToInt(x[i]))
+			*val = append(*val, ToInt(x[i]))
 		}
 
 	// uint32
 	//----------------------------------------------------------------------------------------------
 	case uint32:
-		val = []int{int(x)}
+		*val = append(*val, int(x))
 	case []uint32:
 		for i := range x {
-			val = append(val, int(x[i]))
+			*val = append(*val, int(x[i]))
 		}
 	case []*uint32:
 		for i := range x {
-			val = append(val, ToInt(x[i]))
+			*val = append(*val, ToInt(x[i]))
 		}
 
 	// uint64
 	//----------------------------------------------------------------------------------------------
 	case uint64:
-		val = []int{int(x)}
+		*val = append(*val, int(x))
 
 	case []uint64:
 		for i := range x {
-			val = append(val, int(x[i]))
+			*val = append(*val, int(x[i]))
 		}
 	case []*uint64:
 		for i := range x {
-			val = append(val, ToInt(x[i]))
+			*val = append(*val, ToInt(x[i]))
 		}
 
 	// fall back on reflection
@@ -1050,7 +1051,7 @@ func ToIntSliceE(obj interface{}) (val []int, err error) {
 		case k == reflect.Array || k == reflect.Slice:
 			for i := 0; i < v.Len(); i++ {
 				if v, e := ToIntE(v.Index(i).Interface()); e == nil {
-					val = append(val, v)
+					*val = append(*val, v)
 				} else {
 					err = errors.WithMessagef(e, "unable to convert %T to []int", x)
 					return

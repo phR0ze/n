@@ -14,15 +14,13 @@ type IntSlice []int
 
 // NewIntSlice creates a new *IntSlice
 func NewIntSlice(slice interface{}) *IntSlice {
-	new := IntSlice(ToIntSlice(slice))
-	return &new
+	return ToIntSlice(slice)
 }
 
 // NewIntSliceV creates a new *IntSlice from the given variadic elements. Always returns
 // at least a reference to an empty IntSlice.
 func NewIntSliceV(elems ...interface{}) *IntSlice {
-	new := IntSlice(ToIntSlice(elems))
-	return &new
+	return ToIntSlice(elems)
 }
 
 // A is an alias to String for brevity
@@ -64,9 +62,9 @@ func (p *IntSlice) AnyS(slice interface{}) bool {
 		return false
 	}
 	if elems, err := ToIntSliceE(slice); err == nil {
-		for i := range elems {
+		for i := range *elems {
 			for j := range *p {
-				if (*p)[j] == elems[i] {
+				if (*p)[j] == (*elems)[i] {
 					return true
 				}
 			}
@@ -140,7 +138,7 @@ func (p *IntSlice) ConcatM(slice interface{}) Slice {
 		p = NewIntSliceV()
 	}
 	if elems, err := ToIntSliceE(slice); err == nil {
-		*p = append(*p, elems...)
+		*p = append(*p, *elems...)
 	}
 	return p
 }
@@ -395,6 +393,11 @@ func (p *IntSlice) FirstN(n int) Slice {
 	return p.Slice(0, abs(n)-1)
 }
 
+// G returns the underlying data structure as a builtin Go type
+func (p *IntSlice) G() []int {
+	return p.O().([]int)
+}
+
 // Generic returns true if the underlying implementation is a RefSlice
 func (p *IntSlice) Generic() bool {
 	return false
@@ -471,13 +474,13 @@ func (p *IntSlice) InsertS(i int, slice interface{}) Slice {
 	}
 	if elems, err := ToIntSliceE(slice); err == nil {
 		if j == 0 {
-			*p = append(elems, (*p)...)
+			*p = append(*elems, *p...)
 		} else if j < len(*p) {
-			*p = append(*p, elems...)           // ensures enough space exists
-			copy((*p)[j+len(elems):], (*p)[j:]) // shifts right elements drop added
-			copy((*p)[j:], elems)               // set new in locations vacated
+			*p = append(*p, *elems...)           // ensures enough space exists
+			copy((*p)[j+len(*elems):], (*p)[j:]) // shifts right elements drop added
+			copy((*p)[j:], *elems)               // set new in locations vacated
 		} else {
-			*p = append(*p, elems...)
+			*p = append(*p, *elems...)
 		}
 	}
 	return p
@@ -546,6 +549,9 @@ func (p *IntSlice) Nil() bool {
 
 // O returns the underlying data structure as is
 func (p *IntSlice) O() interface{} {
+	if p == nil {
+		return []int{}
+	}
 	return []int(*p)
 }
 
