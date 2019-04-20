@@ -13,20 +13,15 @@ import (
 type IntSlice []int
 
 // NewIntSlice creates a new *IntSlice
-func NewIntSlice(slice []int) *IntSlice {
-	new := IntSlice(slice)
+func NewIntSlice(slice interface{}) *IntSlice {
+	new := IntSlice(ToIntSlice(slice))
 	return &new
 }
 
 // NewIntSliceV creates a new *IntSlice from the given variadic elements. Always returns
 // at least a reference to an empty IntSlice.
-func NewIntSliceV(elems ...int) *IntSlice {
-	var new IntSlice
-	if len(elems) == 0 {
-		new = IntSlice([]int{})
-	} else {
-		new = IntSlice(elems)
-	}
+func NewIntSliceV(elems ...interface{}) *IntSlice {
+	new := IntSlice(ToIntSlice(elems))
 	return &new
 }
 

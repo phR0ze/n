@@ -130,6 +130,23 @@ func Indirect(obj interface{}) interface{} {
 		}
 		return *x
 
+	// interface
+	//----------------------------------------------------------------------------------------------
+	case []interface{}:
+		return x
+	case []*interface{}:
+		return x
+	case *[]interface{}:
+		if x == nil {
+			return []interface{}{}
+		}
+		return *x
+	case *[]*interface{}:
+		if x == nil {
+			return []*interface{}{}
+		}
+		return *x
+
 	// int
 	//----------------------------------------------------------------------------------------------
 	case int:
@@ -811,6 +828,17 @@ func ToIntSliceE(obj interface{}) (val []int, err error) {
 			val = append(val, ToInt(x[i]))
 		}
 
+	// interface
+	//----------------------------------------------------------------------------------------------
+	case []interface{}:
+		for i := range x {
+			if v, e := ToIntE(x[i]); e == nil {
+				val = append(val, v)
+			} else {
+				err = errors.WithMessagef(e, "unable to convert %T to []int", x)
+			}
+		}
+
 	// int
 	//----------------------------------------------------------------------------------------------
 	case int:
@@ -1009,10 +1037,30 @@ func ToIntSliceE(obj interface{}) (val []int, err error) {
 			val = append(val, ToInt(x[i]))
 		}
 
-	// unable to convert
+	// fall back on reflection
 	//----------------------------------------------------------------------------------------------
 	default:
-		err = fmt.Errorf("unable to convert type %T to []int", x)
+		v := reflect.ValueOf(x)
+		k := v.Kind()
+
+		switch {
+
+		// generically convert array and slice types
+		case k == reflect.Array || k == reflect.Slice:
+			for i := 0; i < v.Len(); i++ {
+				if v, e := ToIntE(v.Index(i).Interface()); e == nil {
+					val = append(val, v)
+				} else {
+					err = errors.WithMessagef(e, "unable to convert %T to []int", x)
+					return
+				}
+			}
+
+		// not supporting this type yet
+		default:
+			err = fmt.Errorf("unable to convert type %T to []int", x)
+			return
+		}
 	}
 	return
 }

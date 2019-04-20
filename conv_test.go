@@ -100,6 +100,15 @@ func TestIndirect(t *testing.T) {
 		assert.Equal(t, []*int{&test}, Indirect(&[]*int{&test}))
 	}
 
+	// interface
+	//-----------------------------------------
+	{
+		assert.Equal(t, []interface{}{1, 2, 3}, Indirect([]interface{}{1, 2, 3}))
+		assert.Equal(t, []interface{}{1, 2, 3}, Indirect(&[]interface{}{1, 2, 3}))
+		assert.Equal(t, []interface{}{}, Indirect((*[]interface{})(nil)))
+		assert.Equal(t, []*interface{}{}, Indirect((*[]*interface{})(nil)))
+	}
+
 	// int8
 	//-----------------------------------------
 	{
@@ -1270,6 +1279,18 @@ func TestToIntSliceE(t *testing.T) {
 		val, err = ToIntSliceE((*[]bool)(nil))
 		assert.Nil(t, err)
 		assert.Equal(t, []int{}, val)
+	}
+
+	// interface
+	//-----------------------------------------
+	{
+		val, err := ToIntSliceE([]interface{}{1, 2, 3})
+		assert.Nil(t, err)
+		assert.Equal(t, []int{1, 2, 3}, val)
+
+		val, err = ToIntSliceE(&[]interface{}{1, 2, 3})
+		assert.Nil(t, err)
+		assert.Equal(t, []int{1, 2, 3}, val)
 	}
 
 	// int

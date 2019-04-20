@@ -37,6 +37,7 @@ func TestIntSlice_NewIntSlice(t *testing.T) {
 	var array [2]int
 	array[0] = 1
 	array[1] = 2
+	assert.Equal(t, []int{1, 2}, NewIntSlice(array).O())
 	assert.Equal(t, []int{1, 2}, NewIntSlice(array[:]).O())
 
 	// empty
@@ -45,6 +46,16 @@ func TestIntSlice_NewIntSlice(t *testing.T) {
 	// slice
 	assert.Equal(t, []int{0}, NewIntSlice([]int{0}).O())
 	assert.Equal(t, []int{1, 2}, NewIntSlice([]int{1, 2}).O())
+
+	// Conversion
+	{
+		assert.Equal(t, []int{1}, NewIntSlice("1").O())
+		assert.Equal(t, []int{1, 2}, NewIntSlice([]string{"1", "2"}).O())
+		assert.Equal(t, []int{1}, NewIntSlice(Object{1}).O())
+		assert.Equal(t, []int{1, 2}, NewIntSlice([]Object{{1}, {2}}).O())
+		assert.Equal(t, []int{1}, NewIntSlice(true).O())
+		assert.Equal(t, []int{1, 0}, NewIntSlice([]bool{true, false}).O())
+	}
 }
 
 // NewIntSliceV
@@ -77,19 +88,20 @@ func ExampleNewIntSliceV_variadic() {
 
 func TestIntSlice_NewIntSliceV(t *testing.T) {
 
-	// array
-	var array [2]int
-	array[0] = 1
-	array[1] = 2
-	assert.Equal(t, []int{1, 2}, NewIntSliceV(array[:]...).O())
-
 	// empty
 	assert.Equal(t, []int{}, NewIntSliceV().O())
 
 	// multiples
 	assert.Equal(t, []int{1}, NewIntSliceV(1).O())
 	assert.Equal(t, []int{1, 2}, NewIntSliceV(1, 2).O())
-	assert.Equal(t, []int{1, 2}, NewIntSliceV([]int{1, 2}...).O())
+	assert.Equal(t, []int{1, 2}, NewIntSliceV([]interface{}{1, 2}...).O())
+
+	// Conversion
+	{
+		assert.Equal(t, []int{1, 2}, NewIntSliceV("1", "2").O())
+		assert.Equal(t, []int{1, 2}, NewIntSliceV(Obj(1), Obj(2)).O())
+		assert.Equal(t, []int{1, 0}, NewIntSliceV(true, false).O())
+	}
 }
 
 // Any
