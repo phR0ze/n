@@ -404,6 +404,11 @@ func (p *StringSlice) FirstN(n int) Slice {
 	return p.Slice(0, abs(n)-1)
 }
 
+// G returns the underlying data structure as a builtin Go type
+func (p *StringSlice) G() []string {
+	return p.O().([]string)
+}
+
 // Generic returns true if the underlying implementation is a RefSlice
 func (p *StringSlice) Generic() bool {
 	return false

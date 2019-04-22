@@ -1744,6 +1744,18 @@ func TestStringSlice_FirstN(t *testing.T) {
 	assert.Equal(t, NewStringSliceV("1", "2"), NewStringSliceV("1", "2", "3").FirstN(2))
 }
 
+// G
+//--------------------------------------------------------------------------------------------------
+func ExampleStringSlice_G() {
+	fmt.Println(NewStringSliceV("1", "2", "3").G())
+	// Output: [1 2 3]
+}
+
+func TestStringSlice_G(t *testing.T) {
+	assert.IsType(t, []string{}, NewStringSliceV().G())
+	assert.IsType(t, []string{"1", "2", "3"}, NewStringSliceV("1", "2", "3").G())
+}
+
 // Generic
 //--------------------------------------------------------------------------------------------------
 func ExampleStringSlice_Generic() {
