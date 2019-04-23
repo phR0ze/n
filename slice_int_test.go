@@ -278,6 +278,14 @@ func TestIntSlice_AnyS(t *testing.T) {
 	assert.False(t, NewIntSliceV(1, 2).AnyS((*[]int)(nil)))
 	assert.False(t, NewIntSliceV(1, 2).AnyS((*IntSlice)(nil)))
 	assert.False(t, NewIntSliceV(1, 2).AnyS([]string{"bob"}))
+
+	// Conversion
+	{
+		assert.True(t, NewIntSliceV(1, 2, 3).AnyS(NewIntSliceV(int64(1))))
+		assert.True(t, NewIntSliceV(1, 2, 3).AnyS(NewIntSliceV("2")))
+		assert.True(t, NewIntSliceV(1, 2, 3).AnyS(NewIntSliceV(true)))
+		assert.True(t, NewIntSliceV(1, 2, 3).AnyS(NewIntSliceV(Str("3"))))
+	}
 }
 
 // AnyW
@@ -373,13 +381,6 @@ func TestIntSlice_Append(t *testing.T) {
 		assert.Equal(t, NewIntSliceV(1, 2), slice)
 	}
 
-	// Conversion
-	{
-		assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1).Append(Object{2}))
-		assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1).Append("2"))
-		assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV().Append(true).Append(Char('2')))
-	}
-
 	// Start with just appending without chaining
 	{
 		slice := NewIntSliceV()
@@ -420,6 +421,13 @@ func TestIntSlice_Append(t *testing.T) {
 		assert.Equal(t, 1, slice.Len())
 		assert.Equal(t, []int{1, 2}, slice.Append(2).O())
 		assert.Equal(t, NewIntSliceV(1, 2), slice)
+	}
+
+	// Conversion
+	{
+		assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1).Append(Object{2}))
+		assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV(1).Append("2"))
+		assert.Equal(t, NewIntSliceV(1, 2), NewIntSliceV().Append(true).Append(Char('2')))
 	}
 }
 
@@ -1888,6 +1896,15 @@ func TestIntSlice_Insert(t *testing.T) {
 		assert.Equal(t, NewIntSliceV(0), slice.Insert(-1, 0))
 		assert.Equal(t, NewIntSliceV(0, 1), slice.Insert(-1, 1))
 		assert.Equal(t, NewIntSliceV(0, 1, 2), slice.Insert(-1, 2))
+
+	}
+
+	// [] append
+	{
+		slice := NewIntSliceV()
+		assert.Equal(t, NewIntSliceV(0), slice.Insert(-1, []int{0}))
+		assert.Equal(t, NewIntSliceV(0, 1), slice.Insert(-1, []int{1}))
+		assert.Equal(t, NewIntSliceV(0, 1, 2), slice.Insert(-1, []int{2}))
 	}
 
 	// prepend
@@ -1896,6 +1913,14 @@ func TestIntSlice_Insert(t *testing.T) {
 		assert.Equal(t, NewIntSliceV(2), slice.Insert(0, 2))
 		assert.Equal(t, NewIntSliceV(1, 2), slice.Insert(0, 1))
 		assert.Equal(t, NewIntSliceV(0, 1, 2), slice.Insert(0, 0))
+	}
+
+	// [] prepend
+	{
+		slice := NewIntSliceV()
+		assert.Equal(t, NewIntSliceV(2), slice.Insert(0, []int{2}))
+		assert.Equal(t, NewIntSliceV(1, 2), slice.Insert(0, []int{1}))
+		assert.Equal(t, NewIntSliceV(0, 1, 2), slice.Insert(0, []int{0}))
 	}
 
 	// middle pos
@@ -1907,6 +1932,13 @@ func TestIntSlice_Insert(t *testing.T) {
 		assert.Equal(t, NewIntSliceV(0, 1, 2, 3, 4, 5), slice.Insert(4, 4))
 	}
 
+	// [] middle pos
+	{
+		slice := NewIntSliceV(0, 5)
+		assert.Equal(t, NewIntSliceV(0, 1, 2, 5), slice.Insert(1, []int{1, 2}))
+		assert.Equal(t, NewIntSliceV(0, 1, 2, 3, 4, 5), slice.Insert(3, []int{3, 4}))
+	}
+
 	// middle neg
 	{
 		slice := NewIntSliceV(0, 5)
@@ -1916,7 +1948,25 @@ func TestIntSlice_Insert(t *testing.T) {
 		assert.Equal(t, NewIntSliceV(0, 1, 2, 3, 4, 5), slice.Insert(-2, 4))
 	}
 
+	// [] middle neg
+	{
+		slice := NewIntSliceV(0, 5)
+		assert.Equal(t, NewIntSliceV(0, 1, 2, 5), slice.Insert(-2, []int{1, 2}))
+		assert.Equal(t, NewIntSliceV(0, 1, 2, 3, 4, 5), slice.Insert(-2, []int{3, 4}))
+	}
+
 	// error cases
+	{
+		var slice *IntSlice
+		assert.False(t, slice.Insert(0, 0).Nil())
+		assert.Equal(t, NewIntSliceV(0), slice.Insert(0, 0))
+		assert.Equal(t, NewIntSliceV(0, 1), NewIntSliceV(0, 1).Insert(-10, 1))
+		assert.Equal(t, NewIntSliceV(0, 1), NewIntSliceV(0, 1).Insert(10, 1))
+		assert.Equal(t, NewIntSliceV(0, 1), NewIntSliceV(0, 1).Insert(2, 1))
+		assert.Equal(t, NewIntSliceV(0, 1), NewIntSliceV(0, 1).Insert(-3, 1))
+	}
+
+	// [] error cases
 	{
 		var slice *IntSlice
 		assert.False(t, slice.Insert(0, 0).Nil())
@@ -1934,81 +1984,13 @@ func TestIntSlice_Insert(t *testing.T) {
 		assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(2, 3).Insert(0, true))
 		assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 2).Insert(-1, Char('3')))
 	}
-}
 
-// InsertS
-//--------------------------------------------------------------------------------------------------
-func BenchmarkIntSlice_InsertS_Go(t *testing.B) {
-	ints := []int{}
-	for i := range Range(0, nines6) {
-		ints = append(ints, i)
-		copy(ints[1:], ints[1:])
-		ints[0] = i
-	}
-}
-
-func BenchmarkIntSlice_InsertS_Slice(t *testing.B) {
-	slice := NewIntSliceV()
-	for i := range Range(0, nines6) {
-		slice.InsertS(0, i)
-	}
-}
-
-func ExampleIntSlice_InsertS() {
-	slice := NewIntSliceV(1, 4)
-	fmt.Println(slice.InsertS(1, []int{2, 3}))
-	// Output: [1 2 3 4]
-}
-
-func TestIntSlice_InsertS(t *testing.T) {
-
-	// append
+	// [] Conversion
 	{
-		slice := NewIntSliceV()
-		assert.Equal(t, NewIntSliceV(0), slice.InsertS(-1, []int{0}))
-		assert.Equal(t, NewIntSliceV(0, 1), slice.InsertS(-1, []int{1}))
-		assert.Equal(t, NewIntSliceV(0, 1, 2), slice.InsertS(-1, []int{2}))
-	}
-
-	// prepend
-	{
-		slice := NewIntSliceV()
-		assert.Equal(t, NewIntSliceV(2), slice.InsertS(0, []int{2}))
-		assert.Equal(t, NewIntSliceV(1, 2), slice.InsertS(0, []int{1}))
-		assert.Equal(t, NewIntSliceV(0, 1, 2), slice.InsertS(0, []int{0}))
-	}
-
-	// middle pos
-	{
-		slice := NewIntSliceV(0, 5)
-		assert.Equal(t, NewIntSliceV(0, 1, 2, 5), slice.InsertS(1, []int{1, 2}))
-		assert.Equal(t, NewIntSliceV(0, 1, 2, 3, 4, 5), slice.InsertS(3, []int{3, 4}))
-	}
-
-	// middle neg
-	{
-		slice := NewIntSliceV(0, 5)
-		assert.Equal(t, NewIntSliceV(0, 1, 2, 5), slice.InsertS(-2, []int{1, 2}))
-		assert.Equal(t, NewIntSliceV(0, 1, 2, 3, 4, 5), slice.InsertS(-2, []int{3, 4}))
-	}
-
-	// error cases
-	{
-		var slice *IntSlice
-		assert.False(t, slice.InsertS(0, 0).Nil())
-		assert.Equal(t, NewIntSliceV(0), slice.InsertS(0, 0))
-		assert.Equal(t, NewIntSliceV(0, 1), NewIntSliceV(0, 1).InsertS(-10, 1))
-		assert.Equal(t, NewIntSliceV(0, 1), NewIntSliceV(0, 1).InsertS(10, 1))
-		assert.Equal(t, NewIntSliceV(0, 1), NewIntSliceV(0, 1).InsertS(2, 1))
-		assert.Equal(t, NewIntSliceV(0, 1), NewIntSliceV(0, 1).InsertS(-3, 1))
-	}
-
-	// Conversion
-	{
-		assert.Equal(t, NewIntSliceV(1, 2, 3, 4), NewIntSliceV(1, 4).InsertS(1, []Object{{2}, {3}}))
-		assert.Equal(t, NewIntSliceV(1, 2, 3, 4), NewIntSliceV(1, 4).InsertS(1, []string{"2", "3"}))
-		assert.Equal(t, NewIntSliceV(0, 1, 2, 3), NewIntSliceV(2, 3).InsertS(0, []bool{false, true}))
-		assert.Equal(t, NewIntSliceV(1, 2, 3, 4), NewIntSliceV(1, 2).InsertS(-1, []Char{'3', '4'}))
+		assert.Equal(t, NewIntSliceV(1, 2, 3, 4), NewIntSliceV(1, 4).Insert(1, []Object{{2}, {3}}))
+		assert.Equal(t, NewIntSliceV(1, 2, 3, 4), NewIntSliceV(1, 4).Insert(1, []string{"2", "3"}))
+		assert.Equal(t, NewIntSliceV(0, 1, 2, 3), NewIntSliceV(2, 3).Insert(0, []bool{false, true}))
+		assert.Equal(t, NewIntSliceV(1, 2, 3, 4), NewIntSliceV(1, 2).Insert(-1, []Char{'3', '4'}))
 	}
 }
 

@@ -12,21 +12,14 @@ import (
 type StringSlice []string
 
 // NewStringSlice creates a new *StringSlice
-func NewStringSlice(slice []string) *StringSlice {
-	new := StringSlice(slice)
-	return &new
+func NewStringSlice(slice interface{}) *StringSlice {
+	return ToStringSlice(slice)
 }
 
 // NewStringSliceV creates a new *StringSlice from the given variadic elements. Always returns
 // at least a reference to an empty StringSlice.
-func NewStringSliceV(elems ...string) *StringSlice {
-	var new StringSlice
-	if len(elems) == 0 {
-		new = StringSlice([]string{})
-	} else {
-		new = StringSlice(elems)
-	}
-	return &new
+func NewStringSliceV(elems ...interface{}) *StringSlice {
+	return ToStringSlice(elems)
 }
 
 // A is an alias to String for brevity
@@ -48,11 +41,10 @@ func (p *StringSlice) Any(elems ...interface{}) bool {
 
 	// Looking for something specific returns false if incompatible type
 	for i := range elems {
-		if x, ok := elems[i].(string); ok {
-			for j := range *p {
-				if (*p)[j] == x {
-					return true
-				}
+		x := ToString(elems[i])
+		for j := range *p {
+			if (*p)[j] == x {
+				return true
 			}
 		}
 	}
@@ -66,17 +58,12 @@ func (p *StringSlice) AnyS(slice interface{}) bool {
 	if p == nil || len(*p) == 0 {
 		return false
 	}
-	var elems []string
-	switch x := slice.(type) {
-	case []string, *[]string:
-		elems = Indirect(x).([]string)
-	case StringSlice, *StringSlice:
-		elems = Indirect(x).(StringSlice)
-	}
-	for i := range elems {
-		for j := range *p {
-			if (*p)[j] == elems[i] {
-				return true
+	if elems, err := ToStringSliceE(slice); err == nil {
+		for i := range *elems {
+			for j := range *p {
+				if (*p)[j] == (*elems)[i] {
+					return true
+				}
 			}
 		}
 	}
@@ -93,9 +80,7 @@ func (p *StringSlice) Append(elem interface{}) Slice {
 	if p == nil {
 		p = NewStringSliceV()
 	}
-	if x, ok := elem.(string); ok {
-		*p = append(*p, x)
-	}
+	*p = append(*p, ToString(elem))
 	return p
 }
 
@@ -105,7 +90,7 @@ func (p *StringSlice) AppendV(elems ...interface{}) Slice {
 		p = NewStringSliceV()
 	}
 	for _, elem := range elems {
-		p.Append(elem)
+		*p = append(*p, ToString(elem))
 	}
 	return p
 }
@@ -145,11 +130,8 @@ func (p *StringSlice) ConcatM(slice interface{}) Slice {
 	if p == nil {
 		p = NewStringSliceV()
 	}
-	switch x := slice.(type) {
-	case []string, *[]string:
-		*p = append(*p, Indirect(x).([]string)...)
-	case StringSlice, *StringSlice:
-		*p = append(*p, Indirect(x).(StringSlice)...)
+	if elems, err := ToStringSliceE(slice); err == nil {
+		*p = append(*p, *elems...)
 	}
 	return p
 }
@@ -421,23 +403,24 @@ func (p *StringSlice) Index(elem interface{}) (loc int) {
 	if p == nil || len(*p) == 0 {
 		return
 	}
+	x := ToString(elem)
 	for i := range *p {
-		if elem == (*p)[i] {
+		if (*p)[i] == x {
 			return i
 		}
 	}
 	return
 }
 
-// Insert modifies this Slice to insert the given element before the element with the given index.
+// Insert modifies this Slice to insert the given elements before the element(s) with the given index.
 // Negative indices count backwards from the end of the slice, where -1 is the last element. If a
 // negative index is used, the given element will be inserted after that element, so using an index
 // of -1 will insert the element at the end of the slice. If a Slice is given all elements will be
 // inserted starting from the beging until the end. Slice is returned for chaining. Invalid
 // index locations will not change the slice.
-func (p *StringSlice) Insert(i int, elem interface{}) Slice {
+func (p *StringSlice) Insert(i int, obj interface{}) Slice {
 	if p == nil || len(*p) == 0 {
-		return p.Append(elem)
+		return p.ConcatM(obj)
 	}
 
 	// Insert the item before j if pos and after j if neg
@@ -448,50 +431,17 @@ func (p *StringSlice) Insert(i int, elem interface{}) Slice {
 	if i < 0 {
 		j++
 	}
-	if x, ok := elem.(string); ok {
+	if elems, err := ToStringSliceE(obj); err == nil {
 		if j == 0 {
-			*p = append([]string{x}, (*p)...)
+			*p = append(*elems, *p...)
 		} else if j < len(*p) {
-			*p = append(*p, x)
-			copy((*p)[j+1:], (*p)[j:])
-			(*p)[j] = x
+			*p = append(*p, *elems...)           // ensures enough space exists
+			copy((*p)[j+len(*elems):], (*p)[j:]) // shifts right elements drop added
+			copy((*p)[j:], *elems)               // set new in locations vacated
 		} else {
-			*p = append(*p, x)
+			*p = append(*p, *elems...)
 		}
 	}
-	return p
-}
-
-// InsertS modifies this Slice to insert the given elements before the element with the given index.
-// Negative indices count backwards from the end of the slice, where -1 is the last element. If a
-// negative index is used, the given element will be inserted after that element, so using an index
-// of -1 will insert the element at the end of the slice. If a Slice is given all elements will be
-// inserted starting from the beging until the end. Slice is returned for chaining. Invalid
-// index locations will not change the slice.
-func (p *StringSlice) InsertS(i int, slice interface{}) Slice {
-	if p == nil || len(*p) == 0 {
-		return p.ConcatM(slice)
-	}
-
-	// // Insert the item before j if pos and after j if neg
-	j := i
-	if j = absIndex(len(*p), j); j == -1 {
-		return p
-	}
-	if i < 0 {
-		j++
-	}
-	// if x, ok := elem.(string); ok {
-	// 	if j == 0 {
-	// 		*p = append([]string{x}, (*p)...)
-	// 	} else if j < len(*p) {
-	// 		*p = append(*p, x)
-	// 		copy((*p)[j+1:], (*p)[j:])
-	// 		(*p)[j] = x
-	// 	} else {
-	// 		*p = append(*p, x)
-	// 	}
-	// }
 	return p
 }
 
