@@ -1260,7 +1260,7 @@ func TestToBoolE(t *testing.T) {
 // ToChar
 //--------------------------------------------------------------------------------------------------
 func ExampleToChar() {
-	val := ToString("v")
+	val := ToChar("v")
 	fmt.Println(val)
 	// Output: v
 }
@@ -1368,46 +1368,6 @@ func TestToChar(t *testing.T) {
 		assert.Equal(t, NewCharV(), ToChar(""))
 		assert.Equal(t, NewCharV(), ToChar((*[]string)(nil)))
 	}
-
-	// // template.CSS
-	// {
-	// 	var test template.CSS
-	// 	assert.Equal(t, "test", ToString(template.CSS("test")))
-	// 	assert.Equal(t, "", ToString(&test))
-	// 	assert.Equal(t, "", ToString((*template.CSS)(nil)))
-	// }
-
-	// // template.HTML
-	// {
-	// 	var test template.HTML
-	// 	assert.Equal(t, "test", ToString(template.HTML("test")))
-	// 	assert.Equal(t, "", ToString(&test))
-	// 	assert.Equal(t, "", ToString((*template.HTML)(nil)))
-	// }
-
-	// // template.HTMLAttr
-	// {
-	// 	var test template.HTMLAttr
-	// 	assert.Equal(t, "test", ToString(template.HTMLAttr("test")))
-	// 	assert.Equal(t, "", ToString(&test))
-	// 	assert.Equal(t, "", ToString((*template.HTMLAttr)(nil)))
-	// }
-
-	// // template.JS
-	// {
-	// 	var test template.JS
-	// 	assert.Equal(t, "test", ToString(template.JS("test")))
-	// 	assert.Equal(t, "", ToString(&test))
-	// 	assert.Equal(t, "", ToString((*template.JS)(nil)))
-	// }
-
-	// // template.URL
-	// {
-	// 	var test template.URL
-	// 	assert.Equal(t, "test", ToString(template.URL("test")))
-	// 	assert.Equal(t, "", ToString(&test))
-	// 	assert.Equal(t, "", ToString((*template.URL)(nil)))
-	// }
 
 	// uint
 	{
@@ -2256,7 +2216,7 @@ func TestToString(t *testing.T) {
 		assert.Equal(t, "true", ToString(true))
 		assert.Equal(t, "false", ToString(false))
 		assert.Equal(t, "false", ToString(&test))
-		assert.Equal(t, "false", ToString((*bool)(nil)))
+		assert.Equal(t, "", ToString((*bool)(nil)))
 	}
 
 	// []byte
@@ -2276,7 +2236,7 @@ func TestToString(t *testing.T) {
 		var test float32
 		assert.Equal(t, "7.22", ToString(float32(7.22)))
 		assert.Equal(t, "0", ToString(&test))
-		assert.Equal(t, "0", ToString((*float32)(nil)))
+		assert.Equal(t, "", ToString((*float32)(nil)))
 	}
 
 	// float64
@@ -2284,7 +2244,7 @@ func TestToString(t *testing.T) {
 		var test float64
 		assert.Equal(t, "7.22", ToString(float64(7.22)))
 		assert.Equal(t, "0", ToString(&test))
-		assert.Equal(t, "0", ToString((*float64)(nil)))
+		assert.Equal(t, "", ToString((*float64)(nil)))
 	}
 
 	// int
@@ -2292,7 +2252,7 @@ func TestToString(t *testing.T) {
 		var test int
 		assert.Equal(t, "3", ToString(3))
 		assert.Equal(t, "0", ToString(&test))
-		assert.Equal(t, "0", ToString((*int)(nil)))
+		assert.Equal(t, "", ToString((*int)(nil)))
 	}
 
 	// int8
@@ -2300,7 +2260,7 @@ func TestToString(t *testing.T) {
 		var test int8
 		assert.Equal(t, "3", ToString(int8(3)))
 		assert.Equal(t, "0", ToString(&test))
-		assert.Equal(t, "0", ToString((*int8)(nil)))
+		assert.Equal(t, "", ToString((*int8)(nil)))
 	}
 
 	// int16
@@ -2308,7 +2268,7 @@ func TestToString(t *testing.T) {
 		var test int16
 		assert.Equal(t, "3", ToString(int16(3)))
 		assert.Equal(t, "0", ToString(&test))
-		assert.Equal(t, "0", ToString((*int16)(nil)))
+		assert.Equal(t, "", ToString((*int16)(nil)))
 	}
 
 	// int32
@@ -2316,7 +2276,7 @@ func TestToString(t *testing.T) {
 		var test int32
 		assert.Equal(t, "3", ToString(int32(3)))
 		assert.Equal(t, "0", ToString(&test))
-		assert.Equal(t, "0", ToString((*int32)(nil)))
+		assert.Equal(t, "", ToString((*int32)(nil)))
 	}
 
 	// int64
@@ -2324,7 +2284,7 @@ func TestToString(t *testing.T) {
 		var test int64
 		assert.Equal(t, "3", ToString(int64(3)))
 		assert.Equal(t, "0", ToString(&test))
-		assert.Equal(t, "0", ToString((*int64)(nil)))
+		assert.Equal(t, "", ToString((*int64)(nil)))
 	}
 
 	// ints
@@ -2386,7 +2346,7 @@ func TestToString(t *testing.T) {
 		var test uint
 		assert.Equal(t, "3", ToString(uint(3)))
 		assert.Equal(t, "0", ToString(&test))
-		assert.Equal(t, "0", ToString((*uint)(nil)))
+		assert.Equal(t, "", ToString((*uint)(nil)))
 	}
 
 	// uint8
@@ -2394,7 +2354,7 @@ func TestToString(t *testing.T) {
 		var test uint8
 		assert.Equal(t, "3", ToString(uint8(3)))
 		assert.Equal(t, "0", ToString(&test))
-		assert.Equal(t, "0", ToString((*uint8)(nil)))
+		assert.Equal(t, "", ToString((*uint8)(nil)))
 	}
 
 	// uint16
@@ -2402,7 +2362,7 @@ func TestToString(t *testing.T) {
 		var test uint16
 		assert.Equal(t, "3", ToString(uint16(3)))
 		assert.Equal(t, "0", ToString(&test))
-		assert.Equal(t, "0", ToString((*uint16)(nil)))
+		assert.Equal(t, "", ToString((*uint16)(nil)))
 	}
 
 	// uint32
@@ -2410,7 +2370,7 @@ func TestToString(t *testing.T) {
 		var test uint32
 		assert.Equal(t, "3", ToString(uint32(3)))
 		assert.Equal(t, "0", ToString(&test))
-		assert.Equal(t, "0", ToString((*uint32)(nil)))
+		assert.Equal(t, "", ToString((*uint32)(nil)))
 	}
 
 	// uint64
@@ -2418,7 +2378,7 @@ func TestToString(t *testing.T) {
 		var test uint64
 		assert.Equal(t, "3", ToString(uint64(3)))
 		assert.Equal(t, "0", ToString(&test))
-		assert.Equal(t, "0", ToString((*uint64)(nil)))
+		assert.Equal(t, "", ToString((*uint64)(nil)))
 	}
 
 	// uints
