@@ -21,31 +21,42 @@ func TestStr_NewStr(t *testing.T) {
 		assert.Equal(t, "", NewStr(nil).A())
 	}
 
-	// Str
+	// ints
 	{
-		assert.Equal(t, "test", A(A("test")).A())
-	}
-
-	// string
-	{
-		assert.Equal(t, "test", A("test").A())
-		assert.Equal(t, "test1", A([]string{"test", "1"}).O())
-	}
-
-	// runes
-	{
-		assert.Equal(t, "b", A('b').A())
-		assert.Equal(t, "test", A([]rune("test")).A())
+		assert.Equal(t, "10", NewStr(10).A())
 	}
 
 	// bytes
 	{
-		assert.Equal(t, "test", A([]byte{0x74, 0x65, 0x73, 0x74}).A())
+		assert.Equal(t, "test", NewStr([]byte{0x74, 0x65, 0x73, 0x74}).A())
 	}
 
-	// ints
+	// Object
 	{
-		assert.Equal(t, "10", A(10).A())
+		assert.Equal(t, "1", NewStr(Object{1}).A())
+		assert.Equal(t, "12", NewStr([]Object{{1}, {2}}).A())
+	}
+
+	// runes
+	{
+		assert.Equal(t, "b", NewStr('b').A())
+		assert.Equal(t, "test", NewStr([]rune("test")).A())
+	}
+
+	// Str
+	{
+		assert.Equal(t, "test", NewStr(NewStr("test")).A())
+	}
+
+	// string
+	{
+		assert.Equal(t, "test", NewStr("test").A())
+		assert.Equal(t, "test1", NewStr([]string{"test", "1"}).O())
+	}
+
+	// reflection
+	{
+		assert.NotEqual(t, "test", NewStr(TestObj{"test"}).A())
 	}
 }
 
@@ -115,6 +126,7 @@ func TestStr_All(t *testing.T) {
 	assert.False(t, NewStrV("123").All(4, 5))
 
 	// Conversion
+	assert.True(t, NewStrV("12").All(2))
 	assert.True(t, NewStrV("12").All(Object{"2"}))
 }
 
@@ -161,32 +173,44 @@ func TestStr_AllS(t *testing.T) {
 		assert.False(t, NewStrV("1").AllS(nil))
 	}
 
-	// []rune
+	// byte
 	{
-		assert.True(t, NewStrV("123").AllS([]rune{'1'}))
-		assert.True(t, NewStrV("123").AllS([]rune{'2', '3'}))
-		assert.False(t, NewStrV("123").AllS([]rune{'1', '5'}))
-	}
+		// byte
+		assert.True(t, NewStrV("test").AllS(byte(0x74)))
 
-	// *[]rune
-	{
-		assert.True(t, NewStrV("123").AllS(&([]rune{'1'})))
-		assert.True(t, NewStrV("123").AllS(&([]rune{'2', '3'})))
-		assert.False(t, NewStrV("123").AllS(&([]rune{'1', '5'})))
-	}
-
-	// []byte
-	{
+		// []byte
 		assert.True(t, NewStrV("test").AllS([]byte{0x74}))
 		assert.True(t, NewStrV("test").AllS([]byte{0x74, 0x65}))
 		assert.False(t, NewStrV("tbob").AllS([]byte{0x74, 0x65}))
-	}
 
-	// *[]byte
-	{
+		// *[]byte
 		assert.True(t, NewStrV("test").AllS(&[]byte{0x74}))
 		assert.True(t, NewStrV("test").AllS(&[]byte{0x74, 0x65}))
 		assert.False(t, NewStrV("tbob").AllS(&[]byte{0x74, 0x65}))
+	}
+
+	// []int
+	{
+		assert.True(t, NewStrV("1", "2").AllS([]int{2}))
+		assert.True(t, NewStrV("1", "2").AllS([]int{1, 2}))
+		assert.False(t, NewStrV("1", "2").AllS([]int{1, 3}))
+		assert.False(t, NewStrV("1", "2").AllS([]int{3, 4}))
+	}
+
+	// rune
+	{
+		// rune
+		assert.True(t, NewStrV("test").AllS('t'))
+
+		// []rune
+		assert.True(t, NewStrV("123").AllS([]rune{'1'}))
+		assert.True(t, NewStrV("123").AllS([]rune{'2', '3'}))
+		assert.False(t, NewStrV("123").AllS([]rune{'1', '5'}))
+
+		// *[]rune
+		assert.True(t, NewStrV("123").AllS(&([]rune{'1'})))
+		assert.True(t, NewStrV("123").AllS(&([]rune{'2', '3'})))
+		assert.False(t, NewStrV("123").AllS(&([]rune{'1', '5'})))
 	}
 
 	// []string
@@ -194,10 +218,8 @@ func TestStr_AllS(t *testing.T) {
 		assert.True(t, NewStrV("123").AllS([]string{"1"}))
 		assert.True(t, NewStrV("123").AllS([]string{"2", "3"}))
 		assert.False(t, NewStrV("123").AllS([]string{"1", "5"}))
-	}
 
-	// *[]string
-	{
+		// *[]string
 		assert.True(t, NewStrV("123").AllS(&([]string{"1"})))
 		assert.True(t, NewStrV("123").AllS(&([]string{"2", "3"})))
 		assert.False(t, NewStrV("123").AllS(&([]string{"1", "5"})))
@@ -215,13 +237,16 @@ func TestStr_AllS(t *testing.T) {
 		assert.True(t, NewStrV("123").AllS([]Str{Str("1"), Str("2")}))
 		assert.True(t, NewStrV("123").AllS(&[]Str{Str("1"), Str("2")}))
 		assert.False(t, NewStrV("123").AllS([]Str{Str("1"), Str("5")}))
+
+		// *Str
+		assert.True(t, NewStrV("123").AllS([]*Str{A("1"), A("2")}))
+		assert.False(t, NewStrV("123").AllS([]*Str{A("1"), A("5")}))
 	}
 
 	// invalid types
 	assert.False(t, NewStrV("1", "2").AllS(nil))
 	assert.False(t, NewStrV("1", "2").AllS((*[]string)(nil)))
 	assert.False(t, NewStrV("1", "2").AllS((*Str)(nil)))
-	assert.False(t, NewStrV("1", "2").AllS([]int{2}))
 }
 
 // Any
@@ -342,15 +367,17 @@ func TestStr_AnyS(t *testing.T) {
 		assert.False(t, NewStrV("1").AnyS(nil))
 	}
 
-	// []rune
+	// rune
 	{
+		// rune
+		//assert.True(t, NewStrV("test").AnyS('t'))
+
+		// []rune
 		assert.True(t, NewStrV("123").AnyS([]rune{'1'}))
 		assert.True(t, NewStrV("123").AnyS([]rune{'4', '3'}))
 		assert.False(t, NewStrV("123").AnyS([]rune{'4', '5'}))
-	}
 
-	// *[]rune
-	{
+		// *[]rune
 		assert.True(t, NewStrV("123").AnyS(&([]rune{'1'})))
 		assert.True(t, NewStrV("123").AnyS(&([]rune{'4', '3'})))
 		assert.False(t, NewStrV("123").AnyS(&([]rune{'4', '5'})))

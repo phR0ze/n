@@ -42,16 +42,7 @@ func (p *IntSlice) Any(elems ...interface{}) bool {
 	}
 
 	// Looking for something specific returns false if incompatible type
-	for i := range elems {
-		if x, err := ToIntE(elems[i]); err == nil {
-			for j := range *p {
-				if (*p)[j] == x {
-					return true
-				}
-			}
-		}
-	}
-	return false
+	return p.AnyS(elems)
 }
 
 // AnyS tests if this Slice contains any of the given Slice's elements.

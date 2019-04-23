@@ -19,7 +19,7 @@ type Str []rune
 
 // A is an alias to NewStr for brevity
 func A(obj interface{}) *Str {
-	return NewStr(obj)
+	return ToStr(obj)
 }
 
 // NewStr creates a new *Str which will never be nil
@@ -71,26 +71,9 @@ func (p *Str) AllS(slice interface{}) bool {
 	result := true
 	o := DeReference(slice)
 	switch x := o.(type) {
-	case []Str:
-		SetOnTrue(&result, false, len(x) == 0)
-		for i := range x {
-			if !strings.Contains(str, string(x[i])) {
-				return false
-			}
-		}
-	case []string:
-		SetOnTrue(&result, false, len(x) == 0)
-		for i := range x {
-			if !strings.Contains(str, x[i]) {
-				return false
-			}
-		}
-	case StringSlice:
-		SetOnTrue(&result, false, len(x) == 0)
-		for i := 0; i < x.Len(); i++ {
-			if !strings.Contains(str, x.At(i).A()) {
-				return false
-			}
+	case byte:
+		if !strings.ContainsRune(str, rune(x)) {
+			return false
 		}
 	case []byte:
 		SetOnTrue(&result, false, len(x) == 0)
@@ -98,6 +81,10 @@ func (p *Str) AllS(slice interface{}) bool {
 			if !strings.ContainsRune(str, rune(x[i])) {
 				return false
 			}
+		}
+	case rune:
+		if !strings.ContainsRune(str, x) {
+			return false
 		}
 	case []rune:
 		SetOnTrue(&result, false, len(x) == 0)
@@ -107,7 +94,13 @@ func (p *Str) AllS(slice interface{}) bool {
 			}
 		}
 	default:
-		result = false
+		elems := *ToStringSlice(x)
+		SetOnTrue(&result, false, len(elems) == 0)
+		for i := range elems {
+			if !strings.Contains(str, elems[i]) {
+				return false
+			}
+		}
 	}
 	return result
 }
@@ -127,12 +120,38 @@ func (p *Str) Any(elems ...interface{}) bool {
 
 	// Looking for something specific returns false if incompatible type
 	str := p.A()
-	for i := range elems {
-		if strings.Contains(str, NewStr(elems[i]).A()) {
+	result := false
+	o := DeReference(elems)
+	switch x := o.(type) {
+	case byte:
+		if strings.ContainsRune(str, rune(x)) {
 			return true
 		}
+	case []byte:
+		for i := range x {
+			if strings.ContainsRune(str, rune(x[i])) {
+				return true
+			}
+		}
+	case rune:
+		if strings.ContainsRune(str, x) {
+			return true
+		}
+	case []rune:
+		for i := range x {
+			if strings.ContainsRune(str, x[i]) {
+				return true
+			}
+		}
+	default:
+		elems := *ToStringSlice(x)
+		for i := range elems {
+			if strings.Contains(str, elems[i]) {
+				return true
+			}
+		}
 	}
-	return false
+	return result
 }
 
 // AnyS tests if this Slice contains any of the given Slice's elements.

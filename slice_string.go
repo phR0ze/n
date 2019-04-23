@@ -40,15 +40,7 @@ func (p *StringSlice) Any(elems ...interface{}) bool {
 	}
 
 	// Looking for something specific returns false if incompatible type
-	for i := range elems {
-		x := ToString(elems[i])
-		for j := range *p {
-			if (*p)[j] == x {
-				return true
-			}
-		}
-	}
-	return false
+	return p.AnyS(elems)
 }
 
 // AnyS tests if this Slice contains any of the given Slice's elements.
