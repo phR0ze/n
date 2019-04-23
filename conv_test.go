@@ -1267,96 +1267,107 @@ func ExampleToChar() {
 
 func TestToChar(t *testing.T) {
 
-	// // nil
-	// {
-	// 	assert.Equal(t, NewCharV(), ToChar(nil))
-	// }
+	// nil
+	{
+		assert.Equal(t, NewCharV(), ToChar(nil))
+	}
 
-	// // bool
-	// {
-	// 	var test bool
-	// 	assert.Equal(t, '1', ToChar(true).O())
-	// 	assert.Equal(t, '0', ToChar(false).O())
-	// 	assert.Equal(t, '0', ToChar(&test).O())
-	// 	assert.Equal(t, NewCharV(), ToChar((*bool)(nil)))
-	// }
+	// bool
+	{
+		var test bool
+		assert.Equal(t, '1', ToChar(true).O())
+		assert.Equal(t, '0', ToChar(false).O())
+		assert.Equal(t, '0', ToChar(&test).O())
+		assert.Equal(t, NewCharV(), ToChar((*bool)(nil)))
+	}
 
-	// // []byte
-	// {
-	// 	assert.Equal(t, 't', ToChar([]byte{0x74, 0x65, 0x73, 0x74}).O())
-	// 	assert.Equal(t, 'e', ToChar(&[]byte{0x65, 0x73, 0x74}).O())
-	// 	assert.Equal(t, NewCharV(), ToChar((*[]byte)(nil)))
-	// }
+	// []byte
+	{
+		assert.Equal(t, 't', ToChar([]byte{0x74, 0x65, 0x73, 0x74}).O())
+		assert.Equal(t, 'e', ToChar(&[]byte{0x65, 0x73, 0x74}).O())
+		assert.Equal(t, NewCharV(), ToChar((*[]byte)(nil)))
+	}
 
-	// // float32
-	// {
-	// 	var test float32
-	// 	assert.Equal(t, '7', ToChar(float32(7.22)).O())
-	// 	assert.Equal(t, '0', ToChar(&test).O())
-	// 	assert.Equal(t, NewCharV(), ToChar((*float32)(nil)))
-	// }
+	// float32
+	{
+		var test float32
+		assert.Equal(t, '7', ToChar(float32(7.22)).O())
+		assert.Equal(t, '0', ToChar(&test).O())
+		assert.Equal(t, NewCharV(), ToChar((*float32)(nil)))
+	}
 
-	// // float64
-	// {
-	// 	var test float64
-	// 	assert.Equal(t, '7', ToChar(float64(7.22)).O())
-	// 	assert.Equal(t, '0', ToChar(&test).O())
-	// 	assert.Equal(t, NewCharV(), ToChar((*float64)(nil)))
-	// }
+	// float64
+	{
+		var test float64
+		assert.Equal(t, '7', ToChar(float64(7.22)).O())
+		assert.Equal(t, '0', ToChar(&test).O())
+		assert.Equal(t, NewCharV(), ToChar((*float64)(nil)))
+	}
 
-	// // int
-	// {
-	// 	var test int
-	// 	assert.Equal(t, '3', ToChar(3).O())
-	// 	assert.Equal(t, '0', ToChar(&test).O())
-	// 	assert.Equal(t, NewCharV(), ToChar((*int)(nil)))
-	// }
+	// int
+	{
+		var test int
+		assert.Equal(t, '3', ToChar(3).O())
+		assert.Equal(t, '0', ToChar(&test).O())
+		assert.Equal(t, NewCharV(), ToChar((*int)(nil)))
+	}
 
-	// // int8
-	// {
-	// 	var test int8
-	// 	assert.Equal(t, '3', ToChar(int8(3)).O())
-	// 	assert.Equal(t, '0', ToChar(&test).O())
-	// 	assert.Equal(t, '0', ToChar((*int8)(nil)).O())
-	// }
+	// int8
+	{
+		var test int8
+		assert.Equal(t, '3', ToChar(int8(3)).O())
+		assert.Equal(t, '0', ToChar(&test).O())
+		assert.Equal(t, NewCharV(), ToChar((*int8)(nil)))
+	}
 
-	// // int16
-	// {
-	// 	var test int16
-	// 	assert.Equal(t, '3', ToChar(int16(3)).O())
-	// 	assert.Equal(t, '0', ToChar(&test).O())
-	// 	assert.Equal(t, '0', ToChar((*int16)(nil)).O())
-	// }
+	// int16
+	{
+		var test int16
+		assert.Equal(t, '3', ToChar(int16(3)).O())
+		assert.Equal(t, '0', ToChar(&test).O())
+		assert.Equal(t, NewCharV(), ToChar((*int16)(nil)))
+	}
 
-	// // int32
-	// {
-	// 	var test int32
-	// 	assert.Equal(t, '3', ToChar(int32(3)).O())
-	// 	assert.Equal(t, '0', ToChar(&test).O())
-	// 	assert.Equal(t, '0', ToChar((*int32)(nil)).O())
-	// }
+	// int32 a.k.a rune
+	{
+		test := '3'
+		assert.Equal(t, '3', ToChar('3').O())
+		assert.Equal(t, '3', ToChar(&test).O())
+		assert.Equal(t, NewCharV(), ToChar((*int32)(nil)))
+	}
 
-	// // int64
-	// {
-	// 	var test int64
-	// 	assert.Equal(t, '3', ToChar(int64(3)).O())
-	// 	assert.Equal(t, '0', ToChar(&test).O())
-	// 	assert.Equal(t, '0', ToChar((*int64)(nil)).O())
-	// }
+	// int64
+	{
+		var test int64
+		assert.Equal(t, '3', ToChar(int64(3)).O())
+		assert.Equal(t, '0', ToChar(&test).O())
+		assert.Equal(t, NewCharV(), ToChar((*int64)(nil)))
+	}
 
-	// // ints
-	// {
-	// 	assert.Equal(t, '7', ToChar(int(7)).O())
-	// 	assert.Equal(t, '7', ToChar(int8(7)).O())
-	// 	assert.Equal(t, '7', ToChar(int16(7)).O())
-	// 	assert.Equal(t, '7', ToChar(int32(7)).O())
-	// 	assert.Equal(t, '7', ToChar(int64(7)).O())
-	// }
+	// []rune
+	{
+		val1 := []rune{'1'}
+		assert.Equal(t, '1', ToChar(val1).O())
+		assert.Equal(t, '1', ToChar(&val1).O())
+		assert.Equal(t, NewCharV(), ToChar((*[]rune)(nil)))
+	}
 
-	// // nil
-	// {
-	// 	assert.Equal(t, "", ToString(nil))
-	// }
+	// Str
+	{
+		val1 := *NewStr("1")
+		assert.Equal(t, '1', ToChar(val1).O())
+		assert.Equal(t, '1', ToChar(&val1).O())
+		assert.Equal(t, NewCharV(), ToChar((*[]Str)(nil)))
+	}
+
+	// string
+	{
+		val1 := "1"
+		assert.Equal(t, '1', ToChar(val1).O())
+		assert.Equal(t, '1', ToChar(&val1).O())
+		assert.Equal(t, NewCharV(), ToChar(""))
+		assert.Equal(t, NewCharV(), ToChar((*[]string)(nil)))
+	}
 
 	// // template.CSS
 	// {
@@ -1398,54 +1409,45 @@ func TestToChar(t *testing.T) {
 	// 	assert.Equal(t, "", ToString((*template.URL)(nil)))
 	// }
 
-	// // uint
-	// {
-	// 	var test uint
-	// 	assert.Equal(t, "3", ToString(uint(3)))
-	// 	assert.Equal(t, "0", ToString(&test))
-	// 	assert.Equal(t, "0", ToString((*uint)(nil)))
-	// }
+	// uint
+	{
+		var test uint
+		assert.Equal(t, '3', ToChar(3).O())
+		assert.Equal(t, '0', ToChar(&test).O())
+		assert.Equal(t, NewCharV(), ToChar((*uint)(nil)))
+	}
 
-	// // uint8
-	// {
-	// 	var test uint8
-	// 	assert.Equal(t, "3", ToString(uint8(3)))
-	// 	assert.Equal(t, "0", ToString(&test))
-	// 	assert.Equal(t, "0", ToString((*uint8)(nil)))
-	// }
+	// uint8 i.e. byte handle differently
+	{
+		var test uint8
+		assert.Equal(t, 't', ToChar(uint8(0x74)).O())
+		assert.Equal(t, rune(0), ToChar(&test).O())
+		assert.Equal(t, NewCharV(), ToChar((*uint8)(nil)))
+	}
 
-	// // uint16
-	// {
-	// 	var test uint16
-	// 	assert.Equal(t, "3", ToString(uint16(3)))
-	// 	assert.Equal(t, "0", ToString(&test))
-	// 	assert.Equal(t, "0", ToString((*uint16)(nil)))
-	// }
+	// uint16
+	{
+		var test uint16
+		assert.Equal(t, '3', ToChar(uint16(3)).O())
+		assert.Equal(t, '0', ToChar(&test).O())
+		assert.Equal(t, NewCharV(), ToChar((*uint16)(nil)))
+	}
 
-	// // uint32
-	// {
-	// 	var test uint32
-	// 	assert.Equal(t, "3", ToString(uint32(3)))
-	// 	assert.Equal(t, "0", ToString(&test))
-	// 	assert.Equal(t, "0", ToString((*uint32)(nil)))
-	// }
+	// uint32
+	{
+		var test uint32
+		assert.Equal(t, '3', ToChar(uint32(3)).O())
+		assert.Equal(t, '0', ToChar(&test).O())
+		assert.Equal(t, NewCharV(), ToChar((*uint32)(nil)))
+	}
 
-	// // uint64
-	// {
-	// 	var test uint64
-	// 	assert.Equal(t, "3", ToString(uint64(3)))
-	// 	assert.Equal(t, "0", ToString(&test))
-	// 	assert.Equal(t, "0", ToString((*uint64)(nil)))
-	// }
-
-	// // uints
-	// {
-	// 	assert.Equal(t, "7", ToString(uint(7)))
-	// 	assert.Equal(t, "7", ToString(uint8(7)))
-	// 	assert.Equal(t, "7", ToString(uint16(7)))
-	// 	assert.Equal(t, "7", ToString(uint32(7)))
-	// 	assert.Equal(t, "7", ToString(uint64(7)))
-	// }
+	// uint64
+	{
+		var test uint64
+		assert.Equal(t, '3', ToChar(uint64(3)).O())
+		assert.Equal(t, '0', ToChar(&test).O())
+		assert.Equal(t, NewCharV(), ToChar((*uint64)(nil)))
+	}
 }
 
 // ToInt

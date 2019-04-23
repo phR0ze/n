@@ -13,28 +13,7 @@ type Char rune
 // NewChar creates a new chart from the given obj. Will always be non nil.
 // Supports: string, *string, rune, *rune, byte, *byte
 func NewChar(obj interface{}) *Char {
-	str := ""
-	new := Char(0)
-	o := DeReference(obj)
-	switch x := o.(type) {
-	case nil:
-	case Str:
-		str = string(x)
-	case string:
-		str = x
-	case byte:
-		str = string(x)
-	case []byte:
-		str = string(x)
-	case rune:
-		str = string(x)
-	default:
-		str = ToString(o)
-	}
-	if len(str) > 0 {
-		new = Char(str[0])
-	}
-	return &new
+	return ToChar(obj)
 }
 
 // NewCharV creates a new chart from the given obj. Will always be non nil.

@@ -646,7 +646,8 @@ func DeReference(obj interface{}) interface{} {
 	}
 }
 
-// Reference converts the interface to a pointer type i.e. no default values
+// Reference converts the interface to a pointer type. Unlike DeReference nil may be returned as
+// all pointers are simply passed through. This allows for custom default handling for callers.
 func Reference(obj interface{}) interface{} {
 	switch x := obj.(type) {
 	case nil:
@@ -1090,6 +1091,171 @@ func ToBoolE(obj interface{}) (val bool, err error) {
 	return
 }
 
+// ToChar convert an interface to a Char type.
+func ToChar(obj interface{}) *Char {
+	val := Char(0)
+	o := Reference(obj)
+
+	// Optimized types
+	switch x := o.(type) {
+	case nil:
+
+	// bool
+	//----------------------------------------------------------------------------------------------
+	case *bool:
+		if x != nil {
+			v := 0
+			if *x {
+				v = 1
+			}
+			val = Char(([]rune(strconv.FormatInt(int64(v), 10)))[0])
+		}
+
+	// byte
+	//----------------------------------------------------------------------------------------------
+	case *[]byte:
+		if x != nil {
+			if len(*x) != 0 {
+				v, _ := utf8.DecodeRune(*x)
+				val = Char(v)
+			}
+		}
+
+	// Char
+	//----------------------------------------------------------------------------------------------
+	case *Char:
+		if x != nil {
+			return x
+		}
+
+	// float32
+	//----------------------------------------------------------------------------------------------
+	case *float32:
+		if x != nil {
+			val = Char(([]rune(strconv.FormatInt(int64(*x), 10)))[0])
+		}
+
+	// float64
+	//----------------------------------------------------------------------------------------------
+	case *float64:
+		if x != nil {
+			val = Char(([]rune(strconv.FormatInt(int64(*x), 10)))[0])
+		}
+
+	// int
+	//----------------------------------------------------------------------------------------------
+	case *int:
+		if x != nil {
+			val = Char(([]rune(strconv.FormatInt(int64(*x), 10)))[0])
+		}
+
+	// int8
+	//----------------------------------------------------------------------------------------------
+	case *int8:
+		if x != nil {
+			val = Char(([]rune(strconv.FormatInt(int64(*x), 10)))[0])
+		}
+
+	// int16
+	//----------------------------------------------------------------------------------------------
+	case *int16:
+		if x != nil {
+			val = Char(([]rune(strconv.FormatInt(int64(*x), 10)))[0])
+		}
+
+	// int32 i.e. rune
+	//----------------------------------------------------------------------------------------------
+	case *int32:
+		if x != nil {
+			val = Char(*x)
+		}
+
+	// int64
+	//----------------------------------------------------------------------------------------------
+	case *int64:
+		if x != nil {
+			val = Char(([]rune(strconv.FormatInt(*x, 10)))[0])
+		}
+
+	// *[]rune
+	//----------------------------------------------------------------------------------------------
+	case *[]rune:
+		if x != nil && len(*x) != 0 {
+			val = Char((*x)[0])
+		}
+
+	// Str
+	//----------------------------------------------------------------------------------------------
+	case *Str:
+		if x != nil && len(*x) != 0 {
+			val = Char((*x)[0])
+		}
+
+	// string
+	//----------------------------------------------------------------------------------------------
+	case *string:
+		if x != nil && len(*x) != 0 {
+			v, _ := utf8.DecodeRuneInString(*x)
+			val = Char(v)
+		}
+
+	// case template.CSS:
+	// case template.HTML:
+	// case template.HTMLAttr:
+	// case template.JS:
+	// case template.URL:
+
+	// uint
+	//----------------------------------------------------------------------------------------------
+	case *uint:
+		if x != nil {
+			val = Char(([]rune(strconv.FormatInt(int64(*x), 10)))[0])
+		}
+
+	// uint8 i.e. byte handle differently
+	//----------------------------------------------------------------------------------------------
+	case *uint8:
+		if x != nil && len(string(*x)) != 0 {
+			val = Char(string(*x)[0])
+		}
+
+	// uint16
+	//----------------------------------------------------------------------------------------------
+	case *uint16:
+		if x != nil {
+			val = Char(([]rune(strconv.FormatInt(int64(*x), 10)))[0])
+		}
+
+	// uint32
+	//----------------------------------------------------------------------------------------------
+	case *uint32:
+		if x != nil {
+			val = Char(([]rune(strconv.FormatInt(int64(*x), 10)))[0])
+		}
+
+	// uint64
+	//----------------------------------------------------------------------------------------------
+	case *uint64:
+		if x != nil {
+			val = Char(([]rune(strconv.FormatInt(int64(*x), 10)))[0])
+		}
+
+		// fmt.Stringer
+		//----------------------------------------------------------------------------------------------
+		// case fmt.Stringer:
+		// 	if x != nil && len(x.String()) != 0 {
+		// 		val = Char(x.String()[0])
+		// 	}
+
+		// default:
+		// 	v := fmt.Sprintf("%v", obj)
+		// 	if len(v) != 0 {
+		// 		val = Char(v[0])
+		// 	}
+	}
+	return &val
+}
+
 // ToInt convert an interface to an int type.
 func ToInt(obj interface{}) int {
 	x, _ := ToIntE(obj)
@@ -1490,92 +1656,6 @@ func ToIntSliceE(obj interface{}) (val *IntSlice, err error) {
 		}
 	}
 	return
-}
-
-// ToChar convert an interface to a Char type.
-func ToChar(obj interface{}) *Char {
-	val := Char(0)
-	o := DeReference(obj)
-
-	// Optimized types
-	switch x := o.(type) {
-	case nil:
-	case bool:
-		v := 0
-		if x {
-			v = 1
-		}
-		val = Char(([]rune(strconv.FormatInt(int64(v), 10)))[0])
-	case []byte:
-		if len(x) != 0 {
-			v, _ := utf8.DecodeRune(x)
-			val = Char(v)
-		}
-	case Char:
-		val = x
-	case float32:
-		val = Char(([]rune(strconv.FormatInt(int64(x), 10)))[0])
-	case float64:
-		val = Char(([]rune(strconv.FormatInt(int64(x), 10)))[0])
-	case int:
-		val = Char(([]rune(strconv.FormatInt(int64(x), 10)))[0])
-	case int8:
-		val = Char(([]rune(strconv.FormatInt(int64(x), 10)))[0])
-	case int16:
-		val = Char(([]rune(strconv.FormatInt(int64(x), 10)))[0])
-	case int32:
-		val = Char(([]rune(strconv.FormatInt(int64(x), 10)))[0])
-	case int64:
-		val = Char(([]rune(strconv.FormatInt(x, 10)))[0])
-	case Object:
-		if v, e := x.ToIntE(); e == nil {
-			val = Char(([]rune(strconv.FormatInt(int64(v), 10)))[0])
-		}
-	case []rune:
-		if len(x) != 0 {
-			val = Char(x[0])
-		}
-	case Str:
-		if len(x) != 0 {
-			val = Char(x[0])
-		}
-	case string:
-		if len(x) != 0 {
-			v, _ := utf8.DecodeRuneInString(x)
-			val = Char(v)
-		}
-		// case template.CSS:
-		// 	return string(x)
-		// case template.HTML:
-		// 	return string(x)
-		// case template.HTMLAttr:
-		// 	return string(x)
-		// case template.JS:
-		// 	return string(x)
-		// case template.URL:
-		// 	return string(x)
-		// case uint:
-		// 	return strconv.FormatInt(int64(x), 10)
-		// case uint8:
-		// 	return strconv.FormatInt(int64(x), 10)
-		// case uint16:
-		// 	return strconv.FormatInt(int64(x), 10)
-		// case uint32:
-		// 	return strconv.FormatInt(int64(x), 10)
-		// case uint64:
-		// 	return strconv.FormatInt(int64(x), 10)
-		// case fmt.Stringer, *fmt.Stringer:
-		// 	if x, ok := x.(*fmt.Stringer); ok {
-		// 		if x == nil {
-		// 			return ""
-		// 		}
-		// 		return (*x).String()
-		// 	}
-		// 	return x.(fmt.Stringer).String()
-		// default:
-		// 	return fmt.Sprintf("%v", obj)
-	}
-	return &val
 }
 
 // // ToRuneSlice convert an interface to a []rune type.

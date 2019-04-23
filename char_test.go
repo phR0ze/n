@@ -28,7 +28,7 @@ func TestChar_String(t *testing.T) {
 	{
 		assert.Equal(t, "2", NewChar(2).String())
 		assert.Equal(t, "4", NewChar(int64(4)).String())
-		assert.Equal(t, "t", NewChar(uint8(0x74)).String())
+		assert.Equal(t, 't', NewChar(uint8(0x74)).O())
 	}
 
 	// rune
