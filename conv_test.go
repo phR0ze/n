@@ -2195,6 +2195,202 @@ func TestToIntSliceE(t *testing.T) {
 	}
 }
 
+// ToStr
+//--------------------------------------------------------------------------------------------------
+func ExampleToStr() {
+	val := ToStr(true)
+	fmt.Println(val)
+	// Output: true
+}
+
+func TestToStr(t *testing.T) {
+
+	// bool
+	{
+		assert.Equal(t, "", ToStr(nil).G())
+	}
+
+	// bool
+	{
+		var test bool
+		assert.Equal(t, "true", ToStr(true).G())
+		assert.Equal(t, "false", ToStr(false).G())
+		assert.Equal(t, "false", ToStr(&test).G())
+		assert.Equal(t, "", ToStr((*bool)(nil)).G())
+	}
+
+	// []byte
+	{
+		assert.Equal(t, "test", ToStr([]byte{0x74, 0x65, 0x73, 0x74}).G())
+		assert.Equal(t, "test", ToStr(&[]byte{0x74, 0x65, 0x73, 0x74}).G())
+		assert.Equal(t, "", ToStr((*[]byte)(nil)).G())
+	}
+
+	// error
+	{
+		assert.Equal(t, "test", ToStr(errors.New("test")).G())
+	}
+
+	// float32
+	{
+		var test float32
+		assert.Equal(t, "7.22", ToStr(float32(7.22)).G())
+		assert.Equal(t, "0", ToStr(&test).G())
+		assert.Equal(t, "", ToStr((*float32)(nil)).G())
+	}
+
+	// float64
+	{
+		var test float64
+		assert.Equal(t, "7.22", ToStr(float64(7.22)).G())
+		assert.Equal(t, "0", ToStr(&test).G())
+		assert.Equal(t, "", ToStr((*float64)(nil)).G())
+	}
+
+	// int
+	{
+		var test int
+		assert.Equal(t, "3", ToStr(3).G())
+		assert.Equal(t, "0", ToStr(&test).G())
+		assert.Equal(t, "", ToStr((*int)(nil)).G())
+	}
+
+	// int8
+	{
+		var test int8
+		assert.Equal(t, "3", ToStr(int8(3)).G())
+		assert.Equal(t, "0", ToStr(&test).G())
+		assert.Equal(t, "", ToStr((*int8)(nil)).G())
+	}
+
+	// int16
+	{
+		var test int16
+		assert.Equal(t, "3", ToStr(int16(3)).G())
+		assert.Equal(t, "0", ToStr(&test).G())
+		assert.Equal(t, "", ToStr((*int16)(nil)).G())
+	}
+
+	// int32
+	{
+		var test int32
+		assert.Equal(t, "3", ToStr(int32(3)).G())
+		assert.Equal(t, "0", ToStr(&test).G())
+		assert.Equal(t, "", ToStr((*int32)(nil)).G())
+	}
+
+	// int64
+	{
+		var test int64
+		assert.Equal(t, "3", ToStr(int64(3)).G())
+		assert.Equal(t, "0", ToStr(&test).G())
+		assert.Equal(t, "", ToStr((*int64)(nil)).G())
+	}
+
+	// ints
+	{
+		assert.Equal(t, "7", ToStr(int(7)).G())
+		assert.Equal(t, "7", ToStr(int8(7)).G())
+		assert.Equal(t, "7", ToStr(int16(7)).G())
+		assert.Equal(t, "7", ToStr(int32(7)).G())
+		assert.Equal(t, "7", ToStr(int64(7)).G())
+	}
+
+	// nil
+	{
+		assert.Equal(t, "", ToStr(nil).G())
+	}
+
+	// template.CSS
+	{
+		var test template.CSS
+		assert.Equal(t, "test", ToStr(template.CSS("test")).G())
+		assert.Equal(t, "", ToStr(&test).G())
+		assert.Equal(t, "", ToStr((*template.CSS)(nil)).G())
+	}
+
+	// template.HTML
+	{
+		var test template.HTML
+		assert.Equal(t, "test", ToStr(template.HTML("test")).G())
+		assert.Equal(t, "", ToStr(&test).G())
+		assert.Equal(t, "", ToStr((*template.HTML)(nil)).G())
+	}
+
+	// template.HTMLAttr
+	{
+		var test template.HTMLAttr
+		assert.Equal(t, "test", ToStr(template.HTMLAttr("test")).G())
+		assert.Equal(t, "", ToStr(&test).G())
+		assert.Equal(t, "", ToStr((*template.HTMLAttr)(nil)).G())
+	}
+
+	// template.JS
+	{
+		var test template.JS
+		assert.Equal(t, "test", ToStr(template.JS("test")).G())
+		assert.Equal(t, "", ToStr(&test).G())
+		assert.Equal(t, "", ToStr((*template.JS)(nil)).G())
+	}
+
+	// template.URL
+	{
+		var test template.URL
+		assert.Equal(t, "test", ToStr(template.URL("test")).G())
+		assert.Equal(t, "", ToStr(&test).G())
+		assert.Equal(t, "", ToStr((*template.URL)(nil)).G())
+	}
+
+	// uint
+	{
+		var test uint
+		assert.Equal(t, "3", ToStr(uint(3)).G())
+		assert.Equal(t, "0", ToStr(&test).G())
+		assert.Equal(t, "", ToStr((*uint)(nil)).G())
+	}
+
+	// uint8
+	{
+		var test uint8
+		assert.Equal(t, "3", ToStr(uint8(3)).G())
+		assert.Equal(t, "0", ToStr(&test).G())
+		assert.Equal(t, "", ToStr((*uint8)(nil)).G())
+	}
+
+	// uint16
+	{
+		var test uint16
+		assert.Equal(t, "3", ToStr(uint16(3)).G())
+		assert.Equal(t, "0", ToStr(&test).G())
+		assert.Equal(t, "", ToStr((*uint16)(nil)).G())
+	}
+
+	// uint32
+	{
+		var test uint32
+		assert.Equal(t, "3", ToStr(uint32(3)).G())
+		assert.Equal(t, "0", ToStr(&test).G())
+		assert.Equal(t, "", ToStr((*uint32)(nil)).G())
+	}
+
+	// uint64
+	{
+		var test uint64
+		assert.Equal(t, "3", ToStr(uint64(3)).G())
+		assert.Equal(t, "0", ToStr(&test).G())
+		assert.Equal(t, "", ToStr((*uint64)(nil)).G())
+	}
+
+	// uints
+	{
+		assert.Equal(t, "7", ToStr(uint(7)).G())
+		assert.Equal(t, "7", ToStr(uint8(7)).G())
+		assert.Equal(t, "7", ToStr(uint16(7)).G())
+		assert.Equal(t, "7", ToStr(uint32(7)).G())
+		assert.Equal(t, "7", ToStr(uint64(7)).G())
+	}
+}
+
 // ToString
 //--------------------------------------------------------------------------------------------------
 func ExampleToString() {

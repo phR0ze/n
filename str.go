@@ -754,6 +754,9 @@ func (p *Str) Nil() bool {
 
 // O returns the underlying data structure as is
 func (p *Str) O() interface{} {
+	if p == nil {
+		return ""
+	}
 	return string(*p)
 }
 
