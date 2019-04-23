@@ -687,7 +687,7 @@ func TestStr_B(t *testing.T) {
 
 	// runes
 	{
-		assert.Equal(t, []byte{0x74}, A('t').B())
+		assert.Equal(t, "t", string(A('t').B()))
 		assert.Equal(t, []byte{0x74, 0x65, 0x73, 0x74}, A([]rune("test")).B())
 	}
 

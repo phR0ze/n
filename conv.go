@@ -1659,30 +1659,397 @@ func ToIntSliceE(obj interface{}) (val *IntSlice, err error) {
 // ToStr convert an interface to a *Str type.
 func ToStr(obj interface{}) *Str {
 	val := Str{}
+	o := Reference(obj)
 
 	// Optimized types
-	switch x := obj.(type) {
+	switch x := o.(type) {
+	case nil:
 
-	// []rune
+	// bool
 	//----------------------------------------------------------------------------------------------
-	case []rune:
-		val = Str(x)
-	case *[]rune:
-		if x != nil && len(*x) != 0 {
-			val = Str(*x)
+	case *bool:
+		if x != nil {
+			val = Str(ToString(x))
+		}
+	case *[]bool:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+	case *[]*bool:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+
+	// Char
+	//----------------------------------------------------------------------------------------------
+	case *Char:
+		if x != nil {
+			val = Str(x.String())
+		}
+	case *[]Char:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str((*x)[i].String())...)
+			}
+		}
+	case *[]*Char:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str((*x)[i].String())...)
+			}
+		}
+
+	// float32
+	//----------------------------------------------------------------------------------------------
+	case *float32:
+		if x != nil {
+			val = Str(ToString(*x))
+		}
+	case *[]float32:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+	case *[]*float32:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+
+	// float64
+	//----------------------------------------------------------------------------------------------
+	case *float64:
+		if x != nil {
+			val = Str(ToString(*x))
+		}
+	case *[]float64:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+	case *[]*float64:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+
+	// interface
+	//----------------------------------------------------------------------------------------------
+	case *[]interface{}:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+
+	// int
+	//----------------------------------------------------------------------------------------------
+	case *int:
+		if x != nil {
+			val = Str(ToString(*x))
+		}
+	case *[]int:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+	case *[]*int:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+
+	// int8
+	//----------------------------------------------------------------------------------------------
+	case *int8:
+		if x != nil {
+			val = Str(ToString(*x))
+		}
+	case *[]int8:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+	case *[]*int8:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+
+	// int16
+	//----------------------------------------------------------------------------------------------
+	case *int16:
+		if x != nil {
+			val = Str(ToString(*x))
+		}
+	case *[]int16:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+	case *[]*int16:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+
+	// int32
+	//----------------------------------------------------------------------------------------------
+	case *int32:
+		if x != nil && *x != rune(0) {
+			val = append(val, *x)
+		}
+	case *[]int32:
+		if x != nil {
+			val = append(val, *x...)
+		}
+	case *[]*int32:
+		if x != nil {
+			for i := range *x {
+				y := (*x)[i]
+				if y != nil {
+					val = append(val, *y)
+				}
+			}
+		}
+
+	// int64
+	//----------------------------------------------------------------------------------------------
+	case *int64:
+		if x != nil {
+			val = Str(ToString(*x))
+		}
+	case *[]int64:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+	case *[]*int64:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+
+	// IntSlice
+	//----------------------------------------------------------------------------------------------
+	case *IntSlice:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+	case *[]IntSlice:
+		if x != nil {
+			for i := range *x {
+				for j := range (*x)[i] {
+					val = append(val, Str(ToString((*x)[i][j]))...)
+				}
+			}
+		}
+	case *[]*IntSlice:
+		if x != nil {
+			for i := range *x {
+				y := (*x)[i]
+				if y != nil {
+					for j := range *y {
+						val = append(val, Str(ToString((*y)[j]))...)
+					}
+				}
+			}
+		}
+
+	// Object
+	//----------------------------------------------------------------------------------------------
+	case *Object:
+		val = Str(x.String())
+	case *[]Object:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str((*x)[i].String())...)
+			}
+		}
+	case *[]*Object:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str((*x)[i].String())...)
+			}
 		}
 
 	// Str
 	//----------------------------------------------------------------------------------------------
-	case Str:
-		val = x
 	case *Str:
-		val = *x
+		if x != nil {
+			val = *x
+		}
+	case *[]Str:
+		if x != nil {
+			for i := range *x {
+				val = append(val, (*x)[i]...)
+			}
+		}
+	case *[]*Str:
+		if x != nil {
+			for i := range *x {
+				y := (*x)[i]
+				if y != nil {
+					val = append(val, *y...)
+				}
+			}
+		}
 
-	// fall back on casting ToString
+	// string
+	//----------------------------------------------------------------------------------------------
+	case *string:
+		if x != nil {
+			val = Str(*x)
+		}
+	case *[]string:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str((*x)[i])...)
+			}
+		}
+	case *[]*string:
+		if x != nil {
+			for i := range *x {
+				y := (*x)[i]
+				if y != nil {
+					val = append(val, Str(*y)...)
+				}
+			}
+		}
+
+	// uint
+	//----------------------------------------------------------------------------------------------
+	case *uint:
+		if x != nil {
+			val = Str(ToString(*x))
+		}
+	case *[]uint:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+	case *[]*uint:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+
+	// uint8 i.e. byte handle differently
+	//----------------------------------------------------------------------------------------------
+	case *uint8:
+		if x != nil {
+			val = Str(ToString(*x))
+		}
+	case *[]uint8:
+		if x != nil && len(*x) != 0 {
+			val = Str(string(*x))
+		}
+	case *[]*uint8:
+		if x != nil {
+			bytes := []byte{}
+			for i := range *x {
+				y := (*x)[i]
+				if y != nil {
+					bytes = append(bytes, *y)
+				}
+			}
+			val = Str(string(bytes))
+		}
+
+	// uint16
+	//----------------------------------------------------------------------------------------------
+	case *uint16:
+		if x != nil {
+			val = Str(ToString(*x))
+		}
+	case *[]uint16:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+	case *[]*uint16:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+
+	// uint32
+	//----------------------------------------------------------------------------------------------
+	case *uint32:
+		if x != nil {
+			val = Str(ToString(*x))
+		}
+	case *[]uint32:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+	case *[]*uint32:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+
+	// uint64
+	//----------------------------------------------------------------------------------------------
+	case *uint64:
+		if x != nil {
+			val = Str(ToString(*x))
+		}
+	case *[]uint64:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+	case *[]*uint64:
+		if x != nil {
+			for i := range *x {
+				val = append(val, Str(ToString((*x)[i]))...)
+			}
+		}
+
+	// fall back on reflection
 	//----------------------------------------------------------------------------------------------
 	default:
-		val = Str(ToString(obj))
+		v := reflect.ValueOf(x)
+		k := v.Kind()
+
+		switch {
+
+		// generically convert array and slice types
+		case k == reflect.Array || k == reflect.Slice:
+			for i := 0; i < v.Len(); i++ {
+				val = append(val, *ToStr(v.Index(i).Interface())...)
+			}
+
+		default:
+			val = Str(ToString(x))
+		}
 	}
 	return &val
 }

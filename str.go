@@ -25,41 +25,14 @@ func A(obj interface{}) *Str {
 // NewStr creates a new *Str which will never be nil
 // Supports: Str *Str, string *string, []byte *[]byte, rune *rune, []rune *[]rune, []string *[]string ...
 func NewStr(obj interface{}) *Str {
-	new := Str{}
-	o := DeReference(obj)
-	switch x := o.(type) {
-	case nil:
-	case Str:
-		new = x
-	case string:
-		new = Str(x)
-	case byte:
-		new = Str(string(x))
-	case []byte:
-		new = Str(string(x))
-	case rune:
-		new = append(new, x)
-	case []rune:
-		new = Str(x)
-	case []string:
-		for i := range x {
-			new = append(new, []rune(x[i])...)
-		}
-	default:
-		new = Str(ToString(o))
-	}
-	return &new
+	return ToStr(obj)
 }
 
 // NewStrV creates a new *Str from the given variadic elements. Returned *Str
 // will never be nil.
 // Supports: Str *Str, string *string, []byte *[]byte, rune *rune, []rune *[]rune, []string *[]string ...
 func NewStrV(elems ...interface{}) *Str {
-	new := Str{}
-	for i := range elems {
-		new.Append(elems[i])
-	}
-	return &new
+	return ToStr(elems)
 }
 
 // A exports the Str as a Go string

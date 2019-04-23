@@ -2271,11 +2271,11 @@ func TestToStr(t *testing.T) {
 		assert.Equal(t, "", ToStr((*int16)(nil)).G())
 	}
 
-	// int32
+	// int32 i.e. rune
 	{
 		var test int32
-		assert.Equal(t, "3", ToStr(int32(3)).G())
-		assert.Equal(t, "0", ToStr(&test).G())
+		assert.Equal(t, "t", ToStr(int32(0x74)).G())
+		assert.Equal(t, "", ToStr(&test).G())
 		assert.Equal(t, "", ToStr((*int32)(nil)).G())
 	}
 
@@ -2292,7 +2292,7 @@ func TestToStr(t *testing.T) {
 		assert.Equal(t, "7", ToStr(int(7)).G())
 		assert.Equal(t, "7", ToStr(int8(7)).G())
 		assert.Equal(t, "7", ToStr(int16(7)).G())
-		assert.Equal(t, "7", ToStr(int32(7)).G())
+		assert.Equal(t, "7", ToStr(uint32(7)).G())
 		assert.Equal(t, "7", ToStr(int64(7)).G())
 	}
 
