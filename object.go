@@ -320,7 +320,7 @@ func (p *Object) ToStringE() (string, error) {
 	if p == nil {
 		return "", nil
 	}
-	return cast.ToStringE(p.o)
+	return p.ToString(), nil
 }
 
 // Map related

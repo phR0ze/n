@@ -107,12 +107,15 @@ func TestStr_All(t *testing.T) {
 	assert.True(t, NewStrV("2").All("2"))
 
 	// invalid
-	assert.False(t, NewStrV("12").All(Object{"2"}))
+	assert.False(t, NewStrV("12").Any(TestObj{"2"}))
 
 	assert.True(t, NewStrV("123").All("2"))
 	assert.False(t, NewStrV("123").All(4))
 	assert.True(t, NewStrV("123").All("2", "3"))
 	assert.False(t, NewStrV("123").All(4, 5))
+
+	// Conversion
+	assert.True(t, NewStrV("12").All(Object{"2"}))
 }
 
 // AllS
@@ -285,12 +288,15 @@ func TestStr_Any(t *testing.T) {
 	assert.True(t, NewStrV("2").Any())
 
 	// invalid
-	assert.False(t, NewStrV("12").Any(Object{"2"}))
+	assert.False(t, NewStrV("12").Any(TestObj{"2"}))
 
 	assert.True(t, NewStrV("123").Any("2"))
 	assert.False(t, NewStrV("123").Any(4))
 	assert.True(t, NewStrV("123").Any(4, "3"))
 	assert.False(t, NewStrV("123").Any(4, 5))
+
+	// Conversion
+	assert.True(t, NewStrV("12").Any(Object{"2"}))
 }
 
 // AnyS

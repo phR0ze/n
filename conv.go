@@ -674,6 +674,8 @@ func ToBoolE(obj interface{}) (val bool, err error) {
 		val = x != 0
 	case Object:
 		val, err = x.ToBoolE()
+	case Str:
+		return ToBoolE(string(x))
 	case string:
 		if val, err = strconv.ParseBool(x); err != nil {
 			err = errors.Wrapf(err, "failed to convert string to bool")
@@ -738,6 +740,8 @@ func ToIntE(obj interface{}) (val int, err error) {
 		val = int(x)
 	case uint64:
 		val = int(x)
+	case Str:
+		return ToIntE(string(x))
 	case string:
 		var v int64
 		if v, err = strconv.ParseInt(x, 0, 0); err != nil {
@@ -946,6 +950,33 @@ func ToIntSliceE(obj interface{}) (val *IntSlice, err error) {
 			}
 		}
 
+	// Str
+	//----------------------------------------------------------------------------------------------
+	case Str:
+		if v, e := ToIntE(x); e != nil {
+			err = fmt.Errorf("unable to convert type Str to []int")
+		} else {
+			*val = append(*val, v)
+		}
+	case []Str:
+		for i := range x {
+			if v, e := ToIntE(x[i]); e == nil {
+				*val = append(*val, v)
+			} else {
+				err = fmt.Errorf("unable to convert type Str to []int")
+				return
+			}
+		}
+	case []*Str:
+		for i := range x {
+			if v, e := ToIntE(x[i]); e == nil {
+				*val = append(*val, v)
+			} else {
+				err = fmt.Errorf("unable to convert type *Str to []int")
+				return
+			}
+		}
+
 	// string
 	//----------------------------------------------------------------------------------------------
 	case string:
@@ -1067,15 +1098,19 @@ func ToIntSliceE(obj interface{}) (val *IntSlice, err error) {
 	return
 }
 
+// ToRuneSlice convert an interface to a []rune type.
+func ToRuneSlice(obj interface{}) []rune {
+	return []rune(ToString(obj))
+}
+
 // ToString convert an interface to a string type.
 func ToString(obj interface{}) string {
 	o := Indirect(obj)
 
+	// Optimized types
 	switch x := o.(type) {
 	case nil:
 		return ""
-	case string:
-		return x
 	case bool:
 		return strconv.FormatBool(x)
 	case []byte:
@@ -1098,6 +1133,14 @@ func ToString(obj interface{}) string {
 		return strconv.FormatInt(int64(x), 10)
 	case int64:
 		return strconv.FormatInt(x, 10)
+	case Object:
+		return x.ToString()
+	case []rune:
+		return string(x)
+	case Str:
+		return string(x)
+	case string:
+		return x
 	case template.CSS:
 		return string(x)
 	case template.HTML:
@@ -1107,8 +1150,6 @@ func ToString(obj interface{}) string {
 	case template.JS:
 		return string(x)
 	case template.URL:
-		return string(x)
-	case []rune:
 		return string(x)
 	case uint:
 		return strconv.FormatInt(int64(x), 10)
@@ -1134,16 +1175,293 @@ func ToString(obj interface{}) string {
 }
 
 // ToStringSlice convert an interface to a []int type.
-func ToStringSlice(obj interface{}) []string {
+func ToStringSlice(obj interface{}) *StringSlice {
 	x, _ := ToStringSliceE(obj)
 	if x == nil {
-		return []string{}
+		return &StringSlice{}
 	}
 	return x
 }
 
 // ToStringSliceE convert an interface to a []string type.
-func ToStringSliceE(obj interface{}) (val []string, err error) {
+func ToStringSliceE(obj interface{}) (val *StringSlice, err error) {
+	val = &StringSlice{}
+	o := Indirect(obj)
+
+	// Optimized types
+	switch x := o.(type) {
+	case nil:
+
+	// bool
+	//----------------------------------------------------------------------------------------------
+	case bool:
+		*val = append(*val, ToString(x))
+	case []bool:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+	case []*bool:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+
+	// Char
+	//----------------------------------------------------------------------------------------------
+	case Char:
+		*val = append(*val, ToString(x))
+	case []Char:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+	case []*Char:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+
+	// float32
+	//----------------------------------------------------------------------------------------------
+	case float32:
+		*val = append(*val, ToString(x))
+	case []float32:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+	case []*float32:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+
+	// float64
+	//----------------------------------------------------------------------------------------------
+	case float64:
+		*val = append(*val, ToString(x))
+	case []float64:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+	case []*float64:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+
+	// interface
+	//----------------------------------------------------------------------------------------------
+	case []interface{}:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+
+	// int
+	//----------------------------------------------------------------------------------------------
+	case int:
+		*val = append(*val, ToString(x))
+	case []int:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+	case []*int:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+
+	// int8
+	//----------------------------------------------------------------------------------------------
+	case int8:
+		*val = append(*val, ToString(x))
+	case []int8:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+	case []*int8:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+
+	// int16
+	//----------------------------------------------------------------------------------------------
+	case int16:
+		*val = append(*val, ToString(x))
+	case []int16:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+	case []*int16:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+
+	// int32
+	//----------------------------------------------------------------------------------------------
+	case int32:
+		*val = append(*val, ToString(x))
+	case []int32:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+	case []*int32:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+
+	// int64
+	//----------------------------------------------------------------------------------------------
+	case int64:
+		*val = append(*val, ToString(x))
+	case []int64:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+	case []*int64:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+
+	// IntSlice
+	//----------------------------------------------------------------------------------------------
+	case IntSlice:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+	case []IntSlice:
+		for i := range x {
+			for j := range x[i] {
+				*val = append(*val, ToString(x[i][j]))
+			}
+		}
+	case []*IntSlice:
+		for i := range x {
+			for j := range *x[i] {
+				*val = append(*val, ToString((*x[i])[j]))
+			}
+		}
+
+	// Object
+	//----------------------------------------------------------------------------------------------
+	case Object:
+		val, err = ToStringSliceE(ToString(x))
+	case []Object:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+	case []*Object:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+
+	// Str
+	//----------------------------------------------------------------------------------------------
+	case Str:
+		val, err = ToStringSliceE(ToString(x))
+	case []Str:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+	case []*Str:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+
+	// string
+	//----------------------------------------------------------------------------------------------
+	case string:
+		*val = strings.Fields(x)
+	case []string:
+		*val = x
+	case []*string:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+
+	// uint
+	//----------------------------------------------------------------------------------------------
+	case uint:
+		*val = append(*val, ToString(x))
+	case []uint:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+	case []*uint:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+
+	// uint8
+	//----------------------------------------------------------------------------------------------
+	case uint8:
+		*val = append(*val, ToString(x))
+	case []uint8:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+	case []*uint8:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+
+	// uint16
+	//----------------------------------------------------------------------------------------------
+	case uint16:
+		*val = append(*val, ToString(x))
+	case []uint16:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+	case []*uint16:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+
+	// uint32
+	//----------------------------------------------------------------------------------------------
+	case uint32:
+		*val = append(*val, ToString(x))
+	case []uint32:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+	case []*uint32:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+
+	// uint64
+	//----------------------------------------------------------------------------------------------
+	case uint64:
+		*val = append(*val, ToString(x))
+
+	case []uint64:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+	case []*uint64:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+
+	// fall back on reflection
+	//----------------------------------------------------------------------------------------------
+	default:
+		v := reflect.ValueOf(x)
+		k := v.Kind()
+
+		switch {
+
+		// generically convert array and slice types
+		case k == reflect.Array || k == reflect.Slice:
+			for i := 0; i < v.Len(); i++ {
+				*val = append(*val, ToString(v.Index(i).Interface()))
+			}
+
+		default:
+			err = fmt.Errorf("unable to convert type %T to []int", x)
+			return
+		}
+	}
+	return
+}
+
+// ToStringSliceGE convert an interface to a []string type.
+func ToStringSliceGE(obj interface{}) (val []string, err error) {
 	val = []string{}
 	o := Indirect(obj)
 
@@ -1153,55 +1471,55 @@ func ToStringSliceE(obj interface{}) (val []string, err error) {
 
 	// bool
 	//----------------------------------------------------------------------------------------------
-	// case bool:
-	// 	val = []int{ToInt(x)}
-	// case []bool:
-	// 	for i := range x {
-	// 		val = append(val, ToInt(x[i]))
-	// 	}
-	// case []*bool:
-	// 	for i := range x {
-	// 		val = append(val, ToInt(x[i]))
-	// 	}
+	case bool:
+		val = append(val, ToString(x))
+	case []bool:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
+	case []*bool:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
 
-	// // Char
-	// //----------------------------------------------------------------------------------------------
-	// case Char:
-	// 	val = []int{ToInt(x)}
-	// case []Char:
-	// 	for i := range x {
-	// 		val = append(val, ToInt(x[i]))
-	// 	}
-	// case []*Char:
-	// 	for i := range x {
-	// 		val = append(val, ToInt(x[i]))
-	// 	}
+	// Char
+	//----------------------------------------------------------------------------------------------
+	case Char:
+		val = append(val, ToString(x))
+	case []Char:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
+	case []*Char:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
 
-	// // float32
-	// //----------------------------------------------------------------------------------------------
-	// case float32:
-	// 	val = []int{int(x)}
-	// case []float32:
-	// 	for i := range x {
-	// 		val = append(val, int(x[i]))
-	// 	}
-	// case []*float32:
-	// 	for i := range x {
-	// 		val = append(val, ToInt(x[i]))
-	// 	}
+	// float32
+	//----------------------------------------------------------------------------------------------
+	case float32:
+		val = append(val, ToString(x))
+	case []float32:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
+	case []*float32:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
 
-	// // float64
-	// //----------------------------------------------------------------------------------------------
-	// case float64:
-	// 	val = []int{int(x)}
-	// case []float64:
-	// 	for i := range x {
-	// 		val = append(val, int(x[i]))
-	// 	}
-	// case []*float64:
-	// 	for i := range x {
-	// 		val = append(val, ToInt(x[i]))
-	// 	}
+	// float64
+	//----------------------------------------------------------------------------------------------
+	case float64:
+		val = append(val, ToString(x))
+	case []float64:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
+	case []*float64:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
 
 	// interface
 	//----------------------------------------------------------------------------------------------
@@ -1210,110 +1528,115 @@ func ToStringSliceE(obj interface{}) (val []string, err error) {
 			val = append(val, ToString(x[i]))
 		}
 
-	// // int
-	// //----------------------------------------------------------------------------------------------
-	// case int:
-	// 	val = []int{int(x)}
-	// case []int:
-	// 	val = x
-	// case []*int:
-	// 	for i := range x {
-	// 		val = append(val, ToInt(x[i]))
-	// 	}
+	// int
+	//----------------------------------------------------------------------------------------------
+	case int:
+		val = append(val, ToString(x))
+	case []int:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
+	case []*int:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
 
-	// // int8
-	// //----------------------------------------------------------------------------------------------
-	// case int8:
-	// 	val = []int{int(x)}
-	// case []int8:
-	// 	for i := range x {
-	// 		val = append(val, int(x[i]))
-	// 	}
-	// case []*int8:
-	// 	for i := range x {
-	// 		val = append(val, ToInt(x[i]))
-	// 	}
+	// int8
+	//----------------------------------------------------------------------------------------------
+	case int8:
+		val = append(val, ToString(x))
+	case []int8:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
+	case []*int8:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
 
-	// // int16
-	// //----------------------------------------------------------------------------------------------
-	// case int16:
-	// 	val = []int{int(x)}
-	// case []int16:
-	// 	for i := range x {
-	// 		val = append(val, int(x[i]))
-	// 	}
-	// case []*int16:
-	// 	for i := range x {
-	// 		val = append(val, ToInt(x[i]))
-	// 	}
+	// int16
+	//----------------------------------------------------------------------------------------------
+	case int16:
+		val = append(val, ToString(x))
+	case []int16:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
+	case []*int16:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
 
-	// // int32
-	// //----------------------------------------------------------------------------------------------
-	// case int32:
-	// 	val = []int{int(x)}
-	// case []int32:
-	// 	for i := range x {
-	// 		val = append(val, int(x[i]))
-	// 	}
-	// case []*int32:
-	// 	for i := range x {
-	// 		val = append(val, ToInt(x[i]))
-	// 	}
+	// int32
+	//----------------------------------------------------------------------------------------------
+	case int32:
+		val = append(val, ToString(x))
+	case []int32:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
+	case []*int32:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
 
-	// // int64
-	// //----------------------------------------------------------------------------------------------
-	// case int64:
-	// 	val = []int{int(x)}
-	// case []int64:
-	// 	for i := range x {
-	// 		val = append(val, int(x[i]))
-	// 	}
-	// case []*int64:
-	// 	for i := range x {
-	// 		val = append(val, ToInt(x[i]))
-	// 	}
+	// int64
+	//----------------------------------------------------------------------------------------------
+	case int64:
+		val = append(val, ToString(x))
+	case []int64:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
+	case []*int64:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
 
-	// // IntSlice
-	// //----------------------------------------------------------------------------------------------
-	// case IntSlice:
-	// 	val = x
-	// case []IntSlice:
-	// 	for i := range x {
-	// 		val = append(val, x[i]...)
-	// 	}
-	// case []*IntSlice:
-	// 	for i := range x {
-	// 		if x[i] != nil {
-	// 			val = append(val, *x[i]...)
-	// 		}
-	// 	}
+	// IntSlice
+	//----------------------------------------------------------------------------------------------
+	case IntSlice:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
+	case []IntSlice:
+		for i := range x {
+			for j := range x[i] {
+				val = append(val, ToString(x[i][j]))
+			}
+		}
+	case []*IntSlice:
+		for i := range x {
+			for j := range *x[i] {
+				val = append(val, ToString((*x[i])[j]))
+			}
+		}
 
-	// // Object
-	// //----------------------------------------------------------------------------------------------
-	// case Object:
-	// 	if v, e := x.ToIntE(); e != nil {
-	// 		err = fmt.Errorf("unable to convert type Object to []int")
-	// 	} else {
-	// 		val = []int{v}
-	// 	}
-	// case []Object:
-	// 	for i := range x {
-	// 		if v, e := x[i].ToIntE(); e == nil {
-	// 			val = append(val, v)
-	// 		} else {
-	// 			err = fmt.Errorf("unable to convert type %T to []int", x[i].O())
-	// 			return
-	// 		}
-	// 	}
-	// case []*Object:
-	// 	for i := range x {
-	// 		if v, e := x[i].ToIntE(); e == nil {
-	// 			val = append(val, v)
-	// 		} else {
-	// 			err = fmt.Errorf("unable to convert type %T to []int", x[i].O())
-	// 			return
-	// 		}
-	// 	}
+	// Object
+	//----------------------------------------------------------------------------------------------
+	case Object:
+		val, err = ToStringSliceGE(ToString(x))
+	case []Object:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
+	case []*Object:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
+
+	// Str
+	//----------------------------------------------------------------------------------------------
+	case Str:
+		val, err = ToStringSliceGE(ToString(x))
+	case []Str:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
+	case []*Str:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
 
 	// string
 	//----------------------------------------------------------------------------------------------
@@ -1326,96 +1649,90 @@ func ToStringSliceE(obj interface{}) (val []string, err error) {
 			val = append(val, ToString(x[i]))
 		}
 
-		// // uint
-		// //----------------------------------------------------------------------------------------------
-		// case uint:
-		// 	val = []int{int(x)}
-		// case []uint:
-		// 	for i := range x {
-		// 		val = append(val, int(x[i]))
-		// 	}
-		// case []*uint:
-		// 	for i := range x {
-		// 		val = append(val, ToInt(x[i]))
-		// 	}
+	// uint
+	//----------------------------------------------------------------------------------------------
+	case uint:
+		val = append(val, ToString(x))
+	case []uint:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
+	case []*uint:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
 
-		// // uint8
-		// //----------------------------------------------------------------------------------------------
-		// case uint8:
-		// 	val = []int{int(x)}
-		// case []uint8:
-		// 	for i := range x {
-		// 		val = append(val, int(x[i]))
-		// 	}
-		// case []*uint8:
-		// 	for i := range x {
-		// 		val = append(val, ToInt(x[i]))
-		// 	}
+	// uint8
+	//----------------------------------------------------------------------------------------------
+	case uint8:
+		val = append(val, ToString(x))
+	case []uint8:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
+	case []*uint8:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
 
-		// // uint16
-		// //----------------------------------------------------------------------------------------------
-		// case uint16:
-		// 	val = []int{int(x)}
-		// case []uint16:
-		// 	for i := range x {
-		// 		val = append(val, int(x[i]))
-		// 	}
-		// case []*uint16:
-		// 	for i := range x {
-		// 		val = append(val, ToInt(x[i]))
-		// 	}
+	// uint16
+	//----------------------------------------------------------------------------------------------
+	case uint16:
+		val = append(val, ToString(x))
+	case []uint16:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
+	case []*uint16:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
 
-		// // uint32
-		// //----------------------------------------------------------------------------------------------
-		// case uint32:
-		// 	val = []int{int(x)}
-		// case []uint32:
-		// 	for i := range x {
-		// 		val = append(val, int(x[i]))
-		// 	}
-		// case []*uint32:
-		// 	for i := range x {
-		// 		val = append(val, ToInt(x[i]))
-		// 	}
+	// uint32
+	//----------------------------------------------------------------------------------------------
+	case uint32:
+		val = append(val, ToString(x))
+	case []uint32:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
+	case []*uint32:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
 
-		// // uint64
-		// //----------------------------------------------------------------------------------------------
-		// case uint64:
-		// 	val = []int{int(x)}
+	// uint64
+	//----------------------------------------------------------------------------------------------
+	case uint64:
+		val = append(val, ToString(x))
 
-		// case []uint64:
-		// 	for i := range x {
-		// 		val = append(val, int(x[i]))
-		// 	}
-		// case []*uint64:
-		// 	for i := range x {
-		// 		val = append(val, ToInt(x[i]))
-		// 	}
+	case []uint64:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
+	case []*uint64:
+		for i := range x {
+			val = append(val, ToString(x[i]))
+		}
 
-		// // fall back on reflection
-		// //----------------------------------------------------------------------------------------------
-		// default:
-		// 	v := reflect.ValueOf(x)
-		// 	k := v.Kind()
+	// fall back on reflection
+	//----------------------------------------------------------------------------------------------
+	default:
+		v := reflect.ValueOf(x)
+		k := v.Kind()
 
-		// 	switch {
+		switch {
 
-		// 	// generically convert array and slice types
-		// 	case k == reflect.Array || k == reflect.Slice:
-		// 		for i := 0; i < v.Len(); i++ {
-		// 			if v, e := ToIntE(v.Index(i).Interface()); e == nil {
-		// 				val = append(val, v)
-		// 			} else {
-		// 				err = errors.WithMessagef(e, "unable to convert %T to []int", x)
-		// 				return
-		// 			}
-		// 		}
+		// generically convert array and slice types
+		case k == reflect.Array || k == reflect.Slice:
+			for i := 0; i < v.Len(); i++ {
+				val = append(val, ToString(v.Index(i).Interface()))
+			}
 
-		// 	// not supporting this type yet
-		// 	default:
-		// 		err = fmt.Errorf("unable to convert type %T to []int", x)
-		// 		return
-		// 	}
+		default:
+			err = fmt.Errorf("unable to convert type %T to []int", x)
+			return
+		}
 	}
 	return
 }
