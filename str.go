@@ -26,7 +26,7 @@ func A(obj interface{}) *Str {
 // Supports: Str *Str, string *string, []byte *[]byte, rune *rune, []rune *[]rune, []string *[]string ...
 func NewStr(obj interface{}) *Str {
 	new := Str{}
-	o := Indirect(obj)
+	o := DeReference(obj)
 	switch x := o.(type) {
 	case nil:
 	case Str:
@@ -96,7 +96,7 @@ func (p *Str) AllS(slice interface{}) bool {
 	}
 	str := p.A()
 	result := true
-	o := Indirect(slice)
+	o := DeReference(slice)
 	switch x := o.(type) {
 	case []Str:
 		SetOnTrue(&result, false, len(x) == 0)
@@ -170,7 +170,7 @@ func (p *Str) AnyS(slice interface{}) bool {
 		return false
 	}
 	str := p.A()
-	o := Indirect(slice)
+	o := DeReference(slice)
 	switch x := o.(type) {
 	case []Str:
 		for i := range x {
@@ -703,7 +703,7 @@ func (p *Str) Join(separator ...string) (str *Object) {
 	}
 
 	var builder strings.Builder
-	for i := 0; i < len(*p); i++ {
+	for i := range *p {
 		builder.WriteString(Obj((*p)[i]).ToString())
 		if i+1 < len(*p) {
 			builder.WriteString(sep)
@@ -794,11 +794,6 @@ func (p *Str) Prepend(elem interface{}) Slice {
 	return p.Insert(0, elem)
 }
 
-// R exports the Str as a rune
-func (p *Str) R() rune {
-	return NewChar(p).R()
-}
-
 // Reverse returns a new Slice with the order of the elements reversed.
 func (p *Str) Reverse() (new Slice) {
 	if p == nil || len(*p) < 2 {
@@ -824,7 +819,7 @@ func (p *Str) Select(sel func(O) bool) (new Slice) {
 	if p == nil || len(*p) == 0 {
 		return slice
 	}
-	// for i := 0; i < len(*p); i++ {
+	// for i := range *p {
 	// 	if sel((*p)[i]) {
 	// 		*slice = append(*slice, (*p)[i])
 	// 	}

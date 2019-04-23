@@ -6,12 +6,13 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/pkg/errors"
 )
 
-// Indirect dereferences the interface if needed returning a non-pointer type
-func Indirect(obj interface{}) interface{} {
+// DeReference dereferences the interface if needed returning a non-pointer type
+func DeReference(obj interface{}) interface{} {
 	switch x := obj.(type) {
 	case nil:
 		return x
@@ -645,6 +646,399 @@ func Indirect(obj interface{}) interface{} {
 	}
 }
 
+// Reference converts the interface to a pointer type i.e. no default values
+func Reference(obj interface{}) interface{} {
+	switch x := obj.(type) {
+	case nil:
+		return x
+
+	// bool
+	//----------------------------------------------------------------------------------------------
+	case bool:
+		return &x
+	case *bool:
+		return x
+	case []bool:
+		return &x
+	case []*bool:
+		return &x
+	case *[]bool:
+		return x
+	case *[]*bool:
+		return x
+
+	// byte
+	//----------------------------------------------------------------------------------------------
+	// byte is just a uint8
+	// []byte is just a uint8[] which is defined later
+
+	// Char
+	//----------------------------------------------------------------------------------------------
+	case Char:
+		return &x
+	case *Char:
+		return x
+	case []Char:
+		return &x
+	case []*Char:
+		return &x
+	case *[]Char:
+		return x
+	case *[]*Char:
+		return x
+
+	// float32
+	//----------------------------------------------------------------------------------------------
+	case float32:
+		return &x
+	case *float32:
+		return x
+	case []float32:
+		return &x
+	case []*float32:
+		return &x
+	case *[]float32:
+		return x
+	case *[]*float32:
+		return x
+
+	// float64
+	//----------------------------------------------------------------------------------------------
+	case float64:
+		return &x
+	case *float64:
+		return x
+	case []float64:
+		return &x
+	case []*float64:
+		return &x
+	case *[]float64:
+		return x
+	case *[]*float64:
+		return x
+
+	// interface
+	//----------------------------------------------------------------------------------------------
+	case []interface{}:
+		return &x
+	case []*interface{}:
+		return &x
+	case *[]interface{}:
+		return x
+	case *[]*interface{}:
+		return x
+
+	// int
+	//----------------------------------------------------------------------------------------------
+	case int:
+		return &x
+	case *int:
+		return x
+	case []int:
+		return &x
+	case []*int:
+		return &x
+	case *[]int:
+		return x
+	case *[]*int:
+		return x
+
+	// int8
+	//----------------------------------------------------------------------------------------------
+	case int8:
+		return &x
+	case *int8:
+		return x
+	case []int8:
+		return &x
+	case []*int8:
+		return &x
+	case *[]int8:
+		return x
+	case *[]*int8:
+		return x
+
+	// int16
+	//----------------------------------------------------------------------------------------------
+	case int16:
+		return &x
+	case *int16:
+		return x
+	case []int16:
+		return &x
+	case []*int16:
+		return &x
+	case *[]int16:
+		return x
+	case *[]*int16:
+		return x
+
+	// int32
+	//----------------------------------------------------------------------------------------------
+	case int32:
+		return &x
+	case *int32:
+		return x
+	case []int32:
+		return &x
+	case []*int32:
+		return &x
+	case *[]int32:
+		return x
+	case *[]*int32:
+		return x
+
+	// int64
+	//----------------------------------------------------------------------------------------------
+	case int64:
+		return &x
+	case *int64:
+		return x
+	case []int64:
+		return &x
+	case []*int64:
+		return &x
+	case *[]int64:
+		return x
+	case *[]*int64:
+		return x
+
+	// IntSlice
+	//----------------------------------------------------------------------------------------------
+	case IntSlice:
+		return &x
+	case *IntSlice:
+		return x
+	case []IntSlice:
+		return &x
+	case []*IntSlice:
+		return &x
+	case *[]IntSlice:
+		return x
+	case *[]*IntSlice:
+		return x
+
+	// Object
+	//----------------------------------------------------------------------------------------------
+	case Object:
+		return &x
+	case *Object:
+		return x
+	case []Object:
+		return &x
+	case []*Object:
+		return &x
+	case *[]Object:
+		return x
+	case *[]*Object:
+		return x
+
+	// Str
+	//----------------------------------------------------------------------------------------------
+	case Str:
+		return &x
+	case *Str:
+		return x
+	case []Str:
+		return &x
+	case []*Str:
+		return &x
+	case *[]Str:
+		return x
+	case *[]*Str:
+		return x
+
+	// rune
+	//----------------------------------------------------------------------------------------------
+	// rune is a int32 which is already defined
+
+	// StringSlice
+	//----------------------------------------------------------------------------------------------
+	case StringSlice:
+		return &x
+	case *StringSlice:
+		return x
+	case []StringSlice:
+		return &x
+	case []*StringSlice:
+		return &x
+	case *[]StringSlice:
+		return x
+	case *[]*StringSlice:
+		return x
+
+	// string
+	//----------------------------------------------------------------------------------------------
+	case string:
+		return &x
+	case *string:
+		return x
+	case []string:
+		return &x
+	case []*string:
+		return &x
+	case *[]string:
+		return x
+	case *[]*string:
+		return x
+
+	// template.CSS
+	//----------------------------------------------------------------------------------------------
+	case template.CSS:
+		return &x
+	case *template.CSS:
+		return x
+	case []template.CSS:
+		return &x
+	case []*template.CSS:
+		return &x
+	case *[]template.CSS:
+		return x
+	case *[]*template.CSS:
+		return x
+
+	// template.HTML
+	//----------------------------------------------------------------------------------------------
+	case template.HTML:
+		return &x
+	case *template.HTML:
+		return x
+	case []template.HTML:
+		return &x
+	case []*template.HTML:
+		return &x
+	case *[]template.HTML:
+		return x
+	case *[]*template.HTML:
+		return x
+
+	// template.HTMLAttr
+	//----------------------------------------------------------------------------------------------
+	case template.HTMLAttr:
+		return &x
+	case *template.HTMLAttr:
+		return x
+	case []template.HTMLAttr:
+		return &x
+	case []*template.HTMLAttr:
+		return &x
+	case *[]template.HTMLAttr:
+		return x
+	case *[]*template.HTMLAttr:
+		return x
+
+	// template.JS
+	//----------------------------------------------------------------------------------------------
+	case template.JS:
+		return &x
+	case *template.JS:
+		return x
+	case []template.JS:
+		return &x
+	case []*template.JS:
+		return &x
+	case *[]template.JS:
+		return x
+	case *[]*template.JS:
+		return x
+
+	// template.URL
+	//----------------------------------------------------------------------------------------------
+	case template.URL:
+		return &x
+	case *template.URL:
+		return x
+	case []template.URL:
+		return &x
+	case []*template.URL:
+		return &x
+	case *[]template.URL:
+		return x
+	case *[]*template.URL:
+		return x
+
+	// uint
+	//----------------------------------------------------------------------------------------------
+	case uint:
+		return &x
+	case *uint:
+		return x
+	case []uint:
+		return &x
+	case []*uint:
+		return &x
+	case *[]uint:
+		return x
+	case *[]*uint:
+		return x
+
+	// uint8
+	//----------------------------------------------------------------------------------------------
+	case uint8:
+		return &x
+	case *uint8:
+		return x
+	case []uint8:
+		return &x
+	case []*uint8:
+		return &x
+	case *[]uint8:
+		return x
+	case *[]*uint8:
+		return x
+
+	// uint16
+	//----------------------------------------------------------------------------------------------
+	case uint16:
+		return &x
+	case *uint16:
+		return x
+	case []uint16:
+		return &x
+	case []*uint16:
+		return &x
+	case *[]uint16:
+		return x
+	case *[]*uint16:
+		return x
+
+	// uint32
+	//----------------------------------------------------------------------------------------------
+	case uint32:
+		return &x
+	case *uint32:
+		return x
+	case []uint32:
+		return &x
+	case []*uint32:
+		return &x
+	case *[]uint32:
+		return x
+	case *[]*uint32:
+		return x
+
+	// uint64
+	//----------------------------------------------------------------------------------------------
+	case uint64:
+		return &x
+	case *uint64:
+		return x
+	case []uint64:
+		return &x
+	case []*uint64:
+		return &x
+	case *[]uint64:
+		return x
+	case *[]*uint64:
+		return x
+
+	// fall back on reflection
+	//----------------------------------------------------------------------------------------------
+	default:
+		return reflect.Indirect(reflect.ValueOf(obj)).Addr()
+	}
+}
+
 // Convert functions
 //--------------------------------------------------------------------------------------------------
 
@@ -656,7 +1050,7 @@ func ToBool(obj interface{}) bool {
 
 // ToBoolE converts an interface to a bool type.
 func ToBoolE(obj interface{}) (val bool, err error) {
-	o := Indirect(obj)
+	o := DeReference(obj)
 
 	switch x := o.(type) {
 	case nil:
@@ -704,7 +1098,7 @@ func ToInt(obj interface{}) int {
 
 // ToIntE convert an interface to an int type.
 func ToIntE(obj interface{}) (val int, err error) {
-	o := Indirect(obj)
+	o := DeReference(obj)
 
 	switch x := o.(type) {
 	case nil:
@@ -775,7 +1169,7 @@ func ToIntSlice(obj interface{}) *IntSlice {
 // ToIntSliceE convert an interface to a IntSlice type.
 func ToIntSliceE(obj interface{}) (val *IntSlice, err error) {
 	val = &IntSlice{}
-	o := Indirect(obj)
+	o := DeReference(obj)
 
 	// Optimized types
 	switch x := o.(type) {
@@ -1098,14 +1492,435 @@ func ToIntSliceE(obj interface{}) (val *IntSlice, err error) {
 	return
 }
 
-// ToRuneSlice convert an interface to a []rune type.
-func ToRuneSlice(obj interface{}) []rune {
-	return []rune(ToString(obj))
+// ToChar convert an interface to a Char type.
+func ToChar(obj interface{}) *Char {
+	val := Char(0)
+	o := DeReference(obj)
+
+	// Optimized types
+	switch x := o.(type) {
+	case nil:
+	case bool:
+		v := 0
+		if x {
+			v = 1
+		}
+		val = Char(([]rune(strconv.FormatInt(int64(v), 10)))[0])
+	case []byte:
+		if len(x) != 0 {
+			v, _ := utf8.DecodeRune(x)
+			val = Char(v)
+		}
+	case Char:
+		val = x
+	case float32:
+		val = Char(([]rune(strconv.FormatInt(int64(x), 10)))[0])
+	case float64:
+		val = Char(([]rune(strconv.FormatInt(int64(x), 10)))[0])
+	case int:
+		val = Char(([]rune(strconv.FormatInt(int64(x), 10)))[0])
+	case int8:
+		val = Char(([]rune(strconv.FormatInt(int64(x), 10)))[0])
+	case int16:
+		val = Char(([]rune(strconv.FormatInt(int64(x), 10)))[0])
+	case int32:
+		val = Char(([]rune(strconv.FormatInt(int64(x), 10)))[0])
+	case int64:
+		val = Char(([]rune(strconv.FormatInt(x, 10)))[0])
+	case Object:
+		if v, e := x.ToIntE(); e == nil {
+			val = Char(([]rune(strconv.FormatInt(int64(v), 10)))[0])
+		}
+	case []rune:
+		if len(x) != 0 {
+			val = Char(x[0])
+		}
+	case Str:
+		if len(x) != 0 {
+			val = Char(x[0])
+		}
+	case string:
+		if len(x) != 0 {
+			v, _ := utf8.DecodeRuneInString(x)
+			val = Char(v)
+		}
+		// case template.CSS:
+		// 	return string(x)
+		// case template.HTML:
+		// 	return string(x)
+		// case template.HTMLAttr:
+		// 	return string(x)
+		// case template.JS:
+		// 	return string(x)
+		// case template.URL:
+		// 	return string(x)
+		// case uint:
+		// 	return strconv.FormatInt(int64(x), 10)
+		// case uint8:
+		// 	return strconv.FormatInt(int64(x), 10)
+		// case uint16:
+		// 	return strconv.FormatInt(int64(x), 10)
+		// case uint32:
+		// 	return strconv.FormatInt(int64(x), 10)
+		// case uint64:
+		// 	return strconv.FormatInt(int64(x), 10)
+		// case fmt.Stringer, *fmt.Stringer:
+		// 	if x, ok := x.(*fmt.Stringer); ok {
+		// 		if x == nil {
+		// 			return ""
+		// 		}
+		// 		return (*x).String()
+		// 	}
+		// 	return x.(fmt.Stringer).String()
+		// default:
+		// 	return fmt.Sprintf("%v", obj)
+	}
+	return &val
 }
+
+// // ToRuneSlice convert an interface to a []rune type.
+// func ToRuneSlice(obj interface{}) (val []rune) {
+// 	val = []rune{}
+// 	o := Indirect(obj)
+
+// 	// Optimized types
+// 	switch x := o.(type) {
+// 	case nil:
+
+// 	// bool
+// 	//----------------------------------------------------------------------------------------------
+// 	case bool:
+// 		if x {
+// 			val = append(val, 1)
+// 		} else {
+// 			val = append(val, 0)
+// 		}
+// 	case []bool:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+// 	case []*bool:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+
+// 	case []byte:
+// 		return string(x)
+// 	case Char:
+// 		return x.String()
+// 	case error:
+// 		return x.Error()
+// 	case float32:
+// 		return strconv.FormatFloat(float64(x), 'f', -1, 32)
+// 	case float64:
+// 		return strconv.FormatFloat(x, 'f', -1, 64)
+// 	case int:
+// 		return strconv.FormatInt(int64(x), 10)
+// 	case int8:
+// 		return strconv.FormatInt(int64(x), 10)
+// 	case int16:
+// 		return strconv.FormatInt(int64(x), 10)
+// 	case int32:
+// 		return strconv.FormatInt(int64(x), 10)
+// 	case int64:
+// 		return strconv.FormatInt(x, 10)
+// 	case Object:
+// 		return x.ToString()
+// 	case []rune:
+// 		return string(x)
+// 	case Str:
+// 		return string(x)
+// 	case string:
+// 		return x
+// 	case template.CSS:
+// 		return string(x)
+// 	case template.HTML:
+// 		return string(x)
+// 	case template.HTMLAttr:
+// 		return string(x)
+// 	case template.JS:
+// 		return string(x)
+// 	case template.URL:
+// 		return string(x)
+// 	case uint:
+// 		return strconv.FormatInt(int64(x), 10)
+// 	case uint8:
+// 		return strconv.FormatInt(int64(x), 10)
+// 	case uint16:
+// 		return strconv.FormatInt(int64(x), 10)
+// 	case uint32:
+// 		return strconv.FormatInt(int64(x), 10)
+// 	case uint64:
+// 		return strconv.FormatInt(int64(x), 10)
+// 	// case fmt.Stringer, *fmt.Stringer:
+// 	// 	if x, ok := x.(*fmt.Stringer); ok {
+// 	// 		if x == nil {
+// 	// 			return ""
+// 	// 		}
+// 	// 		return (*x).String()
+// 	// 	}
+// 	// 	return x.(fmt.Stringer).String()
+// 	// default:
+// 	// 	return fmt.Sprintf("%v", obj)
+
+// 	// Char
+// 	//----------------------------------------------------------------------------------------------
+// 	case Char:
+// 		val = append(val, ToString(x))
+// 	case []Char:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+// 	case []*Char:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+
+// 	// float32
+// 	//----------------------------------------------------------------------------------------------
+// 	case float32:
+// 		val = append(val, ToString(x))
+// 	case []float32:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+// 	case []*float32:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+
+// 	// float64
+// 	//----------------------------------------------------------------------------------------------
+// 	case float64:
+// 		val = append(val, ToString(x))
+// 	case []float64:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+// 	case []*float64:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+
+// 	// interface
+// 	//----------------------------------------------------------------------------------------------
+// 	case []interface{}:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+
+// 	// int
+// 	//----------------------------------------------------------------------------------------------
+// 	case int:
+// 		val = append(val, ToString(x))
+// 	case []int:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+// 	case []*int:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+
+// 	// int8
+// 	//----------------------------------------------------------------------------------------------
+// 	case int8:
+// 		val = append(val, ToString(x))
+// 	case []int8:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+// 	case []*int8:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+
+// 	// int16
+// 	//----------------------------------------------------------------------------------------------
+// 	case int16:
+// 		val = append(val, ToString(x))
+// 	case []int16:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+// 	case []*int16:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+
+// 	// int32
+// 	//----------------------------------------------------------------------------------------------
+// 	case int32:
+// 		val = append(val, ToString(x))
+// 	case []int32:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+// 	case []*int32:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+
+// 	// int64
+// 	//----------------------------------------------------------------------------------------------
+// 	case int64:
+// 		val = append(val, ToString(x))
+// 	case []int64:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+// 	case []*int64:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+
+// 	// IntSlice
+// 	//----------------------------------------------------------------------------------------------
+// 	case IntSlice:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+// 	case []IntSlice:
+// 		for i := range x {
+// 			for j := range x[i] {
+// 				val = append(val, ToString(x[i][j]))
+// 			}
+// 		}
+// 	case []*IntSlice:
+// 		for i := range x {
+// 			for j := range *x[i] {
+// 				val = append(val, ToString((*x[i])[j]))
+// 			}
+// 		}
+
+// 	// Object
+// 	//----------------------------------------------------------------------------------------------
+// 	case Object:
+// 		val, err = ToStringSliceGE(ToString(x))
+// 	case []Object:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+// 	case []*Object:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+
+// 	// Str
+// 	//----------------------------------------------------------------------------------------------
+// 	case Str:
+// 		val, err = ToStringSliceGE(ToString(x))
+// 	case []Str:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+// 	case []*Str:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+
+// 	// string
+// 	//----------------------------------------------------------------------------------------------
+// 	case string:
+// 		val = strings.Fields(x)
+// 	case []string:
+// 		val = x
+// 	case []*string:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+
+// 	// uint
+// 	//----------------------------------------------------------------------------------------------
+// 	case uint:
+// 		val = append(val, ToString(x))
+// 	case []uint:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+// 	case []*uint:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+
+// 	// uint8
+// 	//----------------------------------------------------------------------------------------------
+// 	case uint8:
+// 		val = append(val, ToString(x))
+// 	case []uint8:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+// 	case []*uint8:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+
+// 	// uint16
+// 	//----------------------------------------------------------------------------------------------
+// 	case uint16:
+// 		val = append(val, ToString(x))
+// 	case []uint16:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+// 	case []*uint16:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+
+// 	// uint32
+// 	//----------------------------------------------------------------------------------------------
+// 	case uint32:
+// 		val = append(val, ToString(x))
+// 	case []uint32:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+// 	case []*uint32:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+
+// 	// uint64
+// 	//----------------------------------------------------------------------------------------------
+// 	case uint64:
+// 		val = append(val, ToString(x))
+
+// 	case []uint64:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+// 	case []*uint64:
+// 		for i := range x {
+// 			val = append(val, ToString(x[i]))
+// 		}
+
+// 	// fall back on reflection
+// 	//----------------------------------------------------------------------------------------------
+// 	default:
+// 		v := reflect.ValueOf(x)
+// 		k := v.Kind()
+
+// 		switch {
+
+// 		// generically convert array and slice types
+// 		case k == reflect.Array || k == reflect.Slice:
+// 			for i := 0; i < v.Len(); i++ {
+// 				val = append(val, ToString(v.Index(i).Interface()))
+// 			}
+
+// 		default:
+// 			err = fmt.Errorf("unable to convert type %T to []int", x)
+// 			return
+// 		}
+// 	}
+// 	return
+// }
 
 // ToString convert an interface to a string type.
 func ToString(obj interface{}) string {
-	o := Indirect(obj)
+	o := DeReference(obj)
 
 	// Optimized types
 	switch x := o.(type) {
@@ -1186,7 +2001,7 @@ func ToStringSlice(obj interface{}) *StringSlice {
 // ToStringSliceE convert an interface to a []string type.
 func ToStringSliceE(obj interface{}) (val *StringSlice, err error) {
 	val = &StringSlice{}
-	o := Indirect(obj)
+	o := DeReference(obj)
 
 	// Optimized types
 	switch x := o.(type) {
@@ -1463,7 +2278,7 @@ func ToStringSliceE(obj interface{}) (val *StringSlice, err error) {
 // ToStringSliceGE convert an interface to a []string type.
 func ToStringSliceGE(obj interface{}) (val []string, err error) {
 	val = []string{}
-	o := Indirect(obj)
+	o := DeReference(obj)
 
 	// Optimized types
 	switch x := o.(type) {

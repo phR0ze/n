@@ -14,8 +14,8 @@ type Char rune
 // Supports: string, *string, rune, *rune, byte, *byte
 func NewChar(obj interface{}) *Char {
 	str := ""
-	var new Char
-	o := Indirect(obj)
+	new := Char(0)
+	o := DeReference(obj)
 	switch x := o.(type) {
 	case nil:
 	case Str:
@@ -37,6 +37,13 @@ func NewChar(obj interface{}) *Char {
 	return &new
 }
 
+// NewCharV creates a new chart from the given obj. Will always be non nil.
+// Allows for empty Char with a Null value
+func NewCharV(obj ...interface{}) *Char {
+	new := Char(0)
+	return &new
+}
+
 // Object interface methods
 //--------------------------------------------------------------------------------------------------
 
@@ -45,12 +52,17 @@ func (p *Char) A() string {
 	return p.String()
 }
 
+// G returns the underlying data structure as a builtin Go type
+func (p *Char) G() rune {
+	return p.O().(rune)
+}
+
 // O returns the underlying data structure as is
 func (p *Char) O() interface{} {
 	if p == nil {
-		return nil
+		return rune(0)
 	}
-	return *p
+	return rune(*p)
 }
 
 // Nil tests if the object is nil
@@ -61,12 +73,12 @@ func (p *Char) Nil() bool {
 	return false
 }
 
-// R exports the Char as a rune
-func (p *Char) R() rune {
+// Null tests if the char is a rune(0)
+func (p *Char) Null() bool {
 	if p == nil {
-		return rune(0)
+		return false
 	}
-	return rune(*p)
+	return rune(*p) == rune(0)
 }
 
 // String returns a string representation of the Object, implements Stringer interface.

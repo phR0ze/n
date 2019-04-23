@@ -93,9 +93,9 @@ func S(obj interface{}) (new Slice) {
 func NewSlice(obj interface{}) (new Slice) {
 	switch x := obj.(type) {
 	case []int, *[]int:
-		return NewIntSlice(Indirect(x).([]int))
+		return NewIntSlice(DeReference(x).([]int))
 	case []string, *[]string:
-		return NewStringSlice(Indirect(x).([]string))
+		return NewStringSlice(DeReference(x).([]string))
 	default:
 		return NewRefSlice(obj)
 	}
