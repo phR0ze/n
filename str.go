@@ -119,9 +119,19 @@ func (p *Str) Any(elems ...interface{}) bool {
 	}
 
 	// Looking for something specific returns false if incompatible type
+	return p.AnyS(elems)
+}
+
+// AnyS tests if this Slice contains any of the given Slice's elements.
+// Incompatible types will return false.
+// Supports: []Str *[]Str, []string *[]string, StringSlice *StringSlice, []rune *[]rune as chars, []byte *[]byte as chars
+func (p *Str) AnyS(slice interface{}) bool {
+	if p == nil || len(*p) == 0 {
+		return false
+	}
 	str := p.A()
 	result := false
-	o := DeReference(elems)
+	o := DeReference(slice)
 	switch x := o.(type) {
 	case byte:
 		if strings.ContainsRune(str, rune(x)) {
@@ -152,50 +162,6 @@ func (p *Str) Any(elems ...interface{}) bool {
 		}
 	}
 	return result
-}
-
-// AnyS tests if this Slice contains any of the given Slice's elements.
-// Incompatible types will return false.
-// Supports: []Str *[]Str, []string *[]string, StringSlice *StringSlice, []rune *[]rune as chars, []byte *[]byte as chars
-func (p *Str) AnyS(slice interface{}) bool {
-	if p == nil || len(*p) == 0 {
-		return false
-	}
-	str := p.A()
-	o := DeReference(slice)
-	switch x := o.(type) {
-	case []Str:
-		for i := range x {
-			if strings.Contains(str, string(x[i])) {
-				return true
-			}
-		}
-	case []string:
-		for i := range x {
-			if strings.Contains(str, x[i]) {
-				return true
-			}
-		}
-	case StringSlice:
-		for i := 0; i < x.Len(); i++ {
-			if strings.Contains(str, x.At(i).A()) {
-				return true
-			}
-		}
-	case []byte:
-		for i := range x {
-			if strings.ContainsRune(str, rune(x[i])) {
-				return true
-			}
-		}
-	case []rune:
-		for i := range x {
-			if strings.ContainsRune(str, x[i]) {
-				return true
-			}
-		}
-	}
-	return false
 }
 
 // AnyW tests if this Slice contains any that match the lambda selector.

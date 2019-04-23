@@ -367,10 +367,44 @@ func TestStr_AnyS(t *testing.T) {
 		assert.False(t, NewStrV("1").AnyS(nil))
 	}
 
+	// byte
+	{
+		// byte
+		assert.True(t, NewStrV("test").AnyS(byte(0x74)))
+
+		// []byte
+		assert.True(t, NewStrV("test").AnyS([]byte{0x74}))
+		assert.True(t, NewStrV("bobe").AnyS([]byte{0x74, 0x65}))
+		assert.False(t, NewStrV("bob").AnyS([]byte{0x74, 0x65}))
+
+		// *[]byte
+		assert.True(t, NewStrV("test").AnyS(&[]byte{0x74}))
+		assert.True(t, NewStrV("bobe").AnyS(&[]byte{0x74, 0x65}))
+		assert.False(t, NewStrV("bob").AnyS(&[]byte{0x74, 0x65}))
+	}
+
+	// Char
+	{
+		assert.True(t, NewStrV("123").AnyS([]Char{'1', '2'}))
+		assert.True(t, NewStrV("123").AnyS(&[]Char{'1', '2'}))
+		assert.False(t, NewStrV("123").AnyS([]Char{'4', '5'}))
+	}
+
+	// ints
+	{
+		assert.True(t, NewStrV("1", "2").AnyS([]int{2}))
+		assert.True(t, NewStrV("1", "2").AnyS([]int8{2}))
+		assert.True(t, NewStrV("1", "2").AnyS([]int16{2}))
+		assert.True(t, NewStrV("1", "2").AnyS([]int64{2}))
+		assert.True(t, NewStrV("1", "2").AnyS([]int{1, 2}))
+		assert.True(t, NewStrV("1", "2").AnyS([]int{1, 3}))
+		assert.False(t, NewStrV("1", "2").AnyS([]int{3, 4}))
+	}
+
 	// rune
 	{
 		// rune
-		//assert.True(t, NewStrV("test").AnyS('t'))
+		assert.True(t, NewStrV("test").AnyS('t'))
 
 		// []rune
 		assert.True(t, NewStrV("123").AnyS([]rune{'1'}))
@@ -383,29 +417,14 @@ func TestStr_AnyS(t *testing.T) {
 		assert.False(t, NewStrV("123").AnyS(&([]rune{'4', '5'})))
 	}
 
-	// []byte
+	// string
 	{
-		assert.True(t, NewStrV("test").AnyS([]byte{0x74}))
-		assert.True(t, NewStrV("bobe").AnyS([]byte{0x74, 0x65}))
-		assert.False(t, NewStrV("bob").AnyS([]byte{0x74, 0x65}))
-	}
-
-	// *[]byte
-	{
-		assert.True(t, NewStrV("test").AnyS(&[]byte{0x74}))
-		assert.True(t, NewStrV("bobe").AnyS(&[]byte{0x74, 0x65}))
-		assert.False(t, NewStrV("bob").AnyS(&[]byte{0x74, 0x65}))
-	}
-
-	// []string
-	{
+		// []string
 		assert.True(t, NewStrV("123").AnyS([]string{"1"}))
 		assert.True(t, NewStrV("123").AnyS([]string{"4", "3"}))
 		assert.False(t, NewStrV("123").AnyS([]string{"4", "5"}))
-	}
 
-	// *[]string
-	{
+		// *[]string
 		assert.True(t, NewStrV("123").AnyS(&([]string{"1"})))
 		assert.True(t, NewStrV("123").AnyS(&([]string{"4", "3"})))
 		assert.False(t, NewStrV("123").AnyS(&([]string{"4", "5"})))
@@ -425,11 +444,18 @@ func TestStr_AnyS(t *testing.T) {
 		assert.False(t, NewStrV("123").AnyS([]Str{Str("4"), Str("5")}))
 	}
 
+	// uints
+	{
+		assert.True(t, NewStrV("1", "2").AnyS([]uint{2}))
+		assert.True(t, NewStrV("1", "2").AnyS([]uint16{2}))
+		assert.True(t, NewStrV("1", "2").AnyS([]uint32{2}))
+		assert.True(t, NewStrV("1", "2").AnyS([]uint64{2}))
+	}
+
 	// invalid types
 	assert.False(t, NewStrV("1", "2").AnyS(nil))
 	assert.False(t, NewStrV("1", "2").AnyS((*[]string)(nil)))
 	assert.False(t, NewStrV("1", "2").AnyS((*Str)(nil)))
-	assert.False(t, NewStrV("1", "2").AnyS([]int{2}))
 }
 
 // AnyW
