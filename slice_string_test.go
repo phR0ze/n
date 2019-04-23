@@ -2591,6 +2591,14 @@ func TestStringSlice_Set(t *testing.T) {
 	{
 		assert.Equal(t, NewStringSliceV("1", "2", "3"), NewStringSliceV("1", "2", "3").Set(5, "1"))
 	}
+
+	// Conversion
+	{
+		assert.Equal(t, NewStringSliceV(0, 2, 0), NewStringSliceV(0, 0, 0).Set(1, Object{2}))
+		assert.Equal(t, NewStringSliceV(0, 2, 0), NewStringSliceV(0, 0, 0).Set(1, "2"))
+		assert.Equal(t, NewStringSliceV(true, 0, 0), NewStringSliceV(0, 0, 0).Set(0, true))
+		assert.Equal(t, NewStringSliceV(0, 0, 3), NewStringSliceV(0, 0, 0).Set(-1, Char('3')))
+	}
 }
 
 // SetE

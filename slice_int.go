@@ -660,7 +660,8 @@ func (p *IntSlice) Slice(indices ...int) Slice {
 		return NewIntSliceV()
 	}
 
-	return NewIntSlice((*p)[i:j])
+	slice := IntSlice((*p)[i:j])
+	return &slice
 }
 
 // Sort returns a new Slice with sorted elements.

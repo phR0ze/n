@@ -458,7 +458,7 @@ func (p *StringSlice) Join(separator ...string) (str *Object) {
 
 	var builder strings.Builder
 	for i := range *p {
-		builder.WriteString(Obj((*p)[i]).ToString())
+		builder.WriteString(ToString((*p)[i]))
 		if i+1 < len(*p) {
 			builder.WriteString(sep)
 		}
@@ -600,11 +600,7 @@ func (p *StringSlice) SetE(i int, elem interface{}) (Slice, error) {
 		return p, err
 	}
 
-	if x, ok := elem.(string); ok {
-		(*p)[i] = x
-	} else {
-		err = errors.Errorf("can't set type '%T' in '%T'", elem, p)
-	}
+	(*p)[i] = ToString(elem)
 	return p, err
 }
 
@@ -649,7 +645,8 @@ func (p *StringSlice) Slice(indices ...int) Slice {
 		return NewStringSliceV()
 	}
 
-	return NewStringSlice((*p)[i:j])
+	slice := StringSlice((*p)[i:j])
+	return &slice
 }
 
 // Sort returns a new Slice with sorted elements.
