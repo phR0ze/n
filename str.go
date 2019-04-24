@@ -53,7 +53,7 @@ func (p *Str) All(elems ...interface{}) bool {
 	str := p.A()
 	result := true
 	for i := range elems {
-		if !strings.Contains(str, NewStr(elems[i]).A()) {
+		if !strings.Contains(str, ToStr(elems[i]).A()) {
 			return false
 		}
 	}
@@ -175,7 +175,7 @@ func (p *Str) Append(elem interface{}) Slice {
 	if p == nil {
 		p = NewStrV()
 	}
-	*p = append(*p, (*NewStr(elem))...)
+	*p = append(*p, (*ToStr(elem))...)
 	return p
 }
 
@@ -186,7 +186,7 @@ func (p *Str) AppendV(elems ...interface{}) Slice {
 		p = NewStrV()
 	}
 	for _, elem := range elems {
-		*p = append(*p, (*NewStr(elem))...)
+		*p = append(*p, (*ToStr(elem))...)
 	}
 	return p
 }
@@ -265,11 +265,7 @@ func (p *Str) ConcatA(str interface{}) string {
 // ConcatM modifies this Slice by appending the given and returns a reference to this Slice.
 // Supports: Str *Str, string *string, []byte *[]byte, rune *rune, []rune *[]rune, []string *[]string ...
 func (p *Str) ConcatM(slice interface{}) Slice {
-	if p == nil {
-		p = NewStrV()
-	}
-	*p = append(*p, (*NewStr(slice))...)
-	return p
+	return p.Append(slice)
 }
 
 // Contains checks if the given str is contained in this Str.
@@ -323,7 +319,7 @@ func (p *Str) Copy(indices ...int) (new Slice) {
 	// Copy elements over to new Slice
 	x := make([]rune, j-i, j-i)
 	copy(x, []rune(*p)[i:j])
-	return NewStr(x)
+	return ToStr(x)
 }
 
 // CopyA calls Copy and returns it as a string for brevity
@@ -339,7 +335,7 @@ func (p *Str) Count(elem interface{}) (cnt int) {
 	if p == nil || len(*p) == 0 || elem == nil {
 		return
 	}
-	return strings.Count(string(*p), string(*NewStr(elem)))
+	return strings.Count(string(*p), string(*ToStr(elem)))
 }
 
 // CountW counts the number of elements in this Slice that match the lambda selector.
@@ -430,26 +426,26 @@ func (p *Str) DropW(sel func(O) bool) Slice {
 }
 
 // Each calls the given lambda once for each element in this Slice, passing in that element
-// as a parameter. Returns a reference to this Slice
+// as a parameter. Element will be a *Char. Returns a reference to this Slice
 func (p *Str) Each(action func(O)) Slice {
 	if p == nil {
 		return p
 	}
 	for i := range *p {
-		action(Char((*p)[i]))
+		action(ToChar((*p)[i]))
 	}
 	return p
 }
 
 // EachE calls the given lambda once for each element in this Slice, passing in that element
-// as a parameter. Returns a reference to this Slice and any error from the lambda.
+// as a parameter. Element will be a *Char. Returns a reference to this Slice and any error from the lambda.
 func (p *Str) EachE(action func(O) error) (Slice, error) {
 	var err error
 	if p == nil {
 		return p, err
 	}
 	for i := range *p {
-		if err = action(Char((*p)[i])); err != nil {
+		if err = action(ToChar((*p)[i])); err != nil {
 			return p, err
 		}
 	}
@@ -457,26 +453,26 @@ func (p *Str) EachE(action func(O) error) (Slice, error) {
 }
 
 // EachI calls the given lambda once for each element in this Slice, passing in the index and element
-// as a parameter. Returns a reference to this Slice
+// as a parameter. Element will be a *Char. Returns a reference to this Slice
 func (p *Str) EachI(action func(int, O)) Slice {
 	if p == nil {
 		return p
 	}
 	for i := range *p {
-		action(i, Char((*p)[i]))
+		action(i, ToChar((*p)[i]))
 	}
 	return p
 }
 
 // EachIE calls the given lambda once for each element in this Slice, passing in the index and element
-// as a parameter. Returns a reference to this Slice and any error from the lambda.
+// as a parameter. Element will be a *Char. Returns a reference to this Slice and any error from the lambda.
 func (p *Str) EachIE(action func(int, O) error) (Slice, error) {
 	var err error
 	if p == nil {
 		return p, err
 	}
 	for i := range *p {
-		if err = action(i, Char((*p)[i])); err != nil {
+		if err = action(i, ToChar((*p)[i])); err != nil {
 			return p, err
 		}
 	}
@@ -484,26 +480,26 @@ func (p *Str) EachIE(action func(int, O) error) (Slice, error) {
 }
 
 // EachR calls the given lambda once for each element in this Slice in reverse, passing in that element
-// as a parameter. Returns a reference to this Slice
+// as a parameter. Element will be a *Char. Returns a reference to this Slice
 func (p *Str) EachR(action func(O)) Slice {
 	if p == nil {
 		return p
 	}
 	for i := len(*p) - 1; i >= 0; i-- {
-		action(Char((*p)[i]))
+		action(ToChar((*p)[i]))
 	}
 	return p
 }
 
 // EachRE calls the given lambda once for each element in this Slice in reverse, passing in that element
-// as a parameter. Returns a reference to this Slice and any error from the lambda.
+// as a parameter. Element will be a *Char. Returns a reference to this Slice and any error from the lambda.
 func (p *Str) EachRE(action func(O) error) (Slice, error) {
 	var err error
 	if p == nil {
 		return p, err
 	}
 	for i := len(*p) - 1; i >= 0; i-- {
-		if err = action(Char((*p)[i])); err != nil {
+		if err = action(ToChar((*p)[i])); err != nil {
 			return p, err
 		}
 	}
@@ -511,26 +507,26 @@ func (p *Str) EachRE(action func(O) error) (Slice, error) {
 }
 
 // EachRI calls the given lambda once for each element in this Slice in reverse, passing in that element
-// as a parameter. Returns a reference to this Slice
+// as a parameter. Element will be a *Char. Returns a reference to this Slice
 func (p *Str) EachRI(action func(int, O)) Slice {
 	if p == nil {
 		return p
 	}
 	for i := len(*p) - 1; i >= 0; i-- {
-		action(i, Char((*p)[i]))
+		action(i, ToChar((*p)[i]))
 	}
 	return p
 }
 
 // EachRIE calls the given lambda once for each element in this Slice in reverse, passing in that element
-// as a parameter. Returns a reference to this Slice and any error from the lambda.
+// as a parameter. Element will be a *Char. Returns a reference to this Slice and any error from the lambda.
 func (p *Str) EachRIE(action func(int, O) error) (Slice, error) {
 	var err error
 	if p == nil {
 		return p, err
 	}
 	for i := len(*p) - 1; i >= 0; i-- {
-		if err = action(i, Char((*p)[i])); err != nil {
+		if err = action(i, ToChar((*p)[i])); err != nil {
 			return p, err
 		}
 	}
@@ -807,7 +803,7 @@ func (p *Str) SetE(i int, elem interface{}) (Slice, error) {
 		return p, err
 	}
 
-	y := NewStr(elem)
+	y := ToStr(elem)
 	if len(*y) > 0 {
 		(*p)[i] = (*y)[0]
 	}
@@ -855,7 +851,7 @@ func (p *Str) Slice(indices ...int) Slice {
 		return NewStrV()
 	}
 
-	return NewStr((*p)[i:j])
+	return ToStr((*p)[i:j])
 }
 
 // Sort returns a new Slice with sorted elements.

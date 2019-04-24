@@ -595,6 +595,13 @@ func TestStr_Append(t *testing.T) {
 		assert.Equal(t, "1test4", NewStrV("1").Append([]byte{0x74, 0x65, 0x73, 0x74}).Append("4").O())
 		assert.Equal(t, "1234", NewStrV("1").Append([]rune{'2', '3'}).Append("4").O())
 	}
+
+	// Conversion
+	{
+		assert.Equal(t, "12", NewStrV(1).Append(Object{2}).A())
+		assert.Equal(t, "12", NewStrV(1).Append(2).A())
+		assert.Equal(t, "true2", NewStrV().Append(true).Append(Char('2')).A())
+	}
 }
 
 // AppendV
@@ -634,6 +641,13 @@ func TestStr_AppendV(t *testing.T) {
 	{
 		assert.Equal(t, NewStrV("123"), NewStrV("1").AppendV("2", "3"))
 		assert.Equal(t, NewStrV("12345"), NewStrV("1").AppendV("2", "3").AppendV("4", "5"))
+	}
+
+	// Conversion
+	{
+		assert.Equal(t, NewStrV("0", "1"), NewStrV().AppendV(Object{0}, Object{1}))
+		assert.Equal(t, NewStrV("0", "1"), NewStrV().AppendV(0, 1))
+		assert.Equal(t, NewStrV("false", "true"), NewStrV().AppendV(false, true))
 	}
 }
 
@@ -865,6 +879,18 @@ func TestStr_Concat(t *testing.T) {
 		assert.Equal(t, "12", NewStrV("1", "2").Concat((*[]string)(nil)).O())
 		assert.Equal(t, "12", NewStrV("1", "2").Concat((*Str)(nil)).O())
 	}
+
+	// Conversion
+	{
+		assert.Equal(t, NewStrV("0", "1"), NewStrV().Concat([]Object{{0}, {1}}))
+		assert.Equal(t, NewStrV("0", "1"), NewStrV().Concat([]int{0, 1}))
+		assert.Equal(t, NewStrV("false", "true"), NewStrV().Concat([]bool{false, true}))
+
+		slice := NewStrV(Object{1})
+		concated := slice.Concat([]int64{2, 3})
+		assert.Equal(t, NewStrV("1", "4"), slice.Append(Char('4')))
+		assert.Equal(t, NewStrV("1", "2", "3"), concated)
+	}
 }
 
 // ConcatM
@@ -948,6 +974,14 @@ func TestStr_ConcatM(t *testing.T) {
 	{
 		assert.Equal(t, NewStrV("1", "2"), NewStrV("1", "2").ConcatM((*[]string)(nil)))
 		assert.Equal(t, NewStrV("1", "2"), NewStrV("1", "2").ConcatM((*Str)(nil)))
+	}
+
+	// Conversion
+	{
+		slice := NewStrV(Object{1})
+		concated := slice.ConcatM([]Object{{2}, {3}})
+		assert.Equal(t, NewStrV("1", "2", "3", "4"), slice.Append(Char('4')))
+		assert.Equal(t, NewStrV("1", "2", "3", "4"), concated)
 	}
 }
 
@@ -1489,59 +1523,467 @@ func TestStr_DropLastN(t *testing.T) {
 	assert.Equal(t, NewStrV(), NewStrV("1", "2", "3").DropLastN(4))
 }
 
-// // DropW
-// //--------------------------------------------------------------------------------------------------
-// func BenchmarkStr_DropW_Go(t *testing.B) {
-// 	src := RangeString(nines5)
-// 	l := len(src)
-// 	for i := 0; i < l; i++ {
-// 		if Obj(src[i]).ToInt()%2 == 0 {
-// 			if i+1 < l {
-// 				src = append(src[:i], src[i+1:]...)
-// 			} else if i >= 0 && i < l {
-// 				src = src[:i]
-// 			}
-// 			l--
-// 			i--
-// 		}
-// 	}
-// }
+// DropW
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_DropW_Go(t *testing.B) {
+	// src := RangeString(nines5)
+	// l := len(src)
+	// for i := 0; i < l; i++ {
+	// 	if Obj(src[i]).ToInt()%2 == 0 {
+	// 		if i+1 < l {
+	// 			src = append(src[:i], src[i+1:]...)
+	// 		} else if i >= 0 && i < l {
+	// 			src = src[:i]
+	// 		}
+	// 		l--
+	// 		i--
+	// 	}
+	// }
+}
 
-// func BenchmarkStr_DropW_Slice(t *testing.B) {
-// 	slice := NewStr(RangeString(nines5))
-// 	slice.DropW(func(x O) bool {
-// 		return ExB(Obj(x).ToInt()%2 == 0)
-// 	})
-// }
+func BenchmarkStr_DropW_Slice(t *testing.B) {
+	slice := NewStr(RangeString(nines5))
+	slice.DropW(func(x O) bool {
+		return ExB(Obj(x).ToInt()%2 == 0)
+	})
+}
 
-// func ExampleStr_DropW() {
-// 	slice := NewStrV("1", "2", "3")
-// 	fmt.Println(slice.DropW(func(x O) bool {
-// 		return ExB(Obj(x).ToInt()%2 == 0)
-// 	}))
-// 	// Output: [1 3]
-// }
+func ExampleStr_DropW() {
+	slice := NewStrV("1", "2", "3")
+	fmt.Println(slice.DropW(func(x O) bool {
+		return ExB(Obj(x).ToInt()%2 == 0)
+	}))
+	// Output: 13
+}
 
-// func TestStr_DropW(t *testing.T) {
+func TestStr_DropW(t *testing.T) {
 
-// 	// drop all odd values
-// 	{
-// 		slice := NewStrV("1", "2", "3", "4", "5", "6", "7", "8", "9")
-// 		slice.DropW(func(x O) bool {
-// 			return ExB(ToInt(x)%2 != 0)
-// 		})
-// 		assert.Equal(t, "2468", slice.A())
-// 	}
+	// drop all odd values
+	{
+		slice := NewStrV("1", "2", "3", "4", "5", "6", "7", "8", "9")
+		slice.DropW(func(x O) bool {
+			return ExB(ToInt(x)%2 != 0)
+		})
+		assert.Equal(t, "2468", slice.A())
+	}
 
-// 	// drop all even values
-// 	{
-// 		slice := NewStrV("1", "2", "3", "4", "5", "6", "7", "8", "9")
-// 		slice.DropW(func(x O) bool {
-// 			return ExB(ToInt(x)%2 == 0)
-// 		})
-// 		assert.Equal(t, "13579", slice.A())
-// 	}
-// }
+	// drop all even values
+	{
+		slice := NewStrV("1", "2", "3", "4", "5", "6", "7", "8", "9")
+		slice.DropW(func(x O) bool {
+			return ExB(ToInt(x)%2 == 0)
+		})
+		assert.Equal(t, "13579", slice.A())
+	}
+}
+
+// Each
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_Each_Go(t *testing.B) {
+	// action := func(x interface{}) {
+	// 	assert.IsType(t, "", x)
+	// }
+	// for _, x := range RangeString(nines6) {
+	// 	action(x)
+	// }
+}
+
+func BenchmarkStr_Each_Slice(t *testing.B) {
+	// NewStr(RangeString(nines6)).Each(func(x O) {
+	// 	assert.IsType(t, "", x)
+	// })
+}
+
+func ExampleStr_Each() {
+	NewStrV("1", "2", "3").Each(func(x O) {
+		fmt.Printf("%v", x.(*Char).A())
+	})
+	// Output: 123
+}
+
+func TestStr_Each(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *Str
+		slice.Each(func(x O) {})
+	}
+
+	// Loop through
+	{
+		results := []string{}
+		NewStrV("1", "2", "3").Each(func(x O) {
+			results = append(results, x.(*Char).A())
+		})
+		assert.Equal(t, []string{"1", "2", "3"}, results)
+	}
+}
+
+// EachE
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_EachE_Go(t *testing.B) {
+	// action := func(x interface{}) {
+	// 	assert.IsType(t, "0", x)
+	// }
+	// for _, x := range RangeString(nines6) {
+	// 	action(x)
+	// }
+}
+
+func BenchmarkStr_EachE_Slice(t *testing.B) {
+	// NewStr(RangeString(nines6)).EachE(func(x O) error {
+	// 	assert.IsType(t, "", x)
+	// 	return nil
+	// })
+}
+
+func ExampleStr_EachE() {
+	NewStrV("1", "2", "3").EachE(func(x O) error {
+		fmt.Printf("%v", x.(*Char))
+		return nil
+	})
+	// Output: 123
+}
+
+func TestStr_EachE(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *Str
+		slice.EachE(func(x O) error {
+			return nil
+		})
+	}
+
+	// Loop through
+	{
+		results := []string{}
+		NewStrV("1", "2", "3").EachE(func(x O) error {
+			results = append(results, x.(*Char).A())
+			return nil
+		})
+		assert.Equal(t, []string{"1", "2", "3"}, results)
+	}
+
+	// Break early with error
+	{
+		results := []string{}
+		NewStrV("1", "2", "3").EachE(func(x O) error {
+			if x.(*Char).G() == '3' {
+				return ErrBreak
+			}
+			results = append(results, x.(*Char).A())
+			return nil
+		})
+		assert.Equal(t, []string{"1", "2"}, results)
+	}
+}
+
+// EachI
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_EachI_Go(t *testing.B) {
+	// action := func(x interface{}) {
+	// 	assert.IsType(t, "", x)
+	// }
+	// for _, x := range RangeString(nines6) {
+	// 	action(x)
+	// }
+}
+
+func BenchmarkStr_EachI_Slice(t *testing.B) {
+	// NewStr(RangeString(nines6)).EachI(func(i int, x O) {
+	// 	assert.IsType(t, "", x)
+	// })
+}
+
+func ExampleStr_EachI() {
+	NewStrV("1", "2", "3").EachI(func(i int, x O) {
+		fmt.Printf("%v:%v", i, x.(*Char))
+	})
+	// Output: 0:11:22:3
+}
+
+func TestStr_EachI(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *Str
+		slice.EachI(func(i int, x O) {})
+	}
+
+	// Loop through
+	{
+		results := []string{}
+		NewStrV("1", "2", "3").EachI(func(i int, x O) {
+			results = append(results, x.(*Char).A())
+		})
+		assert.Equal(t, []string{"1", "2", "3"}, results)
+	}
+}
+
+// EachIE
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_EachIE_Go(t *testing.B) {
+	// action := func(x interface{}) {
+	// 	assert.IsType(t, "", x)
+	// }
+	// for _, x := range RangeString(nines6) {
+	// 	action(x)
+	// }
+}
+
+func BenchmarkStr_EachIE_Slice(t *testing.B) {
+	// NewStr(RangeString(nines6)).EachIE(func(i int, x O) error {
+	// 	assert.IsType(t, "", x)
+	// 	return nil
+	// })
+}
+
+func ExampleStr_EachIE() {
+	NewStrV("1", "2", "3").EachIE(func(i int, x O) error {
+		fmt.Printf("%v:%v", i, x.(*Char))
+		return nil
+	})
+	// Output: 0:11:22:3
+}
+
+func TestStr_EachIE(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *Str
+		slice.EachIE(func(i int, x O) error {
+			return nil
+		})
+	}
+
+	// Loop through
+	{
+		results := []string{}
+		NewStrV("1", "2", "3").EachIE(func(i int, x O) error {
+			results = append(results, x.(*Char).A())
+			return nil
+		})
+		assert.Equal(t, []string{"1", "2", "3"}, results)
+	}
+
+	// Break early with error
+	{
+		results := []string{}
+		NewStrV("1", "2", "3").EachIE(func(i int, x O) error {
+			if i == 2 {
+				return ErrBreak
+			}
+			results = append(results, x.(*Char).A())
+			return nil
+		})
+		assert.Equal(t, []string{"1", "2"}, results)
+	}
+}
+
+// EachR
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_EachR_Go(t *testing.B) {
+	// action := func(x interface{}) {
+	// 	assert.IsType(t, "", x)
+	// }
+	// for _, x := range RangeString(nines6) {
+	// 	action(x)
+	// }
+}
+
+func BenchmarkStr_EachR_Slice(t *testing.B) {
+	// NewStr(RangeString(nines6)).EachR(func(x O) {
+	// 	assert.IsType(t, "", x)
+	// })
+}
+
+func ExampleStr_EachR() {
+	NewStrV("1", "2", "3").EachR(func(x O) {
+		fmt.Printf("%v", x.(*Char))
+	})
+	// Output: 321
+}
+
+func TestStr_EachR(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *Str
+		slice.EachR(func(x O) {})
+	}
+
+	// Loop through
+	{
+		results := []string{}
+		NewStrV("1", "2", "3").EachR(func(x O) {
+			results = append(results, x.(*Char).A())
+		})
+		assert.Equal(t, []string{"3", "2", "1"}, results)
+	}
+}
+
+// EachRE
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_EachRE_Go(t *testing.B) {
+	// action := func(x interface{}) {
+	// 	assert.IsType(t, "", x)
+	// }
+	// for _, x := range RangeString(nines6) {
+	// 	action(x)
+	// }
+}
+
+func BenchmarkStr_EachRE_Slice(t *testing.B) {
+	// NewStr(RangeString(nines6)).EachRE(func(x O) error {
+	// 	assert.IsType(t, "", x)
+	// 	return nil
+	// })
+}
+
+func ExampleStr_EachRE() {
+	NewStrV("1", "2", "3").EachRE(func(x O) error {
+		fmt.Printf("%v", x.(*Char))
+		return nil
+	})
+	// Output: 321
+}
+
+func TestStr_EachRE(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *Str
+		slice.EachRE(func(x O) error {
+			return nil
+		})
+	}
+
+	// Loop through
+	{
+		results := []string{}
+		NewStrV("1", "2", "3").EachRE(func(x O) error {
+			results = append(results, x.(*Char).A())
+			return nil
+		})
+		assert.Equal(t, []string{"3", "2", "1"}, results)
+	}
+
+	// Break early with error
+	{
+		results := []string{}
+		NewStrV("1", "2", "3").EachRE(func(x O) error {
+			if x.(*Char).A() == "1" {
+				return ErrBreak
+			}
+			results = append(results, x.(*Char).A())
+			return nil
+		})
+		assert.Equal(t, []string{"3", "2"}, results)
+	}
+}
+
+// EachRI
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_EachRI_Go(t *testing.B) {
+	// action := func(x interface{}) {
+	// 	assert.IsType(t, "", x)
+	// }
+	// for _, x := range RangeString(nines6) {
+	// 	action(x)
+	// }
+}
+
+func BenchmarkStr_EachRI_Slice(t *testing.B) {
+	// NewStr(RangeString(nines6)).EachRI(func(i int, x O) {
+	// 	assert.IsType(t, "", x)
+	// })
+}
+
+func ExampleStr_EachRI() {
+	NewStrV("1", "2", "3").EachRI(func(i int, x O) {
+		fmt.Printf("%v:%v", i, x.(*Char))
+	})
+	// Output: 2:31:20:1
+}
+
+func TestStr_EachRI(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *Str
+		slice.EachRI(func(i int, x O) {})
+	}
+
+	// Loop through
+	{
+		results := []string{}
+		NewStrV("1", "2", "3").EachRI(func(i int, x O) {
+			results = append(results, x.(*Char).A())
+		})
+		assert.Equal(t, []string{"3", "2", "1"}, results)
+	}
+}
+
+// EachRIE
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_EachRIE_Go(t *testing.B) {
+	// action := func(x interface{}) {
+	// 	assert.IsType(t, "", x)
+	// }
+	// for _, x := range RangeString(nines6) {
+	// 	action(x)
+	// }
+}
+
+func BenchmarkStr_EachRIE_Slice(t *testing.B) {
+	// NewStr(RangeString(nines6)).EachRIE(func(i int, x O) error {
+	// 	assert.IsType(t, "", x)
+	// 	return nil
+	// })
+}
+
+func ExampleStr_EachRIE() {
+	NewStrV("1", "2", "3").EachRIE(func(i int, x O) error {
+		fmt.Printf("%v:%v", i, x.(*Char))
+		return nil
+	})
+	// Output: 2:31:20:1
+}
+
+func TestStr_EachRIE(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *Str
+		slice.EachRIE(func(i int, x O) error {
+			return nil
+		})
+	}
+
+	// Loop through
+	{
+		results := []string{}
+		NewStrV("1", "2", "3").EachRIE(func(i int, x O) error {
+			results = append(results, x.(*Char).A())
+			return nil
+		})
+		assert.Equal(t, []string{"3", "2", "1"}, results)
+	}
+
+	// Break early with error
+	{
+		results := []string{}
+		NewStrV("1", "2", "3").EachRIE(func(i int, x O) error {
+			if i == 0 {
+				return ErrBreak
+			}
+			results = append(results, x.(*Char).A())
+			return nil
+		})
+		assert.Equal(t, []string{"3", "2"}, results)
+	}
+}
 
 // // func TestStr_Empty(t *testing.T) {
 // // 	var empty *Str
