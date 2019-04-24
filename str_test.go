@@ -252,30 +252,30 @@ func TestStr_AllS(t *testing.T) {
 // Any
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStr_Any_Go(t *testing.B) {
-	any := func(list []string, x []string) bool {
-		for i := range x {
-			for j := range list {
-				if list[j] == x[i] {
-					return true
-				}
-			}
-		}
-		return false
-	}
+	// any := func(list []string, x []string) bool {
+	// 	for i := range x {
+	// 		for j := range list {
+	// 			if list[j] == x[i] {
+	// 				return true
+	// 			}
+	// 		}
+	// 	}
+	// 	return false
+	// }
 
-	// test here
-	src := RangeString(nines4)
-	for _, x := range src {
-		any(src, []string{x})
-	}
+	// // test here
+	// src := RangeString(nines4)
+	// for _, x := range src {
+	// 	any(src, []string{x})
+	// }
 }
 
 func BenchmarkStr_Any_Slice(t *testing.B) {
-	src := RangeString(nines4)
-	slice := NewStr(src)
-	for i := range src {
-		slice.Any(i)
-	}
+	// src := RangeString(nines4)
+	// slice := NewStr(src)
+	// for i := range src {
+	// 	slice.Any(i)
+	// }
 }
 
 func ExampleStr_Any_empty() {
@@ -327,30 +327,30 @@ func TestStr_Any(t *testing.T) {
 // AnyS
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStr_AnyS_Go(t *testing.B) {
-	any := func(list []string, x []string) bool {
-		for i := range x {
-			for j := range list {
-				if list[j] == x[i] {
-					return true
-				}
-			}
-		}
-		return false
-	}
+	// any := func(list []string, x []string) bool {
+	// 	for i := range x {
+	// 		for j := range list {
+	// 			if list[j] == x[i] {
+	// 				return true
+	// 			}
+	// 		}
+	// 	}
+	// 	return false
+	// }
 
-	// test here
-	src := RangeString(nines4)
-	for _, x := range src {
-		any(src, []string{x})
-	}
+	// // test here
+	// src := RangeString(nines4)
+	// for _, x := range src {
+	// 	any(src, []string{x})
+	// }
 }
 
 func BenchmarkStr_AnyS_Slice(t *testing.B) {
-	src := RangeString(nines4)
-	slice := NewStr(src)
-	for _, x := range src {
-		slice.Any([]string{x})
-	}
+	// src := RangeString(nines4)
+	// slice := NewStr(src)
+	// for _, x := range src {
+	// 	slice.Any([]string{x})
+	// }
 }
 
 func ExampleStr_AnyS() {
@@ -461,19 +461,19 @@ func TestStr_AnyS(t *testing.T) {
 // AnyW
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStr_AnyW_Go(t *testing.B) {
-	src := RangeString(nines5)
-	for _, x := range src {
-		if x == string(nines4) {
-			break
-		}
-	}
+	// src := RangeString(nines5)
+	// for _, x := range src {
+	// 	if x == string(nines4) {
+	// 		break
+	// 	}
+	// }
 }
 
 func BenchmarkStr_AnyW_Slice(t *testing.B) {
-	src := RangeString(nines5)
-	NewStr(src).AnyW(func(x O) bool {
-		return ExB(x.(string) == string(nines4))
-	})
+	// src := RangeString(nines5)
+	// NewStr(src).AnyW(func(x O) bool {
+	// 	return ExB(x.(string) == string(nines4))
+	// })
 }
 
 func ExampleStr_AnyW() {
@@ -607,14 +607,14 @@ func TestStr_Append(t *testing.T) {
 // AppendV
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStr_AppendV_Go(t *testing.B) {
-	src := []string{}
-	src = append(src, RangeString(nines6)...)
+	// src := []string{}
+	// src = append(src, RangeString(nines6)...)
 }
 
 func BenchmarkStr_AppendV_Slice(t *testing.B) {
-	n := NewStrV()
-	new := rangeO(0, nines6)
-	n.AppendV(new...)
+	// n := NewStrV()
+	// new := rangeO(0, nines6)
+	// n.AppendV(new...)
 }
 
 func ExampleStr_AppendV() {
@@ -688,19 +688,19 @@ func TestStr_AsciiOnly(t *testing.T) {
 // At
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStr_At_Go(t *testing.B) {
-	src := RangeString(nines6)
-	for _, x := range src {
-		assert.IsType(t, 0, x)
-	}
+	// src := RangeString(nines6)
+	// for _, x := range src {
+	// 	assert.IsType(t, 0, x)
+	// }
 }
 
 func BenchmarkStr_At_Slice(t *testing.B) {
-	src := RangeString(nines6)
-	slice := NewStr(src)
-	for i := 0; i < len(src); i++ {
-		_, ok := (slice.At(i).O()).(string)
-		assert.True(t, ok)
-	}
+	// src := RangeString(nines6)
+	// slice := NewStr(src)
+	// for i := 0; i < len(src); i++ {
+	// 	_, ok := (slice.At(i).O()).(string)
+	// 	assert.True(t, ok)
+	// }
 }
 
 func ExampleStr_At() {
@@ -726,7 +726,7 @@ func TestStr_At(t *testing.T) {
 		assert.Equal(t, "2", slice.At(1).A())
 		assert.Equal(t, "3", slice.At(2).A())
 		assert.Equal(t, "4", slice.At(3).A())
-		assert.Equal(t, Char(52), slice.At(3).O())
+		assert.Equal(t, ToChar("4"), slice.At(3).O())
 	}
 
 	// index out of bounds
@@ -1985,14 +1985,301 @@ func TestStr_EachRIE(t *testing.T) {
 	}
 }
 
-// // func TestStr_Empty(t *testing.T) {
-// // 	var empty *Str
-// // 	assert.True(t, A("").Empty())
-// // 	assert.True(t, empty.Empty())
-// // 	assert.True(t, A("  ").Empty())
-// // 	assert.True(t, A("\n").Empty())
-// // 	assert.True(t, A("\t").Empty())
-// // }
+// Empty
+//--------------------------------------------------------------------------------------------------
+func ExampleStr_Empty() {
+	fmt.Println(NewStrV().Empty())
+	// Output: true
+}
+
+func TestStr_Empty(t *testing.T) {
+
+	// nil or empty
+	{
+		var nilSlice *Str
+		assert.Equal(t, true, nilSlice.Empty())
+	}
+
+	assert.Equal(t, true, NewStrV().Empty())
+	assert.Equal(t, false, NewStrV("1").Empty())
+	assert.Equal(t, false, NewStrV("1", "2", "3").Empty())
+	assert.Equal(t, false, NewStrV("1").Empty())
+	assert.Equal(t, false, NewStr([]string{"1", "2", "3"}).Empty())
+}
+
+// First
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_First_Go(t *testing.B) {
+	// src := RangeString(nines7)
+	// for len(src) > 1 {
+	// 	_ = src[0]
+	// 	src = src[1:]
+	// }
+}
+
+func BenchmarkStr_First_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines7))
+	// for slice.Len() > 0 {
+	// 	slice.First()
+	// 	slice.DropFirst()
+	// }
+}
+
+func ExampleStr_First() {
+	slice := NewStrV("1", "2", "3")
+	fmt.Println(slice.First())
+	// Output: 1
+}
+
+func TestStr_First(t *testing.T) {
+	// invalid
+	assert.Equal(t, Obj(nil), NewStrV().First())
+
+	// int
+	assert.Equal(t, ToChar("2"), NewStrV("2", "3").First().O())
+	assert.Equal(t, ToChar("3"), NewStrV("3", "2").First().O())
+	assert.Equal(t, ToChar("1"), NewStrV("1", "3", "2").First().O())
+}
+
+// FirstN
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_FirstN_Go(t *testing.B) {
+	// src := RangeString(nines7)
+	// _ = src[0:10]
+}
+
+func BenchmarkStr_FirstN_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines7))
+	// slice.FirstN(10)
+}
+
+func ExampleStr_FirstN() {
+	slice := NewStrV("1", "2", "3")
+	fmt.Println(slice.FirstN(2))
+	// Output: 12
+}
+
+func TestStr_FirstN(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *Str
+		assert.Equal(t, NewStrV(), slice.FirstN(1))
+		assert.Equal(t, NewStrV(), slice.FirstN(-1))
+	}
+
+	// Test that the original is modified when the slice is modified
+	{
+		original := NewStrV("1", "2", "3")
+		result := original.FirstN(2).Set(0, "0")
+		assert.Equal(t, NewStrV("0", "2", "3"), original)
+		assert.Equal(t, NewStrV("0", "2"), result)
+	}
+
+	// Get none
+	assert.Equal(t, NewStrV(), NewStrV("1", "2", "3").FirstN(0))
+
+	// slice full array includeing out of bounds
+	assert.Equal(t, NewStrV(), NewStrV().FirstN(1))
+	assert.Equal(t, NewStrV(), NewStrV().FirstN(10))
+	assert.Equal(t, NewStrV("1", "2", "3"), NewStrV("1", "2", "3").FirstN(10))
+	assert.Equal(t, NewStr([]string{"1", "2", "3"}), NewStr([]string{"1", "2", "3"}).FirstN(10))
+
+	// grab a few diff
+	assert.Equal(t, NewStrV("1"), NewStrV("1", "2", "3").FirstN(1))
+	assert.Equal(t, NewStrV("1", "2"), NewStrV("1", "2", "3").FirstN(2))
+}
+
+// G
+//--------------------------------------------------------------------------------------------------
+func ExampleStr_G() {
+	fmt.Println(NewStrV("1", "2", "3").G())
+	// Output: 123
+}
+
+func TestStr_G(t *testing.T) {
+	assert.IsType(t, "", NewStrV().G())
+	assert.IsType(t, "123", NewStrV("1", "2", "3").G())
+}
+
+// Generic
+//--------------------------------------------------------------------------------------------------
+func ExampleStr_Generic() {
+	slice := NewStrV("1", "2", "3")
+	fmt.Println(slice.Generic())
+	// Output: false
+}
+
+// Index
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_Index_Go(t *testing.B) {
+	// for _, x := range RangeString(nines5) {
+	// 	if x == string(nines4) {
+	// 		break
+	// 	}
+	// }
+}
+
+func BenchmarkStr_Index_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines5))
+	// slice.Index(nines4)
+}
+
+func ExampleStr_Index() {
+	slice := NewStrV("1", "2", "3")
+	fmt.Println(slice.Index("2"))
+	// Output: 1
+}
+
+func TestStr_Index(t *testing.T) {
+
+	// empty
+	var slice *Str
+	assert.Equal(t, -1, slice.Index("2"))
+	assert.Equal(t, -1, NewStrV().Index("1"))
+
+	assert.Equal(t, 0, NewStrV("1", "2", "3").Index("1"))
+	assert.Equal(t, 1, NewStrV("1", "2", "3").Index("2"))
+	assert.Equal(t, 2, NewStrV("1", "2", "3").Index("3"))
+	assert.Equal(t, -1, NewStrV("1", "2", "3").Index("4"))
+	assert.Equal(t, -1, NewStrV("1", "2", "3").Index("5"))
+
+	// Conversion
+	{
+		assert.Equal(t, 1, NewStrV("1", "2", "3").Index(Object{2}))
+		assert.Equal(t, 1, NewStrV("1", "2", "3").Index("2"))
+		assert.Equal(t, 0, NewStrV("1", "2", "3").Index(true))
+		assert.Equal(t, -1, NewStrV("1", "2", "3").Index(false))
+		assert.Equal(t, 2, NewStrV("1", "2", "3").Index(Char('3')))
+	}
+}
+
+// Insert
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_Insert_Go(t *testing.B) {
+	src := []string{}
+	for _, x := range RangeString(nines6) {
+		src = append(src, x)
+		copy(src[1:], src[1:])
+		src[0] = x
+	}
+}
+
+func BenchmarkStr_Insert_Slice(t *testing.B) {
+	slice := NewStrV()
+	for x := range RangeString(nines6) {
+		slice.Insert(0, x)
+	}
+}
+
+func ExampleStr_Insert() {
+	slice := NewStrV("1", "3")
+	fmt.Println(slice.Insert(1, "2"))
+	// Output: 123
+}
+
+func TestStr_Insert(t *testing.T) {
+
+	// append
+	{
+		slice := NewStrV()
+		assert.Equal(t, NewStrV("0"), slice.Insert(-1, "0"))
+		assert.Equal(t, NewStrV("0", "1"), slice.Insert(-1, "1"))
+		assert.Equal(t, NewStrV("0", "1", "2"), slice.Insert(-1, "2"))
+	}
+
+	// [] append
+	{
+		slice := NewStrV()
+		assert.Equal(t, NewStrV("0"), slice.Insert(-1, []string{"0"}))
+		assert.Equal(t, NewStrV("0", "1", "2"), slice.Insert(-1, []string{"1", "2"}))
+	}
+
+	// prepend
+	{
+		slice := NewStrV()
+		assert.Equal(t, NewStrV("2"), slice.Insert(0, "2"))
+		assert.Equal(t, NewStrV("1", "2"), slice.Insert(0, "1"))
+		assert.Equal(t, NewStrV("0", "1", "2"), slice.Insert(0, "0"))
+	}
+
+	// [] prepend
+	{
+		slice := NewStrV()
+		assert.Equal(t, NewStrV("2"), slice.Insert(0, []string{"2"}))
+		assert.Equal(t, NewStrV("0", "1", "2"), slice.Insert(0, []string{"0", "1"}))
+	}
+
+	// middle pos
+	{
+		slice := NewStrV("0", "5")
+		assert.Equal(t, NewStrV("0", "1", "5"), slice.Insert(1, "1"))
+		assert.Equal(t, NewStrV("0", "1", "2", "5"), slice.Insert(2, "2"))
+		assert.Equal(t, NewStrV("0", "1", "2", "3", "5"), slice.Insert(3, "3"))
+		assert.Equal(t, NewStrV("0", "1", "2", "3", "4", "5"), slice.Insert(4, "4"))
+	}
+
+	// [] middle pos
+	{
+		slice := NewStrV("0", "5")
+		assert.Equal(t, NewStrV("0", "1", "2", "5"), slice.Insert(1, []string{"1", "2"}))
+		assert.Equal(t, NewStrV("0", "1", "2", "3", "4", "5"), slice.Insert(3, []string{"3", "4"}))
+	}
+
+	// middle neg
+	{
+		slice := NewStrV("0", "5")
+		assert.Equal(t, NewStrV("0", "1", "5"), slice.Insert(-2, "1"))
+		assert.Equal(t, NewStrV("0", "1", "2", "5"), slice.Insert(-2, "2"))
+		assert.Equal(t, NewStrV("0", "1", "2", "3", "5"), slice.Insert(-2, "3"))
+		assert.Equal(t, NewStrV("0", "1", "2", "3", "4", "5"), slice.Insert(-2, "4"))
+	}
+
+	// [] middle neg
+	{
+		slice := NewStrV(0, 5)
+		assert.Equal(t, NewStrV(0, 1, 2, 5), slice.Insert(-2, []string{"1", "2"}))
+		assert.Equal(t, NewStrV(0, "1", "2", "3", 4, 5), slice.Insert(-2, []int{3, 4}))
+	}
+
+	// error cases
+	{
+		var slice *Str
+		assert.False(t, slice.Insert(0, 0).Nil())
+		assert.Equal(t, NewStrV("0"), slice.Insert(0, "0"))
+		assert.Equal(t, NewStrV("0", "1"), NewStrV("0", "1").Insert(-10, "1"))
+		assert.Equal(t, NewStrV("0", "1"), NewStrV("0", "1").Insert(10, "1"))
+		assert.Equal(t, NewStrV("0", "1"), NewStrV("0", "1").Insert(2, "1"))
+		assert.Equal(t, NewStrV("0", "1"), NewStrV("0", "1").Insert(-3, "1"))
+	}
+
+	// [] error cases
+	{
+		var slice *Str
+		assert.False(t, slice.Insert(0, 0).Nil())
+		assert.Equal(t, NewStrV(0), slice.Insert(0, 0))
+		assert.Equal(t, NewStrV(0, 1), NewStrV(0, 1).Insert(-10, 1))
+		assert.Equal(t, NewStrV(0, 1), NewStrV(0, 1).Insert(10, 1))
+		assert.Equal(t, NewStrV(0, 1), NewStrV(0, 1).Insert(2, 1))
+		assert.Equal(t, NewStrV(0, 1), NewStrV(0, 1).Insert(-3, 1))
+	}
+
+	// Conversion
+	{
+		assert.Equal(t, NewStrV("1", "2", "3"), NewStrV(1, 3).Insert(1, Object{2}))
+		assert.Equal(t, NewStrV("1", "2", "3"), NewStrV(1, 3).Insert(1, "2"))
+		assert.Equal(t, NewStrV(true, "2", "3"), NewStrV(2, 3).Insert(0, true))
+		assert.Equal(t, NewStrV("1", "2", "3"), NewStrV(1, 2).Insert(-1, Char('3')))
+	}
+
+	// [] Conversion
+	{
+		assert.Equal(t, NewStrV("1", "2", "3", 4), NewStrV(1, 4).Insert(1, []Object{{2}, {3}}))
+		assert.Equal(t, NewStrV("1", "2", "3", 4), NewStrV(1, 4).Insert(1, []string{"2", "3"}))
+		assert.Equal(t, NewStrV(false, true, "2", "3"), NewStrV(2, 3).Insert(0, []bool{false, true}))
+		assert.Equal(t, NewStrV("1", "2", "3", 4), NewStrV(1, 2).Insert(-1, []Char{'3', '4'}))
+	}
+}
 
 // // func TestStr_HasAnyPrefix(t *testing.T) {
 // // 	assert.True(t, A("test").HasAnyPrefix("tes"))

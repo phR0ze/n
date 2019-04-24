@@ -1344,6 +1344,16 @@ func TestToChar(t *testing.T) {
 		assert.Equal(t, NewCharV(), ToChar((*int64)(nil)))
 	}
 
+	// Object
+	{
+		var val1 Object
+		val2 := Object{3}
+		assert.Equal(t, '3', ToChar(val2).G())
+		assert.Equal(t, '3', ToChar(&val2).G())
+		assert.Equal(t, NewCharV(), ToChar(val1))
+		assert.Equal(t, NewCharV(), ToChar((*Object)(nil)))
+	}
+
 	// []rune
 	{
 		val1 := []rune{'1'}

@@ -49,7 +49,7 @@ func (p *Object) String() string {
 	return ToString(p.o)
 }
 
-// Bool related
+// Bool
 //--------------------------------------------------------------------------------------------------
 
 // ToBool casts an interface to a bool type.
@@ -67,6 +67,18 @@ func (p *Object) ToBoolE() (bool, error) {
 		return false, nil
 	}
 	return ToBoolE(p.o)
+}
+
+// Char
+//--------------------------------------------------------------------------------------------------
+
+// ToChar casts an interface to a *Char type.
+func (p *Object) ToChar() *Char {
+	if p == nil {
+		val := Char(0)
+		return &val
+	}
+	return ToChar(p.o)
 }
 
 // Time related

@@ -224,7 +224,7 @@ func (p *Str) At(i int) (elem *Object) {
 	if i = absIndex(len(*p), i); i == -1 {
 		return
 	}
-	elem.o = Char((*p)[i])
+	elem.o = ToChar((*p)[i])
 	return
 }
 
@@ -573,8 +573,9 @@ func (p *Str) Index(elem interface{}) (loc int) {
 	if p == nil || len(*p) == 0 {
 		return
 	}
+	x := ToChar(elem).G()
 	for i := range *p {
-		if elem == (*p)[i] {
+		if (*p)[i] == x {
 			return i
 		}
 	}
