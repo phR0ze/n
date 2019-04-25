@@ -31,9 +31,27 @@ func (p *Char) A() string {
 	return p.String()
 }
 
+// Equal returns true if the given *Char is value equal to this *Char.
+func (p *Char) Equal(obj interface{}) bool {
+	other := ToChar(obj)
+	if p == nil {
+		return false
+	}
+	return *p == *other
+}
+
 // G returns the underlying data structure as a builtin Go type
 func (p *Char) G() rune {
 	return p.O().(rune)
+}
+
+// Less returns true if the given *Char is less than this *Char.
+func (p *Char) Less(obj interface{}) bool {
+	other := ToChar(obj)
+	if p == nil {
+		return false
+	}
+	return p.A() < other.A()
 }
 
 // O returns the underlying data structure as is

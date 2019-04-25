@@ -1108,6 +1108,11 @@ func ToBoolE(obj interface{}) (val bool, err error) {
 	return
 }
 
+// C is an alias to ToChar for brevity
+func C(obj interface{}) *Char {
+	return ToChar(obj)
+}
+
 // ToChar convert an interface to a Char type.
 func ToChar(obj interface{}) *Char {
 	val := Char(0)
@@ -1661,6 +1666,16 @@ func ToIntSliceE(obj interface{}) (val *IntSlice, err error) {
 		}
 	}
 	return
+}
+
+// R is an alias to ToRune for brevity
+func R(obj interface{}) rune {
+	return rune(*ToChar(obj))
+}
+
+// ToRune convert an interface to a rune type.
+func ToRune(obj interface{}) rune {
+	return rune(*ToChar(obj))
 }
 
 // ToStr convert an interface to a *Str type.

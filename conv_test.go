@@ -1377,6 +1377,10 @@ func TestToChar(t *testing.T) {
 		assert.Equal(t, '1', ToChar(&val1).O())
 		assert.Equal(t, NewCharV(), ToChar(""))
 		assert.Equal(t, NewCharV(), ToChar((*[]string)(nil)))
+
+		// neg
+		assert.Equal(t, '-', ToChar("-1").O())
+		assert.Equal(t, '-', ToChar(-1).O())
 	}
 
 	// uint

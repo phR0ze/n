@@ -225,3 +225,18 @@ func absIndices(l int, indices ...int) (i int, j int, err error) {
 
 	return
 }
+
+// get the absolute value for the pos/neg index. then offset this index
+// to account for the targets length.
+// return of -1 indicates out of bounds
+func absOffset(len, tlen, i int) (abs int) {
+	if i < 0 {
+		abs = len + i
+	} else {
+		abs = i
+	}
+	if abs < 0 || abs >= len {
+		abs = -1
+	}
+	return
+}

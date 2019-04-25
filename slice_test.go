@@ -180,3 +180,21 @@ func TestSlice_absIndices(t *testing.T) {
 		assert.Nil(t, err)
 	}
 }
+
+func TestSlice_absOffset(t *testing.T) {
+	//             -4,-3,-2,-1
+	//              0, 1, 2, 3
+	assert.Equal(t, 3, absOffset(4, 0, -1))
+	assert.Equal(t, 2, absOffset(4, 0, -2))
+	assert.Equal(t, 1, absOffset(4, 0, -3))
+	assert.Equal(t, 0, absOffset(4, 0, -4))
+
+	assert.Equal(t, 0, absOffset(4, 0, 0))
+	assert.Equal(t, 1, absOffset(4, 0, 1))
+	assert.Equal(t, 2, absOffset(4, 0, 2))
+	assert.Equal(t, 3, absOffset(4, 0, 3))
+
+	// out of bounds
+	assert.Equal(t, -1, absOffset(4, 0, 4))
+	assert.Equal(t, -1, absOffset(4, 0, -5))
+}

@@ -587,62 +587,29 @@ func (p *Str) Index(elem interface{}) (loc int) {
 // negative index is used, the given element will be inserted after that element, so using an index
 // of -1 will insert the element at the end of the slice. Slice is returned for chaining. Invalid
 // index locations will not change the slice.
-func (p *Str) Insert(i int, elem interface{}) Slice {
+func (p *Str) Insert(i int, obj interface{}) Slice {
 	if p == nil || len(*p) == 0 {
-		return p.Append(elem)
+		return p.ConcatM(obj)
 	}
 
-	// // Insert the item before j if pos and after j if neg
-	// j := i
-	// if j = absIndex(len(*p), j); j == -1 {
-	// 	return p
-	// }
-	// if i < 0 {
-	// 	j++
-	// }
-	// if x, ok := elem.(string); ok {
-	// 	if j == 0 {
-	// 		*p = append([]string{x}, (*p)...)
-	// 	} else if j < len(*p) {
-	// 		*p = append(*p, x)
-	// 		copy((*p)[j+1:], (*p)[j:])
-	// 		(*p)[j] = x
-	// 	} else {
-	// 		*p = append(*p, x)
-	// 	}
-	// }
-	return p
-}
-
-// InsertS modifies this Slice to insert the given elements before the element with the given index.
-// Negative indices count backwards from the end of the slice, where -1 is the last element. If a
-// negative index is used, the given element will be inserted after that element, so using an index
-// of -1 will insert the element at the end of the slice. Slice is returned for chaining. Invalid
-// index locations will not change the slice.
-func (p *Str) InsertS(i int, slice interface{}) Slice {
-	if p == nil || len(*p) == 0 {
-		return p.ConcatM(slice)
+	// Insert the item before j if pos and after j if neg
+	j := i
+	if j = absIndex(len(*p), j); j == -1 {
+		return p
 	}
-
-	// // Insert the item before j if pos and after j if neg
-	// j := i
-	// if j = absIndex(len(*p), j); j == -1 {
-	// 	return p
-	// }
-	// if i < 0 {
-	// 	j++
-	// }
-	// if x, ok := elem.(string); ok {
-	// 	if j == 0 {
-	// 		*p = append([]string{x}, (*p)...)
-	// 	} else if j < len(*p) {
-	// 		*p = append(*p, x)
-	// 		copy((*p)[j+1:], (*p)[j:])
-	// 		(*p)[j] = x
-	// 	} else {
-	// 		*p = append(*p, x)
-	// 	}
-	// }
+	if i < 0 {
+		j++
+	}
+	x := ToStr(obj)
+	if j == 0 {
+		*p = append(*x, *p...)
+	} else if j < len(*p) {
+		*p = append(*p, *x...)           // ensures enough space exists
+		copy((*p)[j+len(*x):], (*p)[j:]) // shifts right elements drop added
+		copy((*p)[j:], *x)               // set new in locations vacated
+	} else {
+		*p = append(*p, *x...)
+	}
 	return p
 }
 
@@ -659,7 +626,7 @@ func (p *Str) Join(separator ...string) (str *Object) {
 
 	var builder strings.Builder
 	for i := range *p {
-		builder.WriteString(Obj((*p)[i]).ToString())
+		builder.WriteString(ToChar((*p)[i]).A())
 		if i+1 < len(*p) {
 			builder.WriteString(sep)
 		}
@@ -696,7 +663,7 @@ func (p *Str) Less(i, j int) bool {
 	if p == nil || len(*p) < 2 || i < 0 || j < 0 || i >= len(*p) || j >= len(*p) {
 		return false
 	}
-	return (*p)[i] < (*p)[j]
+	return ToChar((*p)[i]).Less((*p)[j])
 }
 
 // Nil tests if this Slice is nil
@@ -777,11 +744,11 @@ func (p *Str) Select(sel func(O) bool) (new Slice) {
 	if p == nil || len(*p) == 0 {
 		return slice
 	}
-	// for i := range *p {
-	// 	if sel((*p)[i]) {
-	// 		*slice = append(*slice, (*p)[i])
-	// 	}
-	// }
+	for i := range *p {
+		if sel(ToChar((*p)[i])) {
+			*slice = append(*slice, (*p)[i])
+		}
+	}
 	return slice
 }
 
@@ -792,21 +759,27 @@ func (p *Str) Set(i int, elem interface{}) Slice {
 	return slice
 }
 
-// SetE the element at the given index location to the given element. Allows for negative notation.
-// Returns a referenc to this Slice and an error if out of bounds or elem is the wrong type.
-func (p *Str) SetE(i int, elem interface{}) (Slice, error) {
+// SetE the element(s) at the given index location to the given element. Allows for negative notation.
+// Returns a reference to this Slice and an error if out of bounds or elem is the wrong type.
+func (p *Str) SetE(i int, elems interface{}) (Slice, error) {
 	var err error
 	if p == nil {
 		return NewStrV(), err
 	}
-	if i = absIndex(len(*p), i); i == -1 {
+	j := -1
+	if j = absIndex(len(*p), i); j == -1 {
 		err = errors.Errorf("slice assignment is out of bounds")
 		return p, err
 	}
 
-	y := ToStr(elem)
+	// Account for length of elems
+	y := ToStr(elems)
+	// p.Drop(absNeg(n), -1)
+	// if i < 0 {
+	// 	j -
+	// }
 	if len(*y) > 0 {
-		(*p)[i] = (*y)[0]
+		copy((*p)[j:], *y)
 	}
 	return p, err
 }

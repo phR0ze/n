@@ -72,6 +72,11 @@ func (p *Object) ToBoolE() (bool, error) {
 // Char
 //--------------------------------------------------------------------------------------------------
 
+// C is an alias to ToChar for brevity
+func (p *Object) C() *Char {
+	return p.ToChar()
+}
+
 // ToChar casts an interface to a *Char type.
 func (p *Object) ToChar() *Char {
 	if p == nil {
@@ -79,6 +84,19 @@ func (p *Object) ToChar() *Char {
 		return &val
 	}
 	return ToChar(p.o)
+}
+
+// R is an alias to ToRune for brevity
+func (p *Object) R() rune {
+	return p.ToRune()
+}
+
+// ToRune casts an interface to a rune type.
+func (p *Object) ToRune() rune {
+	if p == nil {
+		return rune(0)
+	}
+	return rune(*ToChar(p.o))
 }
 
 // Time related
