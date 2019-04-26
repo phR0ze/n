@@ -2624,13 +2624,29 @@ func ExampleStringSlice_SetE() {
 }
 
 func TestStringSlice_SetE(t *testing.T) {
+
+	// pos - begining
 	{
 		slice := NewStringSliceV("1", "2", "3")
 		result, err := slice.SetE(0, "0")
 		assert.Nil(t, err)
 		assert.Equal(t, NewStringSliceV("0", "2", "3"), slice)
 		assert.Equal(t, NewStringSliceV("0", "2", "3"), result)
+
+		// multiple
+		result, err = slice.SetE(0, []string{"4", "5", "6"})
+		assert.Nil(t, err)
+		assert.Equal(t, NewStringSliceV("4", "5", "6"), slice)
+		assert.Equal(t, NewStringSliceV("4", "5", "6"), result)
+
+		// multiple over
+		result, err = slice.SetE(0, []string{"4", "5", "6", "7"})
+		assert.Nil(t, err)
+		assert.Equal(t, NewStringSliceV("4", "5", "6"), slice)
+		assert.Equal(t, NewStringSliceV("4", "5", "6"), result)
 	}
+
+	// pos - middle
 	{
 		slice := NewStringSliceV("1", "2", "3")
 		result, err := slice.SetE(1, "0")
@@ -2638,6 +2654,8 @@ func TestStringSlice_SetE(t *testing.T) {
 		assert.Equal(t, NewStringSliceV("1", "0", "3"), slice)
 		assert.Equal(t, NewStringSliceV("1", "0", "3"), result)
 	}
+
+	// pos - end
 	{
 		slice := NewStringSliceV("1", "2", "3")
 		result, err := slice.SetE(2, "0")
@@ -2645,13 +2663,29 @@ func TestStringSlice_SetE(t *testing.T) {
 		assert.Equal(t, NewStringSliceV("1", "2", "0"), slice)
 		assert.Equal(t, NewStringSliceV("1", "2", "0"), result)
 	}
+
+	// neg - begining
 	{
 		slice := NewStringSliceV("1", "2", "3")
 		result, err := slice.SetE(-3, "0")
 		assert.Nil(t, err)
 		assert.Equal(t, NewStringSliceV("0", "2", "3"), slice)
 		assert.Equal(t, NewStringSliceV("0", "2", "3"), result)
+
+		// multiple
+		result, err = slice.SetE(-3, []string{"4", "5", "6"})
+		assert.Nil(t, err)
+		assert.Equal(t, NewStringSliceV("4", "5", "6"), slice)
+		assert.Equal(t, NewStringSliceV("4", "5", "6"), result)
+
+		// multiple over
+		result, err = slice.SetE(-3, []string{"4", "5", "6", "7"})
+		assert.Nil(t, err)
+		assert.Equal(t, NewStringSliceV("4", "5", "6"), slice)
+		assert.Equal(t, NewStringSliceV("4", "5", "6"), result)
 	}
+
+	// neg - middle
 	{
 		slice := NewStringSliceV("1", "2", "3")
 		result, err := slice.SetE(-2, "0")
@@ -2659,6 +2693,8 @@ func TestStringSlice_SetE(t *testing.T) {
 		assert.Equal(t, NewStringSliceV("1", "0", "3"), slice)
 		assert.Equal(t, NewStringSliceV("1", "0", "3"), result)
 	}
+
+	// neg - end
 	{
 		slice := NewStringSliceV("1", "2", "3")
 		result, err := slice.SetE(-1, "0")

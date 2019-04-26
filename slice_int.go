@@ -583,16 +583,16 @@ func (p *IntSlice) Select(sel func(O) bool) (new Slice) {
 	return slice
 }
 
-// Set the element at the given index location to the given element. Allows for negative notation.
+// Set the element(s) at the given index location to the given element(s). Allows for negative notation.
 // Returns a reference to this Slice and swallows any errors.
-func (p *IntSlice) Set(i int, elem interface{}) Slice {
-	slice, _ := p.SetE(i, elem)
+func (p *IntSlice) Set(i int, elems interface{}) Slice {
+	slice, _ := p.SetE(i, elems)
 	return slice
 }
 
-// SetE the element at the given index location to the given element. Allows for negative notation.
+// SetE the element(s) at the given index location to the given element(s). Allows for negative notation.
 // Returns a referenc to this Slice and an error if out of bounds or elem is the wrong type.
-func (p *IntSlice) SetE(i int, elem interface{}) (Slice, error) {
+func (p *IntSlice) SetE(i int, elems interface{}) (Slice, error) {
 	var err error
 	if p == nil {
 		return p, err
@@ -602,10 +602,13 @@ func (p *IntSlice) SetE(i int, elem interface{}) (Slice, error) {
 		return p, err
 	}
 
-	if x, err := ToIntE(elem); err == nil {
-		(*p)[i] = x
+	// Account for length of elems
+	if x, err := ToIntSliceE(elems); err == nil {
+		if len(*x) > 0 {
+			copy((*p)[i:], *x)
+		}
 	} else {
-		err = errors.Wrapf(err, "can't set type '%T' in '%T'", elem, p)
+		err = errors.Wrapf(err, "can't set type '%T' in '%T'", elems, p)
 	}
 	return p, err
 }

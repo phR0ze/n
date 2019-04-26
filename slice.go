@@ -57,8 +57,8 @@ type Slice interface {
 	Reverse() (new Slice)                             // Reverse returns a new Slice with the order of the elements reversed.
 	ReverseM() Slice                                  // ReverseM modifies this Slice reversing the order of the elements and returns a reference to this Slice.
 	Select(sel func(O) bool) (new Slice)              // Select creates a new slice with the elements that match the lambda selector.
-	Set(i int, elem interface{}) Slice                // Set the element at the given index location to the given element. Allows for negative notation.
-	SetE(i int, elem interface{}) (Slice, error)      // Set the element at the given index location to the given element. Allows for negative notation.
+	Set(i int, elems interface{}) Slice               // Set the element(s) at the given index location to the given element(s). Allows for negative notation.
+	SetE(i int, elems interface{}) (Slice, error)     // SetE the element(s) at the given index location to the given element(s). Allows for negative notation.
 	Shift() (elem *Object)                            // Shift modifies this Slice to remove the first element and returns the removed element as an Object.
 	ShiftN(n int) (new Slice)                         // ShiftN modifies this Slice to remove the first n elements and returns the removed elements as a new Slice.
 	Single() bool                                     // Single reports true if there is only one element in this Slice.
@@ -223,20 +223,5 @@ func absIndices(l int, indices ...int) (i int, j int, err error) {
 	// so offsetting the end by one
 	j++
 
-	return
-}
-
-// get the absolute value for the pos/neg index. then offset this index
-// to account for the targets length.
-// return of -1 indicates out of bounds
-func absOffset(len, tlen, i int) (abs int) {
-	if i < 0 {
-		abs = len + i
-	} else {
-		abs = i
-	}
-	if abs < 0 || abs >= len {
-		abs = -1
-	}
 	return
 }

@@ -752,7 +752,7 @@ func (p *Str) Select(sel func(O) bool) (new Slice) {
 	return slice
 }
 
-// Set the element at the given index location to the given element. Allows for negative notation.
+// Set the element(s) at the given index location to the given element(s). Allows for negative notation.
 // Returns a reference to this Slice and swallows any errors.
 func (p *Str) Set(i int, elem interface{}) Slice {
 	slice, _ := p.SetE(i, elem)
@@ -766,20 +766,15 @@ func (p *Str) SetE(i int, elems interface{}) (Slice, error) {
 	if p == nil {
 		return NewStrV(), err
 	}
-	j := -1
-	if j = absIndex(len(*p), i); j == -1 {
+	if i = absIndex(len(*p), i); i == -1 {
 		err = errors.Errorf("slice assignment is out of bounds")
 		return p, err
 	}
 
 	// Account for length of elems
-	y := ToStr(elems)
-	// p.Drop(absNeg(n), -1)
-	// if i < 0 {
-	// 	j -
-	// }
-	if len(*y) > 0 {
-		copy((*p)[j:], *y)
+	x := ToStr(elems)
+	if len(*x) > 0 {
+		copy((*p)[i:], *x)
 	}
 	return p, err
 }

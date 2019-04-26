@@ -2874,11 +2874,11 @@ func TestStr_Set(t *testing.T) {
 		assert.Equal(t, NewStrV("1", "2", "3"), NewStrV("1", "2", "3").Set(5, "1"))
 	}
 
-	// // Multi
-	// {
-	// 	assert.Equal(t, "trueings", NewStr("testings").Set(0, true).A())
-	// 	assert.Equal(t, "testtrue", NewStr("testings").Set(-1, true).A())
-	// }
+	// Override
+	{
+		assert.Equal(t, "trueings", NewStr("testings").Set(0, true).A())
+		assert.Equal(t, "testingt", NewStr("testings").Set(-1, true).A())
+	}
 
 	// Conversion
 	{

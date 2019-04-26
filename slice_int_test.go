@@ -2623,13 +2623,29 @@ func ExampleIntSlice_SetE() {
 }
 
 func TestIntSlice_SetE(t *testing.T) {
+
+	// pos - begining
 	{
 		slice := NewIntSliceV(1, 2, 3)
 		result, err := slice.SetE(0, 0)
 		assert.Nil(t, err)
 		assert.Equal(t, NewIntSliceV(0, 2, 3), slice)
 		assert.Equal(t, NewIntSliceV(0, 2, 3), result)
+
+		// multiple
+		result, err = slice.SetE(0, []int{4, 5, 6})
+		assert.Nil(t, err)
+		assert.Equal(t, NewIntSliceV(4, 5, 6), slice)
+		assert.Equal(t, NewIntSliceV(4, 5, 6), result)
+
+		// multiple over
+		result, err = slice.SetE(0, []int{1, 2, 3, 4})
+		assert.Nil(t, err)
+		assert.Equal(t, NewIntSliceV(1, 2, 3), slice)
+		assert.Equal(t, NewIntSliceV(1, 2, 3), result)
 	}
+
+	// pos - middle
 	{
 		slice := NewIntSliceV(1, 2, 3)
 		result, err := slice.SetE(1, 0)
@@ -2637,6 +2653,8 @@ func TestIntSlice_SetE(t *testing.T) {
 		assert.Equal(t, NewIntSliceV(1, 0, 3), slice)
 		assert.Equal(t, NewIntSliceV(1, 0, 3), result)
 	}
+
+	// pos - end
 	{
 		slice := NewIntSliceV(1, 2, 3)
 		result, err := slice.SetE(2, 0)
@@ -2644,13 +2662,29 @@ func TestIntSlice_SetE(t *testing.T) {
 		assert.Equal(t, NewIntSliceV(1, 2, 0), slice)
 		assert.Equal(t, NewIntSliceV(1, 2, 0), result)
 	}
+
+	// neg - begining
 	{
 		slice := NewIntSliceV(1, 2, 3)
 		result, err := slice.SetE(-3, 0)
 		assert.Nil(t, err)
 		assert.Equal(t, NewIntSliceV(0, 2, 3), slice)
 		assert.Equal(t, NewIntSliceV(0, 2, 3), result)
+
+		// multiple
+		result, err = slice.SetE(-3, []int{4, 5, 6})
+		assert.Nil(t, err)
+		assert.Equal(t, NewIntSliceV(4, 5, 6), slice)
+		assert.Equal(t, NewIntSliceV(4, 5, 6), result)
+
+		// multiple over
+		result, err = slice.SetE(-3, []int{1, 2, 3, 4})
+		assert.Nil(t, err)
+		assert.Equal(t, NewIntSliceV(1, 2, 3), slice)
+		assert.Equal(t, NewIntSliceV(1, 2, 3), result)
 	}
+
+	// neg - middle
 	{
 		slice := NewIntSliceV(1, 2, 3)
 		result, err := slice.SetE(-2, 0)
@@ -2658,6 +2692,8 @@ func TestIntSlice_SetE(t *testing.T) {
 		assert.Equal(t, NewIntSliceV(1, 0, 3), slice)
 		assert.Equal(t, NewIntSliceV(1, 0, 3), result)
 	}
+
+	// neg - end
 	{
 		slice := NewIntSliceV(1, 2, 3)
 		result, err := slice.SetE(-1, 0)

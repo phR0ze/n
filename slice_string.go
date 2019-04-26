@@ -573,16 +573,16 @@ func (p *StringSlice) Select(sel func(O) bool) (new Slice) {
 	return slice
 }
 
-// Set the element at the given index location to the given element. Allows for negative notation.
+// Set the element(s) at the given index location to the given element(s). Allows for negative notation.
 // Returns a reference to this Slice and swallows any errors.
 func (p *StringSlice) Set(i int, elem interface{}) Slice {
 	slice, _ := p.SetE(i, elem)
 	return slice
 }
 
-// SetE the element at the given index location to the given element. Allows for negative notation.
+// SetE the element(s) at the given index location to the given element(s). Allows for negative notation.
 // Returns a referenc to this Slice and an error if out of bounds or elem is the wrong type.
-func (p *StringSlice) SetE(i int, elem interface{}) (Slice, error) {
+func (p *StringSlice) SetE(i int, elems interface{}) (Slice, error) {
 	var err error
 	if p == nil {
 		return p, err
@@ -592,7 +592,14 @@ func (p *StringSlice) SetE(i int, elem interface{}) (Slice, error) {
 		return p, err
 	}
 
-	(*p)[i] = ToString(elem)
+	// Account for length of elems
+	if x, err := ToStringSliceE(elems); err == nil {
+		if len(*x) > 0 {
+			copy((*p)[i:], *x)
+		}
+	} else {
+		err = errors.Wrapf(err, "can't set type '%T' in '%T'", elems, p)
+	}
 	return p, err
 }
 
