@@ -2,6 +2,7 @@ package n
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -1171,6 +1172,9 @@ func TestStr_Count(t *testing.T) {
 	assert.Equal(t, 4, NewStr("44344").Count("4"))
 	assert.Equal(t, 3, NewStr("32335").Count("3"))
 	assert.Equal(t, 1, NewStr("123").Count("3"))
+
+	// Multi char
+	assert.Equal(t, 2, NewStr("foobarfoo").Count("foo"))
 }
 
 // CountW
@@ -2005,6 +2009,86 @@ func TestStr_Empty(t *testing.T) {
 	assert.Equal(t, false, NewStrV("1", "2", "3").Empty())
 	assert.Equal(t, false, NewStrV("1").Empty())
 	assert.Equal(t, false, NewStr([]string{"1", "2", "3"}).Empty())
+}
+
+// Fields
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_Fields_Go(t *testing.B) {
+	// src := RangeString(nines7)
+	// for len(src) > 1 {
+	// 	_ = src[0]
+	// 	src = src[1:]
+	// }
+}
+
+func BenchmarkStr_Fields_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines7))
+	// for slice.Len() > 0 {
+	// 	slice.Fields()
+	// 	slice.DropFields()
+	// }
+}
+
+func ExampleStr_Fields() {
+	slice := NewStr("1 2 3")
+	fmt.Println(slice.Fields())
+	// Output: [1 2 3]
+}
+
+func TestStr_Fields(t *testing.T) {
+
+	// whitespace only
+	{
+		assert.Equal(t, []string{}, NewStrV().Fields().O())
+		assert.Equal(t, []string{}, NewStrV("  ").Fields().O())
+		assert.Equal(t, []string{}, NewStrV("\n  \t").Fields().O())
+	}
+
+	// split on white space
+	{
+		assert.Equal(t, []string{"1", "2", "3"}, NewStr("1 2 3").Fields().O())
+		assert.Equal(t, []string{"1", "2", "3"}, NewStr("1\t2\t3").Fields().O())
+		assert.Equal(t, []string{"1", "2", "3"}, NewStr("1\n2\n3").Fields().O())
+	}
+}
+
+// FieldsW
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_FieldsW_Go(t *testing.B) {
+	// src := RangeString(nines7)
+	// for len(src) > 1 {
+	// 	_ = src[0]
+	// 	src = src[1:]
+	// }
+}
+
+func BenchmarkStr_FieldsW_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines7))
+	// for slice.Len() > 0 {
+	// 	slice.FieldsW()
+	// 	slice.DropFieldsW()
+	// }
+}
+
+func ExampleStr_FieldsW() {
+	slice := NewStr("1 2 3")
+	fmt.Println(slice.FieldsW(func(x rune) bool {
+		return ExB(x == ' ')
+	}))
+	// Output: [1 2 3]
+}
+
+func TestStr_FieldsW(t *testing.T) {
+
+	assert.Equal(t, []string{}, NewStrV().FieldsW(func(x rune) bool { return ExB(x == ' ') }).O())
+	assert.Equal(t, []string{}, strings.FieldsFunc("  ", func(x rune) bool { return ExB(x == ' ') }))
+	assert.Equal(t, []string{}, NewStr("111").FieldsW(func(x rune) bool { return ExB(x == '1') }).O())
+	assert.Equal(t, []string{}, strings.FieldsFunc("111", func(x rune) bool { return ExB(x == '1') }))
+	assert.Equal(t, []string{}, NewStr("  ").FieldsW(func(x rune) bool { return ExB(x == ' ') }).O())
+	assert.Equal(t, []string{"\n ", " "}, NewStr("\n \t ").FieldsW(func(x rune) bool { return ExB(x == '\t') }).O())
+	assert.Equal(t, []string{"1", "2", "3"}, NewStr("1 2 3").FieldsW(func(x rune) bool { return ExB(x == ' ') }).O())
+	assert.Equal(t, []string{"1", "2", "3"}, NewStr("1,2,3").FieldsW(func(x rune) bool { return ExB(x == ',') }).O())
+	assert.Equal(t, []string{"1", "2", "3"}, NewStr("1.2.3").FieldsW(func(x rune) bool { return ExB(x == '.') }).O())
 }
 
 // First

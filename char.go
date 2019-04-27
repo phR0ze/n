@@ -2,7 +2,7 @@ package n
 
 // Char wraps the Go rune providing a way to distinguish it from an int32
 // where as a rune is indistinguishable from an int32. Provides convenience
-// methods on par with other rapid development languages.
+// methods on par with rapid development languages.
 type Char rune
 
 // // C is an alias to NewChar for brevity

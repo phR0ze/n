@@ -8,7 +8,7 @@ import (
 )
 
 // StringSlice implements the Slice interface providing a generic way to work with slice types
-// including convenience methods on par with other rapid development languages.
+// including convenience methods on par with rapid development languages.
 type StringSlice []string
 
 // NewStringSlice creates a new *StringSlice

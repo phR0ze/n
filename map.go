@@ -1,7 +1,7 @@
 package n
 
 // Map provides a generic way to work with map types providing convenience methods
-// on par with other rapid development languages. 'this Map' refers to the current map
+// on par with rapid development languages. 'this Map' refers to the current map
 // instance being operated on.  'new Map' refers to a copy of the map.
 type Map interface {
 	Any(keys ...interface{}) bool // Any tests if this Map is not empty or optionally if it contains any of the given variadic keys.

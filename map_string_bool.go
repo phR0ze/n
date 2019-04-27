@@ -1,7 +1,7 @@
 package n
 
 // StringMapBool implements the Map interface providing a generic way to work with map types
-// including convenience methods on par with other rapid development languages.
+// including convenience methods on par with rapid development languages.
 type StringMapBool map[string]bool
 
 // NewStringMapBool creates a new empty StringMapBool if nothing given else simply

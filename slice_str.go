@@ -8,7 +8,7 @@ package n
 // )
 
 // // StrSlice implements the Slice interface providing a generic way to work with slice types
-// // including convenience methods on par with other rapid development languages.
+// // including convenience methods on par with rapid development languages.
 // type StrSlice []Str
 
 // // NewStrSlice creates a new *StrSlice

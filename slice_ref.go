@@ -9,7 +9,7 @@ import (
 )
 
 // RefSlice implements the Slice interface providing a generic way to work with slice types
-// including convenience methods on par with other rapid development languages. This type
+// including convenience methods on par with rapid development languages. This type
 // incurs the typical 10x reflection overhead costs. For high performance use the Slice
 // implementation matching the type your working with or implement a new type that satisfies
 // the Slice interface.

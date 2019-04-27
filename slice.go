@@ -1,4 +1,3 @@
-// Package n provides many Go types with convenience functions reminiscent of Ruby or C#.
 package n
 
 import (
@@ -6,7 +5,7 @@ import (
 )
 
 // Slice provides a generic way to work with slice types providing convenience methods
-// on par with other rapid development languages. 'this Slice' refers to the current slice
+// on par with rapid development languages. 'this Slice' refers to the current slice
 // instance being operated on.  'new Slice' refers to a copy of the slice based on a new
 // underlying Array.
 type Slice interface {

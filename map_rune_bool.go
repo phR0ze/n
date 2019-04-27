@@ -1,7 +1,7 @@
 package n
 
 // RuneMapBool implements the Map interface providing a generic way to work with map types
-// including convenience methods on par with other rapid development languages.
+// including convenience methods on par with rapid development languages.
 type RuneMapBool map[rune]bool
 
 // NewRuneMapBool creates a new empty RuneMapBool if nothing given else simply

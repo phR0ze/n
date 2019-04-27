@@ -1,7 +1,7 @@
 package n
 
 // IntMapBool implements the Map interface providing a generic way to work with map types
-// including convenience methods on par with other rapid development languages.
+// including convenience methods on par with rapid development languages.
 type IntMapBool map[int]bool
 
 // NewIntMapBool creates a new empty IntMapBool if nothing given else simply

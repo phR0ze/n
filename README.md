@@ -37,7 +37,7 @@ requirements:
 * ***Brevity*** - keep the naming as concise as possible while not infringing on clarity
 * ***Clarity*** - keep the naming as unambiguous as possible while not infringing on brevity
 * ***Performance*** - keep convenience functions as performant as possible while calling out significant costs
-* ***Speed*** - provide convenience function parity with other rapid development languages
+* ***Speed*** - provide convenience function parity with rapid development languages
 * ***Comfort*** - use naming and concepts in similar ways to popular languages
 
 # Background <a name="background"></a>

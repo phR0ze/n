@@ -14,7 +14,7 @@ var (
 )
 
 // Str wraps the Go []rune and implements the Slice interface providing
-// convenience methods on par with other rapid development languages.
+// convenience methods on par with rapid development languages.
 type Str []rune
 
 // A is an alias to NewStr for brevity
@@ -269,7 +269,6 @@ func (p *Str) ConcatM(slice interface{}) Slice {
 }
 
 // Contains checks if the given str is contained in this Str.
-//
 // Pass through for strings.Contains
 func (p *Str) Contains(str string) bool {
 	if p == nil {
@@ -279,7 +278,6 @@ func (p *Str) Contains(str string) bool {
 }
 
 // ContainsAny checks if any of the given chars exist in this Str.
-//
 // Pass through for strings.ContainsAny
 func (p *Str) ContainsAny(chars string) bool {
 	if p == nil {
@@ -289,7 +287,6 @@ func (p *Str) ContainsAny(chars string) bool {
 }
 
 // ContainsRune checks if the given rune exists in this Str.
-//
 // Pass through for strings.ContainsRune
 func (p *Str) ContainsRune(r rune) bool {
 	if p == nil {
@@ -539,6 +536,42 @@ func (p *Str) Empty() bool {
 		return true
 	}
 	return false
+}
+
+// Fields splits the Str around each instance of one or more consecutive white space characters
+// as defined by unicode.IsSpace, returning a Slice of substrings or an empty Slice if only
+// white space is found or the Str is nil or empty.
+func (p *Str) Fields() (new *StringSlice) {
+	if p == nil || len(*p) == 0 {
+		return ToStringSlice(p)
+	}
+	return ToStringSlice(strings.Fields(string(*p)))
+}
+
+// FieldsW splits the Str where the lambda f returns true, returning a Slice of substrings or
+// an empty Slice if nothing returns true or the Str is nil or empty.
+func (p *Str) FieldsW(f func(rune) bool) (new *StringSlice) {
+	new = NewStringSliceV()
+	if p == nil || len(*p) == 0 {
+		return
+	}
+	i := 0
+	capture := false
+	for j := range *p {
+		if f((*p)[j]) {
+			if capture {
+				capture = false
+				*new = append(*new, string((*p)[i:j]))
+			}
+		} else if !capture {
+			capture = true
+			i = j
+		}
+	}
+	if capture {
+		*new = append(*new, p.Slice(i, -1).A())
+	}
+	return
 }
 
 // First returns the first element in this Slice as Object.
