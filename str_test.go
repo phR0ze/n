@@ -2194,6 +2194,134 @@ func ExampleStr_Generic() {
 	// Output: false
 }
 
+// HasAnyPrefix
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_HasAnyPrefix_Go(t *testing.B) {
+	// src := RangeString(nines7)
+	// for len(src) > 1 {
+	// 	_ = src[0]
+	// 	src = src[1:]
+	// }
+}
+
+func BenchmarkStr_HasAnyPrefix_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines7))
+	// for slice.Len() > 0 {
+	// 	slice.HasAnyPrefix()
+	// 	slice.DropHasAnyPrefix()
+	// }
+}
+
+func ExampleStr_HasAnyPrefix() {
+	fmt.Println(NewStr("foobar").HasAnyPrefix("foo"))
+	// Output: true
+}
+
+func TestStr_HasAnyPrefix(t *testing.T) {
+
+	// Singles
+	assert.Equal(t, false, NewStr("foobar").HasAnyPrefix('f'))
+	assert.Equal(t, true, NewStr("foobar").HasAnyPrefix(ToChar('f')))
+	assert.Equal(t, false, NewStr("foobar").HasAnyPrefix('z'))
+	assert.Equal(t, false, NewStrV().HasAnyPrefix(""))
+	assert.Equal(t, false, NewStr("").HasAnyPrefix(""))
+	assert.Equal(t, false, NewStr("foobar").HasAnyPrefix(""))
+	assert.Equal(t, true, NewStr("foobar").HasAnyPrefix("foo"))
+	assert.Equal(t, false, NewStr("foobar").HasAnyPrefix("boo"))
+	assert.Equal(t, true, NewStr("123").HasAnyPrefix(1))
+	assert.Equal(t, false, NewStr("123").HasAnyPrefix(2))
+
+	// Multiples
+	assert.Equal(t, false, NewStr("foobar").HasAnyPrefix([]rune{'f', 'o'}))
+	assert.Equal(t, true, NewStr("foobar").HasAnyPrefix([]*Char{ToChar('f'), ToChar('o')}))
+	assert.Equal(t, true, NewStr("foobar").HasAnyPrefix([]string{"foo", "bar"}))
+	assert.Equal(t, false, NewStr("foobar").HasAnyPrefix([]string{"boo", "blah"}))
+	assert.Equal(t, true, NewStr("123").HasAnyPrefix([]int{1, 2}))
+	assert.Equal(t, false, NewStr("123").HasAnyPrefix([]int{2, 3}))
+}
+
+// HasAnyPrefixV
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_HasAnyPrefixV_Go(t *testing.B) {
+	// src := RangeString(nines7)
+	// for len(src) > 1 {
+	// 	_ = src[0]
+	// 	src = src[1:]
+	// }
+}
+
+func BenchmarkStr_HasAnyPrefixV_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines7))
+	// for slice.Len() > 0 {
+	// 	slice.HasAnyPrefixV()
+	// 	slice.DropHasAnyPrefixV()
+	// }
+}
+
+func ExampleStr_HasAnyPrefixV() {
+	fmt.Println(NewStr("foobar").HasAnyPrefixV("bar", "foo"))
+	// Output: true
+}
+
+func TestStr_HasAnyPrefixV(t *testing.T) {
+
+	// Singles
+	assert.Equal(t, true, NewStr("foobar").HasAnyPrefixV('f'))
+	assert.Equal(t, true, NewStr("foobar").HasAnyPrefixV(ToChar('f')))
+	assert.Equal(t, false, NewStr("foobar").HasAnyPrefixV('z'))
+	assert.Equal(t, false, NewStrV().HasAnyPrefixV(""))
+	assert.Equal(t, false, NewStr("").HasAnyPrefixV(""))
+	assert.Equal(t, false, NewStr("foobar").HasAnyPrefixV(""))
+	assert.Equal(t, true, NewStr("foobar").HasAnyPrefixV("foo"))
+	assert.Equal(t, false, NewStr("foobar").HasAnyPrefixV("boo"))
+	assert.Equal(t, true, NewStr("123").HasAnyPrefixV(1))
+	assert.Equal(t, false, NewStr("123").HasAnyPrefixV(2))
+
+	// Multiples
+	assert.Equal(t, true, NewStr("foobar").HasAnyPrefixV('o', 'f'))
+	assert.Equal(t, true, NewStr("foobar").HasAnyPrefixV(ToChar('f'), ToChar('o')))
+	assert.Equal(t, true, NewStr("foobar").HasAnyPrefixV("foo", "bar"))
+	assert.Equal(t, false, NewStr("foobar").HasAnyPrefixV("boo", "blah"))
+	assert.Equal(t, true, NewStr("123").HasAnyPrefixV(1, 2))
+	assert.Equal(t, false, NewStr("123").HasAnyPrefixV(2, 3))
+}
+
+// HasPrefix
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_HasPrefix_Go(t *testing.B) {
+	// src := RangeString(nines7)
+	// for len(src) > 1 {
+	// 	_ = src[0]
+	// 	src = src[1:]
+	// }
+}
+
+func BenchmarkStr_HasPrefix_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines7))
+	// for slice.Len() > 0 {
+	// 	slice.HasPrefix()
+	// 	slice.DropHasPrefix()
+	// }
+}
+
+func ExampleStr_HasPrefix() {
+	fmt.Println(NewStr("foobar").HasPrefix("foo"))
+	// Output: true
+}
+
+func TestStr_HasPrefix(t *testing.T) {
+
+	assert.Equal(t, true, NewStr("foobar").HasPrefix('f'))
+	assert.Equal(t, false, NewStr("foobar").HasPrefix('z'))
+	assert.Equal(t, false, NewStrV().HasPrefix(""))
+	assert.Equal(t, false, NewStr("").HasPrefix(""))
+	assert.Equal(t, false, NewStr("foobar").HasPrefix(""))
+	assert.Equal(t, true, NewStr("foobar").HasPrefix("foo"))
+	assert.Equal(t, false, NewStr("foobar").HasPrefix("boo"))
+	assert.Equal(t, true, NewStr("123").HasPrefix(1))
+	assert.Equal(t, false, NewStr("123").HasPrefix(2))
+}
+
 // Index
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStr_Index_Go(t *testing.B) {

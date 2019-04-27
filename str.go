@@ -599,6 +599,61 @@ func (p *Str) Generic() bool {
 	return false
 }
 
+// HasAnyPrefix checks if the string has any of the given prefixes
+func (p *Str) HasAnyPrefix(prefixes interface{}) bool {
+	if p == nil || len(*p) == 0 {
+		return false
+	}
+	str := p.A()
+	slice := ToStringSlice(prefixes)
+	for i := range *slice {
+		x := (*slice)[i]
+		if len(x) > 0 && strings.HasPrefix(str, x) {
+			return true
+		}
+	}
+	return false
+}
+
+// HasAnyPrefixV checks if the string has any of the given prefixes
+func (p *Str) HasAnyPrefixV(prefixes ...interface{}) bool {
+	if p == nil || len(*p) == 0 {
+		return false
+	}
+	str := p.A()
+	for i := range prefixes {
+		x := ToStr(prefixes[i]).A()
+		if len(x) > 0 && strings.HasPrefix(str, x) {
+			return true
+		}
+	}
+	return false
+}
+
+// // // // HasAnySuffix checks if the string has any of the given suffixes
+// // // func (q *QStr) HasAnySuffix(suffixes ...string) bool {
+// // // 	for i := range suffixes {
+// // // 		if strings.HasSuffix(q.v, suffixes[i]) {
+// // // 			return true
+// // // 		}
+// // // 	}
+// // // 	return false
+// // // }
+
+// HasPrefix checks if the Str has the given prefix
+func (p *Str) HasPrefix(prefix interface{}) bool {
+	x := ToStr(prefix)
+	if p == nil || len(*p) == 0 || len(*x) == 0 {
+		return false
+	}
+	return strings.HasPrefix(string(*p), string(*x))
+}
+
+// // // // HasSuffix checks if the string has the given suffix
+// // // func (q *QStr) HasSuffix(suffix string) bool {
+// // // 	return strings.HasSuffix(q.v, suffix)
+// // // }
+
 // Index returns the index of the first element in this Slice where element == elem
 // Returns a -1 if the element was not not found.
 func (p *Str) Index(elem interface{}) (loc int) {
@@ -987,41 +1042,6 @@ func (p *Str) UniqM() Slice {
 	}
 	return p
 }
-
-// // // // Empty returns true if the pointer is nil, string is empty or whitespace only
-// // // func (q *QStr) Empty() bool {
-// // // 	return q == nil || q.TrimSpace().v == ""
-// // // }
-
-// // // // HasAnyPrefix checks if the string has any of the given prefixes
-// // // func (q *QStr) HasAnyPrefix(prefixes ...string) bool {
-// // // 	for i := range prefixes {
-// // // 		if strings.HasPrefix(q.v, prefixes[i]) {
-// // // 			return true
-// // // 		}
-// // // 	}
-// // // 	return false
-// // // }
-
-// // // // HasAnySuffix checks if the string has any of the given suffixes
-// // // func (q *QStr) HasAnySuffix(suffixes ...string) bool {
-// // // 	for i := range suffixes {
-// // // 		if strings.HasSuffix(q.v, suffixes[i]) {
-// // // 			return true
-// // // 		}
-// // // 	}
-// // // 	return false
-// // // }
-
-// // // // HasPrefix checks if the string has the given prefix
-// // // func (q *QStr) HasPrefix(prefix string) bool {
-// // // 	return strings.HasPrefix(q.v, prefix)
-// // // }
-
-// // // // HasSuffix checks if the string has the given suffix
-// // // func (q *QStr) HasSuffix(suffix string) bool {
-// // // 	return strings.HasSuffix(q.v, suffix)
-// // // }
 
 // // // // Len returns the length of the string
 // // // func (q *QStr) Len() int {
