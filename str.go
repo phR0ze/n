@@ -943,9 +943,9 @@ func (p *Str) UniqM() Slice {
 	if p == nil || len(*p) < 2 {
 		return p
 	}
-	m := NewStringMapBool()
+	m := NewRuneMapBool()
 	l := len(*p)
-	for i := range *p {
+	for i := 0; i < l; i++ {
 		if ok := m.Set((*p)[i], true); !ok {
 			p.DropAt(i)
 			l--
