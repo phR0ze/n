@@ -2286,6 +2286,97 @@ func TestStr_HasAnyPrefixV(t *testing.T) {
 	assert.Equal(t, false, NewStr("123").HasAnyPrefixV(2, 3))
 }
 
+// HasAnySuffix
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_HasAnySuffix_Go(t *testing.B) {
+	// src := RangeString(nines7)
+	// for len(src) > 1 {
+	// 	_ = src[0]
+	// 	src = src[1:]
+	// }
+}
+
+func BenchmarkStr_HasAnySuffix_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines7))
+	// for slice.Len() > 0 {
+	// 	slice.HasAnySuffix()
+	// 	slice.DropHasAnySuffix()
+	// }
+}
+
+func ExampleStr_HasAnySuffix() {
+	fmt.Println(NewStr("foobar").HasAnySuffix("bar"))
+	// Output: true
+}
+
+func TestStr_HasAnySuffix(t *testing.T) {
+
+	// Singles
+	assert.Equal(t, false, NewStr("foobar").HasAnySuffix('r'))
+	assert.Equal(t, true, NewStr("foobar").HasAnySuffix(ToChar('r')))
+	assert.Equal(t, false, NewStrV().HasAnySuffix(""))
+	assert.Equal(t, false, NewStr("").HasAnySuffix(""))
+	assert.Equal(t, false, NewStr("foobar").HasAnySuffix(""))
+	assert.Equal(t, true, NewStr("foobar").HasAnySuffix("bar"))
+	assert.Equal(t, false, NewStr("foobar").HasAnySuffix("boo"))
+	assert.Equal(t, true, NewStr("123").HasAnySuffix(3))
+	assert.Equal(t, false, NewStr("123").HasAnySuffix(2))
+
+	// Multiples
+	assert.Equal(t, false, NewStr("foobar").HasAnySuffix([]rune{'r', 'o'}))
+	assert.Equal(t, true, NewStr("foobar").HasAnySuffix([]*Char{ToChar('r'), ToChar('o')}))
+	assert.Equal(t, true, NewStr("foobar").HasAnySuffix([]string{"foo", "bar"}))
+	assert.Equal(t, false, NewStr("foobar").HasAnySuffix([]string{"boo", "blah"}))
+	assert.Equal(t, true, NewStr("123").HasAnySuffix([]int{1, 3}))
+	assert.Equal(t, false, NewStr("123").HasAnySuffix([]int{1, 2}))
+}
+
+// HasAnySuffixV
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_HasAnySuffixV_Go(t *testing.B) {
+	// src := RangeString(nines7)
+	// for len(src) > 1 {
+	// 	_ = src[0]
+	// 	src = src[1:]
+	// }
+}
+
+func BenchmarkStr_HasAnySuffixV_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines7))
+	// for slice.Len() > 0 {
+	// 	slice.HasAnySuffixV()
+	// 	slice.DropHasAnySuffixV()
+	// }
+}
+
+func ExampleStr_HasAnySuffixV() {
+	fmt.Println(NewStr("foobar").HasAnySuffixV("bar", "foo"))
+	// Output: true
+}
+
+func TestStr_HasAnySuffixV(t *testing.T) {
+
+	// Singles
+	assert.Equal(t, true, NewStr("foobar").HasAnySuffixV('r'))
+	assert.Equal(t, true, NewStr("foobar").HasAnySuffixV(ToChar('r')))
+	assert.Equal(t, false, NewStr("foobar").HasAnySuffixV('z'))
+	assert.Equal(t, false, NewStrV().HasAnySuffixV(""))
+	assert.Equal(t, false, NewStr("").HasAnySuffixV(""))
+	assert.Equal(t, false, NewStr("foobar").HasAnySuffixV(""))
+	assert.Equal(t, true, NewStr("foobar").HasAnySuffixV("bar"))
+	assert.Equal(t, false, NewStr("foobar").HasAnySuffixV("boo"))
+	assert.Equal(t, true, NewStr("123").HasAnySuffixV(3))
+	assert.Equal(t, false, NewStr("123").HasAnySuffixV(2))
+
+	// Multiples
+	assert.Equal(t, true, NewStr("foobar").HasAnySuffixV('o', 'r'))
+	assert.Equal(t, true, NewStr("foobar").HasAnySuffixV(ToChar('r'), ToChar('o')))
+	assert.Equal(t, true, NewStr("foobar").HasAnySuffixV("foo", "bar"))
+	assert.Equal(t, false, NewStr("foobar").HasAnySuffixV("boo", "blah"))
+	assert.Equal(t, true, NewStr("123").HasAnySuffixV(3, 2))
+	assert.Equal(t, false, NewStr("123").HasAnySuffixV(1, 2))
+}
+
 // HasPrefix
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStr_HasPrefix_Go(t *testing.B) {
@@ -2320,6 +2411,42 @@ func TestStr_HasPrefix(t *testing.T) {
 	assert.Equal(t, false, NewStr("foobar").HasPrefix("boo"))
 	assert.Equal(t, true, NewStr("123").HasPrefix(1))
 	assert.Equal(t, false, NewStr("123").HasPrefix(2))
+}
+
+// HasSuffix
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_HasSuffix_Go(t *testing.B) {
+	// src := RangeString(nines7)
+	// for len(src) > 1 {
+	// 	_ = src[0]
+	// 	src = src[1:]
+	// }
+}
+
+func BenchmarkStr_HasSuffix_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines7))
+	// for slice.Len() > 0 {
+	// 	slice.HasSuffix()
+	// 	slice.DropHasSuffix()
+	// }
+}
+
+func ExampleStr_HasSuffix() {
+	fmt.Println(NewStr("foobar").HasSuffix("bar"))
+	// Output: true
+}
+
+func TestStr_HasSuffix(t *testing.T) {
+
+	assert.Equal(t, true, NewStr("foobar").HasSuffix('r'))
+	assert.Equal(t, false, NewStr("foobar").HasSuffix('z'))
+	assert.Equal(t, false, NewStrV().HasSuffix(""))
+	assert.Equal(t, false, NewStr("").HasSuffix(""))
+	assert.Equal(t, false, NewStr("foobar").HasSuffix(""))
+	assert.Equal(t, true, NewStr("foobar").HasSuffix("bar"))
+	assert.Equal(t, false, NewStr("foobar").HasSuffix("foo"))
+	assert.Equal(t, true, NewStr("123").HasSuffix(3))
+	assert.Equal(t, false, NewStr("123").HasSuffix(2))
 }
 
 // Index

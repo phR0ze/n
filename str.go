@@ -630,15 +630,36 @@ func (p *Str) HasAnyPrefixV(prefixes ...interface{}) bool {
 	return false
 }
 
-// // // // HasAnySuffix checks if the string has any of the given suffixes
-// // // func (q *QStr) HasAnySuffix(suffixes ...string) bool {
-// // // 	for i := range suffixes {
-// // // 		if strings.HasSuffix(q.v, suffixes[i]) {
-// // // 			return true
-// // // 		}
-// // // 	}
-// // // 	return false
-// // // }
+// HasAnySuffix checks if the string has any of the given prefixes
+func (p *Str) HasAnySuffix(prefixes interface{}) bool {
+	if p == nil || len(*p) == 0 {
+		return false
+	}
+	str := p.A()
+	slice := ToStringSlice(prefixes)
+	for i := range *slice {
+		x := (*slice)[i]
+		if len(x) > 0 && strings.HasSuffix(str, x) {
+			return true
+		}
+	}
+	return false
+}
+
+// HasAnySuffixV checks if the string has any of the given prefixes
+func (p *Str) HasAnySuffixV(prefixes ...interface{}) bool {
+	if p == nil || len(*p) == 0 {
+		return false
+	}
+	str := p.A()
+	for i := range prefixes {
+		x := ToStr(prefixes[i]).A()
+		if len(x) > 0 && strings.HasSuffix(str, x) {
+			return true
+		}
+	}
+	return false
+}
 
 // HasPrefix checks if the Str has the given prefix
 func (p *Str) HasPrefix(prefix interface{}) bool {
@@ -649,10 +670,14 @@ func (p *Str) HasPrefix(prefix interface{}) bool {
 	return strings.HasPrefix(string(*p), string(*x))
 }
 
-// // // // HasSuffix checks if the string has the given suffix
-// // // func (q *QStr) HasSuffix(suffix string) bool {
-// // // 	return strings.HasSuffix(q.v, suffix)
-// // // }
+// HasSuffix checks if the Str has the given prefix
+func (p *Str) HasSuffix(prefix interface{}) bool {
+	x := ToStr(prefix)
+	if p == nil || len(*p) == 0 || len(*x) == 0 {
+		return false
+	}
+	return strings.HasSuffix(string(*p), string(*x))
+}
 
 // Index returns the index of the first element in this Slice where element == elem
 // Returns a -1 if the element was not not found.
