@@ -679,20 +679,26 @@ func (p *Str) HasSuffix(prefix interface{}) bool {
 	return strings.HasSuffix(string(*p), string(*x))
 }
 
-// Index returns the index of the first element in this Slice where element == elem
-// Returns a -1 if the element was not not found.
-func (p *Str) Index(elem interface{}) (loc int) {
+// Index returns the index of the first substr in this Str, or -1 if substr is not present.
+func (p *Str) Index(substr interface{}) (loc int) {
 	loc = -1
 	if p == nil || len(*p) == 0 {
 		return
 	}
-	x := ToChar(elem).G()
-	for i := range *p {
-		if (*p)[i] == x {
-			return i
-		}
+	str := string(*p)
+	x := ToStr(substr).A()
+	return strings.Index(str, x)
+}
+
+// IndexAny returns the index of the first rune in the given elems found, or -1 if not found.
+func (p *Str) IndexAny(elems interface{}) (loc int) {
+	loc = -1
+	if p == nil || len(*p) == 0 {
+		return
 	}
-	return
+	str := string(*p)
+	x := ToStr(elems).A()
+	return strings.IndexAny(str, x)
 }
 
 // Insert modifies this Slice to insert the given element before the element with the given index.
@@ -1067,28 +1073,6 @@ func (p *Str) UniqM() Slice {
 	}
 	return p
 }
-
-// // // // Len returns the length of the string
-// // // func (q *QStr) Len() int {
-// // // 	return len(q.v)
-// // // }
-
-// // // // Nil tests if the numerable is nil.
-// // // // Implements Numerable interface
-// // // func (q *QStr) Nil() bool {
-// // // 	if q == nil {
-// // // 		return true
-// // // 	}
-// // // 	return false
-// // // }
-
-// // // O returns the underlying data structure as is
-// // func (p *Str) O() interface{} {
-// // 	if p == nil {
-// // 		return ""
-// // 	}
-// // 	return string(*p)
-// // }
 
 // // // // Replace wraps strings.Replace and allows for chaining and defaults
 // // // func (q *QStr) Replace(old, new string, ns ...int) *QStr {

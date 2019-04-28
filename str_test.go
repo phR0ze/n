@@ -2487,9 +2487,54 @@ func TestStr_Index(t *testing.T) {
 	{
 		assert.Equal(t, 1, NewStrV("1", "2", "3").Index(Object{2}))
 		assert.Equal(t, 1, NewStrV("1", "2", "3").Index("2"))
-		assert.Equal(t, 0, NewStrV("1", "2", "3").Index(true))
+		assert.Equal(t, 0, NewStrV("truebob").Index(true))
 		assert.Equal(t, -1, NewStrV("1", "2", "3").Index(false))
 		assert.Equal(t, 2, NewStrV("1", "2", "3").Index(Char('3')))
+	}
+}
+
+// IndexAny
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_IndexAny_Go(t *testing.B) {
+	// for _, x := range RangeString(nines5) {
+	// 	if x == string(nines4) {
+	// 		break
+	// 	}
+	// }
+}
+
+func BenchmarkStr_IndexAny_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines5))
+	// slice.IndexAny(nines4)
+}
+
+func ExampleStr_IndexAny() {
+	slice := NewStrV("1", "2", "3")
+	fmt.Println(slice.IndexAny("42"))
+	// Output: 1
+}
+
+func TestStr_IndexAny(t *testing.T) {
+
+	// empty
+	var slice *Str
+	assert.Equal(t, -1, slice.IndexAny("2"))
+	assert.Equal(t, -1, NewStrV().IndexAny("1"))
+
+	assert.Equal(t, 0, NewStrV("1", "2", "3").IndexAny("41"))
+	assert.Equal(t, 1, NewStrV("1", "2", "3").IndexAny("42"))
+	assert.Equal(t, 2, NewStrV("1", "2", "3").IndexAny("43"))
+	assert.Equal(t, -1, NewStrV("1", "2", "3").IndexAny("44"))
+	assert.Equal(t, -1, NewStrV("1", "2", "3").IndexAny("45"))
+
+	// Conversion
+	{
+		assert.Equal(t, 1, NewStrV("1", "2", "3").IndexAny(Object{2}))
+		assert.Equal(t, 1, NewStrV("1", "2", "3").IndexAny("2"))
+		assert.Equal(t, 1, NewStrV("1", "2", "3").IndexAny(byte(2)))
+		assert.Equal(t, 0, NewStrV("truebob").IndexAny(true))
+		assert.Equal(t, -1, NewStrV("1", "2", "3").IndexAny(false))
+		assert.Equal(t, 2, NewStrV("1", "2", "3").IndexAny(Char('3')))
 	}
 }
 
