@@ -661,7 +661,8 @@ func (p *Str) HasAnySuffixV(prefixes ...interface{}) bool {
 	return false
 }
 
-// HasPrefix checks if the Str has the given prefix
+// HasPrefix checks if the Str has the given prefix.
+// Pass through to strings.HasPrefix
 func (p *Str) HasPrefix(prefix interface{}) bool {
 	x := ToStr(prefix)
 	if p == nil || len(*p) == 0 || len(*x) == 0 {
@@ -670,7 +671,8 @@ func (p *Str) HasPrefix(prefix interface{}) bool {
 	return strings.HasPrefix(string(*p), string(*x))
 }
 
-// HasSuffix checks if the Str has the given prefix
+// HasSuffix checks if the Str has the given prefix.
+// Pass through to strings.HasSuffix
 func (p *Str) HasSuffix(prefix interface{}) bool {
 	x := ToStr(prefix)
 	if p == nil || len(*p) == 0 || len(*x) == 0 {
@@ -680,6 +682,7 @@ func (p *Str) HasSuffix(prefix interface{}) bool {
 }
 
 // Index returns the index of the first substr in this Str, or -1 if substr is not present.
+// Pass through to strings.Index
 func (p *Str) Index(substr interface{}) (loc int) {
 	loc = -1
 	if p == nil || len(*p) == 0 {
@@ -691,6 +694,7 @@ func (p *Str) Index(substr interface{}) (loc int) {
 }
 
 // IndexAny returns the index of the first rune in the given elems found, or -1 if not found.
+// Pass through to strings.IndexAny
 func (p *Str) IndexAny(elems interface{}) (loc int) {
 	loc = -1
 	if p == nil || len(*p) == 0 {
@@ -699,6 +703,18 @@ func (p *Str) IndexAny(elems interface{}) (loc int) {
 	str := string(*p)
 	x := ToStr(elems).A()
 	return strings.IndexAny(str, x)
+}
+
+// IndexChar returns the index of the first instance of char in this Str, or -1 if char is not present.
+// Specifically handles byte, rune and Char
+func (p *Str) IndexChar(char interface{}) (loc int) {
+	loc = -1
+	if p == nil || len(*p) == 0 {
+		return
+	}
+	str := string(*p)
+	x := ToChar(char).G()
+	return strings.IndexRune(str, x)
 }
 
 // Insert modifies this Slice to insert the given element before the element with the given index.
@@ -758,6 +774,42 @@ func (p *Str) Join(separator ...string) (str *Object) {
 // Object.Nil() == true will be returned if there are no elements in the slice.
 func (p *Str) Last() (elem *Object) {
 	return p.At(-1)
+}
+
+// LastIndex returns the index of the last substr in this Str, or -1 if substr is not present.
+// Pass through to strings.LastIndex
+func (p *Str) LastIndex(substr interface{}) (loc int) {
+	loc = -1
+	if p == nil || len(*p) == 0 {
+		return
+	}
+	str := string(*p)
+	x := ToStr(substr).A()
+	return strings.LastIndex(str, x)
+}
+
+// LastIndexAny returns the index of the first rune in the given elems found, or -1 if not found.
+// Pass through to strings.LastIndexAny
+func (p *Str) LastIndexAny(elems interface{}) (loc int) {
+	loc = -1
+	if p == nil || len(*p) == 0 {
+		return
+	}
+	str := string(*p)
+	x := ToStr(elems).A()
+	return strings.LastIndexAny(str, x)
+}
+
+// LastIndexChar returns the index of the first instance of char in this Str, or -1 if char is not present.
+// Specifically handles byte, rune and Char
+func (p *Str) LastIndexChar(char interface{}) (loc int) {
+	loc = -1
+	if p == nil || len(*p) == 0 {
+		return
+	}
+	str := string(*p)
+	x := string(ToChar(char).G())
+	return strings.LastIndexAny(str, x)
 }
 
 // LastN returns the last n elements in this Slice as a Slice reference to the original.
@@ -836,6 +888,34 @@ func (p *Str) PopN(n int) (new Slice) {
 // Prepend modifies this Slice to add the given element at the begining and returns a reference to this Slice.
 func (p *Str) Prepend(elem interface{}) Slice {
 	return p.Insert(0, elem)
+}
+
+// Replace returns a copy of the string s with the first n non-overlapping instances of old
+// replaced by new. If old is empty, it matches at the beginning of the string and after each
+// UTF-8 sequence, yielding up to k+1 replacements for a k-rune string. If n < 0, there is no
+// limit on the number of replacements. Pass through to strings.Replace
+func (p *Str) Replace(old, new interface{}, n int) *Str {
+	if p == nil || len(*p) == 0 {
+		return NewStrV()
+	}
+	str := p.A()
+	x := ToStr(old).A()
+	y := ToStr(new).A()
+	return ToStr(strings.Replace(str, x, y, n))
+}
+
+// ReplaceAll returns a copy of the string s with all non-overlapping instances of old
+// replaced by new. If old is empty, it matches at the beginning of the string and after each
+// UTF-8 sequence, yielding up to k+1 replacements for a k-rune string.  Pass through
+// to strings.ReplaceAll
+func (p *Str) ReplaceAll(old, new interface{}) *Str {
+	if p == nil || len(*p) == 0 {
+		return NewStrV()
+	}
+	str := p.A()
+	x := ToStr(old).A()
+	y := ToStr(new).A()
+	return ToStr(strings.ReplaceAll(str, x, y))
 }
 
 // Reverse returns a new Slice with the order of the elements reversed.
@@ -974,6 +1054,22 @@ func (p *Str) SortReverseM() Slice {
 	}
 	sort.Sort(sort.Reverse(p))
 	return p
+}
+
+// Split this Str into all substrings deliniated by separator and returns a slice of the
+// substrings. If Str does not contain separator and separator is not empty, Split returns a
+// slice of length 1 whose only element is Str. If separator is empty, Split splits after
+// each UTF-8 sequence. If both Str and separator are empty, Split returns an empty slice.
+// It is equivalent to SplitN with a count of -1. separator defaults to comma if not given.
+func (p *Str) Split(separator ...string) (slice *StringSlice) {
+	if p == nil || len(*p) == 0 {
+		return NewStringSliceV()
+	}
+	sep := ","
+	if len(separator) > 0 {
+		sep = separator[0]
+	}
+	return ToStringSlice(strings.Split(p.A(), sep))
 }
 
 // String returns a string representation of this Slice, implements the Stringer interface
