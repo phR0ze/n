@@ -1072,6 +1072,22 @@ func (p *Str) Split(separator ...string) (slice *StringSlice) {
 	return ToStringSlice(strings.Split(p.A(), sep))
 }
 
+// SplitAfter slices Str into all substrings after each instance of separator. If Str does
+// not contain separator and separator is not empty, Split returns a slice of length 1 whose
+// only element is Str. If separator is empty, Split splits after each UTF-8 sequence. If
+// both Str and separator are empty, Split returns an empty slice. It is equivalent to
+// SplitN with a count of -1. separator defaults to comma if not given.
+func (p *Str) SplitAfter(separator ...string) (slice *StringSlice) {
+	if p == nil || len(*p) == 0 {
+		return NewStringSliceV()
+	}
+	sep := ","
+	if len(separator) > 0 {
+		sep = separator[0]
+	}
+	return ToStringSlice(strings.SplitAfter(p.A(), sep))
+}
+
 // String returns a string representation of this Slice, implements the Stringer interface
 func (p *Str) String() string {
 	if p == nil {
@@ -1086,6 +1102,16 @@ func (p *Str) Swap(i, j int) {
 		return
 	}
 	(*p)[i], (*p)[j] = (*p)[j], (*p)[i]
+}
+
+//Title returns a copy of the string s with all Unicode letters that begin words mapped to their title case.
+// BUG(rsc): The rule Title uses for word boundaries does not handle Unicode punctuation properly.
+// Pass through for strings.Title
+func (p *Str) Title() (new *Str) {
+	if p == nil {
+		return NewStrV()
+	}
+	return NewStr(strings.Title(p.A()))
 }
 
 // Take modifies this Slice removing the indicated range of elements from this Slice and returning them as a new Slice.

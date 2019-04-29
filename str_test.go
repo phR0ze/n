@@ -4083,6 +4083,49 @@ func TestStr_Split(t *testing.T) {
 	}
 }
 
+// SplitAfter
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_SplitAfter_Go(t *testing.B) {
+	// src := RangeString(nines7)
+	// for len(src) > 1 {
+	// 	_ = src[0]
+	// 	src = src[1:]
+	// }
+}
+
+func BenchmarkStr_SplitAfter_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines7))
+	// for slice.Len() > 0 {
+	// 	slice.SplitAfter()
+	// 	slice.DropSplitAfter()
+	// }
+}
+
+func ExampleStr_SplitAfter() {
+	slice := NewStr("1,2,3")
+	fmt.Println(slice.SplitAfter())
+	// Output: [1, 2, 3]
+}
+
+func TestStr_SplitAfter(t *testing.T) {
+
+	// whitespace only
+	{
+		assert.Equal(t, []string{}, NewStrV().SplitAfter().O())
+		assert.Equal(t, []string{}, NewStrV("").SplitAfter().O())
+		assert.Equal(t, []string{"\n  \t"}, NewStrV("\n  \t").SplitAfter().O())
+	}
+
+	// split on white space
+	{
+		assert.Equal(t, []string{"1 2 3"}, NewStr("1 2 3").SplitAfter().O())
+		assert.Equal(t, []string{"1,", "2,", "3,", ""}, NewStr("1,2,3,").SplitAfter().O())
+		assert.Equal(t, []string{"1\t", "2\t", "3"}, NewStr("1\t2\t3").SplitAfter("\t").O())
+		assert.Equal(t, []string{"1\n", "2\n", "3"}, NewStr("1\n2\n3").SplitAfter("\n").O())
+		assert.Equal(t, []string{"1bob", "2bob", "3"}, NewStr("1bob2bob3").SplitAfter("bob").O())
+	}
+}
+
 // String
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStr_String_Go(t *testing.B) {
@@ -4526,6 +4569,35 @@ func TestStr_TakeW(t *testing.T) {
 		assert.Equal(t, NewStrV("1", "3", "5", "7", "9"), slice)
 		assert.Equal(t, NewStrV("2", "4", "6", "8"), new)
 	}
+}
+
+// Title
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_Title_Go(t *testing.B) {
+	// src := RangeString(nines7)
+	// for len(src) > 1 {
+	// 	_ = src[0]
+	// 	src = src[1:]
+	// }
+}
+
+func BenchmarkStr_Title_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines7))
+	// for slice.Len() > 0 {
+	// 	slice.Title()
+	// 	slice.DropTitle()
+	// }
+}
+
+func ExampleStr_Title() {
+	slice := NewStr("her royal highness")
+	fmt.Println(slice.Title())
+	// Output: Her Royal Highness
+}
+
+func TestStr_Title(t *testing.T) {
+	assert.Equal(t, "This Is A Test", NewStr("this is a test").Title().A())
+	assert.Equal(t, "This   Is   A   Test", NewStr("this   is   a   test").Title().A())
 }
 
 // Union
