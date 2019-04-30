@@ -4600,6 +4600,302 @@ func TestStr_Title(t *testing.T) {
 	assert.Equal(t, "This   Is   A   Test", NewStr("this   is   a   test").Title().A())
 }
 
+// ToLower
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_ToLower_Go(t *testing.B) {
+	// src := RangeString(nines7)
+	// for len(src) > 1 {
+	// 	_ = src[0]
+	// 	src = src[1:]
+	// }
+}
+
+func BenchmarkStr_ToLower_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines7))
+	// for slice.Len() > 0 {
+	// 	slice.ToLower()
+	// 	slice.DropToLower()
+	// }
+}
+
+func ExampleStr_ToLower() {
+	slice := NewStr("Her Royal Highness")
+	fmt.Println(slice.ToLower())
+	// Output: her royal highness
+}
+
+func TestStr_ToLower(t *testing.T) {
+	assert.Equal(t, "this is a test", NewStr("This Is A Test").ToLower().A())
+	assert.Equal(t, "this   is   a   test", NewStr("This   Is   A   Test").ToLower().A())
+}
+
+// ToUpper
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_ToUpper_Go(t *testing.B) {
+	// src := RangeString(nines7)
+	// for len(src) > 1 {
+	// 	_ = src[0]
+	// 	src = src[1:]
+	// }
+}
+
+func BenchmarkStr_ToUpper_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines7))
+	// for slice.Len() > 0 {
+	// 	slice.ToUpper()
+	// 	slice.DropToUpper()
+	// }
+}
+
+func ExampleStr_ToUpper() {
+	slice := NewStr("Her Royal Highness")
+	fmt.Println(slice.ToUpper())
+	// Output: HER ROYAL HIGHNESS
+}
+
+func TestStr_ToUpper(t *testing.T) {
+	assert.Equal(t, "THIS IS A TEST", NewStr("This Is A Test").ToUpper().A())
+	assert.Equal(t, "THIS   IS   A   TEST", NewStr("This   Is   A   Test").ToUpper().A())
+}
+
+// Trim
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_Trim_Go(t *testing.B) {
+	// src := RangeString(nines7)
+	// for len(src) > 1 {
+	// 	_ = src[0]
+	// 	src = src[1:]
+	// }
+}
+
+func BenchmarkStr_Trim_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines7))
+	// for slice.Len() > 0 {
+	// 	slice.Trim()
+	// 	slice.DropTrim()
+	// }
+}
+
+func ExampleStr_Trim() {
+	slice := NewStr("Her Royal Highness")
+	fmt.Println(slice.Trim("H"))
+	// Output: er Royal Highness
+}
+
+func TestStr_Trim(t *testing.T) {
+	assert.Equal(t, "This Is A Tes", NewStr("This Is A Test").Trim("t").A())
+	assert.Equal(t, "This   Is   A   Test", NewStr(" This   Is   A   Test  ").Trim().A())
+}
+
+// TrimFunc
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_TrimFunc_Go(t *testing.B) {
+	// src := RangeString(nines7)
+	// for len(src) > 1 {
+	// 	_ = src[0]
+	// 	src = src[1:]
+	// }
+}
+
+func BenchmarkStr_TrimFunc_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines7))
+	// for slice.Len() > 0 {
+	// 	slice.TrimFunc()
+	// 	slice.DropTrimFunc()
+	// }
+}
+
+func ExampleStr_TrimFunc() {
+	slice := NewStr("Her Royal Highness")
+	fmt.Println(slice.TrimFunc(func(x rune) bool {
+		return ExB(x == 'H')
+	}))
+	// Output: er Royal Highness
+}
+
+func TestStr_TrimFunc(t *testing.T) {
+	assert.Equal(t, "This Is A Tes", NewStr("This Is A Test").TrimFunc(func(x rune) bool { return ExB(x == 't') }).A())
+	assert.Equal(t, "This   Is   A   Test", NewStr(" This   Is   A   Test  ").TrimFunc(func(x rune) bool { return ExB(x == ' ') }).A())
+}
+
+// TrimLeft
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_TrimLeft_Go(t *testing.B) {
+	// src := RangeString(nines7)
+	// for len(src) > 1 {
+	// 	_ = src[0]
+	// 	src = src[1:]
+	// }
+}
+
+func BenchmarkStr_TrimLeft_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines7))
+	// for slice.Len() > 0 {
+	// 	slice.TrimLeft()
+	// 	slice.DropTrimLeft()
+	// }
+}
+
+func ExampleStr_TrimLeft() {
+	slice := NewStr("Her Royal Highness")
+	fmt.Println(slice.TrimLeft("H"))
+	// Output: er Royal Highness
+}
+
+func TestStr_TrimLeft(t *testing.T) {
+	assert.Equal(t, "This Is A Test", NewStr("This Is A Test").TrimLeft("t").A())
+	assert.Equal(t, "This   Is   A   Test  ", NewStr(" This   Is   A   Test  ").TrimLeft().A())
+}
+
+// TrimLeftFunc
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_TrimLeftFunc_Go(t *testing.B) {
+	// src := RangeString(nines7)
+	// for len(src) > 1 {
+	// 	_ = src[0]
+	// 	src = src[1:]
+	// }
+}
+
+func BenchmarkStr_TrimLeftFunc_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines7))
+	// for slice.Len() > 0 {
+	// 	slice.TrimLeftFunc()
+	// 	slice.DropTrimLeftFunc()
+	// }
+}
+
+func ExampleStr_TrimLeftFunc() {
+	slice := NewStr("Her Royal Highness")
+	fmt.Println(slice.TrimLeftFunc(func(x rune) bool {
+		return ExB(x == 'H')
+	}))
+	// Output: er Royal Highness
+}
+
+func TestStr_TrimLeftFunc(t *testing.T) {
+	assert.Equal(t, "This Is A Test", NewStr("This Is A Test").TrimLeftFunc(func(x rune) bool { return ExB(x == 't') }).A())
+	assert.Equal(t, "This   Is   A   Test  ", NewStr(" This   Is   A   Test  ").TrimLeftFunc(func(x rune) bool { return ExB(x == ' ') }).A())
+}
+
+// TrimPrefix
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_TrimPrefix_Go(t *testing.B) {
+	// src := RangeString(nines7)
+	// for len(src) > 1 {
+	// 	_ = src[0]
+	// 	src = src[1:]
+	// }
+}
+
+func BenchmarkStr_TrimPrefix_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines7))
+	// for slice.Len() > 0 {
+	// 	slice.TrimPrefix()
+	// 	slice.DropTrimPrefix()
+	// }
+}
+
+func ExampleStr_TrimPrefix() {
+	slice := NewStr("Her Royal Highness")
+	fmt.Println(slice.TrimPrefix("Her "))
+	// Output: Royal Highness
+}
+
+func TestStr_TrimPrefix(t *testing.T) {
+	assert.Equal(t, "Is A Test", NewStr("This Is A Test").TrimPrefix("This ").A())
+	assert.Equal(t, "Is   A   Test  ", NewStr(" This   Is   A   Test  ").TrimPrefix(" This   ").A())
+}
+
+// TrimRight
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_TrimRight_Go(t *testing.B) {
+	// src := RangeString(nines7)
+	// for len(src) > 1 {
+	// 	_ = src[0]
+	// 	src = src[1:]
+	// }
+}
+
+func BenchmarkStr_TrimRight_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines7))
+	// for slice.Len() > 0 {
+	// 	slice.TrimRight()
+	// 	slice.DropTrimRight()
+	// }
+}
+
+func ExampleStr_TrimRight() {
+	slice := NewStr("Her Royal Highness")
+	fmt.Println(slice.TrimRight("s"))
+	// Output: Her Royal Highne
+}
+
+func TestStr_TrimRight(t *testing.T) {
+	assert.Equal(t, "This Is A Tes", NewStr("This Is A Test").TrimRight("t").A())
+	assert.Equal(t, " This   Is   A   Test", NewStr(" This   Is   A   Test  ").TrimRight().A())
+}
+
+// TrimRightFunc
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_TrimRightFunc_Go(t *testing.B) {
+	// src := RangeString(nines7)
+	// for len(src) > 1 {
+	// 	_ = src[0]
+	// 	src = src[1:]
+	// }
+}
+
+func BenchmarkStr_TrimRightFunc_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines7))
+	// for slice.Len() > 0 {
+	// 	slice.TrimRightFunc()
+	// 	slice.DropTrimRightFunc()
+	// }
+}
+
+func ExampleStr_TrimRightFunc() {
+	slice := NewStr("Her Royal Highness")
+	fmt.Println(slice.TrimRightFunc(func(x rune) bool {
+		return ExB(x == 's')
+	}))
+	// Output: Her Royal Highne
+}
+
+func TestStr_TrimRightFunc(t *testing.T) {
+	assert.Equal(t, "This Is A Tes", NewStr("This Is A Test").TrimRightFunc(func(x rune) bool { return ExB(x == 't') }).A())
+	assert.Equal(t, " This   Is   A   Test", NewStr(" This   Is   A   Test  ").TrimRightFunc(func(x rune) bool { return ExB(x == ' ') }).A())
+}
+
+// TrimSuffix
+//--------------------------------------------------------------------------------------------------
+func BenchmarkStr_TrimSuffix_Go(t *testing.B) {
+	// src := RangeString(nines7)
+	// for len(src) > 1 {
+	// 	_ = src[0]
+	// 	src = src[1:]
+	// }
+}
+
+func BenchmarkStr_TrimSuffix_Slice(t *testing.B) {
+	// slice := NewStr(RangeString(nines7))
+	// for slice.Len() > 0 {
+	// 	slice.TrimSuffix()
+	// 	slice.DropTrimSuffix()
+	// }
+}
+
+func ExampleStr_TrimSuffix() {
+	slice := NewStr("Her Royal Highness")
+	fmt.Println(slice.TrimSuffix(" Highness"))
+	// Output: Her Royal
+}
+
+func TestStr_TrimSuffix(t *testing.T) {
+	assert.Equal(t, "This Is A", NewStr("This Is A Test").TrimSuffix(" Test").A())
+	assert.Equal(t, " This   Is   A", NewStr(" This   Is   A   Test  ").TrimSuffix("   Test  ").A())
+}
+
 // Union
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStr_Union_Go(t *testing.B) {

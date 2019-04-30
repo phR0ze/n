@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"unicode"
 
 	"github.com/pkg/errors"
 )
@@ -1104,16 +1105,6 @@ func (p *Str) Swap(i, j int) {
 	(*p)[i], (*p)[j] = (*p)[j], (*p)[i]
 }
 
-//Title returns a copy of the string s with all Unicode letters that begin words mapped to their title case.
-// BUG(rsc): The rule Title uses for word boundaries does not handle Unicode punctuation properly.
-// Pass through for strings.Title
-func (p *Str) Title() (new *Str) {
-	if p == nil {
-		return NewStrV()
-	}
-	return NewStr(strings.Title(p.A()))
-}
-
 // Take modifies this Slice removing the indicated range of elements from this Slice and returning them as a new Slice.
 // Expects nothing, in which case everything is taken, or two indices i and j, in which case positive and negative
 // notation is supported and uses an inclusive behavior such that Take(0, -1) includes index -1 as opposed to Go's
@@ -1148,6 +1139,115 @@ func (p *Str) TakeW(sel func(O) bool) (new Slice) {
 		}
 	}
 	return slice
+}
+
+//Title returns a copy of the string s with all Unicode letters that begin words mapped to their title case.
+// BUG(rsc): The rule Title uses for word boundaries does not handle Unicode punctuation properly.
+// Pass through for strings.Title
+func (p *Str) Title() (new *Str) {
+	if p == nil {
+		return NewStrV()
+	}
+	return NewStr(strings.Title(p.A()))
+}
+
+// ToLower returns a copy of the Str with all Unicode letters mapped to their lower case.
+func (p *Str) ToLower() (new *Str) {
+	if p == nil {
+		return NewStrV()
+	}
+	return NewStr(strings.ToLower(p.A()))
+}
+
+// ToUpper returns a copy of the Str with all Unicode letters mapped to their upper case.
+func (p *Str) ToUpper() (new *Str) {
+	if p == nil {
+		return NewStrV()
+	}
+	return NewStr(strings.ToUpper(p.A()))
+}
+
+// Trim returns a slice of this Str with all leading and trailing Unicode code points contained
+// in the optional string compatible cutset param removed. Cutset defaults to whitespace.
+func (p *Str) Trim(cutset ...interface{}) (new *Str) {
+	if p == nil {
+		return NewStrV()
+	}
+	if len(cutset) > 0 {
+		x := ToStr(cutset).A()
+		return NewStr(strings.Trim(p.A(), x))
+	}
+	return NewStr(strings.TrimSpace(p.A()))
+}
+
+// TrimFunc returns a slice of this Str with all leading and trailing Unicode code points c satisfying f(c) removed.
+func (p *Str) TrimFunc(f func(rune) bool) (new *Str) {
+	if p == nil {
+		return NewStrV()
+	}
+	return NewStr(strings.TrimFunc(p.A(), f))
+}
+
+// TrimLeft returns a slice of this Str with all leading Unicode code points contained
+// in the optional string compatible cutset param removed. Cutset defaults to whitespace.
+func (p *Str) TrimLeft(cutset ...interface{}) (new *Str) {
+	if p == nil {
+		return NewStrV()
+	}
+	if len(cutset) > 0 {
+		x := ToStr(cutset).A()
+		return NewStr(strings.TrimLeft(p.A(), x))
+	}
+	return NewStr(strings.TrimLeftFunc(p.A(), unicode.IsSpace))
+}
+
+// TrimLeftFunc returns a slice of the Str with all leading Unicode code points c satisfying f(c) removed.
+func (p *Str) TrimLeftFunc(f func(rune) bool) (new *Str) {
+	if p == nil {
+		return NewStrV()
+	}
+	return NewStr(strings.TrimLeftFunc(p.A(), f))
+}
+
+// TrimPrefix returns this Str without the leading prefix. If Str doesn't start with prefix,
+// the response is returned unchanged.
+func (p *Str) TrimPrefix(prefix interface{}) (new *Str) {
+	if p == nil {
+		return NewStrV()
+	}
+	x := ToStr(prefix).A()
+	return NewStr(strings.TrimPrefix(p.A(), x))
+}
+
+// TrimRight returns a slice of this Str with all leading Unicode code points contained
+// in the optional string compatible cutset param removed. Cutset defaults to whitespace.
+func (p *Str) TrimRight(cutset ...interface{}) (new *Str) {
+	if p == nil {
+		return NewStrV()
+	}
+	if len(cutset) > 0 {
+		x := ToStr(cutset).A()
+		return NewStr(strings.TrimRight(p.A(), x))
+	}
+	return NewStr(strings.TrimRightFunc(p.A(), unicode.IsSpace))
+}
+
+// TrimRightFunc returns a slice of the Str with all leading Unicode code points c satisfying f(c) removed.
+func (p *Str) TrimRightFunc(f func(rune) bool) (new *Str) {
+	if p == nil {
+		return NewStrV()
+	}
+	return NewStr(strings.TrimRightFunc(p.A(), f))
+}
+
+// TrimSuffix returns this Str without the trailing suffix. If Str doesn't end with suffix,
+// the response is returned unchanged.
+func (p *Str) TrimSuffix(suffix interface{}) (new *Str) {
+	if p == nil {
+		return NewStrV()
+	}
+	x := ToStr(suffix).A()
+	return NewStr(strings.TrimSuffix(p.A(), x))
 }
 
 // Union returns a new Slice by joining uniq elements from this Slice with uniq elements from the given Slice while preserving order.
@@ -1195,94 +1295,6 @@ func (p *Str) UniqM() Slice {
 	}
 	return p
 }
-
-// // // // Replace wraps strings.Replace and allows for chaining and defaults
-// // // func (q *QStr) Replace(old, new string, ns ...int) *QStr {
-// // // 	n := -1
-// // // 	if len(ns) > 0 {
-// // // 		n = ns[0]
-// // // 	}
-// // // 	return A(strings.Replace(q.v, old, new, n))
-// // // }
-
-// // // // SpaceLeft returns leading whitespace
-// // // func (q *QStr) SpaceLeft() *QStr {
-// // // 	spaces := []rune{}
-// // // 	for _, r := range q.v {
-// // // 		if unicode.IsSpace(r) {
-// // // 			spaces = append(spaces, r)
-// // // 		} else {
-// // // 			break
-// // // 		}
-// // // 	}
-// // // 	return A(spaces)
-// // // }
-
-// // // // SpaceRight returns trailing whitespace
-// // // func (q *QStr) SpaceRight() *QStr {
-// // // 	spaces := []rune{}
-// // // 	for i := len(q.v) - 1; i > 0; i-- {
-// // // 		if unicode.IsSpace(rune(q.v[i])) {
-// // // 			spaces = append(spaces, rune(q.v[i]))
-// // // 		} else {
-// // // 			break
-// // // 		}
-// // // 	}
-// // // 	return A(spaces)
-// // // }
-
-// // // // // Split creates a new NSlice from the split string.
-// // // // // Optional 'delim' defaults to space allows for changing the split delimiter.
-// // // // func (q *QStr) Split(delim ...string) *NSlice {
-// // // // 	_delim := " "
-// // // // 	if len(delim) > 0 {
-// // // // 		_delim = delim[0]
-// // // // 	}
-// // // // 	return S(strings.Split(q.v, _delim))
-// // // // }
-
-// // // // SplitOn splits the string on the first occurance of the delim.
-// // // // The delim is included in the first component.
-// // // func (q *QStr) SplitOn(delim string) (first, second string) {
-// // // 	// if q.v != "" {
-// // // 	// 	s := q.Split(delim)
-// // // 	// 	if s.Len() > 0 {
-// // // 	// 		first = s.First().A()
-// // // 	// 		if strings.Contains(q.v, delim) {
-// // // 	// 			first += delim
-// // // 	// 		}
-// // // 	// 	}
-// // // 	// 	if s.Len() > 1 {
-// // // 	// 		second = s.Slice(1, -1).Join(delim).A()
-// // // 	// 	}
-// // // 	// }
-// // // 	return
-// // // }
-
-// // // // // TrimPrefix trims the given prefix off the string
-// // // // func (q *strN) TrimPrefix(prefix string) *strN {
-// // // // 	return A(strings.TrimPrefix(q.v, prefix))
-// // // // }
-
-// // // // TrimSpace pass through to strings.TrimSpace
-// // // func (q *QStr) TrimSpace() *QStr {
-// // // 	return A(strings.TrimSpace(q.v))
-// // // }
-
-// // // // // TrimSpaceLeft trims leading whitespace
-// // // // func (q *strN) TrimSpaceLeft() *strN {
-// // // // 	return A(strings.TrimLeftFunc(q.v, unicode.IsSpace))
-// // // // }
-
-// // // // // TrimSpaceRight trims trailing whitespace
-// // // // func (q *strN) TrimSpaceRight() *strN {
-// // // // 	return A(strings.TrimRightFunc(q.v, unicode.IsSpace))
-// // // // }
-
-// // // // // TrimSuffix trims the given suffix off the string
-// // // // func (q *strN) TrimSuffix(suffix string) *strN {
-// // // // 	return A(strings.TrimSuffix(q.v, suffix))
-// // // // }
 
 // // // // // YamlType converts the given string into a type expected in Yaml.
 // // // // // Quotes signifies a string.
