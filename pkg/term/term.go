@@ -1,3 +1,4 @@
+// Package term provides TTY helper functions for prompting for passwords etc...
 package term
 
 import (

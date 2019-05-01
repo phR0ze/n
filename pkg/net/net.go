@@ -1,3 +1,4 @@
+// Package net provides simple networking helper functions
 package net
 
 import (

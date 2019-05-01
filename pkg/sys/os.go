@@ -1,3 +1,4 @@
+// Package sys provides os level helper functions for interacting with the system
 package sys
 
 import (

@@ -26,7 +26,6 @@ test: $(NAME)
 	go test $(PKGROOT)/pkg/term
 	go test $(PKGROOT)/pkg/time
 	go test $(PKGROOT)/pkg/tmpl
-	go test $(PKGROOT)/pkg/trace
 	go test $(PKGROOT)/pkg/unit
 
 bench: $(NAME)

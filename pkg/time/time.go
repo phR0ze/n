@@ -1,3 +1,4 @@
+// Package time provides simple time helper functions
 package time
 
 import (

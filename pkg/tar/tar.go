@@ -1,3 +1,4 @@
+// Package tar provides create and extract implementations
 package tar
 
 import (
