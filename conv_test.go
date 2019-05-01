@@ -2288,7 +2288,7 @@ func TestToStr(t *testing.T) {
 	// int32 i.e. rune
 	{
 		var test int32
-		assert.Equal(t, "t", ToStr(int32(0x74)).G())
+		assert.Equal(t, "t", ToStr(int32('t')).G())
 		assert.Equal(t, "", ToStr(&test).G())
 		assert.Equal(t, "", ToStr((*int32)(nil)).G())
 	}
@@ -2366,8 +2366,8 @@ func TestToStr(t *testing.T) {
 	// uint8
 	{
 		var test uint8
-		assert.Equal(t, "3", ToStr(uint8(3)).G())
-		assert.Equal(t, "0", ToStr(&test).G())
+		assert.Equal(t, "3", ToStr(uint8('3')).G())
+		assert.Equal(t, "", ToStr(&test).G())
 		assert.Equal(t, "", ToStr((*uint8)(nil)).G())
 	}
 
@@ -2398,7 +2398,7 @@ func TestToStr(t *testing.T) {
 	// uints
 	{
 		assert.Equal(t, "7", ToStr(uint(7)).G())
-		assert.Equal(t, "7", ToStr(uint8(7)).G())
+		assert.Equal(t, "7", ToStr(uint8('7')).G())
 		assert.Equal(t, "7", ToStr(uint16(7)).G())
 		assert.Equal(t, "7", ToStr(uint32(7)).G())
 		assert.Equal(t, "7", ToStr(uint64(7)).G())
@@ -2484,8 +2484,8 @@ func TestToString(t *testing.T) {
 	// int32
 	{
 		var test int32
-		assert.Equal(t, "3", ToString(int32(3)))
-		assert.Equal(t, "0", ToString(&test))
+		assert.Equal(t, "3", ToString(int32('3')))
+		assert.Equal(t, "", ToString(&test))
 		assert.Equal(t, "", ToString((*int32)(nil)))
 	}
 
@@ -2502,7 +2502,7 @@ func TestToString(t *testing.T) {
 		assert.Equal(t, "7", ToString(int(7)))
 		assert.Equal(t, "7", ToString(int8(7)))
 		assert.Equal(t, "7", ToString(int16(7)))
-		assert.Equal(t, "7", ToString(int32(7)))
+		assert.Equal(t, "7", ToString(int32('7')))
 		assert.Equal(t, "7", ToString(int64(7)))
 	}
 
@@ -2562,8 +2562,8 @@ func TestToString(t *testing.T) {
 	// uint8
 	{
 		var test uint8
-		assert.Equal(t, "3", ToString(uint8(3)))
-		assert.Equal(t, "0", ToString(&test))
+		assert.Equal(t, "3", ToString(uint8('3')))
+		assert.Equal(t, "", ToString(&test))
 		assert.Equal(t, "", ToString((*uint8)(nil)))
 	}
 
@@ -2594,7 +2594,7 @@ func TestToString(t *testing.T) {
 	// uints
 	{
 		assert.Equal(t, "7", ToString(uint(7)))
-		assert.Equal(t, "7", ToString(uint8(7)))
+		assert.Equal(t, "7", ToString(uint8('7')))
 		assert.Equal(t, "7", ToString(uint16(7)))
 		assert.Equal(t, "7", ToString(uint32(7)))
 		assert.Equal(t, "7", ToString(uint64(7)))
@@ -2731,22 +2731,22 @@ func TestToStringSliceE(t *testing.T) {
 
 	// int32
 	{
-		val, err := ToStringSliceE(int32(3))
+		val, err := ToStringSliceE(int32('3'))
 		assert.Nil(t, err)
 		assert.Equal(t, &StringSlice{"3"}, val)
 
-		val, err = ToStringSliceE(int32(0))
+		val, err = ToStringSliceE(int32('0'))
 		assert.Nil(t, err)
 		assert.Equal(t, &StringSlice{"0"}, val)
 
 		var test int32
 		val, err = ToStringSliceE(&test)
 		assert.Nil(t, err)
-		assert.Equal(t, &StringSlice{"0"}, val)
+		assert.Equal(t, &StringSlice{""}, val)
 
 		val, err = ToStringSliceE((*int32)(nil))
 		assert.Nil(t, err)
-		assert.Equal(t, &StringSlice{"0"}, val)
+		assert.Equal(t, &StringSlice{""}, val)
 	}
 
 	// int64
@@ -2870,22 +2870,22 @@ func TestToStringSliceE(t *testing.T) {
 
 	// uint8
 	{
-		val, err := ToStringSliceE(uint8(3))
+		val, err := ToStringSliceE(uint8('3'))
 		assert.Nil(t, err)
 		assert.Equal(t, &StringSlice{"3"}, val)
 
-		val, err = ToStringSliceE(uint8(0))
+		val, err = ToStringSliceE(uint8('0'))
 		assert.Nil(t, err)
 		assert.Equal(t, &StringSlice{"0"}, val)
 
 		var test uint8
 		val, err = ToStringSliceE(&test)
 		assert.Nil(t, err)
-		assert.Equal(t, &StringSlice{"0"}, val)
+		assert.Equal(t, &StringSlice{""}, val)
 
 		val, err = ToStringSliceE((*uint8)(nil))
 		assert.Nil(t, err)
-		assert.Equal(t, &StringSlice{"0"}, val)
+		assert.Equal(t, &StringSlice{""}, val)
 	}
 
 	// uint16
@@ -3079,22 +3079,22 @@ func TestToStringSliceGE(t *testing.T) {
 
 	// int32
 	{
-		val, err := ToStringSliceGE(int32(3))
+		val, err := ToStringSliceGE(int32('3'))
 		assert.Nil(t, err)
 		assert.Equal(t, []string{"3"}, val)
 
-		val, err = ToStringSliceGE(int32(0))
+		val, err = ToStringSliceGE(int32('0'))
 		assert.Nil(t, err)
 		assert.Equal(t, []string{"0"}, val)
 
 		var test int32
 		val, err = ToStringSliceGE(&test)
 		assert.Nil(t, err)
-		assert.Equal(t, []string{"0"}, val)
+		assert.Equal(t, []string{""}, val)
 
 		val, err = ToStringSliceGE((*int32)(nil))
 		assert.Nil(t, err)
-		assert.Equal(t, []string{"0"}, val)
+		assert.Equal(t, []string{""}, val)
 	}
 
 	// int64
@@ -3218,22 +3218,22 @@ func TestToStringSliceGE(t *testing.T) {
 
 	// uint8
 	{
-		val, err := ToStringSliceGE(uint8(3))
+		val, err := ToStringSliceGE(uint8('3'))
 		assert.Nil(t, err)
 		assert.Equal(t, []string{"3"}, val)
 
-		val, err = ToStringSliceGE(uint8(0))
+		val, err = ToStringSliceGE(uint8('0'))
 		assert.Nil(t, err)
 		assert.Equal(t, []string{"0"}, val)
 
 		var test uint8
 		val, err = ToStringSliceGE(&test)
 		assert.Nil(t, err)
-		assert.Equal(t, []string{"0"}, val)
+		assert.Equal(t, []string{""}, val)
 
 		val, err = ToStringSliceGE((*uint8)(nil))
 		assert.Nil(t, err)
-		assert.Equal(t, []string{"0"}, val)
+		assert.Equal(t, []string{""}, val)
 	}
 
 	// uint16

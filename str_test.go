@@ -2220,7 +2220,7 @@ func ExampleStr_HasAnyPrefix() {
 func TestStr_HasAnyPrefix(t *testing.T) {
 
 	// Singles
-	assert.Equal(t, false, NewStr("foobar").HasAnyPrefix('f'))
+	assert.Equal(t, true, NewStr("foobar").HasAnyPrefix('f'))
 	assert.Equal(t, true, NewStr("foobar").HasAnyPrefix(ToChar('f')))
 	assert.Equal(t, false, NewStr("foobar").HasAnyPrefix('z'))
 	assert.Equal(t, false, NewStrV().HasAnyPrefix(""))
@@ -2232,7 +2232,7 @@ func TestStr_HasAnyPrefix(t *testing.T) {
 	assert.Equal(t, false, NewStr("123").HasAnyPrefix(2))
 
 	// Multiples
-	assert.Equal(t, false, NewStr("foobar").HasAnyPrefix([]rune{'f', 'o'}))
+	assert.Equal(t, true, NewStr("foobar").HasAnyPrefix([]rune{'f', 'o'}))
 	assert.Equal(t, true, NewStr("foobar").HasAnyPrefix([]*Char{ToChar('f'), ToChar('o')}))
 	assert.Equal(t, true, NewStr("foobar").HasAnyPrefix([]string{"foo", "bar"}))
 	assert.Equal(t, false, NewStr("foobar").HasAnyPrefix([]string{"boo", "blah"}))
@@ -2312,7 +2312,7 @@ func ExampleStr_HasAnySuffix() {
 func TestStr_HasAnySuffix(t *testing.T) {
 
 	// Singles
-	assert.Equal(t, false, NewStr("foobar").HasAnySuffix('r'))
+	assert.Equal(t, true, NewStr("foobar").HasAnySuffix('r'))
 	assert.Equal(t, true, NewStr("foobar").HasAnySuffix(ToChar('r')))
 	assert.Equal(t, false, NewStrV().HasAnySuffix(""))
 	assert.Equal(t, false, NewStr("").HasAnySuffix(""))
@@ -2323,7 +2323,7 @@ func TestStr_HasAnySuffix(t *testing.T) {
 	assert.Equal(t, false, NewStr("123").HasAnySuffix(2))
 
 	// Multiples
-	assert.Equal(t, false, NewStr("foobar").HasAnySuffix([]rune{'r', 'o'}))
+	assert.Equal(t, true, NewStr("foobar").HasAnySuffix([]rune{'r', 'o'}))
 	assert.Equal(t, true, NewStr("foobar").HasAnySuffix([]*Char{ToChar('r'), ToChar('o')}))
 	assert.Equal(t, true, NewStr("foobar").HasAnySuffix([]string{"foo", "bar"}))
 	assert.Equal(t, false, NewStr("foobar").HasAnySuffix([]string{"boo", "blah"}))
@@ -2487,7 +2487,7 @@ func TestStr_Index(t *testing.T) {
 	{
 		assert.Equal(t, 1, NewStrV("1", "2", "3").Index(Object{2}))
 		assert.Equal(t, 1, NewStrV("1", "2", "3").Index("2"))
-		assert.Equal(t, 1, NewStrV("1", "2", "3").Index(byte(2)))
+		assert.Equal(t, 1, NewStrV("1", "2", "3").Index(byte('2')))
 		assert.Equal(t, 0, NewStrV("truebob").Index(true))
 		assert.Equal(t, -1, NewStrV("1", "2", "3").Index(false))
 		assert.Equal(t, 2, NewStrV("1", "2", "3").Index(Char('3')))
@@ -2532,7 +2532,7 @@ func TestStr_IndexAny(t *testing.T) {
 	{
 		assert.Equal(t, 1, NewStrV("1", "2", "3").IndexAny(Object{2}))
 		assert.Equal(t, 1, NewStrV("1", "2", "3").IndexAny("2"))
-		assert.Equal(t, 1, NewStrV("1", "2", "3").IndexAny(byte(2)))
+		assert.Equal(t, 1, NewStrV("1", "2", "3").IndexAny(byte('2')))
 		assert.Equal(t, 0, NewStrV("truebob").IndexAny(true))
 		assert.Equal(t, -1, NewStrV("1", "2", "3").IndexAny(false))
 		assert.Equal(t, 2, NewStrV("1", "2", "3").IndexAny(Char('3')))
@@ -2818,7 +2818,7 @@ func TestStr_LastIndex(t *testing.T) {
 	{
 		assert.Equal(t, 1, NewStrV("1", "2", "3").LastIndex(Object{2}))
 		assert.Equal(t, 1, NewStrV("1", "2", "3").LastIndex("2"))
-		assert.Equal(t, 1, NewStrV("1", "2", "3").LastIndex(byte(2)))
+		assert.Equal(t, 1, NewStrV("1", "2", "3").LastIndex(byte('2')))
 		assert.Equal(t, 0, NewStrV("truebob").LastIndex(true))
 		assert.Equal(t, -1, NewStrV("1", "2", "3").LastIndex(false))
 		assert.Equal(t, 2, NewStrV("1", "2", "3").LastIndex(Char('3')))
@@ -2863,7 +2863,7 @@ func TestStr_LastIndexAny(t *testing.T) {
 	{
 		assert.Equal(t, 1, NewStrV("1", "2", "3").LastIndexAny(Object{2}))
 		assert.Equal(t, 1, NewStrV("1", "2", "3").LastIndexAny("2"))
-		assert.Equal(t, 1, NewStrV("1", "2", "3").LastIndexAny(byte(2)))
+		assert.Equal(t, 1, NewStrV("1", "2", "3").LastIndexAny(byte('2')))
 		assert.Equal(t, 3, NewStrV("truebob").LastIndexAny(true))
 		assert.Equal(t, -1, NewStrV("1", "2", "3").LastIndexAny(false))
 		assert.Equal(t, 2, NewStrV("1", "2", "3").LastIndexAny(Char('3')))
@@ -5169,124 +5169,6 @@ func TestStr_UniqM(t *testing.T) {
 		assert.Equal(t, NewStrV("1", "2", "3", "4"), uniq)
 	}
 }
-
-// // func TestStr_HasAnyPrefix(t *testing.T) {
-// // 	assert.True(t, A("test").HasAnyPrefix("tes"))
-// // 	assert.True(t, A("test").HasAnyPrefix("bob", "tes"))
-// // 	assert.False(t, A("test").HasAnyPrefix("bob"))
-// // }
-
-// // func TestStr_HasAnySuffix(t *testing.T) {
-// // 	assert.True(t, A("test").HasAnySuffix("est"))
-// // 	assert.True(t, A("test").HasAnySuffix("bob", "est"))
-// // 	assert.False(t, A("test").HasAnySuffix("bob"))
-// // }
-
-// // func TestStr_HasPrefix(t *testing.T) {
-// // 	assert.True(t, A("test").HasPrefix("tes"))
-// // }
-
-// // func TestStr_HasSuffix(t *testing.T) {
-// // 	assert.True(t, A("test").HasSuffix("est"))
-// // }
-
-// // func TestStr_Len(t *testing.T) {
-// // 	assert.Equal(t, 0, A("").Len())
-// // 	assert.Equal(t, 4, A("test").Len())
-// // }
-
-// // func TestStr_Replace(t *testing.T) {
-// // 	assert.Equal(t, "tfoo", A("test").Replace("est", "foo").A())
-// // 	assert.Equal(t, "foost", A("test").Replace("te", "foo").A())
-// // 	assert.Equal(t, "foostfoo", A("testte").Replace("te", "foo").A())
-// // }
-
-// // func TestStr_SpaceLeft(t *testing.T) {
-// // 	assert.Equal(t, "", A("").SpaceLeft().A())
-// // 	assert.Equal(t, "  ", A("  bob").SpaceLeft().A())
-// // 	assert.Equal(t, "\n", A("\nbob").SpaceLeft().A())
-// // 	assert.Equal(t, " \t ", A(" \t bob").SpaceLeft().A())
-// // }
-
-// // func TestStr_SpaceRight(t *testing.T) {
-// // 	assert.Equal(t, "", A("").SpaceRight().A())
-// // 	assert.Equal(t, "  ", A("bob  ").SpaceRight().A())
-// // 	assert.Equal(t, "\n", A("bob\n").SpaceRight().A())
-// // 	assert.Equal(t, " \t ", A("bob \t ").SpaceRight().A())
-// // }
-
-// // // func TestStr_Split(t *testing.T) {
-// // // 	assert.Equal(t, []string{""}, A("").Split(".").O())
-// // // 	assert.Equal(t, []string{"1", "2"}, A("1.2").Split(".").O())
-// // // 	assert.Equal(t, []string{"1", "2"}, A("1.2").Split(".").S())
-// // // }
-
-// // // func TestStr_SplitOn(t *testing.T) {
-// // // 	{
-// // // 		first, second := A("").SplitOn(":")
-// // // 		assert.Equal(t, "", first)
-// // // 		assert.Equal(t, "", second)
-// // // 	}
-// // // 	{
-// // // 		first, second := A("foo").SplitOn(":")
-// // // 		assert.Equal(t, "foo", first)
-// // // 		assert.Equal(t, "", second)
-// // // 	}
-// // // 	{
-// // // 		first, second := A("foo:").SplitOn(":")
-// // // 		assert.Equal(t, "foo:", first)
-// // // 		assert.Equal(t, "", second)
-// // // 	}
-// // // 	{
-// // // 		first, second := A(":foo").SplitOn(":")
-// // // 		assert.Equal(t, ":", first)
-// // // 		assert.Equal(t, "foo", second)
-// // // 	}
-// // // 	{
-// // // 		first, second := A("foo: bar").SplitOn(":")
-// // // 		assert.Equal(t, "foo:", first)
-// // // 		assert.Equal(t, " bar", second)
-// // // 	}
-// // // 	{
-// // // 		first, second := A("foo: bar:frodo").SplitOn(":")
-// // // 		assert.Equal(t, "foo:", first)
-// // // 		assert.Equal(t, " bar:frodo", second)
-// // // 	}
-// // // }
-
-// // // func TestStrSpaceLeft(t *testing.T) {
-// // // 	assert.Equal(t, "", A("").SpaceLeft())
-// // // 	assert.Equal(t, "", A("bob").SpaceLeft())
-// // // 	assert.Equal(t, "  ", A("  bob").SpaceLeft())
-// // // 	assert.Equal(t, "    ", A("    bob").SpaceLeft())
-// // // 	assert.Equal(t, "\n", A("\nbob").SpaceLeft())
-// // // 	assert.Equal(t, "\t", A("\tbob").SpaceLeft())
-// // // }
-
-// // // func TestStrTrimPrefix(t *testing.T) {
-// // // 	assert.Equal(t, "test]", A("[test]").TrimPrefix("[").A())
-// // // }
-
-// // // func TestStrTrimSpace(t *testing.T) {
-// // // 	{
-// // // 		//Left
-// // // 		assert.Equal(t, "bob", A("bob").TrimSpaceLeft().A())
-// // // 		assert.Equal(t, "bob", A("  bob").TrimSpaceLeft().A())
-// // // 		assert.Equal(t, "bob  ", A("  bob  ").TrimSpaceLeft().A())
-// // // 		assert.Equal(t, 3, A("  bob").TrimSpaceLeft().Len())
-// // // 	}
-// // // 	{
-// // // 		// Right
-// // // 		assert.Equal(t, "bob", A("bob").TrimSpaceRight().A())
-// // // 		assert.Equal(t, "bob", A("bob  ").TrimSpaceRight().A())
-// // // 		assert.Equal(t, "  bob", A("  bob  ").TrimSpaceRight().A())
-// // // 		assert.Equal(t, 3, A("bob  ").TrimSpaceRight().Len())
-// // // 	}
-// // // }
-
-// // // func TestStrTrimSuffix(t *testing.T) {
-// // // 	assert.Equal(t, "[test", A("[test]").TrimSuffix("]").A())
-// // // }
 
 // // // func TestYamlType(t *testing.T) {
 // // // 	{

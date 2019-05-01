@@ -1057,8 +1057,28 @@ func Reference(obj interface{}) interface{} {
 	}
 }
 
-// Convert functions
-//--------------------------------------------------------------------------------------------------
+// FromYAML converts the given YAML string into a type expected in Yaml.
+// bool: quoted or not, true, false
+// int: no quotes and convertable to int.
+// string: quoted or not fall back
+func FromYAML(obj interface{}) interface{} {
+	// if q.HasAnyPrefix("\"", "'") && q.HasAnySuffix("\"", "'") {
+	// 	return q.v[1 : len(q.v)-1]
+	// }
+
+	// if x, err := strconv.ParseBool(obj); err == nil {
+	// 	return x
+	// }
+
+	// } else if q.v == "true" || q.v == "false" {
+	// 	if b, err := strconv.ParseBool(q.v); err == nil {
+	// 		return b
+	// 	}
+	// } else if f, err := strconv.ParseFloat(q.v, 32); err == nil {
+	// 	return f
+	// }
+	return ToString(obj)
+}
 
 // ToBool converts an interface to a bool type.
 func ToBool(obj interface{}) bool {
@@ -1691,18 +1711,20 @@ func ToStr(obj interface{}) *Str {
 	//----------------------------------------------------------------------------------------------
 	case *bool:
 		if x != nil {
-			val = Str(ToString(x))
+			val = Str(strconv.FormatBool(*x))
 		}
 	case *[]bool:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				val = append(val, Str(strconv.FormatBool((*x)[i]))...)
 			}
 		}
 	case *[]*bool:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				if y := (*x)[i]; y != nil {
+					val = append(val, Str(strconv.FormatBool(*y))...)
+				}
 			}
 		}
 
@@ -1715,32 +1737,43 @@ func ToStr(obj interface{}) *Str {
 	case *[]Char:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str((*x)[i].String())...)
+				if y := (*x)[i]; y.G() != rune(0) {
+					val = append(val, Str(y.String())...)
+				}
 			}
 		}
 	case *[]*Char:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str((*x)[i].String())...)
+				if y := (*x)[i]; y != nil && y.G() != rune(0) {
+					val = append(val, Str(y.String())...)
+				}
 			}
 		}
+
+	// error
+	//----------------------------------------------------------------------------------------------
+	case error:
+		val = Str(x.Error())
 
 	// float32
 	//----------------------------------------------------------------------------------------------
 	case *float32:
 		if x != nil {
-			val = Str(ToString(*x))
+			val = Str(strconv.FormatFloat(float64(*x), 'f', -1, 32))
 		}
 	case *[]float32:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				val = append(val, Str(strconv.FormatFloat(float64((*x)[i]), 'f', -1, 32))...)
 			}
 		}
 	case *[]*float32:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				if y := (*x)[i]; y != nil {
+					val = append(val, Str(strconv.FormatFloat(float64(*y), 'f', -1, 32))...)
+				}
 			}
 		}
 
@@ -1748,18 +1781,20 @@ func ToStr(obj interface{}) *Str {
 	//----------------------------------------------------------------------------------------------
 	case *float64:
 		if x != nil {
-			val = Str(ToString(*x))
+			val = Str(strconv.FormatFloat(float64(*x), 'f', -1, 64))
 		}
 	case *[]float64:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				val = append(val, Str(strconv.FormatFloat(float64((*x)[i]), 'f', -1, 64))...)
 			}
 		}
 	case *[]*float64:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				if y := (*x)[i]; y != nil {
+					val = append(val, Str(strconv.FormatFloat(float64(*y), 'f', -1, 64))...)
+				}
 			}
 		}
 
@@ -1768,7 +1803,7 @@ func ToStr(obj interface{}) *Str {
 	case *[]interface{}:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				val = append(val, *ToStr((*x)[i])...)
 			}
 		}
 
@@ -1776,18 +1811,20 @@ func ToStr(obj interface{}) *Str {
 	//----------------------------------------------------------------------------------------------
 	case *int:
 		if x != nil {
-			val = Str(ToString(*x))
+			val = Str(strconv.FormatInt(int64(*x), 10))
 		}
 	case *[]int:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				val = append(val, Str(strconv.FormatInt(int64((*x)[i]), 10))...)
 			}
 		}
 	case *[]*int:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				if y := (*x)[i]; y != nil {
+					val = append(val, Str(strconv.FormatInt(int64(*y), 10))...)
+				}
 			}
 		}
 
@@ -1795,18 +1832,20 @@ func ToStr(obj interface{}) *Str {
 	//----------------------------------------------------------------------------------------------
 	case *int8:
 		if x != nil {
-			val = Str(ToString(*x))
+			val = Str(strconv.FormatInt(int64(*x), 10))
 		}
 	case *[]int8:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				val = append(val, Str(strconv.FormatInt(int64((*x)[i]), 10))...)
 			}
 		}
 	case *[]*int8:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				if y := (*x)[i]; y != nil {
+					val = append(val, Str(strconv.FormatInt(int64(*y), 10))...)
+				}
 			}
 		}
 
@@ -1814,22 +1853,24 @@ func ToStr(obj interface{}) *Str {
 	//----------------------------------------------------------------------------------------------
 	case *int16:
 		if x != nil {
-			val = Str(ToString(*x))
+			val = Str(strconv.FormatInt(int64(*x), 10))
 		}
 	case *[]int16:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				val = append(val, Str(strconv.FormatInt(int64((*x)[i]), 10))...)
 			}
 		}
 	case *[]*int16:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				if y := (*x)[i]; y != nil {
+					val = append(val, Str(strconv.FormatInt(int64(*y), 10))...)
+				}
 			}
 		}
 
-	// int32
+	// int32 a.k.a rune handle differently as Golang only has a single type
 	//----------------------------------------------------------------------------------------------
 	case *int32:
 		if x != nil && *x != rune(0) {
@@ -1842,8 +1883,7 @@ func ToStr(obj interface{}) *Str {
 	case *[]*int32:
 		if x != nil {
 			for i := range *x {
-				y := (*x)[i]
-				if y != nil {
+				if y := (*x)[i]; y != nil {
 					val = append(val, *y)
 				}
 			}
@@ -1853,18 +1893,20 @@ func ToStr(obj interface{}) *Str {
 	//----------------------------------------------------------------------------------------------
 	case *int64:
 		if x != nil {
-			val = Str(ToString(*x))
+			val = Str(strconv.FormatInt(*x, 10))
 		}
 	case *[]int64:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				val = append(val, Str(strconv.FormatInt((*x)[i], 10))...)
 			}
 		}
 	case *[]*int64:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				if y := (*x)[i]; y != nil {
+					val = append(val, Str(strconv.FormatInt(*y, 10))...)
+				}
 			}
 		}
 
@@ -1873,24 +1915,23 @@ func ToStr(obj interface{}) *Str {
 	case *IntSlice:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				val = append(val, Str(strconv.FormatInt(int64((*x)[i]), 10))...)
 			}
 		}
 	case *[]IntSlice:
 		if x != nil {
 			for i := range *x {
 				for j := range (*x)[i] {
-					val = append(val, Str(ToString((*x)[i][j]))...)
+					val = append(val, Str(strconv.FormatInt(int64((*x)[i][j]), 10))...)
 				}
 			}
 		}
 	case *[]*IntSlice:
 		if x != nil {
 			for i := range *x {
-				y := (*x)[i]
-				if y != nil {
+				if y := (*x)[i]; y != nil {
 					for j := range *y {
-						val = append(val, Str(ToString((*y)[j]))...)
+						val = append(val, Str(strconv.FormatInt(int64((*y)[j]), 10))...)
 					}
 				}
 			}
@@ -1957,30 +1998,67 @@ func ToStr(obj interface{}) *Str {
 			}
 		}
 
+	// template.CSS
+	//----------------------------------------------------------------------------------------------
+	case *template.CSS:
+		if x != nil {
+			val = Str(string(*x))
+		}
+
+	// template.HTML
+	//----------------------------------------------------------------------------------------------
+	case *template.HTML:
+		if x != nil {
+			val = Str(string(*x))
+		}
+
+	// template.HTMLAttr
+	//----------------------------------------------------------------------------------------------
+	case *template.HTMLAttr:
+		if x != nil {
+			val = Str(string(*x))
+		}
+
+	// template.JS
+	//----------------------------------------------------------------------------------------------
+	case *template.JS:
+		if x != nil {
+			val = Str(string(*x))
+		}
+
+	// template.URL
+	//----------------------------------------------------------------------------------------------
+	case *template.URL:
+		if x != nil {
+			val = Str(string(*x))
+		}
+
 	// uint
 	//----------------------------------------------------------------------------------------------
 	case *uint:
 		if x != nil {
-			val = Str(ToString(*x))
+			val = Str(strconv.FormatUint(uint64(*x), 10))
 		}
 	case *[]uint:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				val = append(val, Str(strconv.FormatUint(uint64((*x)[i]), 10))...)
 			}
 		}
 	case *[]*uint:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				if y := (*x)[i]; y != nil {
+					val = append(val, Str(strconv.FormatUint(uint64(*y), 10))...)
+				}
 			}
 		}
 
-	// uint8 i.e. byte handle differently
+	// uint8 a.k.a byte handle differently as Golang only has a single type
 	//----------------------------------------------------------------------------------------------
 	case *uint8:
-		if x != nil {
-			val = Str(ToString(*x))
+		if x != nil && *x != byte(0) {
+			val = append(val, rune(*x))
 		}
 	case *[]uint8:
 		if x != nil && len(*x) != 0 {
@@ -1988,32 +2066,32 @@ func ToStr(obj interface{}) *Str {
 		}
 	case *[]*uint8:
 		if x != nil {
-			bytes := []byte{}
 			for i := range *x {
 				y := (*x)[i]
 				if y != nil {
-					bytes = append(bytes, *y)
+					val = append(val, rune(*y))
 				}
 			}
-			val = Str(string(bytes))
 		}
 
 	// uint16
 	//----------------------------------------------------------------------------------------------
 	case *uint16:
 		if x != nil {
-			val = Str(ToString(*x))
+			val = Str(strconv.FormatUint(uint64(*x), 10))
 		}
 	case *[]uint16:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				val = append(val, Str(strconv.FormatUint(uint64((*x)[i]), 10))...)
 			}
 		}
 	case *[]*uint16:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				if y := (*x)[i]; y != nil {
+					val = append(val, Str(strconv.FormatUint(uint64(*y), 10))...)
+				}
 			}
 		}
 
@@ -2021,18 +2099,20 @@ func ToStr(obj interface{}) *Str {
 	//----------------------------------------------------------------------------------------------
 	case *uint32:
 		if x != nil {
-			val = Str(ToString(*x))
+			val = Str(strconv.FormatUint(uint64(*x), 10))
 		}
 	case *[]uint32:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				val = append(val, Str(strconv.FormatUint(uint64((*x)[i]), 10))...)
 			}
 		}
 	case *[]*uint32:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				if y := (*x)[i]; y != nil {
+					val = append(val, Str(strconv.FormatUint(uint64(*y), 10))...)
+				}
 			}
 		}
 
@@ -2040,18 +2120,20 @@ func ToStr(obj interface{}) *Str {
 	//----------------------------------------------------------------------------------------------
 	case *uint64:
 		if x != nil {
-			val = Str(ToString(*x))
+			val = Str(strconv.FormatUint(*x, 10))
 		}
 	case *[]uint64:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				val = append(val, Str(strconv.FormatUint((*x)[i], 10))...)
 			}
 		}
 	case *[]*uint64:
 		if x != nil {
 			for i := range *x {
-				val = append(val, Str(ToString((*x)[i]))...)
+				if y := (*x)[i]; y != nil {
+					val = append(val, Str(strconv.FormatUint(*y, 10))...)
+				}
 			}
 		}
 
@@ -2070,200 +2152,19 @@ func ToStr(obj interface{}) *Str {
 			}
 
 		default:
-			val = Str(ToString(x))
+			if y, ok := x.(fmt.Stringer); ok && y != nil {
+				val = Str(y.String())
+			} else {
+				val = Str(fmt.Sprintf("%v", x))
+			}
 		}
 	}
 	return &val
 }
 
 // ToString convert an interface to a string type.
-func ToString(obj interface{}) (val string) {
-	o := Reference(obj)
-
-	// Optimized types
-	switch x := o.(type) {
-	case nil:
-
-	// bool
-	//----------------------------------------------------------------------------------------------
-	case *bool:
-		if x != nil {
-			val = strconv.FormatBool(*x)
-		}
-
-	// []byte
-	//----------------------------------------------------------------------------------------------
-	case *[]byte:
-		if x != nil && len(*x) != 0 {
-			val = string(*x)
-		}
-
-	// Char
-	//----------------------------------------------------------------------------------------------
-	case *Char:
-		val = x.String()
-
-	// error
-	//----------------------------------------------------------------------------------------------
-	case error:
-		val = x.Error()
-
-	// float32
-	//----------------------------------------------------------------------------------------------
-	case *float32:
-		if x != nil {
-			val = strconv.FormatFloat(float64(*x), 'f', -1, 32)
-		}
-
-	// float64
-	//----------------------------------------------------------------------------------------------
-	case *float64:
-		if x != nil {
-			val = strconv.FormatFloat(float64(*x), 'f', -1, 64)
-		}
-
-	// int
-	//----------------------------------------------------------------------------------------------
-	case *int:
-		if x != nil {
-			val = strconv.FormatInt(int64(*x), 10)
-		}
-
-	// int8
-	//----------------------------------------------------------------------------------------------
-	case *int8:
-		if x != nil {
-			val = strconv.FormatInt(int64(*x), 10)
-		}
-
-	// int16
-	//----------------------------------------------------------------------------------------------
-	case *int16:
-		if x != nil {
-			val = strconv.FormatInt(int64(*x), 10)
-		}
-
-	// int32
-	//----------------------------------------------------------------------------------------------
-	case *int32:
-		if x != nil {
-			val = strconv.FormatInt(int64(*x), 10)
-		}
-
-	// int64
-	//----------------------------------------------------------------------------------------------
-	case *int64:
-		if x != nil {
-			val = strconv.FormatInt(*x, 10)
-		}
-
-	// Object
-	//----------------------------------------------------------------------------------------------
-	case *Object:
-		if x != nil {
-			val = x.ToString()
-		}
-
-	// []rune
-	//----------------------------------------------------------------------------------------------
-	case *[]rune:
-		if x != nil && len(*x) != 0 {
-			val = string(*x)
-		}
-
-	// Str
-	//----------------------------------------------------------------------------------------------
-	case *Str:
-		val = x.String()
-
-	// string
-	//----------------------------------------------------------------------------------------------
-	case *string:
-		if x != nil {
-			val = *x
-		}
-
-	// template.CSS
-	//----------------------------------------------------------------------------------------------
-	case *template.CSS:
-		if x != nil {
-			val = string(*x)
-		}
-
-	// template.HTML
-	//----------------------------------------------------------------------------------------------
-	case *template.HTML:
-		if x != nil {
-			val = string(*x)
-		}
-
-	// template.HTMLAttr
-	//----------------------------------------------------------------------------------------------
-	case *template.HTMLAttr:
-		if x != nil {
-			val = string(*x)
-		}
-
-	// template.JS
-	//----------------------------------------------------------------------------------------------
-	case *template.JS:
-		if x != nil {
-			val = string(*x)
-		}
-
-	// template.URL
-	//----------------------------------------------------------------------------------------------
-	case *template.URL:
-		if x != nil {
-			val = string(*x)
-		}
-
-	// uint8
-	//----------------------------------------------------------------------------------------------
-	case *uint:
-		if x != nil {
-			val = strconv.FormatInt(int64(*x), 10)
-		}
-
-	// uint8
-	//----------------------------------------------------------------------------------------------
-	case *uint8:
-		if x != nil {
-			val = strconv.FormatInt(int64(*x), 10)
-		}
-
-	// uint16
-	//----------------------------------------------------------------------------------------------
-	case *uint16:
-		if x != nil {
-			val = strconv.FormatInt(int64(*x), 10)
-		}
-
-	// uint32
-	//----------------------------------------------------------------------------------------------
-	case *uint32:
-		if x != nil {
-			val = strconv.FormatInt(int64(*x), 10)
-		}
-
-	// uint64
-	//----------------------------------------------------------------------------------------------
-	case *uint64:
-		if x != nil {
-			val = strconv.FormatInt(int64(*x), 10)
-		}
-
-	// fmt.Stringer
-	//----------------------------------------------------------------------------------------------
-	case fmt.Stringer:
-		if x != nil {
-			val = x.String()
-		}
-
-	default:
-		val = fmt.Sprintf("%v", obj)
-	}
-	return
+func ToString(obj interface{}) string {
+	return ToStr(obj).A()
 }
 
 // ToStringSlice convert an interface to a []int type.

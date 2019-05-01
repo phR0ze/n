@@ -54,7 +54,7 @@ func (p *Str) All(elems ...interface{}) bool {
 	str := p.A()
 	result := true
 	for i := range elems {
-		if !strings.Contains(str, ToStr(elems[i]).A()) {
+		if !strings.Contains(str, ToString(elems[i])) {
 			return false
 		}
 	}
@@ -623,7 +623,7 @@ func (p *Str) HasAnyPrefixV(prefixes ...interface{}) bool {
 	}
 	str := p.A()
 	for i := range prefixes {
-		x := ToStr(prefixes[i]).A()
+		x := ToString(prefixes[i])
 		if len(x) > 0 && strings.HasPrefix(str, x) {
 			return true
 		}
@@ -654,7 +654,7 @@ func (p *Str) HasAnySuffixV(prefixes ...interface{}) bool {
 	}
 	str := p.A()
 	for i := range prefixes {
-		x := ToStr(prefixes[i]).A()
+		x := ToString(prefixes[i])
 		if len(x) > 0 && strings.HasSuffix(str, x) {
 			return true
 		}
@@ -690,7 +690,7 @@ func (p *Str) Index(substr interface{}) (loc int) {
 		return
 	}
 	str := string(*p)
-	x := ToStr(substr).A()
+	x := ToString(substr)
 	return strings.Index(str, x)
 }
 
@@ -702,7 +702,7 @@ func (p *Str) IndexAny(elems interface{}) (loc int) {
 		return
 	}
 	str := string(*p)
-	x := ToStr(elems).A()
+	x := ToString(elems)
 	return strings.IndexAny(str, x)
 }
 
@@ -785,7 +785,7 @@ func (p *Str) LastIndex(substr interface{}) (loc int) {
 		return
 	}
 	str := string(*p)
-	x := ToStr(substr).A()
+	x := ToString(substr)
 	return strings.LastIndex(str, x)
 }
 
@@ -797,7 +797,7 @@ func (p *Str) LastIndexAny(elems interface{}) (loc int) {
 		return
 	}
 	str := string(*p)
-	x := ToStr(elems).A()
+	x := ToString(elems)
 	return strings.LastIndexAny(str, x)
 }
 
@@ -900,8 +900,8 @@ func (p *Str) Replace(old, new interface{}, n int) *Str {
 		return NewStrV()
 	}
 	str := p.A()
-	x := ToStr(old).A()
-	y := ToStr(new).A()
+	x := ToString(old)
+	y := ToString(new)
 	return ToStr(strings.Replace(str, x, y, n))
 }
 
@@ -914,8 +914,8 @@ func (p *Str) ReplaceAll(old, new interface{}) *Str {
 		return NewStrV()
 	}
 	str := p.A()
-	x := ToStr(old).A()
-	y := ToStr(new).A()
+	x := ToString(old)
+	y := ToString(new)
 	return ToStr(strings.ReplaceAll(str, x, y))
 }
 
@@ -1174,7 +1174,7 @@ func (p *Str) Trim(cutset ...interface{}) (new *Str) {
 		return NewStrV()
 	}
 	if len(cutset) > 0 {
-		x := ToStr(cutset).A()
+		x := ToString(cutset)
 		return NewStr(strings.Trim(p.A(), x))
 	}
 	return NewStr(strings.TrimSpace(p.A()))
@@ -1195,7 +1195,7 @@ func (p *Str) TrimLeft(cutset ...interface{}) (new *Str) {
 		return NewStrV()
 	}
 	if len(cutset) > 0 {
-		x := ToStr(cutset).A()
+		x := ToString(cutset)
 		return NewStr(strings.TrimLeft(p.A(), x))
 	}
 	return NewStr(strings.TrimLeftFunc(p.A(), unicode.IsSpace))
@@ -1215,7 +1215,7 @@ func (p *Str) TrimPrefix(prefix interface{}) (new *Str) {
 	if p == nil {
 		return NewStrV()
 	}
-	x := ToStr(prefix).A()
+	x := ToString(prefix)
 	return NewStr(strings.TrimPrefix(p.A(), x))
 }
 
@@ -1226,7 +1226,7 @@ func (p *Str) TrimRight(cutset ...interface{}) (new *Str) {
 		return NewStrV()
 	}
 	if len(cutset) > 0 {
-		x := ToStr(cutset).A()
+		x := ToString(cutset)
 		return NewStr(strings.TrimRight(p.A(), x))
 	}
 	return NewStr(strings.TrimRightFunc(p.A(), unicode.IsSpace))
@@ -1246,7 +1246,7 @@ func (p *Str) TrimSuffix(suffix interface{}) (new *Str) {
 	if p == nil {
 		return NewStrV()
 	}
-	x := ToStr(suffix).A()
+	x := ToString(suffix)
 	return NewStr(strings.TrimSuffix(p.A(), x))
 }
 
@@ -1295,20 +1295,3 @@ func (p *Str) UniqM() Slice {
 	}
 	return p
 }
-
-// // // // // YamlType converts the given string into a type expected in Yaml.
-// // // // // Quotes signifies a string.
-// // // // // No quotes signifies an int.
-// // // // // true or false signifies a bool.
-// // // // func (q *strN) YamlType() interface{} {
-// // // // 	if q.HasAnyPrefix("\"", "'") && q.HasAnySuffix("\"", "'") {
-// // // // 		return q.v[1 : len(q.v)-1]
-// // // // 	} else if q.v == "true" || q.v == "false" {
-// // // // 		if b, err := strconv.ParseBool(q.v); err == nil {
-// // // // 			return b
-// // // // 		}
-// // // // 	} else if f, err := strconv.ParseFloat(q.v, 32); err == nil {
-// // // // 		return f
-// // // // 	}
-// // // // 	return q.v
-// // // // }
