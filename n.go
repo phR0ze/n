@@ -119,9 +119,9 @@ func ValueOrDefault(value, defaulty string) string {
 	return defaulty
 }
 
-// MergeMap b into a and returns the new modified a
+// MergeYamlMap b into a and returns the new modified a
 // b takes higher precedence and will override a
-func MergeMap(a, b map[string]interface{}) map[string]interface{} {
+func MergeYamlMap(a, b map[string]interface{}) map[string]interface{} {
 	switch {
 	case (a == nil || len(a) == 0) && (b == nil || len(b) == 0):
 		return map[string]interface{}{}
@@ -136,7 +136,7 @@ func MergeMap(a, b map[string]interface{}) map[string]interface{} {
 			a[k] = bv
 		} else if bc, ok := bv.(map[string]interface{}); ok {
 			if ac, ok := av.(map[string]interface{}); ok {
-				a[k] = MergeMap(ac, bc)
+				a[k] = MergeYamlMap(ac, bc)
 			} else {
 				a[k] = bv
 			}

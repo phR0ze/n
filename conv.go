@@ -1101,28 +1101,28 @@ func Reference(obj interface{}) interface{} {
 	}
 }
 
-// FromYAML converts the given YAML string into a type expected in Yaml.
-// bool: quoted or not, true, false
-// int: no quotes and convertable to int.
-// string: quoted or not fall back
-func FromYAML(obj interface{}) interface{} {
-	// if q.HasAnyPrefix("\"", "'") && q.HasAnySuffix("\"", "'") {
-	// 	return q.v[1 : len(q.v)-1]
-	// }
+// // FromYAML converts the given YAML string into an expected Go type.
+// // bool: quoted or not, true, false
+// // int: no quotes and convertable to int.
+// // string: quoted or not fall back
+// func FromYAML(obj interface{}) interface{} {
+// 	if .HasAnyPrefix("\"", "'") && q.HasAnySuffix("\"", "'") {
+// 	// 	return q.v[1 : len(q.v)-1]
+// 	// }
 
-	// if x, err := strconv.ParseBool(obj); err == nil {
-	// 	return x
-	// }
+// 	// if x, err := strconv.ParseBool(obj); err == nil {
+// 	// 	return x
+// 	// }
 
-	// } else if q.v == "true" || q.v == "false" {
-	// 	if b, err := strconv.ParseBool(q.v); err == nil {
-	// 		return b
-	// 	}
-	// } else if f, err := strconv.ParseFloat(q.v, 32); err == nil {
-	// 	return f
-	// }
-	return ToString(obj)
-}
+// 	// } else if q.v == "true" || q.v == "false" {
+// 	// 	if b, err := strconv.ParseBool(q.v); err == nil {
+// 	// 		return b
+// 	// 	}
+// 	// } else if f, err := strconv.ParseFloat(q.v, 32); err == nil {
+// 	// 	return f
+// 	// }
+// 	return ToString(obj)
+// }
 
 // ToBool converts an interface to a bool type.
 func ToBool(obj interface{}) bool {

@@ -18,22 +18,22 @@ type bob struct {
 
 func TestMergeMap(t *testing.T) {
 	{
-		assert.Equal(t, map[string]interface{}{}, MergeMap(nil, nil))
+		assert.Equal(t, map[string]interface{}{}, MergeYamlMap(nil, nil))
 	}
 	{
 		a := map[string]interface{}{}
 		b := map[string]interface{}{}
-		assert.Equal(t, map[string]interface{}{}, MergeMap(a, b))
+		assert.Equal(t, map[string]interface{}{}, MergeYamlMap(a, b))
 	}
 	{
 		a := map[string]interface{}{}
 		b := map[string]interface{}{"1": "one"}
-		assert.Equal(t, b, MergeMap(a, b))
+		assert.Equal(t, b, MergeYamlMap(a, b))
 	}
 	{
 		a := map[string]interface{}{"1": "one"}
 		b := map[string]interface{}{}
-		assert.Equal(t, a, MergeMap(a, b))
+		assert.Equal(t, a, MergeYamlMap(a, b))
 	}
 	{
 		a := map[string]interface{}{
@@ -46,7 +46,7 @@ func TestMergeMap(t *testing.T) {
 			"1": "one",
 			"2": "two",
 		}
-		assert.Equal(t, expected, MergeMap(a, b))
+		assert.Equal(t, expected, MergeYamlMap(a, b))
 	}
 	{
 		// Override string in a with string in b
@@ -63,7 +63,7 @@ func TestMergeMap(t *testing.T) {
 			"2": "two",
 			"3": "three",
 		}
-		assert.Equal(t, expected, MergeMap(a, b))
+		assert.Equal(t, expected, MergeYamlMap(a, b))
 	}
 	{
 		// Override string in a with map from b
@@ -80,7 +80,7 @@ func TestMergeMap(t *testing.T) {
 			"2": map[string]interface{}{"foo": "bar"},
 			"3": "three",
 		}
-		assert.Equal(t, expected, MergeMap(a, b))
+		assert.Equal(t, expected, MergeYamlMap(a, b))
 	}
 	{
 		// Override map in a with string from b
@@ -97,7 +97,7 @@ func TestMergeMap(t *testing.T) {
 			"2": "two",
 			"3": "three",
 		}
-		assert.Equal(t, expected, MergeMap(a, b))
+		assert.Equal(t, expected, MergeYamlMap(a, b))
 	}
 	{
 		// Override sub map string in a with sub map string from b
@@ -120,7 +120,7 @@ func TestMergeMap(t *testing.T) {
 			},
 			"3": "three",
 		}
-		assert.Equal(t, expected, MergeMap(a, b))
+		assert.Equal(t, expected, MergeYamlMap(a, b))
 	}
 }
 

@@ -72,6 +72,38 @@ type Map interface {
 	// UniqM() Slice                                     // UniqM modifies this Map to remove all non uniq elements while preserving element order.
 }
 
+// M is an alias for NewMap
+func M(m interface{}) (new Map) {
+	return NewMap(m)
+}
+
+// NewMap provides a generic way to work with Map types. It does this by wrapping Go types
+// directly for optimized types thus avoiding reflection processing overhead and making a plethora
+// of Map methods available. Non optimized types will fall back on reflection to generically
+// handle the type incurring the full 10x reflection processing overhead. Defaults to StringMap
+// type if nothing is given.
+//
+// Optimized: map[string]interface{}
+func NewMap(m ...interface{}) (new Map) {
+	if len(m) == 0 {
+		return NewStringMap()
+	}
+	o := Reference(m[0])
+	switch x := o.(type) {
+
+	// StringMap
+	// ---------------------------------------------------------------------------------------------
+	case map[string]interface{}:
+		new = NewStringMap(x)
+
+	// RefSlice
+	// ---------------------------------------------------------------------------------------------
+	default:
+		panic("not yet implemented")
+	}
+	return
+}
+
 // // Any checks if the numerable has anything in it
 // func (q *Numerable) Any() bool {
 // 	if q.v == nil {
