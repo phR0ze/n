@@ -10,14 +10,31 @@ func TestSlice_NewSlice(t *testing.T) {
 
 	// int
 	{
-		assert.Equal(t, NewIntSliceV(1, 2, 3), NewSlice([]int{1, 2, 3}))
-		assert.Equal(t, NewIntSliceV(1, 2, 3), NewSlice(&([]int{1, 2, 3})))
+		assert.Equal(t, NewIntSliceV(3), NewSlice([]float32{3}))
+		assert.Equal(t, NewIntSliceV(3), NewSlice([]float64{3}))
+		assert.Equal(t, NewIntSliceV(3), NewSlice([]int{3}))
+		assert.Equal(t, NewIntSliceV(3), NewSlice(&([]int{3})))
+		assert.Equal(t, NewIntSliceV(3), NewSlice([]int8{3}))
+		assert.Equal(t, NewIntSliceV(3), NewSlice([]int16{3}))
+		assert.Equal(t, NewIntSliceV(3), NewSlice([]int64{3}))
+		assert.Equal(t, NewIntSliceV(3), NewSlice([]uint16{3}))
+		assert.Equal(t, NewIntSliceV(3), NewSlice([]uint32{3}))
+		assert.Equal(t, NewIntSliceV(3), NewSlice([]uint64{3}))
 	}
 
 	// string
 	{
 		assert.Equal(t, NewStringSliceV("1", "2", "3"), NewSlice([]string{"1", "2", "3"}))
 		assert.Equal(t, NewStringSliceV("1", "2", "3"), NewSlice(&([]string{"1", "2", "3"})))
+		assert.Equal(t, NewStringSliceV("3"), NewSlice([][]byte{{'3'}}))
+		assert.Equal(t, NewStringSliceV("3"), NewSlice([][]rune{{'3'}}))
+	}
+
+	// Str
+	{
+		assert.Equal(t, NewStrV("3"), NewSlice([]rune{'3'}))
+		assert.Equal(t, NewStrV("3"), NewSlice([]byte{'3'}))
+		assert.Equal(t, NewStrV("3"), NewSlice([]Char{'3'}))
 	}
 }
 
@@ -25,16 +42,30 @@ func TestSlice_NewSliceV(t *testing.T) {
 
 	// int
 	{
-		one, two := 1, 2
-		assert.Equal(t, NewIntSliceV(1, 2, 3), NewSliceV(1, 2, 3))
-		assert.Equal(t, NewIntSliceV(1, 2), NewSliceV(&one, &two))
+		assert.Equal(t, NewIntSliceV(3), NewSliceV(float32(3.0)))
+		assert.Equal(t, NewIntSliceV(3), NewSliceV(float64(3.0)))
+		assert.Equal(t, NewIntSliceV(3), NewSliceV(3))
+		assert.Equal(t, NewIntSliceV(3), NewSliceV(int8(3)))
+		assert.Equal(t, NewIntSliceV(3), NewSliceV(int16(3)))
+		assert.Equal(t, NewIntSliceV(3), NewSliceV(int64(3)))
+		assert.Equal(t, NewIntSliceV(3), NewSliceV(uint16(3)))
+		assert.Equal(t, NewIntSliceV(3), NewSliceV(uint32(3)))
+		assert.Equal(t, NewIntSliceV(3), NewSliceV(uint64(3)))
 	}
 
 	// string
 	{
-		one, two := "1", "2"
-		assert.Equal(t, NewStringSliceV("1", "2", "3"), NewSliceV("1", "2", "3"))
-		assert.Equal(t, NewStringSliceV("1", "2"), NewSliceV(&one, &two))
+		assert.Equal(t, NewStringSliceV("3"), NewSliceV("3"))
+		assert.Equal(t, NewStringSliceV("3"), NewSliceV([]byte{'3'}))
+		assert.Equal(t, NewStringSliceV("3"), NewSliceV([]rune{'3'}))
+		assert.Equal(t, NewStringSliceV("3"), NewSliceV(Str{'3'}))
+	}
+
+	// Str
+	{
+		assert.Equal(t, NewStrV("3"), NewSliceV('3'))
+		assert.Equal(t, NewStrV("3"), NewSliceV(byte('3')))
+		assert.Equal(t, NewStrV("3"), NewSliceV(Char('3')))
 	}
 }
 

@@ -88,16 +88,35 @@ func S(obj interface{}) (new Slice) {
 // of Slice methods available. Non optimized types will fall back on reflection to generically
 // handle the type incurring the full 10x reflection processing overhead.
 //
-// Optimized: []int, []string
+// Optimized: []int, []string, Str
 func NewSlice(obj interface{}) (new Slice) {
-	switch x := obj.(type) {
-	case []int, *[]int:
-		return NewIntSlice(DeReference(x).([]int))
-	case []string, *[]string:
-		return NewStringSlice(DeReference(x).([]string))
+	o := Reference(obj)
+	switch x := o.(type) {
+
+	// IntSlice
+	// ---------------------------------------------------------------------------------------------
+	case *[]float32, *[]float64, *[]int, *[]int8, *[]int16, *[]int64, *[]uint, *[]uint16, *[]uint32, *[]uint64,
+		*[]*float32, *[]*float64, *[]*int, *[]*int8, *[]*int16, *[]*int64, *[]*uint, *[]*uint16, *[]*uint32, *[]*uint64:
+		new, _ = ToIntSliceE(x)
+
+	// StrSlice
+	// ---------------------------------------------------------------------------------------------
+	case *[]string, *[][]byte, *[][]rune, *[]Str,
+		*[]*string, *[]*[]byte, *[]*[]rune, *[]*Str:
+		new, _ = ToStringSliceE(x)
+
+	// Str
+	// ---------------------------------------------------------------------------------------------
+	case *[]Char, *[]rune, *[]byte,
+		*[]*Char, *[]*rune, *[]*byte:
+		new = ToStr(x)
+
+	// RefSlice
+	// ---------------------------------------------------------------------------------------------
 	default:
-		return NewRefSlice(obj)
+		new = NewRefSlice(obj)
 	}
+	return
 }
 
 // SV is an alias for NewSliceV
@@ -110,37 +129,30 @@ func SV(obj ...interface{}) (new Slice) {
 // on reflection to generically handle the type incurring the full 10x reflection processing
 // overhead. In the case where nothing is given a new *RefSlice will be returned.
 //
-// Optimized: []int, []string
+// Optimized: []int, []string, Str
 func NewSliceV(elems ...interface{}) (new Slice) {
 	if len(elems) == 0 {
 		new = NewRefSliceV(elems...)
 	} else {
-		switch elems[0].(type) {
-		case int:
-			var slice []int
-			for _, x := range elems {
-				slice = append(slice, x.(int))
-			}
-			new = NewIntSlice(slice)
-		case *int:
-			var slice []int
-			for _, x := range elems {
-				slice = append(slice, *(x.(*int)))
-			}
-			new = NewIntSlice(slice)
-		case string:
-			var slice []string
-			for _, x := range elems {
-				slice = append(slice, x.(string))
-			}
-			new = NewStringSlice(slice)
-		case *string:
-			var slice []string
-			for _, x := range elems {
-				slice = append(slice, *(x.(*string)))
-			}
-			new = NewStringSlice(slice)
+		switch Reference(elems[0]).(type) {
 
+		// IntSlice
+		// -----------------------------------------------------------------------------------------
+		case *float32, *float64, *int, *int8, *int16, *int64, *uint, *uint16, *uint32, *uint64:
+			new, _ = ToIntSliceE(elems)
+
+		// StringSlice
+		// -----------------------------------------------------------------------------------------
+		case *string, *[]byte, *[]rune, *Str:
+			new, _ = ToStringSliceE(elems)
+
+		// Str
+		// -----------------------------------------------------------------------------------------
+		case *Char, *rune, *byte:
+			new = ToStr(elems)
+
+		// RefSlice
+		// -----------------------------------------------------------------------------------------
 		default:
 			new = NewRefSliceV(elems...)
 		}

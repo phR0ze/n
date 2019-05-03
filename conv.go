@@ -249,6 +249,20 @@ func DeReference(obj interface{}) interface{} {
 			return []*int32{}
 		}
 		return *x
+	case [][]int32:
+		return x
+	case [][]*int32:
+		return x
+	case *[][]int32:
+		if x == nil {
+			return [][]int32{}
+		}
+		return *x
+	case *[][]*int32:
+		if x == nil {
+			return [][]*int32{}
+		}
+		return *x
 
 	// int64
 	//----------------------------------------------------------------------------------------------
@@ -571,6 +585,20 @@ func DeReference(obj interface{}) interface{} {
 			return []*uint8{}
 		}
 		return *x
+	case [][]uint8:
+		return x
+	case [][]*uint8:
+		return x
+	case *[][]uint8:
+		if x == nil {
+			return [][]uint8{}
+		}
+		return *x
+	case *[][]*uint8:
+		if x == nil {
+			return [][]*uint8{}
+		}
+		return *x
 
 	// uint16
 	//----------------------------------------------------------------------------------------------
@@ -798,6 +826,14 @@ func Reference(obj interface{}) interface{} {
 		return x
 	case *[]*int32:
 		return x
+	case [][]int32:
+		return &x
+	case [][]*int32:
+		return &x
+	case *[][]int32:
+		return x
+	case *[][]*int32:
+		return x
 
 	// int64
 	//----------------------------------------------------------------------------------------------
@@ -996,6 +1032,14 @@ func Reference(obj interface{}) interface{} {
 	case *[]uint8:
 		return x
 	case *[]*uint8:
+		return x
+	case [][]uint8:
+		return &x
+	case [][]*uint8:
+		return &x
+	case *[][]uint8:
+		return x
+	case *[][]*uint8:
 		return x
 
 	// uint16
