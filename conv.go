@@ -914,6 +914,13 @@ func Reference(obj interface{}) interface{} {
 	case *[]*StringSlice:
 		return x
 
+	// StringMap
+	//----------------------------------------------------------------------------------------------
+	case StringMap:
+		return &x
+	case *StringMap:
+		return x
+
 	// string
 	//----------------------------------------------------------------------------------------------
 	case string:
@@ -927,6 +934,14 @@ func Reference(obj interface{}) interface{} {
 	case *[]string:
 		return x
 	case *[]*string:
+		return x
+	case map[string]interface{}:
+		return &x
+	case map[string]*interface{}:
+		return &x
+	case *map[string]interface{}:
+		return x
+	case *map[string]*interface{}:
 		return x
 
 	// template.CSS
@@ -2209,6 +2224,46 @@ func ToStr(obj interface{}) *Str {
 // ToString convert an interface to a string type.
 func ToString(obj interface{}) string {
 	return ToStr(obj).A()
+}
+
+// ToStringMap converts an interface to a StringMap type
+func ToStringMap(obj interface{}) *StringMap {
+	x, _ := ToStringMapE(obj)
+	if x == nil {
+		return &StringMap{}
+	}
+	return x
+}
+
+// ToStringMapE converts an interface to a StringMap type
+func ToStringMapE(obj interface{}) (val *StringMap, err error) {
+	val = &StringMap{}
+	o := Reference(obj)
+
+	// Optimized types
+	switch x := o.(type) {
+	case nil:
+
+	// interface
+	//----------------------------------------------------------------------------------------------
+	case *map[string]interface{}:
+		if x != nil {
+			y := StringMap(*x)
+			val = &y
+		}
+
+	// StringMap
+	//----------------------------------------------------------------------------------------------
+	case *StringMap:
+		if x != nil {
+			val = x
+		}
+
+	default:
+		err = errors.Errorf("failed to convert type %T to a StringMap", obj)
+	}
+
+	return
 }
 
 // ToStringSlice convert an interface to a []int type.

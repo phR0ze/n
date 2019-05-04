@@ -16,6 +16,8 @@ type Map interface {
 	// Copy(indices ...int) (new Slice)                  // Copy returns a new Slice with the indicated range of elements copied from this Map.
 	// Count(elem interface{}) (cnt int)                 // Count the number of elements in this Map equal to the given element.
 	// CountW(sel func(O) bool) (cnt int)                // CountW counts the number of elements in this Map that match the lambda selector.
+	Delete(key interface{}) (obj *Object) // Delete modifies this Map to delete the indicated key-value pair and returns the value from the Map.
+	DeleteM(key interface{}) Map          // DeleteM modifies this Map to delete the indicated key-value pair and returns a reference to this Map rather than the key-value pair.
 	// Drop(indices ...int) Slice                        // Drop modifies this Map to delete the indicated range of elements and returns a referece to this Map.
 	// DropAt(i int) Slice                               // DropAt modifies this Map to delete the element at the given index location. Allows for negative notation.
 	// DropFirst() Slice                                 // DropFirst modifies this Map to delete the first element and returns a reference to this Map.
@@ -34,7 +36,7 @@ type Map interface {
 	// Empty() bool                                      // Empty tests if this Map is empty.
 	// First() (elem *Object)                            // First returns the first element in this Map as Object.
 	// FirstN(n int) Slice                               // FirstN returns the first n elements in this Map as a Slice reference to the original.
-	// Generic() bool                                    // Generic returns true if the underlying implementation is a RefSlice
+	Generic() bool // Generic returns true if the underlying implementation uses reflection
 	// Index(elem interface{}) (loc int)                 // Index returns the index of the first element in this Map where element == elem
 	// Insert(i int, elem interface{}) Slice             // Insert modifies this Map to insert the given element before the element with the given index.
 	// Join(separator ...string) (str *Object)           // Join converts each element into a string then joins them together using the given separator or comma by default.
@@ -52,7 +54,7 @@ type Map interface {
 	// ReverseM() Slice                                  // ReverseM modifies this Map reversing the order of the elements and returns a reference to this Map.
 	// Select(sel func(O) bool) (new Map)              // Select creates a new Map with the elements that match the lambda selector.
 	Set(key, val interface{}) bool // Set the value for the given key to the given val. Returns true if the key did not yet exists in this Map.
-	// SetE(i int, elem interface{}) (Slice, error)      // Set the element at the given index location to the given element. Allows for negative notation.
+	SetM(key, val interface{}) Map // SetM the value for the given key to the given val creating map if necessary. Returns a reference to this Map.
 	// Shift() (elem *Object)                            // Shift modifies this Map to remove the first element and returns the removed element as an Object.
 	// ShiftN(n int) (new Map)                         // ShiftN modifies this Map to remove the first n elements and returns the removed elements as a new Map.
 	// Single() bool                                     // Single reports true if there is only one element in this Map.
@@ -88,17 +90,10 @@ func NewMap(m ...interface{}) (new Map) {
 	if len(m) == 0 {
 		return NewStringMap()
 	}
-	o := Reference(m[0])
-	switch x := o.(type) {
-
-	// StringMap
-	// ---------------------------------------------------------------------------------------------
-	case map[string]interface{}:
-		new = NewStringMap(x)
-
-	// RefSlice
-	// ---------------------------------------------------------------------------------------------
-	default:
+	if x, err := ToStringMapE(m[0]); err == nil {
+		new = x
+	} else {
+		// Use reflection
 		panic("not yet implemented")
 	}
 	return

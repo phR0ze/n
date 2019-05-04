@@ -21,12 +21,44 @@ func (p *StringMap) Any(keys ...interface{}) bool {
 	if p == nil || len(*p) == 0 {
 		return false
 	}
+	if len(keys) == 0 {
+		return true
+	}
 	for i := 0; i < len(keys); i++ {
 		key := ToString(keys[i])
 		if _, ok := (*p)[key]; ok {
 			return true
 		}
 	}
+	return false
+}
+
+// Delete modifies this Map to delete the indicated key-value pair and returns the value from the Map.
+func (p *StringMap) Delete(key interface{}) (obj *Object) {
+	obj = &Object{}
+	if p == nil {
+		return
+	}
+	k := ToString(key)
+	if val, ok := (*p)[k]; ok {
+		obj.o = val
+		delete(*p, k)
+	}
+	return
+}
+
+// DeleteM modifies this Map to delete the indicated key-value pair and returns a reference to this Map rather than the key-value pair.
+func (p *StringMap) DeleteM(key interface{}) Map {
+	if p == nil {
+		return p
+	}
+	k := ToString(key)
+	delete(*p, k)
+	return p
+}
+
+// Generic returns true if the underlying implementation uses reflection
+func (p *StringMap) Generic() bool {
 	return false
 }
 
@@ -49,4 +81,13 @@ func (p *StringMap) Set(key, val interface{}) (new bool) {
 	}
 	(*p)[k] = val
 	return
+}
+
+// SetM the value for the given key to the given val creating map if necessary. Returns a reference to this Map.
+func (p *StringMap) SetM(key, val interface{}) Map {
+	if p == nil {
+		p = NewStringMap()
+	}
+	p.Set(key, val)
+	return p
 }
