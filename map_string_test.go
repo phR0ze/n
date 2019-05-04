@@ -52,6 +52,43 @@ func TestStringMap_Any(t *testing.T) {
 	}
 }
 
+// Clear
+//--------------------------------------------------------------------------------------------------
+func ExampleStringMap_Clear() {
+	m := NewStringMap(map[string]interface{}{"1": "one"})
+	fmt.Println(m.Clear())
+	// Output: &map[]
+}
+
+func TestStringMap_Clear(t *testing.T) {
+
+	// nil
+	{
+		assert.Equal(t, NewStringMap(), (*StringMap)(nil).Clear())
+	}
+
+	// empty
+	{
+		m := NewStringMap()
+		assert.Equal(t, NewStringMap(), m.Clear())
+		assert.Equal(t, 0, m.Len())
+	}
+
+	// one
+	{
+		m := NewStringMap(map[string]interface{}{"1": "one"})
+		assert.Equal(t, NewStringMap(), m.Clear())
+		assert.Equal(t, 0, m.Len())
+	}
+
+	// many
+	{
+		m := NewStringMap(map[string]interface{}{"1": "one", "2": "two", "3": "three"})
+		assert.Equal(t, NewStringMap(), m.Clear())
+		assert.Equal(t, 0, m.Len())
+	}
+}
+
 // Delete
 //--------------------------------------------------------------------------------------------------
 func ExampleStringMap_Delete() {
@@ -113,6 +150,47 @@ func TestStringMap_DeleteM(t *testing.T) {
 	assert.Equal(t, 0, m.DeleteM("3").Len())
 }
 
+// Exists
+//--------------------------------------------------------------------------------------------------
+func ExampleStringMap_Exists() {
+	m := NewStringMap(map[string]interface{}{"1": "one"})
+	fmt.Println(m.Exists("1"))
+	// Output: true
+}
+
+func TestStringMap_Exists(t *testing.T) {
+	// bool
+	{
+		m := NewStringMap(map[string]interface{}{"1": true})
+
+		// Non existant key
+		assert.Equal(t, false, m.Exists("0"))
+
+		// exists
+		assert.Equal(t, true, m.Exists("1"))
+	}
+
+	// string
+	{
+		// none
+		assert.Equal(t, false, NewStringMap().Exists("0"))
+
+		m := NewStringMap(map[string]interface{}{"1": "one", "2": "two", "3": "three"})
+
+		// Non existant key
+		assert.Equal(t, false, m.Exists("0"))
+
+		// First key
+		assert.Equal(t, true, m.Exists("1"))
+
+		// Second key
+		assert.Equal(t, true, m.Exists("2"))
+
+		// Last key
+		assert.Equal(t, true, m.Exists("3"))
+	}
+}
+
 // Generic
 //--------------------------------------------------------------------------------------------------
 func ExampleStringMap_Generic() {
@@ -122,6 +200,39 @@ func ExampleStringMap_Generic() {
 
 func TestStringMap_Generic(t *testing.T) {
 	assert.Equal(t, false, NewStringMap().Generic())
+}
+
+// Get
+//--------------------------------------------------------------------------------------------------
+func ExampleStringMap_Get() {
+	m := NewStringMap(map[string]interface{}{"1": "one"})
+	fmt.Println(m.Get("1").O())
+	// Output: one
+}
+
+func TestStringMap_Get(t *testing.T) {
+	m := NewStringMap(map[string]interface{}{"1": "one", "2": "two", "3": "three"})
+	assert.Equal(t, 3, m.Len())
+
+	// Non existant key
+	assert.Equal(t, nil, m.Get("0").O())
+	assert.Equal(t, 3, m.Len())
+
+	// First key
+	assert.Equal(t, "one", m.Get("1").O())
+	assert.Equal(t, 3, m.Len())
+
+	// Second key
+	assert.Equal(t, "two", m.Get("2").O())
+	assert.Equal(t, 3, m.Len())
+
+	// Last key
+	assert.Equal(t, "three", m.Get("3").O())
+	assert.Equal(t, 3, m.Len())
+
+	// Try a key again to make sure its still there
+	assert.Equal(t, "three", m.Get("3").O())
+	assert.Equal(t, 3, m.Len())
 }
 
 // Len

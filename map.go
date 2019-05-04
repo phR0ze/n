@@ -9,22 +9,17 @@ type Map interface {
 	// AnyW(sel func(O) bool) bool                       // AnyW tests if this Map contains any that match the lambda selector.
 	// Append(elem interface{}) Slice                    // Append an element to the end of this Map and returns a reference to this Map.
 	// AppendV(elems ...interface{}) Slice               // AppendV appends the variadic elements to the end of this Map and returns a reference to this Map.
-	// At(i int) (elem *Object)                          // At returns the element at the given index location. Allows for negative notation.
-	// Clear() Slice                                     // Clear modifies this Map to clear out all elements and returns a reference to this Map.
+	Clear() Map // Clear modifies this Map to clear out all key-value pairs and returns a reference to this Map.
 	// Concat(slice interface{}) (new Slice)             // Concat returns a new Slice by appending the given Slice to this Map using variadic expansion.
 	// ConcatM(slice interface{}) Slice                  // ConcatM modifies this Map by appending the given Slice using variadic expansion and returns a reference to this Map.
 	// Copy(indices ...int) (new Slice)                  // Copy returns a new Slice with the indicated range of elements copied from this Map.
 	// Count(elem interface{}) (cnt int)                 // Count the number of elements in this Map equal to the given element.
 	// CountW(sel func(O) bool) (cnt int)                // CountW counts the number of elements in this Map that match the lambda selector.
-	Delete(key interface{}) (obj *Object) // Delete modifies this Map to delete the indicated key-value pair and returns the value from the Map.
+	Delete(key interface{}) (val *Object) // Delete modifies this Map to delete the indicated key-value pair and returns the value from the Map.
 	DeleteM(key interface{}) Map          // DeleteM modifies this Map to delete the indicated key-value pair and returns a reference to this Map rather than the key-value pair.
-	// Drop(indices ...int) Slice                        // Drop modifies this Map to delete the indicated range of elements and returns a referece to this Map.
-	// DropAt(i int) Slice                               // DropAt modifies this Map to delete the element at the given index location. Allows for negative notation.
-	// DropFirst() Slice                                 // DropFirst modifies this Map to delete the first element and returns a reference to this Map.
-	// DropFirstN(n int) Slice                           // DropFirstN modifies this Map to delete the first n elements and returns a reference to this Map.
-	// DropLast() Slice                                  // DropLast modifies this Map to delete the last element and returns a reference to this Map.
-	// DropLastN(n int) Slice                            // DropLastN modifies thi Slice to delete the last n elements and returns a reference to this Map.
-	// DropW(sel func(O) bool) Slice                     // DropW modifies this Map to delete the elements that match the lambda selector and returns a reference to this Map.
+	//DeleteS(keys interface{}) (obj *Object) // DeleteS modifies this Map to delete the indicated key-value pairs and returns the values from the Map as a Slice.
+	Exists(key interface{}) bool // Exists checks if the given key exists in this Map.
+	// DeleteW(sel func(O) bool) Slice                     // DropW modifies this Map to delete the elements that match the lambda selector and returns a reference to this Map.
 	// Each(action func(O)) Slice                        // Each calls the given lambda once for each element in this Map, passing in that element
 	// EachE(action func(O) error) (Slice, error)        // EachE calls the given lambda once for each element in this Map, passing in that element
 	// EachI(action func(int, O)) Slice                  // EachI calls the given lambda once for each element in this Map, passing in the index and element
@@ -36,7 +31,8 @@ type Map interface {
 	// Empty() bool                                      // Empty tests if this Map is empty.
 	// First() (elem *Object)                            // First returns the first element in this Map as Object.
 	// FirstN(n int) Slice                               // FirstN returns the first n elements in this Map as a Slice reference to the original.
-	Generic() bool // Generic returns true if the underlying implementation uses reflection
+	Get(key interface{}) (val *Object) // Get returns the value at the given key location. Returns empty *Object if not found.
+	Generic() bool                     // Generic returns true if the underlying implementation uses reflection
 	// Index(elem interface{}) (loc int)                 // Index returns the index of the first element in this Map where element == elem
 	// Insert(i int, elem interface{}) Slice             // Insert modifies this Map to insert the given element before the element with the given index.
 	// Join(separator ...string) (str *Object)           // Join converts each element into a string then joins them together using the given separator or comma by default.

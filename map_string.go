@@ -33,15 +33,25 @@ func (p *StringMap) Any(keys ...interface{}) bool {
 	return false
 }
 
+// Clear modifies this Map to clear out all key-value pairs and returns a reference to this Map.
+func (p *StringMap) Clear() Map {
+	if p == nil {
+		p = NewStringMap()
+	} else if len(*p) > 0 {
+		*p = *NewStringMap()
+	}
+	return p
+}
+
 // Delete modifies this Map to delete the indicated key-value pair and returns the value from the Map.
-func (p *StringMap) Delete(key interface{}) (obj *Object) {
-	obj = &Object{}
+func (p *StringMap) Delete(key interface{}) (val *Object) {
+	val = &Object{}
 	if p == nil {
 		return
 	}
 	k := ToString(key)
-	if val, ok := (*p)[k]; ok {
-		obj.o = val
+	if v, ok := (*p)[k]; ok {
+		val.o = v
 		delete(*p, k)
 	}
 	return
@@ -57,9 +67,34 @@ func (p *StringMap) DeleteM(key interface{}) Map {
 	return p
 }
 
+// Exists checks if the given key exists in this Map.
+func (p *StringMap) Exists(key interface{}) bool {
+	if p == nil {
+		return false
+	}
+	k := ToString(key)
+	if _, ok := (*p)[k]; ok {
+		return true
+	}
+	return false
+}
+
 // Generic returns true if the underlying implementation uses reflection
 func (p *StringMap) Generic() bool {
 	return false
+}
+
+// Get returns the value at the given key location. Returns empty *Object if not found.
+func (p *StringMap) Get(key interface{}) (val *Object) {
+	val = &Object{}
+	if p == nil {
+		return
+	}
+	k := ToString(key)
+	if v, ok := (*p)[k]; ok {
+		val.o = v
+	}
+	return
 }
 
 // Len returns the number of elements in this Map.
