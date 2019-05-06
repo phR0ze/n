@@ -3054,6 +3054,7 @@ func ExampleStr_O() {
 }
 
 func TestStr_O(t *testing.T) {
+	assert.Equal(t, "", (*Str)(nil).O())
 	assert.Equal(t, "", NewStrV().O())
 	assert.Equal(t, NewStrV("1", "2", "3"), NewStrV("1", "2", "3"))
 }

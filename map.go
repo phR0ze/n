@@ -12,7 +12,7 @@ type Map interface {
 	Clear() Map // Clear modifies this Map to clear out all key-value pairs and returns a reference to this Map.
 	// Concat(slice interface{}) (new Slice)             // Concat returns a new Slice by appending the given Slice to this Map using variadic expansion.
 	// ConcatM(slice interface{}) Slice                  // ConcatM modifies this Map by appending the given Slice using variadic expansion and returns a reference to this Map.
-	// Copy(indices ...int) (new Slice)                  // Copy returns a new Slice with the indicated range of elements copied from this Map.
+	Copy(keys ...interface{}) (new Map) // Copy returns a new Map with the indicated key-value pairs copied from this Map or all if not given.
 	// Count(elem interface{}) (cnt int)                 // Count the number of elements in this Map equal to the given element.
 	// CountW(sel func(O) bool) (cnt int)                // CountW counts the number of elements in this Map that match the lambda selector.
 	Delete(key interface{}) (val *Object) // Delete modifies this Map to delete the indicated key-value pair and returns the value from the Map.
@@ -38,10 +38,12 @@ type Map interface {
 	// Join(separator ...string) (str *Object)           // Join converts each element into a string then joins them together using the given separator or comma by default.
 	// Last() (elem *Object)                             // Last returns the last element in this Map as an Object.
 	// LastN(n int) Slice                                // LastN returns the last n elements in this Map as a Slice reference to the original.
-	Len() int // Len returns the number of elements in this Map.
+	Keys() Slice     // Keys returns all the keys in this Map as a Slice of the key type.
+	Len() int        // Len returns the number of elements in this Map.
+	Merge(m Map) Map // Merge modifies this Map by overriding its values with the given map where they both exist and returns a reference to this Map.
 	// Less(i, j int) bool                               // Less returns true if the element indexed by i is less than the element indexed by j.
 	// Nil() bool                                        // Nil tests if this Map is nil.
-	// O() interface{}                                   // O returns the underlying data structure as is.
+	O() interface{} // O returns the underlying data structure as is.
 	// Pair() (first, second *Object)                    // Pair simply returns the first and second Slice elements as Objects.
 	// Pop() (elem *Object)                              // Pop modifies this Map to remove the last element and returns the removed element as an Object.
 	// PopN(n int) (new Map)                           // PopN modifies this Map to remove the last n elements and returns the removed elements as a new Map.
@@ -93,6 +95,39 @@ func NewMap(m ...interface{}) (new Map) {
 		panic("not yet implemented")
 	}
 	return
+}
+
+// MergeStringMap b into a and returns the new modified a
+// b takes higher precedence and will override a
+func MergeStringMap(a, b map[string]interface{}) map[string]interface{} {
+	switch {
+	case (a == nil || len(a) == 0) && (b == nil || len(b) == 0):
+		return map[string]interface{}{}
+	case a == nil || len(a) == 0:
+		return b
+	case b == nil || len(b) == 0:
+		return a
+	}
+
+	for k, bv := range b {
+		if av, exists := a[k]; !exists {
+			// a doesn't have the key so just set
+			a[k] = bv
+		} else if bc, ok := bv.(map[string]interface{}); ok {
+			if ac, ok := av.(map[string]interface{}); ok {
+				// a and b both contain the key and are both submaps so recurse
+				a[k] = MergeStringMap(ac, bc)
+			} else {
+				// a is not a map so just override with b
+				a[k] = bv
+			}
+		} else {
+			// b is not a map so just override a, no need to recurse
+			a[k] = bv
+		}
+	}
+
+	return a
 }
 
 // // Any checks if the numerable has anything in it

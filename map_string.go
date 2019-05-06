@@ -43,6 +43,27 @@ func (p *StringMap) Clear() Map {
 	return p
 }
 
+// Copy returns a new Map with the indicated key-value pairs copied from this Map or all if not given.
+func (p *StringMap) Copy(keys ...interface{}) (new Map) {
+	val := NewStringMap()
+	if p == nil || len(*p) == 0 {
+		return val
+	}
+
+	// Copy target keys or all keys
+	ks := ToStringSliceG(keys)
+	if len(ks) == 0 {
+		for k := range *p {
+			(*val)[k] = (*p)[k]
+		}
+	} else {
+		for _, k := range ks {
+			(*val)[k] = (*p)[k]
+		}
+	}
+	return val
+}
+
 // Delete modifies this Map to delete the indicated key-value pair and returns the value from the Map.
 func (p *StringMap) Delete(key interface{}) (val *Object) {
 	val = &Object{}
@@ -79,6 +100,14 @@ func (p *StringMap) Exists(key interface{}) bool {
 	return false
 }
 
+// G returns the underlying data structure as a Go type.
+func (p *StringMap) G() map[string]interface{} {
+	if p == nil {
+		return map[string]interface{}{}
+	}
+	return map[string]interface{}(*p)
+}
+
 // Generic returns true if the underlying implementation uses reflection
 func (p *StringMap) Generic() bool {
 	return false
@@ -97,12 +126,88 @@ func (p *StringMap) Get(key interface{}) (val *Object) {
 	return
 }
 
+// Keys returns all the keys in this Map as a Slice of the key type.
+func (p *StringMap) Keys() Slice {
+	keys := NewStringSliceV()
+	if p != nil {
+		for key := range *p {
+			*keys = append(*keys, key)
+		}
+	}
+	return keys
+}
+
 // Len returns the number of elements in this Map.
 func (p *StringMap) Len() int {
 	if p == nil {
 		return 0
 	}
 	return len(*p)
+}
+
+// Merge modifies this Map by overriding its values with the given map where they both exist and returns a reference to this Map.
+func (p *StringMap) Merge(m Map) Map {
+
+	// Validate existing/incoming
+	x, err := ToStringMapE(m)
+	switch {
+	case (p == nil || len(*p) == 0) && (err != nil || m == nil || len(*x) == 0):
+		return NewStringMap()
+	case p == nil || len(*p) == 0:
+		return x
+	case err != nil || m == nil || len(*x) == 0:
+		return p
+	}
+
+	// for k, bv := range b {
+	// 	if av, exists := a[k]; !exists {
+	// 		// a doesn't have the key so just set
+	// 		a[k] = bv
+	// 	} else if bc, err := ToStringMapE(bv); err == nil {
+	// 		if ac, err := ToStringMapE(av); err == nil {
+	// 			// a and b both contain the key and are both submaps so recurse
+	// 			a[k] = MergeStringMap(ac.G(), bc.O())
+	// 		} else {
+	// 			// a is not a map so just override with b
+	// 			a[k] = bv
+	// 		}
+	// 	} else {
+	// 		// b is not a supported map so just override a, no need to recurse
+	// 		a[k] = bv
+	// 	}
+	// }
+
+	// Call type specific function helper
+	*p = MergeStringMap(*p, *x)
+
+	return p
+}
+
+// MergeG modifies this Map by overriding its values with the given map where they both exist and returns the Go type
+func (p *StringMap) MergeG(m Map) map[string]interface{} {
+
+	// Validate existing/incoming
+	x, err := ToStringMapE(m)
+	switch {
+	case (p == nil || len(*p) == 0) && (err != nil || m == nil || len(*x) == 0):
+		return NewStringMap().G()
+	case p == nil || len(*p) == 0:
+		return x.G()
+	case err != nil || m == nil || len(*x) == 0:
+		return p.G()
+	}
+
+	// Call type specific function helper
+	*p = MergeStringMap(*p, *x)
+	return p.G()
+}
+
+// O returns the underlying data structure as is.
+func (p *StringMap) O() interface{} {
+	if p == nil {
+		return map[string]interface{}{}
+	}
+	return map[string]interface{}(*p)
 }
 
 // Set the value for the given key to the given val. Returns true if the key did not yet exists in this Map.

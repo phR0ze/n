@@ -2552,6 +2552,12 @@ func ToStringSliceE(obj interface{}) (val *StringSlice, err error) {
 	return
 }
 
+// ToStringSliceG convert an interface to a []string type.
+func ToStringSliceG(obj interface{}) (val []string) {
+	val, _ = ToStringSliceGE(obj)
+	return val
+}
+
 // ToStringSliceGE convert an interface to a []string type.
 func ToStringSliceGE(obj interface{}) (val []string, err error) {
 	val = []string{}

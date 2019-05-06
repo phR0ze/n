@@ -2203,6 +2203,7 @@ func ExampleIntSlice_O() {
 }
 
 func TestIntSlice_O(t *testing.T) {
+	assert.Equal(t, []int{}, (*IntSlice)(nil).O())
 	assert.Equal(t, []int{}, NewIntSliceV().O())
 	assert.Equal(t, NewIntSliceV(1, 2, 3), NewIntSliceV(1, 2, 3))
 }

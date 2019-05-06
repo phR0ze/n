@@ -2206,6 +2206,7 @@ func ExampleStringSlice_O() {
 }
 
 func TestStringSlice_O(t *testing.T) {
+	assert.Equal(t, []string{}, (*StringSlice)(nil).O())
 	assert.Equal(t, []string{}, NewStringSliceV().O())
 	assert.Equal(t, NewStringSliceV("1", "2", "3"), NewStringSliceV("1", "2", "3"))
 }

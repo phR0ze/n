@@ -119,35 +119,6 @@ func ValueOrDefault(value, defaulty string) string {
 	return defaulty
 }
 
-// MergeYamlMap b into a and returns the new modified a
-// b takes higher precedence and will override a
-func MergeYamlMap(a, b map[string]interface{}) map[string]interface{} {
-	switch {
-	case (a == nil || len(a) == 0) && (b == nil || len(b) == 0):
-		return map[string]interface{}{}
-	case a == nil || len(a) == 0:
-		return b
-	case b == nil || len(b) == 0:
-		return a
-	}
-
-	for k, bv := range b {
-		if av, exists := a[k]; !exists {
-			a[k] = bv
-		} else if bc, ok := bv.(map[string]interface{}); ok {
-			if ac, ok := av.(map[string]interface{}); ok {
-				a[k] = MergeYamlMap(ac, bc)
-			} else {
-				a[k] = bv
-			}
-		} else {
-			a[k] = bv
-		}
-	}
-
-	return a
-}
-
 // // M exports numerable into a map
 // func (q *OldNumerable) M() (result map[string]interface{}, err error) {
 // 	result = map[string]interface{}{}

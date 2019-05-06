@@ -500,6 +500,9 @@ func (p *StringSlice) Nil() bool {
 
 // O returns the underlying data structure as is
 func (p *StringSlice) O() interface{} {
+	if p == nil {
+		return []string{}
+	}
 	return []string(*p)
 }
 
