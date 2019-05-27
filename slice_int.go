@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/pkg/errors"
+	"github.com/phR0ze/go-errors"
 )
 
 // IntSlice implements the Slice interface providing a generic way to work with slice types

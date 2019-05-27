@@ -1,7 +1,7 @@
 package n
 
 import (
-	"github.com/pkg/errors"
+	"github.com/phR0ze/go-errors"
 )
 
 // Slice provides a generic way to work with slice types providing convenience methods

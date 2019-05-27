@@ -8,7 +8,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/pkg/errors"
+	"github.com/phR0ze/go-errors"
 )
 
 // DeReference dereferences the interface if needed returning a non-pointer type

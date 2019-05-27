@@ -17,14 +17,6 @@
   version = "v1.1.1"
 
 [[projects]]
-  digest = "1:81466b4218bf6adddac2572a30ac733a9255919bc2f470b4827a317bd4ee1756"
-  name = "github.com/ghodss/yaml"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
-  version = "v1.0.0"
-
-[[projects]]
   digest = "1:a4df73029d2c42fabcb6b41e327d2f87e685284ec03edf76921c267d9cfc9c23"
   name = "github.com/mitchellh/go-homedir"
   packages = ["."]
@@ -41,12 +33,12 @@
   version = "v1.3.0"
 
 [[projects]]
-  digest = "1:14715f705ff5dfe0ffd6571d7d201dd8e921030f8070321a79380d8ca4ec1a24"
-  name = "github.com/pkg/errors"
+  digest = "1:f3bc4dcbd92f5aa52b7e1e598ef696bde6a671ae1732e52511d26f4fd22703eb"
+  name = "github.com/phR0ze/go-errors"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
-  version = "v0.8.1"
+  revision = "27936f6d90f9c8e1145f11ed52ffffbfdb9e0af7"
+  version = "v0.8.2"
 
 [[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
@@ -80,23 +72,14 @@
   pruneopts = "NUT"
   revision = "2be51725563103c17124a318f1745b66f2347acb"
 
-[[projects]]
-  digest = "1:7c95b35057a0ff2e19f707173cc1a947fa43a6eb5c4d300d196ece0334046082"
-  name = "gopkg.in/yaml.v2"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
-  version = "v2.2.1"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
     "github.com/bouk/monkey",
-    "github.com/ghodss/yaml",
     "github.com/mitchellh/go-homedir",
     "github.com/phR0ze/cast",
-    "github.com/pkg/errors",
+    "github.com/phR0ze/go-errors",
     "github.com/stretchr/testify/assert",
     "github.com/valyala/bytebufferpool",
     "golang.org/x/sys/unix",
