@@ -16,6 +16,11 @@ func Float64Sec(duration time.Duration) float64 {
 	return float64(duration) / float64(time.Millisecond) / 1000.0
 }
 
+// FromIntSec converts the given integer in seconds to a time.Duration
+func FromIntSec(sec int) time.Duration {
+	return time.Duration(int64(sec) * int64(time.Second))
+}
+
 // MediaTime calculates the time given the elapse in seconds since MediaEpoch
 func MediaTime(sec uint64) (result time.Time, err error) {
 	dura := time.Second * time.Duration(sec)

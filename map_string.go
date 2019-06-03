@@ -1,7 +1,8 @@
 package n
 
 // StringMap implements the Map interface providing a generic way to work with map types
-// including convenience methods on par with rapid development languages.
+// including convenience methods on par with rapid development languages. This type is
+// also specifically designed to handle YAML constructs.
 type StringMap map[string]interface{}
 
 // NewStringMap creates a new empty StringMap if nothing given else simply
@@ -146,6 +147,7 @@ func (p *StringMap) Len() int {
 }
 
 // Merge modifies this Map by overriding its values with the given map where they both exist and returns a reference to this Map.
+// Converting all string maps into *StringMap instances.
 func (p *StringMap) Merge(m Map) Map {
 
 	// Validate existing/incoming
@@ -159,26 +161,40 @@ func (p *StringMap) Merge(m Map) Map {
 		return p
 	}
 
-	// for k, bv := range b {
-	// 	if av, exists := a[k]; !exists {
-	// 		// a doesn't have the key so just set
-	// 		a[k] = bv
-	// 	} else if bc, err := ToStringMapE(bv); err == nil {
-	// 		if ac, err := ToStringMapE(av); err == nil {
-	// 			// a and b both contain the key and are both submaps so recurse
-	// 			a[k] = MergeStringMap(ac.G(), bc.O())
-	// 		} else {
-	// 			// a is not a map so just override with b
-	// 			a[k] = bv
-	// 		}
-	// 	} else {
-	// 		// b is not a supported map so just override a, no need to recurse
-	// 		a[k] = bv
-	// 	}
-	// }
+	for k, v := range *x {
+		var av, bv interface{}
 
-	// Call type specific function helper
-	*p = MergeStringMap(*p, *x)
+		// Ensure b value is Go type
+		if val, ok := v.(map[string]interface{}); ok {
+			bv = NewStringMap(val)
+		} else {
+			bv = v
+		}
+
+		// a doesn't have the key so just set b's value
+		if val, exists := (*p)[k]; !exists {
+			(*p)[k] = bv
+		} else {
+			if _val, ok := val.(map[string]interface{}); ok {
+				av = NewStringMap(_val)
+			} else {
+				av = val
+			}
+
+			if bc, ok := bv.(*StringMap); ok {
+				if ac, ok := av.(*StringMap); ok {
+					// a and b both contain the key and are both submaps so recurse
+					(*p)[k] = ac.Merge(bc)
+				} else {
+					// a is not a map so just override with b
+					(*p)[k] = bv
+				}
+			} else {
+				// b is not a map so just override a, no need to recurse
+				(*p)[k] = bv
+			}
+		}
+	}
 
 	return p
 }

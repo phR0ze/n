@@ -97,8 +97,8 @@ func NewMap(m ...interface{}) (new Map) {
 	return
 }
 
-// MergeStringMap b into a and returns the new modified a
-// b takes higher precedence and will override a
+// MergeStringMap b into a and returns the new modified a, b takes higher precedence and will override a.
+// Only merges map types by key recursively, does not attempt to merge lists.
 func MergeStringMap(a, b map[string]interface{}) map[string]interface{} {
 	switch {
 	case (a == nil || len(a) == 0) && (b == nil || len(b) == 0):
@@ -109,21 +109,38 @@ func MergeStringMap(a, b map[string]interface{}) map[string]interface{} {
 		return a
 	}
 
-	for k, bv := range b {
-		if av, exists := a[k]; !exists {
-			// a doesn't have the key so just set
+	for k, v := range b {
+		var av, bv interface{}
+
+		// Ensure b value is Go type
+		if val, ok := v.(*StringMap); ok {
+			bv = val.G()
+		} else {
+			bv = v
+		}
+
+		// a doesn't have the key so just set b's value
+		if val, exists := a[k]; !exists {
 			a[k] = bv
-		} else if bc, ok := bv.(map[string]interface{}); ok {
-			if ac, ok := av.(map[string]interface{}); ok {
-				// a and b both contain the key and are both submaps so recurse
-				a[k] = MergeStringMap(ac, bc)
+		} else {
+			if _val, ok := val.(*StringMap); ok {
+				av = _val.G()
 			} else {
-				// a is not a map so just override with b
+				av = val
+			}
+
+			if bc, ok := bv.(map[string]interface{}); ok {
+				if ac, ok := av.(map[string]interface{}); ok {
+					// a and b both contain the key and are both submaps so recurse
+					a[k] = MergeStringMap(ac, bc)
+				} else {
+					// a is not a map so just override with b
+					a[k] = bv
+				}
+			} else {
+				// b is not a map so just override a, no need to recurse
 				a[k] = bv
 			}
-		} else {
-			// b is not a map so just override a, no need to recurse
-			a[k] = bv
 		}
 	}
 

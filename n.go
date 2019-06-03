@@ -77,6 +77,14 @@ func Range(min, max int) []int {
 	return result
 }
 
+// EitherOr returns the first string if not empty else the second
+func EitherOr(first, second string) string {
+	if first != "" {
+		return first
+	}
+	return second
+}
+
 // SetOnTrue provides a simple means of only updating the result to the 'value' if the exp is true
 func SetOnTrue(result *bool, value, exp bool) {
 	if exp {
@@ -118,6 +126,9 @@ func ValueOrDefault(value, defaulty string) string {
 	}
 	return defaulty
 }
+
+// Load and From helper functions
+//--------------------------------------------------------------------------------------------------
 
 // // M exports numerable into a map
 // func (q *OldNumerable) M() (result map[string]interface{}, err error) {
