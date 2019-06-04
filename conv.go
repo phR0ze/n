@@ -2275,7 +2275,7 @@ func ToString(obj interface{}) string {
 	return ToStr(obj).A()
 }
 
-// ToStringMap converts an interface to a StringMap type
+// ToStringMap converts an interface to a StringMap type. Supports converting yaml string as well.
 func ToStringMap(obj interface{}) *StringMap {
 	x, _ := ToStringMapE(obj)
 	if x == nil {
@@ -2284,7 +2284,7 @@ func ToStringMap(obj interface{}) *StringMap {
 	return x
 }
 
-// ToStringMapE converts an interface to a StringMap type
+// ToStringMapE converts an interface to a StringMap type. Supports converting yaml string as well.
 func ToStringMapE(obj interface{}) (val *StringMap, err error) {
 	val = &StringMap{}
 	o := Reference(obj)

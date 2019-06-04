@@ -469,13 +469,13 @@ func TestObject_ToIntSlice(t *testing.T) {
 	// w/out error
 	{
 		n := &Object{[]int{}}
-		assert.IsType(t, []int{}, n.ToIntSlice())
+		assert.IsType(t, []int{}, n.ToIntSliceG())
 	}
 
 	// w/error
 	{
 		n := &Object{[]int{}}
-		obj, e := n.ToIntSliceE()
+		obj, e := n.ToIntSliceGE()
 		assert.Nil(t, e)
 		assert.IsType(t, []int{}, obj)
 	}

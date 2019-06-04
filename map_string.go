@@ -1,7 +1,5 @@
 package n
 
-import "fmt"
-
 // StringMap implements the Map interface providing a generic way to work with map types
 // including convenience methods on par with rapid development languages. This type is
 // also specifically designed to handle YAML constructs.
@@ -251,60 +249,92 @@ func (p *StringMap) SetM(key, val interface{}) Map {
 }
 
 // Yaml returns the value at the given key location, using a simple dot notation. Returns empty *Object if not found.
-// Assumes structure is made up of Yaml primitives and suppresses errors when not.
+// see dot notation from https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
 func (p *StringMap) Yaml(key string) (val *Object) {
-	val = &Object{}
+	val, _ = p.YamlE(key)
+	return val
+}
+
+// YamlE returns the value at the given key location, using a simple dot notation. Returns empty *Object if not found.
+// see dot notation from https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
+func (p *StringMap) YamlE(key string) (val *Object, err error) {
+
+	// Default object is self for identity case: .
+	val = &Object{o: p}
 	if p == nil {
 		return
 	}
 
-	keys := A(key).Split(".")
-	if ko := keys.Shift(); !ko.Nil() {
-		key := ko.ToStr()
-		o := (*p)[key.A()]
+	// Split key sequence into individual keys and process
+	var quotes *StringSlice
+	if quotes, err = A(key).SplitQuotes(); err != nil {
+		return
+	}
+	for i := 0; i < quotes.Len(); i++ {
+		quote := quotes.At(i).ToStr()
 
-		// Switch on value type
-		switch x := o.(type) {
-
-		case map[string]interface{}:
-			fmt.Println(x)
-			// if !key.Any(":", "[", "]") {
-			// 	if v, ok := x[key]; ok {
-			// 		result = Q(v)
-			// 	}
-			// }
-
-		case []interface{}:
-			// 	// 	// 			k, v := A(key).TrimPrefix("[").TrimSuffix("]").Split(":").YamlPair()
-			// 	// 	// 			if v == nil {
-			// 	// 	// 				if i, err := strconv.Atoi(k); err == nil {
-			// 	// 	// 					result = q.At(i)
-			// 	// 	// 				} else {
-			// 	// 	// 					panic(errors.New("Failed to convert index to an int"))
-			// 	// 	// 				}
-			// 	// 	// 			} else {
-			// 	// 	// 				for i := range x {
-			// 	// 	// 					if m, ok := x[i].(map[string]interface{}); ok {
-			// 	// 	// 						if entry, ok := m[k]; ok {
-			// 	// 	// 							if v == entry {
-			// 	// 	// 								result = Q(m)
-			// 	// 	// 								break
-			// 	// 	// 							}
-			// 	// 	// 						}
-			// 	// 	// 					}
-			// 	// 	// 				}
-			// 	// 	// 			}
-			// 	// 	// 		}
-			// 	// 	// 		if keys.Len() != 0 && result != nil && result.Any() {
-			// 	// 	// 			result = result.Yaml(keys.Join(".").A())
-			// 	// 	// 		}
-			// 	// 	// 	}
-			// 	// 	// 	if result == nil {
-			// 	// 	// 		result = Nil()
+		// Split quotes into keys
+		var keys *StringSlice
+		if quote.First().A() != `"` {
+			keys = A(quote).Split(".")
+		} else {
+			keys = ToStringSlice(quote.TrimPrefix(`"`).TrimSuffix(`"`))
 		}
 
-		// value is our target as it wasn't caught earlier
-		val = Obj(o)
+		// Process keys from left to right
+		for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
+			key := ko.ToStr()
+
+			// Skip empty keys e.g. ".key" => ["", "key"]
+			if ko.A() == "" {
+				continue
+			}
+
+			switch x := val.o.(type) {
+
+			// Identifier Index: .foo, .foo.bar
+			case map[string]interface{}, *StringMap:
+				m := ToStringMap(x)
+				val.o = (*m)[key.A()]
+
+				//if key.Any(".[") {
+				//k, v := key.TrimPrefix(".[").TrimSuffix("]").Split(":").YamlPair()
+
+				// if !key.Any(":", "[", "]") {
+				// 	if v, ok := x[key]; ok {
+				// 		result = Q(v)
+				// 	}
+				// }
+
+				// 	// 	// 			k, v := A(key).TrimPrefix("[").TrimSuffix("]").Split(":").YamlPair()
+				// 	// 	// 			if v == nil {
+				// 	// 	// 				if i, err := strconv.Atoi(k); err == nil {
+				// 	// 	// 					result = q.At(i)
+				// 	// 	// 				} else {
+				// 	// 	// 					panic(errors.New("Failed to convert index to an int"))
+				// 	// 	// 				}
+				// 	// 	// 			} else {
+				// 	// 	// 				for i := range x {
+				// 	// 	// 					if m, ok := x[i].(map[string]interface{}); ok {
+				// 	// 	// 						if entry, ok := m[k]; ok {
+				// 	// 	// 							if v == entry {
+				// 	// 	// 								result = Q(m)
+				// 	// 	// 								break
+				// 	// 	// 							}
+				// 	// 	// 						}
+				// 	// 	// 					}
+				// 	// 	// 				}
+				// 	// 	// 			}
+				// 	// 	// 		}
+				// 	// 	// 		if keys.Len() != 0 && result != nil && result.Any() {
+				// 	// 	// 			result = result.Yaml(keys.Join(".").A())
+				// 	// 	// 		}
+				// 	// 	// 	}
+				// 	// 	// 	if result == nil {
+				// 	// 	// 		result = Nil()
+				//}
+			}
+		}
 	}
 	return
 }

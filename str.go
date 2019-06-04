@@ -539,6 +539,14 @@ func (p *Str) Empty() bool {
 	return false
 }
 
+// Equal tests if this Str is equal to the given string
+func (p *Str) Equal(val interface{}) bool {
+	if p == nil || len(*p) == 0 {
+		return false
+	}
+	return string(*p) == string(*ToStr(val))
+}
+
 // Fields splits the Str around each instance of one or more consecutive white space characters
 // as defined by unicode.IsSpace, returning a Slice of substrings or an empty Slice if only
 // white space is found or the Str is nil or empty.
@@ -1058,10 +1066,9 @@ func (p *Str) SortReverseM() Slice {
 }
 
 // Split this Str into all substrings deliniated by separator and returns a slice of the
-// substrings. If Str does not contain separator and separator is not empty, Split returns a
-// slice of length 1 whose only element is Str. If separator is empty, Split splits after
-// each UTF-8 sequence. If both Str and separator are empty, Split returns an empty slice.
-// It is equivalent to SplitN with a count of -1. separator defaults to comma if not given.
+// substrings. If Str does not contain separator, Split returns a slice of length 1 whose
+// only element is Str. If Str is empty, Split returns an empty slice. separator defaults
+// to comma if not given.
 func (p *Str) Split(separator ...string) (slice *StringSlice) {
 	if p == nil || len(*p) == 0 {
 		return NewStringSliceV()
@@ -1073,11 +1080,10 @@ func (p *Str) Split(separator ...string) (slice *StringSlice) {
 	return ToStringSlice(strings.Split(p.A(), sep))
 }
 
-// SplitAfter slices Str into all substrings after each instance of separator. If Str does
-// not contain separator and separator is not empty, Split returns a slice of length 1 whose
-// only element is Str. If separator is empty, Split splits after each UTF-8 sequence. If
-// both Str and separator are empty, Split returns an empty slice. It is equivalent to
-// SplitN with a count of -1. separator defaults to comma if not given.
+// SplitAfter splits this Str into all substrings deliniated by separator and returns a
+// slice of the substrings. If Str does not contain separator, Split returns a slice of
+// length 1 whose only element is Str. If Str is empty, Split returns an empty slice.
+// separator defaults to comma if not given.
 func (p *Str) SplitAfter(separator ...string) (slice *StringSlice) {
 	if p == nil || len(*p) == 0 {
 		return NewStringSliceV()
@@ -1087,6 +1093,67 @@ func (p *Str) SplitAfter(separator ...string) (slice *StringSlice) {
 		sep = separator[0]
 	}
 	return ToStringSlice(strings.SplitAfter(p.A(), sep))
+}
+
+// SplitQuotes splits this Str into substrings starting and ending with double quotes and
+// returns a slice of the substrings. If Str does not contain quotes, Split returns
+// a slice of length 1 whose only element is Str. If Str is empty, Split returns an empty
+// slice. Unmatched quotes throw and error and empty quotes are removed.
+func (p *Str) SplitQuotes(separator ...string) (slice *StringSlice, err error) {
+	if p == nil || len(*p) == 0 {
+		slice = NewStringSliceV()
+		return
+	}
+	sep := '"'
+	if len(separator) > 0 {
+		sep = ToRune(separator[0])
+	}
+
+	// Loop through and create slice
+	var quote bool
+	piece := []rune{}
+	pieces := []string{}
+	for _, r := range *p {
+		if r == sep {
+
+			// Complete current
+			if len(piece) > 0 {
+				if quote {
+					piece = append(piece, r)
+				}
+				if !ToStr(piece).Equal([]rune{sep, sep}) {
+					pieces = append(pieces, string(piece))
+				}
+				piece = []rune{}
+			}
+
+			// Start new quote
+			if !quote {
+				piece = append(piece, r)
+				quote = true
+			} else {
+				quote = false
+			}
+			continue
+		}
+		piece = append(piece, r)
+	}
+
+	// Ensure we capture the last piece
+	if len(piece) > 0 && !ToStr(piece).Equal([]rune{sep, sep}) {
+		pieces = append(pieces, string(piece))
+	}
+	slice = ToStringSlice(pieces)
+
+	// Check for unbalanced quotes and remove empty quotes
+	if slice.AnyW(func(x O) bool {
+		cnt := strings.Count(x.(string), string(sep))
+		return ExB(cnt != 0 && cnt != 2)
+	}) {
+		err = errors.Errorf("Imbalanced quotes")
+	}
+
+	return
 }
 
 // String returns a string representation of this Slice, implements the Stringer interface

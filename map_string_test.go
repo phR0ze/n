@@ -606,6 +606,21 @@ func TestStringMap_SetM(t *testing.T) {
 
 func TestStringMap_Yaml(t *testing.T) {
 
+	// dot notation
+	{
+		// Identity: .
+		assert.Equal(t, &StringMap{"one": "1"}, NewStringMap(map[string]interface{}{"one": "1"}).Yaml(``).ToStringMap())
+		assert.Equal(t, &StringMap{"one": "1"}, NewStringMap(map[string]interface{}{"one": "1"}).Yaml(`.`).ToStringMap())
+
+		// Object Identifier-Index: .foo, .foo.bar
+		assert.Equal(t, "1", NewStringMap(map[string]interface{}{"one": "1"}).Yaml(`one`).ToString())
+		assert.Equal(t, "1", NewStringMap(map[string]interface{}{"one": "1"}).Yaml(`.one`).ToString())
+		assert.Equal(t, "1", NewStringMap(map[string]interface{}{"one": "1"}).Yaml(`."one"`).ToString())
+		assert.Equal(t, "2", NewStringMap(map[string]interface{}{"one": map[string]interface{}{"two": "2"}}).Yaml(`one.two`).ToString())
+		assert.Equal(t, "3", NewStringMap(map[string]interface{}{"one": map[string]interface{}{"two": map[string]interface{}{"three": "3"}}}).Yaml(`one.two.three`).ToString())
+		assert.Equal(t, "foo", NewStringMap(map[string]interface{}{"one": map[string]interface{}{"two.three": "foo"}}).Yaml(`one."two.three"`).ToString())
+	}
+
 	// no dot notation
 	{
 		// floats
@@ -624,6 +639,12 @@ func TestStringMap_Yaml(t *testing.T) {
 		assert.Equal(t, "one", NewStringMap(map[string]interface{}{"1": "one"}).Yaml("1").ToString())
 
 		// maps
+		assert.Equal(t, &StringMap{"2": "two"}, NewStringMap(map[string]interface{}{"1": map[string]interface{}{"2": "two"}}).Yaml("1").ToStringMap())
 		assert.Equal(t, map[string]interface{}{"2": "two"}, NewStringMap(map[string]interface{}{"1": map[string]interface{}{"2": "two"}}).Yaml("1").ToStringMapG())
+
+		// yaml
+		assert.Equal(t, "1", ToStringMap("one: 1").Yaml("one").ToString())
+		assert.Equal(t, []int{1, 2}, ToStringMap("foo: \n  - 1\n  - 2").Yaml("foo").ToIntSliceG())
+		assert.Equal(t, &IntSlice{1, 2}, ToStringMap("foo: \n  - 1\n  - 2").Yaml("foo").ToIntSlice())
 	}
 }

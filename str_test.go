@@ -4127,6 +4127,63 @@ func TestStr_SplitAfter(t *testing.T) {
 	}
 }
 
+// SplitQuotes
+//--------------------------------------------------------------------------------------------------
+func ExampleStr_SplitQuotes() {
+	slice := NewStr(`."foo.bar"`)
+	fmt.Println(slice.SplitQuotes())
+	// Output: [. "foo.bar"] <nil>
+}
+
+func TestStr_SplitDouble(t *testing.T) {
+
+	// quotes
+	{
+		pieces, err := NewStrV(`foo`).SplitQuotes()
+		assert.Nil(t, err)
+		assert.Equal(t, []string{`foo`}, pieces.O())
+
+		pieces, err = NewStrV(`"foo"`).SplitQuotes()
+		assert.Nil(t, err)
+		assert.Equal(t, []string{`"foo"`}, pieces.O())
+
+		pieces, err = NewStrV(`."foo.bar"`).SplitQuotes()
+		assert.Nil(t, err)
+		assert.Equal(t, []string{`.`, `"foo.bar"`}, pieces.O())
+
+		pieces, err = NewStrV(`."foo.bar"""`).SplitQuotes()
+		assert.Nil(t, err)
+		assert.Equal(t, []string{`.`, `"foo.bar"`}, pieces.O())
+
+		pieces, err = NewStrV(`."foo.bar""".blah`).SplitQuotes()
+		assert.Nil(t, err)
+		assert.Equal(t, []string{`.`, `"foo.bar"`, `.blah`}, pieces.O())
+
+		// Empty quotes
+		pieces, err = NewStrV(`foo""`).SplitQuotes()
+		assert.Nil(t, err)
+		assert.Equal(t, []string{`foo`}, pieces.O())
+
+		pieces, err = NewStrV(`""foo`).SplitQuotes()
+		assert.Nil(t, err)
+		assert.Equal(t, []string{`foo`}, pieces.O())
+
+		pieces, err = NewStrV(`""foo""bar`).SplitQuotes()
+		assert.Nil(t, err)
+		assert.Equal(t, []string{`foo`, `bar`}, pieces.O())
+
+		// Error cases
+		pieces, err = NewStrV(`"foo`).SplitQuotes()
+		assert.NotNil(t, err)
+
+		pieces, err = NewStrV(`foo"`).SplitQuotes()
+		assert.NotNil(t, err)
+
+		pieces, err = NewStrV(`foo"bar`).SplitQuotes()
+		assert.NotNil(t, err)
+	}
+}
+
 // String
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStr_String_Go(t *testing.B) {

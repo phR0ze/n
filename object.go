@@ -541,21 +541,47 @@ func (p *Object) ToStringSliceE() ([]string, error) {
 	return cast.ToStringSliceE(p.o)
 }
 
-// ToIntSlice casts an interface to a []int type.
-func (p *Object) ToIntSlice() []int {
+// ToIntSlice converts an interface to a *IntSlice type.
+func (p *Object) ToIntSlice() *IntSlice {
 	if p == nil {
-		return []int{}
+		return NewIntSliceV()
 	}
-	v, _ := cast.ToIntSliceE(p.o)
+	v, _ := ToIntSliceE(p.o)
 	return v
 }
 
-// ToIntSliceE casts an interface to a []int type.
-func (p *Object) ToIntSliceE() ([]int, error) {
+// ToIntSliceE converts an interface to a *IntSlice type.
+func (p *Object) ToIntSliceE() (*IntSlice, error) {
 	if p == nil {
-		return []int{}, nil
+		return NewIntSliceV(), nil
 	}
-	return cast.ToIntSliceE(p.o)
+	return ToIntSliceE(p.o)
+}
+
+// ToIntSliceG converts an interface to a []int type.
+func (p *Object) ToIntSliceG() []int {
+	result := []int{}
+	if p == nil {
+		return result
+	}
+	v, err := ToIntSliceE(p.o)
+	if err != nil {
+		return result
+	}
+	return v.G()
+}
+
+// ToIntSliceGE converts an interface to a []int type.
+func (p *Object) ToIntSliceGE() ([]int, error) {
+	result := []int{}
+	if p == nil {
+		return result, nil
+	}
+	v, err := ToIntSliceE(p.o)
+	if err != nil {
+		return result, err
+	}
+	return v.G(), err
 }
 
 // ToDurationSlice casts an interface to a []time.Duration type.
