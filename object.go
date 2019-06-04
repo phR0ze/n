@@ -337,6 +337,14 @@ func (p *Object) ToUint64E() (uint64, error) {
 // String related
 //--------------------------------------------------------------------------------------------------
 
+// ToStr converts object into a *Str
+func (p *Object) ToStr() *Str {
+	if p == nil {
+		return ToStr(p)
+	}
+	return ToStr(p.o)
+}
+
 // ToString casts an interface to a string type.
 func (p *Object) ToString() string {
 	if p == nil {
@@ -355,6 +363,44 @@ func (p *Object) ToStringE() (string, error) {
 
 // Map related
 //--------------------------------------------------------------------------------------------------
+
+// ToStringMap converts an interface to a *StringMap type.
+func (p *Object) ToStringMap() *StringMap {
+	if p == nil {
+		return NewStringMap()
+	}
+	return ToStringMap(p.o)
+}
+
+// ToStringMapE converts an interface to a *StringMap type.
+func (p *Object) ToStringMapE() (*StringMap, error) {
+	if p == nil {
+		return NewStringMap(), nil
+	}
+	return ToStringMapE(p.o)
+}
+
+// ToStringMapG converts an interface to a map[string]interface{} type.
+func (p *Object) ToStringMapG() map[string]interface{} {
+	if p == nil {
+		return map[string]interface{}{}
+	}
+	v, _ := ToStringMapE(p.o)
+	return v.G()
+}
+
+// ToStringMapGE converts an interface to a map[string]interface{} type.
+func (p *Object) ToStringMapGE() (map[string]interface{}, error) {
+	result := map[string]interface{}{}
+	if p == nil {
+		return result, nil
+	}
+	v, err := ToStringMapE(p.o)
+	if err != nil {
+		return result, err
+	}
+	return v.G(), err
+}
 
 // ToStringMapString casts an interface to a map[string]string type.
 func (p *Object) ToStringMapString() map[string]string {
@@ -439,23 +485,6 @@ func (p *Object) ToStringMapInt64E() (map[string]int64, error) {
 		return map[string]int64{}, nil
 	}
 	return cast.ToStringMapInt64E(p.o)
-}
-
-// ToStringMap casts an interface to a map[string]interface{} type.
-func (p *Object) ToStringMap() map[string]interface{} {
-	if p == nil {
-		return map[string]interface{}{}
-	}
-	v, _ := cast.ToStringMapE(p.o)
-	return v
-}
-
-// ToStringMapE casts an interface to a map[string]interface{} type.
-func (p *Object) ToStringMapE() (map[string]interface{}, error) {
-	if p == nil {
-		return map[string]interface{}{}, nil
-	}
-	return cast.ToStringMapE(p.o)
 }
 
 // Slice related

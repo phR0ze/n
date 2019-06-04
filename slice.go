@@ -88,7 +88,7 @@ func S(obj interface{}) (new Slice) {
 // of Slice methods available. Non optimized types will fall back on reflection to generically
 // handle the type incurring the full 10x reflection processing overhead.
 //
-// Optimized: []int, []string, Str
+// Optimized: []int, []string, StrSlice
 func NewSlice(obj interface{}) (new Slice) {
 	o := Reference(obj)
 	switch x := o.(type) {

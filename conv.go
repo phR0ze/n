@@ -8,6 +8,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/ghodss/yaml"
 	"github.com/phR0ze/go-errors"
 )
 
@@ -935,6 +936,14 @@ func Reference(obj interface{}) interface{} {
 		return x
 	case *[]*string:
 		return x
+	case map[interface{}]interface{}:
+		return &x
+	case map[interface{}]*interface{}:
+		return &x
+	case *map[interface{}]interface{}:
+		return x
+	case *map[interface{}]*interface{}:
+		return x
 	case map[string]interface{}:
 		return &x
 	case map[string]*interface{}:
@@ -942,6 +951,46 @@ func Reference(obj interface{}) interface{} {
 	case *map[string]interface{}:
 		return x
 	case *map[string]*interface{}:
+		return x
+	case map[string]string:
+		return &x
+	case map[string]*string:
+		return &x
+	case *map[string]string:
+		return x
+	case *map[string]*string:
+		return x
+	case map[string]float32:
+		return &x
+	case map[string]*float32:
+		return &x
+	case *map[string]float32:
+		return x
+	case *map[string]*float32:
+		return x
+	case map[string]float64:
+		return &x
+	case map[string]*float64:
+		return &x
+	case *map[string]float64:
+		return x
+	case *map[string]*float64:
+		return x
+	case map[string]int:
+		return &x
+	case map[string]*int:
+		return &x
+	case *map[string]int:
+		return x
+	case *map[string]*int:
+		return x
+	case map[string]int64:
+		return &x
+	case map[string]*int64:
+		return &x
+	case *map[string]int64:
+		return x
+	case *map[string]*int64:
 		return x
 
 	// template.CSS
@@ -2246,10 +2295,26 @@ func ToStringMapE(obj interface{}) (val *StringMap, err error) {
 
 	// interface
 	//----------------------------------------------------------------------------------------------
+	case *map[interface{}]interface{}:
+		if x != nil {
+			for k, v := range *x {
+				val.Set(ToString(k), v)
+			}
+		}
 	case *map[string]interface{}:
 		if x != nil {
 			y := StringMap(*x)
 			val = &y
+		}
+
+	// string
+	//----------------------------------------------------------------------------------------------
+	case *string:
+		if x != nil {
+			m := map[string]interface{}{}
+			if err = yaml.Unmarshal([]byte(*x), &m); err == nil {
+				val = ToStringMap(m)
+			}
 		}
 
 	// StringMap

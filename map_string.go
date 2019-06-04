@@ -1,5 +1,7 @@
 package n
 
+import "fmt"
+
 // StringMap implements the Map interface providing a generic way to work with map types
 // including convenience methods on par with rapid development languages. This type is
 // also specifically designed to handle YAML constructs.
@@ -12,7 +14,7 @@ func NewStringMap(m ...map[string]interface{}) *StringMap {
 	if len(m) == 0 {
 		new = StringMap(map[string]interface{}{})
 	} else {
-		new = StringMap(m[0])
+		new = *ToStringMap(m[0])
 	}
 	return &new
 }
@@ -166,7 +168,7 @@ func (p *StringMap) Merge(m Map) Map {
 
 		// Ensure b value is Go type
 		if val, ok := v.(map[string]interface{}); ok {
-			bv = NewStringMap(val)
+			bv = ToStringMap(val)
 		} else {
 			bv = v
 		}
@@ -176,7 +178,7 @@ func (p *StringMap) Merge(m Map) Map {
 			(*p)[k] = bv
 		} else {
 			if _val, ok := val.(map[string]interface{}); ok {
-				av = NewStringMap(_val)
+				av = ToStringMap(_val)
 			} else {
 				av = val
 			}
@@ -246,4 +248,63 @@ func (p *StringMap) SetM(key, val interface{}) Map {
 	}
 	p.Set(key, val)
 	return p
+}
+
+// Yaml returns the value at the given key location, using a simple dot notation. Returns empty *Object if not found.
+// Assumes structure is made up of Yaml primitives and suppresses errors when not.
+func (p *StringMap) Yaml(key string) (val *Object) {
+	val = &Object{}
+	if p == nil {
+		return
+	}
+
+	keys := A(key).Split(".")
+	if ko := keys.Shift(); !ko.Nil() {
+		key := ko.ToStr()
+		o := (*p)[key.A()]
+
+		// Switch on value type
+		switch x := o.(type) {
+
+		case map[string]interface{}:
+			fmt.Println(x)
+			// if !key.Any(":", "[", "]") {
+			// 	if v, ok := x[key]; ok {
+			// 		result = Q(v)
+			// 	}
+			// }
+
+		case []interface{}:
+			// 	// 	// 			k, v := A(key).TrimPrefix("[").TrimSuffix("]").Split(":").YamlPair()
+			// 	// 	// 			if v == nil {
+			// 	// 	// 				if i, err := strconv.Atoi(k); err == nil {
+			// 	// 	// 					result = q.At(i)
+			// 	// 	// 				} else {
+			// 	// 	// 					panic(errors.New("Failed to convert index to an int"))
+			// 	// 	// 				}
+			// 	// 	// 			} else {
+			// 	// 	// 				for i := range x {
+			// 	// 	// 					if m, ok := x[i].(map[string]interface{}); ok {
+			// 	// 	// 						if entry, ok := m[k]; ok {
+			// 	// 	// 							if v == entry {
+			// 	// 	// 								result = Q(m)
+			// 	// 	// 								break
+			// 	// 	// 							}
+			// 	// 	// 						}
+			// 	// 	// 					}
+			// 	// 	// 				}
+			// 	// 	// 			}
+			// 	// 	// 		}
+			// 	// 	// 		if keys.Len() != 0 && result != nil && result.Any() {
+			// 	// 	// 			result = result.Yaml(keys.Join(".").A())
+			// 	// 	// 		}
+			// 	// 	// 	}
+			// 	// 	// 	if result == nil {
+			// 	// 	// 		result = Nil()
+		}
+
+		// value is our target as it wasn't caught earlier
+		val = Obj(o)
+	}
+	return
 }

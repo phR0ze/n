@@ -648,6 +648,69 @@ func TestReference(t *testing.T) {
 		assert.Equal(t, (*[]string)(nil), Reference((*[]string)(nil)))
 		assert.Equal(t, (*[]*string)(nil), Reference((*[]*string)(nil)))
 		assert.Equal(t, &val3, Reference(val3))
+
+		// map[interface]interface{}
+		{
+			map2 := map[interface{}]interface{}{"1": 1}
+			assert.Equal(t, &map2, Reference(map2))
+			assert.Equal(t, &map2, Reference(&map2))
+			assert.Equal(t, (*map[interface{}]interface{})(nil), Reference((*map[interface{}]interface{})(nil)))
+			assert.Equal(t, (*map[interface{}]*interface{})(nil), Reference((*map[interface{}]*interface{})(nil)))
+		}
+
+		// map[string]interface{}
+		{
+			map2 := map[string]interface{}{"1": 1}
+			assert.Equal(t, &map2, Reference(map2))
+			assert.Equal(t, &map2, Reference(&map2))
+			assert.Equal(t, (*map[string]interface{})(nil), Reference((*map[string]interface{})(nil)))
+			assert.Equal(t, (*map[string]*interface{})(nil), Reference((*map[string]*interface{})(nil)))
+		}
+
+		// map[string]string
+		{
+			map2 := map[string]string{"1": "one"}
+			assert.Equal(t, &map2, Reference(map2))
+			assert.Equal(t, &map2, Reference(&map2))
+			assert.Equal(t, (*map[string]string)(nil), Reference((*map[string]string)(nil)))
+			assert.Equal(t, (*map[string]*string)(nil), Reference((*map[string]*string)(nil)))
+		}
+
+		// map[string]float32
+		{
+			map2 := map[string]float32{"1": 1.0}
+			assert.Equal(t, &map2, Reference(map2))
+			assert.Equal(t, &map2, Reference(&map2))
+			assert.Equal(t, (*map[string]float32)(nil), Reference((*map[string]float32)(nil)))
+			assert.Equal(t, (*map[string]*float32)(nil), Reference((*map[string]*float32)(nil)))
+		}
+
+		// map[string]float64
+		{
+			map2 := map[string]float64{"1": 1.0}
+			assert.Equal(t, &map2, Reference(map2))
+			assert.Equal(t, &map2, Reference(&map2))
+			assert.Equal(t, (*map[string]float64)(nil), Reference((*map[string]float64)(nil)))
+			assert.Equal(t, (*map[string]*float64)(nil), Reference((*map[string]*float64)(nil)))
+		}
+
+		// map[string]int
+		{
+			map2 := map[string]int{"1": 1}
+			assert.Equal(t, &map2, Reference(map2))
+			assert.Equal(t, &map2, Reference(&map2))
+			assert.Equal(t, (*map[string]int)(nil), Reference((*map[string]int)(nil)))
+			assert.Equal(t, (*map[string]*int)(nil), Reference((*map[string]*int)(nil)))
+		}
+
+		// map[string]int64
+		{
+			map2 := map[string]int64{"1": 1}
+			assert.Equal(t, &map2, Reference(map2))
+			assert.Equal(t, &map2, Reference(&map2))
+			assert.Equal(t, (*map[string]int64)(nil), Reference((*map[string]int64)(nil)))
+			assert.Equal(t, (*map[string]*int64)(nil), Reference((*map[string]*int64)(nil)))
+		}
 	}
 
 	// template.CSS
@@ -2598,6 +2661,48 @@ func TestToString(t *testing.T) {
 		assert.Equal(t, "7", ToString(uint16(7)))
 		assert.Equal(t, "7", ToString(uint32(7)))
 		assert.Equal(t, "7", ToString(uint64(7)))
+	}
+}
+
+// ToStringMapE
+//--------------------------------------------------------------------------------------------------
+func ExampleToStringMapE() {
+	fmt.Println(ToStringMapE(map[interface{}]interface{}{"1": "one"}))
+	// Output: &map[1:one] <nil>
+}
+
+func TestToStringMapE(t *testing.T) {
+
+	// maps
+	{
+		val, err := ToStringMapE(map[interface{}]interface{}{"1": "one"})
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"1": "one"}, val)
+		assert.Equal(t, map[string]interface{}{"1": "one"}, val.G())
+
+		val, err = ToStringMapE(&map[interface{}]interface{}{"1": "one"})
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"1": "one"}, val)
+		assert.Equal(t, map[string]interface{}{"1": "one"}, val.G())
+
+		val, err = ToStringMapE(map[string]interface{}{"1": "one"})
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"1": "one"}, val)
+		assert.Equal(t, map[string]interface{}{"1": "one"}, val.G())
+
+		val, err = ToStringMapE(&map[interface{}]interface{}{"1": "one"})
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"1": "one"}, val)
+		assert.Equal(t, map[string]interface{}{"1": "one"}, val.G())
+	}
+
+	// yaml
+	{
+		// int list is interpretted as []interface{} float64
+		val, err := ToStringMapE("foo:\n  - 1\n  - 2\n  - 3\n")
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"foo": []interface{}{float64(1), float64(2), float64(3)}}, val)
+		assert.Equal(t, map[string]interface{}{"foo": []interface{}{float64(1), float64(2), float64(3)}}, val.G())
 	}
 }
 

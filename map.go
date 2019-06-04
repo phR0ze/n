@@ -70,6 +70,7 @@ type Map interface {
 	// UnionM(slice interface{}) Slice                   // UnionM modifies this Map by joining uniq elements from this Map with uniq elements from the given Slice while preserving order.
 	// Uniq() (new Map)                                // Uniq returns a new Map with all non uniq elements removed while preserving element order.
 	// UniqM() Slice                                     // UniqM modifies this Map to remove all non uniq elements while preserving element order.
+	Yaml(key string) (val *Object) // Yaml returns the value at the given key location, using a simple dot notation. Returns empty *Object if not found.
 }
 
 // M is an alias for NewMap
@@ -84,15 +85,19 @@ func M(m interface{}) (new Map) {
 // type if nothing is given.
 //
 // Optimized: map[string]interface{}
-func NewMap(m ...interface{}) (new Map) {
-	if len(m) == 0 {
-		return NewStringMap()
-	}
-	if x, err := ToStringMapE(m[0]); err == nil {
-		new = x
-	} else {
-		// Use reflection
-		panic("not yet implemented")
+func NewMap(obj interface{}) (new Map) {
+	o := Reference(obj)
+	switch x := o.(type) {
+
+	// StringMap
+	// ---------------------------------------------------------------------------------------------
+	case *StringMap, *map[string]interface{}, *map[string]string, *map[string]float32, *map[string]float64, *map[string]int, *map[string]int64:
+		new, _ = ToStringMapE(x)
+
+	// RefMap
+	// ---------------------------------------------------------------------------------------------
+	default:
+		panic("RefMap not yet implemented")
 	}
 	return
 }

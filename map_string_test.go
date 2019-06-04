@@ -16,7 +16,7 @@ func ExampleNewStringMap() {
 
 func TestNewStringMap(t *testing.T) {
 
-	// string interface
+	// map[string]interface
 	{
 		m := map[string]interface{}{"k": "v"}
 		assert.Equal(t, NewStringMap(m), NewStringMap(m))
@@ -593,5 +593,37 @@ func TestStringMap_SetM(t *testing.T) {
 		assert.Equal(t, NewStringMap(map[string]interface{}{"1": "one"}), m.SetM("1", "one"))
 		assert.Equal(t, NewStringMap(map[string]interface{}{"1": "two"}), m.SetM("1", "two"))
 		assert.Equal(t, "two", (*m)["1"].(string))
+	}
+}
+
+// Yaml
+//--------------------------------------------------------------------------------------------------
+// func ExampleStringMap_Yaml() {
+// 	m := NewStringMap(map[string]interface{}{"1": map[string]interface{}{"2": "two"}})
+// 	fmt.Println(m.Yaml("1.2").O())
+// 	// Output: two
+// }
+
+func TestStringMap_Yaml(t *testing.T) {
+
+	// no dot notation
+	{
+		// floats
+		assert.Equal(t, float32(1.2), NewStringMap(map[string]interface{}{"1": 1.2}).Yaml("1").ToFloat32())
+		assert.Equal(t, float64(1.2), NewStringMap(map[string]interface{}{"1": 1.2}).Yaml("1").ToFloat64())
+
+		// ints
+		assert.Equal(t, int(1), NewStringMap(map[string]interface{}{"1": 1}).Yaml("1").ToInt())
+		assert.Equal(t, int8(1), NewStringMap(map[string]interface{}{"1": 1}).Yaml("1").ToInt8())
+		assert.Equal(t, int16(1), NewStringMap(map[string]interface{}{"1": 1}).Yaml("1").ToInt16())
+		assert.Equal(t, int32(1), NewStringMap(map[string]interface{}{"1": 1}).Yaml("1").ToInt32())
+		assert.Equal(t, int64(1), NewStringMap(map[string]interface{}{"1": 1}).Yaml("1").ToInt64())
+		assert.Equal(t, uint(1), NewStringMap(map[string]interface{}{"1": 1}).Yaml("1").ToUint())
+
+		// string
+		assert.Equal(t, "one", NewStringMap(map[string]interface{}{"1": "one"}).Yaml("1").ToString())
+
+		// maps
+		assert.Equal(t, map[string]interface{}{"2": "two"}, NewStringMap(map[string]interface{}{"1": map[string]interface{}{"2": "two"}}).Yaml("1").ToStringMapG())
 	}
 }

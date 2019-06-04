@@ -262,6 +262,21 @@ func TestObject_ToUint64(t *testing.T) {
 	}
 }
 
+func TestObject_ToStr(t *testing.T) {
+
+	{
+		n := &Object{""}
+		assert.IsType(t, (*Str)(nil), n.ToStr())
+	}
+
+	{
+		n := &Object{"test"}
+		obj := n.ToStr()
+		assert.IsType(t, (*Str)(nil), obj)
+		assert.Equal(t, A("test"), obj)
+	}
+}
+
 func TestObject_ToString(t *testing.T) {
 
 	// w/out error
@@ -276,6 +291,40 @@ func TestObject_ToString(t *testing.T) {
 		obj, e := n.ToStringE()
 		assert.Nil(t, e)
 		assert.IsType(t, "", obj)
+	}
+}
+
+func TestObject_ToStringMap(t *testing.T) {
+
+	// w/out error
+	{
+		n := &Object{map[string]interface{}{}}
+		assert.IsType(t, (*StringMap)(nil), n.ToStringMap())
+	}
+
+	// w/error
+	{
+		n := &Object{map[string]interface{}{}}
+		obj, e := n.ToStringMapE()
+		assert.Nil(t, e)
+		assert.IsType(t, (*StringMap)(nil), obj)
+	}
+}
+
+func TestObject_ToStringMapG(t *testing.T) {
+
+	// w/out error
+	{
+		n := &Object{map[string]interface{}{}}
+		assert.IsType(t, map[string]interface{}{}, n.ToStringMapG())
+	}
+
+	// w/error
+	{
+		n := &Object{map[string]interface{}{}}
+		obj, e := n.ToStringMapGE()
+		assert.Nil(t, e)
+		assert.IsType(t, map[string]interface{}{}, obj)
 	}
 }
 
@@ -361,23 +410,6 @@ func TestObject_ToStringMapInt64(t *testing.T) {
 		obj, e := n.ToStringMapInt64E()
 		assert.Nil(t, e)
 		assert.IsType(t, map[string]int64{}, obj)
-	}
-}
-
-func TestObject_ToStringMap(t *testing.T) {
-
-	// w/out error
-	{
-		n := &Object{map[string]interface{}{}}
-		assert.IsType(t, map[string]interface{}{}, n.ToStringMap())
-	}
-
-	// w/error
-	{
-		n := &Object{map[string]interface{}{}}
-		obj, e := n.ToStringMapE()
-		assert.Nil(t, e)
-		assert.IsType(t, map[string]interface{}{}, obj)
 	}
 }
 
