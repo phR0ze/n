@@ -1487,6 +1487,447 @@ func TestToChar(t *testing.T) {
 	}
 }
 
+// ToFloat32
+//--------------------------------------------------------------------------------------------------
+func ExampleToFloat32() {
+	fmt.Println(ToFloat32("3.1"))
+	// Output: 3.1
+}
+
+func TestToFloat32(t *testing.T) {
+
+	// invalid
+	{
+		assert.Equal(t, float32(0), ToFloat32(nil))
+		assert.Equal(t, float32(0), ToFloat32(&Object{}))
+	}
+
+	// bool
+	{
+		var test bool
+		assert.Equal(t, float32(0), ToFloat32(&test))
+		assert.Equal(t, float32(1), ToFloat32(true))
+		assert.Equal(t, float32(0), ToFloat32((*bool)(nil)))
+	}
+
+	// int
+	{
+		var test int
+		assert.Equal(t, float32(0), ToFloat32(&test))
+		assert.Equal(t, float32(3), ToFloat32(3))
+		assert.Equal(t, float32(0), ToFloat32(0))
+		assert.Equal(t, float32(0), ToFloat32((*int)(nil)))
+	}
+
+	// int8
+	{
+		var test int8
+		assert.Equal(t, float32(0), ToFloat32(&test))
+		assert.Equal(t, float32(3), ToFloat32(int8(3)))
+		assert.Equal(t, float32(0), ToFloat32(0))
+		assert.Equal(t, float32(0), ToFloat32((*int8)(nil)))
+	}
+
+	// int16
+	{
+		var test int16
+		assert.Equal(t, float32(0), ToFloat32(&test))
+		assert.Equal(t, float32(3), ToFloat32(int16(3)))
+		assert.Equal(t, float32(0), ToFloat32(0))
+		assert.Equal(t, float32(0), ToFloat32((*int16)(nil)))
+	}
+
+	// int32
+	{
+		var test int32
+		assert.Equal(t, float32(0), ToFloat32(&test))
+		assert.Equal(t, float32(3), ToFloat32(int32(3)))
+		assert.Equal(t, float32(0), ToFloat32(0))
+		assert.Equal(t, float32(0), ToFloat32((*int32)(nil)))
+	}
+
+	// int64
+	{
+		var test int64
+		assert.Equal(t, float32(0), ToFloat32(&test))
+		assert.Equal(t, float32(3), ToFloat32(int64(3)))
+		assert.Equal(t, float32(0), ToFloat32(0))
+		assert.Equal(t, float32(0), ToFloat32((*int64)(nil)))
+	}
+
+	// string
+	{
+		var test string
+		assert.Equal(t, float32(0), ToFloat32(&test))
+		assert.Equal(t, float32(3), ToFloat32("3"))
+		assert.Equal(t, float32(0), ToFloat32(0))
+		assert.Equal(t, float32(0), ToFloat32((*string)(nil)))
+		assert.Equal(t, float32(0), ToFloat32("0"))
+		assert.Equal(t, float32(1), ToFloat32("true"))
+		assert.Equal(t, float32(1), ToFloat32("TRUE"))
+		assert.Equal(t, float32(0), ToFloat32("false"))
+		assert.Equal(t, float32(0), ToFloat32("FALSE"))
+		assert.Equal(t, float32(0), ToFloat32("bob"))
+	}
+
+	// uint
+	{
+		var test uint
+		assert.Equal(t, float32(0), ToFloat32(&test))
+		assert.Equal(t, float32(3), ToFloat32(uint(3)))
+		assert.Equal(t, float32(0), ToFloat32(0))
+		assert.Equal(t, float32(0), ToFloat32((*uint)(nil)))
+	}
+
+	// uint8
+	{
+		var test uint8
+		assert.Equal(t, float32(0), ToFloat32(&test))
+		assert.Equal(t, float32(3), ToFloat32(uint8(3)))
+		assert.Equal(t, float32(0), ToFloat32(0))
+		assert.Equal(t, float32(0), ToFloat32((*uint8)(nil)))
+	}
+
+	// uint16
+	{
+		var test uint16
+		assert.Equal(t, float32(0), ToFloat32(&test))
+		assert.Equal(t, float32(3), ToFloat32(uint16(3)))
+		assert.Equal(t, float32(0), ToFloat32(0))
+		assert.Equal(t, float32(0), ToFloat32((*uint16)(nil)))
+	}
+
+	// uint32
+	{
+		var test uint32
+		assert.Equal(t, float32(0), ToFloat32(&test))
+		assert.Equal(t, float32(3), ToFloat32(uint32(3)))
+		assert.Equal(t, float32(0), ToFloat32(0))
+		assert.Equal(t, float32(0), ToFloat32((*uint32)(nil)))
+	}
+
+	// uint64
+	{
+		var test uint64
+		assert.Equal(t, float32(0), ToFloat32(&test))
+		assert.Equal(t, float32(3), ToFloat32(uint64(3)))
+		assert.Equal(t, float32(0), ToFloat32(0))
+		assert.Equal(t, float32(0), ToFloat32((*uint64)(nil)))
+	}
+}
+
+// ToFloat32E
+//--------------------------------------------------------------------------------------------------
+func ExampleToFloat32E() {
+	fmt.Println(ToFloat32E("1.1"))
+	// Output: 1.1 <nil>
+}
+
+func TestToFloat32E(t *testing.T) {
+
+	// invalid
+	{
+		val, err := ToFloat32E(nil)
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		val, err = ToFloat32E(&TestObj{})
+		assert.Equal(t, "unable to convert type n.TestObj to int", err.Error())
+		assert.Equal(t, float32(0), val)
+	}
+
+	// bool
+	{
+		val, err := ToFloat32E(true)
+		assert.Nil(t, err)
+		assert.Equal(t, float32(1), val)
+
+		var test bool
+		val, err = ToFloat32E(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		val, err = ToFloat32E((*bool)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+	}
+
+	// int
+	{
+		val, err := ToFloat32E(3)
+		assert.Nil(t, err)
+		assert.Equal(t, float32(3), val)
+
+		val, err = ToFloat32E(0)
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		var test int
+		val, err = ToFloat32E(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		val, err = ToFloat32E((*int)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+	}
+
+	// int8
+	{
+		val, err := ToFloat32E(int8(3))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(3), val)
+
+		val, err = ToFloat32E(int8(0))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		var test int8
+		val, err = ToFloat32E(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		val, err = ToFloat32E((*int8)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+	}
+
+	// int16
+	{
+		val, err := ToFloat32E(int16(3))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(3), val)
+
+		val, err = ToFloat32E(int16(0))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		var test int16
+		val, err = ToFloat32E(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		val, err = ToFloat32E((*int16)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+	}
+
+	// int32
+	{
+		val, err := ToFloat32E(int32(3))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(3), val)
+
+		val, err = ToFloat32E(int32(0))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		var test int32
+		val, err = ToFloat32E(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		val, err = ToFloat32E((*int32)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+	}
+
+	// int64
+	{
+		val, err := ToFloat32E(int64(3))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(3), val)
+
+		val, err = ToFloat32E(int64(0))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		var test int64
+		val, err = ToFloat32E(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		val, err = ToFloat32E((*int64)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+	}
+
+	// Object
+	{
+		val, err := ToFloat32E(Object{3})
+		assert.Nil(t, err)
+		assert.Equal(t, float32(3), val)
+
+		val, err = ToFloat32E(Object{0})
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		val, err = ToFloat32E(&Object{})
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		val, err = ToFloat32E((*Object)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+	}
+
+	// Str
+	{
+		val, err := ToFloat32E(NewStr("2"))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(2), val)
+
+		var test Str
+		val, err = ToFloat32E(&test)
+		assert.NotNil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		val, err = ToFloat32E((*Str)(nil))
+		assert.NotNil(t, err)
+		assert.Equal(t, float32(0), val)
+	}
+
+	// string
+	{
+		val, err := ToFloat32E("true")
+		assert.Nil(t, err)
+		assert.Equal(t, float32(1), val)
+
+		val, err = ToFloat32E("TRUE")
+		assert.Nil(t, err)
+		assert.Equal(t, float32(1), val)
+
+		val, err = ToFloat32E("false")
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		val, err = ToFloat32E("FALSE")
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		val, err = ToFloat32E("bob")
+		assert.NotNil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		val, err = ToFloat32E("3")
+		assert.Nil(t, err)
+		assert.Equal(t, float32(3), val)
+
+		val, err = ToFloat32E("0")
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		var test string
+		val, err = ToFloat32E(&test)
+		assert.NotNil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		val, err = ToFloat32E((*string)(nil))
+		assert.NotNil(t, err)
+		assert.Equal(t, float32(0), val)
+	}
+
+	// uint
+	{
+		val, err := ToFloat32E(uint(3))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(3), val)
+
+		val, err = ToFloat32E(0)
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		var test uint
+		val, err = ToFloat32E(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		val, err = ToFloat32E((*uint)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+	}
+
+	// uint8
+	{
+		val, err := ToFloat32E(uint8(3))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(3), val)
+
+		val, err = ToFloat32E(uint8(0))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		var test uint8
+		val, err = ToFloat32E(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		val, err = ToFloat32E((*uint8)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+	}
+
+	// uint16
+	{
+		val, err := ToFloat32E(uint16(3))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(3), val)
+
+		val, err = ToFloat32E(uint16(0))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		var test uint16
+		val, err = ToFloat32E(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		val, err = ToFloat32E((*uint16)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+	}
+
+	// uint32
+	{
+		val, err := ToFloat32E(uint32(3))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(3), val)
+
+		val, err = ToFloat32E(uint32(0))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		var test uint32
+		val, err = ToFloat32E(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		val, err = ToFloat32E((*uint32)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+	}
+
+	// uint64
+	{
+		val, err := ToFloat32E(uint64(3))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(3), val)
+
+		val, err = ToFloat32E(uint64(0))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		var test uint64
+		val, err = ToFloat32E(&test)
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+
+		val, err = ToFloat32E((*uint64)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, float32(0), val)
+	}
+}
+
 // ToFloat64
 //--------------------------------------------------------------------------------------------------
 func ExampleToFloat64() {

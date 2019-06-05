@@ -132,8 +132,7 @@ func (p *Object) ToFloat32() float32 {
 	if p == nil {
 		return float32(0)
 	}
-	v, _ := cast.ToFloat32E(p.o)
-	return v
+	return ToFloat32(p.o)
 }
 
 // ToFloat32E casts an interface to a float32 type.
@@ -141,7 +140,7 @@ func (p *Object) ToFloat32E() (float32, error) {
 	if p == nil {
 		return float32(0), nil
 	}
-	return cast.ToFloat32E(p.o)
+	return ToFloat32E(p.o)
 }
 
 // ToFloat64 converts an interface to a float64 type.
