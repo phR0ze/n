@@ -1394,6 +1394,70 @@ func ToChar(obj interface{}) *Char {
 	return &val
 }
 
+// ToFloat64 convert an interface to a float64 type.
+func ToFloat64(obj interface{}) float64 {
+	x, _ := ToFloat64E(obj)
+	return x
+}
+
+// ToFloat64E convert an interface to a float64 type.
+func ToFloat64E(obj interface{}) (val float64, err error) {
+	o := DeReference(obj)
+
+	switch x := o.(type) {
+	case nil:
+	case bool:
+		if x {
+			val = 1
+		}
+	case Char:
+		val, err = ToFloat64E(x.A())
+	case float32:
+		val = float64(x)
+	case float64:
+		val = x
+	case int:
+		val = float64(x)
+	case int8:
+		val = float64(x)
+	case int16:
+		val = float64(x)
+	case int32:
+		val = float64(x)
+	case int64:
+		val = float64(x)
+	case Object:
+		val, err = x.ToFloat64E()
+	case uint:
+		val = float64(x)
+	case uint8:
+		val = float64(x)
+	case uint16:
+		val = float64(x)
+	case uint32:
+		val = float64(x)
+	case uint64:
+		val = float64(x)
+	case Str:
+		return ToFloat64E(string(x))
+	case string:
+		if val, err = strconv.ParseFloat(x, 64); err != nil {
+			err = errors.Wrapf(err, "failed to convert string to float64")
+
+			// Also convert true|false|TRUE|FALSE
+			if b, e := strconv.ParseBool(x); e == nil {
+				err = nil
+				if b {
+					val = 1
+				}
+			}
+		}
+	default:
+		err = fmt.Errorf("unable to convert type %T to int", x)
+	}
+	return
+}
+
 // ToInt convert an interface to an int type.
 func ToInt(obj interface{}) int {
 	x, _ := ToIntE(obj)

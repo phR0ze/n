@@ -31,8 +31,8 @@ type Map interface {
 	// Empty() bool                                      // Empty tests if this Map is empty.
 	// First() (elem *Object)                            // First returns the first element in this Map as Object.
 	// FirstN(n int) Slice                               // FirstN returns the first n elements in this Map as a Slice reference to the original.
-	Get(key interface{}) (val *Object) // Get returns the value at the given key location. Returns empty *Object if not found.
 	Generic() bool                     // Generic returns true if the underlying implementation uses reflection
+	Get(key interface{}) (val *Object) // Get returns the value at the given key location. Returns empty *Object if not found.
 	// Index(elem interface{}) (loc int)                 // Index returns the index of the first element in this Map where element == elem
 	// Insert(i int, elem interface{}) Slice             // Insert modifies this Map to insert the given element before the element with the given index.
 	// Join(separator ...string) (str *Object)           // Join converts each element into a string then joins them together using the given separator or comma by default.
@@ -48,6 +48,7 @@ type Map interface {
 	// Pop() (elem *Object)                              // Pop modifies this Map to remove the last element and returns the removed element as an Object.
 	// PopN(n int) (new Map)                           // PopN modifies this Map to remove the last n elements and returns the removed elements as a new Map.
 	// Prepend(elem interface{}) Slice                   // Prepend modifies this Map to add the given element at the begining and returns a reference to this Map.
+	Query(key string) (val *Object) // Query returns the value at the given key location, using a jq type selectors. Returns empty *Object if not found.
 	// Reverse() (new Map)                             // Reverse returns a new Map with the order of the elements reversed.
 	// ReverseM() Slice                                  // ReverseM modifies this Map reversing the order of the elements and returns a reference to this Map.
 	// Select(sel func(O) bool) (new Map)              // Select creates a new Map with the elements that match the lambda selector.
@@ -70,7 +71,6 @@ type Map interface {
 	// UnionM(slice interface{}) Slice                   // UnionM modifies this Map by joining uniq elements from this Map with uniq elements from the given Slice while preserving order.
 	// Uniq() (new Map)                                // Uniq returns a new Map with all non uniq elements removed while preserving element order.
 	// UniqM() Slice                                     // UniqM modifies this Map to remove all non uniq elements while preserving element order.
-	Yaml(key string) (val *Object) // Yaml returns the value at the given key location, using a simple dot notation. Returns empty *Object if not found.
 }
 
 // M is an alias for NewMap

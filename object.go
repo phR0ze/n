@@ -144,21 +144,20 @@ func (p *Object) ToFloat32E() (float32, error) {
 	return cast.ToFloat32E(p.o)
 }
 
-// ToFloat64 casts an interface to a float64 type.
+// ToFloat64 converts an interface to a float64 type.
 func (p *Object) ToFloat64() float64 {
 	if p == nil {
 		return float64(0)
 	}
-	v, _ := cast.ToFloat64E(p.o)
-	return v
+	return ToFloat64(p.o)
 }
 
-// ToFloat64E casts an interface to a float64 type.
+// ToFloat64E converts an interface to a float64 type.
 func (p *Object) ToFloat64E() (float64, error) {
 	if p == nil {
 		return float64(0), nil
 	}
-	return cast.ToFloat64E(p.o)
+	return ToFloat64E(p.o)
 }
 
 // Int related

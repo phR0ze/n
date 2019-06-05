@@ -1,5 +1,9 @@
 package n
 
+import (
+	"github.com/phR0ze/go-errors"
+)
+
 // StringMap implements the Map interface providing a generic way to work with map types
 // including convenience methods on par with rapid development languages. This type is
 // also specifically designed to handle YAML constructs.
@@ -226,38 +230,16 @@ func (p *StringMap) O() interface{} {
 	return map[string]interface{}(*p)
 }
 
-// Set the value for the given key to the given val. Returns true if the key did not yet exists in this Map.
-func (p *StringMap) Set(key, val interface{}) (new bool) {
-	if p == nil {
-		return
-	}
-	k := ToString(key)
-	if _, ok := (*p)[k]; !ok {
-		new = true
-	}
-	(*p)[k] = val
-	return
-}
-
-// SetM the value for the given key to the given val creating map if necessary. Returns a reference to this Map.
-func (p *StringMap) SetM(key, val interface{}) Map {
-	if p == nil {
-		p = NewStringMap()
-	}
-	p.Set(key, val)
-	return p
-}
-
-// Yaml returns the value at the given key location, using a simple dot notation. Returns empty *Object if not found.
+// Query returns the value at the given key location, using a jq type selectors. Returns empty *Object if not found.
 // see dot notation from https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
-func (p *StringMap) Yaml(key string) (val *Object) {
-	val, _ = p.YamlE(key)
+func (p *StringMap) Query(key string) (val *Object) {
+	val, _ = p.QueryE(key)
 	return val
 }
 
-// YamlE returns the value at the given key location, using a simple dot notation. Returns empty *Object if not found.
+// QueryE returns the value at the given key location, using a jq type selectors. Returns empty *Object if not found.
 // see dot notation from https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
-func (p *StringMap) YamlE(key string) (val *Object, err error) {
+func (p *StringMap) QueryE(key string) (val *Object, err error) {
 
 	// Default object is self for identity case: .
 	val = &Object{o: p}
@@ -297,44 +279,45 @@ func (p *StringMap) YamlE(key string) (val *Object, err error) {
 				m := ToStringMap(x)
 				val.o = (*m)[key.A()]
 
-				//if key.Any(".[") {
-				//k, v := key.TrimPrefix(".[").TrimSuffix("]").Split(":").YamlPair()
+			// Array Index/Iterator: .[2], .[-1], .[]
+			case []interface{}:
+				if key.First().A() == "[" && key.Last().A() == "]" {
 
-				// if !key.Any(":", "[", "]") {
-				// 	if v, ok := x[key]; ok {
-				// 		result = Q(v)
-				// 	}
-				// }
-
-				// 	// 	// 			k, v := A(key).TrimPrefix("[").TrimSuffix("]").Split(":").YamlPair()
-				// 	// 	// 			if v == nil {
-				// 	// 	// 				if i, err := strconv.Atoi(k); err == nil {
-				// 	// 	// 					result = q.At(i)
-				// 	// 	// 				} else {
-				// 	// 	// 					panic(errors.New("Failed to convert index to an int"))
-				// 	// 	// 				}
-				// 	// 	// 			} else {
-				// 	// 	// 				for i := range x {
-				// 	// 	// 					if m, ok := x[i].(map[string]interface{}); ok {
-				// 	// 	// 						if entry, ok := m[k]; ok {
-				// 	// 	// 							if v == entry {
-				// 	// 	// 								result = Q(m)
-				// 	// 	// 								break
-				// 	// 	// 							}
-				// 	// 	// 						}
-				// 	// 	// 					}
-				// 	// 	// 				}
-				// 	// 	// 			}
-				// 	// 	// 		}
-				// 	// 	// 		if keys.Len() != 0 && result != nil && result.Any() {
-				// 	// 	// 			result = result.Yaml(keys.Join(".").A())
-				// 	// 	// 		}
-				// 	// 	// 	}
-				// 	// 	// 	if result == nil {
-				// 	// 	// 		result = Nil()
-				//}
+					// No index given means return them all
+					i := key.TrimPrefix("[").TrimSuffix("]").A()
+					if i != "" {
+						if o := NewSlice(x).At(ToInt(i)); o.Nil() {
+							err = errors.Errorf("Invalid array index %v", i)
+							val.o = &Object{}
+						} else {
+							val.o = o
+						}
+					}
+				}
 			}
 		}
 	}
 	return
+}
+
+// Set the value for the given key to the given val. Returns true if the key did not yet exists in this Map.
+func (p *StringMap) Set(key, val interface{}) (new bool) {
+	if p == nil {
+		return
+	}
+	k := ToString(key)
+	if _, ok := (*p)[k]; !ok {
+		new = true
+	}
+	(*p)[k] = val
+	return
+}
+
+// SetM the value for the given key to the given val creating map if necessary. Returns a reference to this Map.
+func (p *StringMap) SetM(key, val interface{}) Map {
+	if p == nil {
+		p = NewStringMap()
+	}
+	p.Set(key, val)
+	return p
 }

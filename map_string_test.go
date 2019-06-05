@@ -609,42 +609,64 @@ func TestStringMap_Yaml(t *testing.T) {
 	// dot notation
 	{
 		// Identity: .
-		assert.Equal(t, &StringMap{"one": "1"}, NewStringMap(map[string]interface{}{"one": "1"}).Yaml(``).ToStringMap())
-		assert.Equal(t, &StringMap{"one": "1"}, NewStringMap(map[string]interface{}{"one": "1"}).Yaml(`.`).ToStringMap())
+		assert.Equal(t, &StringMap{"one": "1"}, NewStringMap(map[string]interface{}{"one": "1"}).Query(``).ToStringMap())
+		assert.Equal(t, &StringMap{"one": "1"}, NewStringMap(map[string]interface{}{"one": "1"}).Query(`.`).ToStringMap())
 
 		// Object Identifier-Index: .foo, .foo.bar
-		assert.Equal(t, "1", NewStringMap(map[string]interface{}{"one": "1"}).Yaml(`one`).ToString())
-		assert.Equal(t, "1", NewStringMap(map[string]interface{}{"one": "1"}).Yaml(`.one`).ToString())
-		assert.Equal(t, "1", NewStringMap(map[string]interface{}{"one": "1"}).Yaml(`."one"`).ToString())
-		assert.Equal(t, "2", NewStringMap(map[string]interface{}{"one": map[string]interface{}{"two": "2"}}).Yaml(`one.two`).ToString())
-		assert.Equal(t, "3", NewStringMap(map[string]interface{}{"one": map[string]interface{}{"two": map[string]interface{}{"three": "3"}}}).Yaml(`one.two.three`).ToString())
-		assert.Equal(t, "foo", NewStringMap(map[string]interface{}{"one": map[string]interface{}{"two.three": "foo"}}).Yaml(`one."two.three"`).ToString())
+		assert.Equal(t, "1", NewStringMap(map[string]interface{}{"one": "1"}).Query(`one`).ToString())
+		assert.Equal(t, "1", NewStringMap(map[string]interface{}{"one": "1"}).Query(`.one`).ToString())
+		assert.Equal(t, "1", NewStringMap(map[string]interface{}{"one": "1"}).Query(`."one"`).ToString())
+		assert.Equal(t, "2", NewStringMap(map[string]interface{}{"one": map[string]interface{}{"two": "2"}}).Query(`one.two`).ToString())
+		assert.Equal(t, "3", NewStringMap(map[string]interface{}{"one": map[string]interface{}{"two": map[string]interface{}{"three": "3"}}}).Query(`one.two.three`).ToString())
+		assert.Equal(t, "foo", NewStringMap(map[string]interface{}{"one": map[string]interface{}{"two.three": "foo"}}).Query(`one."two.three"`).ToString())
+
+		// Array Index: .[2], .[-1]
+		assert.Equal(t, 0, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[0]`).ToInt())
+		assert.Equal(t, 1, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[1]`).ToInt())
+		assert.Equal(t, 2, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[2]`).ToInt())
+		assert.Equal(t, 2, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[-1]`).ToInt())
+		assert.Equal(t, 1, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[-2]`).ToInt())
+		assert.Equal(t, 0, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[-3]`).ToInt())
+		//assert.Equal(t, 2.2, ToStringMap("foo:\n  - 0.5\n  - 1.1\n  - 2.2\n").Query(`foo.[-1]`).ToFloat64())
+		assert.Equal(t, "0", NewStringMap(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[0]`).ToString())
+		assert.Equal(t, "1", NewStringMap(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[1]`).ToString())
+		assert.Equal(t, "2", NewStringMap(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[2]`).ToString())
+		assert.Equal(t, "2", NewStringMap(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[-1]`).ToString())
+		assert.Equal(t, "1", NewStringMap(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[-2]`).ToString())
+		assert.Equal(t, "0", NewStringMap(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[-3]`).ToString())
+		assert.Equal(t, "", NewStringMap(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[-5]`).ToString())
+
+		// Array Interator: .[]
+		assert.Equal(t, []int{0, 1, 2}, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[]`).ToIntSliceG())
+		assert.Equal(t, []int{0, 1, 2}, NewStringMap(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[]`).ToIntSliceG())
+
+		// Array Slice: .[1:]
 	}
 
 	// no dot notation
 	{
 		// floats
-		assert.Equal(t, float32(1.2), NewStringMap(map[string]interface{}{"1": 1.2}).Yaml("1").ToFloat32())
-		assert.Equal(t, float64(1.2), NewStringMap(map[string]interface{}{"1": 1.2}).Yaml("1").ToFloat64())
+		assert.Equal(t, float32(1.2), NewStringMap(map[string]interface{}{"1": 1.2}).Query("1").ToFloat32())
+		assert.Equal(t, float64(1.2), NewStringMap(map[string]interface{}{"1": 1.2}).Query("1").ToFloat64())
 
 		// ints
-		assert.Equal(t, int(1), NewStringMap(map[string]interface{}{"1": 1}).Yaml("1").ToInt())
-		assert.Equal(t, int8(1), NewStringMap(map[string]interface{}{"1": 1}).Yaml("1").ToInt8())
-		assert.Equal(t, int16(1), NewStringMap(map[string]interface{}{"1": 1}).Yaml("1").ToInt16())
-		assert.Equal(t, int32(1), NewStringMap(map[string]interface{}{"1": 1}).Yaml("1").ToInt32())
-		assert.Equal(t, int64(1), NewStringMap(map[string]interface{}{"1": 1}).Yaml("1").ToInt64())
-		assert.Equal(t, uint(1), NewStringMap(map[string]interface{}{"1": 1}).Yaml("1").ToUint())
+		assert.Equal(t, int(1), NewStringMap(map[string]interface{}{"1": 1}).Query("1").ToInt())
+		assert.Equal(t, int8(1), NewStringMap(map[string]interface{}{"1": 1}).Query("1").ToInt8())
+		assert.Equal(t, int16(1), NewStringMap(map[string]interface{}{"1": 1}).Query("1").ToInt16())
+		assert.Equal(t, int32(1), NewStringMap(map[string]interface{}{"1": 1}).Query("1").ToInt32())
+		assert.Equal(t, int64(1), NewStringMap(map[string]interface{}{"1": 1}).Query("1").ToInt64())
+		assert.Equal(t, uint(1), NewStringMap(map[string]interface{}{"1": 1}).Query("1").ToUint())
 
 		// string
-		assert.Equal(t, "one", NewStringMap(map[string]interface{}{"1": "one"}).Yaml("1").ToString())
+		assert.Equal(t, "one", NewStringMap(map[string]interface{}{"1": "one"}).Query("1").ToString())
 
 		// maps
-		assert.Equal(t, &StringMap{"2": "two"}, NewStringMap(map[string]interface{}{"1": map[string]interface{}{"2": "two"}}).Yaml("1").ToStringMap())
-		assert.Equal(t, map[string]interface{}{"2": "two"}, NewStringMap(map[string]interface{}{"1": map[string]interface{}{"2": "two"}}).Yaml("1").ToStringMapG())
+		assert.Equal(t, &StringMap{"2": "two"}, NewStringMap(map[string]interface{}{"1": map[string]interface{}{"2": "two"}}).Query("1").ToStringMap())
+		assert.Equal(t, map[string]interface{}{"2": "two"}, NewStringMap(map[string]interface{}{"1": map[string]interface{}{"2": "two"}}).Query("1").ToStringMapG())
 
 		// yaml
-		assert.Equal(t, "1", ToStringMap("one: 1").Yaml("one").ToString())
-		assert.Equal(t, []int{1, 2}, ToStringMap("foo: \n  - 1\n  - 2").Yaml("foo").ToIntSliceG())
-		assert.Equal(t, &IntSlice{1, 2}, ToStringMap("foo: \n  - 1\n  - 2").Yaml("foo").ToIntSlice())
+		assert.Equal(t, "1", ToStringMap("one: 1").Query("one").ToString())
+		assert.Equal(t, []int{1, 2}, ToStringMap("foo: \n  - 1\n  - 2").Query("foo").ToIntSliceG())
+		assert.Equal(t, &IntSlice{1, 2}, ToStringMap("foo: \n  - 1\n  - 2").Query("foo").ToIntSlice())
 	}
 }
