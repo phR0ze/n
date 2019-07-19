@@ -16,6 +16,16 @@ func ExampleNewMap() {
 
 func TestNewMap(t *testing.T) {
 
+	// []byte
+	{
+		assert.Equal(t, &StringMap{"foo": map[string]interface{}{"bar": float64(1)}}, NewMap([]byte("foo:\n bar: 1\n")))
+	}
+
+	// string
+	{
+		assert.Equal(t, &StringMap{"foo": map[string]interface{}{"bar": float64(1)}}, NewMap("foo:\n bar: 1\n"))
+	}
+
 	// string interface
 	{
 		m := map[string]interface{}{"k": "v"}

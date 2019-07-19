@@ -546,65 +546,14 @@ func TestStringMap_O(t *testing.T) {
 	assert.Equal(t, map[string]interface{}{"1": "one"}, NewStringMap(map[string]interface{}{"1": "one"}).O())
 }
 
-// Set
+// Query
 //--------------------------------------------------------------------------------------------------
-func ExampleStringMap_Set() {
-	fmt.Println(NewStringMap().Set("key", "value"))
-	// Output: true
+func ExampleStringMap_Query() {
+	fmt.Println(ToStringMap("foo:\n  bar: 1\n").Query("foo.bar"))
+	// Output: 1
 }
 
-func TestStringMap_Set(t *testing.T) {
-	// bool
-	{
-		m := NewStringMap()
-		assert.Equal(t, true, m.Set("test", false))
-		assert.Equal(t, false, m.Set("test", true))
-		assert.Equal(t, true, (*m)["test"].(bool))
-	}
-
-	// string
-	{
-		m := NewStringMap()
-		assert.Equal(t, true, m.Set("1", "one"))
-		assert.Equal(t, false, m.Set("1", "two"))
-		assert.Equal(t, "two", (*m)["1"].(string))
-	}
-}
-
-// SetM
-//--------------------------------------------------------------------------------------------------
-func ExampleStringMap_SetM() {
-	fmt.Println(NewStringMap().SetM("k", "v"))
-	// Output: &map[k:v]
-}
-
-func TestStringMap_SetM(t *testing.T) {
-	// bool
-	{
-		m := NewStringMap()
-		assert.Equal(t, NewStringMap(map[string]interface{}{"test": false}), m.SetM("test", false))
-		assert.Equal(t, NewStringMap(map[string]interface{}{"test": true}), m.SetM("test", true))
-		assert.Equal(t, true, (*m)["test"].(bool))
-	}
-
-	// string
-	{
-		m := NewStringMap()
-		assert.Equal(t, NewStringMap(map[string]interface{}{"1": "one"}), m.SetM("1", "one"))
-		assert.Equal(t, NewStringMap(map[string]interface{}{"1": "two"}), m.SetM("1", "two"))
-		assert.Equal(t, "two", (*m)["1"].(string))
-	}
-}
-
-// Yaml
-//--------------------------------------------------------------------------------------------------
-// func ExampleStringMap_Yaml() {
-// 	m := NewStringMap(map[string]interface{}{"1": map[string]interface{}{"2": "two"}})
-// 	fmt.Println(m.Yaml("1.2").O())
-// 	// Output: two
-// }
-
-func TestStringMap_Yaml(t *testing.T) {
+func TestStringMap_Query(t *testing.T) {
 
 	// dot notation
 	{
@@ -669,5 +618,55 @@ func TestStringMap_Yaml(t *testing.T) {
 		assert.Equal(t, "1", ToStringMap("one: 1").Query("one").ToString())
 		assert.Equal(t, []int{1, 2}, ToStringMap("foo: \n  - 1\n  - 2").Query("foo").ToIntSliceG())
 		assert.Equal(t, &IntSlice{1, 2}, ToStringMap("foo: \n  - 1\n  - 2").Query("foo").ToIntSlice())
+	}
+}
+
+// Set
+//--------------------------------------------------------------------------------------------------
+func ExampleStringMap_Set() {
+	fmt.Println(NewStringMap().Set("key", "value"))
+	// Output: true
+}
+
+func TestStringMap_Set(t *testing.T) {
+	// bool
+	{
+		m := NewStringMap()
+		assert.Equal(t, true, m.Set("test", false))
+		assert.Equal(t, false, m.Set("test", true))
+		assert.Equal(t, true, (*m)["test"].(bool))
+	}
+
+	// string
+	{
+		m := NewStringMap()
+		assert.Equal(t, true, m.Set("1", "one"))
+		assert.Equal(t, false, m.Set("1", "two"))
+		assert.Equal(t, "two", (*m)["1"].(string))
+	}
+}
+
+// SetM
+//--------------------------------------------------------------------------------------------------
+func ExampleStringMap_SetM() {
+	fmt.Println(NewStringMap().SetM("k", "v"))
+	// Output: &map[k:v]
+}
+
+func TestStringMap_SetM(t *testing.T) {
+	// bool
+	{
+		m := NewStringMap()
+		assert.Equal(t, NewStringMap(map[string]interface{}{"test": false}), m.SetM("test", false))
+		assert.Equal(t, NewStringMap(map[string]interface{}{"test": true}), m.SetM("test", true))
+		assert.Equal(t, true, (*m)["test"].(bool))
+	}
+
+	// string
+	{
+		m := NewStringMap()
+		assert.Equal(t, NewStringMap(map[string]interface{}{"1": "one"}), m.SetM("1", "one"))
+		assert.Equal(t, NewStringMap(map[string]interface{}{"1": "two"}), m.SetM("1", "two"))
+		assert.Equal(t, "two", (*m)["1"].(string))
 	}
 }

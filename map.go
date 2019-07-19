@@ -91,7 +91,8 @@ func NewMap(obj interface{}) (new Map) {
 
 	// StringMap
 	// ---------------------------------------------------------------------------------------------
-	case *StringMap, *map[string]interface{}, *map[string]string, *map[string]float32, *map[string]float64, *map[string]int, *map[string]int64:
+	case []byte, *[]byte, string, *string, *StringMap, *map[string]interface{}, *map[string]string, *map[string]float32,
+		*map[string]float64, *map[string]int, *map[string]int64:
 		new, _ = ToStringMapE(x)
 
 	// RefMap

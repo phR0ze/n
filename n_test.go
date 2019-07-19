@@ -1,7 +1,10 @@
 package n
 
 import (
+	"fmt"
 	"testing"
+
+	"github.com/phR0ze/n/pkg/sys"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -16,13 +19,23 @@ type bob struct {
 	o interface{}
 }
 
+var tmpDir = "test/temp"
+var tmpFile = "test/temp/.tmp"
+
 func TestRange(t *testing.T) {
 	assert.Equal(t, []int{0}, Range(0, 0))
 	assert.Equal(t, []int{0, 1}, Range(0, 1))
 	assert.Equal(t, []int{3, 4, 5, 6, 7, 8}, Range(3, 8))
 }
 
-func TestSetValueOrDefault(t *testing.T) {
+func ExampleSetOrDefault() {
+	// example
+	target := ""
+	fmt.Println(SetOrDefault(&target, "", "default"))
+	// Output: default
+}
+
+func TestSetOrDefault(t *testing.T) {
 	// Test default set
 	{
 		target := ""
@@ -35,6 +48,12 @@ func TestSetValueOrDefault(t *testing.T) {
 		SetOrDefault(&target, "foo", "test")
 		assert.Equal(t, "foo", target)
 	}
+}
+
+func ExampleSetIfEmpty() {
+	target := ""
+	fmt.Println(SetIfEmpty(&target, "value"))
+	// Output: value
 }
 
 func TestSetIfEmpty(t *testing.T) {
@@ -52,6 +71,11 @@ func TestSetIfEmpty(t *testing.T) {
 	}
 }
 
+func ExampleValueOrDefault() {
+	fmt.Println(ValueOrDefault("", "default"))
+	// Output: default
+}
+
 func TestValueOrDefault(t *testing.T) {
 	// Test default set
 	{
@@ -61,6 +85,22 @@ func TestValueOrDefault(t *testing.T) {
 	// Test value set
 	{
 		assert.Equal(t, "foo", ValueOrDefault("foo", "test"))
+	}
+}
+
+func TestLoadYamlE(t *testing.T) {
+	cleanTmpDir()
+
+	// Load yaml file
+	{
+		// Write out the yaml to read in
+		data := "foo:\n  bar: 1\n"
+		sys.WriteFile(tmpFile, []byte(data))
+
+		// Load the yaml and validate
+		m, err := LoadYamlE(tmpFile)
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"foo": map[string]interface{}{"bar": float64(1)}}, m)
 	}
 }
 
@@ -2020,4 +2060,11 @@ func rangeO(min, max int) []interface{} {
 		result[i] = min + i
 	}
 	return result
+}
+
+func cleanTmpDir() {
+	if sys.Exists(tmpDir) {
+		sys.RemoveAll(tmpDir)
+	}
+	sys.MkdirP(tmpDir)
 }

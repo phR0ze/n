@@ -9,7 +9,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/ghodss/yaml"
-	"github.com/phR0ze/go-errors"
+	"github.com/pkg/errors"
 )
 
 // DeReference dereferences the interface if needed returning a non-pointer type
@@ -1164,29 +1164,6 @@ func Reference(obj interface{}) interface{} {
 		return x
 	}
 }
-
-// // FromYAML converts the given YAML string into an expected Go type.
-// // bool: quoted or not, true, false
-// // int: no quotes and convertable to int.
-// // string: quoted or not fall back
-// func FromYAML(obj interface{}) interface{} {
-// 	if .HasAnyPrefix("\"", "'") && q.HasAnySuffix("\"", "'") {
-// 	// 	return q.v[1 : len(q.v)-1]
-// 	// }
-
-// 	// if x, err := strconv.ParseBool(obj); err == nil {
-// 	// 	return x
-// 	// }
-
-// 	// } else if q.v == "true" || q.v == "false" {
-// 	// 	if b, err := strconv.ParseBool(q.v); err == nil {
-// 	// 		return b
-// 	// 	}
-// 	// } else if f, err := strconv.ParseFloat(q.v, 32); err == nil {
-// 	// 	return f
-// 	// }
-// 	return ToString(obj)
-// }
 
 // ToBool converts an interface to a bool type.
 func ToBool(obj interface{}) bool {
@@ -2438,14 +2415,28 @@ func ToStringMapE(obj interface{}) (val *StringMap, err error) {
 			val = &y
 		}
 
+	// byte
+	//----------------------------------------------------------------------------------------------
+	case *[]byte:
+		if x != nil && len(*x) != 0 {
+			m := map[string]interface{}{}
+			if err = yaml.Unmarshal(*x, &m); err != nil {
+				err = errors.Wrap(err, "failed to unmarshal bytes into StringMap")
+				return
+			}
+			val = ToStringMap(m)
+		}
+
 	// string
 	//----------------------------------------------------------------------------------------------
 	case *string:
 		if x != nil {
 			m := map[string]interface{}{}
-			if err = yaml.Unmarshal([]byte(*x), &m); err == nil {
-				val = ToStringMap(m)
+			if err = yaml.Unmarshal([]byte(*x), &m); err != nil {
+				err = errors.Wrap(err, "failed to unmarshal string into StringMap")
+				return
 			}
+			val = ToStringMap(m)
 		}
 
 	// StringMap

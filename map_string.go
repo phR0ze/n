@@ -1,7 +1,7 @@
 package n
 
 import (
-	"github.com/phR0ze/go-errors"
+	"github.com/pkg/errors"
 )
 
 // StringMap implements the Map interface providing a generic way to work with map types

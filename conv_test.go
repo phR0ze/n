@@ -3555,6 +3555,58 @@ func ExampleToStringMapE() {
 
 func TestToStringMapE(t *testing.T) {
 
+	// []byte
+	{
+		// int list is interpretted as []interface{} float64
+		yml := `foo:
+  - 1
+  - 2
+  - 3
+`
+		val, err := ToStringMapE([]byte(yml))
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"foo": []interface{}{float64(1), float64(2), float64(3)}}, val)
+		assert.Equal(t, map[string]interface{}{"foo": []interface{}{float64(1), float64(2), float64(3)}}, val.G())
+	}
+
+	// string
+	{
+		// int list is interpretted as []interface{} float64
+		yml := `foo:
+  - 1
+  - 2
+  - 3
+`
+		val, err := ToStringMapE(yml)
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"foo": []interface{}{float64(1), float64(2), float64(3)}}, val)
+		assert.Equal(t, map[string]interface{}{"foo": []interface{}{float64(1), float64(2), float64(3)}}, val.G())
+
+		// string map
+		yml = `foo1: bar1
+foo2: bar2
+foo3: bar3
+`
+		val, err = ToStringMapE(yml)
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"foo1": "bar1", "foo2": "bar2", "foo3": "bar3"}, val)
+		assert.Equal(t, map[string]interface{}{"foo1": "bar1", "foo2": "bar2", "foo3": "bar3"}, val.G())
+
+		// string map nested
+		yml = `foo:
+  - name: foo1
+    val:
+      bar1: 1
+  - name: foo2
+    val:
+      bar2: 1
+`
+		val, err = ToStringMapE(yml)
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"foo": []interface{}{map[string]interface{}{"name": "foo1", "val": map[string]interface{}{"bar1": float64(1)}}, map[string]interface{}{"name": "foo2", "val": map[string]interface{}{"bar2": float64(1)}}}}, val)
+		assert.Equal(t, map[string]interface{}{"foo": []interface{}{map[string]interface{}{"name": "foo1", "val": map[string]interface{}{"bar1": float64(1)}}, map[string]interface{}{"name": "foo2", "val": map[string]interface{}{"bar2": float64(1)}}}}, val.G())
+	}
+
 	// maps
 	{
 		val, err := ToStringMapE(map[interface{}]interface{}{"1": "one"})
@@ -3576,15 +3628,6 @@ func TestToStringMapE(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, &StringMap{"1": "one"}, val)
 		assert.Equal(t, map[string]interface{}{"1": "one"}, val.G())
-	}
-
-	// yaml
-	{
-		// int list is interpretted as []interface{} float64
-		val, err := ToStringMapE("foo:\n  - 1\n  - 2\n  - 3\n")
-		assert.Nil(t, err)
-		assert.Equal(t, &StringMap{"foo": []interface{}{float64(1), float64(2), float64(3)}}, val)
-		assert.Equal(t, map[string]interface{}{"foo": []interface{}{float64(1), float64(2), float64(3)}}, val.G())
 	}
 }
 

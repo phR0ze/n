@@ -1,17 +1,5 @@
 package n
 
-// // Load a yaml file as a Numerable
-// func Load(filepath string) (result *OldNumerable, err error) {
-// 	var yamlBytes []byte
-// 	if yamlBytes, err = ioutil.ReadFile(filepath); err == nil {
-// 		data := map[string]interface{}{}
-// 		if err = yaml.Unmarshal(yamlBytes, &data); err == nil {
-// 			result = Q(data)
-// 		}
-// 	}
-// 	return
-// }
-
 // // FromYaml return a numerable from the given Yaml
 // func FromYaml(yml string) (result *OldNumerable, err error) {
 // 	data := map[string]interface{}{}

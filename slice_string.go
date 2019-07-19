@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/phR0ze/go-errors"
+	"github.com/pkg/errors"
 )
 
 // StringSlice implements the Slice interface providing a generic way to work with slice types

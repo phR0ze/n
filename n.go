@@ -50,7 +50,9 @@
 package n
 
 import (
-	"errors"
+	"io/ioutil"
+
+	"github.com/pkg/errors"
 )
 
 // Misc convenience type/functions
@@ -132,6 +134,22 @@ func ValueOrDefault(value, defaulty string) string {
 
 // Load and From helper functions
 //--------------------------------------------------------------------------------------------------
+
+// LoadYamlE reads in a yaml file and converts it to a *StringMap
+func LoadYamlE(filepath string) (m *StringMap, err error) {
+
+	// Read in the yaml file
+	var bytes []byte
+	if bytes, err = ioutil.ReadFile(filepath); err != nil {
+		err = errors.Wrapf(err, "failed to read in the yaml file %s", filepath)
+		return
+	}
+
+	// Unmarshal the yaml into a *StringMap
+	m, err = ToStringMapE(bytes)
+
+	return
+}
 
 // // M exports numerable into a map
 // func (q *OldNumerable) M() (result map[string]interface{}, err error) {

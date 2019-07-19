@@ -6,7 +6,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/phR0ze/go-errors"
+	"github.com/pkg/errors"
 )
 
 var (
