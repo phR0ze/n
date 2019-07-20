@@ -77,7 +77,7 @@ func (p *Str) AllS(slice interface{}) bool {
 			return false
 		}
 	case []byte:
-		SetOnTrue(&result, false, len(x) == 0)
+		SetOnTrueB(&result, false, len(x) == 0)
 		for i := range x {
 			if !strings.ContainsRune(str, rune(x[i])) {
 				return false
@@ -88,7 +88,7 @@ func (p *Str) AllS(slice interface{}) bool {
 			return false
 		}
 	case []rune:
-		SetOnTrue(&result, false, len(x) == 0)
+		SetOnTrueB(&result, false, len(x) == 0)
 		for i := range x {
 			if !strings.ContainsRune(str, x[i]) {
 				return false
@@ -96,7 +96,7 @@ func (p *Str) AllS(slice interface{}) bool {
 		}
 	default:
 		elems := *ToStringSlice(x)
-		SetOnTrue(&result, false, len(elems) == 0)
+		SetOnTrueB(&result, false, len(elems) == 0)
 		for i := range elems {
 			if !strings.Contains(str, elems[i]) {
 				return false

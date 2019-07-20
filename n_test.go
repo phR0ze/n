@@ -39,6 +39,32 @@ func TestEitherStr(t *testing.T) {
 	}
 }
 
+func ExampleSetOnFalseB() {
+	result := false
+	fmt.Println(SetOnFalseB(&result, true, false))
+	// Output: true
+}
+
+func TestSetOnFalseB(t *testing.T) {
+	result := false
+	assert.Equal(t, true, SetOnFalseB(&result, true, false))
+	assert.Equal(t, true, SetOnFalseB(&result, false, true))
+	assert.Equal(t, true, SetOnFalseB(&result, true, false))
+}
+
+func ExampleSetOnTrueB() {
+	result := false
+	fmt.Println(SetOnTrueB(&result, true, true))
+	// Output: true
+}
+
+func TestSetOnTrueB(t *testing.T) {
+	result := false
+	assert.Equal(t, true, SetOnTrueB(&result, true, true))
+	assert.Equal(t, false, SetOnTrueB(&result, false, true))
+	assert.Equal(t, false, SetOnTrueB(&result, true, false))
+}
+
 func TestRange(t *testing.T) {
 	assert.Equal(t, []int{0}, Range(0, 0))
 	assert.Equal(t, []int{0, 1}, Range(0, 1))

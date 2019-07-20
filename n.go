@@ -90,6 +90,28 @@ func Range(min, max int) []int {
 	return result
 }
 
+// SetOnFalseB only updates the result to the 'value' if the exp is false
+func SetOnFalseB(result *bool, value, exp bool) bool {
+	if result != nil {
+		if !exp {
+			*result = value
+		}
+		return *result
+	}
+	return false
+}
+
+// SetOnTrueB only updates the result to the 'value' if the exp is true
+func SetOnTrueB(result *bool, value, exp bool) bool {
+	if result != nil {
+		if exp {
+			*result = value
+		}
+		return *result
+	}
+	return false
+}
+
 // Load and From helper functions
 //--------------------------------------------------------------------------------------------------
 
