@@ -2908,7 +2908,19 @@ func ToStringMapE(obj interface{}) (val *StringMap, err error) {
 	switch x := o.(type) {
 	case nil:
 
-	// interface
+	// byte
+	//----------------------------------------------------------------------------------------------
+	case *[]byte:
+		if x != nil && len(*x) != 0 {
+			m := map[string]interface{}{}
+			if err = yaml.Unmarshal(*x, &m); err != nil {
+				err = errors.Wrap(err, "failed to unmarshal bytes into StringMap")
+				return
+			}
+			val = ToStringMap(m)
+		}
+
+	// maps
 	//----------------------------------------------------------------------------------------------
 	case *map[interface{}]interface{}:
 		if x != nil {
@@ -2921,17 +2933,18 @@ func ToStringMapE(obj interface{}) (val *StringMap, err error) {
 			y := StringMap(*x)
 			val = &y
 		}
-
-	// byte
-	//----------------------------------------------------------------------------------------------
-	case *[]byte:
-		if x != nil && len(*x) != 0 {
-			m := map[string]interface{}{}
-			if err = yaml.Unmarshal(*x, &m); err != nil {
-				err = errors.Wrap(err, "failed to unmarshal bytes into StringMap")
-				return
+	case *map[string]string:
+		if x != nil {
+			for k, v := range *x {
+				val.Set(k, v)
 			}
-			val = ToStringMap(m)
+		}
+
+	// Object
+	//----------------------------------------------------------------------------------------------
+	case *Object:
+		if x != nil {
+			val, err = ToStringMapE(x.o)
 		}
 
 	// string
