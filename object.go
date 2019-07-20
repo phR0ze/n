@@ -41,6 +41,11 @@ func (p *Object) A() string {
 	return p.String()
 }
 
+// S is an alias to ToStringSliceG for brevity
+func (p *Object) S() []string {
+	return p.ToStringSliceG()
+}
+
 // String returns a string representation of the Object, implements Stringer interface.
 func (p *Object) String() string {
 	if p == nil {
