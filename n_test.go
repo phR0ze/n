@@ -22,70 +22,27 @@ type bob struct {
 var tmpDir = "test/temp"
 var tmpFile = "test/temp/.tmp"
 
+func ExampleEitherStr() {
+	fmt.Println(EitherStr("", "default"))
+	// Output: default
+}
+
+func TestEitherStr(t *testing.T) {
+	// Test default set
+	{
+		assert.Equal(t, "test", EitherStr("", "test"))
+	}
+
+	// Test value set
+	{
+		assert.Equal(t, "foo", EitherStr("foo", "test"))
+	}
+}
+
 func TestRange(t *testing.T) {
 	assert.Equal(t, []int{0}, Range(0, 0))
 	assert.Equal(t, []int{0, 1}, Range(0, 1))
 	assert.Equal(t, []int{3, 4, 5, 6, 7, 8}, Range(3, 8))
-}
-
-func ExampleSetOrDefault() {
-	// example
-	target := ""
-	fmt.Println(SetOrDefault(&target, "", "default"))
-	// Output: default
-}
-
-func TestSetOrDefault(t *testing.T) {
-	// Test default set
-	{
-		target := ""
-		assert.Equal(t, "test", SetOrDefault(&target, "", "test"))
-	}
-
-	// Test value set
-	{
-		target := ""
-		SetOrDefault(&target, "foo", "test")
-		assert.Equal(t, "foo", target)
-	}
-}
-
-func ExampleSetIfEmpty() {
-	target := ""
-	fmt.Println(SetIfEmpty(&target, "value"))
-	// Output: value
-}
-
-func TestSetIfEmpty(t *testing.T) {
-	// Test empty
-	{
-		target := ""
-		SetIfEmpty(&target, "test")
-		assert.Equal(t, "test", target)
-	}
-
-	// Not empty
-	{
-		target := "foo"
-		assert.Equal(t, "foo", SetIfEmpty(&target, "test"))
-	}
-}
-
-func ExampleValueOrDefault() {
-	fmt.Println(ValueOrDefault("", "default"))
-	// Output: default
-}
-
-func TestValueOrDefault(t *testing.T) {
-	// Test default set
-	{
-		assert.Equal(t, "test", ValueOrDefault("", "test"))
-	}
-
-	// Test value set
-	{
-		assert.Equal(t, "foo", ValueOrDefault("foo", "test"))
-	}
 }
 
 func TestLoadYamlE(t *testing.T) {

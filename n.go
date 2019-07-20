@@ -64,6 +64,14 @@ type O interface{}
 // Break is a brevity helper for breaking out of lambda loops
 var Break = errors.New("break")
 
+// EitherStr returns the first string if not empty else the second
+func EitherStr(first, second string) string {
+	if first != "" {
+		return first
+	}
+	return second
+}
+
 // ExB avoids Go's gastly 4 line monstrosity required to implement this providing
 // instead a single clean line of code for lambdas.
 func ExB(exp bool) bool {
@@ -80,56 +88,6 @@ func Range(min, max int) []int {
 		result[i] = min + i
 	}
 	return result
-}
-
-// EitherOr returns the first string if not empty else the second
-func EitherOr(first, second string) string {
-	if first != "" {
-		return first
-	}
-	return second
-}
-
-// SetOnTrue provides a simple means of only updating the result to the 'value' if the exp is true
-func SetOnTrue(result *bool, value, exp bool) {
-	if exp {
-		*result = value
-	}
-}
-
-// SetOnFalse provides a simple means of only updating the result to the 'value' if the exp is false
-func SetOnFalse(result *bool, value, exp bool) {
-	if !exp {
-		*result = value
-	}
-}
-
-// SetOrDefault sets the value of 'this' string to the given 'value' if 'value'
-// is not empty else sets 'this' string to the 'defaulty' value and returns 'this' string.
-func SetOrDefault(this *string, value, defaulty string) string {
-	if value != "" {
-		*this = value
-	} else {
-		*this = defaulty
-	}
-
-	return *this
-}
-
-// SetIfEmpty sets the value of 'this' string to the given 'value' if not empty and returns 'this' string.
-func SetIfEmpty(this *string, value string) string {
-	if *this == "" {
-		*this = value
-	}
-	return *this
-}
-
-// ValueOrDefault returns the value or defaulty if the value is empty
-func ValueOrDefault(value, defaulty string) string {
-	if value != "" {
-		return value
-	}
-	return defaulty
 }
 
 // Load and From helper functions
