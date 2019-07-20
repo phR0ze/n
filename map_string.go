@@ -1,7 +1,6 @@
 package n
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -304,14 +303,17 @@ func (p *StringMap) QueryE(key string) (val *Object, err error) {
 						// Select by key==value, e.g. .[k==v]
 						case len(pieces) == 2:
 							k, v := pieces[0], pieces[1]
-							m := NewSlice(x)
-							fmt.Println(m, k, v)
+							m := NewSlice(x).Select(func(x O) bool {
+								return ToStringMap(x).Get(k).A() == v
+							})
+							if m.Any() {
+								val.o = m.First().o
+							}
 
 						// Index in if the value is a valid integer, e.g. .[2], .[-1]
 						case e == nil:
 							if val.o = NewSlice(x).At(i); val.Nil() {
 								err = errors.Errorf("Invalid array index %v", i)
-								val.o = &Object{}
 								return
 							}
 						}

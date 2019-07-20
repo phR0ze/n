@@ -622,8 +622,7 @@ func TestStringMap_Query(t *testing.T) {
   - name: bar
     val: 3
 `
-		fmt.Println(yml)
-		//assert.Equal(t, "3", NewStringMap(yml).Query(`one.[name==bar].val`).ToString())
+		assert.Equal(t, "3", NewStringMap(yml).Query(`one.[name==bar].val`).ToString())
 	}
 
 	// no dot notation
