@@ -381,8 +381,8 @@ func (p *MapSlice) FirstN(n int) Slice {
 }
 
 // G returns the underlying data structure as a builtin Go type
-func (p *MapSlice) G() []string {
-	return p.O().([]string)
+func (p *MapSlice) G() []map[string]interface{} {
+	return p.O().([]map[string]interface{})
 }
 
 // Generic returns true if the underlying implementation is a RefSlice
