@@ -538,6 +538,26 @@ func (p *Object) ToMapSliceE() (*MapSlice, error) {
 	return ToMapSliceE(p.o)
 }
 
+// ToMapSliceG converts an interface to a []map[string]interface{} type.
+func (p *Object) ToMapSliceG() []map[string]interface{} {
+	if p == nil {
+		return NewMapSliceV().G()
+	}
+	return ToMapSlice(p.o).G()
+}
+
+// ToMapSliceGE converts an interface to a []map[string]interface{} type.
+func (p *Object) ToMapSliceGE() ([]map[string]interface{}, error) {
+	if p == nil {
+		return NewMapSliceV().G(), nil
+	}
+	m, err := ToMapSliceE(p.o)
+	if err != nil {
+		return nil, err
+	}
+	return m.G(), nil
+}
+
 // ToStringSlice converts an interface to a *StringSlice type.
 func (p *Object) ToStringSlice() *StringSlice {
 	if p == nil {
