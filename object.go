@@ -1,6 +1,7 @@
 package n
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/phR0ze/cast"
@@ -107,6 +108,34 @@ func (p *Object) ToRune() rune {
 		return rune(0)
 	}
 	return rune(*ToChar(p.o))
+}
+
+// Map
+//--------------------------------------------------------------------------------------------------
+
+// Query an object if it is a StringMap type
+func (p *Object) Query(key string) *Object {
+	obj, _ := p.QueryE(key)
+	return obj
+}
+
+// QueryE an object if it is a StringMap type
+func (p *Object) QueryE(key string) (obj *Object, err error) {
+	obj = &Object{}
+	if p == nil {
+		return
+	}
+	var m *StringMap
+	if m, err = ToStringMapE(p.o); err != nil {
+		return
+	}
+	if obj, err = m.QueryE(key); err != nil {
+		return
+	}
+	if obj.o == nil {
+		err = fmt.Errorf("invalid key")
+	}
+	return
 }
 
 // Time related

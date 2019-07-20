@@ -7,6 +7,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestObject_Query(t *testing.T) {
+	obj := NewStringMapV(map[string]interface{}{"one": map[string]interface{}{"two": "2"}}).Query("one")
+	assert.Equal(t, &StringMap{"two": "2"}, obj.ToStringMap())
+	assert.Equal(t, "2", obj.Query("two").ToString())
+
+	// Check invalid keys
+	assert.True(t, obj.Query("four").Nil())
+	_, err := obj.QueryE("four")
+	assert.Equal(t, "invalid key", err.Error())
+}
+
 func TestObject_ToBool(t *testing.T) {
 
 	// w/out error
