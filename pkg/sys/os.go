@@ -16,6 +16,8 @@ import (
 	"strings"
 
 	"github.com/phR0ze/n/pkg/opt"
+	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 )
 
 // Copy copies src to dst recursively.
@@ -412,6 +414,37 @@ func WriteLines(target string, lines []string, perms ...uint32) (err error) {
 	}
 	err = writer.Sync()
 
+	return
+}
+
+// WriteYaml converts the given obj interface{} into yaml then writes to disk
+// with default permissions.
+func WriteYaml(target string, obj interface{}, perms ...uint32) (err error) {
+	if target, err = Abs(target); err != nil {
+		return
+	}
+
+	// Ensure we don't have a string
+	switch obj.(type) {
+	case string, []byte:
+		err = errors.Errorf("invalid data structure to marshal - %T", obj)
+		return
+	}
+
+	// Convert data structure into a yaml string
+	var data []byte
+	if data, err = yaml.Marshal(obj); err != nil {
+		err = errors.Wrapf(err, "failed to marshal object %T", obj)
+		return
+	}
+
+	perm := os.FileMode(0644)
+	if len(perms) > 0 {
+		perm = os.FileMode(perms[0])
+	}
+	if err = ioutil.WriteFile(target, data, perm); err != nil {
+		err = errors.Wrapf(err, "failed to write out yaml data to file %s", target)
+	}
 	return
 }
 

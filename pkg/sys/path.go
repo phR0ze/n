@@ -1,7 +1,6 @@
 package sys
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -11,12 +10,13 @@ import (
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/phR0ze/n/pkg/opt"
+	"github.com/pkg/errors"
 )
 
 // Abs gets the absolute path, taking into account homedir expansion
 func Abs(target string) (result string, err error) {
 	if target == "" {
-		err = fmt.Errorf("Empty string is an invalid path")
+		err = errors.Errorf("empty string is an invalid path")
 		return
 	}
 	target = TrimProtocol(target)
