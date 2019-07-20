@@ -2367,7 +2367,7 @@ func TestRefSlice_EachIE(t *testing.T) {
 		results := []int{}
 		NewRefSliceV(1, 2, 3).EachIE(func(i int, x O) error {
 			if i == 2 {
-				return ErrBreak
+				return Break
 			}
 			results = append(results, x.(int))
 			return nil
@@ -2482,7 +2482,7 @@ func TestRefSlice_EachRE(t *testing.T) {
 		results := []int{}
 		NewRefSliceV(1, 2, 3).EachRE(func(x O) error {
 			if x.(int) == 1 {
-				return ErrBreak
+				return Break
 			}
 			results = append(results, x.(int))
 			return nil
@@ -2597,7 +2597,7 @@ func TestRefSlice_EachRIE(t *testing.T) {
 		results := []int{}
 		NewRefSliceV(1, 2, 3).EachRIE(func(i int, x O) error {
 			if i == 0 {
-				return ErrBreak
+				return Break
 			}
 			results = append(results, x.(int))
 			return nil

@@ -522,8 +522,40 @@ func (p *Object) ToBoolSliceE() ([]bool, error) {
 	return cast.ToBoolSliceE(p.o)
 }
 
-// ToStringSlice casts an interface to a []string type.
-func (p *Object) ToStringSlice() []string {
+// ToMapSlice converts an interface to a *MapSlice type.
+func (p *Object) ToMapSlice() *MapSlice {
+	if p == nil {
+		return NewMapSliceV()
+	}
+	return ToMapSlice(p.o)
+}
+
+// ToMapSliceE converts an interface to a *MapSlice type.
+func (p *Object) ToMapSliceE() (*MapSlice, error) {
+	if p == nil {
+		return NewMapSliceV(), nil
+	}
+	return ToMapSliceE(p.o)
+}
+
+// ToStringSlice converts an interface to a *StringSlice type.
+func (p *Object) ToStringSlice() *StringSlice {
+	if p == nil {
+		return NewStringSliceV()
+	}
+	return ToStringSlice(p.o)
+}
+
+// ToStringSliceE converts an interface to a *StringSlice type.
+func (p *Object) ToStringSliceE() (*StringSlice, error) {
+	if p == nil {
+		return NewStringSliceV(), nil
+	}
+	return ToStringSliceE(p.o)
+}
+
+// ToStringSliceG casts an interface to a []string type.
+func (p *Object) ToStringSliceG() []string {
 	if p == nil {
 		return []string{}
 	}
@@ -531,8 +563,8 @@ func (p *Object) ToStringSlice() []string {
 	return v
 }
 
-// ToStringSliceE casts an interface to a []string type.
-func (p *Object) ToStringSliceE() ([]string, error) {
+// ToStringSliceGE casts an interface to a []string type.
+func (p *Object) ToStringSliceGE() ([]string, error) {
 	if p == nil {
 		return []string{}, nil
 	}

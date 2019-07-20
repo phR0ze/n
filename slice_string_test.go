@@ -1391,7 +1391,7 @@ func TestStringSlice_EachE(t *testing.T) {
 		results := []string{}
 		NewStringSliceV("1", "2", "3").EachE(func(x O) error {
 			if x.(string) == "3" {
-				return ErrBreak
+				return Break
 			}
 			results = append(results, x.(string))
 			return nil
@@ -1493,7 +1493,7 @@ func TestStringSlice_EachIE(t *testing.T) {
 		results := []string{}
 		NewStringSliceV("1", "2", "3").EachIE(func(i int, x O) error {
 			if i == 2 {
-				return ErrBreak
+				return Break
 			}
 			results = append(results, x.(string))
 			return nil
@@ -1595,7 +1595,7 @@ func TestStringSlice_EachRE(t *testing.T) {
 		results := []string{}
 		NewStringSliceV("1", "2", "3").EachRE(func(x O) error {
 			if x.(string) == "1" {
-				return ErrBreak
+				return Break
 			}
 			results = append(results, x.(string))
 			return nil
@@ -1697,7 +1697,7 @@ func TestStringSlice_EachRIE(t *testing.T) {
 		results := []string{}
 		NewStringSliceV("1", "2", "3").EachRIE(func(i int, x O) error {
 			if i == 0 {
-				return ErrBreak
+				return Break
 			}
 			results = append(results, x.(string))
 			return nil

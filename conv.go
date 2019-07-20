@@ -936,21 +936,57 @@ func Reference(obj interface{}) interface{} {
 		return x
 	case *[]*string:
 		return x
+	case []map[interface{}]interface{}:
+		return &x
+	case *[]map[interface{}]interface{}:
+		return x
 	case map[interface{}]interface{}:
 		return &x
+	case []map[interface{}]*interface{}:
+		return &x
+	case *[]map[interface{}]*interface{}:
+		return x
 	case map[interface{}]*interface{}:
 		return &x
+	case []*map[interface{}]interface{}:
+		return &x
+	case *[]*map[interface{}]interface{}:
+		return x
 	case *map[interface{}]interface{}:
+		return x
+	case []*map[interface{}]*interface{}:
+		return &x
+	case *[]*map[interface{}]*interface{}:
 		return x
 	case *map[interface{}]*interface{}:
 		return x
+	case []map[string]interface{}:
+		return &x
+	case *[]map[string]interface{}:
+		return x
 	case map[string]interface{}:
 		return &x
+	case []map[string]*interface{}:
+		return &x
+	case *[]map[string]*interface{}:
+		return x
 	case map[string]*interface{}:
 		return &x
+	case []*map[string]interface{}:
+		return &x
+	case *[]*map[string]interface{}:
+		return x
 	case *map[string]interface{}:
 		return x
+	case []*map[string]*interface{}:
+		return &x
+	case *[]*map[string]*interface{}:
+		return x
 	case *map[string]*interface{}:
+		return x
+	case []map[string]string:
+		return &x
+	case *[]map[string]string:
 		return x
 	case map[string]string:
 		return &x
@@ -1901,6 +1937,85 @@ func ToIntSliceE(obj interface{}) (val *IntSlice, err error) {
 			return
 		}
 	}
+	return
+}
+
+// ToMapSlice converts an interface to a MapSlice type.
+func ToMapSlice(obj interface{}) *MapSlice {
+	x, _ := ToMapSliceE(obj)
+	if x == nil {
+		return &MapSlice{}
+	}
+	return x
+}
+
+// ToMapSliceE converts an interface to a MapSlice type.
+func ToMapSliceE(obj interface{}) (val *MapSlice, err error) {
+	val = &MapSlice{}
+	o := Reference(obj)
+
+	// Optimized types
+	switch x := o.(type) {
+	case nil:
+
+	// []interface{}
+	//----------------------------------------------------------------------------------------------
+	case *[]interface{}:
+		if x != nil {
+			for _, raw := range *x {
+				var m *MapSlice
+				if m, err = ToMapSliceE(raw); err != nil {
+					return
+				}
+				for _, v := range *m {
+					*val = append(*val, v)
+				}
+			}
+		}
+
+	// MapSlice
+	//----------------------------------------------------------------------------------------------
+	case *MapSlice:
+		if x != nil {
+			val = x
+		}
+	case *map[string]interface{}:
+		if x != nil {
+			*val = append(*val, *x)
+		}
+	case *map[string]string:
+		if x != nil {
+			new := map[string]interface{}{}
+			for k, v := range *x {
+				new[k] = v
+			}
+			*val = append(*val, new)
+		}
+
+	// []map[string]interface{}
+	//----------------------------------------------------------------------------------------------
+	case *[]map[string]interface{}:
+		if x != nil {
+			v := MapSlice(*x)
+			val = &v
+		}
+	case *[]map[string]string:
+		if x != nil {
+			for _, raw := range *x {
+				var m *MapSlice
+				if m, err = ToMapSliceE(raw); err != nil {
+					return
+				}
+				for _, v := range *m {
+					*val = append(*val, v)
+				}
+			}
+		}
+
+	default:
+		err = errors.Errorf("failed to convert type %T to a MapString", x)
+	}
+
 	return
 }
 

@@ -1674,7 +1674,7 @@ func TestStr_EachE(t *testing.T) {
 		results := []string{}
 		NewStrV("1", "2", "3").EachE(func(x O) error {
 			if x.(*Char).G() == '3' {
-				return ErrBreak
+				return Break
 			}
 			results = append(results, x.(*Char).A())
 			return nil
@@ -1776,7 +1776,7 @@ func TestStr_EachIE(t *testing.T) {
 		results := []string{}
 		NewStrV("1", "2", "3").EachIE(func(i int, x O) error {
 			if i == 2 {
-				return ErrBreak
+				return Break
 			}
 			results = append(results, x.(*Char).A())
 			return nil
@@ -1878,7 +1878,7 @@ func TestStr_EachRE(t *testing.T) {
 		results := []string{}
 		NewStrV("1", "2", "3").EachRE(func(x O) error {
 			if x.(*Char).A() == "1" {
-				return ErrBreak
+				return Break
 			}
 			results = append(results, x.(*Char).A())
 			return nil
@@ -1980,7 +1980,7 @@ func TestStr_EachRIE(t *testing.T) {
 		results := []string{}
 		NewStrV("1", "2", "3").EachRIE(func(i int, x O) error {
 			if i == 0 {
-				return ErrBreak
+				return Break
 			}
 			results = append(results, x.(*Char).A())
 			return nil

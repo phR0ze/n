@@ -61,8 +61,8 @@ import (
 // O is an alias for interface{} used in lambda expresssions for brevity.
 type O interface{}
 
-// ErrBreak is a brevity helper for breaking out of lambda loops
-var ErrBreak = errors.New("break")
+// Break is a brevity helper for breaking out of lambda loops
+var Break = errors.New("break")
 
 // ExB avoids Go's gastly 4 line monstrosity required to implement this providing
 // instead a single clean line of code for lambdas.
