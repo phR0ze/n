@@ -601,6 +601,9 @@ func TestStringMap_Query(t *testing.T) {
 		// Array Index: empty array
 		assert.True(t, ToStringMap("foo: []\n").Query(`foo.[0]`).Nil())
 
+		// Array Index: move through index
+		assert.Equal(t, 1.1, ToStringMap("items:\n  - item: 1\n    val: 1.1\n  - item: 2\n    val: 2.2\n  - item: 3\n    val: 3.3\n").Query("items.[0].val").ToFloat64())
+
 		// Array Index: .[2], .[-1]
 		assert.Equal(t, 0, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[0]`).ToInt())
 		assert.Equal(t, 1, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[1]`).ToInt())

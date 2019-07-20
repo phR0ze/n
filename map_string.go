@@ -325,7 +325,7 @@ func (p *StringMap) QueryE(key string) (val *Object, err error) {
 
 						// Index in if the value is a valid integer, e.g. .[2], .[-1]
 						case e == nil:
-							if val.o = NewSlice(x).At(i); val.Nil() {
+							if val.o = NewSlice(x).At(i).o; val.Nil() {
 								err = errors.Errorf("invalid array index %v", i)
 								val.o = nil
 								return
