@@ -586,19 +586,16 @@ func (p *Object) ToStringSliceE() (*StringSlice, error) {
 
 // ToStringSliceG casts an interface to a []string type.
 func (p *Object) ToStringSliceG() []string {
-	if p == nil {
-		return []string{}
-	}
-	v, _ := cast.ToStringSliceE(p.o)
-	return v
+	return p.ToStringSlice().G()
 }
 
 // ToStringSliceGE casts an interface to a []string type.
 func (p *Object) ToStringSliceGE() ([]string, error) {
-	if p == nil {
-		return []string{}, nil
+	result, err := p.ToStringSliceE()
+	if err != nil {
+		return []string{}, err
 	}
-	return cast.ToStringSliceE(p.o)
+	return result.G(), nil
 }
 
 // ToIntSlice converts an interface to a *IntSlice type.
