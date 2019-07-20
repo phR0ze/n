@@ -275,6 +275,26 @@ func TestReadLines(t *testing.T) {
 	assert.Equal(t, 18, len(lines))
 }
 
+func TestReadYaml(t *testing.T) {
+	cleanTmpDir()
+
+	// Write out a test yaml file
+	yamldata1 := "foo:\n  bar:\n    - 1\n    - 2\n"
+	data1 := map[string]interface{}{}
+	err := yaml.Unmarshal([]byte(yamldata1), &data1)
+	assert.Nil(t, err)
+
+	// Write out the data structure as yaml to disk
+	err = WriteYaml(tmpfile, data1)
+	assert.Nil(t, err)
+
+	// Read the file back into memory and compare data structure
+	var data2 map[string]interface{}
+	data2, err = ReadYaml(tmpfile)
+
+	assert.Equal(t, data1, data2)
+}
+
 func TestSize(t *testing.T) {
 	assert.Equal(t, int64(604), Size(testfile))
 

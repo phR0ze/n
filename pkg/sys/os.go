@@ -278,9 +278,11 @@ func ReadFile(target string) (result string, err error) {
 	}
 
 	var fileBytes []byte
-	if fileBytes, err = ioutil.ReadFile(target); err == nil {
-		result = string(fileBytes)
+	if fileBytes, err = ioutil.ReadFile(target); err != nil {
+		err = errors.Wrapf(err, "failed to read the file %s", target)
+		return
 	}
+	result = string(fileBytes)
 	return
 }
 
@@ -296,6 +298,28 @@ func ReadLines(target string) (result []string, err error) {
 		for scanner.Scan() {
 			result = append(result, scanner.Text())
 		}
+	}
+	return
+}
+
+// ReadYaml reads the target file and returns a map[string]interface{} data
+// structure representing the yaml read in.
+func ReadYaml(target string) (obj map[string]interface{}, err error) {
+	if target, err = Abs(target); err != nil {
+		return
+	}
+
+	// Read in the file data
+	var data []byte
+	if data, err = ioutil.ReadFile(target); err != nil {
+		err = errors.Wrapf(err, "failed to read the file %s", target)
+		return
+	}
+
+	// Convert data structure into a yaml string
+	obj = map[string]interface{}{}
+	if err = yaml.Unmarshal(data, &obj); err != nil {
+		err = errors.Wrapf(err, "failed to marshal object %T", obj)
 	}
 	return
 }
