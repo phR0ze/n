@@ -8,10 +8,14 @@ import (
 
 func TestSlice_NewSlice(t *testing.T) {
 
+	// float
+	{
+		assert.Equal(t, NewFloatSliceV(3), NewSlice([]float32{3}))
+		assert.Equal(t, NewFloatSliceV(3), NewSlice([]float64{3}))
+	}
+
 	// int
 	{
-		assert.Equal(t, NewIntSliceV(3), NewSlice([]float32{3}))
-		assert.Equal(t, NewIntSliceV(3), NewSlice([]float64{3}))
 		assert.Equal(t, NewIntSliceV(3), NewSlice([]int{3}))
 		assert.Equal(t, NewIntSliceV(3), NewSlice(&([]int{3})))
 		assert.Equal(t, NewIntSliceV(3), NewSlice([]int8{3}))

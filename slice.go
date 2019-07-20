@@ -93,23 +93,70 @@ func NewSlice(obj interface{}) (new Slice) {
 	o := Reference(obj)
 	switch x := o.(type) {
 
+	// []interface{}
+	// ---------------------------------------------------------------------------------------------
+	case *[]interface{}:
+		if x != nil && len(*x) > 0 {
+			item := Reference((*x)[0])
+			switch item.(type) {
+
+			// FloatSlice
+			// ---------------------------------------------------------------------------------------------
+			case *float32, *float64:
+				new = ToFloatSlice(x)
+
+			// IntSlice
+			// ---------------------------------------------------------------------------------------------
+			case *int, *int8, *int16, *int64, *uint, *uint16, *uint32, *uint64:
+				new = ToIntSlice(x)
+
+			// StrSlice
+			// ---------------------------------------------------------------------------------------------
+			case *string, *[]byte, *[]rune, *Str:
+				new = ToStringSlice(x)
+
+			// MapSlice
+			//----------------------------------------------------------------------------------------------
+			case *map[string]interface{}, *map[string]string:
+				new = ToMapSlice(x)
+
+			// RefSlice
+			// ---------------------------------------------------------------------------------------------
+			default:
+				new = NewRefSlice(obj)
+			}
+		} else {
+			new = NewRefSlice(obj)
+			return
+		}
+
+	// FloatSlice
+	// ---------------------------------------------------------------------------------------------
+	case *[]float32, *[]float64, *[]*float32, *[]*float64:
+		new = ToFloatSlice(x)
+
 	// IntSlice
 	// ---------------------------------------------------------------------------------------------
-	case *[]float32, *[]float64, *[]int, *[]int8, *[]int16, *[]int64, *[]uint, *[]uint16, *[]uint32, *[]uint64,
-		*[]*float32, *[]*float64, *[]*int, *[]*int8, *[]*int16, *[]*int64, *[]*uint, *[]*uint16, *[]*uint32, *[]*uint64:
-		new, _ = ToIntSliceE(x)
+	case *[]int, *[]int8, *[]int16, *[]int64, *[]uint, *[]uint16, *[]uint32, *[]uint64,
+		*[]*int, *[]*int8, *[]*int16, *[]*int64, *[]*uint, *[]*uint16, *[]*uint32, *[]*uint64:
+		new = ToIntSlice(x)
 
 	// StrSlice
 	// ---------------------------------------------------------------------------------------------
 	case *[]string, *[][]byte, *[][]rune, *[]Str,
 		*[]*string, *[]*[]byte, *[]*[]rune, *[]*Str:
-		new, _ = ToStringSliceE(x)
+		new = ToStringSlice(x)
 
 	// Str
 	// ---------------------------------------------------------------------------------------------
 	case *[]Char, *[]rune, *[]byte,
 		*[]*Char, *[]*rune, *[]*byte:
 		new = ToStr(x)
+
+	// MapSlice
+	//----------------------------------------------------------------------------------------------
+	case *MapSlice, *map[string]interface{}, *map[string]string, *[]map[string]interface{}, *[]map[string]string:
+		new = ToMapSlice(x)
 
 	// RefSlice
 	// ---------------------------------------------------------------------------------------------

@@ -375,7 +375,7 @@ func (p *Object) ToStringE() (string, error) {
 // ToStringMap converts an interface to a *StringMap type.
 func (p *Object) ToStringMap() *StringMap {
 	if p == nil {
-		return NewStringMap()
+		return NewStringMapV()
 	}
 	return ToStringMap(p.o)
 }
@@ -383,7 +383,7 @@ func (p *Object) ToStringMap() *StringMap {
 // ToStringMapE converts an interface to a *StringMap type.
 func (p *Object) ToStringMapE() (*StringMap, error) {
 	if p == nil {
-		return NewStringMap(), nil
+		return NewStringMapV(), nil
 	}
 	return ToStringMapE(p.o)
 }

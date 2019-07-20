@@ -29,12 +29,12 @@ func TestNewMap(t *testing.T) {
 	// string interface
 	{
 		m := map[string]interface{}{"k": "v"}
-		assert.Equal(t, NewStringMap(m), NewMap(m))
+		assert.Equal(t, NewStringMapV(m), NewMap(m))
 	}
 
 	// StringMap
 	{
-		m := NewStringMap()
+		m := NewStringMapV()
 		m.Set("k", "v")
 		assert.Equal(t, m, NewMap(m))
 	}

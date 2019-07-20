@@ -1,6 +1,10 @@
 package n
 
 import (
+	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/pkg/errors"
 )
 
@@ -9,12 +13,17 @@ import (
 // also specifically designed to handle YAML constructs.
 type StringMap map[string]interface{}
 
-// NewStringMap creates a new empty StringMap if nothing given else simply
+// NewStringMap converts the given interface{} into a StringMap
+func NewStringMap(m interface{}) *StringMap {
+	return ToStringMap(m)
+}
+
+// NewStringMapV creates a new empty StringMap if nothing given else simply
 // casts the given map to StringMap.
-func NewStringMap(m ...map[string]interface{}) *StringMap {
+func NewStringMapV(m ...map[string]interface{}) *StringMap {
 	var new StringMap
 	if len(m) == 0 {
-		new = StringMap(map[string]interface{}{})
+		new = StringMap{}
 	} else {
 		new = *ToStringMap(m[0])
 	}
@@ -41,16 +50,16 @@ func (p *StringMap) Any(keys ...interface{}) bool {
 // Clear modifies this Map to clear out all key-value pairs and returns a reference to this Map.
 func (p *StringMap) Clear() Map {
 	if p == nil {
-		p = NewStringMap()
+		p = NewStringMapV()
 	} else if len(*p) > 0 {
-		*p = *NewStringMap()
+		*p = *NewStringMapV()
 	}
 	return p
 }
 
 // Copy returns a new Map with the indicated key-value pairs copied from this Map or all if not given.
 func (p *StringMap) Copy(keys ...interface{}) (new Map) {
-	val := NewStringMap()
+	val := NewStringMapV()
 	if p == nil || len(*p) == 0 {
 		return val
 	}
@@ -158,7 +167,7 @@ func (p *StringMap) Merge(m Map) Map {
 	x, err := ToStringMapE(m)
 	switch {
 	case (p == nil || len(*p) == 0) && (err != nil || m == nil || len(*x) == 0):
-		return NewStringMap()
+		return NewStringMapV()
 	case p == nil || len(*p) == 0:
 		return x
 	case err != nil || m == nil || len(*x) == 0:
@@ -210,7 +219,7 @@ func (p *StringMap) MergeG(m Map) map[string]interface{} {
 	x, err := ToStringMapE(m)
 	switch {
 	case (p == nil || len(*p) == 0) && (err != nil || m == nil || len(*x) == 0):
-		return NewStringMap().G()
+		return NewStringMapV().G()
 	case p == nil || len(*p) == 0:
 		return x.G()
 	case err != nil || m == nil || len(*x) == 0:
@@ -256,6 +265,8 @@ func (p *StringMap) QueryE(key string) (val *Object, err error) {
 		quote := quotes.At(i).ToStr()
 
 		// Split quotes into keys
+		// 1. a single dot notation string that nees split
+		// 2. a single quoted key to leave intact
 		var keys *StringSlice
 		if quote.First().A() != `"` {
 			keys = A(quote).Split(".")
@@ -279,19 +290,33 @@ func (p *StringMap) QueryE(key string) (val *Object, err error) {
 				m := ToStringMap(x)
 				val.o = (*m)[key.A()]
 
-			// Array Index/Iterator: .[2], .[-1], .[]
+			// Array Index/Iterator: .[2], .[-1], .[], .[key==val]
 			case []interface{}:
 				if key.First().A() == "[" && key.Last().A() == "]" {
 
-					// No index given means return them all
-					i := key.TrimPrefix("[").TrimSuffix("]").A()
-					if i != "" {
-						if o := NewSlice(x).At(ToInt(i)); o.Nil() {
-							err = errors.Errorf("Invalid array index %v", i)
-							val.o = &Object{}
-						} else {
-							val.o = o
+					// Trim off the indexer/selector brackets and check the indexer
+					idx := key.TrimPrefix("[").TrimSuffix("]").A()
+					if idx != "" {
+						pieces := strings.Split(idx, "==")
+						i, e := strconv.Atoi(idx)
+						switch {
+
+						// Select by key==value, e.g. .[k==v]
+						case len(pieces) == 2:
+							k, v := pieces[0], pieces[1]
+							m := NewSlice(x)
+							fmt.Println(m, k, v)
+
+						// Index in if the value is a valid integer, e.g. .[2], .[-1]
+						case e == nil:
+							if val.o = NewSlice(x).At(i); val.Nil() {
+								err = errors.Errorf("Invalid array index %v", i)
+								val.o = &Object{}
+								return
+							}
 						}
+
+						// Fall through to return all array elements
 					}
 				}
 			}
@@ -316,7 +341,7 @@ func (p *StringMap) Set(key, val interface{}) (new bool) {
 // SetM the value for the given key to the given val creating map if necessary. Returns a reference to this Map.
 func (p *StringMap) SetM(key, val interface{}) Map {
 	if p == nil {
-		p = NewStringMap()
+		p = NewStringMapV()
 	}
 	p.Set(key, val)
 	return p

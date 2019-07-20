@@ -138,6 +138,30 @@ func DeReference(obj interface{}) interface{} {
 		}
 		return *x
 
+	// FloatSlice
+	//----------------------------------------------------------------------------------------------
+	case FloatSlice:
+		return x
+	case *FloatSlice:
+		if x == nil {
+			return *NewFloatSliceV()
+		}
+		return *x
+	case []FloatSlice:
+		return x
+	case []*FloatSlice:
+		return x
+	case *[]FloatSlice:
+		if x == nil {
+			return []FloatSlice{}
+		}
+		return *x
+	case *[]*FloatSlice:
+		if x == nil {
+			return []*FloatSlice{}
+		}
+		return *x
+
 	// interface
 	//----------------------------------------------------------------------------------------------
 	case []interface{}:
@@ -755,6 +779,21 @@ func Reference(obj interface{}) interface{} {
 	case *[]float64:
 		return x
 	case *[]*float64:
+		return x
+
+	// FloatSlice
+	//----------------------------------------------------------------------------------------------
+	case FloatSlice:
+		return &x
+	case *FloatSlice:
+		return x
+	case []FloatSlice:
+		return &x
+	case []*FloatSlice:
+		return &x
+	case *[]FloatSlice:
+		return x
+	case *[]*FloatSlice:
 		return x
 
 	// interface
@@ -1601,6 +1640,359 @@ func ToIntE(obj interface{}) (val int, err error) {
 		}
 	default:
 		err = fmt.Errorf("unable to convert type %T to int", x)
+	}
+	return
+}
+
+// ToFloatSlice convert an interface to a FloatSlice type which will never be nil
+func ToFloatSlice(obj interface{}) *FloatSlice {
+	x, _ := ToFloatSliceE(obj)
+	if x == nil {
+		return &FloatSlice{}
+	}
+	return x
+}
+
+// ToFloatSliceE convert an interface to a FloatSlice type.
+func ToFloatSliceE(obj interface{}) (val *FloatSlice, err error) {
+	val = &FloatSlice{}
+	o := DeReference(obj)
+
+	// Optimized types
+	switch x := o.(type) {
+	case nil:
+
+	// bool
+	//----------------------------------------------------------------------------------------------
+	case bool:
+		*val = append(*val, ToFloat64(x))
+	case []bool:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+	case []*bool:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+
+	// Char
+	//----------------------------------------------------------------------------------------------
+	case Char:
+		*val = append(*val, ToFloat64(x))
+	case []Char:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+	case []*Char:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+
+	// float32
+	//----------------------------------------------------------------------------------------------
+	case float32:
+		*val = append(*val, ToFloat64(x))
+	case []float32:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+	case []*float32:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+
+	// float64
+	//----------------------------------------------------------------------------------------------
+	case float64:
+		*val = append(*val, x)
+	case []float64:
+		*val = x
+	case []*float64:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+
+	// FloatSlice
+	//----------------------------------------------------------------------------------------------
+	case FloatSlice:
+		val = &x
+	case []FloatSlice:
+		for i := range x {
+			*val = append(*val, x[i]...)
+		}
+	case []*FloatSlice:
+		for i := range x {
+			if x[i] != nil {
+				*val = append(*val, *x[i]...)
+			}
+		}
+
+	// interface
+	//----------------------------------------------------------------------------------------------
+	case []interface{}:
+		for i := range x {
+			if v, e := ToFloat64E(x[i]); e == nil {
+				*val = append(*val, v)
+			} else {
+				err = errors.WithMessagef(e, "unable to convert %T to []float64", x)
+			}
+		}
+
+	// int
+	//----------------------------------------------------------------------------------------------
+	case int:
+		*val = append(*val, ToFloat64(x))
+	case []int:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+	case []*int:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+
+	// int8
+	//----------------------------------------------------------------------------------------------
+	case int8:
+		*val = append(*val, ToFloat64(x))
+	case []int8:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+	case []*int8:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+
+	// int16
+	//----------------------------------------------------------------------------------------------
+	case int16:
+		*val = append(*val, ToFloat64(x))
+	case []int16:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+	case []*int16:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+
+	// int32
+	//----------------------------------------------------------------------------------------------
+	case int32:
+		*val = append(*val, ToFloat64(x))
+	case []int32:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+	case []*int32:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+
+	// int64
+	//----------------------------------------------------------------------------------------------
+	case int64:
+		*val = append(*val, ToFloat64(x))
+	case []int64:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+	case []*int64:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+
+	// IntSlice
+	//----------------------------------------------------------------------------------------------
+	case IntSlice:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+	case []IntSlice:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+	case []*IntSlice:
+		for i := range x {
+			if x[i] != nil {
+				for j := range *x[i] {
+					*val = append(*val, ToFloat64((*x[i])[j]))
+				}
+			}
+		}
+
+	// Object
+	//----------------------------------------------------------------------------------------------
+	case Object:
+		if v, e := x.ToFloat64E(); e != nil {
+			err = fmt.Errorf("unable to convert type Object to []float64")
+		} else {
+			*val = append(*val, v)
+		}
+	case []Object:
+		for i := range x {
+			if v, e := x[i].ToFloat64E(); e == nil {
+				*val = append(*val, v)
+			} else {
+				err = fmt.Errorf("unable to convert type %T to []float64", x[i].O())
+				return
+			}
+		}
+	case []*Object:
+		for i := range x {
+			if v, e := x[i].ToFloat64E(); e == nil {
+				*val = append(*val, v)
+			} else {
+				err = fmt.Errorf("unable to convert type %T to []float64", x[i].O())
+				return
+			}
+		}
+
+	// Str
+	//----------------------------------------------------------------------------------------------
+	case Str:
+		if v, e := ToFloat64E(x); e != nil {
+			err = fmt.Errorf("unable to convert type Str to []float64")
+		} else {
+			*val = append(*val, v)
+		}
+	case []Str:
+		for i := range x {
+			if v, e := ToFloat64E(x[i]); e == nil {
+				*val = append(*val, v)
+			} else {
+				err = fmt.Errorf("unable to convert type Str to []float64")
+				return
+			}
+		}
+	case []*Str:
+		for i := range x {
+			if v, e := ToFloat64E(x[i]); e == nil {
+				*val = append(*val, v)
+			} else {
+				err = fmt.Errorf("unable to convert type *Str to []float64")
+				return
+			}
+		}
+
+	// string
+	//----------------------------------------------------------------------------------------------
+	case string:
+		if v, e := ToFloat64E(x); e != nil {
+			err = fmt.Errorf("unable to convert type string to []float64")
+		} else {
+			*val = append(*val, v)
+		}
+	case []string:
+		for i := range x {
+			if v, e := ToFloat64E(x[i]); e == nil {
+				*val = append(*val, v)
+			} else {
+				err = fmt.Errorf("unable to convert type string to []float64")
+				return
+			}
+		}
+	case []*string:
+		for i := range x {
+			if v, e := ToFloat64E(x[i]); e == nil {
+				*val = append(*val, v)
+			} else {
+				err = fmt.Errorf("unable to convert type *string to []float64")
+				return
+			}
+		}
+
+	// uint
+	//----------------------------------------------------------------------------------------------
+	case uint:
+		*val = append(*val, ToFloat64(x))
+	case []uint:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+	case []*uint:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+
+	// uint8
+	//----------------------------------------------------------------------------------------------
+	case uint8:
+		*val = append(*val, ToFloat64(x))
+	case []uint8:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+	case []*uint8:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+
+	// uint16
+	//----------------------------------------------------------------------------------------------
+	case uint16:
+		*val = append(*val, ToFloat64(x))
+	case []uint16:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+	case []*uint16:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+
+	// uint32
+	//----------------------------------------------------------------------------------------------
+	case uint32:
+		*val = append(*val, ToFloat64(x))
+	case []uint32:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+	case []*uint32:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+
+	// uint64
+	//----------------------------------------------------------------------------------------------
+	case uint64:
+		*val = append(*val, ToFloat64(x))
+
+	case []uint64:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+	case []*uint64:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+
+	// fall back on reflection
+	//----------------------------------------------------------------------------------------------
+	default:
+		v := reflect.ValueOf(x)
+		k := v.Kind()
+
+		switch {
+
+		// generically convert array and slice types
+		case k == reflect.Array || k == reflect.Slice:
+			for i := 0; i < v.Len(); i++ {
+				if v, e := ToFloat64E(v.Index(i).Interface()); e == nil {
+					*val = append(*val, v)
+				} else {
+					err = errors.WithMessagef(e, "unable to convert %T to []float64", x)
+					return
+				}
+			}
+
+		// not supporting this type yet
+		default:
+			err = fmt.Errorf("unable to convert type %T to []float64", x)
+			return
+		}
 	}
 	return
 }
