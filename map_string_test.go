@@ -578,6 +578,12 @@ func ExampleStringMap_Query() {
 
 func TestStringMap_Query(t *testing.T) {
 
+	// malformed yaml
+	{
+		_, err := NewStringMap("foo:\n\t- 1\n").QueryE("foo.[0]")
+		assert.Equal(t, "failed to query empty map", err.Error())
+	}
+
 	// dot notation
 	{
 		// Identity: .
@@ -618,11 +624,17 @@ func TestStringMap_Query(t *testing.T) {
 		// Array element selection based on element value
 		yml := `one:
   - name: foo
-    val: 2
+    val:
+      - 3.3
+      - 1.1
+      - 2.2
   - name: bar
     val: 3
 `
-		assert.Equal(t, "3", NewStringMap(yml).Query(`one.[name==bar].val`).ToString())
+		assert.Equal(t, 3, NewStringMap(yml).Query(`one.[name==bar].val`).ToInt())
+		assert.Equal(t, 2, NewStringMap(yml).Query(`one.[name==foo].val.[-1]`).ToInt())
+		assert.Equal(t, 1.1, NewStringMap(yml).Query(`one.[name==foo].val.[-2]`).ToFloat64())
+		assert.Equal(t, "3.3", NewStringMap(yml).Query(`one.[name==foo].val.[-3]`).ToString())
 	}
 
 	// no dot notation

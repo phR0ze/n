@@ -248,6 +248,10 @@ func (p *StringMap) Query(key string) (val *Object) {
 // QueryE returns the value at the given key location, using a jq type selectors. Returns empty *Object if not found.
 // see dot notation from https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
 func (p *StringMap) QueryE(key string) (val *Object, err error) {
+	if p == nil || len(*p) == 0 {
+		err = errors.Errorf("failed to query empty map")
+		return
+	}
 
 	// Default object is self for identity case: .
 	val = &Object{o: p}
