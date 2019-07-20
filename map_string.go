@@ -295,6 +295,15 @@ func (p *StringMap) QueryE(key string) (val *Object, err error) {
 
 			// Array Index/Iterator: .[2], .[-1], .[], .[key==val]
 			case []interface{}:
+
+				// Empty list so return nil i.e. failed
+				if len(x) == 0 {
+					err = errors.Errorf("array is empty")
+					val.o = nil
+					return
+				}
+
+				// Continue if list is not empty
 				if key.First().A() == "[" && key.Last().A() == "]" {
 
 					// Trim off the indexer/selector brackets and check the indexer
@@ -317,7 +326,8 @@ func (p *StringMap) QueryE(key string) (val *Object, err error) {
 						// Index in if the value is a valid integer, e.g. .[2], .[-1]
 						case e == nil:
 							if val.o = NewSlice(x).At(i); val.Nil() {
-								err = errors.Errorf("Invalid array index %v", i)
+								err = errors.Errorf("invalid array index %v", i)
+								val.o = nil
 								return
 							}
 						}

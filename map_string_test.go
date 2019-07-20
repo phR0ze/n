@@ -598,6 +598,9 @@ func TestStringMap_Query(t *testing.T) {
 		assert.Equal(t, "3", NewStringMapV(map[string]interface{}{"one": map[string]interface{}{"two": map[string]interface{}{"three": "3"}}}).Query(`one.two.three`).ToString())
 		assert.Equal(t, "foo", NewStringMapV(map[string]interface{}{"one": map[string]interface{}{"two.three": "foo"}}).Query(`one."two.three"`).ToString())
 
+		// Array Index: empty array
+		assert.True(t, ToStringMap("foo: []\n").Query(`foo.[0]`).Nil())
+
 		// Array Index: .[2], .[-1]
 		assert.Equal(t, 0, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[0]`).ToInt())
 		assert.Equal(t, 1, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[1]`).ToInt())
