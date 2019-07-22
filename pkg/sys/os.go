@@ -20,10 +20,10 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// Copy copies src to dst recursively.
+// Copy copies src to dst recursively, creating destination directories as needed.
 // Handles globbing e.g. Copy("./*", "../")
 // The dst will be copied to if it is an existing directory.
-// The dst will be a clone of the src if it doesn't exist, but it's parent directory does.
+// The dst will be a clone of the src if it doesn't exist.
 // Doesn't follow links by default but can be turned on with &Opt{"follow", true}
 func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 	var sources []string
@@ -55,7 +55,7 @@ func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 	for _, srcRoot := range sources {
 
 		// Walk over file structure
-		err = Walk(srcRoot, func(srcPath string, info *FileInfo, e error) error {
+		err = Walk(srcRoot, func(srcPath string, srcInfo *FileInfo, e error) error {
 			if e != nil {
 				return e
 			}
@@ -68,12 +68,13 @@ func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 				dstPath = path.Join(dstAbs, strings.TrimPrefix(srcPath, path.Dir(srcRoot)))
 			}
 
-			if info.IsDir() {
-				if e = os.MkdirAll(dstPath, info.Mode()); e != nil {
+			// Create destination directories as needed
+			if srcInfo.IsDir() {
+				if e = os.MkdirAll(dstPath, srcInfo.Mode()); e != nil {
 					return e
 				}
 			} else {
-				CopyFile(srcPath, dstPath, newInfoOpt(info))
+				CopyFile(srcPath, dstPath, newInfoOpt(srcInfo))
 			}
 			return nil
 		}, newFollowOpt(false))
@@ -81,13 +82,13 @@ func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 	return
 }
 
-// CopyFile copies a single file from src to dst.
+// CopyFile copies a single file from src to dsty, creating destination directories as needed.
 // The dst will be copied to if it is an existing directory.
-// The dst will be a clone of the src if it doesn't exist, but it's parent directory does.
+// The dst will be a clone of the src if it doesn't exist.
 // Doesn't follow links by default but can be turned on with &Opt{"follow", true}
 func CopyFile(src, dst string, opts ...*opt.Opt) (err error) {
-	var srcInfo *FileInfo
 	var srcPath, dstPath string
+	var srcInfo, srcDirInfo *FileInfo
 
 	// Set following links to off by default
 	defaultFollowOpt(&opts, false)
@@ -104,6 +105,11 @@ func CopyFile(src, dst string, opts ...*opt.Opt) (err error) {
 		}
 	}
 
+	// Source dir permissions to use for destination directories
+	if srcDirInfo, err = Lstat(path.Dir(src)); err != nil {
+		return
+	}
+
 	// Error out if not a regular file or symlink
 	if srcInfo.IsDir() {
 		err = fmt.Errorf("src target is not a regular file or a symlink to a file")
@@ -114,10 +120,10 @@ func CopyFile(src, dst string, opts ...*opt.Opt) (err error) {
 	dstInfo, e := os.Stat(dst)
 	switch {
 
-	// Doesn't exist but maybe the parent does and this is the new dst name
+	// Doesn't exist so this is the new destination name
 	case os.IsNotExist(e):
-		if _, err = os.Stat(path.Dir(dst)); err != nil {
-			return
+		if e = os.MkdirAll(path.Dir(dst), srcDirInfo.Mode()); e != nil {
+			return e
 		}
 		if dstPath, err = Abs(path.Dir(dst)); err != nil {
 			return

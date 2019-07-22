@@ -165,6 +165,63 @@ func TestCopy(t *testing.T) {
 	}
 }
 
+func TestCopyWithFileParentDoentExist(t *testing.T) {
+	// test/temp/foo/bar/README.md does not exist and neither does its parent
+	// so foo/bar will be created then Copy README.md to bar will be a clone
+	cleanTmpDir()
+	src := "./README.md"
+	dst := path.Join(tmpDir, "foo/bar/readme")
+
+	assert.False(t, Exists(dst))
+	Copy(src, dst)
+	assert.True(t, Exists(dst))
+
+	srcMD5, err := MD5(src)
+	assert.Nil(t, err)
+	dstMD5, err := MD5(dst)
+	assert.Nil(t, err)
+	assert.Equal(t, srcMD5, dstMD5)
+}
+
+func TestCopyFileParentDoentExist(t *testing.T) {
+	// test/temp/foo/bar/README.md does not exist and neither does its parent
+	// so foo/bar will be created then Copy README.md to bar will be a clone
+	cleanTmpDir()
+	src := "./README.md"
+	dst := path.Join(tmpDir, "foo/bar/readme")
+
+	assert.False(t, Exists(dst))
+	CopyFile(src, dst)
+	assert.True(t, Exists(dst))
+
+	srcMD5, err := MD5(src)
+	assert.Nil(t, err)
+	dstMD5, err := MD5(dst)
+	assert.Nil(t, err)
+	assert.Equal(t, srcMD5, dstMD5)
+}
+
+func TestCopyWithDirParentDoentExist(t *testing.T) {
+	// test/temp/foo/bar/pkg does not exist and neither does its parent
+	// so foo/bar will be created then Copy sys to pkg will be a clone
+	cleanTmpDir()
+	src := "."
+	dst := path.Join(tmpDir, "foo/bar/pkg")
+
+	Copy(src, dst)
+	srcPaths, err := AllPaths(src)
+	assert.Nil(t, err)
+	dstPaths, err := AllPaths(dst)
+	assert.Nil(t, err)
+	for i := range dstPaths {
+		srcPaths[i] = path.Base(srcPaths[i])
+		dstPaths[i] = path.Base(dstPaths[i])
+	}
+	assert.Equal(t, "sys", srcPaths[0])
+	assert.Equal(t, "pkg", dstPaths[0])
+	assert.Equal(t, srcPaths[1:], dstPaths[1:])
+}
+
 func TestCopyGlob(t *testing.T) {
 	{
 		cleanTmpDir()
