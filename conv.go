@@ -2421,6 +2421,11 @@ func ToRune(obj interface{}) rune {
 	return rune(*ToChar(obj))
 }
 
+// A is an alias to ToStr for brevity
+func A(obj interface{}) *Str {
+	return ToStr(obj)
+}
+
 // ToStr convert an interface to a *Str type.
 func ToStr(obj interface{}) *Str {
 	val := Str{}
@@ -2973,7 +2978,7 @@ func ToStringMapE(obj interface{}) (val *StringMap, err error) {
 	return
 }
 
-// ToStringSlice convert an interface to a []int type.
+// ToStringSlice convert an interface to a StringSlice type.
 func ToStringSlice(obj interface{}) *StringSlice {
 	x, _ := ToStringSliceE(obj)
 	if x == nil {
@@ -2982,7 +2987,7 @@ func ToStringSlice(obj interface{}) *StringSlice {
 	return x
 }
 
-// ToStringSliceE convert an interface to a []string type.
+// ToStringSliceE convert an interface to a StringSlice type.
 func ToStringSliceE(obj interface{}) (val *StringSlice, err error) {
 	val = &StringSlice{}
 	o := DeReference(obj)

@@ -2183,6 +2183,26 @@ func TestStringSlice_Less(t *testing.T) {
 	assert.Equal(t, true, NewStringSliceV("0", "1", "2").Less(1, 2))
 }
 
+// Map
+//--------------------------------------------------------------------------------------------------
+func ExampleStringSlice_Map() {
+	slice := NewStringSliceV("1", "2", "3")
+	slice = slice.Map(func(x O) O {
+		return ToStr(ToInt(x.(string)) + 1).A()
+	})
+	fmt.Println(slice.G())
+	// Output: [2 3 4]
+}
+
+func TestStringSlice_Map(t *testing.T) {
+	slice := StrsV("1", "2", "3")
+	slice = slice.Map(func(x O) O {
+		return ToStr(ToInt(x.(string)) + 1).A()
+	})
+	assert.Equal(t, []string{"2", "3", "4"}, slice.G())
+	assert.Equal(t, Strs([]string{"2", "3", "4"}), slice)
+}
+
 // Nil
 //--------------------------------------------------------------------------------------------------
 func ExampleStringSlice_Nil() {

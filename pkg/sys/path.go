@@ -66,7 +66,7 @@ func Home() (result string, err error) {
 	return
 }
 
-// Dirs returns all directories from the given target path
+// Dirs returns all directories from the given target path, sorted by filename
 func Dirs(target string) (result []string) {
 	result = []string{}
 	if target != "" && IsDir(target) {
@@ -84,7 +84,7 @@ func Dirs(target string) (result []string) {
 	return
 }
 
-// Files returns all files from the given target path
+// Files returns all files from the given target path, sorted by filename
 func Files(target string) (result []string) {
 	result = []string{}
 	if target != "" && IsDir(target) {
@@ -101,7 +101,7 @@ func Files(target string) (result []string) {
 	return
 }
 
-// Paths returns all directories/files from the given target path
+// Paths returns all directories/files from the given target path, sorted by filename
 func Paths(target string) (result []string) {
 	result = []string{}
 	if target != "" && IsDir(target) {

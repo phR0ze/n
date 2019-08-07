@@ -18,11 +18,6 @@ var (
 // convenience methods on par with rapid development languages.
 type Str []rune
 
-// A is an alias to NewStr for brevity
-func A(obj interface{}) *Str {
-	return ToStr(obj)
-}
-
 // NewStr creates a new *Str which will never be nil
 // Supports: Str *Str, string *string, []byte *[]byte, rune *rune, []rune *[]rune, []string *[]string ...
 func NewStr(obj interface{}) *Str {

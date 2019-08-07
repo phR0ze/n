@@ -11,6 +11,16 @@ import (
 // including convenience methods on par with rapid development languages.
 type StringSlice []string
 
+// Strs is an alias for NewStringSlice for brevity
+func Strs(slice interface{}) (new *StringSlice) {
+	return ToStringSlice(slice)
+}
+
+// StrsV is an alias for NewStringSliceV for brevity
+func StrsV(elems ...interface{}) (new *StringSlice) {
+	return ToStringSlice(elems)
+}
+
 // NewStringSlice creates a new *StringSlice
 func NewStringSlice(slice interface{}) *StringSlice {
 	return ToStringSlice(slice)
@@ -488,6 +498,19 @@ func (p *StringSlice) Less(i, j int) bool {
 		return false
 	}
 	return (*p)[i] < (*p)[j]
+}
+
+// Map creates a new slice with the modified elements from the lambda.
+func (p *StringSlice) Map(mod func(O) O) (new *StringSlice) {
+	slice := NewStringSliceV()
+	if p == nil || len(*p) == 0 {
+		return slice
+	}
+	for i := range *p {
+		v := ToStr(mod((*p)[i])).A()
+		*slice = append(*slice, v)
+	}
+	return slice
 }
 
 // Nil tests if this Slice is nil
