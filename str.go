@@ -1203,6 +1203,11 @@ func (p *Str) TakeW(sel func(O) bool) (new Slice) {
 	return slice
 }
 
+// ToStrsG converts the underlying map into a []string slice
+func (p *Str) ToStrsG() (new []string) {
+	return ToStringSliceG(p.O())
+}
+
 //Title returns a copy of the string s with all Unicode letters that begin words mapped to their title case.
 // BUG(rsc): The rule Title uses for word boundaries does not handle Unicode punctuation properly.
 // Pass through for strings.Title

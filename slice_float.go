@@ -752,6 +752,11 @@ func (p *FloatSlice) TakeW(sel func(O) bool) (new Slice) {
 	return slice
 }
 
+// ToStrsG converts the underlying slice into a []string slice
+func (p *FloatSlice) ToStrsG() (new []string) {
+	return ToStringSliceG(p.O())
+}
+
 // Union returns a new Slice by joining uniq elements from this Slice with uniq elements from the given Slice while preserving order.
 // Supports FloatSlice, *FloatSlice, []float64 or *[]float64
 func (p *FloatSlice) Union(slice interface{}) (new Slice) {

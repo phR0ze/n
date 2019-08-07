@@ -2978,6 +2978,15 @@ func ToStringMapE(obj interface{}) (val *StringMap, err error) {
 	return
 }
 
+// ToStrs is an alias to ToStringSliceE
+func ToStrs(obj interface{}) *StringSlice {
+	x, _ := ToStringSliceE(obj)
+	if x == nil {
+		return &StringSlice{}
+	}
+	return x
+}
+
 // ToStringSlice convert an interface to a StringSlice type.
 func ToStringSlice(obj interface{}) *StringSlice {
 	x, _ := ToStringSliceE(obj)
@@ -3163,6 +3172,21 @@ func ToStringSliceE(obj interface{}) (val *StringSlice, err error) {
 	case []*Str:
 		for i := range x {
 			*val = append(*val, ToString(x[i]))
+		}
+
+	// StringSlice
+	//----------------------------------------------------------------------------------------------
+	case StringSlice:
+		val = &x
+	case []StringSlice:
+		for i := range x {
+			*val = append(*val, x[i]...)
+		}
+	case []*StringSlice:
+		for i := range x {
+			if x[i] != nil {
+				*val = append(*val, *x[i]...)
+			}
 		}
 
 	// string
@@ -3446,6 +3470,21 @@ func ToStringSliceGE(obj interface{}) (val []string, err error) {
 	case []*Str:
 		for i := range x {
 			val = append(val, ToString(x[i]))
+		}
+
+	// StringSlice
+	//----------------------------------------------------------------------------------------------
+	case StringSlice:
+		val = x.G()
+	case []StringSlice:
+		for i := range x {
+			val = append(val, x[i].G()...)
+		}
+	case []*StringSlice:
+		for i := range x {
+			if x[i] != nil {
+				val = append(val, x[i].G()...)
+			}
 		}
 
 	// string

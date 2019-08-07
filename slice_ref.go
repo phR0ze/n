@@ -1034,6 +1034,11 @@ func (p *RefSlice) TakeW(sel func(O) bool) (new Slice) {
 	return slice
 }
 
+// ToStrsG converts the underlying slice into a []string slice
+func (p *RefSlice) ToStrsG() (new []string) {
+	return ToStringSliceG(p.O())
+}
+
 // Union returns a new Slice by joining uniq elements from this Slice with uniq elements from the given Slice while preserving order.
 // Supports RefSlice, *RefSlice, Slice and Go slice types
 func (p *RefSlice) Union(slice interface{}) (new Slice) {

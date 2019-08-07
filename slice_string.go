@@ -768,6 +768,11 @@ func (p *StringSlice) TakeW(sel func(O) bool) (new Slice) {
 	return slice
 }
 
+// ToStrsG converts the underlying slice into a []string slice
+func (p *StringSlice) ToStrsG() (new []string) {
+	return p.O().([]string)
+}
+
 // Union returns a new Slice by joining uniq elements from this Slice with uniq elements from the given Slice while preserving order.
 // Supports StringSlice, *StringSlice, []string or *[]string
 func (p *StringSlice) Union(slice interface{}) (new Slice) {
