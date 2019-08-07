@@ -122,7 +122,7 @@ func ExtractAll(tarball, dest string) (err error) {
 		// Create directories
 		if header.Typeflag == tar.TypeDir {
 			dirPath := path.Join(dest, header.Name)
-			if _, exists := dirCache[dirPath]; !exists {
+			if _, exist := dirCache[dirPath]; !exist {
 				sys.MkdirP(dirPath, uint32(header.Mode))
 				dirCache[dirPath] = true
 			}
@@ -133,7 +133,11 @@ func ExtractAll(tarball, dest string) (err error) {
 			filePath := path.Join(dest, header.Name)
 
 			// Create any directories with default permissions that don't exist
-			sys.MkdirP(path.Dir(filePath))
+			dirPath := path.Dir(filePath)
+			if _, exist := dirCache[dirPath]; !exist {
+				sys.MkdirP(path.Dir(filePath))
+				dirCache[dirPath] = true
+			}
 
 			// Create file and write content to it
 			var fw *os.File

@@ -206,6 +206,46 @@ func TestAllFilesWithFileLink(t *testing.T) {
 	//assert.Equal(t, []string{"first/f0", "first/f1", "second/s0", "second/s1", "second/t0", "third/t0", "third/t1"}, results)
 }
 
+func TestAllDirs(t *testing.T) {
+	cleanTmpDir()
+
+	// Single dir
+	// temp/first
+	{
+		targetDir, _ := MkdirP(path.Join(tmpDir, "first"))
+		expected := []string{targetDir}
+		paths, err := AllDirs(tmpDir)
+		assert.Nil(t, err)
+		assert.Equal(t, expected, paths)
+	}
+
+	// Second dir
+	// temp/second
+	{
+		targetDir, _ := MkdirP(path.Join(tmpDir, "second"))
+		expected := []string{path.Join(path.Dir(targetDir), "first"), targetDir}
+		paths, err := AllDirs(tmpDir)
+		assert.Nil(t, err)
+		assert.Equal(t, expected, paths)
+	}
+
+	// Nested dirs
+	// temp/first/d1
+	// temp/second/d2
+	{
+		firstDir, _ := Abs(path.Join(tmpDir, "first"))
+		secondDir, _ := Abs(path.Join(tmpDir, "second"))
+		d1, _ := MkdirP(path.Join(firstDir, "d1"))
+		d2, _ := MkdirP(path.Join(secondDir, "d2"))
+		d3, _ := MkdirP(path.Join(d2, "d3"))
+
+		expected := []string{firstDir, d1, secondDir, d2, d3}
+		paths, err := AllDirs(tmpDir)
+		assert.Nil(t, err)
+		assert.Equal(t, expected, paths)
+	}
+}
+
 func TestAllFiles(t *testing.T) {
 	cleanTmpDir()
 

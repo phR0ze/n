@@ -116,6 +116,41 @@ func Paths(target string) (result []string) {
 	return
 }
 
+// AllDirs returns a list of all dirs recursively for the given root path
+// in a deterministic order. Follows links by default, but can be stopped
+// with &Opt{"follow", false}. Paths are distinct.
+func AllDirs(root string, opts ...*opt.Opt) (result []string, err error) {
+	distinct := map[string]bool{}
+	if root, err = Abs(root); err != nil {
+		return
+	}
+
+	// Set following links by default
+	defaultFollowOpt(&opts, true)
+
+	err = Walk(root, func(p string, i *FileInfo, e error) error {
+		if e != nil {
+			return e
+		}
+
+		// IsDir will ignore files
+		if p != root && p != "." && p != ".." && i.IsDir() {
+			absPath, e := Abs(p)
+			if e != nil {
+				return e
+			}
+
+			// Ensure file paths are distinct
+			if _, exists := distinct[absPath]; !exists {
+				distinct[absPath] = true
+				result = append(result, absPath)
+			}
+		}
+		return nil
+	}, opts...)
+	return
+}
+
 // AllFiles returns a list of all files recursively for the given root path
 // in a deterministic order. Follows links by default, but can be stopped
 // with &Opt{"follow", false}. Paths are distinct.
