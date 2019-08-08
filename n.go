@@ -115,8 +115,15 @@ func SetOnTrueB(result *bool, value, exp bool) bool {
 // Load and From helper functions
 //--------------------------------------------------------------------------------------------------
 
+// LoadYaml reads in a yaml file and converts it to a *StringMap
+func LoadYaml(filepath string) (m *StringMap) {
+	m, _ = LoadYamlE(filepath)
+	return m
+}
+
 // LoadYamlE reads in a yaml file and converts it to a *StringMap
 func LoadYamlE(filepath string) (m *StringMap, err error) {
+	m = NewStringMapV()
 
 	// Read in the yaml file
 	var bytes []byte
