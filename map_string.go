@@ -261,83 +261,147 @@ func (p *StringMap) QueryE(key string) (val *Object, err error) {
 		return
 	}
 
-	// Split key sequence into individual keys and process
-	var quotes *StringSlice
-	if quotes, err = A(key).SplitQuotes(); err != nil {
+	// Process keys from left to right
+	var keys *StringSlice
+	if keys, err = keysFromSelectorString(key); err != nil {
 		return
 	}
-	for i := 0; i < quotes.Len(); i++ {
-		quote := quotes.At(i).ToStr()
+	for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
+		key := ko.ToStr()
 
-		// Split quotes into keys
-		// 1. a single dot notation string that nees split
-		// 2. a single quoted key to leave intact
-		var keys *StringSlice
-		if quote.First().A() != `"` {
-			keys = A(quote).Split(".")
-		} else {
-			keys = ToStringSlice(quote.TrimPrefix(`"`).TrimSuffix(`"`))
-		}
+		switch x := val.o.(type) {
 
-		// Process keys from left to right
-		for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
-			key := ko.ToStr()
+		// Identifier Index: .foo, .foo.bar
+		case map[string]interface{}, *StringMap:
+			m := ToStringMap(x)
+			val.o = (*m)[key.A()]
 
-			// Skip empty keys e.g. ".key" => ["", "key"]
-			if ko.A() == "" {
-				continue
+		// Array Index/Iterator: .[2], .[-1], .[], .[key==val]
+		case []interface{}:
+
+			// Empty list so return nil i.e. failed
+			if len(x) == 0 {
+				err = errors.Errorf("array is empty")
+				val.o = nil
+				return
 			}
 
-			switch x := val.o.(type) {
+			// Continue if list is not empty
+			if key.First().A() == "[" && key.Last().A() == "]" {
 
-			// Identifier Index: .foo, .foo.bar
-			case map[string]interface{}, *StringMap:
-				m := ToStringMap(x)
-				val.o = (*m)[key.A()]
+				// Trim off the indexer/selector brackets and check the indexer
+				idx := key.TrimPrefix("[").TrimSuffix("]").A()
+				if idx != "" {
+					pieces := strings.Split(idx, "==")
+					i, e := strconv.Atoi(idx)
+					switch {
 
-			// Array Index/Iterator: .[2], .[-1], .[], .[key==val]
-			case []interface{}:
-
-				// Empty list so return nil i.e. failed
-				if len(x) == 0 {
-					err = errors.Errorf("array is empty")
-					val.o = nil
-					return
-				}
-
-				// Continue if list is not empty
-				if key.First().A() == "[" && key.Last().A() == "]" {
-
-					// Trim off the indexer/selector brackets and check the indexer
-					idx := key.TrimPrefix("[").TrimSuffix("]").A()
-					if idx != "" {
-						pieces := strings.Split(idx, "==")
-						i, e := strconv.Atoi(idx)
-						switch {
-
-						// Select by key==value, e.g. .[k==v]
-						case len(pieces) == 2:
-							k, v := pieces[0], pieces[1]
-							m := NewSlice(x).Select(func(x O) bool {
-								return ToStringMap(x).Get(k).A() == v
-							})
-							if m.Any() {
-								val.o = m.First().o
-							}
-
-						// Index in if the value is a valid integer, e.g. .[2], .[-1]
-						case e == nil:
-							if val.o = NewSlice(x).At(i).o; val.Nil() {
-								err = errors.Errorf("invalid array index %v", i)
-								val.o = nil
-								return
-							}
+					// Select by key==value, e.g. .[k==v]
+					case len(pieces) == 2:
+						k, v := pieces[0], pieces[1]
+						m := NewSlice(x).Select(func(x O) bool {
+							return ToStringMap(x).Get(k).A() == v
+						})
+						if m.Any() {
+							val.o = m.First().o
 						}
 
-						// Fall through to return all array elements
+					// Index in if the value is a valid integer, e.g. .[2], .[-1]
+					case e == nil:
+						if val.o = NewSlice(x).At(i).o; val.Nil() {
+							err = errors.Errorf("invalid array index %v", i)
+							val.o = nil
+							return
+						}
 					}
+
+					// Fall through to return all array elements
 				}
 			}
+		}
+	}
+	return
+}
+
+// Remove modifies this Map to delete the given key location, using jq type selectors
+// and returns a reference to this Map rather than the deleted value.
+// see dot notation from https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
+func (p *StringMap) Remove(key string) Map {
+	_, _ = p.RemoveE(key)
+	return p
+}
+
+// RemoveE modifies this Map to delete the given key location, using jq type selectors
+// and returns a reference to this Map rather than the deleted value.
+// see dot notation from https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
+func (p *StringMap) RemoveE(key string) (m Map, err error) {
+	m = p
+	if p == nil || len(*p) == 0 {
+		return
+	}
+	val := &Object{o: p}
+
+	// Process keys from left to right
+	var keys *StringSlice
+	if keys, err = keysFromSelectorString(key); err != nil {
+		return
+	}
+	for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
+		key := ko.ToStr()
+
+		switch x := val.o.(type) {
+
+		// Identifier Index: .foo, .foo.bar
+		case map[string]interface{}, *StringMap:
+			m := ToStringMap(x)
+			if keys.Any() {
+				val.o = (*m)[key.A()]
+			} else {
+				delete(*m, key.A())
+			}
+
+			// // Array Index/Iterator: .[2], .[-1], .[], .[key==val]
+			// case []interface{}:
+
+			// 	// Empty list so return nil i.e. failed
+			// 	if len(x) == 0 {
+			// 		err = errors.Errorf("array is empty")
+			// 		val.o = nil
+			// 		return
+			// 	}
+
+			// 	// Continue if list is not empty
+			// 	if key.First().A() == "[" && key.Last().A() == "]" {
+
+			// 		// Trim off the indexer/selector brackets and check the indexer
+			// 		idx := key.TrimPrefix("[").TrimSuffix("]").A()
+			// 		if idx != "" {
+			// 			pieces := strings.Split(idx, "==")
+			// 			i, e := strconv.Atoi(idx)
+			// 			switch {
+
+			// 			// Select by key==value, e.g. .[k==v]
+			// 			case len(pieces) == 2:
+			// 				k, v := pieces[0], pieces[1]
+			// 				m := NewSlice(x).Select(func(x O) bool {
+			// 					return ToStringMap(x).Get(k).A() == v
+			// 				})
+			// 				if m.Any() {
+			// 					val.o = m.First().o
+			// 				}
+
+			// 			// Index in if the value is a valid integer, e.g. .[2], .[-1]
+			// 			case e == nil:
+			// 				if val.o = NewSlice(x).At(i).o; val.Nil() {
+			// 					err = errors.Errorf("invalid array index %v", i)
+			// 					val.o = nil
+			// 					return
+			// 				}
+			// 			}
+
+			// 			// Fall through to return all array elements
+			// 		}
+			// 	}
 		}
 	}
 	return
@@ -369,4 +433,40 @@ func (p *StringMap) SetM(key, val interface{}) Map {
 // sys.WriteYaml on it to write it out to disk.
 func (p *StringMap) WriteYaml(filename string) (err error) {
 	return sys.WriteYaml(filename, p.G())
+}
+
+// Split the given key selectors into individual keys
+func keysFromSelectorString(key string) (keys *StringSlice, err error) {
+	keys = NewStringSliceV()
+
+	var quotes *StringSlice
+	if quotes, err = A(key).SplitQuotes(); err != nil {
+		return
+	}
+	for i := 0; i < quotes.Len(); i++ {
+		quote := quotes.At(i).ToStr()
+
+		// Split quotes into keys
+		// 1. a single dot notation string that needs split
+		// 2. a single quoted key to leave intact
+		var qKeys *StringSlice
+		if quote.First().A() != `"` {
+			qKeys = A(quote).Split(".")
+		} else {
+			qKeys = ToStringSlice(quote.TrimPrefix(`"`).TrimSuffix(`"`))
+		}
+
+		// Process keys from left to right
+		for k := qKeys.Shift(); !k.Nil(); k = qKeys.Shift() {
+			key := k.ToStr()
+
+			// Skip empty keys e.g. ".key" => ["", "key"]
+			if k.A() == "" {
+				continue
+			}
+
+			keys.Append(key)
+		}
+	}
+	return
 }

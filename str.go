@@ -1145,7 +1145,7 @@ func (p *Str) SplitQuotes(separator ...string) (slice *StringSlice, err error) {
 		cnt := strings.Count(x.(string), string(sep))
 		return ExB(cnt != 0 && cnt != 2)
 	}) {
-		err = errors.Errorf("Imbalanced quotes")
+		err = errors.Errorf("imbalanced quotes")
 	}
 
 	return

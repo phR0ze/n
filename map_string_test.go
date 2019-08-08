@@ -671,6 +671,28 @@ func TestStringMap_Query(t *testing.T) {
 	}
 }
 
+// Remove
+//--------------------------------------------------------------------------------------------------
+func ExampleStringMap_Remove() {
+	fmt.Println(ToStringMap("foo:\n  bar: 1\n  foo2: 2\n").Remove("foo.bar"))
+	// Output: &map[foo:map[foo2:2]]
+}
+
+func TestStringMap_Remove(t *testing.T) {
+
+	// Identity: .
+	assert.Equal(t, &StringMap{"one": "1"}, NewStringMapV(map[string]interface{}{"one": "1"}).Remove(``))
+	assert.Equal(t, &StringMap{"one": "1"}, NewStringMapV(map[string]interface{}{"one": "1"}).Remove(`.`))
+
+	// Object Identifier-Index: .foo, .foo.bar
+	assert.Equal(t, &StringMap{}, NewStringMapV(map[string]interface{}{"one": "1"}).Remove(`one`))
+	assert.Equal(t, &StringMap{}, NewStringMapV(map[string]interface{}{"one": "1"}).Remove(`.one`))
+	assert.Equal(t, &StringMap{}, NewStringMapV(map[string]interface{}{"one": "1"}).Remove(`."one"`))
+	assert.Equal(t, &StringMap{"one": map[string]interface{}{}}, NewStringMapV(map[string]interface{}{"one": map[string]interface{}{"two": "2"}}).Remove(`one.two`))
+	assert.Equal(t, &StringMap{"one": map[string]interface{}{"two": map[string]interface{}{}}}, NewStringMapV(map[string]interface{}{"one": map[string]interface{}{"two": map[string]interface{}{"three": "3"}}}).Remove(`one.two.three`))
+	assert.Equal(t, &StringMap{"one": map[string]interface{}{}}, NewStringMapV(map[string]interface{}{"one": map[string]interface{}{"two.three": "foo"}}).Remove(`one."two.three"`))
+}
+
 // Set
 //--------------------------------------------------------------------------------------------------
 func ExampleStringMap_Set() {
@@ -738,4 +760,84 @@ func TestWriteYaml(t *testing.T) {
 	assert.Nil(t, err)
 
 	assert.Equal(t, m1, m2)
+}
+
+// keysFromSelectorString
+//--------------------------------------------------------------------------------------------------
+func TestStringMap_keysFromSelectorString(t *testing.T) {
+
+	// Empty
+	keys, err := keysFromSelectorString("")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{}, keys)
+
+	// Identity
+	keys, err = keysFromSelectorString(".")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{}, keys)
+
+	// Object Identifier-Index: .foo, .foo.bar
+	keys, err = keysFromSelectorString("foo")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"foo"}, keys)
+
+	keys, err = keysFromSelectorString(".foo")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"foo"}, keys)
+
+	keys, err = keysFromSelectorString(`."foo"`)
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"foo"}, keys)
+
+	keys, err = keysFromSelectorString(".foo.bar")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"foo", "bar"}, keys)
+
+	keys, err = keysFromSelectorString("foo.bar")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"foo", "bar"}, keys)
+
+	keys, err = keysFromSelectorString("foo1.bar.foo2")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"foo1", "bar", "foo2"}, keys)
+
+	keys, err = keysFromSelectorString(`foo1."bar.foo2"`)
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"foo1", "bar.foo2"}, keys)
+
+	// Array Index: .[], .[0], .[-1]
+	keys, err = keysFromSelectorString("foo.[]")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"foo", "[]"}, keys)
+
+	keys, err = keysFromSelectorString("foo.[0]")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"foo", "[0]"}, keys)
+
+	keys, err = keysFromSelectorString("foo.[-1]")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"foo", "[-1]"}, keys)
+
+	// Array Index: move through index
+	keys, err = keysFromSelectorString("foo.[0].val")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"foo", "[0]", "val"}, keys)
+
+	// Array element selection based on element value
+	keys, err = keysFromSelectorString("one.[name==bar].val")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"one", "[name==bar]", "val"}, keys)
+
+	keys, err = keysFromSelectorString("one.[name==bar].val.[-2]")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"one", "[name==bar]", "val", "[-2]"}, keys)
+
+	// no dot notation
+	keys, err = keysFromSelectorString("one")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"one"}, keys)
+
+	keys, err = keysFromSelectorString("1")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"1"}, keys)
 }
