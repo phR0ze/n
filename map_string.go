@@ -4,6 +4,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/phR0ze/n/pkg/sys"
+
 	"github.com/pkg/errors"
 )
 
@@ -361,4 +363,10 @@ func (p *StringMap) SetM(key, val interface{}) Map {
 	}
 	p.Set(key, val)
 	return p
+}
+
+// WriteYaml converts the *StringMap into a map[string]interface{} then calls
+// sys.WriteYaml on it to write it out to disk.
+func (p *StringMap) WriteYaml(filename string) (err error) {
+	return sys.WriteYaml(filename, p.G())
 }

@@ -2895,6 +2895,15 @@ func ToString(obj interface{}) string {
 	return ToStr(obj).A()
 }
 
+// ToYaml is an alias to ToStringMap
+func ToYaml(obj interface{}) *StringMap {
+	x, _ := ToStringMapE(obj)
+	if x == nil {
+		return &StringMap{}
+	}
+	return x
+}
+
 // ToStringMap converts an interface to a StringMap type. Supports converting yaml string as well.
 func ToStringMap(obj interface{}) *StringMap {
 	x, _ := ToStringMapE(obj)

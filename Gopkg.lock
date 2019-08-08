@@ -41,12 +41,12 @@
   version = "v1.3.0"
 
 [[projects]]
-  digest = "1:f3bc4dcbd92f5aa52b7e1e598ef696bde6a671ae1732e52511d26f4fd22703eb"
+  digest = "1:14715f705ff5dfe0ffd6571d7d201dd8e921030f8070321a79380d8ca4ec1a24"
   name = "github.com/pkg/errors"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "27936f6d90f9c8e1145f11ed52ffffbfdb9e0af7"
-  version = "v0.8.2"
+  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
+  version = "v0.8.1"
 
 [[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
@@ -74,11 +74,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:106f424a4eb5ae759f9649ab2cbb6785eb9dc289bb643952502a00699da6e593"
+  digest = "1:9c684a8c6bb9501591c1ac600e7669fdf4683b1a08be53e17e98e4660985c000"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "NUT"
-  revision = "2be51725563103c17124a318f1745b66f2347acb"
+  revision = "51ab0e2deafac1f46c46ad59cf0921be2f180c3d"
 
 [[projects]]
   digest = "1:18108594151654e9e696b27b181b953f9a90b16bf14d253dd1b397b025a1487f"

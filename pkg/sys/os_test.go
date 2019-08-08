@@ -6,8 +6,8 @@ import (
 	"path"
 	"testing"
 
+	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v2"
 )
 
 var tmpDir = "../../test/temp"

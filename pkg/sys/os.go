@@ -15,9 +15,9 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/ghodss/yaml"
 	"github.com/phR0ze/n/pkg/opt"
 	"github.com/pkg/errors"
-	"gopkg.in/yaml.v2"
 )
 
 // Copy copies src to dst recursively, creating destination directories as needed.
@@ -448,7 +448,7 @@ func WriteLines(target string, lines []string, perms ...uint32) (err error) {
 }
 
 // WriteYaml converts the given obj interface{} into yaml then writes to disk
-// with default permissions.
+// with default permissions. Expects obj to be a structure that github.com/ghodss/yaml understands
 func WriteYaml(target string, obj interface{}, perms ...uint32) (err error) {
 	if target, err = Abs(target); err != nil {
 		return

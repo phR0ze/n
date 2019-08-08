@@ -720,3 +720,22 @@ func TestStringMap_SetM(t *testing.T) {
 		assert.Equal(t, "two", (*m)["1"].(string))
 	}
 }
+
+// WriteYaml
+//--------------------------------------------------------------------------------------------------
+func TestWriteYaml(t *testing.T) {
+	cleanTmpDir()
+
+	// Convert yaml string into a data structure
+	m1 := NewStringMap(map[string]interface{}{"1": "one"})
+
+	// Write out the data structure as yaml to disk
+	err := m1.WriteYaml(tmpFile)
+	assert.Nil(t, err)
+
+	// Read the file back into memory and compare data structure
+	m2, err := LoadYamlE(tmpFile)
+	assert.Nil(t, err)
+
+	assert.Equal(t, m1, m2)
+}
