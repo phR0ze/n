@@ -47,8 +47,13 @@ func (p *Object) M() map[string]interface{} {
 	return p.ToStringMapG()
 }
 
-// S is an alias to ToStringSliceG for brevity
-func (p *Object) S() []string {
+// Strs is an alias to ToStringSlice for brevity
+func (p *Object) Strs() *StringSlice {
+	return p.ToStringSlice()
+}
+
+// StrsG is an alias to ToStringSliceG for brevity
+func (p *Object) StrsG() []string {
 	return p.ToStringSliceG()
 }
 
