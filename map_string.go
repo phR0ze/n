@@ -14,9 +14,19 @@ import (
 // also specifically designed to handle YAML constructs.
 type StringMap map[string]interface{}
 
+// Yaml is an alias to NewStringMap
+func Yaml(obj interface{}) *StringMap {
+	return ToStringMap(obj)
+}
+
+// YamlV is an alias to NewStringMapV
+func YamlV(m ...map[string]interface{}) *StringMap {
+	return NewStringMapV(m...)
+}
+
 // NewStringMap converts the given interface{} into a StringMap
-func NewStringMap(m interface{}) *StringMap {
-	return ToStringMap(m)
+func NewStringMap(obj interface{}) *StringMap {
+	return ToStringMap(obj)
 }
 
 // NewStringMapV creates a new empty StringMap if nothing given else simply
