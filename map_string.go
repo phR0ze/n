@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ghodss/yaml"
 	"github.com/phR0ze/n/pkg/sys"
-
 	"github.com/pkg/errors"
 )
 
@@ -111,6 +111,14 @@ func (p *StringMap) DeleteM(key interface{}) Map {
 	k := ToString(key)
 	delete(*p, k)
 	return p
+}
+
+// Dump convert the StringMap into a pretty printed yaml string
+func (p *StringMap) Dump() (pretty string) {
+	if yml, err := yaml.Marshal(p.G()); err == nil {
+		pretty = string(yml)
+	}
+	return
 }
 
 // Exists checks if the given key exists in this Map.

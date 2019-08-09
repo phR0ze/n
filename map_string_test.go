@@ -201,6 +201,31 @@ func TestStringMap_DeleteM(t *testing.T) {
 	assert.Equal(t, 0, m.DeleteM("3").Len())
 }
 
+// Dump
+//--------------------------------------------------------------------------------------------------
+func ExampleStringMap_Dump() {
+	m := NewStringMapV(map[string]interface{}{"1": "one"})
+	fmt.Println(m.Dump())
+	// Output: "1": one
+}
+
+func TestStringMap_Dump(t *testing.T) {
+	{
+		m := NewStringMapV(map[string]interface{}{"1": "one", "2": "two", "3": "three"})
+		assert.Equal(t, `"1": one
+"2": two
+"3": three
+`, m.Dump())
+	}
+	{
+		m := NewStringMapV(map[string]interface{}{"1": map[string]interface{}{"2": "two", "3": "three"}})
+		assert.Equal(t, `"1":
+  "2": two
+  "3": three
+`, m.Dump())
+	}
+}
+
 // Exists
 //--------------------------------------------------------------------------------------------------
 func ExampleStringMap_Exists() {
