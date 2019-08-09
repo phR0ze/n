@@ -752,8 +752,8 @@ func (p *IntSlice) TakeW(sel func(O) bool) (new Slice) {
 	return slice
 }
 
-// ToStrsG converts the underlying slice into a []string slice
-func (p *IntSlice) ToStrsG() (new []string) {
+// S converts the underlying slice into a []string slice
+func (p *IntSlice) S() (new []string) {
 	return ToStringSliceG(p.O())
 }
 

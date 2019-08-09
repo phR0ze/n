@@ -1034,8 +1034,8 @@ func (p *RefSlice) TakeW(sel func(O) bool) (new Slice) {
 	return slice
 }
 
-// ToStrsG converts the underlying slice into a []string slice
-func (p *RefSlice) ToStrsG() (new []string) {
+// S converts the underlying slice into a []string slice
+func (p *RefSlice) S() (new []string) {
 	return ToStringSliceG(p.O())
 }
 

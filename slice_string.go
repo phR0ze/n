@@ -11,13 +11,17 @@ import (
 // including convenience methods on par with rapid development languages.
 type StringSlice []string
 
-// Strs is an alias for NewStringSlice for brevity
-func Strs(slice interface{}) (new *StringSlice) {
-	return ToStringSlice(slice)
+// S is an alias to ToStringSliceE
+func S(obj interface{}) *StringSlice {
+	x, _ := ToStringSliceE(obj)
+	if x == nil {
+		return &StringSlice{}
+	}
+	return x
 }
 
-// StrsV is an alias for NewStringSliceV for brevity
-func StrsV(elems ...interface{}) (new *StringSlice) {
+// SV is an alias for NewStringSliceV for brevity
+func SV(elems ...interface{}) (new *StringSlice) {
 	return ToStringSlice(elems)
 }
 
@@ -768,8 +772,8 @@ func (p *StringSlice) TakeW(sel func(O) bool) (new Slice) {
 	return slice
 }
 
-// ToStrsG converts the underlying slice into a []string slice
-func (p *StringSlice) ToStrsG() (new []string) {
+// S converts the underlying slice into a []string slice
+func (p *StringSlice) S() (new []string) {
 	return p.O().([]string)
 }
 

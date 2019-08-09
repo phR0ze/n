@@ -2195,12 +2195,12 @@ func ExampleStringSlice_Map() {
 }
 
 func TestStringSlice_Map(t *testing.T) {
-	slice := StrsV("1", "2", "3")
+	slice := SV("1", "2", "3")
 	slice = slice.Map(func(x O) O {
 		return ToStr(ToInt(x.(string)) + 1).A()
 	})
 	assert.Equal(t, []string{"2", "3", "4"}, slice.G())
-	assert.Equal(t, Strs([]string{"2", "3", "4"}), slice)
+	assert.Equal(t, S([]string{"2", "3", "4"}), slice)
 }
 
 // Nil

@@ -72,16 +72,11 @@ type Slice interface {
 	Take(indices ...int) (new Slice)                  // Take modifies this Slice removing the indicated range of elements from this Slice and returning them as a new Slice.
 	TakeAt(i int) (elem *Object)                      // TakeAt modifies this Slice removing the elemement at the given index location and returns the removed element as an Object.
 	TakeW(sel func(O) bool) (new Slice)               // TakeW modifies this Slice removing the elements that match the lambda selector and returns them as a new Slice.
-	ToStrsG() (new []string)                          // ToStrsG converts the underlying slice into a []string slice
+	S() (new []string)                                // ToStrsG converts the underlying slice into a []string slice
 	Union(slice interface{}) (new Slice)              // Union returns a new Slice by joining uniq elements from this Slice with uniq elements from the given Slice while preserving order.
 	UnionM(slice interface{}) Slice                   // UnionM modifies this Slice by joining uniq elements from this Slice with uniq elements from the given Slice while preserving order.
 	Uniq() (new Slice)                                // Uniq returns a new Slice with all non uniq elements removed while preserving element order.
 	UniqM() Slice                                     // UniqM modifies this Slice to remove all non uniq elements while preserving element order.
-}
-
-// S is an alias for NewSlice
-func S(obj interface{}) (new Slice) {
-	return NewSlice(obj)
 }
 
 // NewSlice provides a generic way to work with Slice types. It does this by wrapping Go types
@@ -165,11 +160,6 @@ func NewSlice(obj interface{}) (new Slice) {
 		new = NewRefSlice(obj)
 	}
 	return
-}
-
-// SV is an alias for NewSliceV
-func SV(obj ...interface{}) (new Slice) {
-	return NewSliceV(obj...)
 }
 
 // NewSliceV creates a new Slice encapsulating the given variadic elements in a new Slice of

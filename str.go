@@ -1203,8 +1203,8 @@ func (p *Str) TakeW(sel func(O) bool) (new Slice) {
 	return slice
 }
 
-// ToStrsG converts the underlying map into a []string slice
-func (p *Str) ToStrsG() (new []string) {
+// S converts the underlying map into a []string slice
+func (p *Str) S() (new []string) {
 	return ToStringSliceG(p.O())
 }
 

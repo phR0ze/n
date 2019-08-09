@@ -752,8 +752,8 @@ func (p *FloatSlice) TakeW(sel func(O) bool) (new Slice) {
 	return slice
 }
 
-// ToStrsG converts the underlying slice into a []string slice
-func (p *FloatSlice) ToStrsG() (new []string) {
+// S converts the underlying slice into a []string slice
+func (p *FloatSlice) S() (new []string) {
 	return ToStringSliceG(p.O())
 }
 

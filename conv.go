@@ -1240,8 +1240,8 @@ func Reference(obj interface{}) interface{} {
 	}
 }
 
-// ToBool converts an interface to a bool type.
-func ToBool(obj interface{}) bool {
+// B converts an interface to a bool type.
+func B(obj interface{}) bool {
 	val, _ := ToBoolE(obj)
 	return val
 }
@@ -2976,15 +2976,6 @@ func ToStringMapE(obj interface{}) (val *StringMap, err error) {
 	}
 
 	return
-}
-
-// ToStrs is an alias to ToStringSliceE
-func ToStrs(obj interface{}) *StringSlice {
-	x, _ := ToStringSliceE(obj)
-	if x == nil {
-		return &StringSlice{}
-	}
-	return x
 }
 
 // ToStringSlice convert an interface to a StringSlice type.
