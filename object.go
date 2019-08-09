@@ -401,6 +401,23 @@ func (p *Object) ToStringE() (string, error) {
 // Map related
 //--------------------------------------------------------------------------------------------------
 
+// Yaml is an alias to ToStringMap
+func (p *Object) Yaml() *StringMap {
+	if p == nil {
+		return NewStringMapV()
+	}
+	return ToStringMap(p.o)
+}
+
+// YamlG is an alias to ToStringMapG
+func (p *Object) YamlG() map[string]interface{} {
+	if p == nil {
+		return map[string]interface{}{}
+	}
+	v, _ := ToStringMapE(p.o)
+	return v.G()
+}
+
 // ToStringMap converts an interface to a *StringMap type.
 func (p *Object) ToStringMap() *StringMap {
 	if p == nil {
