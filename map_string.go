@@ -183,7 +183,7 @@ func (p *StringMap) Merge(m Map, location ...string) Map {
 		val = *p
 
 		// Process keys from left to right
-		keys, err := keysFromSelectorString(key)
+		keys, err := KeysFromSelector(key)
 		if err == nil {
 			for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
 				key := ko.ToString()
@@ -264,7 +264,7 @@ func (p *StringMap) MergeG(m Map, location ...string) map[string]interface{} {
 		val = *p
 
 		// Process keys from left to right
-		keys, err := keysFromSelectorString(key)
+		keys, err := KeysFromSelector(key)
 		if err == nil {
 			for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
 				key := ko.ToString()
@@ -331,7 +331,7 @@ func (p *StringMap) QueryE(key string) (val *Object, err error) {
 
 	// Process keys from left to right
 	var keys *StringSlice
-	if keys, err = keysFromSelectorString(key); err != nil {
+	if keys, err = KeysFromSelector(key); err != nil {
 		return
 	}
 	for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
@@ -411,7 +411,7 @@ func (p *StringMap) RemoveE(key string) (m Map, err error) {
 
 	// Process keys from left to right
 	var keys *StringSlice
-	if keys, err = keysFromSelectorString(key); err != nil {
+	if keys, err = KeysFromSelector(key); err != nil {
 		return
 	}
 	for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {

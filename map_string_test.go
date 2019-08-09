@@ -1035,77 +1035,77 @@ func TestWriteYaml(t *testing.T) {
 func TestStringMap_keysFromSelectorString(t *testing.T) {
 
 	// Empty
-	keys, err := keysFromSelectorString("")
+	keys, err := KeysFromSelector("")
 	assert.Nil(t, err)
 	assert.Equal(t, &StringSlice{}, keys)
 
 	// Identity
-	keys, err = keysFromSelectorString(".")
+	keys, err = KeysFromSelector(".")
 	assert.Nil(t, err)
 	assert.Equal(t, &StringSlice{}, keys)
 
 	// Object Identifier-Index: .foo, .foo.bar
-	keys, err = keysFromSelectorString("foo")
+	keys, err = KeysFromSelector("foo")
 	assert.Nil(t, err)
 	assert.Equal(t, &StringSlice{"foo"}, keys)
 
-	keys, err = keysFromSelectorString(".foo")
+	keys, err = KeysFromSelector(".foo")
 	assert.Nil(t, err)
 	assert.Equal(t, &StringSlice{"foo"}, keys)
 
-	keys, err = keysFromSelectorString(`."foo"`)
+	keys, err = KeysFromSelector(`."foo"`)
 	assert.Nil(t, err)
 	assert.Equal(t, &StringSlice{"foo"}, keys)
 
-	keys, err = keysFromSelectorString(".foo.bar")
+	keys, err = KeysFromSelector(".foo.bar")
 	assert.Nil(t, err)
 	assert.Equal(t, &StringSlice{"foo", "bar"}, keys)
 
-	keys, err = keysFromSelectorString("foo.bar")
+	keys, err = KeysFromSelector("foo.bar")
 	assert.Nil(t, err)
 	assert.Equal(t, &StringSlice{"foo", "bar"}, keys)
 
-	keys, err = keysFromSelectorString("foo1.bar.foo2")
+	keys, err = KeysFromSelector("foo1.bar.foo2")
 	assert.Nil(t, err)
 	assert.Equal(t, &StringSlice{"foo1", "bar", "foo2"}, keys)
 
-	keys, err = keysFromSelectorString(`foo1."bar.foo2"`)
+	keys, err = KeysFromSelector(`foo1."bar.foo2"`)
 	assert.Nil(t, err)
 	assert.Equal(t, &StringSlice{"foo1", "bar.foo2"}, keys)
 
 	// Array Index: .[], .[0], .[-1]
-	keys, err = keysFromSelectorString("foo.[]")
+	keys, err = KeysFromSelector("foo.[]")
 	assert.Nil(t, err)
 	assert.Equal(t, &StringSlice{"foo", "[]"}, keys)
 
-	keys, err = keysFromSelectorString("foo.[0]")
+	keys, err = KeysFromSelector("foo.[0]")
 	assert.Nil(t, err)
 	assert.Equal(t, &StringSlice{"foo", "[0]"}, keys)
 
-	keys, err = keysFromSelectorString("foo.[-1]")
+	keys, err = KeysFromSelector("foo.[-1]")
 	assert.Nil(t, err)
 	assert.Equal(t, &StringSlice{"foo", "[-1]"}, keys)
 
 	// Array Index: move through index
-	keys, err = keysFromSelectorString("foo.[0].val")
+	keys, err = KeysFromSelector("foo.[0].val")
 	assert.Nil(t, err)
 	assert.Equal(t, &StringSlice{"foo", "[0]", "val"}, keys)
 
 	// Array element selection based on element value
-	keys, err = keysFromSelectorString("one.[name==bar].val")
+	keys, err = KeysFromSelector("one.[name==bar].val")
 	assert.Nil(t, err)
 	assert.Equal(t, &StringSlice{"one", "[name==bar]", "val"}, keys)
 
-	keys, err = keysFromSelectorString("one.[name==bar].val.[-2]")
+	keys, err = KeysFromSelector("one.[name==bar].val.[-2]")
 	assert.Nil(t, err)
 	assert.Equal(t, &StringSlice{"one", "[name==bar]", "val", "[-2]"}, keys)
 
 	// no dot notation
-	keys, err = keysFromSelectorString("one")
+	keys, err = KeysFromSelector("one")
 	assert.Nil(t, err)
 	assert.Equal(t, &StringSlice{"one"}, keys)
 
-	keys, err = keysFromSelectorString("1")
+	keys, err = KeysFromSelector("1")
 	assert.Nil(t, err)
 	assert.Equal(t, &StringSlice{"1"}, keys)
 }

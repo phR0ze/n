@@ -124,7 +124,7 @@ func MergeStringMap(a, b map[string]interface{}, location ...string) map[string]
 		val = a
 
 		// Process keys from left to right
-		keys, err := keysFromSelectorString(key)
+		keys, err := KeysFromSelector(key)
 		if err == nil {
 			for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
 				key := ko.ToString()
@@ -192,8 +192,8 @@ func MergeStringMap(a, b map[string]interface{}, location ...string) map[string]
 	return a
 }
 
-// Split the given key selectors into individual keys
-func keysFromSelectorString(key string) (keys *StringSlice, err error) {
+// KeysFromSelector splits the given key selectors into individual keys
+func KeysFromSelector(key string) (keys *StringSlice, err error) {
 	keys = NewStringSliceV()
 
 	var quotes *StringSlice
