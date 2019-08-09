@@ -13,7 +13,7 @@ import (
 )
 
 // Create a 'dst' tarball from the given 'src' directory
-func Create(dst string, src string) (err error) {
+func Create(src string, dst string) (err error) {
 	var root string
 	if root, err = sys.Abs(src); err != nil {
 		return

@@ -16,7 +16,7 @@ func TestCreate(t *testing.T) {
 
 	// Create the new tarball
 	src := path.Join(tmpDir, "cli")
-	err := Create(tmpfile, src)
+	err := Create(src, tmpfile)
 	assert.Nil(t, err)
 	assert.True(t, sys.Exists(tmpfile))
 
