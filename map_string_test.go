@@ -336,6 +336,140 @@ func ExampleStringMap_Merge() {
 }
 
 func TestStringMap_Merge(t *testing.T) {
+
+	// Location tests
+	{
+		// Nesting - merge advanced
+		a := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+				"4": "five",
+			},
+		}
+		b := map[string]interface{}{
+			"4": "four",
+			"5": "five",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+				"4": "four",
+				"5": "five",
+			},
+		}
+		assert.Equal(t, expected, NewStringMap(a).Merge(Yaml(b), "2").ToYamlG())
+	}
+	{
+		// Nesting - merge
+		a := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+				"4": "five",
+			},
+		}
+		b := map[string]interface{}{
+			"4": "four",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+				"4": "four",
+			},
+		}
+		assert.Equal(t, expected, NewStringMap(a).Merge(Yaml(b), "2").ToYamlG())
+	}
+	{
+		// Nesting - two
+		a := map[string]interface{}{
+			"1": "one",
+			"2": "2",
+		}
+		b := map[string]interface{}{
+			"4": "four",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": map[string]interface{}{
+					"4": "four",
+				},
+			},
+		}
+		assert.Equal(t, expected, NewStringMap(a).Merge(Yaml(b), "2.3").ToYamlG())
+	}
+	{
+		// Nesting - one
+		a := map[string]interface{}{
+			"1": "one",
+			"2": "2",
+		}
+		b := map[string]interface{}{
+			"3": "three",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+			},
+		}
+		assert.Equal(t, expected, NewStringMap(a).Merge(Yaml(b), "2").ToYamlG())
+	}
+	{
+		// Nesting - doesn't exist two
+		a := map[string]interface{}{
+			"1": "one",
+		}
+		b := map[string]interface{}{
+			"4": "four",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": map[string]interface{}{
+					"4": "four",
+				},
+			},
+		}
+		assert.Equal(t, expected, NewStringMap(a).Merge(Yaml(b), "2.3").ToYamlG())
+	}
+	{
+		// Nesting - doesn't exist one
+		a := map[string]interface{}{
+			"1": "one",
+		}
+		b := map[string]interface{}{
+			"3": "three",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+			},
+		}
+		assert.Equal(t, expected, NewStringMap(a).Merge(Yaml(b), "2").ToYamlG())
+	}
+	{
+		// root indicator
+		a := map[string]interface{}{
+			"1": "one",
+			"2": "2",
+		}
+		b := map[string]interface{}{
+			"2": "two",
+			"3": "three",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": "two",
+			"3": "three",
+		}
+		assert.Equal(t, expected, NewStringMap(a).Merge(Yaml(b), ".").ToYamlG())
+	}
+
 	// nil or empty
 	{
 		assert.Equal(t, NewStringMapV(), (*StringMap)(nil).Merge(nil))
@@ -451,6 +585,140 @@ func ExampleStringMap_MergeG() {
 }
 
 func TestStringMap_MergeG(t *testing.T) {
+
+	// Location tests
+	{
+		// Nesting - merge advanced
+		a := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+				"4": "five",
+			},
+		}
+		b := map[string]interface{}{
+			"4": "four",
+			"5": "five",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+				"4": "four",
+				"5": "five",
+			},
+		}
+		assert.Equal(t, expected, NewStringMap(a).MergeG(Yaml(b), "2"))
+	}
+	{
+		// Nesting - merge
+		a := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+				"4": "five",
+			},
+		}
+		b := map[string]interface{}{
+			"4": "four",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+				"4": "four",
+			},
+		}
+		assert.Equal(t, expected, NewStringMap(a).MergeG(Yaml(b), "2"))
+	}
+	{
+		// Nesting - two
+		a := map[string]interface{}{
+			"1": "one",
+			"2": "2",
+		}
+		b := map[string]interface{}{
+			"4": "four",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": map[string]interface{}{
+					"4": "four",
+				},
+			},
+		}
+		assert.Equal(t, expected, NewStringMap(a).MergeG(Yaml(b), "2.3"))
+	}
+	{
+		// Nesting - one
+		a := map[string]interface{}{
+			"1": "one",
+			"2": "2",
+		}
+		b := map[string]interface{}{
+			"3": "three",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+			},
+		}
+		assert.Equal(t, expected, NewStringMap(a).MergeG(Yaml(b), "2"))
+	}
+	{
+		// Nesting - doesn't exist two
+		a := map[string]interface{}{
+			"1": "one",
+		}
+		b := map[string]interface{}{
+			"4": "four",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": map[string]interface{}{
+					"4": "four",
+				},
+			},
+		}
+		assert.Equal(t, expected, NewStringMap(a).MergeG(Yaml(b), "2.3"))
+	}
+	{
+		// Nesting - doesn't exist one
+		a := map[string]interface{}{
+			"1": "one",
+		}
+		b := map[string]interface{}{
+			"3": "three",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+			},
+		}
+		assert.Equal(t, expected, NewStringMap(a).MergeG(Yaml(b), "2"))
+	}
+	{
+		// root indicator
+		a := map[string]interface{}{
+			"1": "one",
+			"2": "2",
+		}
+		b := map[string]interface{}{
+			"2": "two",
+			"3": "three",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": "two",
+			"3": "three",
+		}
+		assert.Equal(t, expected, NewStringMap(a).MergeG(Yaml(b), "."))
+	}
+
 	// nil or empty
 	{
 		assert.Equal(t, map[string]interface{}{}, NewStringMapV().MergeG(nil))

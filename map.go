@@ -38,9 +38,9 @@ type Map interface {
 	// Join(separator ...string) (str *Object)           // Join converts each element into a string then joins them together using the given separator or comma by default.
 	// Last() (elem *Object)                             // Last returns the last element in this Map as an Object.
 	// LastN(n int) Slice                                // LastN returns the last n elements in this Map as a Slice reference to the original.
-	Keys() Slice     // Keys returns all the keys in this Map as a Slice of the key type.
-	Len() int        // Len returns the number of elements in this Map.
-	Merge(m Map) Map // Merge modifies this Map by overriding its values with the given map where they both exist and returns a reference to this Map.
+	Keys() Slice                         // Keys returns all the keys in this Map as a Slice of the key type.
+	Len() int                            // Len returns the number of elements in this Map.
+	Merge(m Map, location ...string) Map // Merge modifies this Map by overriding its values at location with the given map where they both exist and returns a reference to this Map.
 	// Less(i, j int) bool                               // Less returns true if the element indexed by i is less than the element indexed by j.
 	// Nil() bool                                        // Nil tests if this Map is nil.
 	O() interface{} // O returns the underlying data structure as is.
@@ -67,6 +67,10 @@ type Map interface {
 	// SortReverseM() Slice                              // SortReverseM modifies this Map sorting the elements in reverse and returns a reference to this Map.
 	// String() string                                   // Returns a string representation of this Map, implements the Stringer interface
 	// Swap(i, j int)                                    // Swap modifies this Map swapping the indicated elements.
+	ToStringMap() (m *StringMap)              // ToStringMap converts the map to a *StringMap
+	ToStringMapG() (m map[string]interface{}) // ToStringMapG converts the map to a google type map[string]interface{}
+	ToYaml() (m *StringMap)                   // ToYaml is an alias to ToStringMap
+	ToYamlG() (m map[string]interface{})      // ToYamlG is an alias to ToStringMapG
 	// Take(indices ...int) (new Map)                  // Take modifies this Map removing the indicated range of elements from this Map and returning them as a new Map.
 	// TakeAt(i int) (elem *Object)                      // TakeAt modifies this Map removing the elemement at the given index location and returns the removed element as an Object.
 	// TakeW(sel func(O) bool) (new Map)               // TakeW modifies this Map removing the elements that match the lambda selector and returns them as a new Map.
@@ -107,16 +111,47 @@ func NewMap(obj interface{}) (new Map) {
 	return
 }
 
-// MergeStringMap b into a and returns the new modified a, b takes higher precedence and will override a.
+// MergeStringMap b into a at location and returns the new modified a, b takes higher precedence and will override a.
 // Only merges map types by key recursively, does not attempt to merge lists.
-func MergeStringMap(a, b map[string]interface{}) map[string]interface{} {
+func MergeStringMap(a, b map[string]interface{}, location ...string) map[string]interface{} {
+	a2 := a
+
+	// 1. Handle location if given
+	key := ""
+	if len(location) > 0 {
+		key = location[0]
+		var val interface{}
+		val = a
+
+		// Process keys from left to right
+		keys, err := keysFromSelectorString(key)
+		if err == nil {
+			for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
+				key := ko.ToString()
+				m := ToStringMap(val)
+
+				// Set a new map as the value if not a map
+				if v, ok := (*m)[key]; ok {
+					if !ToStringMap(v).Any() {
+						m.Set(key, map[string]interface{}{})
+					}
+				} else {
+					m.Set(key, map[string]interface{}{})
+				}
+				val = (*m)[key]
+			}
+		}
+		a2 = ToStringMap(val).G()
+	}
+
+	// 2. Merge at location
 	switch {
-	case (a == nil || len(a) == 0) && (b == nil || len(b) == 0):
+	case a2 == nil && b == nil:
 		return map[string]interface{}{}
-	case a == nil || len(a) == 0:
+	case a2 == nil:
 		return b
-	case b == nil || len(b) == 0:
-		return a
+	case b == nil:
+		return a2
 	}
 
 	for k, v := range b {
@@ -130,8 +165,8 @@ func MergeStringMap(a, b map[string]interface{}) map[string]interface{} {
 		}
 
 		// a doesn't have the key so just set b's value
-		if val, exists := a[k]; !exists {
-			a[k] = bv
+		if val, exists := a2[k]; !exists {
+			a2[k] = bv
 		} else {
 			if _val, ok := val.(*StringMap); ok {
 				av = _val.G()
@@ -142,19 +177,55 @@ func MergeStringMap(a, b map[string]interface{}) map[string]interface{} {
 			if bc, ok := bv.(map[string]interface{}); ok {
 				if ac, ok := av.(map[string]interface{}); ok {
 					// a and b both contain the key and are both submaps so recurse
-					a[k] = MergeStringMap(ac, bc)
+					a2[k] = MergeStringMap(ac, bc)
 				} else {
 					// a is not a map so just override with b
-					a[k] = bv
+					a2[k] = bv
 				}
 			} else {
 				// b is not a map so just override a, no need to recurse
-				a[k] = bv
+				a2[k] = bv
 			}
 		}
 	}
 
 	return a
+}
+
+// Split the given key selectors into individual keys
+func keysFromSelectorString(key string) (keys *StringSlice, err error) {
+	keys = NewStringSliceV()
+
+	var quotes *StringSlice
+	if quotes, err = A(key).SplitQuotes(); err != nil {
+		return
+	}
+	for i := 0; i < quotes.Len(); i++ {
+		quote := quotes.At(i).ToStr()
+
+		// Split quotes into keys
+		// 1. a single dot notation string that needs split
+		// 2. a single quoted key to leave intact
+		var qKeys *StringSlice
+		if quote.First().A() != `"` {
+			qKeys = A(quote).Split(".")
+		} else {
+			qKeys = ToStringSlice(quote.TrimPrefix(`"`).TrimSuffix(`"`))
+		}
+
+		// Process keys from left to right
+		for k := qKeys.Shift(); !k.Nil(); k = qKeys.Shift() {
+			key := k.ToStr()
+
+			// Skip empty keys e.g. ".key" => ["", "key"]
+			if k.A() == "" {
+				continue
+			}
+
+			keys.Append(key)
+		}
+	}
+	return
 }
 
 // // Any checks if the numerable has anything in it

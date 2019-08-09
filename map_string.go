@@ -170,25 +170,54 @@ func (p *StringMap) Len() int {
 	return len(*p)
 }
 
-// Merge modifies this Map by overriding its values with the given map where they both exist and returns a reference to this Map.
+// Merge modifies this Map by overriding its values at location with the given map where they both exist and returns a reference to this Map.
 // Converting all string maps into *StringMap instances.
-func (p *StringMap) Merge(m Map) Map {
+func (p *StringMap) Merge(m Map, location ...string) Map {
+	p2 := p
 
-	// Validate existing/incoming
+	// 1. Handle location if given
+	key := ""
+	if len(location) > 0 {
+		key = location[0]
+		var val interface{}
+		val = *p
+
+		// Process keys from left to right
+		keys, err := keysFromSelectorString(key)
+		if err == nil {
+			for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
+				key := ko.ToString()
+				m := ToStringMap(val)
+
+				// Set a new map as the value if not a map
+				if v, ok := (*m)[key]; ok {
+					if !ToStringMap(v).Any() {
+						m.Set(key, map[string]interface{}{})
+					}
+				} else {
+					m.Set(key, map[string]interface{}{})
+				}
+				val = (*m)[key]
+			}
+		}
+		p2 = ToStringMap(val)
+	}
+
+	// 2. Merge at location
 	x, err := ToStringMapE(m)
 	switch {
-	case (p == nil || len(*p) == 0) && (err != nil || m == nil || len(*x) == 0):
+	case p2 == nil && (err != nil || m == nil):
 		return NewStringMapV()
-	case p == nil || len(*p) == 0:
+	case p2 == nil:
 		return x
-	case err != nil || m == nil || len(*x) == 0:
-		return p
+	case err != nil || m == nil:
+		return p2
 	}
 
 	for k, v := range *x {
 		var av, bv interface{}
 
-		// Ensure b value is Go type
+		// Ensure b value is n type
 		if val, ok := v.(map[string]interface{}); ok {
 			bv = ToStringMap(val)
 		} else {
@@ -196,8 +225,8 @@ func (p *StringMap) Merge(m Map) Map {
 		}
 
 		// a doesn't have the key so just set b's value
-		if val, exists := (*p)[k]; !exists {
-			(*p)[k] = bv
+		if val, exists := (*p2)[k]; !exists {
+			(*p2)[k] = bv
 		} else {
 			if _val, ok := val.(map[string]interface{}); ok {
 				av = ToStringMap(_val)
@@ -208,14 +237,14 @@ func (p *StringMap) Merge(m Map) Map {
 			if bc, ok := bv.(*StringMap); ok {
 				if ac, ok := av.(*StringMap); ok {
 					// a and b both contain the key and are both submaps so recurse
-					(*p)[k] = ac.Merge(bc)
+					(*p2)[k] = ac.Merge(bc)
 				} else {
 					// a is not a map so just override with b
-					(*p)[k] = bv
+					(*p2)[k] = bv
 				}
 			} else {
 				// b is not a map so just override a, no need to recurse
-				(*p)[k] = bv
+				(*p2)[k] = bv
 			}
 		}
 	}
@@ -223,22 +252,51 @@ func (p *StringMap) Merge(m Map) Map {
 	return p
 }
 
-// MergeG modifies this Map by overriding its values with the given map where they both exist and returns the Go type
-func (p *StringMap) MergeG(m Map) map[string]interface{} {
+// MergeG modifies this Map by overriding its values with the given map location where they both exist and returns the Go type
+func (p *StringMap) MergeG(m Map, location ...string) map[string]interface{} {
+	p2 := p
 
-	// Validate existing/incoming
+	// 1. Handle location if given
+	key := ""
+	if len(location) > 0 {
+		key = location[0]
+		var val interface{}
+		val = *p
+
+		// Process keys from left to right
+		keys, err := keysFromSelectorString(key)
+		if err == nil {
+			for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
+				key := ko.ToString()
+				m := ToStringMap(val)
+
+				// Set a new map as the value if not a map
+				if v, ok := (*m)[key]; ok {
+					if !ToStringMap(v).Any() {
+						m.Set(key, map[string]interface{}{})
+					}
+				} else {
+					m.Set(key, map[string]interface{}{})
+				}
+				val = (*m)[key]
+			}
+		}
+		p2 = ToStringMap(val)
+	}
+
+	// 2. Merge at location
 	x, err := ToStringMapE(m)
 	switch {
-	case (p == nil || len(*p) == 0) && (err != nil || m == nil || len(*x) == 0):
+	case p2 == nil && (err != nil || m == nil):
 		return NewStringMapV().G()
-	case p == nil || len(*p) == 0:
+	case p2 == nil:
 		return x.G()
-	case err != nil || m == nil || len(*x) == 0:
-		return p.G()
+	case err != nil || m == nil:
+		return p2.G()
 	}
 
 	// Call type specific function helper
-	*p = MergeStringMap(*p, *x)
+	*p2 = MergeStringMap(*p2, *x)
 	return p.G()
 }
 
@@ -439,44 +497,34 @@ func (p *StringMap) SetM(key, val interface{}) Map {
 	return p
 }
 
+// ToStringMap converts the map to a *StringMap
+func (p *StringMap) ToStringMap() (m *StringMap) {
+	if p == nil {
+		return NewStringMapV()
+	}
+	return p
+}
+
+// ToStringMapG converts the map to a google type map[string]interface{}
+func (p *StringMap) ToStringMapG() (m map[string]interface{}) {
+	return p.G()
+}
+
+// ToYaml is an alias to ToStringMap
+func (p *StringMap) ToYaml() (m *StringMap) {
+	if p == nil {
+		return NewStringMapV()
+	}
+	return p
+}
+
+// ToYamlG is an alias to ToStringMapG
+func (p *StringMap) ToYamlG() (m map[string]interface{}) {
+	return p.G()
+}
+
 // WriteYaml converts the *StringMap into a map[string]interface{} then calls
 // sys.WriteYaml on it to write it out to disk.
 func (p *StringMap) WriteYaml(filename string) (err error) {
 	return sys.WriteYaml(filename, p.G())
-}
-
-// Split the given key selectors into individual keys
-func keysFromSelectorString(key string) (keys *StringSlice, err error) {
-	keys = NewStringSliceV()
-
-	var quotes *StringSlice
-	if quotes, err = A(key).SplitQuotes(); err != nil {
-		return
-	}
-	for i := 0; i < quotes.Len(); i++ {
-		quote := quotes.At(i).ToStr()
-
-		// Split quotes into keys
-		// 1. a single dot notation string that needs split
-		// 2. a single quoted key to leave intact
-		var qKeys *StringSlice
-		if quote.First().A() != `"` {
-			qKeys = A(quote).Split(".")
-		} else {
-			qKeys = ToStringSlice(quote.TrimPrefix(`"`).TrimSuffix(`"`))
-		}
-
-		// Process keys from left to right
-		for k := qKeys.Shift(); !k.Nil(); k = qKeys.Shift() {
-			key := k.ToStr()
-
-			// Skip empty keys e.g. ".key" => ["", "key"]
-			if k.A() == "" {
-				continue
-			}
-
-			keys.Append(key)
-		}
-	}
-	return
 }
