@@ -598,11 +598,6 @@ func (p *Str) G() string {
 	return p.O().(string)
 }
 
-// Generic returns true if the underlying implementation is a RefSlice
-func (p *Str) Generic() bool {
-	return false
-}
-
 // HasAnyPrefix checks if the string has any of the given prefixes
 func (p *Str) HasAnyPrefix(prefixes interface{}) bool {
 	if p == nil || len(*p) == 0 {
@@ -752,6 +747,11 @@ func (p *Str) Insert(i int, obj interface{}) Slice {
 	return p
 }
 
+// InterSlice returns true if the underlying implementation is a RefSlice
+func (p *Str) InterSlice() bool {
+	return false
+}
+
 // Join converts each element into a string then joins them together using the given separator or comma by default.
 func (p *Str) Join(separator ...string) (str *Object) {
 	if p == nil || len(*p) == 0 {
@@ -892,6 +892,11 @@ func (p *Str) PopN(n int) (new Slice) {
 // Prepend modifies this Slice to add the given element at the begining and returns a reference to this Slice.
 func (p *Str) Prepend(elem interface{}) Slice {
 	return p.Insert(0, elem)
+}
+
+// RefSlice returns true if the underlying implementation is a RefSlice
+func (p *Str) RefSlice() bool {
+	return false
 }
 
 // Replace returns a copy of the string s with the first n non-overlapping instances of old

@@ -2757,11 +2757,11 @@ func TestRefSlice_FirstN(t *testing.T) {
 	}
 }
 
-// Generic
+// RefSlicej
 //--------------------------------------------------------------------------------------------------
-func ExampleRefSlice_Generic() {
+func ExampleRefSlice_RefSlice() {
 	slice := NewRefSliceV(1, 2, 3)
-	fmt.Println(slice.Generic())
+	fmt.Println(slice.RefSlice())
 	// Output: true
 }
 

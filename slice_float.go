@@ -389,11 +389,6 @@ func (p *FloatSlice) G() []float64 {
 	return p.O().([]float64)
 }
 
-// Generic returns true if the underlying implementation is a RefSlice
-func (p *FloatSlice) Generic() bool {
-	return false
-}
-
 // Index returns the index of the first element in this Slice where element == elem
 // Returns a -1 if the element was not not found.
 func (p *FloatSlice) Index(elem interface{}) (loc int) {
@@ -442,6 +437,11 @@ func (p *FloatSlice) Insert(i int, obj interface{}) Slice {
 		}
 	}
 	return p
+}
+
+// InterSlice returns true if the underlying implementation is a RefSlice
+func (p *FloatSlice) InterSlice() bool {
+	return false
 }
 
 // Join converts each element into a string then joins them together using the given separator or comma by default.
@@ -548,6 +548,11 @@ func (p *FloatSlice) PopN(n int) (new Slice) {
 // Prepend modifies this Slice to add the given element at the begining and returns a reference to this Slice.
 func (p *FloatSlice) Prepend(elem interface{}) Slice {
 	return p.Insert(0, elem)
+}
+
+// RefSlice returns true if the underlying implementation is a RefSlice
+func (p *FloatSlice) RefSlice() bool {
+	return false
 }
 
 // Reverse returns a new Slice with the order of the elements reversed.

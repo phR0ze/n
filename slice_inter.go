@@ -1,7 +1,12 @@
 package n
 
 import (
+	"fmt"
 	"reflect"
+	"sort"
+	"strings"
+
+	"github.com/pkg/errors"
 )
 
 // InterSlice implements the Slice interface providing a generic way to work with slice types
@@ -261,132 +266,131 @@ func (p *InterSlice) DropLastN(n int) Slice {
 // DropW modifies this Slice to delete the elements that match the lambda selector and returns a reference to this Slice.
 // The slice is updated instantly when lambda expression is evaluated not after DropW completes.
 func (p *InterSlice) DropW(sel func(O) bool) Slice {
-	// l := p.Len()
-	// if p.Nil() || l == 0 {
-	// 	return p
-	// }
-
-	// for i := 0; i < l; i++ {
-	// 	if sel(p.v.Index(i).Interface()) {
-	// 		p.DropAt(i)
-	// 		l--
-	// 		i--
-	// 	}
-	// }
+	if p == nil || len(*p) == 0 {
+		return p
+	}
+	l := len(*p)
+	for i := 0; i < l; i++ {
+		if sel((*p)[i]) {
+			p.DropAt(i)
+			l--
+			i--
+		}
+	}
 	return p
 }
 
 // Each calls the given lambda once for each element in this Slice, passing in that element
 // as a parameter. Returns a reference to this Slice
 func (p *InterSlice) Each(action func(O)) Slice {
-	// if p.Nil() {
-	// 	return p
-	// }
-	// for i := 0; i < p.Len(); i++ {
-	// 	action(p.v.Index(i).Interface())
-	// }
+	if p == nil {
+		return p
+	}
+	for i := range *p {
+		action((*p)[i])
+	}
 	return p
 }
 
 // EachE calls the given lambda once for each element in this Slice, passing in that element
 // as a parameter. Returns a reference to this Slice and any error from the lambda.
-func (p *InterSlice) EachE(action func(O) error) (slice Slice, err error) {
-	// slice = p
-	// if p.Nil() {
-	// 	return
-	// }
-	// for i := 0; i < p.Len(); i++ {
-	// 	if err = action(p.v.Index(i).Interface()); err != nil {
-	// 		return
-	// 	}
-	// }
-	return
+func (p *InterSlice) EachE(action func(O) error) (Slice, error) {
+	var err error
+	if p == nil {
+		return p, err
+	}
+	for i := range *p {
+		if err = action((*p)[i]); err != nil {
+			return p, err
+		}
+	}
+	return p, err
 }
 
 // EachI calls the given lambda once for each element in this Slice, passing in the index and element
 // as a parameter. Returns a reference to this Slice
 func (p *InterSlice) EachI(action func(int, O)) Slice {
-	// if p.Nil() {
-	// 	return p
-	// }
-	// for i := 0; i < p.Len(); i++ {
-	// 	action(i, p.v.Index(i).Interface())
-	// }
+	if p == nil {
+		return p
+	}
+	for i := range *p {
+		action(i, (*p)[i])
+	}
 	return p
 }
 
 // EachIE calls the given lambda once for each element in this Slice, passing in the index and element
 // as a parameter. Returns a reference to this Slice and any error from the lambda.
-func (p *InterSlice) EachIE(action func(int, O) error) (slice Slice, err error) {
-	// slice = p
-	// if p.Nil() {
-	// 	return
-	// }
-	// for i := 0; i < p.Len(); i++ {
-	// 	if err = action(i, p.v.Index(i).Interface()); err != nil {
-	// 		return
-	// 	}
-	// }
-	return
+func (p *InterSlice) EachIE(action func(int, O) error) (Slice, error) {
+	var err error
+	if p == nil {
+		return p, err
+	}
+	for i := range *p {
+		if err = action(i, (*p)[i]); err != nil {
+			return p, err
+		}
+	}
+	return p, err
 }
 
 // EachR calls the given lambda once for each element in this Slice in reverse, passing in that element
 // as a parameter. Returns a reference to this Slice
 func (p *InterSlice) EachR(action func(O)) Slice {
-	// if p.Nil() {
-	// 	return p
-	// }
-	// for i := p.Len() - 1; i >= 0; i-- {
-	// 	action(p.v.Index(i).Interface())
-	// }
+	if p == nil {
+		return p
+	}
+	for i := len(*p) - 1; i >= 0; i-- {
+		action((*p)[i])
+	}
 	return p
 }
 
 // EachRE calls the given lambda once for each element in this Slice in reverse, passing in that element
 // as a parameter. Returns a reference to this Slice and any error from the lambda.
-func (p *InterSlice) EachRE(action func(O) error) (slice Slice, err error) {
-	// slice = p
-	// if p.Nil() {
-	// 	return
-	// }
-	// for i := p.Len() - 1; i >= 0; i-- {
-	// 	if err = action(p.v.Index(i).Interface()); err != nil {
-	// 		return
-	// 	}
-	// }
-	return
+func (p *InterSlice) EachRE(action func(O) error) (Slice, error) {
+	var err error
+	if p == nil {
+		return p, err
+	}
+	for i := len(*p) - 1; i >= 0; i-- {
+		if err = action((*p)[i]); err != nil {
+			return p, err
+		}
+	}
+	return p, err
 }
 
 // EachRI calls the given lambda once for each element in this Slice in reverse, passing in that element
 // as a parameter. Returns a reference to this Slice
 func (p *InterSlice) EachRI(action func(int, O)) Slice {
-	// if p.Nil() {
-	// 	return p
-	// }
-	// for i := p.Len() - 1; i >= 0; i-- {
-	// 	action(i, p.v.Index(i).Interface())
-	// }
+	if p == nil {
+		return p
+	}
+	for i := len(*p) - 1; i >= 0; i-- {
+		action(i, (*p)[i])
+	}
 	return p
 }
 
 // EachRIE calls the given lambda once for each element in this Slice in reverse, passing in that element
 // as a parameter. Returns a reference to this Slice and any error from the lambda.
-func (p *InterSlice) EachRIE(action func(int, O) error) (slice Slice, err error) {
-	// slice = p
-	// if p.Nil() {
-	// 	return
-	// }
-	// for i := p.Len() - 1; i >= 0; i-- {
-	// 	if err = action(i, p.v.Index(i).Interface()); err != nil {
-	// 		return
-	// 	}
-	// }
-	return
+func (p *InterSlice) EachRIE(action func(int, O) error) (Slice, error) {
+	var err error
+	if p == nil {
+		return p, err
+	}
+	for i := len(*p) - 1; i >= 0; i-- {
+		if err = action(i, (*p)[i]); err != nil {
+			return p, err
+		}
+	}
+	return p, err
 }
 
 // Empty tests if this Slice is empty.
 func (p *InterSlice) Empty() bool {
-	if p.Nil() || p.Len() == 0 {
+	if p == nil || len(*p) == 0 {
 		return true
 	}
 	return false
@@ -401,11 +405,8 @@ func (p *InterSlice) First() (elem *Object) {
 // FirstN returns the first n elements in this slice as a Slice reference to the original.
 // Best effort is used such that as many as can be will be returned up until the request is satisfied.
 func (p *InterSlice) FirstN(n int) Slice {
-	if p.Nil() {
-		return NewInterSliceV()
-	}
 	if n == 0 {
-		return newEmptySlice(p.O())
+		return NewInterSliceV()
 	}
 	return p.Slice(0, abs(n)-1)
 }
@@ -418,24 +419,18 @@ func (p *InterSlice) G() []interface{} {
 	return []interface{}(*p)
 }
 
-// Generic returns true if the underlying implementation is a InterSlice
-func (p *InterSlice) Generic() bool {
-	return true
-}
-
 // Index returns the index of the first element in this Slice where element == elem
 // Returns a -1 if the element was not not found.
 func (p *InterSlice) Index(elem interface{}) (loc int) {
-	// loc = -1
-	// l := p.Len()
-	// if p.Nil() || l == 0 {
-	// 	return
-	// }
-	// for i := 0; i < l; i++ {
-	// 	if elem == p.v.Index(i).Interface() {
-	// 		return i
-	// 	}
-	// }
+	loc = -1
+	if p == nil || len(*p) == 0 {
+		return
+	}
+	for i := range *p {
+		if (*p)[i] == elem {
+			return i
+		}
+	}
 	return
 }
 
@@ -445,98 +440,56 @@ func (p *InterSlice) Index(elem interface{}) (loc int) {
 // of -1 will insert the element at the end of the slice. If a Slice is given all elements will be
 // inserted starting from the beging until the end. Slice is returned for chaining. Invalid
 // index locations will not change the slice.
-func (p *InterSlice) Insert(i int, elem interface{}) Slice {
-	// l := p.Len()
-	// if p.Nil() || l == 0 {
-	// 	return p.Append(elem)
-	// }
-
-	// // Insert the item before j if pos and after j if neg
-	// j := i
-	// if j = absIndex(l, j); j == -1 {
-	// 	return p
-	// }
-	// if i < 0 {
-	// 	j++
-	// }
-	// x := reflect.ValueOf(elem)
-	// if p.v.Type().Elem() != x.Type() {
-	// 	panic(fmt.Sprintf("can't insert type '%v' into '%v'", x.Type(), p.v.Type()))
-	// } else {
-	// 	if j == 0 {
-	// 		*p.v = reflect.Append(*p.v, x)
-	// 		reflect.Copy(p.v.Slice(1, p.v.Len()), p.v.Slice(0, p.v.Len()-1))
-	// 		p.v.Index(0).Set(x)
-	// 	} else if j < l {
-	// 		*p.v = reflect.Append(*p.v, x)
-	// 		reflect.Copy(p.v.Slice(j+1, p.v.Len()), p.v.Slice(j, p.v.Len()))
-	// 		p.v.Index(j).Set(x)
-	// 	} else {
-	// 		*p.v = reflect.Append(*p.v, x)
-	// 	}
-	// }
-	return p
-}
-
-// InsertS modifies this Slice to insert the given elements before the element with the given index.
-// Negative indices count backwards from the end of the slice, where -1 is the last element. If a
-// negative index is used, the given element will be inserted after that element, so using an index
-// of -1 will insert the element at the end of the slice. If a Slice is given all elements will be
-// inserted starting from the beging until the end. Slice is returned for chaining. Invalid
-// index locations will not change the slice.
-func (p *InterSlice) InsertS(i int, slice interface{}) Slice {
-	l := p.Len()
-	if p.Nil() || l == 0 {
-		return p.ConcatM(slice)
+func (p *InterSlice) Insert(i int, obj interface{}) Slice {
+	if p == nil || len(*p) == 0 {
+		return p.ConcatM(obj)
 	}
 
-	// // Insert the item before j if pos and after j if neg
+	// Insert the item before j if pos and after j if neg
 	j := i
-	if j = absIndex(l, j); j == -1 {
+	if j = absIndex(len(*p), j); j == -1 {
 		return p
 	}
 	if i < 0 {
 		j++
 	}
-	// x := reflect.ValueOf(elem)
-	// if p.v.Type().Elem() != x.Type() {
-	// 	panic(fmt.Sprintf("can't insert type '%v' into '%v'", x.Type(), p.v.Type()))
-	// } else {
-	// 	if j == 0 {
-	// 		*p.v = reflect.Append(*p.v, x)
-	// 		reflect.Copy(p.v.Slice(1, p.v.Len()), p.v.Slice(0, p.v.Len()-1))
-	// 		p.v.Index(0).Set(x)
-	// 	} else if j < l {
-	// 		*p.v = reflect.Append(*p.v, x)
-	// 		reflect.Copy(p.v.Slice(j+1, p.v.Len()), p.v.Slice(j, p.v.Len()))
-	// 		p.v.Index(j).Set(x)
-	// 	} else {
-	// 		*p.v = reflect.Append(*p.v, x)
-	// 	}
-	// }
+	elems := ToInterSlice(obj)
+	if j == 0 {
+		*p = append(*elems, *p...)
+	} else if j < len(*p) {
+		*p = append(*p, *elems...)           // ensures enough space exists
+		copy((*p)[j+len(*elems):], (*p)[j:]) // shifts right elements drop added
+		copy((*p)[j:], *elems)               // set new in locations vacated
+	} else {
+		*p = append(*p, *elems...)
+	}
 	return p
+}
+
+// InterSlice returns true if the underlying implementation is a RefSlice
+func (p *InterSlice) InterSlice() bool {
+	return true
 }
 
 // Join converts each element into a string then joins them together using the given separator or comma by default.
 func (p *InterSlice) Join(separator ...string) (str *Object) {
-	// l := p.Len()
-	// if p.Nil() || l == 0 {
-	// 	str = &Object{""}
-	// 	return
-	// }
-	// sep := ","
-	// if len(separator) > 0 {
-	// 	sep = separator[0]
-	// }
+	if p == nil || len(*p) == 0 {
+		str = &Object{""}
+		return
+	}
+	sep := ","
+	if len(separator) > 0 {
+		sep = separator[0]
+	}
 
-	// var builder strings.Builder
-	// for i := 0; i < l; i++ {
-	// 	builder.WriteString(Obj(p.v.Index(i).Interface()).ToString())
-	// 	if i+1 < l {
-	// 		builder.WriteString(sep)
-	// 	}
-	// }
-	// str = &Object{builder.String()}
+	var builder strings.Builder
+	for i := range *p {
+		builder.WriteString(ToString((*p)[i]))
+		if i+1 < len(*p) {
+			builder.WriteString(sep)
+		}
+	}
+	str = &Object{builder.String()}
 	return
 }
 
@@ -549,11 +502,8 @@ func (p *InterSlice) Last() (elem *Object) {
 // LastN returns the last n elements in this Slice as a Slice reference to the original.
 // Best effort is used such that as many as can be will be returned up until the request is satisfied.
 func (p *InterSlice) LastN(n int) Slice {
-	if p.Nil() {
-		return NewInterSliceV()
-	}
 	if n == 0 {
-		return newEmptySlice(p.O())
+		return NewInterSliceV()
 	}
 	return p.Slice(absNeg(n), -1)
 }
@@ -569,19 +519,18 @@ func (p *InterSlice) Len() int {
 // Less returns true if the element indexed by i is less than the element indexed by j.
 // Supports optimized Slice types or Go types that can be converted into an optimized Slice type.
 func (p *InterSlice) Less(i, j int) bool {
-	// l := p.Len()
-	// if p.Nil() || l < 2 || i < 0 || j < 0 || i >= l || j >= l {
-	// 	return false
-	// }
+	l := p.Len()
+	if p.Nil() || l < 2 || i < 0 || j < 0 || i >= l || j >= l {
+		return false
+	}
 
-	// // Handle supported types
-	// slice := NewSlice(p.v.Interface())
-	// if !slice.Generic() {
-	// 	return slice.Less(i, j)
-	// }
+	// Handle supported types
+	slice := NewSlice(*p)
+	if !slice.RefSlice() {
+		return slice.Less(i, j)
+	}
 
-	// panic(fmt.Sprintf("unsupported comparable type '%v'", p.v.Type()))
-	return false
+	panic(fmt.Sprintf("unsupported comparable type '%T'", *p))
 }
 
 // Nil tests if this Slice is nil
@@ -602,12 +551,14 @@ func (p *InterSlice) O() interface{} {
 
 // Pair simply returns the first and second Slice elements as Objects
 func (p *InterSlice) Pair() (first, second *Object) {
-	l := p.Len()
 	first, second = &Object{}, &Object{}
-	if l > 0 {
+	if p == nil {
+		return
+	}
+	if len(*p) > 0 {
 		first = p.At(0)
 	}
-	if l > 1 {
+	if len(*p) > 1 {
 		second = p.At(1)
 	}
 	return
@@ -622,11 +573,8 @@ func (p *InterSlice) Pop() (elem *Object) {
 
 // PopN modifies this Slice to remove the last n elements and returns the removed elements as a new Slice.
 func (p *InterSlice) PopN(n int) (new Slice) {
-	if p.Nil() {
-		return NewInterSliceV()
-	}
 	if n == 0 {
-		return newEmptySlice(p.O())
+		return NewInterSliceV()
 	}
 	new = p.Copy(absNeg(n), -1)
 	p.DropLastN(n)
@@ -638,9 +586,14 @@ func (p *InterSlice) Prepend(elem interface{}) Slice {
 	return p.Insert(0, elem)
 }
 
+// RefSlice returns true if the underlying implementation is a RefSlice
+func (p *InterSlice) RefSlice() bool {
+	return false
+}
+
 // Reverse returns a new Slice with the order of the elements reversed.
 func (p *InterSlice) Reverse() (new Slice) {
-	if p.Nil() || p.Len() < 2 {
+	if p == nil || len(*p) < 2 {
 		return p.Copy()
 	}
 	return p.Copy().ReverseM()
@@ -648,11 +601,10 @@ func (p *InterSlice) Reverse() (new Slice) {
 
 // ReverseM modifies this Slice reversing the order of the elements and returns a reference to this Slice.
 func (p *InterSlice) ReverseM() Slice {
-	l := p.Len()
-	if p.Nil() || l == 0 {
+	if p == nil || len(*p) == 0 {
 		return p
 	}
-	for i, j := 0, l-1; i < j; i, j = i+1, j-1 {
+	for i, j := 0, len(*p)-1; i < j; i, j = i+1, j-1 {
 		p.Swap(i, j)
 	}
 	return p
@@ -670,18 +622,16 @@ func (p *InterSlice) SG() (slice []string) {
 
 // Select creates a new slice with the elements that match the lambda selector.
 func (p *InterSlice) Select(sel func(O) bool) (new Slice) {
-	// l := p.Len()
-	// slice := NewInterSliceV()
-	// if p.Nil() || l == 0 {
-	// 	return slice
-	// }
-	// for i := 0; i < l; i++ {
-	// 	obj := p.v.Index(i).Interface()
-	// 	if sel(obj) {
-	// 		slice.Append(obj)
-	// 	}
-	// }
-	return
+	slice := NewInterSliceV()
+	if p == nil || len(*p) == 0 {
+		return slice
+	}
+	for i := range *p {
+		if sel((*p)[i]) {
+			*slice = append(*slice, (*p)[i])
+		}
+	}
+	return slice
 }
 
 // Set the element at the given index location to the given element. Allows for negative notation.
@@ -693,23 +643,22 @@ func (p *InterSlice) Set(i int, elem interface{}) Slice {
 
 // SetE the element at the given index location to the given element. Allows for negative notation.
 // Returns a referenc to this Slice and an error if out of bounds or elem is the wrong type.
-func (p *InterSlice) SetE(i int, elem interface{}) (slice Slice, err error) {
-	// slice = p
-	// if p.Nil() {
-	// 	return
-	// }
-	// if i = absIndex(p.Len(), i); i == -1 {
-	// 	err = errors.Errorf("slice assignment is out of bounds")
-	// 	return
-	// }
+func (p *InterSlice) SetE(i int, elems interface{}) (Slice, error) {
+	var err error
+	if p == nil {
+		return p, err
+	}
+	if i = absIndex(len(*p), i); i == -1 {
+		err = errors.Errorf("slice assignment is out of bounds")
+		return p, err
+	}
 
-	// x := reflect.ValueOf(elem)
-	// if p.v.Type().Elem() != x.Type() {
-	// 	err = errors.Errorf("can't set type '%v' in '%v'", x.Type(), p.v.Type())
-	// } else {
-	// 	p.v.Index(i).Set(x)
-	// }
-	return
+	// Account for length of elems
+	x := ToInterSlice(elems)
+	if len(*x) > 0 {
+		copy((*p)[i:], *x)
+	}
+	return p, err
 }
 
 // Shift modifies this Slice to remove the first element and returns the removed element as an Object.
@@ -721,11 +670,8 @@ func (p *InterSlice) Shift() (elem *Object) {
 
 // ShiftN modifies this Slice to remove the first n elements and returns the removed elements as a new Slice.
 func (p *InterSlice) ShiftN(n int) (new Slice) {
-	if p.Nil() {
-		return NewInterSliceV()
-	}
 	if n == 0 {
-		return newEmptySlice(p.O())
+		return NewInterSliceV()
 	}
 	new = p.Copy(0, abs(n)-1)
 	p.DropFirstN(n)
@@ -746,24 +692,24 @@ func (p *InterSlice) Single() bool {
 //
 // e.g. NewInterSliceV(1,2,3).Slice(0, -1) == [1,2,3] && NewInterSliceV(1,2,3).Slice(1,2) == [2,3]
 func (p *InterSlice) Slice(indices ...int) Slice {
-	// if p.Nil() {
-	// 	return NewInterSliceV()
-	// }
+	if p == nil || len(*p) == 0 {
+		return NewInterSliceV()
+	}
 
-	// // Handle index manipulation
-	// i, j, err := absIndices(p.Len(), indices...)
-	// if err != nil {
-	// 	return newEmptySlice(p.O())
-	// }
+	// Handle index manipulation
+	i, j, err := absIndices(len(*p), indices...)
+	if err != nil {
+		return NewInterSliceV()
+	}
 
-	// return NewInterSlice(p.v.Slice(i, j).Interface())
-	return nil
+	slice := InterSlice((*p)[i:j])
+	return &slice
 }
 
 // Sort returns a new Slice with sorted elements.
 // Supports optimized Slice types or Go types that can be converted into an optimized Slice type.
 func (p *InterSlice) Sort() (new Slice) {
-	if p.Nil() || p.Len() < 2 {
+	if p == nil || len(*p) < 2 {
 		return p.Copy()
 	}
 	return p.Copy().SortM()
@@ -772,26 +718,17 @@ func (p *InterSlice) Sort() (new Slice) {
 // SortM modifies this Slice sorting the elements and returns a reference to this Slice.
 // Supports optimized Slice types or Go types that can be converted into an optimized Slice type.
 func (p *InterSlice) SortM() Slice {
-	// if p.Nil() || p.Len() < 2 {
-	// 	return p
-	// }
-
-	// // Handle supported types
-	// slice := NewSlice(p.v.Interface())
-	// if !slice.Generic() {
-	// 	slice.SortM()
-	// 	*p = *NewInterSlice(slice.O())
-	// } else {
-	// 	panic(fmt.Sprintf("unsupported comparable type '%v'", p.v.Type()))
-	// }
-
+	if p == nil || len(*p) < 2 {
+		return p
+	}
+	sort.Sort(p)
 	return p
 }
 
 // SortReverse returns a new Slice sorting the elements in reverse.
 // Supports optimized Slice types or Go types that can be converted into an optimized Slice type.
 func (p *InterSlice) SortReverse() (new Slice) {
-	if p.Nil() || p.Len() < 2 {
+	if p == nil || len(*p) < 2 {
 		return p.Copy()
 	}
 	return p.Copy().SortReverseM()
@@ -800,45 +737,35 @@ func (p *InterSlice) SortReverse() (new Slice) {
 // SortReverseM modifies this Slice sorting the elements in reverse and returns a reference to this Slice.
 // Supports optimized Slice types or Go types that can be converted into an optimized Slice type.
 func (p *InterSlice) SortReverseM() Slice {
-	// if p.Nil() || p.Len() < 2 {
-	// 	return p
-	// }
-
-	// // Handle supported types
-	// slice := NewSlice(p.v.Interface())
-	// if !slice.Generic() {
-	// 	slice.SortReverseM()
-	// 	*p = *NewInterSlice(slice.O())
-	// } else {
-	// 	panic(fmt.Sprintf("unsupported comparable type '%v'", p.v.Type()))
-	// }
-
+	if p == nil || len(*p) < 2 {
+		return p
+	}
+	sort.Sort(sort.Reverse(p))
 	return p
 }
 
 // Returns a string representation of this Slice, implements the Stringer interface
 func (p *InterSlice) String() string {
-	// l := p.Len()
-	// var builder strings.Builder
-	// builder.WriteString("[")
-	// for i := 0; i < l; i++ {
-	// 	builder.WriteString(fmt.Sprintf("%d", p.v.Index(i).Interface()))
-	// 	if i+1 < l {
-	// 		builder.WriteString(" ")
-	// 	}
-	// }
-	// builder.WriteString("]")
-	//return builder.String()
-	return ""
+	var builder strings.Builder
+	builder.WriteString("[")
+	if p != nil {
+		for i := range *p {
+			builder.WriteString(ToString((*p)[i]))
+			if i+1 < len(*p) {
+				builder.WriteString(" ")
+			}
+		}
+	}
+	builder.WriteString("]")
+	return builder.String()
 }
 
 // Swap modifies this Slice swapping the indicated elements.
 func (p *InterSlice) Swap(i, j int) {
-	// l := p.Len()
-	// if p.Nil() || l < 2 || i < 0 || j < 0 || i >= l || j >= l {
-	// 	return
-	// }
-	// reflect.Swapper(p.v.Interface())(i, j)
+	if p == nil || len(*p) < 2 || i < 0 || j < 0 || i >= len(*p) || j >= len(*p) {
+		return
+	}
+	(*p)[i], (*p)[j] = (*p)[j], (*p)[i]
 }
 
 // Take modifies this Slice removing the indicated range of elements from this Slice and returning them as a new Slice.
@@ -861,21 +788,20 @@ func (p *InterSlice) TakeAt(i int) (elem *Object) {
 
 // TakeW modifies this Slice removing the elements that match the lambda selector and returns them as a new Slice.
 func (p *InterSlice) TakeW(sel func(O) bool) (new Slice) {
-	// l := p.Len()
-	// slice := NewInterSliceV()
-	// if p.Nil() || l == 0 {
-	// 	return slice
-	// }
-	// for i := 0; i < l; i++ {
-	// 	obj := p.v.Index(i).Interface()
-	// 	if sel(obj) {
-	// 		slice.Append(obj)
-	// 		p.DropAt(i)
-	// 		l--
-	// 		i--
-	// 	}
-	// }
-	return
+	slice := NewInterSliceV()
+	if p == nil || len(*p) == 0 {
+		return slice
+	}
+	l := len(*p)
+	for i := 0; i < l; i++ {
+		if sel((*p)[i]) {
+			*slice = append(*slice, (*p)[i])
+			p.DropAt(i)
+			l--
+			i--
+		}
+	}
+	return slice
 }
 
 // ToInterSlice converts the given slice to a generic []interface{} slice
@@ -908,43 +834,11 @@ func (p *InterSlice) UnionM(slice interface{}) Slice {
 // Uniq returns a new Slice with all non uniq elements removed while preserving element order.
 // Cost for this call vs the UniqM is roughly the same, this one is appending that one dropping.
 func (p *InterSlice) Uniq() (new Slice) {
-	// l := p.Len()
-	// if p.Nil() || l < 2 {
-	// 	return p.Copy()
-	// }
-	// slice := NewInterSliceV()
-	// v := reflect.ValueOf(true)
-	// typ := reflect.MapOf(p.v.Type().Elem(), v.Type())
-	// m := reflect.MakeMap(typ)
-	// for i := 0; i < l; i++ {
-	// 	k := p.v.Index(i)
-	// 	if ok := m.MapIndex(k); ok == (reflect.Value{}) {
-	// 		m.SetMapIndex(k, v)
-	// 		slice.Append(k.Interface())
-	// 	}
-	// }
-	return
+	panic("NOT IMPLEMENTED")
 }
 
 // UniqM modifies this Slice to remove all non uniq elements while preserving element order.
 // Cost for this call vs the Uniq is roughly the same, this one is dropping that one appending.
 func (p *InterSlice) UniqM() Slice {
-	// l := p.Len()
-	// if p.Nil() || l < 2 {
-	// 	return p
-	// }
-	// v := reflect.ValueOf(true)
-	// typ := reflect.MapOf(p.v.Type().Elem(), v.Type())
-	// m := reflect.MakeMap(typ)
-	// for i := 0; i < l; i++ {
-	// 	k := p.v.Index(i)
-	// 	if ok := m.MapIndex(k); ok == (reflect.Value{}) {
-	// 		m.SetMapIndex(k, v)
-	// 	} else {
-	// 		p.DropAt(i)
-	// 		l--
-	// 		i--
-	// 	}
-	// }
-	return p
+	panic("NOT IMPLEMENTED")
 }

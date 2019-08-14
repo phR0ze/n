@@ -1816,7 +1816,7 @@ func TestIntSlice_G(t *testing.T) {
 //--------------------------------------------------------------------------------------------------
 func ExampleIntSlice_Generic() {
 	slice := NewIntSliceV(1, 2, 3)
-	fmt.Println(slice.Generic())
+	fmt.Println(slice.InterSlice())
 	// Output: false
 }
 

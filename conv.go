@@ -953,6 +953,21 @@ func Reference(obj interface{}) interface{} {
 	case *[]*IntSlice:
 		return x
 
+	// InterSlice
+	//----------------------------------------------------------------------------------------------
+	case InterSlice:
+		return &x
+	case *InterSlice:
+		return x
+	case []InterSlice:
+		return &x
+	case []*InterSlice:
+		return &x
+	case *[]InterSlice:
+		return x
+	case *[]*InterSlice:
+		return x
+
 	// Object
 	//----------------------------------------------------------------------------------------------
 	case Object:
@@ -987,6 +1002,28 @@ func Reference(obj interface{}) interface{} {
 	//----------------------------------------------------------------------------------------------
 	// rune is a int32 which is already defined
 
+	// string
+	//----------------------------------------------------------------------------------------------
+	case string:
+		return &x
+	case *string:
+		return x
+	case []string:
+		return &x
+	case []*string:
+		return &x
+	case *[]string:
+		return x
+	case *[]*string:
+		return x
+
+	// StringMap
+	//----------------------------------------------------------------------------------------------
+	case StringMap:
+		return &x
+	case *StringMap:
+		return x
+
 	// StringSlice
 	//----------------------------------------------------------------------------------------------
 	case StringSlice:
@@ -1002,27 +1039,6 @@ func Reference(obj interface{}) interface{} {
 	case *[]*StringSlice:
 		return x
 
-	// StringMap
-	//----------------------------------------------------------------------------------------------
-	case StringMap:
-		return &x
-	case *StringMap:
-		return x
-
-	// string
-	//----------------------------------------------------------------------------------------------
-	case string:
-		return &x
-	case *string:
-		return x
-	case []string:
-		return &x
-	case []*string:
-		return &x
-	case *[]string:
-		return x
-	case *[]*string:
-		return x
 	case []map[interface{}]interface{}:
 		return &x
 	case *[]map[interface{}]interface{}:
@@ -1870,6 +1886,25 @@ func ToFloatSliceE(obj interface{}) (val *FloatSlice, err error) {
 			}
 		}
 
+	// InterSlice
+	//----------------------------------------------------------------------------------------------
+	case InterSlice:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+	case []InterSlice:
+		for i := range x {
+			*val = append(*val, ToFloat64(x[i]))
+		}
+	case []*InterSlice:
+		for i := range x {
+			if x[i] != nil {
+				for j := range *x[i] {
+					*val = append(*val, ToFloat64((*x[i])[j]))
+				}
+			}
+		}
+
 	// Object
 	//----------------------------------------------------------------------------------------------
 	case Object:
@@ -2115,6 +2150,27 @@ func ToIntSliceE(obj interface{}) (val *IntSlice, err error) {
 			*val = append(*val, ToInt(x[i]))
 		}
 
+	// FloatSlice
+	//----------------------------------------------------------------------------------------------
+	case FloatSlice:
+		for i := range x {
+			*val = append(*val, int(x[i]))
+		}
+	case []FloatSlice:
+		for i := range x {
+			for j := range x[i] {
+				*val = append(*val, int(x[i][j]))
+			}
+		}
+	case []*FloatSlice:
+		for i := range x {
+			if x[i] != nil {
+				for j := range *x[i] {
+					*val = append(*val, int((*x[i])[j]))
+				}
+			}
+		}
+
 	// interface
 	//----------------------------------------------------------------------------------------------
 	case []interface{}:
@@ -2202,6 +2258,25 @@ func ToIntSliceE(obj interface{}) (val *IntSlice, err error) {
 		for i := range x {
 			if x[i] != nil {
 				*val = append(*val, *x[i]...)
+			}
+		}
+
+	// InterSlice
+	//----------------------------------------------------------------------------------------------
+	case InterSlice:
+		for i := range x {
+			*val = append(*val, ToInt(x[i]))
+		}
+	case []InterSlice:
+		for i := range x {
+			*val = append(*val, ToInt(x[i]))
+		}
+	case []*InterSlice:
+		for i := range x {
+			if x[i] != nil {
+				for j := range *x[i] {
+					*val = append(*val, ToInt((*x[i])[j]))
+				}
 			}
 		}
 
@@ -2763,6 +2838,51 @@ func ToMapSliceE(obj interface{}) (val *MapSlice, err error) {
 				}
 				for _, v := range *m {
 					*val = append(*val, v)
+				}
+			}
+		}
+
+	// InterSlice
+	//----------------------------------------------------------------------------------------------
+	case *InterSlice:
+		if x != nil {
+			for _, raw := range *x {
+				var m *MapSlice
+				if m, err = ToMapSliceE(raw); err != nil {
+					return
+				}
+				for _, v := range *m {
+					*val = append(*val, v)
+				}
+			}
+		}
+	case *[]InterSlice:
+		if x != nil {
+			for i := range *x {
+				for _, raw := range (*x)[i] {
+					var m *MapSlice
+					if m, err = ToMapSliceE(raw); err != nil {
+						return
+					}
+					for _, v := range *m {
+						*val = append(*val, v)
+					}
+				}
+			}
+		}
+	case *[]*InterSlice:
+		if x != nil {
+			for i := range *x {
+				if (*x)[i] != nil {
+					for _, raw := range *((*x)[i]) {
+						var m *MapSlice
+						if m, err = ToMapSliceE(raw); err != nil {
+							return
+						}
+						for _, v := range *m {
+							*val = append(*val, v)
+						}
+					}
 				}
 			}
 		}
@@ -3567,6 +3687,25 @@ func ToStringSliceE(obj interface{}) (val *StringSlice, err error) {
 		for i := range x {
 			for j := range *x[i] {
 				*val = append(*val, ToString((*x[i])[j]))
+			}
+		}
+
+	// InterSlice
+	//----------------------------------------------------------------------------------------------
+	case InterSlice:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+	case []InterSlice:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+	case []*InterSlice:
+		for i := range x {
+			if x[i] != nil {
+				for j := range *x[i] {
+					*val = append(*val, ToString((*x[i])[j]))
+				}
 			}
 		}
 

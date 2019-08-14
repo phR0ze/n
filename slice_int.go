@@ -389,11 +389,6 @@ func (p *IntSlice) G() []int {
 	return p.O().([]int)
 }
 
-// Generic returns true if the underlying implementation is a RefSlice
-func (p *IntSlice) Generic() bool {
-	return false
-}
-
 // Index returns the index of the first element in this Slice where element == elem
 // Returns a -1 if the element was not not found.
 func (p *IntSlice) Index(elem interface{}) (loc int) {
@@ -442,6 +437,11 @@ func (p *IntSlice) Insert(i int, obj interface{}) Slice {
 		}
 	}
 	return p
+}
+
+// InterSlice returns true if the underlying implementation is a RefSlice
+func (p *IntSlice) InterSlice() bool {
+	return false
 }
 
 // Join converts each element into a string then joins them together using the given separator or comma by default.
@@ -548,6 +548,11 @@ func (p *IntSlice) PopN(n int) (new Slice) {
 // Prepend modifies this Slice to add the given element at the begining and returns a reference to this Slice.
 func (p *IntSlice) Prepend(elem interface{}) Slice {
 	return p.Insert(0, elem)
+}
+
+// RefSlice returns true if the underlying implementation is a RefSlice
+func (p *IntSlice) RefSlice() bool {
+	return false
 }
 
 // Reverse returns a new Slice with the order of the elements reversed.

@@ -397,8 +397,8 @@ func (p *StringSlice) G() []string {
 	return p.O().([]string)
 }
 
-// Generic returns true if the underlying implementation is a RefSlice
-func (p *StringSlice) Generic() bool {
+// InterSlice returns true if the underlying implementation is a RefSlice
+func (p *StringSlice) InterSlice() bool {
 	return false
 }
 
@@ -568,6 +568,11 @@ func (p *StringSlice) PopN(n int) (new Slice) {
 // Prepend modifies this Slice to add the given element at the begining and returns a reference to this Slice.
 func (p *StringSlice) Prepend(elem interface{}) Slice {
 	return p.Insert(0, elem)
+}
+
+// RefSlice returns true if the underlying implementation is a RefSlice
+func (p *StringSlice) RefSlice() bool {
+	return false
 }
 
 // Reverse returns a new Slice with the order of the elements reversed.
@@ -746,21 +751,6 @@ func (p *StringSlice) Swap(i, j int) {
 	(*p)[i], (*p)[j] = (*p)[j], (*p)[i]
 }
 
-// ToInterSlice converts the given slice to a generic []interface{} slice
-func (p *StringSlice) ToInterSlice() (slice []interface{}) {
-	return ToInterSlice(p.O()).G()
-}
-
-// ToStringSlice converts the underlying slice into a *StringSlice
-func (p *StringSlice) ToStringSlice() (slice *StringSlice) {
-	return ToStringSlice(p.O())
-}
-
-// ToStringSliceG converts the underlying slice into a []string slice
-func (p *StringSlice) ToStringSliceG() (slice []string) {
-	return ToStringSliceG(p.O())
-}
-
 // Take modifies this Slice removing the indicated range of elements from this Slice and returning them as a new Slice.
 // Expects nothing, in which case everything is taken, or two indices i and j, in which case positive and negative
 // notation is supported and uses an inclusive behavior such that Take(0, -1) includes index -1 as opposed to Go's
@@ -795,6 +785,21 @@ func (p *StringSlice) TakeW(sel func(O) bool) (new Slice) {
 		}
 	}
 	return slice
+}
+
+// ToInterSlice converts the given slice to a generic []interface{} slice
+func (p *StringSlice) ToInterSlice() (slice []interface{}) {
+	return ToInterSlice(p.O()).G()
+}
+
+// ToStringSlice converts the underlying slice into a *StringSlice
+func (p *StringSlice) ToStringSlice() (slice *StringSlice) {
+	return ToStringSlice(p.O())
+}
+
+// ToStringSliceG converts the underlying slice into a []string slice
+func (p *StringSlice) ToStringSliceG() (slice []string) {
+	return ToStringSliceG(p.O())
 }
 
 // Union returns a new Slice by joining uniq elements from this Slice with uniq elements from the given Slice while preserving order.

@@ -385,11 +385,6 @@ func (p *MapSlice) G() []map[string]interface{} {
 	return p.O().([]map[string]interface{})
 }
 
-// Generic returns true if the underlying implementation is a RefSlice
-func (p *MapSlice) Generic() bool {
-	return false
-}
-
 // Index returns the index of the first element in this Slice where element == elem
 // Returns a -1 if the element was not not found.
 func (p *MapSlice) Index(elem interface{}) (loc int) {
@@ -439,6 +434,11 @@ func (p *MapSlice) Insert(i int, obj interface{}) Slice {
 		}
 	}
 	return p
+}
+
+// InterSlice returns true if the underlying implementation is a RefSlice
+func (p *MapSlice) InterSlice() bool {
+	return false
 }
 
 // Join converts each element into a string then joins them together using the given separator or comma by default.
@@ -546,6 +546,11 @@ func (p *MapSlice) PopN(n int) (new Slice) {
 // Prepend modifies this Slice to add the given element at the begining and returns a reference to this Slice.
 func (p *MapSlice) Prepend(elem interface{}) Slice {
 	return p.Insert(0, elem)
+}
+
+// RefSlice returns true if the underlying implementation is a RefSlice
+func (p *MapSlice) RefSlice() bool {
+	return false
 }
 
 // Reverse returns a new Slice with the order of the elements reversed.

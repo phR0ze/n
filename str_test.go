@@ -2190,7 +2190,7 @@ func TestStr_G(t *testing.T) {
 //--------------------------------------------------------------------------------------------------
 func ExampleStr_Generic() {
 	slice := NewStrV("1", "2", "3")
-	fmt.Println(slice.Generic())
+	fmt.Println(slice.InterSlice())
 	// Output: false
 }
 

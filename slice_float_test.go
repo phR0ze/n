@@ -1810,7 +1810,7 @@ func TestFloatSlice_G(t *testing.T) {
 //--------------------------------------------------------------------------------------------------
 func ExampleFloatSlice_Generic() {
 	slice := NewFloatSliceV(1, 2, 3)
-	fmt.Println(slice.Generic())
+	fmt.Println(slice.InterSlice())
 	// Output: false
 }
 

@@ -40,7 +40,7 @@ type Slice interface {
 	Empty() bool                                      // Empty tests if this Slice is empty.
 	First() (elem *Object)                            // First returns the first element in this Slice as Object.
 	FirstN(n int) Slice                               // FirstN returns the first n elements in this slice as a Slice reference to the original.
-	Generic() bool                                    // Generic returns true if the underlying implementation uses reflection
+	InterSlice() bool                                 // Generic returns true if the underlying implementation uses reflection
 	Index(elem interface{}) (loc int)                 // Index returns the index of the first element in this Slice where element == elem
 	Insert(i int, elem interface{}) Slice             // Insert modifies this Slice to insert the given element(s) before the element with the given index.
 	Join(separator ...string) (str *Object)           // Join converts each element into a string then joins them together using the given separator or comma by default.
@@ -54,6 +54,7 @@ type Slice interface {
 	Pop() (elem *Object)                              // Pop modifies this Slice to remove the last element and returns the removed element as an Object.
 	PopN(n int) (new Slice)                           // PopN modifies this Slice to remove the last n elements and returns the removed elements as a new Slice.
 	Prepend(elem interface{}) Slice                   // Prepend modifies this Slice to add the given element at the begining and returns a reference to this Slice.
+	RefSlice() bool                                   // RefSlice returns true if the underlying implementation is a RefSlice
 	Reverse() (new Slice)                             // Reverse returns a new Slice with the order of the elements reversed.
 	ReverseM() Slice                                  // ReverseM modifies this Slice reversing the order of the elements and returns a reference to this Slice.
 	S() (slice *StringSlice)                          // S is an alias to ToStringSlice
@@ -90,12 +91,13 @@ type Slice interface {
 //
 // Optimized: []int, []string, StrSlice
 func NewSlice(obj interface{}) (new Slice) {
-	o := Reference(obj)
-	switch x := o.(type) {
+	ref := Reference(obj)
+	switch o := ref.(type) {
 
 	// []interface{}
 	// ---------------------------------------------------------------------------------------------
-	case *[]interface{}:
+	case *[]interface{}, *InterSlice:
+		x := ToInterSlice(o)
 		if x != nil && len(*x) > 0 {
 			item := Reference((*x)[0])
 			switch item.(type) {
@@ -103,22 +105,22 @@ func NewSlice(obj interface{}) (new Slice) {
 			// FloatSlice
 			// ---------------------------------------------------------------------------------------------
 			case *float32, *float64:
-				new = ToFloatSlice(x)
+				new = ToFloatSlice(*x)
 
 			// IntSlice
 			// ---------------------------------------------------------------------------------------------
 			case *int, *int8, *int16, *int64, *uint, *uint16, *uint32, *uint64:
-				new = ToIntSlice(x)
+				new = ToIntSlice(*x)
 
 			// StrSlice
 			// ---------------------------------------------------------------------------------------------
 			case *string, *[]byte, *[]rune, *Str:
-				new = ToStringSlice(x)
+				new = ToStringSlice(*x)
 
 			// MapSlice
 			//----------------------------------------------------------------------------------------------
 			case *map[string]interface{}, *map[string]string:
-				new = ToMapSlice(x)
+				new = ToMapSlice(*x)
 
 			// RefSlice
 			// ---------------------------------------------------------------------------------------------
@@ -126,37 +128,37 @@ func NewSlice(obj interface{}) (new Slice) {
 				new = NewRefSlice(obj)
 			}
 		} else {
-			new = NewRefSlice(obj)
+			new = x
 			return
 		}
 
 	// FloatSlice
 	// ---------------------------------------------------------------------------------------------
 	case *[]float32, *[]float64, *[]*float32, *[]*float64:
-		new = ToFloatSlice(x)
+		new = ToFloatSlice(o)
 
 	// IntSlice
 	// ---------------------------------------------------------------------------------------------
 	case *[]int, *[]int8, *[]int16, *[]int64, *[]uint, *[]uint16, *[]uint32, *[]uint64,
 		*[]*int, *[]*int8, *[]*int16, *[]*int64, *[]*uint, *[]*uint16, *[]*uint32, *[]*uint64:
-		new = ToIntSlice(x)
+		new = ToIntSlice(o)
 
 	// StrSlice
 	// ---------------------------------------------------------------------------------------------
 	case *[]string, *[][]byte, *[][]rune, *[]Str,
 		*[]*string, *[]*[]byte, *[]*[]rune, *[]*Str:
-		new = ToStringSlice(x)
+		new = ToStringSlice(o)
 
 	// Str
 	// ---------------------------------------------------------------------------------------------
 	case *[]Char, *[]rune, *[]byte,
 		*[]*Char, *[]*rune, *[]*byte:
-		new = ToStr(x)
+		new = ToStr(o)
 
 	// MapSlice
 	//----------------------------------------------------------------------------------------------
 	case *MapSlice, *map[string]interface{}, *map[string]string, *[]map[string]interface{}, *[]map[string]string:
-		new = ToMapSlice(x)
+		new = ToMapSlice(o)
 
 	// RefSlice
 	// ---------------------------------------------------------------------------------------------

@@ -587,11 +587,6 @@ func (p *RefSlice) FirstN(n int) Slice {
 	return p.Slice(0, abs(n)-1)
 }
 
-// Generic returns true if the underlying implementation is a RefSlice
-func (p *RefSlice) Generic() bool {
-	return true
-}
-
 // Index returns the index of the first element in this Slice where element == elem
 // Returns a -1 if the element was not not found.
 func (p *RefSlice) Index(elem interface{}) (loc int) {
@@ -686,6 +681,11 @@ func (p *RefSlice) InsertS(i int, slice interface{}) Slice {
 	return p
 }
 
+// InterSlice returns true if the underlying implementation is a RefSlice
+func (p *RefSlice) InterSlice() bool {
+	return false
+}
+
 // Join converts each element into a string then joins them together using the given separator or comma by default.
 func (p *RefSlice) Join(separator ...string) (str *Object) {
 	l := p.Len()
@@ -745,7 +745,7 @@ func (p *RefSlice) Less(i, j int) bool {
 
 	// Handle supported types
 	slice := NewSlice(p.v.Interface())
-	if !slice.Generic() {
+	if !slice.RefSlice() {
 		return slice.Less(i, j)
 	}
 
@@ -804,6 +804,11 @@ func (p *RefSlice) PopN(n int) (new Slice) {
 // Prepend modifies this Slice to add the given element at the begining and returns a reference to this Slice.
 func (p *RefSlice) Prepend(elem interface{}) Slice {
 	return p.Insert(0, elem)
+}
+
+// RefSlice returns true if the underlying implementation is a RefSlice
+func (p *RefSlice) RefSlice() bool {
+	return true
 }
 
 // Reverse returns a new Slice with the order of the elements reversed.
@@ -945,7 +950,7 @@ func (p *RefSlice) SortM() Slice {
 
 	// Handle supported types
 	slice := NewSlice(p.v.Interface())
-	if !slice.Generic() {
+	if !slice.RefSlice() {
 		slice.SortM()
 		*p = *NewRefSlice(slice.O())
 	} else {
@@ -973,7 +978,7 @@ func (p *RefSlice) SortReverseM() Slice {
 
 	// Handle supported types
 	slice := NewSlice(p.v.Interface())
-	if !slice.Generic() {
+	if !slice.RefSlice() {
 		slice.SortReverseM()
 		*p = *NewRefSlice(slice.O())
 	} else {
