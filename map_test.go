@@ -289,3 +289,170 @@ func TestMergeStringMap(t *testing.T) {
 		assert.Equal(t, expected, MergeStringMap(a, b))
 	}
 }
+
+// IdxFromSelector
+//--------------------------------------------------------------------------------------------------
+func TestStringMap_IdxFromSelector(t *testing.T) {
+
+	assert.Equal(t, []int{0, 1, 2}, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[]`).ToIntSliceG())
+
+	// Full slice
+	{
+		// Valid selector
+		i, k, v, err := IdxFromSelector("[foo==bar]", 3)
+		assert.Equal(t, -1, i)
+		assert.Equal(t, "foo", k)
+		assert.Equal(t, "bar", v)
+		assert.Nil(t, err)
+
+		// Invalid selector
+		i, k, v, err = IdxFromSelector("[foo=bar]", 3)
+		assert.Equal(t, -1, i)
+		assert.Equal(t, "", k)
+		assert.Equal(t, "", v)
+		assert.Equal(t, "invalid array index selector foo=bar", err.Error())
+
+		// Valid index neg
+		i, k, v, err = IdxFromSelector("[-1]", 3)
+		assert.Equal(t, 2, i)
+		assert.Equal(t, "", k)
+		assert.Equal(t, "", v)
+		assert.Nil(t, err)
+
+		// Valid index pos
+		i, k, v, err = IdxFromSelector("[1]", 3)
+		assert.Equal(t, 1, i)
+		assert.Equal(t, "", k)
+		assert.Equal(t, "", v)
+		assert.Nil(t, err)
+
+		// Invalid index
+		i, k, v, err = IdxFromSelector("[3]", 3)
+		assert.Equal(t, -1, i)
+		assert.Equal(t, "", k)
+		assert.Equal(t, "", v)
+		assert.Equal(t, "invalid array index 3", err.Error())
+
+		// Invalid index
+		i, k, v, err = IdxFromSelector("[-4]", 3)
+		assert.Equal(t, -1, i)
+		assert.Equal(t, "", k)
+		assert.Equal(t, "", v)
+		assert.Equal(t, "invalid array index -4", err.Error())
+	}
+	// Empty slice
+	{
+		i, k, v, err := IdxFromSelector("[foo==bar]", 0)
+		assert.Equal(t, -1, i)
+		assert.Equal(t, "foo", k)
+		assert.Equal(t, "bar", v)
+		assert.Nil(t, err)
+
+		// Invalid selector
+		i, k, v, err = IdxFromSelector("[foo=bar]", 0)
+		assert.Equal(t, -1, i)
+		assert.Equal(t, "", k)
+		assert.Equal(t, "", v)
+		assert.Equal(t, "invalid array index selector foo=bar", err.Error())
+
+		i, k, v, err = IdxFromSelector("[]", 0)
+		assert.Equal(t, -1, i)
+		assert.Equal(t, "", k)
+		assert.Equal(t, "", v)
+		assert.Nil(t, err)
+
+		// Invalid index
+		i, k, v, err = IdxFromSelector("[1]", 0)
+		assert.Equal(t, -1, i)
+		assert.Equal(t, "", k)
+		assert.Equal(t, "", v)
+		assert.Equal(t, "invalid array index 1", err.Error())
+
+		// Invalid index
+		i, k, v, err = IdxFromSelector("[-2]", 0)
+		assert.Equal(t, -1, i)
+		assert.Equal(t, "", k)
+		assert.Equal(t, "", v)
+		assert.Equal(t, "invalid array index -2", err.Error())
+	}
+}
+
+// KeysFromSelector
+//--------------------------------------------------------------------------------------------------
+func TestStringMap_KeysFromSelector(t *testing.T) {
+
+	// Empty
+	keys, err := KeysFromSelector("")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{}, keys)
+
+	// Identity
+	keys, err = KeysFromSelector(".")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{}, keys)
+
+	// Object Identifier-Index: .foo, .foo.bar
+	keys, err = KeysFromSelector("foo")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"foo"}, keys)
+
+	keys, err = KeysFromSelector(".foo")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"foo"}, keys)
+
+	keys, err = KeysFromSelector(`."foo"`)
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"foo"}, keys)
+
+	keys, err = KeysFromSelector(".foo.bar")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"foo", "bar"}, keys)
+
+	keys, err = KeysFromSelector("foo.bar")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"foo", "bar"}, keys)
+
+	keys, err = KeysFromSelector("foo1.bar.foo2")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"foo1", "bar", "foo2"}, keys)
+
+	keys, err = KeysFromSelector(`foo1."bar.foo2"`)
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"foo1", "bar.foo2"}, keys)
+
+	// Array Index: .[], .[0], .[-1]
+	keys, err = KeysFromSelector("foo.[]")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"foo", "[]"}, keys)
+
+	keys, err = KeysFromSelector("foo.[0]")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"foo", "[0]"}, keys)
+
+	keys, err = KeysFromSelector("foo.[-1]")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"foo", "[-1]"}, keys)
+
+	// Array Index: move through index
+	keys, err = KeysFromSelector("foo.[0].val")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"foo", "[0]", "val"}, keys)
+
+	// Array element selection based on element value
+	keys, err = KeysFromSelector("one.[name==bar].val")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"one", "[name==bar]", "val"}, keys)
+
+	keys, err = KeysFromSelector("one.[name==bar].val.[-2]")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"one", "[name==bar]", "val", "[-2]"}, keys)
+
+	// no dot notation
+	keys, err = KeysFromSelector("one")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"one"}, keys)
+
+	keys, err = KeysFromSelector("1")
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"1"}, keys)
+}

@@ -7,6 +7,44 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Benchmarks
+//--------------------------------------------------------------------------------------------------
+
+// The intent of this benchmark is to determine how long it takes to insert one int into a []interface{}{}
+// by converting to []int and inserting than back to []interface{}{}
+func BenchmarkStringMap_SetValueToFromInterfaceSlice(t *testing.B) {
+
+	// Create generic slice of ints
+	slice := []interface{}{}
+	for i := range Range(0, nines6) {
+		slice = append(slice, i)
+	}
+
+	// Convert to ints
+	s := NewSlice(slice)
+	s.Set(1000, 5)
+
+	// Convert back to interface
+	result := s.ToInterSlice()
+	assert.Equal(t, 5, result[1000])
+}
+func BenchmarkStringMap_SetValueRefSlice(t *testing.B) {
+
+	// Create generic slice of ints
+	slice := []interface{}{}
+	for i := range Range(0, nines6) {
+		slice = append(slice, i)
+	}
+
+	// Set value
+	s := NewRefSlice(slice)
+	s.Set(1000, 5)
+
+	// Convert back to interface
+	result := s.ToInterSlice()
+	assert.Equal(t, 5, result[1000])
+}
+
 // NewStringMap
 //--------------------------------------------------------------------------------------------------
 func ExampleNewStringMap() {
@@ -311,6 +349,180 @@ func TestStringMap_Get(t *testing.T) {
 	assert.Equal(t, 3, m.Len())
 }
 
+// Inject
+//--------------------------------------------------------------------------------------------------
+func ExampleStringMap_Inject() {
+	fmt.Println(NewStringMapV().Inject(".", map[string]interface{}{"1": "one"}))
+	// Output: &map[1:one]
+}
+
+func TestStringMap_Inject(t *testing.T) {
+
+	// // Inject into list
+	// {
+	// 	// Replace element in list
+	// 	a := map[string]interface{}{
+	// 		"1": "one",
+	// 		"2": []interface{}{"1", "2"},
+	// 	}
+	// 	expected := map[string]interface{}{
+	// 		"1": "one",
+	// 		"2": []interface{}{"1", "3"},
+	// 	}
+	// 	assert.Equal(t, expected, M(a).Inject("2.[1]", "3").MG())
+	// }
+	{
+		// Replace the whole list as we gave the whole list selector
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []string{"1", "2"},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": "3",
+		}
+		assert.Equal(t, expected, M(a).Inject("2.[]", "3").MG())
+	}
+
+	// Simple key indexing
+	{
+		// Nesting - merge
+		a := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+				"4": "five",
+			},
+		}
+		b := map[string]interface{}{
+			"4": "four",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"4": "four",
+			},
+		}
+		assert.Equal(t, expected, M(a).Inject("2", b).MG())
+	}
+	{
+		// Nesting - two
+		a := map[string]interface{}{
+			"1": "one",
+			"2": "2",
+		}
+		b := map[string]interface{}{
+			"4": "four",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": map[string]interface{}{
+					"4": "four",
+				},
+			},
+		}
+		assert.Equal(t, expected, M(a).Inject("2.3", b).MG())
+	}
+	{
+		// Nesting - one
+		a := map[string]interface{}{
+			"1": "one",
+			"2": "2",
+		}
+		b := map[string]interface{}{
+			"3": "three",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+			},
+		}
+		assert.Equal(t, expected, M(a).Inject("2", b).MG())
+	}
+	{
+		// Nesting - doesn't exist two
+		a := map[string]interface{}{
+			"1": "one",
+		}
+		b := map[string]interface{}{
+			"4": "four",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": map[string]interface{}{
+					"4": "four",
+				},
+			},
+		}
+		assert.Equal(t, expected, M(a).Inject("2.3", b).MG())
+	}
+
+	// Nesting - doesn't exist one
+	{
+		a := map[string]interface{}{
+			"1": "one",
+		}
+		b := map[string]interface{}{
+			"3": "three",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+			},
+		}
+		assert.Equal(t, expected, M(a).Inject("2", b).MG())
+	}
+
+	// Root injection - override
+	{
+		a := map[string]interface{}{
+			"1": "one",
+			"2": "2",
+		}
+		b := map[string]interface{}{
+			"2": "two",
+			"3": "three",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": "two",
+			"3": "three",
+		}
+		assert.Equal(t, expected, M(a).Inject(".", b).MG())
+	}
+
+	// Root injections - empty
+	{
+		b := map[string]interface{}{
+			"foo": "bar",
+		}
+		expected := map[string]interface{}{
+			"foo": "bar",
+		}
+		// map[string]interface{}
+		assert.Equal(t, expected, MV().Inject("", b).MG())
+		assert.Equal(t, expected, MV().Inject(".", b).MG())
+
+		// *StringMap
+		assert.Equal(t, expected, MV().Inject("", M(b)).MG())
+		assert.Equal(t, expected, MV().Inject(".", M(b)).MG())
+
+		// string
+		m, err := MV().InjectE("", "foo")
+		assert.Equal(t, &StringMap{}, m)
+		assert.Equal(t, "invalid selector for the type of value given, 'string'", err.Error())
+
+		// int
+		m, err = MV().InjectE("", 2)
+		assert.Equal(t, &StringMap{}, m)
+		assert.Equal(t, "invalid selector for the type of value given, 'int'", err.Error())
+	}
+}
+
 // Keys
 //--------------------------------------------------------------------------------------------------
 func ExampleStringMap_Keys() {
@@ -384,7 +596,7 @@ func TestStringMap_Merge(t *testing.T) {
 				"5": "five",
 			},
 		}
-		assert.Equal(t, expected, NewStringMap(a).Merge(Yaml(b), "2").ToYamlG())
+		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), "2").MG())
 	}
 	{
 		// Nesting - merge
@@ -405,7 +617,7 @@ func TestStringMap_Merge(t *testing.T) {
 				"4": "four",
 			},
 		}
-		assert.Equal(t, expected, NewStringMap(a).Merge(Yaml(b), "2").ToYamlG())
+		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), "2").MG())
 	}
 	{
 		// Nesting - two
@@ -424,7 +636,7 @@ func TestStringMap_Merge(t *testing.T) {
 				},
 			},
 		}
-		assert.Equal(t, expected, NewStringMap(a).Merge(Yaml(b), "2.3").ToYamlG())
+		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), "2.3").MG())
 	}
 	{
 		// Nesting - one
@@ -441,7 +653,7 @@ func TestStringMap_Merge(t *testing.T) {
 				"3": "three",
 			},
 		}
-		assert.Equal(t, expected, NewStringMap(a).Merge(Yaml(b), "2").ToYamlG())
+		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), "2").MG())
 	}
 	{
 		// Nesting - doesn't exist two
@@ -459,7 +671,7 @@ func TestStringMap_Merge(t *testing.T) {
 				},
 			},
 		}
-		assert.Equal(t, expected, NewStringMap(a).Merge(Yaml(b), "2.3").ToYamlG())
+		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), "2.3").MG())
 	}
 	{
 		// Nesting - doesn't exist one
@@ -475,7 +687,7 @@ func TestStringMap_Merge(t *testing.T) {
 				"3": "three",
 			},
 		}
-		assert.Equal(t, expected, NewStringMap(a).Merge(Yaml(b), "2").ToYamlG())
+		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), "2").MG())
 	}
 	{
 		// root indicator
@@ -492,7 +704,7 @@ func TestStringMap_Merge(t *testing.T) {
 			"2": "two",
 			"3": "three",
 		}
-		assert.Equal(t, expected, NewStringMap(a).Merge(Yaml(b), ".").ToYamlG())
+		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), ".").MG())
 	}
 
 	// nil or empty
@@ -633,7 +845,7 @@ func TestStringMap_MergeG(t *testing.T) {
 				"5": "five",
 			},
 		}
-		assert.Equal(t, expected, NewStringMap(a).MergeG(Yaml(b), "2"))
+		assert.Equal(t, expected, NewStringMap(a).MergeG(M(b), "2"))
 	}
 	{
 		// Nesting - merge
@@ -654,7 +866,7 @@ func TestStringMap_MergeG(t *testing.T) {
 				"4": "four",
 			},
 		}
-		assert.Equal(t, expected, NewStringMap(a).MergeG(Yaml(b), "2"))
+		assert.Equal(t, expected, NewStringMap(a).MergeG(M(b), "2"))
 	}
 	{
 		// Nesting - two
@@ -673,7 +885,7 @@ func TestStringMap_MergeG(t *testing.T) {
 				},
 			},
 		}
-		assert.Equal(t, expected, NewStringMap(a).MergeG(Yaml(b), "2.3"))
+		assert.Equal(t, expected, NewStringMap(a).MergeG(M(b), "2.3"))
 	}
 	{
 		// Nesting - one
@@ -690,7 +902,7 @@ func TestStringMap_MergeG(t *testing.T) {
 				"3": "three",
 			},
 		}
-		assert.Equal(t, expected, NewStringMap(a).MergeG(Yaml(b), "2"))
+		assert.Equal(t, expected, NewStringMap(a).MergeG(M(b), "2"))
 	}
 	{
 		// Nesting - doesn't exist two
@@ -708,7 +920,7 @@ func TestStringMap_MergeG(t *testing.T) {
 				},
 			},
 		}
-		assert.Equal(t, expected, NewStringMap(a).MergeG(Yaml(b), "2.3"))
+		assert.Equal(t, expected, NewStringMap(a).MergeG(M(b), "2.3"))
 	}
 	{
 		// Nesting - doesn't exist one
@@ -724,7 +936,7 @@ func TestStringMap_MergeG(t *testing.T) {
 				"3": "three",
 			},
 		}
-		assert.Equal(t, expected, NewStringMap(a).MergeG(Yaml(b), "2"))
+		assert.Equal(t, expected, NewStringMap(a).MergeG(M(b), "2"))
 	}
 	{
 		// root indicator
@@ -741,7 +953,7 @@ func TestStringMap_MergeG(t *testing.T) {
 			"2": "two",
 			"3": "three",
 		}
-		assert.Equal(t, expected, NewStringMap(a).MergeG(Yaml(b), "."))
+		assert.Equal(t, expected, NewStringMap(a).MergeG(M(b), "."))
 	}
 
 	// nil or empty
@@ -1053,84 +1265,4 @@ func TestWriteYaml(t *testing.T) {
 	assert.Nil(t, err)
 
 	assert.Equal(t, m1, m2)
-}
-
-// keysFromSelectorString
-//--------------------------------------------------------------------------------------------------
-func TestStringMap_keysFromSelectorString(t *testing.T) {
-
-	// Empty
-	keys, err := KeysFromSelector("")
-	assert.Nil(t, err)
-	assert.Equal(t, &StringSlice{}, keys)
-
-	// Identity
-	keys, err = KeysFromSelector(".")
-	assert.Nil(t, err)
-	assert.Equal(t, &StringSlice{}, keys)
-
-	// Object Identifier-Index: .foo, .foo.bar
-	keys, err = KeysFromSelector("foo")
-	assert.Nil(t, err)
-	assert.Equal(t, &StringSlice{"foo"}, keys)
-
-	keys, err = KeysFromSelector(".foo")
-	assert.Nil(t, err)
-	assert.Equal(t, &StringSlice{"foo"}, keys)
-
-	keys, err = KeysFromSelector(`."foo"`)
-	assert.Nil(t, err)
-	assert.Equal(t, &StringSlice{"foo"}, keys)
-
-	keys, err = KeysFromSelector(".foo.bar")
-	assert.Nil(t, err)
-	assert.Equal(t, &StringSlice{"foo", "bar"}, keys)
-
-	keys, err = KeysFromSelector("foo.bar")
-	assert.Nil(t, err)
-	assert.Equal(t, &StringSlice{"foo", "bar"}, keys)
-
-	keys, err = KeysFromSelector("foo1.bar.foo2")
-	assert.Nil(t, err)
-	assert.Equal(t, &StringSlice{"foo1", "bar", "foo2"}, keys)
-
-	keys, err = KeysFromSelector(`foo1."bar.foo2"`)
-	assert.Nil(t, err)
-	assert.Equal(t, &StringSlice{"foo1", "bar.foo2"}, keys)
-
-	// Array Index: .[], .[0], .[-1]
-	keys, err = KeysFromSelector("foo.[]")
-	assert.Nil(t, err)
-	assert.Equal(t, &StringSlice{"foo", "[]"}, keys)
-
-	keys, err = KeysFromSelector("foo.[0]")
-	assert.Nil(t, err)
-	assert.Equal(t, &StringSlice{"foo", "[0]"}, keys)
-
-	keys, err = KeysFromSelector("foo.[-1]")
-	assert.Nil(t, err)
-	assert.Equal(t, &StringSlice{"foo", "[-1]"}, keys)
-
-	// Array Index: move through index
-	keys, err = KeysFromSelector("foo.[0].val")
-	assert.Nil(t, err)
-	assert.Equal(t, &StringSlice{"foo", "[0]", "val"}, keys)
-
-	// Array element selection based on element value
-	keys, err = KeysFromSelector("one.[name==bar].val")
-	assert.Nil(t, err)
-	assert.Equal(t, &StringSlice{"one", "[name==bar]", "val"}, keys)
-
-	keys, err = KeysFromSelector("one.[name==bar].val.[-2]")
-	assert.Nil(t, err)
-	assert.Equal(t, &StringSlice{"one", "[name==bar]", "val", "[-2]"}, keys)
-
-	// no dot notation
-	keys, err = KeysFromSelector("one")
-	assert.Nil(t, err)
-	assert.Equal(t, &StringSlice{"one"}, keys)
-
-	keys, err = KeysFromSelector("1")
-	assert.Nil(t, err)
-	assert.Equal(t, &StringSlice{"1"}, keys)
 }

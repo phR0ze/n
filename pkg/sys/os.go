@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"crypto/md5"
 	"encoding/hex"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -112,7 +111,7 @@ func CopyFile(src, dst string, opts ...*opt.Opt) (err error) {
 
 	// Error out if not a regular file or symlink
 	if srcInfo.IsDir() {
-		err = fmt.Errorf("src target is not a regular file or a symlink to a file")
+		err = errors.Errorf("src target is not a regular file or a symlink to a file")
 		return
 	}
 

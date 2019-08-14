@@ -9,6 +9,7 @@ import (
 // instance being operated on.  'new Slice' refers to a copy of the slice based on a new
 // underlying Array.
 type Slice interface {
+	A() string                                        // A is an alias to String for brevity
 	Any(elems ...interface{}) bool                    // Any tests if this Slice is not empty or optionally if it contains any of the given variadic elements.
 	AnyS(slice interface{}) bool                      // AnyS tests if this Slice contains any of the given Slice's elements.
 	AnyW(sel func(O) bool) bool                       // AnyW tests if this Slice contains any that match the lambda selector.
@@ -55,6 +56,8 @@ type Slice interface {
 	Prepend(elem interface{}) Slice                   // Prepend modifies this Slice to add the given element at the begining and returns a reference to this Slice.
 	Reverse() (new Slice)                             // Reverse returns a new Slice with the order of the elements reversed.
 	ReverseM() Slice                                  // ReverseM modifies this Slice reversing the order of the elements and returns a reference to this Slice.
+	S() (slice *StringSlice)                          // S is an alias to ToStringSlice
+	SG() (slice []string)                             // S is an alias to ToStringSliceG
 	Select(sel func(O) bool) (new Slice)              // Select creates a new slice with the elements that match the lambda selector.
 	Set(i int, elems interface{}) Slice               // Set the element(s) at the given index location to the given element(s). Allows for negative notation.
 	SetE(i int, elems interface{}) (Slice, error)     // SetE the element(s) at the given index location to the given element(s). Allows for negative notation.
@@ -66,13 +69,14 @@ type Slice interface {
 	SortM() Slice                                     // SortM modifies this Slice sorting the elements and returns a reference to this Slice.
 	SortReverse() (new Slice)                         // SortReverse returns a new Slice sorting the elements in reverse.
 	SortReverseM() Slice                              // SortReverseM modifies this Slice sorting the elements in reverse and returns a reference to this Slice.
-	A() string                                        // A is an alias to String for brevity
 	String() string                                   // String returns a string representation of this Slice, implements the Stringer interface
 	Swap(i, j int)                                    // Swap modifies this Slice swapping the indicated elements.
 	Take(indices ...int) (new Slice)                  // Take modifies this Slice removing the indicated range of elements from this Slice and returning them as a new Slice.
 	TakeAt(i int) (elem *Object)                      // TakeAt modifies this Slice removing the elemement at the given index location and returns the removed element as an Object.
 	TakeW(sel func(O) bool) (new Slice)               // TakeW modifies this Slice removing the elements that match the lambda selector and returns them as a new Slice.
-	S() (new []string)                                // ToStrsG converts the underlying slice into a []string slice
+	ToInterSlice() (slice []interface{})              // ToInterSlice converts the given slice to a generic []interface{} slice
+	ToStringSlice() (slice *StringSlice)              // ToStringSlice converts the underlying slice into a *StringSlice
+	ToStringSliceG() (slice []string)                 // ToStringSliceG converts the underlying slice into a []string slice
 	Union(slice interface{}) (new Slice)              // Union returns a new Slice by joining uniq elements from this Slice with uniq elements from the given Slice while preserving order.
 	UnionM(slice interface{}) Slice                   // UnionM modifies this Slice by joining uniq elements from this Slice with uniq elements from the given Slice while preserving order.
 	Uniq() (new Slice)                                // Uniq returns a new Slice with all non uniq elements removed while preserving element order.

@@ -1,12 +1,12 @@
 package sys
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"time"
 
 	homedir "github.com/mitchellh/go-homedir"
+	"github.com/pkg/errors"
 )
 
 // FileInfo wraps the os.FileInfo interface and provide additional helper functions
@@ -161,7 +161,7 @@ func IsSymlinkFile(src string) bool {
 // SymlinkTarget follows the symlink to get the path for the target
 func (info *FileInfo) SymlinkTarget() (target string, err error) {
 	if info.v.Mode()&os.ModeSymlink == 0 {
-		err = fmt.Errorf("not a symlink")
+		err = errors.Errorf("not a symlink")
 		return
 	}
 	if target, err = os.Readlink(info.path); err != nil {

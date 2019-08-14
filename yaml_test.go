@@ -16,7 +16,7 @@ package n
 // 		yaml.Unmarshal([]byte(rawYaml), &data)
 // 		q := Q(data)
 // 		assert.True(t, q.Any())
-// 		assert.False(t, q.Yaml("foo").Any())
+// 		assert.False(t, q.M("foo").Any())
 // 	}
 // 	{
 // 		// Get non existing nested string
@@ -26,7 +26,7 @@ package n
 // 		yaml.Unmarshal([]byte(rawYaml), &data)
 // 		q := Q(data)
 // 		assert.True(t, q.Any())
-// 		assert.False(t, q.Yaml("foo.foo").Any())
+// 		assert.False(t, q.M("foo.foo").Any())
 // 	}
 // 	{
 // 		// Get string from map
@@ -36,7 +36,7 @@ package n
 // 		yaml.Unmarshal([]byte(rawYaml), &data)
 // 		q := Q(data)
 // 		assert.True(t, q.Any())
-// 		assert.Equal(t, "two", q.Yaml("1.2").A())
+// 		assert.Equal(t, "two", q.M("1.2").A())
 // 	}
 // 	{
 // 		// Get string from nested map
@@ -47,7 +47,7 @@ package n
 // 		yaml.Unmarshal([]byte(rawYaml), &data)
 // 		q := Q(data)
 // 		assert.True(t, q.Any())
-// 		assert.Equal(t, "three", q.Yaml("1.2.3").A())
+// 		assert.Equal(t, "three", q.M("1.2.3").A())
 // 	}
 // 	{
 // 		// Get map from map
@@ -59,7 +59,7 @@ package n
 
 // 		q := Q(data)
 // 		assert.True(t, q.Any())
-// 		assert.Equal(t, expected, getM(t, q.Yaml("1")))
+// 		assert.Equal(t, expected, getM(t, q.M("1")))
 // 	}
 // 	{
 // 		// Get map from map from map
@@ -72,7 +72,7 @@ package n
 
 // 		q := Q(data)
 // 		assert.True(t, q.Any())
-// 		assert.Equal(t, expected, getM(t, q.Yaml("1.2")))
+// 		assert.Equal(t, expected, getM(t, q.M("1.2")))
 // 	}
 // 	{
 // 		// Get slice from map
@@ -85,7 +85,7 @@ package n
 
 // 		q := Q(data)
 // 		assert.True(t, q.Any())
-// 		assert.Equal(t, []string{"1", "2", "3"}, q.Yaml("foo").Strs())
+// 		assert.Equal(t, []string{"1", "2", "3"}, q.M("foo").Strs())
 // 	}
 // }
 
@@ -102,7 +102,7 @@ package n
 
 // 		q := Q(data)
 // 		assert.True(t, q.Any())
-// 		assert.Equal(t, expected, getM(t, q.Yaml("foo.[name:2]")))
+// 		assert.Equal(t, expected, getM(t, q.M("foo.[name:2]")))
 // 	}
 // 	{
 // 		// Bad key
@@ -115,7 +115,7 @@ package n
 
 // 		q := Q(data)
 // 		assert.True(t, q.Any())
-// 		assert.False(t, q.Yaml("fee.[name:2]").Any())
+// 		assert.False(t, q.M("fee.[name:2]").Any())
 // 	}
 // 	{
 // 		// Bad sub key
@@ -128,7 +128,7 @@ package n
 
 // 		q := Q(data)
 // 		assert.True(t, q.Any())
-// 		assert.False(t, q.Yaml("foo.[fee:2]").Any())
+// 		assert.False(t, q.M("foo.[fee:2]").Any())
 // 	}
 // 	{
 // 		// Missing target
@@ -141,7 +141,7 @@ package n
 
 // 		q := Q(data)
 // 		assert.True(t, q.Any())
-// 		assert.False(t, q.Yaml("foo.[name:5]").Any())
+// 		assert.False(t, q.M("foo.[name:5]").Any())
 // 	}
 // 	{
 // 		// Continue keying in after slice: one
@@ -153,7 +153,7 @@ package n
 // 		yaml.Unmarshal([]byte(rawYaml), &data)
 // 		q := Q(data)
 // 		assert.True(t, q.Any())
-// 		assert.Equal(t, "one", q.Yaml("foo.[name:one].name").O())
+// 		assert.Equal(t, "one", q.M("foo.[name:one].name").O())
 // 	}
 // 	// 	{
 // 	// TODO: implement this ???
@@ -168,7 +168,7 @@ package n
 // 	// 		yaml.Unmarshal([]byte(rawYaml), &data)
 // 	// 		q := Q(data)
 // 	// 		assert.True(t, q.Any())
-// 	// 		assert.Equal(t, "frodo", q.Yaml("foo.[name.bar:frodo].name.bar").O())
+// 	// 		assert.Equal(t, "frodo", q.M("foo.[name.bar:frodo].name.bar").O())
 // 	// 	}
 // }
 
@@ -184,27 +184,27 @@ package n
 // 		assert.True(t, q.Any())
 // 		{
 // 			expected := map[string]interface{}{"name": 1.0}
-// 			assert.Equal(t, expected, getM(t, q.Yaml("foo.[0]")))
+// 			assert.Equal(t, expected, getM(t, q.M("foo.[0]")))
 // 		}
 // 		{
 // 			expected := map[string]interface{}{"name": 2.0}
-// 			assert.Equal(t, expected, getM(t, q.Yaml("foo.[1]")))
+// 			assert.Equal(t, expected, getM(t, q.M("foo.[1]")))
 // 		}
 // 		{
 // 			expected := map[string]interface{}{"name": 3.0}
-// 			assert.Equal(t, expected, getM(t, q.Yaml("foo.[2]")))
+// 			assert.Equal(t, expected, getM(t, q.M("foo.[2]")))
 // 		}
 // 		{
 // 			expected := map[string]interface{}{"name": 3.0}
-// 			assert.Equal(t, expected, getM(t, q.Yaml("foo.[-1]")))
+// 			assert.Equal(t, expected, getM(t, q.M("foo.[-1]")))
 // 		}
 // 		{
 // 			expected := map[string]interface{}{"name": 2.0}
-// 			assert.Equal(t, expected, getM(t, q.Yaml("foo.[-2]")))
+// 			assert.Equal(t, expected, getM(t, q.M("foo.[-2]")))
 // 		}
 // 		{
 // 			expected := map[string]interface{}{"name": 1.0}
-// 			assert.Equal(t, expected, getM(t, q.Yaml("foo.[-3]")))
+// 			assert.Equal(t, expected, getM(t, q.M("foo.[-3]")))
 // 		}
 // 	}
 // 	{
@@ -216,8 +216,8 @@ package n
 // 		q := Q(data)
 // 		assert.True(t, q.Any())
 // 		expected := map[string]interface{}{"name": 3.0}
-// 		assert.Equal(t, expected, getM(t, q.Yaml("foo.[0]")))
-// 		assert.Equal(t, expected, getM(t, q.Yaml("foo.[-1]")))
+// 		assert.Equal(t, expected, getM(t, q.M("foo.[0]")))
+// 		assert.Equal(t, expected, getM(t, q.M("foo.[-1]")))
 // 	}
 // 	{
 // 		// Select first element when only one
@@ -228,8 +228,8 @@ package n
 // 		q := Q(data)
 // 		assert.True(t, q.Any())
 // 		expected := map[string]interface{}{"name": 3.0}
-// 		assert.Equal(t, expected, getM(t, q.Yaml("foo.[0]")))
-// 		assert.Equal(t, expected, getM(t, q.Yaml("foo.[-1]")))
+// 		assert.Equal(t, expected, getM(t, q.M("foo.[0]")))
+// 		assert.Equal(t, expected, getM(t, q.M("foo.[-1]")))
 // 	}
 // 	{
 // 		// Continue keying in after slice: one
@@ -241,7 +241,7 @@ package n
 // 		yaml.Unmarshal([]byte(rawYaml), &data)
 // 		q := Q(data)
 // 		assert.True(t, q.Any())
-// 		assert.Equal(t, "one", q.Yaml("foo.[0].name").O())
+// 		assert.Equal(t, "one", q.M("foo.[0].name").O())
 // 	}
 // 	{
 // 		// Continue keying in after slice: two
@@ -254,7 +254,7 @@ package n
 // 		yaml.Unmarshal([]byte(rawYaml), &data)
 // 		q := Q(data)
 // 		assert.True(t, q.Any())
-// 		assert.Equal(t, "frodo", q.Yaml("foo.[0].name.bar").O())
+// 		assert.Equal(t, "frodo", q.M("foo.[0].name.bar").O())
 // 	}
 // }
 

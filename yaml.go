@@ -1,6 +1,6 @@
 package n
 
-// // FromYaml return a numerable from the given Yaml
+// // FromYaml return a numerable from the given M
 // func FromYaml(yml string) (result *OldNumerable, err error) {
 // 	data := map[string]interface{}{}
 // 	if err = yaml.Unmarshal([]byte(yml), &data); err == nil {
@@ -25,9 +25,9 @@ package n
 // 	return Nil()
 // }
 
-// // Yaml gets data by key which can be dot delimited
+// // M gets data by key which can be dot delimited
 // // returns nil numerable on errors or keys not found
-// func (q *Numerable) Yaml(key string) (result *Numerable) {
+// func (q *Numerable) M(key string) (result *Numerable) {
 // 	keys := A(key).Split(".")
 // 	if key, ok := keys.TakeFirst(); ok {
 // 		switch x := q.v.Interface().(type) {
@@ -59,7 +59,7 @@ package n
 // 			}
 // 		}
 // 		if keys.Len() != 0 && result != nil && result.Any() {
-// 			result = result.Yaml(keys.Join(".").A())
+// 			result = result.M(keys.Join(".").A())
 // 		}
 // 	}
 // 	if result == nil {
@@ -78,7 +78,7 @@ package n
 // 		case map[string]interface{}:
 // 			q.Copy(MergeMap(x, y))
 // 		default:
-// 			err = fmt.Errorf("Invalid merge type")
+// 			err = errors.Errorf("Invalid merge type")
 // 		}
 // 	case []interface{}:
 // 		switch y := data.(type) {
@@ -92,7 +92,7 @@ package n
 // 				}
 // 			}
 // 		default:
-// 			err = fmt.Errorf("Invalid merge type")
+// 			err = errors.Errorf("Invalid merge type")
 // 		}
 // 	}
 // 	return

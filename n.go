@@ -47,6 +47,18 @@
 // 'M' refers to map types, 'A' refers to string types, 'I' ints types, 'R' rune types and
 // combinations may be used to indicate complex types. The documentation will always call
 // out what exactly they mean, but the function name may be cryptic until understood.
+//
+// Summary of Types
+//
+// • Char
+// • FloatSlice
+// • IntSlice
+// • InterSlice
+// • Object
+// • RefSlice
+// • Str
+// • StringSlice
+// • StringMap
 package n
 
 import (
@@ -150,7 +162,7 @@ func LoadYamlE(filepath string) (m *StringMap, err error) {
 // 				if pair, ok := x.(KeyVal); ok {
 // 					result[fmt.Sprint(pair.Key)] = pair.Val
 // 				} else {
-// 					err = fmt.Errorf("not a key value pair type")
+// 					err = errors.Errorf("not a key value pair type")
 // 					return
 // 				}
 // 			}
@@ -191,7 +203,7 @@ func LoadYamlE(filepath string) (m *StringMap, err error) {
 // 				if pair, ok := x.(KeyVal); ok {
 // 					result[fmt.Sprint(pair.Key)] = fmt.Sprint(pair.Val)
 // 				} else {
-// 					err = fmt.Errorf("not a key value pair type")
+// 					err = errors.Errorf("not a key value pair type")
 // 					return
 // 				}
 // 			}
@@ -221,7 +233,7 @@ func LoadYamlE(filepath string) (m *StringMap, err error) {
 // 						}
 // 					}
 // 				} else {
-// 					err = fmt.Errorf("not a key value pair type")
+// 					err = errors.Errorf("not a key value pair type")
 // 					return
 // 				}
 // 			}
@@ -257,7 +269,7 @@ func LoadYamlE(filepath string) (m *StringMap, err error) {
 // 					m[fmt.Sprint(k)] = v
 // 				}
 // 			default:
-// 				err = fmt.Errorf("%v is not of type map[string]interface{}", x)
+// 				err = errors.Errorf("%v is not of type map[string]interface{}", x)
 // 				return
 // 			}
 // 			result = append(result, m)
@@ -289,7 +301,7 @@ func LoadYamlE(filepath string) (m *StringMap, err error) {
 // 					m[fmt.Sprint(k)] = fmt.Sprint(v)
 // 				}
 // 			default:
-// 				err = fmt.Errorf("%v is not of type map[string]string", x)
+// 				err = errors.Errorf("%v is not of type map[string]string", x)
 // 				return
 // 			}
 // 			result = append(result, m)

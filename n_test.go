@@ -1431,7 +1431,7 @@ func TestLoadYamlE(t *testing.T) {
 // 		assert.Equal(t, []KeyVal{{"foo", "bar"}}, pairs)
 // 	}
 // 	{
-// 		// Get Yaml values from slice of key=value strings
+// 		// Get M values from slice of key=value strings
 // 		q := Q([]string{"foo=bar"})
 // 		m := getM(t, q.Map(func(x O) O {
 // 			return A(x.(string)).Split("=").YamlKeyVal()
@@ -1695,12 +1695,12 @@ func TestLoadYamlE(t *testing.T) {
 // 		assert.True(t, q.Any())
 
 // 		// Exists
-// 		assert.Equal(t, true, q.Yaml("foo.bar").O())
-// 		assert.Equal(t, true, getB(t, q.Yaml("foo.bar")))
+// 		assert.Equal(t, true, q.M("foo.bar").O())
+// 		assert.Equal(t, true, getB(t, q.M("foo.bar")))
 
 // 		// Doesn't exist
-// 		assert.Equal(t, nil, q.Yaml("foo.foo").O())
-// 		assert.Equal(t, false, getB(t, q.Yaml("foo.foo")))
+// 		assert.Equal(t, nil, q.M("foo.foo").O())
+// 		assert.Equal(t, false, getB(t, q.M("foo.foo")))
 // 	}
 // }
 
@@ -1721,10 +1721,10 @@ func TestLoadYamlE(t *testing.T) {
 // 		assert.True(t, q.Any())
 
 // 		// Key exists
-// 		assert.Equal(t, map[string]interface{}{"bar": true}, getM(t, q.Yaml("foo")))
+// 		assert.Equal(t, map[string]interface{}{"bar": true}, getM(t, q.M("foo")))
 
 // 		// Key doesn't exist
-// 		assert.Equal(t, map[string]interface{}{}, getM(t, q.Yaml("bar")))
+// 		assert.Equal(t, map[string]interface{}{}, getM(t, q.M("bar")))
 // 	}
 // 	{
 // 		// Convert with simple cast
@@ -1754,10 +1754,10 @@ func TestLoadYamlE(t *testing.T) {
 // 		assert.True(t, q.Any())
 
 // 		// Key exists
-// 		assert.Equal(t, map[string]string{"bar": "frodo"}, getAAMap(t, q.Yaml("foo")))
+// 		assert.Equal(t, map[string]string{"bar": "frodo"}, getAAMap(t, q.M("foo")))
 
 // 		// Key doesn't exist
-// 		assert.Equal(t, map[string]string{}, getAAMap(t, q.Yaml("bar")))
+// 		assert.Equal(t, map[string]string{}, getAAMap(t, q.M("bar")))
 // 	}
 // 	{
 // 		// Get map of string to string
@@ -1768,7 +1768,7 @@ func TestLoadYamlE(t *testing.T) {
 //     data: three`)
 // 		assert.True(t, q.Any())
 // 		expected := map[string]string{"name": "one", "meta": "two", "data": "three"}
-// 		assert.Equal(t, expected, getAAMap(t, q.Yaml("foobar.labels")))
+// 		assert.Equal(t, expected, getAAMap(t, q.M("foobar.labels")))
 // 	}
 // 	{
 // 		// Ints as keys
@@ -1779,7 +1779,7 @@ func TestLoadYamlE(t *testing.T) {
 //     3: 3`)
 // 		assert.True(t, q.Any())
 // 		expected := map[string]string{"1": "one", "2": "two", "3": "3"}
-// 		assert.Equal(t, expected, getAAMap(t, q.Yaml("foobar.labels")))
+// 		assert.Equal(t, expected, getAAMap(t, q.M("foobar.labels")))
 // 	}
 // }
 
@@ -1792,7 +1792,7 @@ func TestLoadYamlE(t *testing.T) {
 // 		q, err := FromYaml("foo:\n  bar:\n  - frodo")
 // 		assert.Nil(t, err)
 // 		assert.True(t, q.Any())
-// 		assert.Equal(t, map[string][]string{"bar": []string{"frodo"}}, getASAMap(t, q.Yaml("foo")))
+// 		assert.Equal(t, map[string][]string{"bar": []string{"frodo"}}, getASAMap(t, q.M("foo")))
 // 	}
 // }
 
@@ -1808,7 +1808,7 @@ func TestLoadYamlE(t *testing.T) {
 // 			map[string]interface{}{"name": "two"},
 // 			map[string]interface{}{"name": "three"},
 // 		}
-// 		assert.Equal(t, expected, q.Yaml("items").S())
+// 		assert.Equal(t, expected, q.M("items").S())
 // 	}
 // 	{
 // 		// Not found
@@ -1817,7 +1817,7 @@ func TestLoadYamlE(t *testing.T) {
 //   - name: two
 //   - name: three`)
 // 		assert.True(t, q.Any())
-// 		assert.Equal(t, Nil(), q.Yaml(""))
+// 		assert.Equal(t, Nil(), q.M(""))
 // 	}
 // }
 
@@ -1857,7 +1857,7 @@ func TestLoadYamlE(t *testing.T) {
 // 			{"name": "two"},
 // 			{"name": "three"},
 // 		}
-// 		assert.Equal(t, expected, getSAMap(t, q.Yaml("items")))
+// 		assert.Equal(t, expected, getSAMap(t, q.M("items")))
 // 	}
 // 	{
 // 		q, _ := FromYaml(`items:
@@ -1866,7 +1866,7 @@ func TestLoadYamlE(t *testing.T) {
 //   - name: three`)
 // 		assert.True(t, q.Any())
 // 		expected := []map[string]interface{}{}
-// 		assert.Equal(t, expected, getSAMap(t, q.Yaml("foo")))
+// 		assert.Equal(t, expected, getSAMap(t, q.M("foo")))
 // 	}
 // }
 
@@ -1932,7 +1932,7 @@ func TestLoadYamlE(t *testing.T) {
 // 			{"name": "two"},
 // 			{"name": "three"},
 // 		}
-// 		assert.Equal(t, expected, getSAAMap(t, q.Yaml("items")))
+// 		assert.Equal(t, expected, getSAAMap(t, q.M("items")))
 // 	}
 
 // 	// slice of string to int map
@@ -1947,7 +1947,7 @@ func TestLoadYamlE(t *testing.T) {
 // 			{"name": "2"},
 // 			{"name": "three"},
 // 		}
-// 		assert.Equal(t, expected, getSAAMap(t, q.Yaml("items")))
+// 		assert.Equal(t, expected, getSAAMap(t, q.M("items")))
 // 	}
 // }
 
@@ -1960,7 +1960,7 @@ func TestLoadYamlE(t *testing.T) {
 //   - name: three`)
 // 		assert.True(t, q.Any())
 // 		expected := []string{}
-// 		assert.Equal(t, expected, q.Yaml("frodo.baggins").Strs())
+// 		assert.Equal(t, expected, q.M("frodo.baggins").Strs())
 // 	}
 // 	{
 // 		q := Q([]string{"one"})

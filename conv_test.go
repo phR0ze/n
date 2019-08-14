@@ -84,6 +84,19 @@ func TestDeReference(t *testing.T) {
 		assert.Equal(t, []*float64{&test}, DeReference(&[]*float64{&test}))
 	}
 
+	// FloatSlice
+	//-----------------------------------------
+	{
+		assert.Equal(t, FloatSlice{1.2}, DeReference(FloatSlice{1.2}))
+		assert.Equal(t, FloatSlice{1.2}, DeReference(&FloatSlice{1.2}))
+		assert.Equal(t, FloatSlice{}, DeReference((*FloatSlice)(nil)))
+
+		test := FloatSlice{}
+		assert.Equal(t, []FloatSlice{{1.2}}, DeReference([]FloatSlice{{1.2}}))
+		assert.Equal(t, []FloatSlice{{1.2}}, DeReference(&[]FloatSlice{{1.2}}))
+		assert.Equal(t, []*FloatSlice{&test}, DeReference(&[]*FloatSlice{&test}))
+	}
+
 	// int
 	//-----------------------------------------
 	{
@@ -173,6 +186,32 @@ func TestDeReference(t *testing.T) {
 		assert.Equal(t, []*int64{&test}, DeReference(&[]*int64{&test}))
 	}
 
+	// IntSlice
+	//-----------------------------------------
+	{
+		assert.Equal(t, IntSlice{2}, DeReference(IntSlice{2}))
+		assert.Equal(t, IntSlice{2}, DeReference(&IntSlice{2}))
+		assert.Equal(t, IntSlice{}, DeReference((*IntSlice)(nil)))
+
+		test := IntSlice{}
+		assert.Equal(t, []IntSlice{{2}}, DeReference([]IntSlice{{2}}))
+		assert.Equal(t, []IntSlice{{2}}, DeReference(&[]IntSlice{{2}}))
+		assert.Equal(t, []*IntSlice{&test}, DeReference(&[]*IntSlice{&test}))
+	}
+
+	// InterSlice
+	//-----------------------------------------
+	{
+		assert.Equal(t, InterSlice{2}, DeReference(InterSlice{2}))
+		assert.Equal(t, InterSlice{2}, DeReference(&InterSlice{2}))
+		assert.Equal(t, InterSlice{}, DeReference((*InterSlice)(nil)))
+
+		test := InterSlice{}
+		assert.Equal(t, []InterSlice{{2}}, DeReference([]InterSlice{{2}}))
+		assert.Equal(t, []InterSlice{{2}}, DeReference(&[]InterSlice{{2}}))
+		assert.Equal(t, []*InterSlice{&test}, DeReference(&[]*InterSlice{&test}))
+	}
+
 	// Object
 	//-----------------------------------------
 	{
@@ -232,6 +271,32 @@ func TestDeReference(t *testing.T) {
 		assert.Equal(t, []string{"test"}, DeReference(&[]string{"test"}))
 		assert.Equal(t, []string{}, DeReference((*[]string)(nil)))
 		assert.Equal(t, []*string{}, DeReference((*[]*string)(nil)))
+	}
+
+	// StringSlice
+	//-----------------------------------------
+	{
+		assert.Equal(t, StringSlice{"2"}, DeReference(StringSlice{"2"}))
+		assert.Equal(t, StringSlice{"2"}, DeReference(&StringSlice{"2"}))
+		assert.Equal(t, StringSlice{}, DeReference((*StringSlice)(nil)))
+
+		test := StringSlice{}
+		assert.Equal(t, []StringSlice{{"2"}}, DeReference([]StringSlice{{"2"}}))
+		assert.Equal(t, []StringSlice{{"2"}}, DeReference(&[]StringSlice{{"2"}}))
+		assert.Equal(t, []*StringSlice{&test}, DeReference(&[]*StringSlice{&test}))
+	}
+
+	// StringMap
+	//-----------------------------------------
+	{
+		assert.Equal(t, StringMap{"2": "two"}, DeReference(StringMap{"2": "two"}))
+		assert.Equal(t, StringMap{"2": "two"}, DeReference(&StringMap{"2": "two"}))
+		assert.Equal(t, StringMap{}, DeReference((*StringMap)(nil)))
+
+		test := StringMap{}
+		assert.Equal(t, []StringMap{{"2": "two"}}, DeReference([]StringMap{{"2": "two"}}))
+		assert.Equal(t, []StringMap{{"2": "two"}}, DeReference(&[]StringMap{{"2": "two"}}))
+		assert.Equal(t, []*StringMap{&test}, DeReference(&[]*StringMap{&test}))
 	}
 
 	// template.CSS
@@ -2807,6 +2872,196 @@ func TestToIntE(t *testing.T) {
 		val, err = ToIntE((*uint64)(nil))
 		assert.Nil(t, err)
 		assert.Equal(t, 0, val)
+	}
+}
+
+// ToInterSlice
+//--------------------------------------------------------------------------------------------------
+func ExampleToInterSlice() {
+	fmt.Println(ToInterSlice("3").O())
+	// Output: [3]
+}
+
+func TestToInterSlice(t *testing.T) {
+
+	// invalid
+	{
+		assert.Equal(t, &InterSlice{}, ToInterSlice(nil))
+		assert.Equal(t, &InterSlice{Object{}}, ToInterSlice(&Object{}))
+	}
+
+	// bool
+	{
+		var test bool
+		assert.Equal(t, &InterSlice{false}, ToInterSlice(&test))
+		assert.Equal(t, &InterSlice{true}, ToInterSlice(true))
+		assert.Equal(t, &InterSlice{false}, ToInterSlice((*bool)(nil)))
+		assert.Equal(t, &InterSlice{true, false, true}, ToInterSlice([]bool{true, false, true}))
+	}
+
+	// float32
+	{
+		var test float32
+		assert.Equal(t, &InterSlice{float32(0)}, ToInterSlice(&test))
+		assert.Equal(t, &InterSlice{float32(1.2)}, ToInterSlice(float32(1.2)))
+		assert.Equal(t, &InterSlice{float32(0)}, ToInterSlice((*float32)(nil)))
+		assert.Equal(t, &InterSlice{float32(1), float32(2), float32(3)}, ToInterSlice([]float32{1, 2, 3}))
+	}
+
+	// float64
+	{
+		var test float64
+		assert.Equal(t, &InterSlice{float64(0)}, ToInterSlice(&test))
+		assert.Equal(t, &InterSlice{float64(1.2)}, ToInterSlice(float64(1.2)))
+		assert.Equal(t, &InterSlice{float64(0)}, ToInterSlice((*float64)(nil)))
+		assert.Equal(t, &InterSlice{float64(1), float64(2), float64(3)}, ToInterSlice([]float64{1, 2, 3}))
+	}
+
+	// FloatSlice
+	{
+		assert.Equal(t, &InterSlice{}, ToInterSlice(&FloatSlice{}))
+		assert.Equal(t, &InterSlice{float64(1.2)}, ToInterSlice(&FloatSlice{1.2}))
+		assert.Equal(t, &InterSlice{}, ToInterSlice((*FloatSlice)(nil)))
+		assert.Equal(t, &InterSlice{float64(1), float64(2), float64(3)}, ToInterSlice(FloatSlice{1, 2, 3}))
+	}
+
+	// []interface{}
+	{
+		assert.Equal(t, &InterSlice{1}, ToInterSlice([]interface{}{1}))
+		assert.Equal(t, &InterSlice{"1"}, ToInterSlice([]interface{}{"1"}))
+	}
+
+	// int
+	{
+		var test int
+		assert.Equal(t, &InterSlice{0}, ToInterSlice(&test))
+		assert.Equal(t, &InterSlice{3}, ToInterSlice(3))
+		assert.Equal(t, &InterSlice{0}, ToInterSlice((*int)(nil)))
+		assert.Equal(t, &InterSlice{1, 2, 3}, ToInterSlice([]int{1, 2, 3}))
+	}
+
+	// int8
+	{
+		var test int8
+		assert.Equal(t, &InterSlice{int8(0)}, ToInterSlice(&test))
+		assert.Equal(t, &InterSlice{int8(3)}, ToInterSlice(int8(3)))
+		assert.Equal(t, &InterSlice{int8(0)}, ToInterSlice((*int8)(nil)))
+		assert.Equal(t, &InterSlice{int8(1), int8(2), int8(3)}, ToInterSlice([]int8{1, 2, 3}))
+	}
+
+	// int16
+	{
+		var test int16
+		assert.Equal(t, &InterSlice{int16(0)}, ToInterSlice(&test))
+		assert.Equal(t, &InterSlice{int16(3)}, ToInterSlice(int16(3)))
+		assert.Equal(t, &InterSlice{int16(0)}, ToInterSlice((*int16)(nil)))
+		assert.Equal(t, &InterSlice{int16(1), int16(2), int16(3)}, ToInterSlice([]int16{1, 2, 3}))
+	}
+
+	// int32
+	{
+		var test int32
+		assert.Equal(t, &InterSlice{int32(0)}, ToInterSlice(&test))
+		assert.Equal(t, &InterSlice{int32(3)}, ToInterSlice(int32(3)))
+		assert.Equal(t, &InterSlice{int32(0)}, ToInterSlice((*int32)(nil)))
+		assert.Equal(t, &InterSlice{int32(1), int32(2), int32(3)}, ToInterSlice([]int32{1, 2, 3}))
+	}
+
+	// int64
+	{
+		var test int64
+		assert.Equal(t, &InterSlice{int64(0)}, ToInterSlice(&test))
+		assert.Equal(t, &InterSlice{int64(3)}, ToInterSlice(int64(3)))
+		assert.Equal(t, &InterSlice{int64(0)}, ToInterSlice((*int64)(nil)))
+		assert.Equal(t, &InterSlice{int64(1), int64(2), int64(3)}, ToInterSlice([]int64{1, 2, 3}))
+	}
+
+	// IntSlice
+	{
+		assert.Equal(t, &InterSlice{}, ToInterSlice(&IntSlice{}))
+		assert.Equal(t, &InterSlice{2}, ToInterSlice(&IntSlice{2}))
+		assert.Equal(t, &InterSlice{}, ToInterSlice((*IntSlice)(nil)))
+		assert.Equal(t, &InterSlice{1, 2, 3}, ToInterSlice(IntSlice{1, 2, 3}))
+	}
+
+	// InterSlice
+	{
+		assert.Equal(t, &InterSlice{1}, ToInterSlice(&InterSlice{1}))
+		assert.Equal(t, &InterSlice{"1"}, ToInterSlice(&InterSlice{"1"}))
+	}
+
+	// string
+	{
+		var test string
+		assert.Equal(t, &InterSlice{""}, ToInterSlice(&test))
+		assert.Equal(t, &InterSlice{"3"}, ToInterSlice("3"))
+		assert.Equal(t, &InterSlice{""}, ToInterSlice((*string)(nil)))
+		assert.Equal(t, &InterSlice{"0"}, ToInterSlice("0"))
+		assert.Equal(t, &InterSlice{"true"}, ToInterSlice("true"))
+		assert.Equal(t, &InterSlice{"TRUE"}, ToInterSlice("TRUE"))
+		assert.Equal(t, &InterSlice{"bob"}, ToInterSlice("bob"))
+		assert.Equal(t, &InterSlice{"1", "2", "3"}, ToInterSlice([]string{"1", "2", "3"}))
+	}
+
+	// StringMap
+	{
+		assert.Equal(t, &InterSlice{map[string]interface{}{}}, ToInterSlice(&StringMap{}))
+		assert.Equal(t, &InterSlice{map[string]interface{}{"2": "two"}}, ToInterSlice(&StringMap{"2": "two"}))
+		assert.Equal(t, &InterSlice{map[string]interface{}{}}, ToInterSlice((*StringMap)(nil)))
+		assert.Equal(t, &InterSlice{map[string]interface{}{"1": "one", "2": "two"}}, ToInterSlice(&StringMap{"1": "one", "2": "two"}))
+	}
+
+	// StringSlice
+	{
+		assert.Equal(t, &InterSlice{}, ToInterSlice(&StringSlice{}))
+		assert.Equal(t, &InterSlice{"2"}, ToInterSlice(&StringSlice{"2"}))
+		assert.Equal(t, &InterSlice{}, ToInterSlice((*StringSlice)(nil)))
+		assert.Equal(t, &InterSlice{"1", "2", "3"}, ToInterSlice(StringSlice{"1", "2", "3"}))
+	}
+
+	// uint
+	{
+		var test uint
+		assert.Equal(t, &InterSlice{uint(0)}, ToInterSlice(&test))
+		assert.Equal(t, &InterSlice{uint(3)}, ToInterSlice(uint(3)))
+		assert.Equal(t, &InterSlice{uint(0)}, ToInterSlice((*uint)(nil)))
+		assert.Equal(t, &InterSlice{uint(1), uint(2), uint(3)}, ToInterSlice([]uint{1, 2, 3}))
+	}
+
+	// uint8
+	{
+		var test uint8
+		assert.Equal(t, &InterSlice{uint8(0)}, ToInterSlice(&test))
+		assert.Equal(t, &InterSlice{uint8(3)}, ToInterSlice(uint8(3)))
+		assert.Equal(t, &InterSlice{uint8(0)}, ToInterSlice((*uint8)(nil)))
+		assert.Equal(t, &InterSlice{uint8(1), uint8(2), uint8(3)}, ToInterSlice([]uint8{1, 2, 3}))
+	}
+
+	// uint16
+	{
+		var test uint16
+		assert.Equal(t, &InterSlice{uint16(0)}, ToInterSlice(&test))
+		assert.Equal(t, &InterSlice{uint16(3)}, ToInterSlice(uint16(3)))
+		assert.Equal(t, &InterSlice{uint16(0)}, ToInterSlice((*uint16)(nil)))
+		assert.Equal(t, &InterSlice{uint16(1), uint16(2), uint16(3)}, ToInterSlice([]uint16{1, 2, 3}))
+	}
+
+	// uint32
+	{
+		var test uint32
+		assert.Equal(t, &InterSlice{uint32(0)}, ToInterSlice(&test))
+		assert.Equal(t, &InterSlice{uint32(3)}, ToInterSlice(uint32(3)))
+		assert.Equal(t, &InterSlice{uint32(0)}, ToInterSlice((*uint32)(nil)))
+		assert.Equal(t, &InterSlice{uint32(1), uint32(2), uint32(3)}, ToInterSlice([]uint32{1, 2, 3}))
+	}
+
+	// uint64
+	{
+		var test uint64
+		assert.Equal(t, &InterSlice{uint64(0)}, ToInterSlice(&test))
+		assert.Equal(t, &InterSlice{uint64(3)}, ToInterSlice(uint64(3)))
+		assert.Equal(t, &InterSlice{uint64(0)}, ToInterSlice((*uint64)(nil)))
+		assert.Equal(t, &InterSlice{uint64(1), uint64(2), uint64(3)}, ToInterSlice([]uint64{1, 2, 3}))
 	}
 }
 

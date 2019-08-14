@@ -766,7 +766,7 @@ func ExampleRefSlice_Clear() {
 	// Output: []
 }
 
-func TestQSlice_Clear(t *testing.T) {
+func TestRefSlice_Clear(t *testing.T) {
 
 	// nil
 	{

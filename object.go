@@ -1,10 +1,10 @@
 package n
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/phR0ze/cast"
+	"github.com/pkg/errors"
 )
 
 // Object is a wrapper around an interface{} value wproviding a number of export methods
@@ -42,13 +42,23 @@ func (p *Object) A() string {
 	return p.String()
 }
 
-// M is an alias to ToStringMapG for brevity
-func (p *Object) M() map[string]interface{} {
+// M is an alias to ToStringMap
+func (p *Object) M() *StringMap {
+	return p.ToStringMap()
+}
+
+// MG is an alias to ToStringMapG
+func (p *Object) MG() map[string]interface{} {
 	return p.ToStringMapG()
 }
 
-// S is an alias to ToStringSliceG for brevity
-func (p *Object) S() []string {
+// S is an alias to ToStringSlice for brevity
+func (p *Object) S() *StringSlice {
+	return p.ToStringSlice()
+}
+
+// SG is an alias to ToStringSliceG for brevity
+func (p *Object) SG() []string {
 	return p.ToStringSliceG()
 }
 
@@ -133,7 +143,7 @@ func (p *Object) QueryE(key string) (obj *Object, err error) {
 		return
 	}
 	if obj.o == nil {
-		err = fmt.Errorf("invalid key")
+		err = errors.Errorf("invalid key")
 	}
 	return
 }
@@ -400,23 +410,6 @@ func (p *Object) ToStringE() (string, error) {
 
 // Map related
 //--------------------------------------------------------------------------------------------------
-
-// Yaml is an alias to ToStringMap
-func (p *Object) Yaml() *StringMap {
-	if p == nil {
-		return NewStringMapV()
-	}
-	return ToStringMap(p.o)
-}
-
-// YamlG is an alias to ToStringMapG
-func (p *Object) YamlG() map[string]interface{} {
-	if p == nil {
-		return map[string]interface{}{}
-	}
-	v, _ := ToStringMapE(p.o)
-	return v.G()
-}
 
 // ToStringMap converts an interface to a *StringMap type.
 func (p *Object) ToStringMap() *StringMap {

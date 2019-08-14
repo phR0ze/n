@@ -1,9 +1,6 @@
 package n
 
 import (
-	"strconv"
-	"strings"
-
 	"github.com/ghodss/yaml"
 	"github.com/phR0ze/n/pkg/sys"
 	"github.com/pkg/errors"
@@ -14,13 +11,13 @@ import (
 // also specifically designed to handle YAML constructs.
 type StringMap map[string]interface{}
 
-// Yaml is an alias to NewStringMap
-func Yaml(obj interface{}) *StringMap {
+// M is an alias to NewStringMap
+func M(obj interface{}) *StringMap {
 	return ToStringMap(obj)
 }
 
-// YamlV is an alias to NewStringMapV
-func YamlV(m ...map[string]interface{}) *StringMap {
+// MV is an alias to NewStringMapV
+func MV(m ...map[string]interface{}) *StringMap {
 	return NewStringMapV(m...)
 }
 
@@ -159,6 +156,109 @@ func (p *StringMap) Get(key interface{}) (val *Object) {
 	return
 }
 
+// Inject sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
+func (p *StringMap) Inject(key string, val interface{}) Map {
+	m, _ := p.InjectE(key, val)
+	return m
+}
+
+// InjectE sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
+func (p *StringMap) InjectE(key string, val interface{}) (m Map, err error) {
+	if p == nil {
+		p = NewStringMapV()
+	}
+	m = p
+
+	// Process keys from left to right
+	var keys *StringSlice
+	if keys, err = KeysFromSelector(key); err != nil {
+		return
+	}
+
+	// Inject at root as no keys were given
+	if !keys.Any() {
+		if x, e := ToStringMapE(val); e == nil {
+			for k, v := range *x {
+				(*p)[k] = v
+			}
+		} else {
+			err = errors.Errorf("invalid selector for the type of value given, '%T'", val)
+			return
+		}
+	}
+
+	// Inject at given selector location
+	obj := &Object{o: p}
+	for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
+		key := ko.ToStr()
+
+		// All array selector is handled on previous loop
+		if key.A() == "[]" {
+			break
+		}
+
+		switch o := obj.o.(type) {
+
+		// Identifier Index: .foo, .foo.bar
+		case map[string]interface{}, *StringMap:
+			x := ToStringMap(o)
+
+			// Continue to drill or update and done
+			create := false
+			if keys.Any() && keys.First().A() != "[]" {
+				if v, ok := (*x)[key.A()]; ok {
+					if YamlCont(v) {
+						obj.o = v
+					} else {
+						create = true
+					}
+				} else {
+					create = true
+				}
+			} else {
+				x.Set(key.A(), val)
+			}
+
+			// Doesn't exist so create and drill further
+			if create {
+				x.Set(key.A(), map[string]interface{}{})
+				obj.o = (*x)[key.A()]
+			}
+
+		// Array Index/Iterator: .[2], .[-1], .[], .[key==val]
+		case []interface{}:
+
+			// Get array selectors
+			var i int
+			var k, v string
+			if i, k, v, err = IdxFromSelector(key.A(), len(o)); err != nil {
+				obj.o = nil
+				return
+			}
+
+			// Select by key==value, e.g. .[k==v]
+			if k != "" && v != "" {
+				// m := NewSlice(o).Select(func(x O) bool {
+				// 	return ToStringMap(x).Get(k).A() == v
+				// })
+				// if m.Any() {
+				// 	obj = m.First().o
+				// }
+			}
+
+			// Index in if the value is a valid integer, e.g. .[2], .[-1]
+			// -1 indicates all should be selected.
+			if i != -1 {
+				//s := NewSlice(o).Set(i, val).ToInterSlice()
+			}
+		}
+	}
+	if err != nil {
+		m = nil
+	}
+	return
+}
+
 // Keys returns all the keys in this Map as a Slice of the key type.
 func (p *StringMap) Keys() Slice {
 	keys := NewStringSliceV()
@@ -176,6 +276,16 @@ func (p *StringMap) Len() int {
 		return 0
 	}
 	return len(*p)
+}
+
+// M is an alias to ToStringMap
+func (p *StringMap) M() (m *StringMap) {
+	return ToStringMap(p)
+}
+
+// MG is an alias ToStringMapG
+func (p *StringMap) MG() (m map[string]interface{}) {
+	return p.O().(map[string]interface{})
 }
 
 // Merge modifies this Map by overriding its values at location with the given map where they both exist and returns a reference to this Map.
@@ -355,43 +465,31 @@ func (p *StringMap) QueryE(key string) (val *Object, err error) {
 		// Array Index/Iterator: .[2], .[-1], .[], .[key==val]
 		case []interface{}:
 
-			// Empty list so return nil i.e. failed
-			if len(x) == 0 {
-				err = errors.Errorf("array is empty")
+			// Get array selectors
+			var i int
+			var k, v string
+			if i, k, v, err = IdxFromSelector(key.A(), len(x)); err != nil {
 				val.o = nil
 				return
 			}
 
-			// Continue if list is not empty
-			if key.First().A() == "[" && key.Last().A() == "]" {
+			// Select by key==value, e.g. .[k==v]
+			if k != "" && v != "" {
+				m := NewSlice(x).Select(func(x O) bool {
+					return ToStringMap(x).Get(k).A() == v
+				})
+				if m.Any() {
+					val.o = m.First().o
+				}
+			}
 
-				// Trim off the indexer/selector brackets and check the indexer
-				idx := key.TrimPrefix("[").TrimSuffix("]").A()
-				if idx != "" {
-					pieces := strings.Split(idx, "==")
-					i, e := strconv.Atoi(idx)
-					switch {
-
-					// Select by key==value, e.g. .[k==v]
-					case len(pieces) == 2:
-						k, v := pieces[0], pieces[1]
-						m := NewSlice(x).Select(func(x O) bool {
-							return ToStringMap(x).Get(k).A() == v
-						})
-						if m.Any() {
-							val.o = m.First().o
-						}
-
-					// Index in if the value is a valid integer, e.g. .[2], .[-1]
-					case e == nil:
-						if val.o = NewSlice(x).At(i).o; val.Nil() {
-							err = errors.Errorf("invalid array index %v", i)
-							val.o = nil
-							return
-						}
-					}
-
-					// Fall through to return all array elements
+			// Index in if the value is a valid integer, e.g. .[2], .[-1]
+			// -1 indicates all should be selected.
+			if i != -1 {
+				if val.o = NewSlice(x).At(i).o; val.Nil() {
+					err = errors.Errorf("invalid array index %v", i)
+					val.o = nil
+					return
 				}
 			}
 		}
@@ -439,43 +537,31 @@ func (p *StringMap) RemoveE(key string) (m Map, err error) {
 			// // Array Index/Iterator: .[2], .[-1], .[], .[key==val]
 			// case []interface{}:
 
-			// 	// Empty list so return nil i.e. failed
-			// 	if len(x) == 0 {
-			// 		err = errors.Errorf("array is empty")
+			// 	// Get array selectors
+			// 	var i int
+			// 	var k, v string
+			// 	if i, k, v, err = IdxFromSelector(key.A(), len(x)); err != nil {
 			// 		val.o = nil
 			// 		return
 			// 	}
 
-			// 	// Continue if list is not empty
-			// 	if key.First().A() == "[" && key.Last().A() == "]" {
+			// 	// Select by key==value, e.g. .[k==v]
+			// 	if k != "" && v != "" {
+			// 		m := NewSlice(x).Select(func(x O) bool {
+			// 			return ToStringMap(x).Get(k).A() == v
+			// 		})
+			// 		if m.Any() {
+			// 			val.o = m.First().o
+			// 		}
+			// 	}
 
-			// 		// Trim off the indexer/selector brackets and check the indexer
-			// 		idx := key.TrimPrefix("[").TrimSuffix("]").A()
-			// 		if idx != "" {
-			// 			pieces := strings.Split(idx, "==")
-			// 			i, e := strconv.Atoi(idx)
-			// 			switch {
-
-			// 			// Select by key==value, e.g. .[k==v]
-			// 			case len(pieces) == 2:
-			// 				k, v := pieces[0], pieces[1]
-			// 				m := NewSlice(x).Select(func(x O) bool {
-			// 					return ToStringMap(x).Get(k).A() == v
-			// 				})
-			// 				if m.Any() {
-			// 					val.o = m.First().o
-			// 				}
-
-			// 			// Index in if the value is a valid integer, e.g. .[2], .[-1]
-			// 			case e == nil:
-			// 				if val.o = NewSlice(x).At(i).o; val.Nil() {
-			// 					err = errors.Errorf("invalid array index %v", i)
-			// 					val.o = nil
-			// 					return
-			// 				}
-			// 			}
-
-			// 			// Fall through to return all array elements
+			// 	// Index in if the value is a valid integer, e.g. .[2], .[-1]
+			// 	// -1 indicates all should be selected.
+			// 	if i != -1 {
+			// 		if val.o = NewSlice(x).At(i).o; val.Nil() {
+			// 			err = errors.Errorf("invalid array index %v", i)
+			// 			val.o = nil
+			// 			return
 			// 		}
 			// 	}
 		}
@@ -507,28 +593,12 @@ func (p *StringMap) SetM(key, val interface{}) Map {
 
 // ToStringMap converts the map to a *StringMap
 func (p *StringMap) ToStringMap() (m *StringMap) {
-	if p == nil {
-		return NewStringMapV()
-	}
-	return p
+	return ToStringMap(p)
 }
 
-// ToStringMapG converts the map to a google type map[string]interface{}
+// ToStringMapG converts the map to a Golang map[string]interface{}
 func (p *StringMap) ToStringMapG() (m map[string]interface{}) {
-	return p.G()
-}
-
-// ToYaml is an alias to ToStringMap
-func (p *StringMap) ToYaml() (m *StringMap) {
-	if p == nil {
-		return NewStringMapV()
-	}
-	return p
-}
-
-// ToYamlG is an alias to ToStringMapG
-func (p *StringMap) ToYamlG() (m map[string]interface{}) {
-	return p.G()
+	return p.O().(map[string]interface{})
 }
 
 // WriteYaml converts the *StringMap into a map[string]interface{} then calls

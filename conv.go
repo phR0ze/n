@@ -337,6 +337,30 @@ func DeReference(obj interface{}) interface{} {
 		}
 		return *x
 
+	// InterSlice
+	//----------------------------------------------------------------------------------------------
+	case InterSlice:
+		return x
+	case *InterSlice:
+		if x == nil {
+			return *NewInterSliceV()
+		}
+		return *x
+	case []InterSlice:
+		return x
+	case []*InterSlice:
+		return x
+	case *[]InterSlice:
+		if x == nil {
+			return []InterSlice{}
+		}
+		return *x
+	case *[]*InterSlice:
+		if x == nil {
+			return []*InterSlice{}
+		}
+		return *x
+
 	// Object
 	//----------------------------------------------------------------------------------------------
 	case Object:
@@ -395,30 +419,6 @@ func DeReference(obj interface{}) interface{} {
 	// 		return rune(0)
 	// 	}
 
-	// StringSlice
-	//----------------------------------------------------------------------------------------------
-	case StringSlice:
-		return x
-	case *StringSlice:
-		if x == nil {
-			return *NewStringSliceV()
-		}
-		return *x
-	case []StringSlice:
-		return x
-	case []*StringSlice:
-		return x
-	case *[]StringSlice:
-		if x == nil {
-			return []StringSlice{}
-		}
-		return *x
-	case *[]*StringSlice:
-		if x == nil {
-			return []*StringSlice{}
-		}
-		return *x
-
 	// string
 	//----------------------------------------------------------------------------------------------
 	case string:
@@ -440,6 +440,54 @@ func DeReference(obj interface{}) interface{} {
 	case *[]*string:
 		if x == nil {
 			return []*string{}
+		}
+		return *x
+
+	// StringMap
+	//---------------------------------------------------------------------------------
+	case StringMap:
+		return x
+	case *StringMap:
+		if x == nil {
+			return *NewStringMapV()
+		}
+		return *x
+	case []StringMap:
+		return x
+	case []*StringMap:
+		return x
+	case *[]StringMap:
+		if x == nil {
+			return []StringMap{}
+		}
+		return *x
+	case *[]*StringMap:
+		if x == nil {
+			return []*StringMap{}
+		}
+		return *x
+
+	// StringSlice
+	//----------------------------------------------------------------------------------------------
+	case StringSlice:
+		return x
+	case *StringSlice:
+		if x == nil {
+			return *NewStringSliceV()
+		}
+		return *x
+	case []StringSlice:
+		return x
+	case []*StringSlice:
+		return x
+	case *[]StringSlice:
+		if x == nil {
+			return []StringSlice{}
+		}
+		return *x
+	case *[]*StringSlice:
+		if x == nil {
+			return []*StringSlice{}
 		}
 		return *x
 
@@ -1508,7 +1556,7 @@ func ToFloat32E(obj interface{}) (val float32, err error) {
 			val = float32(v)
 		}
 	default:
-		err = fmt.Errorf("unable to convert type %T to int", x)
+		err = errors.Errorf("unable to convert type %T to int", x)
 	}
 	return
 }
@@ -1572,7 +1620,7 @@ func ToFloat64E(obj interface{}) (val float64, err error) {
 			}
 		}
 	default:
-		err = fmt.Errorf("unable to convert type %T to int", x)
+		err = errors.Errorf("unable to convert type %T to int", x)
 	}
 	return
 }
@@ -1639,7 +1687,7 @@ func ToIntE(obj interface{}) (val int, err error) {
 			val = int(v)
 		}
 	default:
-		err = fmt.Errorf("unable to convert type %T to int", x)
+		err = errors.Errorf("unable to convert type %T to int", x)
 	}
 	return
 }
@@ -1826,7 +1874,7 @@ func ToFloatSliceE(obj interface{}) (val *FloatSlice, err error) {
 	//----------------------------------------------------------------------------------------------
 	case Object:
 		if v, e := x.ToFloat64E(); e != nil {
-			err = fmt.Errorf("unable to convert type Object to []float64")
+			err = errors.Errorf("unable to convert type Object to []float64")
 		} else {
 			*val = append(*val, v)
 		}
@@ -1835,7 +1883,7 @@ func ToFloatSliceE(obj interface{}) (val *FloatSlice, err error) {
 			if v, e := x[i].ToFloat64E(); e == nil {
 				*val = append(*val, v)
 			} else {
-				err = fmt.Errorf("unable to convert type %T to []float64", x[i].O())
+				err = errors.Errorf("unable to convert type %T to []float64", x[i].O())
 				return
 			}
 		}
@@ -1844,7 +1892,7 @@ func ToFloatSliceE(obj interface{}) (val *FloatSlice, err error) {
 			if v, e := x[i].ToFloat64E(); e == nil {
 				*val = append(*val, v)
 			} else {
-				err = fmt.Errorf("unable to convert type %T to []float64", x[i].O())
+				err = errors.Errorf("unable to convert type %T to []float64", x[i].O())
 				return
 			}
 		}
@@ -1853,7 +1901,7 @@ func ToFloatSliceE(obj interface{}) (val *FloatSlice, err error) {
 	//----------------------------------------------------------------------------------------------
 	case Str:
 		if v, e := ToFloat64E(x); e != nil {
-			err = fmt.Errorf("unable to convert type Str to []float64")
+			err = errors.Errorf("unable to convert type Str to []float64")
 		} else {
 			*val = append(*val, v)
 		}
@@ -1862,7 +1910,7 @@ func ToFloatSliceE(obj interface{}) (val *FloatSlice, err error) {
 			if v, e := ToFloat64E(x[i]); e == nil {
 				*val = append(*val, v)
 			} else {
-				err = fmt.Errorf("unable to convert type Str to []float64")
+				err = errors.Errorf("unable to convert type Str to []float64")
 				return
 			}
 		}
@@ -1871,7 +1919,7 @@ func ToFloatSliceE(obj interface{}) (val *FloatSlice, err error) {
 			if v, e := ToFloat64E(x[i]); e == nil {
 				*val = append(*val, v)
 			} else {
-				err = fmt.Errorf("unable to convert type *Str to []float64")
+				err = errors.Errorf("unable to convert type *Str to []float64")
 				return
 			}
 		}
@@ -1880,7 +1928,7 @@ func ToFloatSliceE(obj interface{}) (val *FloatSlice, err error) {
 	//----------------------------------------------------------------------------------------------
 	case string:
 		if v, e := ToFloat64E(x); e != nil {
-			err = fmt.Errorf("unable to convert type string to []float64")
+			err = errors.Errorf("unable to convert type string to []float64")
 		} else {
 			*val = append(*val, v)
 		}
@@ -1889,7 +1937,7 @@ func ToFloatSliceE(obj interface{}) (val *FloatSlice, err error) {
 			if v, e := ToFloat64E(x[i]); e == nil {
 				*val = append(*val, v)
 			} else {
-				err = fmt.Errorf("unable to convert type string to []float64")
+				err = errors.Errorf("unable to convert type string to []float64")
 				return
 			}
 		}
@@ -1898,7 +1946,7 @@ func ToFloatSliceE(obj interface{}) (val *FloatSlice, err error) {
 			if v, e := ToFloat64E(x[i]); e == nil {
 				*val = append(*val, v)
 			} else {
-				err = fmt.Errorf("unable to convert type *string to []float64")
+				err = errors.Errorf("unable to convert type *string to []float64")
 				return
 			}
 		}
@@ -1990,7 +2038,7 @@ func ToFloatSliceE(obj interface{}) (val *FloatSlice, err error) {
 
 		// not supporting this type yet
 		default:
-			err = fmt.Errorf("unable to convert type %T to []float64", x)
+			err = errors.Errorf("unable to convert type %T to []float64", x)
 			return
 		}
 	}
@@ -2161,7 +2209,7 @@ func ToIntSliceE(obj interface{}) (val *IntSlice, err error) {
 	//----------------------------------------------------------------------------------------------
 	case Object:
 		if v, e := x.ToIntE(); e != nil {
-			err = fmt.Errorf("unable to convert type Object to []int")
+			err = errors.Errorf("unable to convert type Object to []int")
 		} else {
 			*val = append(*val, v)
 		}
@@ -2170,7 +2218,7 @@ func ToIntSliceE(obj interface{}) (val *IntSlice, err error) {
 			if v, e := x[i].ToIntE(); e == nil {
 				*val = append(*val, v)
 			} else {
-				err = fmt.Errorf("unable to convert type %T to []int", x[i].O())
+				err = errors.Errorf("unable to convert type %T to []int", x[i].O())
 				return
 			}
 		}
@@ -2179,7 +2227,7 @@ func ToIntSliceE(obj interface{}) (val *IntSlice, err error) {
 			if v, e := x[i].ToIntE(); e == nil {
 				*val = append(*val, v)
 			} else {
-				err = fmt.Errorf("unable to convert type %T to []int", x[i].O())
+				err = errors.Errorf("unable to convert type %T to []int", x[i].O())
 				return
 			}
 		}
@@ -2188,7 +2236,7 @@ func ToIntSliceE(obj interface{}) (val *IntSlice, err error) {
 	//----------------------------------------------------------------------------------------------
 	case Str:
 		if v, e := ToIntE(x); e != nil {
-			err = fmt.Errorf("unable to convert type Str to []int")
+			err = errors.Errorf("unable to convert type Str to []int")
 		} else {
 			*val = append(*val, v)
 		}
@@ -2197,7 +2245,7 @@ func ToIntSliceE(obj interface{}) (val *IntSlice, err error) {
 			if v, e := ToIntE(x[i]); e == nil {
 				*val = append(*val, v)
 			} else {
-				err = fmt.Errorf("unable to convert type Str to []int")
+				err = errors.Errorf("unable to convert type Str to []int")
 				return
 			}
 		}
@@ -2206,7 +2254,7 @@ func ToIntSliceE(obj interface{}) (val *IntSlice, err error) {
 			if v, e := ToIntE(x[i]); e == nil {
 				*val = append(*val, v)
 			} else {
-				err = fmt.Errorf("unable to convert type *Str to []int")
+				err = errors.Errorf("unable to convert type *Str to []int")
 				return
 			}
 		}
@@ -2215,7 +2263,7 @@ func ToIntSliceE(obj interface{}) (val *IntSlice, err error) {
 	//----------------------------------------------------------------------------------------------
 	case string:
 		if v, e := ToIntE(x); e != nil {
-			err = fmt.Errorf("unable to convert type string to []int")
+			err = errors.Errorf("unable to convert type string to []int")
 		} else {
 			*val = append(*val, v)
 		}
@@ -2224,7 +2272,7 @@ func ToIntSliceE(obj interface{}) (val *IntSlice, err error) {
 			if v, e := ToIntE(x[i]); e == nil {
 				*val = append(*val, v)
 			} else {
-				err = fmt.Errorf("unable to convert type string to []int")
+				err = errors.Errorf("unable to convert type string to []int")
 				return
 			}
 		}
@@ -2233,7 +2281,7 @@ func ToIntSliceE(obj interface{}) (val *IntSlice, err error) {
 			if v, e := ToIntE(x[i]); e == nil {
 				*val = append(*val, v)
 			} else {
-				err = fmt.Errorf("unable to convert type *string to []int")
+				err = errors.Errorf("unable to convert type *string to []int")
 				return
 			}
 		}
@@ -2325,8 +2373,362 @@ func ToIntSliceE(obj interface{}) (val *IntSlice, err error) {
 
 		// not supporting this type yet
 		default:
-			err = fmt.Errorf("unable to convert type %T to []int", x)
+			err = errors.Errorf("unable to convert type %T to []int", x)
 			return
+		}
+	}
+	return
+}
+
+// ToInterSlice converts the given slice to an *InterSlice
+func ToInterSlice(obj interface{}) (slice *InterSlice) {
+	slice = &InterSlice{}
+	o := DeReference(obj)
+
+	// Optimized types
+	switch x := o.(type) {
+	case nil:
+
+	// bool
+	//----------------------------------------------------------------------------------------------
+	case bool:
+		*slice = append(*slice, x)
+	case []bool:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+	case []*bool:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+
+	// Char
+	//----------------------------------------------------------------------------------------------
+	case Char:
+		*slice = append(*slice, x)
+	case []Char:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+	case []*Char:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+
+	// float32
+	//----------------------------------------------------------------------------------------------
+	case float32:
+		*slice = append(*slice, x)
+	case []float32:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+	case []*float32:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+
+	// float64
+	//----------------------------------------------------------------------------------------------
+	case float64:
+		*slice = append(*slice, x)
+	case []float64:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+	case []*float64:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+
+	// FloatSlice
+	//----------------------------------------------------------------------------------------------
+	case FloatSlice:
+		*slice = *ToInterSlice(x.G())
+	case []FloatSlice:
+		for i := range x {
+			*slice = append(*slice, *ToInterSlice(x[i].G())...)
+		}
+	case []*FloatSlice:
+		for i := range x {
+			if x[i] != nil {
+				*slice = append(*slice, *ToInterSlice(x[i].G())...)
+			}
+		}
+
+	// interface
+	//----------------------------------------------------------------------------------------------
+	case []interface{}:
+		*slice = x
+
+	// int
+	//----------------------------------------------------------------------------------------------
+	case int:
+		*slice = append(*slice, x)
+	case []int:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+	case []*int:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+
+	// int8
+	//----------------------------------------------------------------------------------------------
+	case int8:
+		*slice = append(*slice, x)
+	case []int8:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+	case []*int8:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+
+	// int16
+	//----------------------------------------------------------------------------------------------
+	case int16:
+		*slice = append(*slice, x)
+	case []int16:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+	case []*int16:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+
+	// int32
+	//----------------------------------------------------------------------------------------------
+	case int32:
+		*slice = append(*slice, x)
+	case []int32:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+	case []*int32:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+
+	// int64
+	//----------------------------------------------------------------------------------------------
+	case int64:
+		*slice = append(*slice, x)
+	case []int64:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+	case []*int64:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+
+	// IntSlice
+	//----------------------------------------------------------------------------------------------
+	case IntSlice:
+		*slice = *ToInterSlice(x.G())
+	case []IntSlice:
+		for i := range x {
+			*slice = append(*slice, *ToInterSlice(x[i].G())...)
+		}
+	case []*IntSlice:
+		for i := range x {
+			if x[i] != nil {
+				*slice = append(*slice, *ToInterSlice(x[i].G())...)
+			}
+		}
+
+	// InterSlice
+	//----------------------------------------------------------------------------------------------
+	case InterSlice:
+		slice = &x
+	case []InterSlice:
+		for i := range x {
+			*slice = append(*slice, x[i]...)
+		}
+	case []*InterSlice:
+		for i := range x {
+			if x[i] != nil {
+				*slice = append(*slice, (*x[i])...)
+			}
+		}
+
+	// Object
+	//----------------------------------------------------------------------------------------------
+	case Object:
+		*slice = append(*slice, x)
+	case []Object:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+	case []*Object:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+
+	// Str
+	//----------------------------------------------------------------------------------------------
+	case Str:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+	case []Str:
+		for i := range x {
+			*slice = append(*slice, *ToInterSlice(x[i])...)
+		}
+	case []*Str:
+		for i := range x {
+			*slice = append(*slice, *ToInterSlice(x[i])...)
+		}
+
+	// string
+	//----------------------------------------------------------------------------------------------
+	case string:
+		*slice = append(*slice, x)
+	case []string:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+	case []*string:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+
+	// map[string]
+	//----------------------------------------------------------------------------------------------
+	case map[string]string:
+		*slice = append(*slice, x)
+	case []map[string]string:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+	case []*map[string]string:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+	case map[string]interface{}:
+		*slice = append(*slice, x)
+	case []map[string]interface{}:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+	case []*map[string]interface{}:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+
+	// StringMap
+	//----------------------------------------------------------------------------------------------
+	case StringMap:
+		slice = ToInterSlice(x.G())
+	case []StringMap:
+		for i := range x {
+			*slice = append(*slice, *ToInterSlice(x[i].G())...)
+		}
+	case []*StringMap:
+		for i := range x {
+			*slice = append(*slice, *ToInterSlice(x[i].G())...)
+		}
+
+	// StringSlice
+	//----------------------------------------------------------------------------------------------
+	case StringSlice:
+		slice = ToInterSlice(x.G())
+	case []StringSlice:
+		for i := range x {
+			*slice = append(*slice, *ToInterSlice(x[i].G())...)
+		}
+	case []*StringSlice:
+		for i := range x {
+			*slice = append(*slice, *ToInterSlice(x[i].G())...)
+		}
+
+	// uint
+	//----------------------------------------------------------------------------------------------
+	case uint:
+		*slice = append(*slice, x)
+	case []uint:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+	case []*uint:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+
+	// uint8
+	//----------------------------------------------------------------------------------------------
+	case uint8:
+		*slice = append(*slice, x)
+	case []uint8:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+	case []*uint8:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+
+	// uint16
+	//----------------------------------------------------------------------------------------------
+	case uint16:
+		*slice = append(*slice, x)
+	case []uint16:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+	case []*uint16:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+
+	// uint32
+	//----------------------------------------------------------------------------------------------
+	case uint32:
+		*slice = append(*slice, x)
+	case []uint32:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+	case []*uint32:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+
+	// uint64
+	//----------------------------------------------------------------------------------------------
+	case uint64:
+		*slice = append(*slice, x)
+
+	case []uint64:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+	case []*uint64:
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+
+	// fall back on reflection
+	//----------------------------------------------------------------------------------------------
+	default:
+		v := reflect.ValueOf(x)
+		k := v.Kind()
+
+		switch {
+
+		// generically convert array and *slice types
+		case k == reflect.Array || k == reflect.Slice:
+			for i := 0; i < v.Len(); i++ {
+				*slice = append(*slice, v.Interface())
+			}
+
+		// everything else just drop in the slice directly
+		default:
+			*slice = append(*slice, x)
 		}
 	}
 	return
@@ -2905,6 +3307,7 @@ func ToStringMap(obj interface{}) *StringMap {
 }
 
 // ToStringMapE converts an interface to a StringMap type. Supports converting yaml string as well.
+// Specifically restricting the number of conversions here to keep it in line with support YAML types.
 func ToStringMapE(obj interface{}) (val *StringMap, err error) {
 	val = &StringMap{}
 	o := Reference(obj)
@@ -2978,6 +3381,15 @@ func ToStringMapE(obj interface{}) (val *StringMap, err error) {
 	return
 }
 
+// ToStringMapG converts an interface to a map[string]interface{} type. Supports converting yaml string as well.
+func ToStringMapG(obj interface{}) map[string]interface{} {
+	x, _ := ToStringMapE(obj)
+	if x == nil {
+		return map[string]interface{}{}
+	}
+	return x.G()
+}
+
 // ToStringSlice convert an interface to a StringSlice type.
 func ToStringSlice(obj interface{}) *StringSlice {
 	x, _ := ToStringSliceE(obj)
@@ -3046,6 +3458,25 @@ func ToStringSliceE(obj interface{}) (val *StringSlice, err error) {
 	case []*float64:
 		for i := range x {
 			*val = append(*val, ToString(x[i]))
+		}
+
+	// FloatSlice
+	//----------------------------------------------------------------------------------------------
+	case FloatSlice:
+		for i := range x {
+			*val = append(*val, ToString(x[i]))
+		}
+	case []FloatSlice:
+		for i := range x {
+			for j := range x[i] {
+				*val = append(*val, ToString(x[i][j]))
+			}
+		}
+	case []*FloatSlice:
+		for i := range x {
+			for j := range *x[i] {
+				*val = append(*val, ToString((*x[i])[j]))
+			}
 		}
 
 	// interface
@@ -3272,7 +3703,7 @@ func ToStringSliceE(obj interface{}) (val *StringSlice, err error) {
 			}
 
 		default:
-			err = fmt.Errorf("unable to convert type %T to []int", x)
+			err = errors.Errorf("unable to convert type %T to []int", x)
 			return
 		}
 	}
@@ -3570,9 +4001,21 @@ func ToStringSliceGE(obj interface{}) (val []string, err error) {
 			}
 
 		default:
-			err = fmt.Errorf("unable to convert type %T to []int", x)
+			err = errors.Errorf("unable to convert type %T to []int", x)
 			return
 		}
 	}
 	return
+}
+
+// YamlCont checks if the given value is a valid Yaml container
+func YamlCont(obj interface{}) bool {
+	switch obj.(type) {
+	case map[string]interface{}, *StringMap:
+		return true
+	case []interface{}, []string, []int:
+		return true
+	default:
+		return false
+	}
 }

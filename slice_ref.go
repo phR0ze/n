@@ -826,6 +826,16 @@ func (p *RefSlice) ReverseM() Slice {
 	return p
 }
 
+// S is an alias to ToStringSlice
+func (p *RefSlice) S() (slice *StringSlice) {
+	return ToStringSlice(p.O())
+}
+
+// SG is an alias to ToStringSliceG
+func (p *RefSlice) SG() (slice []string) {
+	return ToStringSliceG(p.O())
+}
+
 // Select creates a new slice with the elements that match the lambda selector.
 func (p *RefSlice) Select(sel func(O) bool) (new Slice) {
 	l := p.Len()
@@ -1034,8 +1044,18 @@ func (p *RefSlice) TakeW(sel func(O) bool) (new Slice) {
 	return slice
 }
 
-// S converts the underlying slice into a []string slice
-func (p *RefSlice) S() (new []string) {
+// ToInterSlice converts the given slice to a generic []interface{} slice
+func (p *RefSlice) ToInterSlice() (slice []interface{}) {
+	return ToInterSlice(p.O()).G()
+}
+
+// ToStringSlice converts the underlying slice into a *StringSlice
+func (p *RefSlice) ToStringSlice() (slice *StringSlice) {
+	return ToStringSlice(p.O())
+}
+
+// ToStringSliceG converts the underlying slice into a []string slice
+func (p *RefSlice) ToStringSliceG() (slice []string) {
 	return ToStringSliceG(p.O())
 }
 
