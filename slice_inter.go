@@ -20,10 +20,24 @@ type InterSlice []interface{}
 // Expects a Go slice type to be provided and will create an empty *InterSlice if nothing valid
 // is given.
 func NewInterSlice(slice interface{}) (new *InterSlice) {
+
+	// Check for nil upfront
+	if slice == nil {
+		new = &InterSlice{}
+		return
+	}
+
+	// Check if this is already a slice type and if so were good
+	if x, ok := slice.([]interface{}); ok {
+		s := InterSlice(x)
+		new = &s
+		return
+	}
+
+	// Not an obvious type so we'll use reflection
 	new = &InterSlice{}
 	v := reflect.ValueOf(slice)
 	k := v.Kind()
-	x, interfaceSliceType := slice.([]interface{})
 	switch {
 
 	// Return the NSlice.Nil
@@ -34,11 +48,6 @@ func NewInterSlice(slice interface{}) (new *InterSlice) {
 		for i := 0; i < v.Len(); i++ {
 			*new = append(*new, v.Index(i).Interface())
 		}
-
-	// []interface slice can be used directly
-	case interfaceSliceType:
-		s := InterSlice(x)
-		new = &s
 
 	// Append single items
 	default:
@@ -413,7 +422,7 @@ func (p *InterSlice) FirstN(n int) Slice {
 
 // G returns the underlying Go type as is
 func (p *InterSlice) G() []interface{} {
-	if p.Nil() {
+	if p == nil {
 		return []interface{}{}
 	}
 	return []interface{}(*p)
@@ -806,7 +815,10 @@ func (p *InterSlice) TakeW(sel func(O) bool) (new Slice) {
 
 // ToInterSlice converts the given slice to a generic []interface{} slice
 func (p *InterSlice) ToInterSlice() (slice []interface{}) {
-	return p.G()
+	if p == nil {
+		return []interface{}{}
+	}
+	return []interface{}(*p)
 }
 
 // ToStringSlice converts the underlying slice into a *StringSlice

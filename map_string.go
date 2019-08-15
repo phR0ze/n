@@ -227,6 +227,7 @@ func (p *StringMap) InjectE(key string, val interface{}) (m Map, err error) {
 
 		// Array Index/Iterator: .[2], .[-1], .[], .[key==val]
 		case []interface{}:
+			x := ToInterSlice(o)
 
 			// Get array selectors
 			var i int
@@ -238,18 +239,25 @@ func (p *StringMap) InjectE(key string, val interface{}) (m Map, err error) {
 
 			// Select by key==value, e.g. .[k==v]
 			if k != "" && v != "" {
-				// m := NewSlice(o).Select(func(x O) bool {
-				// 	return ToStringMap(x).Get(k).A() == v
-				// })
-				// if m.Any() {
-				// 	obj = m.First().o
-				// }
+				idx := -1
+				x.EachIE(func(i int, y O) error {
+					if hit := ToStringMap(y).Get(k); !hit.Nil() && hit.A() == v {
+						idx = i
+						return Break
+					}
+					return nil
+				})
+				i = idx // reuse code below for indexing
 			}
 
 			// Index in if the value is a valid integer, e.g. .[2], .[-1]
 			// -1 indicates all should be selected.
 			if i != -1 {
-				//s := NewSlice(o).Set(i, val).ToInterSlice()
+				if keys.Any() {
+					obj.o = (*x)[i]
+				} else {
+					x.Set(i, val)
+				}
 			}
 		}
 	}
@@ -509,62 +517,103 @@ func (p *StringMap) Remove(key string) Map {
 // and returns a reference to this Map rather than the deleted value.
 // see dot notation from https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
 func (p *StringMap) RemoveE(key string) (m Map, err error) {
-	m = p
-	if p == nil || len(*p) == 0 {
-		return
+	if p == nil {
+		p = NewStringMapV()
 	}
-	val := &Object{o: p}
+	m = p
 
 	// Process keys from left to right
 	var keys *StringSlice
 	if keys, err = KeysFromSelector(key); err != nil {
 		return
 	}
+
+	// Inject at given selector location
+	pk := ""
+	obj, pobj := interface{}(p), interface{}(p)
 	for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
 		key := ko.ToStr()
 
-		switch x := val.o.(type) {
+		switch o := obj.(type) {
 
 		// Identifier Index: .foo, .foo.bar
 		case map[string]interface{}, *StringMap:
-			m := ToStringMap(x)
+			x := ToStringMap(o)
+
+			// Continue to drill or remove and done
+			done := false
 			if keys.Any() {
-				val.o = (*m)[key.A()]
+				if v, ok := (*x)[key.A()]; ok {
+					if YamlCont(v) {
+						pobj = obj
+						pk = key.A()
+						obj = v
+					} else {
+						done = true
+					}
+				} else {
+					done = true
+				}
 			} else {
-				delete(*m, key.A())
+				x.Delete(key.A())
 			}
 
-			// // Array Index/Iterator: .[2], .[-1], .[], .[key==val]
-			// case []interface{}:
+			// Key doesn't exist or is invalid type
+			if done {
+				return
+			}
 
-			// 	// Get array selectors
-			// 	var i int
-			// 	var k, v string
-			// 	if i, k, v, err = IdxFromSelector(key.A(), len(x)); err != nil {
-			// 		val.o = nil
-			// 		return
-			// 	}
+		// Array Index/Iterator: .[2], .[-1], .[], .[key==val]
+		case []interface{}:
+			x := ToInterSlice(o)
 
-			// 	// Select by key==value, e.g. .[k==v]
-			// 	if k != "" && v != "" {
-			// 		m := NewSlice(x).Select(func(x O) bool {
-			// 			return ToStringMap(x).Get(k).A() == v
-			// 		})
-			// 		if m.Any() {
-			// 			val.o = m.First().o
-			// 		}
-			// 	}
+			// Get array selectors
+			var i int
+			var k, v string
+			if i, k, v, err = IdxFromSelector(key.A(), len(o)); err != nil {
+				obj = nil
+				return
+			}
 
-			// 	// Index in if the value is a valid integer, e.g. .[2], .[-1]
-			// 	// -1 indicates all should be selected.
-			// 	if i != -1 {
-			// 		if val.o = NewSlice(x).At(i).o; val.Nil() {
-			// 			err = errors.Errorf("invalid array index %v", i)
-			// 			val.o = nil
-			// 			return
-			// 		}
-			// 	}
+			// Select by key==value, e.g. .[k==v]
+			if k != "" && v != "" {
+				idx := -1
+				x.EachIE(func(i int, y O) error {
+					if hit := ToStringMap(y).Get(k); !hit.Nil() && hit.A() == v {
+						idx = i
+						return Break
+					}
+					return nil
+				})
+				if idx == -1 {
+					return
+				}
+				i = idx // reuse code below for indexing
+			}
+
+			// Index in if the value is a valid integer, e.g. .[2], .[-1]
+			// -1 indicates all should be selected.
+			if i == -1 && keys.Any() {
+				childKeys := keys.Copy()
+				for _, elem := range *x {
+					if _, err = ToStringMap(elem).RemoveE(childKeys.Join(".").A()); err != nil {
+						return
+					}
+				}
+				keys.Clear()
+			} else {
+				if keys.Any() {
+					pobj = obj
+					pk = key.A()
+					obj = (*x)[i]
+				} else {
+					ToStringMap(pobj).Set(pk, x.DropAt(i).O())
+				}
+			}
 		}
+	}
+	if err != nil {
+		m = nil
 	}
 	return
 }

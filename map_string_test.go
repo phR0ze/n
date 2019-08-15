@@ -358,19 +358,79 @@ func ExampleStringMap_Inject() {
 
 func TestStringMap_Inject(t *testing.T) {
 
-	// // Inject into list
-	// {
-	// 	// Replace element in list
-	// 	a := map[string]interface{}{
-	// 		"1": "one",
-	// 		"2": []interface{}{"1", "2"},
-	// 	}
-	// 	expected := map[string]interface{}{
-	// 		"1": "one",
-	// 		"2": []interface{}{"1", "3"},
-	// 	}
-	// 	assert.Equal(t, expected, M(a).Inject("2.[1]", "3").MG())
-	// }
+	// Move through list
+	{
+		// Move through by name and change order
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo", "order": "1"},
+				map[string]interface{}{"name": "bar", "order": "2"},
+				map[string]interface{}{"name": "bob", "order": "3"},
+			},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo", "order": "1"},
+				map[string]interface{}{"name": "bar", "order": "4"},
+				map[string]interface{}{"name": "bob", "order": "3"},
+			},
+		}
+		assert.Equal(t, expected, M(a).Inject("2.[name==bar].order", "4").MG())
+	}
+	{
+		// Move through and change name
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo"},
+				map[string]interface{}{"name": "bar"},
+			},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo"},
+				map[string]interface{}{"name": "blah"},
+			},
+		}
+		assert.Equal(t, expected, M(a).Inject("2.[1].name", "blah").MG())
+	}
+
+	// Inject into list
+	{
+		// Replace specific map by key value pair
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo"},
+				map[string]interface{}{"name": "bar"},
+				map[string]interface{}{"name": "bob"},
+			},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo"},
+				map[string]interface{}{"name": "blah"},
+				map[string]interface{}{"name": "bob"},
+			},
+		}
+		assert.Equal(t, expected, M(a).Inject("2.[name==bar]", map[string]interface{}{"name": "blah"}).MG())
+	}
+	{
+		// Replace element in list
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{"1", "2"},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{"1", "3"},
+		}
+		assert.Equal(t, expected, M(a).Inject("2.[1]", "3").MG())
+	}
 	{
 		// Replace the whole list as we gave the whole list selector
 		a := map[string]interface{}{
@@ -1184,6 +1244,144 @@ func ExampleStringMap_Remove() {
 }
 
 func TestStringMap_Remove(t *testing.T) {
+
+	// Move through list
+	{
+		// Remove the order property on all maps in the list
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo", "order": "1"},
+				map[string]interface{}{"name": "bar", "order": "2"},
+				map[string]interface{}{"name": "bob", "order": "3"},
+			},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo"},
+				map[string]interface{}{"name": "bar"},
+				map[string]interface{}{"name": "bob"},
+			},
+		}
+		assert.Equal(t, expected, M(a).Remove("2.[].order").MG())
+	}
+	{
+		// Remove the first item's order property
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo", "order": "1"},
+				map[string]interface{}{"name": "bar", "order": "2"},
+			},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo"},
+				map[string]interface{}{"name": "bar", "order": "2"},
+			},
+		}
+		assert.Equal(t, expected, M(a).Remove("2.[0].order").MG())
+	}
+	{
+		// Remove the first item's order property - neg notation
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo", "order": "1"},
+				map[string]interface{}{"name": "bar", "order": "2"},
+			},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo"},
+				map[string]interface{}{"name": "bar", "order": "2"},
+			},
+		}
+		assert.Equal(t, expected, M(a).Remove("2.[-2].order").MG())
+	}
+	{
+		// Remove the second item's order property - neg
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo", "order": "1"},
+				map[string]interface{}{"name": "bar", "order": "2"},
+			},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo", "order": "1"},
+				map[string]interface{}{"name": "bar"},
+			},
+		}
+		assert.Equal(t, expected, M(a).Remove("2.[-1].order").MG())
+	}
+	{
+		// Remove the second item's order property
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo", "order": "1"},
+				map[string]interface{}{"name": "bar", "order": "2"},
+			},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo", "order": "1"},
+				map[string]interface{}{"name": "bar"},
+			},
+		}
+		assert.Equal(t, expected, M(a).Remove("2.[1].order").MG())
+	}
+
+	// Remove from list
+	{
+		// Remove list item by map's key value
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo"},
+				map[string]interface{}{"name": "bar"},
+				map[string]interface{}{"name": "bob"},
+			},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo"},
+				map[string]interface{}{"name": "bob"},
+			},
+		}
+		assert.Equal(t, expected, M(a).Remove("2.[name==bar]").MG())
+	}
+	{
+		// Replace element in list
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{"1", "2"},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{"2"},
+		}
+		assert.Equal(t, expected, M(a).Remove("2.[0]").MG())
+	}
+	{
+		// Remove the whole list by key
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []string{"1", "2"},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+		}
+		assert.Equal(t, expected, M(a).Remove("2").MG())
+	}
 
 	// Identity: .
 	assert.Equal(t, &StringMap{"one": "1"}, NewStringMapV(map[string]interface{}{"one": "1"}).Remove(``))
