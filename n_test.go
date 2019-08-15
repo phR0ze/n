@@ -39,6 +39,18 @@ func TestEitherStr(t *testing.T) {
 	}
 }
 
+func ExampleSetOnEmpty() {
+	result := ""
+	fmt.Println(SetOnEmpty(&result, "foo"))
+	// Output: foo
+}
+
+func TestSetOnEmpty(t *testing.T) {
+	result := ""
+	assert.Equal(t, "foo", SetOnEmpty(&result, "foo"))
+	assert.Equal(t, "foo", SetOnEmpty(&result, "bar"))
+}
+
 func ExampleSetOnFalseB() {
 	result := false
 	fmt.Println(SetOnFalseB(&result, true, false))
