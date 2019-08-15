@@ -20,8 +20,13 @@ func Abs(target string) (result string, err error) {
 		return
 	}
 	target = TrimProtocol(target)
-	if result, err = homedir.Expand(target); err == nil {
-		result, err = filepath.Abs(result)
+	if result, err = homedir.Expand(target); err != nil {
+		err = errors.Wrapf(err, "failed to expand the given path %s", target)
+		return
+	}
+	if result, err = filepath.Abs(result); err != nil {
+		err = errors.Wrapf(err, "failed to compute the absolute path for %s", result)
+		return
 	}
 	return
 }
@@ -60,8 +65,13 @@ func Dir(src string) (result string) {
 
 // Home returns the absolute home directory for the current user
 func Home() (result string, err error) {
-	if result, err = homedir.Dir(); err == nil {
-		result, err = filepath.Abs(result)
+	if result, err = homedir.Dir(); err != nil {
+		err = errors.Wrap(err, "failed to determine the user's home directdory")
+		return
+	}
+	if result, err = filepath.Abs(result); err != nil {
+		err = errors.Wrapf(err, "failed to compute the absolute path for %s", result)
+		return
 	}
 	return
 }
@@ -371,11 +381,13 @@ func walk(root string, info *FileInfo, walkFn WalkFunc, opts []*opt.Opt) (err er
 func ReadDir(dirname string) (names []string, err error) {
 	var f *os.File
 	if f, err = os.Open(dirname); err != nil {
+		err = errors.Wrapf(err, "failed to read directory %s", dirname)
 		return
 	}
 	names, err = f.Readdirnames(-1)
 	f.Close()
 	if err != nil {
+		err = errors.Wrapf(err, "failed to read directory names for %s", dirname)
 		return
 	}
 	sort.Strings(names)

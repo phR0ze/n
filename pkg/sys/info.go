@@ -22,6 +22,7 @@ func Lstat(src string) (result *FileInfo, err error) {
 	result = &FileInfo{path: src}
 	if result.v, err = os.Lstat(src); err != nil {
 		result = nil
+		err = errors.Wrapf(err, "failed to execute Lstate against %s", src)
 	}
 	return
 }

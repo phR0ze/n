@@ -17,7 +17,7 @@ func TestLoad(t *testing.T) {
   chart: {{ name }}:{{ version }}
   release: {{ Release.Name }}
   heritage: {{ Release.Service }}`
-	sys.WriteFile(tmpFile, []byte(data))
+	sys.WriteBytes(tmpFile, []byte(data))
 
 	expected := `labels:
   chart: foo:1.0.2
@@ -42,7 +42,7 @@ func TestNoTemplatVariablesFound(t *testing.T) {
   chart: foo
   release: bar
   heritage: foobar`
-	sys.WriteFile(tmpFile, []byte(data))
+	sys.WriteBytes(tmpFile, []byte(data))
 
 	result, err := Load(tmpFile, "{{ ", " }}", map[string]string{
 		"name": "foo",

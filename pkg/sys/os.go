@@ -41,7 +41,8 @@ func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 
 	// Handle globbing
 	if sources, err = filepath.Glob(srcAbs); err != nil {
-		return err
+		err = errors.Wrapf(err, "failed to get glob for %s", srcAbs)
+		return
 	}
 
 	// Clone given src as dst vs copy into dst
@@ -223,6 +224,7 @@ func MD5(target string) (result string, err error) {
 	// Open target file for reading
 	var f *os.File
 	if f, err = os.Open(target); err != nil {
+		err = errors.Wrapf(err, "failed to open target file %s", target)
 		return
 	}
 	defer f.Close()
@@ -230,6 +232,7 @@ func MD5(target string) (result string, err error) {
 	// Create a new md5 hash and copy in file bits
 	hash := md5.New()
 	if _, err = io.Copy(hash, f); err != nil {
+		err = errors.Wrapf(err, "failed to copy file data into hash from %s", target)
 		return
 	}
 
@@ -253,7 +256,10 @@ func MkdirP(target string, perms ...uint32) (dir string, err error) {
 	}
 
 	// Create directory
-	err = os.MkdirAll(dir, perm)
+	if err = os.MkdirAll(dir, perm); err != nil {
+		err = errors.Wrapf(err, "failed to create directories for %s", dir)
+		return
+	}
 
 	return
 }
@@ -267,7 +273,11 @@ func Move(src, dst string) (err error) {
 	if IsDir(dst) {
 		dst = path.Join(dst, path.Base(src))
 	}
-	return os.Rename(src, dst)
+	if err = os.Rename(src, dst); err != nil {
+		err = errors.Wrapf(err, "failed to rename file %s", src)
+		return
+	}
+	return
 }
 
 // Pwd returns the current working directory
@@ -298,11 +308,13 @@ func ReadLines(target string) (result []string, err error) {
 	}
 
 	var fileBytes []byte
-	if fileBytes, err = ioutil.ReadFile(target); err == nil {
-		scanner := bufio.NewScanner(bytes.NewReader(fileBytes))
-		for scanner.Scan() {
-			result = append(result, scanner.Text())
-		}
+	if fileBytes, err = ioutil.ReadFile(target); err != nil {
+		err = errors.Wrapf(err, "failed to read the file %s", target)
+		return
+	}
+	scanner := bufio.NewScanner(bytes.NewReader(fileBytes))
+	for scanner.Scan() {
+		result = append(result, scanner.Text())
 	}
 	return
 }
@@ -356,6 +368,7 @@ func Touch(target string) (path string, err error) {
 
 	var f *os.File
 	if f, err = os.Create(path); !os.IsExist(err) {
+		err = errors.Wrapf(err, "failed create file %s", target)
 		return
 	}
 	if err == nil {
@@ -364,8 +377,8 @@ func Touch(target string) (path string, err error) {
 	return
 }
 
-// WriteFile is a pass through to ioutil.WriteFile with default permissions
-func WriteFile(target string, data []byte, perms ...uint32) (err error) {
+// WriteBytes is a pass through to ioutil.WriteBytes with default permissions
+func WriteBytes(target string, data []byte, perms ...uint32) (err error) {
 	if target, err = Abs(target); err != nil {
 		return
 	}
@@ -374,44 +387,10 @@ func WriteFile(target string, data []byte, perms ...uint32) (err error) {
 	if len(perms) > 0 {
 		perm = os.FileMode(perms[0])
 	}
-	err = ioutil.WriteFile(target, data, perm)
-	return
-}
-
-// WriteFileA is a pass through to ioutil.WriteFile with default permissions
-func WriteFileA(target string, data string, perms ...uint32) (err error) {
-	if target, err = Abs(target); err != nil {
+	if err = ioutil.WriteFile(target, data, perm); err != nil {
+		err = errors.Wrapf(err, "failed write string to file %s", target)
 		return
 	}
-
-	perm := os.FileMode(0644)
-	if len(perms) > 0 {
-		perm = os.FileMode(perms[0])
-	}
-	err = ioutil.WriteFile(target, []byte(data), perm)
-	return
-}
-
-// WriteStream reads from the io.Reader and writes to the given file using io.Copy
-// thus never filling memory i.e. streaming.  dest will be overwritten if it exists.
-func WriteStream(reader io.Reader, dest string, perms ...uint32) (err error) {
-	perm := os.FileMode(0644)
-	if len(perms) > 0 {
-		perm = os.FileMode(perms[0])
-	}
-
-	var writer *os.File
-	flags := os.O_CREATE | os.O_TRUNC | os.O_WRONLY
-	if writer, err = os.OpenFile(dest, flags, perm); err != nil {
-		return
-	}
-	defer writer.Close()
-
-	if _, err = io.Copy(writer, reader); err != nil {
-		return
-	}
-	err = writer.Sync()
-
 	return
 }
 
@@ -429,20 +408,68 @@ func WriteLines(target string, lines []string, perms ...uint32) (err error) {
 	var writer *os.File
 	flags := os.O_CREATE | os.O_TRUNC | os.O_WRONLY
 	if writer, err = os.OpenFile(target, flags, perm); err != nil {
+		err = errors.Wrapf(err, "failed to open file %s for writing", target)
 		return
 	}
 	defer writer.Close()
 
 	for i := range lines {
 		if _, err = writer.WriteString(lines[i]); err != nil {
+			err = errors.Wrapf(err, "failed to write string to %s", target)
 			return
 		}
 		if _, err = writer.WriteString("\n"); err != nil {
+			err = errors.Wrapf(err, "failed to write newline to %s", target)
 			return
 		}
 	}
 	err = writer.Sync()
 
+	return
+}
+
+// WriteStream reads from the io.Reader and writes to the given file using io.Copy
+// thus never filling memory i.e. streaming.  dest will be overwritten if it exists.
+func WriteStream(reader io.Reader, dest string, perms ...uint32) (err error) {
+	perm := os.FileMode(0644)
+	if len(perms) > 0 {
+		perm = os.FileMode(perms[0])
+	}
+
+	var writer *os.File
+	flags := os.O_CREATE | os.O_TRUNC | os.O_WRONLY
+	if writer, err = os.OpenFile(dest, flags, perm); err != nil {
+		err = errors.Wrapf(err, "failed to open file %s for writing", dest)
+		return
+	}
+	defer writer.Close()
+
+	if _, err = io.Copy(writer, reader); err != nil {
+		err = errors.Wrapf(err, "failed to copy stream data to file %s", dest)
+		return
+	}
+	if err = writer.Sync(); err != nil {
+		err = errors.Wrapf(err, "failed to sync stream to file %s", dest)
+		return
+	}
+
+	return
+}
+
+// WriteString is a pass through to ioutil.WriteFile with default permissions
+func WriteString(target string, data string, perms ...uint32) (err error) {
+	if target, err = Abs(target); err != nil {
+		return
+	}
+
+	perm := os.FileMode(0644)
+	if len(perms) > 0 {
+		perm = os.FileMode(perms[0])
+	}
+	if err = ioutil.WriteFile(target, []byte(data), perm); err != nil {
+		err = errors.Wrapf(err, "failed write string to file %s", target)
+		return
+	}
 	return
 }
 

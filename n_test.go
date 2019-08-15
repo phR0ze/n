@@ -90,7 +90,7 @@ func TestLoadYamlE(t *testing.T) {
 	{
 		// Write out the yaml to read in
 		data := "foo:\n  bar: 1\n"
-		sys.WriteFile(tmpFile, []byte(data))
+		sys.WriteBytes(tmpFile, []byte(data))
 
 		// Load the yaml and validate
 		m, err := LoadYamlE(tmpFile)

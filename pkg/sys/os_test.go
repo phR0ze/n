@@ -377,7 +377,7 @@ func TestWriteFile(t *testing.T) {
 	// Read and write file
 	data, err := ioutil.ReadFile(testfile)
 	assert.Nil(t, err)
-	err = WriteFile(tmpfile, data)
+	err = WriteBytes(tmpfile, data)
 	assert.Nil(t, err)
 
 	// Test the resulting file
