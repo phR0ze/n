@@ -11,6 +11,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 
@@ -196,6 +197,116 @@ func Exists(src string) bool {
 	return false
 }
 
+// ExtractString reads the filepath data then compiles the given regular
+// expression exp and applies it to the data and returns the results.
+// Match will be empty if no matches were found. Use (?m) to have ^ $ apply
+// to each line in the string. Use (?s) to have . span lines.
+func ExtractString(filepath string, exp string) (match string, err error) {
+	if filepath, err = Abs(filepath); err != nil {
+		return
+	}
+
+	// Read in the file data
+	var data []byte
+	if data, err = ioutil.ReadFile(filepath); err != nil {
+		err = errors.Wrapf(err, "failed to read the file %s", filepath)
+		return
+	}
+
+	// Compile the regular expression
+	var rx *regexp.Regexp
+	if rx, err = regexp.Compile(exp); err != nil {
+		err = errors.Wrapf(err, "failed to compile regex '%s'", exp)
+		return
+	}
+
+	// Apply the regular expression to the data
+	if results := rx.FindStringSubmatch(string(data)); len(results) > 1 {
+		match = results[1]
+	}
+
+	return
+}
+
+// ExtractStrings reads the filepath data then compiles the given regular
+// expression exp and applies it to the data and returns the results.
+// Matches will be nil if no matches were found. Use (?m) to have ^ $ apply
+// to each line in the string. Use (?s) to have . span lines.
+func ExtractStrings(filepath string, exp string) (matches []string, err error) {
+	if filepath, err = Abs(filepath); err != nil {
+		return
+	}
+
+	// Read in the file data
+	var data []byte
+	if data, err = ioutil.ReadFile(filepath); err != nil {
+		err = errors.Wrapf(err, "failed to read the file %s", filepath)
+		return
+	}
+
+	// Compile the regular expression
+	var rx *regexp.Regexp
+	if rx, err = regexp.Compile(exp); err != nil {
+		err = errors.Wrapf(err, "failed to compile regex '%s'", exp)
+		return
+	}
+
+	// Apply the regular expression to the data
+	for _, x := range rx.FindAllStringSubmatch(string(data), -1) {
+		if len(x) > 1 {
+			matches = append(matches, x[1])
+		}
+	}
+
+	return
+}
+
+// ExtractStringP reads the filepath data then applies the given regular
+// expression to the data and returns the results. See ExtractString
+func ExtractStringP(filepath string, exp *regexp.Regexp) (match string, err error) {
+	if filepath, err = Abs(filepath); err != nil {
+		return
+	}
+
+	// Read in the file data
+	var data []byte
+	if data, err = ioutil.ReadFile(filepath); err != nil {
+		err = errors.Wrapf(err, "failed to read the file %s", filepath)
+		return
+	}
+
+	// Apply the regular expression to the data
+	if results := exp.FindStringSubmatch(string(data)); len(results) > 1 {
+		match = results[1]
+	}
+
+	return
+}
+
+// ExtractStringsP reads the filepath data then applies the given regular
+// expression to the data and returns the results. See ExtractStrings
+func ExtractStringsP(filepath string, exp *regexp.Regexp) (matches []string, err error) {
+	if filepath, err = Abs(filepath); err != nil {
+		return
+	}
+
+	// Read in the file data
+	var data []byte
+	if data, err = ioutil.ReadFile(filepath); err != nil {
+		err = errors.Wrapf(err, "failed to read the file %s", filepath)
+		return
+	}
+
+	// Apply the regular expression to the data
+	for _, x := range exp.FindAllStringSubmatch(string(data), -1) {
+		if len(x) > 1 {
+			matches = append(matches, x[1])
+		}
+	}
+
+	return
+}
+
 // IsDarwin returns true if the OS is OSX
 func IsDarwin() (result bool) {
 	if runtime.GOOS == "darwin" {
@@ -286,50 +397,63 @@ func Pwd() (pwd string) {
 	return
 }
 
-// ReadFile returns the entire file as a string
-func ReadFile(target string) (result string, err error) {
-	if target, err = Abs(target); err != nil {
+// ReadBytes returns the entire file as []byte
+func ReadBytes(filepath string) (result []byte, err error) {
+	if filepath, err = Abs(filepath); err != nil {
 		return
 	}
 
-	var fileBytes []byte
-	if fileBytes, err = ioutil.ReadFile(target); err != nil {
-		err = errors.Wrapf(err, "failed to read the file %s", target)
+	if result, err = ioutil.ReadFile(filepath); err != nil {
+		err = errors.Wrapf(err, "failed to read the file %s", filepath)
 		return
 	}
-	result = string(fileBytes)
 	return
 }
 
 // ReadLines returns a new slice of string representing lines
-func ReadLines(target string) (result []string, err error) {
-	if target, err = Abs(target); err != nil {
+func ReadLines(filepath string) (result []string, err error) {
+	if filepath, err = Abs(filepath); err != nil {
 		return
 	}
 
-	var fileBytes []byte
-	if fileBytes, err = ioutil.ReadFile(target); err != nil {
-		err = errors.Wrapf(err, "failed to read the file %s", target)
+	var data []byte
+	if data, err = ioutil.ReadFile(filepath); err != nil {
+		err = errors.Wrapf(err, "failed to read the file %s", filepath)
 		return
 	}
-	scanner := bufio.NewScanner(bytes.NewReader(fileBytes))
+	scanner := bufio.NewScanner(bytes.NewReader(data))
 	for scanner.Scan() {
 		result = append(result, scanner.Text())
 	}
 	return
 }
 
+// ReadString returns the entire file as a string
+func ReadString(filepath string) (result string, err error) {
+	if filepath, err = Abs(filepath); err != nil {
+		return
+	}
+
+	var data []byte
+	if data, err = ioutil.ReadFile(filepath); err != nil {
+		err = errors.Wrapf(err, "failed to read the file %s", filepath)
+		return
+	}
+	result = string(data)
+	return
+}
+
 // ReadYaml reads the target file and returns a map[string]interface{} data
 // structure representing the yaml read in.
-func ReadYaml(target string) (obj map[string]interface{}, err error) {
-	if target, err = Abs(target); err != nil {
+func ReadYaml(filepath string) (obj map[string]interface{}, err error) {
+	if filepath, err = Abs(filepath); err != nil {
 		return
 	}
 
 	// Read in the file data
 	var data []byte
-	if data, err = ioutil.ReadFile(target); err != nil {
-		err = errors.Wrapf(err, "failed to read the file %s", target)
+	if data, err = ioutil.ReadFile(filepath); err != nil {
+		err = errors.Wrapf(err, "failed to read the file %s", filepath)
 		return
 	}
 
@@ -361,14 +485,14 @@ func Symlink(oldname, newname string) error {
 }
 
 // Touch creates an empty text file similar to the linux touch command
-func Touch(target string) (path string, err error) {
-	if path, err = Abs(target); err != nil {
+func Touch(filepath string) (path string, err error) {
+	if path, err = Abs(filepath); err != nil {
 		return
 	}
 
 	var f *os.File
 	if f, err = os.Create(path); !os.IsExist(err) {
-		err = errors.Wrapf(err, "failed create file %s", target)
+		err = errors.Wrapf(err, "failed create file %s", filepath)
 		return
 	}
 	if err == nil {
@@ -378,8 +502,8 @@ func Touch(target string) (path string, err error) {
 }
 
 // WriteBytes is a pass through to ioutil.WriteBytes with default permissions
-func WriteBytes(target string, data []byte, perms ...uint32) (err error) {
-	if target, err = Abs(target); err != nil {
+func WriteBytes(filepath string, data []byte, perms ...uint32) (err error) {
+	if filepath, err = Abs(filepath); err != nil {
 		return
 	}
 
@@ -387,16 +511,16 @@ func WriteBytes(target string, data []byte, perms ...uint32) (err error) {
 	if len(perms) > 0 {
 		perm = os.FileMode(perms[0])
 	}
-	if err = ioutil.WriteFile(target, data, perm); err != nil {
-		err = errors.Wrapf(err, "failed write string to file %s", target)
+	if err = ioutil.WriteFile(filepath, data, perm); err != nil {
+		err = errors.Wrapf(err, "failed write string to file %s", filepath)
 		return
 	}
 	return
 }
 
 // WriteLines is a pass through to ioutil.WriteFile with default permissions
-func WriteLines(target string, lines []string, perms ...uint32) (err error) {
-	if target, err = Abs(target); err != nil {
+func WriteLines(filepath string, lines []string, perms ...uint32) (err error) {
+	if filepath, err = Abs(filepath); err != nil {
 		return
 	}
 
@@ -407,19 +531,19 @@ func WriteLines(target string, lines []string, perms ...uint32) (err error) {
 
 	var writer *os.File
 	flags := os.O_CREATE | os.O_TRUNC | os.O_WRONLY
-	if writer, err = os.OpenFile(target, flags, perm); err != nil {
-		err = errors.Wrapf(err, "failed to open file %s for writing", target)
+	if writer, err = os.OpenFile(filepath, flags, perm); err != nil {
+		err = errors.Wrapf(err, "failed to open file %s for writing", filepath)
 		return
 	}
 	defer writer.Close()
 
 	for i := range lines {
 		if _, err = writer.WriteString(lines[i]); err != nil {
-			err = errors.Wrapf(err, "failed to write string to %s", target)
+			err = errors.Wrapf(err, "failed to write string to %s", filepath)
 			return
 		}
 		if _, err = writer.WriteString("\n"); err != nil {
-			err = errors.Wrapf(err, "failed to write newline to %s", target)
+			err = errors.Wrapf(err, "failed to write newline to %s", filepath)
 			return
 		}
 	}
@@ -430,7 +554,7 @@ func WriteLines(target string, lines []string, perms ...uint32) (err error) {
 
 // WriteStream reads from the io.Reader and writes to the given file using io.Copy
 // thus never filling memory i.e. streaming.  dest will be overwritten if it exists.
-func WriteStream(reader io.Reader, dest string, perms ...uint32) (err error) {
+func WriteStream(reader io.Reader, filepath string, perms ...uint32) (err error) {
 	perm := os.FileMode(0644)
 	if len(perms) > 0 {
 		perm = os.FileMode(perms[0])
@@ -438,18 +562,18 @@ func WriteStream(reader io.Reader, dest string, perms ...uint32) (err error) {
 
 	var writer *os.File
 	flags := os.O_CREATE | os.O_TRUNC | os.O_WRONLY
-	if writer, err = os.OpenFile(dest, flags, perm); err != nil {
-		err = errors.Wrapf(err, "failed to open file %s for writing", dest)
+	if writer, err = os.OpenFile(filepath, flags, perm); err != nil {
+		err = errors.Wrapf(err, "failed to open file %s for writing", filepath)
 		return
 	}
 	defer writer.Close()
 
 	if _, err = io.Copy(writer, reader); err != nil {
-		err = errors.Wrapf(err, "failed to copy stream data to file %s", dest)
+		err = errors.Wrapf(err, "failed to copy stream data to file %s", filepath)
 		return
 	}
 	if err = writer.Sync(); err != nil {
-		err = errors.Wrapf(err, "failed to sync stream to file %s", dest)
+		err = errors.Wrapf(err, "failed to sync stream to file %s", filepath)
 		return
 	}
 
@@ -457,8 +581,8 @@ func WriteStream(reader io.Reader, dest string, perms ...uint32) (err error) {
 }
 
 // WriteString is a pass through to ioutil.WriteFile with default permissions
-func WriteString(target string, data string, perms ...uint32) (err error) {
-	if target, err = Abs(target); err != nil {
+func WriteString(filepath string, data string, perms ...uint32) (err error) {
+	if filepath, err = Abs(filepath); err != nil {
 		return
 	}
 
@@ -466,8 +590,8 @@ func WriteString(target string, data string, perms ...uint32) (err error) {
 	if len(perms) > 0 {
 		perm = os.FileMode(perms[0])
 	}
-	if err = ioutil.WriteFile(target, []byte(data), perm); err != nil {
-		err = errors.Wrapf(err, "failed write string to file %s", target)
+	if err = ioutil.WriteFile(filepath, []byte(data), perm); err != nil {
+		err = errors.Wrapf(err, "failed write string to file %s", filepath)
 		return
 	}
 	return
@@ -475,8 +599,8 @@ func WriteString(target string, data string, perms ...uint32) (err error) {
 
 // WriteYaml converts the given obj interface{} into yaml then writes to disk
 // with default permissions. Expects obj to be a structure that github.com/ghodss/yaml understands
-func WriteYaml(target string, obj interface{}, perms ...uint32) (err error) {
-	if target, err = Abs(target); err != nil {
+func WriteYaml(filepath string, obj interface{}, perms ...uint32) (err error) {
+	if filepath, err = Abs(filepath); err != nil {
 		return
 	}
 
@@ -498,8 +622,8 @@ func WriteYaml(target string, obj interface{}, perms ...uint32) (err error) {
 	if len(perms) > 0 {
 		perm = os.FileMode(perms[0])
 	}
-	if err = ioutil.WriteFile(target, data, perm); err != nil {
-		err = errors.Wrapf(err, "failed to write out yaml data to file %s", target)
+	if err = ioutil.WriteFile(filepath, data, perm); err != nil {
+		err = errors.Wrapf(err, "failed to write out yaml data to file %s", filepath)
 	}
 	return
 }
