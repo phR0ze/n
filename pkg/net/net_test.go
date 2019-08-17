@@ -19,6 +19,16 @@ func TestDownloadFile(t *testing.T) {
 	assert.True(t, sys.Exists(dst))
 }
 
+func TestJoinURL(t *testing.T) {
+	assert.Equal(t, "http://foobar.com/blah/bar", JoinURL("HttP://foobar.com", "blah", "bar"))
+	assert.Equal(t, "https://foobar.com/blah/bar", JoinURL("HttPs://foobar.com", "blah", "bar"))
+	assert.Equal(t, "ftp://foobar.com/blah/bar", JoinURL("FTP://foobar.com", "blah", "bar"))
+}
+
+func TestNormalizeURL(t *testing.T) {
+	assert.Equal(t, "https://foobar", NormalizeURL("Https://foobar"))
+}
+
 func TestPing(t *testing.T) {
 	err := Ping(TCP, "www.google.com:80")
 	assert.Nil(t, err)

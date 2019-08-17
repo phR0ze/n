@@ -31,101 +31,6 @@ func Abs(target string) (result string, err error) {
 	return
 }
 
-// Base wraps the filepath.Base but doesn't default to . when empty
-func Base(src string) (result string) {
-
-	// Drop the trailing slash if it exists
-	if len(src) > 1 && rune(src[len(src)-1]) == '/' {
-		src = src[:len(src)-1]
-	}
-
-	// Call base function
-	base := filepath.Base(src)
-	if base != "." {
-		result = base
-	}
-	return
-}
-
-// Dir wraps the filepath.Dir and trims off tailing slashes
-func Dir(src string) (result string) {
-
-	// Drop the trailing slash if it exists
-	if len(src) > 1 && rune(src[len(src)-1]) == '/' {
-		src = src[:len(src)-1]
-	}
-
-	// Call base function
-	base := filepath.Dir(src)
-	if base != "." {
-		result = base
-	}
-	return
-}
-
-// Home returns the absolute home directory for the current user
-func Home() (result string, err error) {
-	if result, err = homedir.Dir(); err != nil {
-		err = errors.Wrap(err, "failed to determine the user's home directdory")
-		return
-	}
-	if result, err = filepath.Abs(result); err != nil {
-		err = errors.Wrapf(err, "failed to compute the absolute path for %s", result)
-		return
-	}
-	return
-}
-
-// Dirs returns all directories from the given target path, sorted by filename
-func Dirs(target string) (result []string) {
-	result = []string{}
-	if target != "" && IsDir(target) {
-		if target, err := Abs(target); err == nil {
-			if items, err := ioutil.ReadDir(target); err == nil {
-				for _, item := range items {
-					if item.IsDir() {
-						result = append(result, path.Join(target, item.Name()))
-					}
-				}
-			}
-		}
-	}
-
-	return
-}
-
-// Files returns all files from the given target path, sorted by filename
-func Files(target string) (result []string) {
-	result = []string{}
-	if target != "" && IsDir(target) {
-		if target, err := Abs(target); err == nil {
-			if items, err := ioutil.ReadDir(target); err == nil {
-				for _, item := range items {
-					if !item.IsDir() {
-						result = append(result, path.Join(target, item.Name()))
-					}
-				}
-			}
-		}
-	}
-	return
-}
-
-// Paths returns all directories/files from the given target path, sorted by filename
-func Paths(target string) (result []string) {
-	result = []string{}
-	if target != "" && IsDir(target) {
-		if target, err := Abs(target); err == nil {
-			if items, err := ioutil.ReadDir(target); err == nil {
-				for _, item := range items {
-					result = append(result, path.Join(target, item.Name()))
-				}
-			}
-		}
-	}
-	return
-}
-
 // AllDirs returns a list of all dirs recursively for the given root path
 // in a deterministic order. Follows links by default, but can be stopped
 // with &Opt{"follow", false}. Paths are distinct.
@@ -228,6 +133,101 @@ func AllPaths(root string, opts ...*opt.Opt) (result []string, err error) {
 		}
 		return nil
 	}, opts...)
+	return
+}
+
+// Base wraps the filepath.Base but doesn't default to . when empty
+func Base(src string) (result string) {
+
+	// Drop the trailing slash if it exists
+	if len(src) > 1 && rune(src[len(src)-1]) == '/' {
+		src = src[:len(src)-1]
+	}
+
+	// Call base function
+	base := filepath.Base(src)
+	if base != "." {
+		result = base
+	}
+	return
+}
+
+// Dir wraps the filepath.Dir and trims off tailing slashes
+func Dir(src string) (result string) {
+
+	// Drop the trailing slash if it exists
+	if len(src) > 1 && rune(src[len(src)-1]) == '/' {
+		src = src[:len(src)-1]
+	}
+
+	// Call base function
+	base := filepath.Dir(src)
+	if base != "." {
+		result = base
+	}
+	return
+}
+
+// Dirs returns all directories from the given target path, sorted by filename
+func Dirs(target string) (result []string) {
+	result = []string{}
+	if target != "" && IsDir(target) {
+		if target, err := Abs(target); err == nil {
+			if items, err := ioutil.ReadDir(target); err == nil {
+				for _, item := range items {
+					if item.IsDir() {
+						result = append(result, path.Join(target, item.Name()))
+					}
+				}
+			}
+		}
+	}
+
+	return
+}
+
+// Files returns all files from the given target path, sorted by filename
+func Files(target string) (result []string) {
+	result = []string{}
+	if target != "" && IsDir(target) {
+		if target, err := Abs(target); err == nil {
+			if items, err := ioutil.ReadDir(target); err == nil {
+				for _, item := range items {
+					if !item.IsDir() {
+						result = append(result, path.Join(target, item.Name()))
+					}
+				}
+			}
+		}
+	}
+	return
+}
+
+// Home returns the absolute home directory for the current user
+func Home() (result string, err error) {
+	if result, err = homedir.Dir(); err != nil {
+		err = errors.Wrap(err, "failed to determine the user's home directdory")
+		return
+	}
+	if result, err = filepath.Abs(result); err != nil {
+		err = errors.Wrapf(err, "failed to compute the absolute path for %s", result)
+		return
+	}
+	return
+}
+
+// Paths returns all directories/files from the given target path, sorted by filename
+func Paths(target string) (result []string) {
+	result = []string{}
+	if target != "" && IsDir(target) {
+		if target, err := Abs(target); err == nil {
+			if items, err := ioutil.ReadDir(target); err == nil {
+				for _, item := range items {
+					result = append(result, path.Join(target, item.Name()))
+				}
+			}
+		}
+	}
 	return
 }
 

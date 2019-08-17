@@ -8,8 +8,11 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"regexp"
+	"strings"
 	"time"
 
+	"github.com/phR0ze/n"
 	"github.com/phR0ze/n/pkg/sys"
 )
 
@@ -19,6 +22,11 @@ const (
 
 	// UDP is a protocol string constant
 	UDP = "udp"
+)
+
+var (
+	gRXURLGetSchema     = regexp.MustCompile(`(?m)^(.*//).*$`)
+	gRXURLReplaceSchema = regexp.MustCompile(`(?m)^.*//`)
 )
 
 // DownloadFile from the given URL to the given destination
@@ -54,6 +62,34 @@ func DownloadFile(url, dst string, perms ...uint32) (result string, err error) {
 	// Write streamed http bits to the file
 	_, err = io.Copy(f, res.Body)
 
+	return
+}
+
+// JoinURL will join and append the given paths to the first element which
+// is assumed will be the schema of the URL. Will also normalize the schema.
+func JoinURL(elems ...string) (result string) {
+
+	// Drop empty strings
+	q := n.S(elems).DropW(func(x n.O) bool {
+		return n.ExB(x.(string) == "")
+	})
+
+	// Normalize schema and join with / skipping the path.Join's Clean call
+	if q.Len() > 0 {
+		schema := NormalizeURL(q.First().A())
+		q.Set(0, schema)
+		result = q.Join("/").A()
+	}
+	return
+}
+
+// NormalizeURL parses the URL and corrects case and other oddities.
+// 1. properly formats the schema
+func NormalizeURL(uri string) (result string) {
+	if matches := gRXURLGetSchema.FindStringSubmatch(uri); len(matches) > 1 {
+		schema := strings.ToLower(matches[1])
+		result = gRXURLReplaceSchema.ReplaceAllString(uri, schema)
+	}
 	return
 }
 
