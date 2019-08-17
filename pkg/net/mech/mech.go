@@ -62,7 +62,7 @@ func Get(url string) (page *Page, err error) {
 }
 
 // Get the target html docuement as a *Page
-// Calller is responsible for Closing the Page
+// Caller is responsible for Closing the Page
 func (mech *Mech) Get(url string) (page *Page, err error) {
 	var stream io.ReadCloser
 	if stream, err = mech.Stream(url); err != nil {
@@ -70,6 +70,25 @@ func (mech *Mech) Get(url string) (page *Page, err error) {
 	}
 	page = &Page{
 		stream: stream,
+	}
+
+	return
+}
+
+// GetLinks wrapper for instance method
+func GetLinks(url string) (links []string, err error) {
+	return New().GetLinks(url)
+}
+
+// GetLinks from the target html docuement
+func (mech *Mech) GetLinks(url string) (links []string, err error) {
+	var stream io.ReadCloser
+	if stream, err = mech.Stream(url); err != nil {
+		return
+	}
+	page := &Page{stream: stream}
+	if links, err = page.Links(); err != nil {
+		return
 	}
 
 	return
