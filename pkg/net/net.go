@@ -65,6 +65,11 @@ func DownloadFile(url, dst string, perms ...uint32) (result string, err error) {
 	return
 }
 
+// DirURL behaves much like the path.Dir only it doesn't garble the schema
+func DirURL(uri string) (result string) {
+	return sys.SlicePath(uri, 0, -2)
+}
+
 // JoinURL will join and append the given paths to the first element which
 // is assumed will be the schema of the URL. Will also normalize the schema.
 func JoinURL(elems ...string) (result string) {
@@ -130,4 +135,19 @@ func EnableProxy(proxy *url.URL) {
 		os.Setenv("http_proxy", proxy.String())
 		http.DefaultTransport = &http.Transport{Proxy: http.ProxyURL(proxy)}
 	}
+}
+
+// SplitURL will split the URL into pieces much as strings.Split(url, "/") would
+// except it keeps the schema intact if it exists.
+func SplitURL(uri string) (pieces []string) {
+	uri = NormalizeURL(uri)
+	if matches := gRXURLGetSchema.FindStringSubmatch(uri); len(matches) > 1 {
+		schema := matches[1]
+		uri = strings.Replace(uri, schema, "", 1)
+		pieces = strings.Split(uri, "/")
+		pieces = append([]string{schema}, pieces...)
+	} else {
+		pieces = strings.Split(uri, "/")
+	}
+	return
 }

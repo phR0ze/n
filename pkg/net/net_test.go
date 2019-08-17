@@ -19,6 +19,11 @@ func TestDownloadFile(t *testing.T) {
 	assert.True(t, sys.Exists(dst))
 }
 
+func TestDirURL(t *testing.T) {
+	assert.Equal(t, "https://foobar.com", DirURL("https://foobar.com/bob"))
+	assert.Equal(t, "https://foobar.com/bob/foo", DirURL("https://foobar.com/bob/foo/bar"))
+}
+
 func TestJoinURL(t *testing.T) {
 	assert.Equal(t, "http://foobar.com/blah/bar", JoinURL("HttP://foobar.com", "/blah", "bar"))
 	assert.Equal(t, "http://foobar.com/blah/bar", JoinURL("HttP://foobar.com", "blah", "bar"))
@@ -36,6 +41,10 @@ func TestPing(t *testing.T) {
 
 	err = Ping(TCP, "blah:80")
 	assert.NotNil(t, err)
+}
+
+func TestSplitURL(t *testing.T) {
+	assert.Equal(t, []string{"http://", "foobar.com", "blah", "bar"}, SplitURL("HttP://foobar.com/blah/bar"))
 }
 
 func cleanTmpDir() {
