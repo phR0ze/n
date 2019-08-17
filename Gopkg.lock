@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:fc86904a62ac4bfff8cfbe94f42231ce3d8cea8fe2506d5293eaef468f8eaecf"
+  name = "github.com/andybalholm/cascadia"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "901648c87902174f774fac311d7f176f8647bdaa"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:d83a0c69ae2f09a89d2c2a05d1158c522947d681c26cd5a0c25a39ca8ed031a9"
   name = "github.com/bouk/monkey"
   packages = ["."]
@@ -41,6 +49,14 @@
   version = "v1.3.0"
 
 [[projects]]
+  digest = "1:d043e5ae59276188d876090c261c311e146792c0908e08e67e766b1020a72d00"
+  name = "github.com/phR0ze/goquery"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "2d2796f41742ece03e8086188fa4db16a3a0b458"
+  version = "v1.5.0"
+
+[[projects]]
   digest = "1:14715f705ff5dfe0ffd6571d7d201dd8e921030f8070321a79380d8ca4ec1a24"
   name = "github.com/pkg/errors"
   packages = ["."]
@@ -74,6 +90,17 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:d7b978a787736537d0ad2f84c0e8b75b05c2febef0537198e28edf1cf2768afd"
+  name = "golang.org/x/net"
+  packages = [
+    "html",
+    "html/atom",
+  ]
+  pruneopts = "NUT"
+  revision = "74dc4d7220e7acc4e100824340f3e66577424772"
+
+[[projects]]
+  branch = "master"
   digest = "1:9c684a8c6bb9501591c1ac600e7669fdf4683b1a08be53e17e98e4660985c000"
   name = "golang.org/x/sys"
   packages = ["unix"]
@@ -96,6 +123,7 @@
     "github.com/ghodss/yaml",
     "github.com/mitchellh/go-homedir",
     "github.com/phR0ze/cast",
+    "github.com/phR0ze/goquery",
     "github.com/pkg/errors",
     "github.com/stretchr/testify/assert",
     "github.com/valyala/bytebufferpool",

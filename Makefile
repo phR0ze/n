@@ -1,10 +1,13 @@
 NAME := n
-DEPDIR := vendor
-PKGROOT := github.com/phR0ze/n
+INSTALL := install
+PKGROOT := github.com/phR0ze/$(NAME)
 
 default: $(NAME)
-$(NAME): $(DEPDIR)
+$(NAME): $(INSTALL)
 	go build -o bin/$(NAME) .
+
+mech: $(DEPDIR)
+	go build -o bin/mech pkg/net/mech/example/mech.go
 
 install:
 	dep ensure -v
