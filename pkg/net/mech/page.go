@@ -11,11 +11,16 @@ import (
 type Page struct {
 	doc    *goquery.Document // goquery document
 	stream io.ReadCloser     // initial stream
+	closed bool              // track if the stream has been closed
 }
 
 // Close implementes the Closer interface
 func (page *Page) Close() error {
-	return page.stream.Close()
+	if err := page.stream.Close(); err != nil {
+		return errors.Wrap(err, "failed to close Page stream")
+	}
+	page.closed = true
+	return nil
 }
 
 // Find exposes the underlying goquery Find function
@@ -32,7 +37,6 @@ func (page *Page) Links() (links []string, err error) {
 	if err = page.Parse(); err != nil {
 		return
 	}
-
 	page.doc.Find("a").Each(func(i int, elem *goquery.Selection) {
 		if href, ok := elem.Attr("href"); ok {
 			links = append(links, href)
@@ -47,6 +51,9 @@ func (page *Page) Parse() (err error) {
 	if page.doc == nil {
 		if page.doc, err = goquery.NewDocumentFromReader(page.stream); err != nil {
 			err = errors.Wrap(err, "failed to create goquery from Page stream")
+			return
+		}
+		if err = page.Close(); err != nil {
 			return
 		}
 	}

@@ -1,19 +1,15 @@
 NAME := n
-INSTALL := install
 PKGROOT := github.com/phR0ze/$(NAME)
 
 default: $(NAME)
-$(NAME): $(INSTALL)
+$(NAME): vendor
 	go build -o bin/$(NAME) .
 
-mech: $(DEPDIR)
+mech: vendor
 	go build -o bin/mech pkg/net/mech/example/mech.go
 
-install:
+vendor:
 	dep ensure -v
-
-update:
-	dep ensure -v -update
 
 test: $(NAME)
 	@echo -e "\nRunning all go tests:"
