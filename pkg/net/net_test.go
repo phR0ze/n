@@ -20,6 +20,7 @@ func TestDownloadFile(t *testing.T) {
 }
 
 func TestJoinURL(t *testing.T) {
+	assert.Equal(t, "http://foobar.com/blah/bar", JoinURL("HttP://foobar.com", "/blah", "bar"))
 	assert.Equal(t, "http://foobar.com/blah/bar", JoinURL("HttP://foobar.com", "blah", "bar"))
 	assert.Equal(t, "https://foobar.com/blah/bar", JoinURL("HttPs://foobar.com", "blah", "bar"))
 	assert.Equal(t, "ftp://foobar.com/blah/bar", JoinURL("FTP://foobar.com", "blah", "bar"))

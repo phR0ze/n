@@ -78,6 +78,11 @@ func JoinURL(elems ...string) (result string) {
 	if q.Len() > 0 {
 		schema := NormalizeURL(q.First().A())
 		q.Set(0, schema)
+
+		// Drop path absolute slash
+		if q.Len() > 1 && strings.HasPrefix(q.At(1).A(), "/") {
+			q.Set(1, q.At(1).A()[1:])
+		}
 		result = q.Join("/").A()
 	}
 	return
