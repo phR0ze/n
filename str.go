@@ -1109,14 +1109,11 @@ func (p *Str) SplitAfter(separator ...string) (slice *StringSlice) {
 // returns a slice of the substrings. If Str does not contain quotes, Split returns
 // a slice of length 1 whose only element is Str. If Str is empty, Split returns an empty
 // slice. Unmatched quotes throw and error and empty quotes are removed.
-func (p *Str) SplitQuotes(separator ...string) (slice *StringSlice, err error) {
+func (p *Str) SplitQuotes() (slice *StringSlice, err error) {
+	sep := '"'
 	if p == nil || len(*p) == 0 {
 		slice = NewStringSliceV()
 		return
-	}
-	sep := '"'
-	if len(separator) > 0 {
-		sep = ToRune(separator[0])
 	}
 
 	// Loop through and create slice
