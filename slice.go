@@ -183,9 +183,14 @@ func NewSliceV(elems ...interface{}) (new ISlice) {
 	} else {
 		switch Reference(elems[0]).(type) {
 
+		// FloatSlice
+		// ---------------------------------------------------------------------------------------------
+		case *float32, *float64, *[]float32, *[]float64, *[]*float32, *[]*float64:
+			new, _ = ToFloatSliceE(elems)
+
 		// IntSlice
 		// -----------------------------------------------------------------------------------------
-		case *float32, *float64, *int, *int8, *int16, *int64, *uint, *uint16, *uint32, *uint64:
+		case *int, *int8, *int16, *int64, *uint, *uint16, *uint32, *uint64:
 			new, _ = ToIntSliceE(elems)
 
 		// StringSlice

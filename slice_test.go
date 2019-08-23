@@ -170,8 +170,8 @@ func TestSlice_NewSliceV(t *testing.T) {
 
 	// int
 	{
-		assert.Equal(t, NewIntSliceV(3), NewSliceV(float32(3.0)))
-		assert.Equal(t, NewIntSliceV(3), NewSliceV(float64(3.0)))
+		assert.Equal(t, NewFloatSliceV(3), NewSliceV(float32(3.0)))
+		assert.Equal(t, NewFloatSliceV(3), NewSliceV(float64(3.0)))
 		assert.Equal(t, NewIntSliceV(3), NewSliceV(3))
 		assert.Equal(t, NewIntSliceV(3), NewSliceV(int8(3)))
 		assert.Equal(t, NewIntSliceV(3), NewSliceV(int16(3)))
