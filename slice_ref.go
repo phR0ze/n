@@ -752,6 +752,12 @@ func (p *RefSlice) Less(i, j int) bool {
 	panic(fmt.Sprintf("unsupported comparable type '%v'", p.v.Type()))
 }
 
+// Map creates a new slice with the modified elements from the lambda.
+func (p *RefSlice) Map(mod func(O) O) Slice {
+	panic("NOT IMPLEMENTED")
+	return nil
+}
+
 // Nil tests if this Slice is nil
 func (p *RefSlice) Nil() bool {
 	if p == nil || p.v == nil {

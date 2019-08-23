@@ -2455,6 +2455,11 @@ func ToIntSliceE(obj interface{}) (val *IntSlice, err error) {
 	return
 }
 
+// ToSlice is an alias to ToInterSlice
+func ToSlice(obj interface{}) (slice *InterSlice) {
+	return ToInterSlice(obj)
+}
+
 // ToInterSlice converts the given slice to an *InterSlice
 func ToInterSlice(obj interface{}) (slice *InterSlice) {
 	slice = &InterSlice{}

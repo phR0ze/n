@@ -497,6 +497,18 @@ func (p *FloatSlice) Less(i, j int) bool {
 	return (*p)[i] < (*p)[j]
 }
 
+// Map creates a new slice with the modified elements from the lambda.
+func (p *FloatSlice) Map(mod func(O) O) Slice {
+	slice := NewFloatSliceV()
+	if p == nil || len(*p) == 0 {
+		return slice
+	}
+	for i := range *p {
+		slice.Append(mod((*p)[i]))
+	}
+	return slice
+}
+
 // Nil tests if this Slice is nil
 func (p *FloatSlice) Nil() bool {
 	if p == nil {

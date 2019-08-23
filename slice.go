@@ -49,6 +49,7 @@ type Slice interface {
 	Len() int                                         // Len returns the number of elements in this Slice.
 	Less(i, j int) bool                               // Less returns true if the element indexed by i is less than the element indexed by j.
 	Nil() bool                                        // Nil tests if this Slice is nil.
+	Map(mod func(O) O) Slice                          // Map creates a new slice with the modified elements from the lambda.
 	O() interface{}                                   // O returns the underlying data structure as is.
 	Pair() (first, second *Object)                    // Pair simply returns the first and second Slice elements as Objects.
 	Pop() (elem *Object)                              // Pop modifies this Slice to remove the last element and returns the removed element as an Object.
@@ -163,7 +164,7 @@ func NewSlice(obj interface{}) (new Slice) {
 	// RefSlice
 	// ---------------------------------------------------------------------------------------------
 	default:
-		new = NewRefSlice(obj)
+		new = ToInterSlice(o)
 	}
 	return
 }

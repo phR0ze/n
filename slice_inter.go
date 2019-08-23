@@ -542,6 +542,19 @@ func (p *InterSlice) Less(i, j int) bool {
 	panic(fmt.Sprintf("unsupported comparable type '%T'", *p))
 }
 
+// Map creates a new slice with the modified elements from the lambda.
+func (p *InterSlice) Map(mod func(O) O) Slice {
+	slice := NewInterSliceV()
+	if p == nil || len(*p) == 0 {
+		return slice
+	}
+	for i := range *p {
+		v := mod((*p)[i])
+		*slice = append(*slice, v)
+	}
+	return slice
+}
+
 // Nil tests if this Slice is nil
 func (p *InterSlice) Nil() bool {
 	if p == nil {

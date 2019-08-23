@@ -2319,6 +2319,35 @@ func TestInterSlice_Less(t *testing.T) {
 	// }
 }
 
+// Map
+//--------------------------------------------------------------------------------------------------
+func ExampleInterSlice_Map() {
+	slice := NewInterSliceV(1, 2, 3)
+	fmt.Println(slice.Map(func(x O) O { return x.(int) + 1 }).O())
+	// Output: [2 3 4]
+}
+
+func TestInterSlice_Map(t *testing.T) {
+	// Extract property from object
+	{
+		slice := NewSlice([]Object{{"1"}, {"2"}, {"3"}})
+		result := slice.Map(func(x O) O {
+			return x.(Object).o
+		}).SG()
+		assert.Equal(t, []string{"1", "2", "3"}, result)
+	}
+
+	// Test with strings
+	{
+		slice := NewInterSliceV("1", "2", "3")
+		result := slice.Map(func(x O) O {
+			return ToStr(ToInt(x.(string)) + 1).A()
+		}).SG()
+		assert.Equal(t, []string{"2", "3", "4"}, result)
+		assert.Equal(t, []interface{}{"1", "2", "3"}, slice.O())
+	}
+}
+
 // Nil
 //--------------------------------------------------------------------------------------------------
 func TestInterSlice_Nil(t *testing.T) {

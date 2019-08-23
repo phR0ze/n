@@ -489,10 +489,12 @@ func (p *MapSlice) Len() int {
 // Less returns true if the element indexed by i is less than the element indexed by j.
 func (p *MapSlice) Less(i, j int) bool {
 	panic("NOT IMPLEMENTED")
-	// if p == nil || len(*p) < 2 || i < 0 || j < 0 || i >= len(*p) || j >= len(*p) {
-	// 	return false
-	// }
-	// return (*p)[i] < (*p)[j]
+}
+
+// Map creates a new slice with the modified elements from the lambda.
+func (p *MapSlice) Map(mod func(O) O) Slice {
+	panic("NOT IMPLEMENTED")
+	return nil
 }
 
 // Nil tests if this Slice is nil

@@ -505,7 +505,7 @@ func (p *StringSlice) Less(i, j int) bool {
 }
 
 // Map creates a new slice with the modified elements from the lambda.
-func (p *StringSlice) Map(mod func(O) O) (new *StringSlice) {
+func (p *StringSlice) Map(mod func(O) O) Slice {
 	slice := NewStringSliceV()
 	if p == nil || len(*p) == 0 {
 		return slice

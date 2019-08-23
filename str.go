@@ -841,6 +841,18 @@ func (p *Str) Less(i, j int) bool {
 	return ToChar((*p)[i]).Less((*p)[j])
 }
 
+// Map creates a new slice with the modified elements from the lambda.
+func (p *Str) Map(mod func(O) O) Slice {
+	slice := NewStrV()
+	if p == nil || len(*p) == 0 {
+		return slice
+	}
+	for i := range *p {
+		slice.Append(mod((*p)[i]))
+	}
+	return slice
+}
+
 // Nil tests if this Slice is nil
 func (p *Str) Nil() bool {
 	if p == nil {
