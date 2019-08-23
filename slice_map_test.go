@@ -254,9 +254,9 @@ func TestMapSlice_NewMapSliceV(t *testing.T) {
 
 // 	// Slice
 // 	{
-// 		assert.True(t, NewMapSliceV("1", "2", "3").AnyS(Slice(NewMapSliceV("1"))))
-// 		assert.True(t, NewMapSliceV("1", "2", "3").AnyS(Slice(NewMapSliceV("4", "3"))))
-// 		assert.False(t, NewMapSliceV("1", "2", "3").AnyS(Slice(NewMapSliceV("4", "5"))))
+// 		assert.True(t, NewMapSliceV("1", "2", "3").AnyS(ISlice(NewMapSliceV("1"))))
+// 		assert.True(t, NewMapSliceV("1", "2", "3").AnyS(ISlice(NewMapSliceV("4", "3"))))
+// 		assert.False(t, NewMapSliceV("1", "2", "3").AnyS(ISlice(NewMapSliceV("4", "5"))))
 // 	}
 
 // 	// MapSlice
@@ -620,7 +620,7 @@ func TestMapSlice_NewMapSliceV(t *testing.T) {
 // 	// Slice
 // 	{
 // 		slice := NewMapSliceV("1")
-// 		concated := slice.Concat(Slice(NewMapSliceV("2", "3")))
+// 		concated := slice.Concat(ISlice(NewMapSliceV("2", "3")))
 // 		assert.Equal(t, NewMapSliceV("1", "2"), slice.Append("2"))
 // 		assert.Equal(t, NewMapSliceV("1", "2", "3"), concated)
 // 	}
@@ -716,7 +716,7 @@ func TestMapSlice_NewMapSliceV(t *testing.T) {
 // 	// Slice
 // 	{
 // 		slice := NewMapSliceV("1")
-// 		concated := slice.ConcatM(Slice(NewMapSliceV("2", "3")))
+// 		concated := slice.ConcatM(ISlice(NewMapSliceV("2", "3")))
 // 		assert.Equal(t, NewMapSliceV("1", "2", "3", "4"), slice.Append("4"))
 // 		assert.Equal(t, NewMapSliceV("1", "2", "3", "4"), concated)
 // 	}

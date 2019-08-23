@@ -475,18 +475,18 @@ func TestObject_ToStringSlice(t *testing.T) {
 	}
 }
 
-func TestObject_ToStringSliceG(t *testing.T) {
+func TestObject_ToStrs(t *testing.T) {
 
 	// w/out error
 	{
 		o := &Object{[]string{}}
-		assert.IsType(t, []string{}, o.ToStringSliceG())
+		assert.IsType(t, []string{}, o.ToStrs())
 	}
 
 	// w/error
 	{
 		o := &Object{[]string{}}
-		obj, e := o.ToStringSliceGE()
+		obj, e := o.ToStrsE()
 		assert.Nil(t, e)
 		assert.IsType(t, []string{}, obj)
 	}

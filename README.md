@@ -14,25 +14,30 @@ https://godoc.org/github.com/phR0ze/n
   * [Requirements](#requirements)
 * [Background](#background)
   * [Resources](#resources)
-  * [Performance](#performance)
-    * [Go vs Python](#go-vs-python)
-    * [Pure Reflection - 10 cost](#pure-reflection-10x-cost)
-    * [Generic Slice - 18 cost](#generic-slice-18x-cost)
+  * [Language Popularity](#language-popularity)
+  * [Language Benchmarks](#language-benchmarks)
+  * [Generic Performance](#generic-performance)
+    * [Custom Native - 0x cost](#custom-native-0x-cost)
+    * [Pure Reflection - 9x cost](#pure-reflection-9x-cost)
+    * [Slice of interface{} - 14 cost](#slice-of-interface-14x-cost)
+    * [Reflection Assisted - 6.83x cost](#reflection-assisted-6.83x-cost)
   * [Deferred Execution](#deferred-execution)
     * [Iterator Pattern](#iterator-pattern)
 
 # Numerable <a name="numerable"></a>
-***Numerable*** provide a way to generically handle various types in Go with the convenience
-methods you would expect similar to Ruby or C#, making life a little easier. Since I'm using
-Reflection to accomplish this it obviously comes at a cost, which in some cases isn't worth it.
-However, as found in many cases, the actual work being done far out ways the bookkeeping overhead
+***Numerable*** provides a way to generically handle various types in Go with the convenience
+methods you would expect similar to Ruby or C#, making life a little easier. I've gone to great
+lengths to implement Numerable types for all common Go types and only fall back on Reflection
+for custom types. This means that in many cases no Reflection is used at all. In the cases where
+Reflection is used it obviously comes at a cost, which in some cases won't be worth it. However
+even then as found in many cases, the actual work being done far out ways the bookkeeping overhead
 incurred with the use of reflection. Other times the speed and convenience of not having to
 re-implement a Delete or Contains function for the millionth time far out weighs the performance
 cost.
 
-## Numerable Requirements <a name="requirements"></a>
-The Numerable interface and types implementing it are designed to accomplish the following
-requirements:
+## Requirements <a name="requirements"></a>
+The Numerable types have been designed to accomplish the following requirements:
+
 * ***Chaining*** - the ability to call additional methods via a returned reference to the type
 * ***Brevity*** - keep the naming as concise as possible while not infringing on clarity
 * ***Clarity*** - keep the naming as unambiguous as possible while not infringing on brevity
@@ -66,14 +71,7 @@ pretty good mix between performance and speed of development.
 ## Language Popularity <a name="language-popularity"></a>
 * https://www.tiobe.com/tiobe-index/
 
-## Performance <a name="performance"></a>
-Performance is a concern in handling generics as the Golang inventors rightly pointed out. Go was
-targeted as a systems language yet also noted as being a rapid development language. Certainly in my
-experience it is being used in place of rapid development languages such as Ruby, Python and C# but
-also Java as well. Generics are so vital to rapid development that a 10x cost may be worth it.
-
-### Benchmarks Game <a name="benchmarks-game"></a>
-
+## Language Benchmarks <a name="language-benchmarks"></a>
 * https://www.techempower.com/benchmarks/
 * https://www.quora.com/Why-use-Rails-if-NET-Core-is-so-much-faster-in-benchmarks
 * https://www.edureka.co/blog/golang-vs-python/
@@ -98,74 +96,211 @@ also Java as well. Generics are so vital to rapid development that a 10x cost ma
 | Reverse Comple  | 16.19s   | 3.98s   | 2.99s    | 23.09s   | 4.05x    | 
 | Spectral-Norm   | 170.52s  | 3.94s   | 4.07s    | 237.96s  | 43.28x   | 
 
-### Reflection Assisted - 2x cost <a name="reflection-assisted-2x-cost"></a>
-By storing items as a `reflect.ValueOf` we can use reflection to assist in handling generic
-types but then type assert for all common types to provide those types with only a 2x cost vs
-the 10x cost that falling back on pure reflection for unhandled types will cost.
+## Generic Performance <a name="generic-performance"></a>
+Performance is a concern in handling generics as the Golang inventors rightly pointed out. Go was
+targeted as a systems language yet also noted as being a rapid development language. Certainly in my
+experience it is being used in place of rapid development languages such as Ruby, Python and C# but
+also Java as well. Generics are so vital to rapid development that a 10x cost may be worth it when
+that is required. In the following sections I examine different implementation workarounds for this
+whole in the language and the cost associated with those implementations.
 
-6 nines slice costs 0.02ns while this implementation costs 0.02ns:
+To do this I'll be implementing a `Map` function that will for testing purposes also include the
+creation of the initial slice from a set of seed data as well as iterating over the seed data
+using a user given lambda to manipulate the data and return a property of the original object then
+to return this new slice of data as a native type.
+
+I'll use these helper types and functions to generate the test data:
 ```golang
-func (q *NSlice) Append(item interface{}) *NSlice {
-	if q.Nil() {
-		nq := Slicef(item)
-		if !nq.Nil() {
-			*q = *nq
-		}
-	} else {
-		switch slice := q.v.Interface().(type) {
-		case []int:
-			if x, ok := item.(int); ok {
-				slice = append(slice, x)
-			} else {
-				panic(fmt.Sprintf("can't insert type '%T' into []string", item))
-			}
-		default:
-			panic("unsupported")
-			item := reflect.ValueOf(item)
-			*q.v = reflect.Append(*q.v, item)
-		}
+type Integer struct { Value int}
+func Range(min, max int) []Integer {
+	result := make([]Integer, max-min+1)
+	for i := range result {
+		result[i] = Bob{min + i
 	}
-	return q
+	return result
 }
 ```
 
-### Pure Reflection - 10x cost <a name="pure-reflection-10x-cost"></a>
-Storing the items as a `reflect.ValueOf` is the most elegant and obvious way of
-doing this and as eveyone knows incurs the standard 10x reflection cost.
+### Custom Native - 0x cost <a name="custom-native-0x-cost"></a>
+To set a base of comparision we'll implement the desired functionality assuming we know the
+types i.e. there is nothing that can be reused in this case and a developer must implement
+their own basic functionality for the new type.
 
-6 nines slice costs 0.01ns while this implementation costs 0.10ns:
+Results from 3 runs after cache warm up:
+```
+BenchmarkSlice_CustomNative-16    	2000000000	         0.01 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSlice_CustomNative-16    	2000000000	         0.01 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSlice_CustomNative-16    	2000000000	         0.01 ns/op	       0 B/op	       0 allocs/op
+```
+
 ```golang
-func (n *NSlice) Append(items ...interface{}) *NSlice {
-	if len(items) > 0 {
-		if n.Nil() {
-			*n = *(Slicef(items...))
-		} else {
-			for i := 0; i < len(items); i++ {
-				item := reflect.ValueOf(items[i])
-				*n.v = reflect.Append(*n.v, item)
-			}
-		}
+func BenchmarkSlice_CustomNative(t *testing.B) {
+	seedData := RangeInteger(0, 999999)
+
+	// Select the actual values out of the custom object
+	lambda := func(x Integer) int {
+		return x.Value
 	}
-	return n
+
+	// Because we are assuming the developer isn't reusing anything we know the types
+	// and can use them directly
+	ints := []int{}
+	for i := range seedData {
+		ints = append(ints, lambda(seedData[i]))
+	}
+
+	assert.Equal(t, 2, ints[2])
+	assert.Equal(t, 99999, ints[99999])
 }
 ```
 
-### Generic Slice - 18x cost <a name="generic-slice-18x-cost"></a>
-Storing the items as a `[]interface{}` avoids the upfront 10x reflection cost but then requires
-looping over the entire set of items and performing a type assertion on each to return the final
-typed slice which resulted in an 18x cost even though reflection wasn't used. 
+### Pure Reflection - 9x cost <a name="pure-reflection-9x-cost"></a>
+The first and most obvious way to deal with the short coming is to work around it using reflection.
+Typically whenever reflection comes into the picture there is a 10x cost associated with it. 
+However I wanted to run some of my own benchmarks as a fun exercise.
 
-6 nines slice costs 0.01ns while this implementation costs 0.20ns:
+***9x*** hit from 3 runs after cache warm up:
+```
+BenchmarkSlice_PureReflection-16    	2000000000	         0.09 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSlice_PureReflection-16    	2000000000	         0.09 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSlice_PureReflection-16    	2000000000	         0.09 ns/op	       0 B/op	       0 allocs/op
+```
+
 ```golang
-func (n *NSlice) Append(items ...interface{}) *NSlice {
-	if n.Nil() {
-		*n = *(Slicef(items))
-	} else {
-		for _, item := range items {
-			n.o = append(n.o, item)
+func BenchmarkSlice_PureReflection(t *testing.B) {
+	seedData := RangeInteger(0, 999999)
+
+	// Select the actual values out of the custom object
+	lambda := func(x interface{}) interface{} {
+		return x.(Integer).Value
+	}
+
+	// Use reflection to determine the Kind this would model creating a reference
+	// to a new type e.g. NewRefSlice(seed). Because we used reflection we don't
+	// need to convert the seed data we can just use the given slice object the
+	// way it is.
+	var v2 reflect.Value
+	v1 := reflect.ValueOf(seedData)
+	k1 := v1.Kind()
+
+	// We do need to validate that is a slice type before working with it
+	if k1 == reflect.Slice {
+		for i := 0; i < v1.Len(); i++ {
+			result := lambda(v1.Index(i).Interface())
+
+			// We need to create a new slice based on the result type to store all the results
+			if !v2.IsValid() {
+				typ := reflect.SliceOf(reflect.TypeOf(result))
+				v2 = reflect.MakeSlice(typ, 0, v1.Len())
+			}
+
+			// Appending the native type to a reflect.Value of slice is more complicated as we
+			// now have to convert the result type into a reflect.Value before appending
+			// type asssert the native type.
+			v2 = reflect.Append(v2, reflect.ValueOf(result))
 		}
 	}
-	return n
+
+	// Now convert the results into a native type
+	// Because we created the native slice type as v2 we can simply get its interface and cast
+	ints := v2.Interface().([]int)
+	assert.Equal(t, 2, ints[2])
+	assert.Equal(t, 99999, ints[99999])
+}
+```
+
+### Slice of interface{} - 14x cost <a name="slice-of-interface-14x-cost"></a>
+Now we'll try using the native `[]interface{}` type to accomplish the same task of appending
+to a given slice a set of values from another slice. I was initially shocked over the results of this
+as I fully expected this to be faster until I looked a little closer. Because we are working with a
+slice of `interface{}` we have go to thank in that we can't simply cast any slice type to a slice of
+interface. Instead we have to iterate over it and pass in each item to the new `[]interface{}` type.
+This means that we need to iterate over the entire slice once to convert to a slice of interface then
+again to execute the lambda over each item then again to convert it into something usable. That is
+3 complete loops and we still had to use reflectdion to get into an initial known state.
+
+***14x*** hit from 3 runs after cache warm up:
+```
+BenchmarkSlice_SliceOfInterface-16    	2000000000	         0.14 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSlice_SliceOfInterface-16    	2000000000	         0.15 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSlice_SliceOfInterface-16    	2000000000	         0.14 ns/op	       0 B/op	       0 allocs/op
+```
+
+```golang
+func BenchmarkSlice_SliceOfInterface(t *testing.B) {
+	seedData := RangeInteger(0, 999999)
+
+	// Select the actual values out of the custom object
+	lambda := func(x interface{}) interface{} {
+		return x.(Integer).Value
+	}
+
+	// Use reflection to determine the Kind this would model creating a reference
+	// to a new type e.g. NewSlice(seed). Once we've done that we need to convert
+	// it into a []interface{}
+	v1 := reflect.ValueOf(seedData)
+	k1 := v1.Kind()
+
+	// We do need to validate that is a slice type before working with it
+	g1 := []interface{}{}
+	if k1 == reflect.Slice {
+		for i := 0; i < v1.Len(); i++ {
+			g1 = append(g1, v1.Index(i).Interface())
+		}
+	}
+
+	// Now iterate and execute the lambda and create the new result
+	results := []interface{}{}
+	for i := range g1 {
+		results = append(results, lambda(g1[i]))
+	}
+
+	// Now convert the results into a native type
+	ints := []int{}
+	for i := range results {
+		ints = append(ints, results[i].(int))
+	}
+	assert.Equal(t, 2, ints[2])
+	assert.Equal(t, 99999, ints[99999])
+}
+```
+
+### Reflection Assisted - 6.83x cost <a name="reflection-assisted-6.83x-cost"></a>
+Reflection assisted is the notion that we can can develop native types to support
+common types e.g. `[]int` and provide helper methods for them and fall back on 
+reflection for custom types that are not yet implemented.
+
+***8x*** hit from 3 runs after cache warm up for a custom type using reflection:
+```
+BenchmarkSlice_RefSlice-16    	2000000000	         0.08 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSlice_RefSlice-16    	2000000000	         0.07 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSlice_RefSlice-16    	2000000000	         0.07 ns/op	       0 B/op	       0 allocs/op
+```
+
+```golang
+func BenchmarkSlice_RefSlice(t *testing.B) {
+	ints := NewSlice(RangeInteger(0, 999999)).Map(func(x O) O {
+		return x.(Integer).Value
+	}).ToInts()
+	assert.Equal(t, 2, ints[2])
+	assert.Equal(t, 99999, ints[99999])
+}
+```
+
+***6x*** hit from 3 runs after cache warm up using IntSlice Numberable type:
+```
+BenchmarkSlice_IntSlice-16    	2000000000	         0.06 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSlice_IntSlice-16    	2000000000	         0.07 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSlice_IntSlice-16    	2000000000	         0.06 ns/op	       0 B/op	       0 allocs/op
+```
+
+```golang
+func BenchmarkSlice_IntSlice(t *testing.B) {
+	ints := NewSlice(Range(0, 999999)).Map(func(x O) O {
+		return x.(int) + 1
+	}).ToInts()
+	assert.Equal(t, 3, ints[2])
+	assert.Equal(t, 100000, ints[99999])
 }
 ```
 

@@ -73,7 +73,7 @@ func (p *StringMap) Copy(keys ...interface{}) (new Map) {
 	}
 
 	// Copy target keys or all keys
-	ks := ToStringSliceG(keys)
+	ks := ToStrs(keys)
 	if len(ks) == 0 {
 		for k := range *p {
 			(*val)[k] = (*p)[k]
@@ -267,8 +267,8 @@ func (p *StringMap) InjectE(key string, val interface{}) (m Map, err error) {
 	return
 }
 
-// Keys returns all the keys in this Map as a Slice of the key type.
-func (p *StringMap) Keys() Slice {
+// Keys returns all the keys in this Map as a ISlice of the key type.
+func (p *StringMap) Keys() ISlice {
 	keys := NewStringSliceV()
 	if p != nil {
 		for key := range *p {

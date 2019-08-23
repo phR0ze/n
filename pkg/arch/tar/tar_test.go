@@ -30,7 +30,7 @@ func TestCreate(t *testing.T) {
 	assert.Nil(t, err)
 	paths, err := sys.AllPaths(tmpDir)
 	assert.Nil(t, err)
-	result := n.S(paths).Map(func(x n.O) n.O { return sys.SlicePath(x.(string), -3, -1) }).SG()
+	result := n.S(paths).Map(func(x n.O) n.O { return sys.SlicePath(x.(string), -3, -1) }).ToStrs()
 	expected := []string{
 		"n/test/temp",
 		"test/temp/.tmp",

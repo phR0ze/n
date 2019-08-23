@@ -2080,6 +2080,15 @@ func ToFloatSliceE(obj interface{}) (val *FloatSlice, err error) {
 	return
 }
 
+// ToInts convert an interface to a []int type
+func ToInts(obj interface{}) []int {
+	x, _ := ToIntSliceE(obj)
+	if x == nil {
+		return []int{}
+	}
+	return x.G()
+}
+
 // ToIntSlice convert an interface to a IntSlice type which will never be nil
 func ToIntSlice(obj interface{}) *IntSlice {
 	x, _ := ToIntSliceE(obj)
@@ -2463,76 +2472,153 @@ func ToSlice(obj interface{}) (slice *InterSlice) {
 // ToInterSlice converts the given slice to an *InterSlice
 func ToInterSlice(obj interface{}) (slice *InterSlice) {
 	slice = &InterSlice{}
-	o := DeReference(obj)
 
 	// Optimized types
-	switch x := o.(type) {
+	switch x := obj.(type) {
 	case nil:
 
 	// bool
 	//----------------------------------------------------------------------------------------------
-	case bool:
+	case bool, *bool:
 		*slice = append(*slice, x)
 	case []bool:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]bool:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 	case []*bool:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]*bool:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 
 	// Char
 	//----------------------------------------------------------------------------------------------
-	case Char:
+	case Char, *Char:
 		*slice = append(*slice, x)
 	case []Char:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]Char:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 	case []*Char:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]*Char:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 
 	// float32
 	//----------------------------------------------------------------------------------------------
-	case float32:
+	case float32, *float32:
 		*slice = append(*slice, x)
 	case []float32:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]float32:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 	case []*float32:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]*float32:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 
 	// float64
 	//----------------------------------------------------------------------------------------------
-	case float64:
+	case float64, *float64:
 		*slice = append(*slice, x)
 	case []float64:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]float64:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 	case []*float64:
 		for i := range x {
 			*slice = append(*slice, x[i])
+		}
+	case *[]*float64:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
 		}
 
 	// FloatSlice
 	//----------------------------------------------------------------------------------------------
 	case FloatSlice:
-		*slice = *ToInterSlice(x.G())
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+	case *FloatSlice:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 	case []FloatSlice:
 		for i := range x {
-			*slice = append(*slice, *ToInterSlice(x[i].G())...)
+			for j := range x[i] {
+				*slice = append(*slice, x[i][j])
+			}
+		}
+	case *[]FloatSlice:
+		if x != nil {
+			for i := range *x {
+				for j := range (*x)[i] {
+					*slice = append(*slice, (*x)[i][j])
+				}
+			}
 		}
 	case []*FloatSlice:
 		for i := range x {
 			if x[i] != nil {
-				*slice = append(*slice, *ToInterSlice(x[i].G())...)
+				for j := range *x[i] {
+					*slice = append(*slice, (*x[i])[j])
+				}
+			}
+		}
+	case *[]*FloatSlice:
+		if x != nil {
+			for i := range *x {
+				if (*x)[i] != nil {
+					for j := range *(*x)[i] {
+						*slice = append(*slice, (*(*x)[i])[j])
+					}
+				}
 			}
 		}
 
@@ -2542,83 +2628,161 @@ func ToInterSlice(obj interface{}) (slice *InterSlice) {
 		val := InterSlice(x)
 		slice = &val
 
+	case *[]interface{}:
+		if x != nil {
+			val := InterSlice(*x)
+			slice = &val
+		}
+
 	// int
 	//----------------------------------------------------------------------------------------------
-	case int:
+	case int, *int:
 		*slice = append(*slice, x)
 	case []int:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]int:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 	case []*int:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]*int:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 
 	// int8
 	//----------------------------------------------------------------------------------------------
-	case int8:
+	case int8, *int8:
 		*slice = append(*slice, x)
 	case []int8:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]int8:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 	case []*int8:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]*int8:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 
 	// int16
 	//----------------------------------------------------------------------------------------------
-	case int16:
+	case int16, *int16:
 		*slice = append(*slice, x)
 	case []int16:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]int16:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 	case []*int16:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]*int16:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 
 	// int32
 	//----------------------------------------------------------------------------------------------
-	case int32:
+	case int32, *int32:
 		*slice = append(*slice, x)
 	case []int32:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]int32:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 	case []*int32:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]*int32:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 
 	// int64
 	//----------------------------------------------------------------------------------------------
-	case int64:
+	case int64, *int64:
 		*slice = append(*slice, x)
 	case []int64:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]int64:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 	case []*int64:
 		for i := range x {
 			*slice = append(*slice, x[i])
+		}
+	case *[]*int64:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
 		}
 
 	// IntSlice
 	//----------------------------------------------------------------------------------------------
 	case IntSlice:
-		*slice = *ToInterSlice(x.G())
+		for i := range x {
+			*slice = append(*slice, x[i])
+		}
+	case *IntSlice:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 	case []IntSlice:
 		for i := range x {
-			*slice = append(*slice, *ToInterSlice(x[i].G())...)
+			for j := range x[i] {
+				*slice = append(*slice, x[i][j])
+			}
 		}
 	case []*IntSlice:
 		for i := range x {
 			if x[i] != nil {
-				*slice = append(*slice, *ToInterSlice(x[i].G())...)
+				for j := range *x[i] {
+					*slice = append(*slice, (*x[i])[j])
+				}
 			}
 		}
 
@@ -2626,9 +2790,19 @@ func ToInterSlice(obj interface{}) (slice *InterSlice) {
 	//----------------------------------------------------------------------------------------------
 	case InterSlice:
 		slice = &x
+	case *InterSlice:
+		if x != nil {
+			slice = x
+		}
 	case []InterSlice:
 		for i := range x {
 			*slice = append(*slice, x[i]...)
+		}
+	case *[]InterSlice:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i]...)
+			}
 		}
 	case []*InterSlice:
 		for i := range x {
@@ -2636,18 +2810,38 @@ func ToInterSlice(obj interface{}) (slice *InterSlice) {
 				*slice = append(*slice, (*x[i])...)
 			}
 		}
+	case *[]*InterSlice:
+		if x != nil {
+			for i := range *x {
+				if (*x)[i] != nil {
+					*slice = append(*slice, (*(*x)[i])...)
+				}
+			}
+		}
 
 	// Object
 	//----------------------------------------------------------------------------------------------
-	case Object:
+	case Object, *Object:
 		*slice = append(*slice, x)
 	case []Object:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]Object:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 	case []*Object:
 		for i := range x {
 			*slice = append(*slice, x[i])
+		}
+	case *[]*Object:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
 		}
 
 	// Str
@@ -2656,141 +2850,282 @@ func ToInterSlice(obj interface{}) (slice *InterSlice) {
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *Str:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 	case []Str:
 		for i := range x {
-			*slice = append(*slice, *ToInterSlice(x[i])...)
+			*slice = append(*slice, x[i])
+		}
+	case *[]Str:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
 		}
 	case []*Str:
 		for i := range x {
-			*slice = append(*slice, *ToInterSlice(x[i])...)
+			*slice = append(*slice, x[i])
+		}
+	case *[]*Str:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
 		}
 
 	// string
 	//----------------------------------------------------------------------------------------------
-	case string:
+	case string, *string:
 		*slice = append(*slice, x)
 	case []string:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]string:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 	case []*string:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]*string:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 
 	// map[string]
 	//----------------------------------------------------------------------------------------------
-	case map[string]string:
+	case map[string]string, *map[string]string:
 		*slice = append(*slice, x)
 	case []map[string]string:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]map[string]string:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 	case []*map[string]string:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
-	case map[string]interface{}:
+	case *[]*map[string]string:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
+	case map[string]interface{}, *map[string]interface{}:
 		*slice = append(*slice, x)
 	case []map[string]interface{}:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]map[string]interface{}:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 	case []*map[string]interface{}:
 		for i := range x {
 			*slice = append(*slice, x[i])
+		}
+	case *[]*map[string]interface{}:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
 		}
 
 	// StringMap
 	//----------------------------------------------------------------------------------------------
 	case StringMap:
 		slice = ToInterSlice(x.G())
+	case *StringMap:
+		slice = ToInterSlice(x.G())
 	case []StringMap:
 		for i := range x {
 			*slice = append(*slice, *ToInterSlice(x[i].G())...)
 		}
+	case *[]StringMap:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, *ToInterSlice((*x)[i].G())...)
+			}
+		}
 	case []*StringMap:
 		for i := range x {
 			*slice = append(*slice, *ToInterSlice(x[i].G())...)
+		}
+	case *[]*StringMap:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, *ToInterSlice((*x)[i].G())...)
+			}
 		}
 
 	// StringSlice
 	//----------------------------------------------------------------------------------------------
 	case StringSlice:
 		slice = ToInterSlice(x.G())
+	case *StringSlice:
+		slice = ToInterSlice(x.G())
 	case []StringSlice:
 		for i := range x {
 			*slice = append(*slice, *ToInterSlice(x[i].G())...)
+		}
+	case *[]StringSlice:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, *ToInterSlice((*x)[i].G())...)
+			}
 		}
 	case []*StringSlice:
 		for i := range x {
 			*slice = append(*slice, *ToInterSlice(x[i].G())...)
 		}
+	case *[]*StringSlice:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, *ToInterSlice((*x)[i].G())...)
+			}
+		}
 
 	// uint
 	//----------------------------------------------------------------------------------------------
-	case uint:
+	case uint, *uint:
 		*slice = append(*slice, x)
 	case []uint:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]uint:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 	case []*uint:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]*uint:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 
 	// uint8
 	//----------------------------------------------------------------------------------------------
-	case uint8:
+	case uint8, *uint8:
 		*slice = append(*slice, x)
 	case []uint8:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]uint8:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 	case []*uint8:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]*uint8:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 
 	// uint16
 	//----------------------------------------------------------------------------------------------
-	case uint16:
+	case uint16, *uint16:
 		*slice = append(*slice, x)
 	case []uint16:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]uint16:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 	case []*uint16:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]*uint16:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 
 	// uint32
 	//----------------------------------------------------------------------------------------------
-	case uint32:
+	case uint32, *uint32:
 		*slice = append(*slice, x)
 	case []uint32:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]uint32:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 	case []*uint32:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]*uint32:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 
 	// uint64
 	//----------------------------------------------------------------------------------------------
-	case uint64:
+	case uint64, *uint64:
 		*slice = append(*slice, x)
-
 	case []uint64:
 		for i := range x {
 			*slice = append(*slice, x[i])
 		}
+	case *[]uint64:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
+		}
 	case []*uint64:
 		for i := range x {
 			*slice = append(*slice, x[i])
+		}
+	case *[]*uint64:
+		if x != nil {
+			for i := range *x {
+				*slice = append(*slice, (*x)[i])
+			}
 		}
 
 	// fall back on reflection
@@ -2804,7 +3139,7 @@ func ToInterSlice(obj interface{}) (slice *InterSlice) {
 		// generically convert array and *slice types
 		case k == reflect.Array || k == reflect.Slice:
 			for i := 0; i < v.Len(); i++ {
-				*slice = append(*slice, v.Interface())
+				*slice = append(*slice, v.Index(i).Interface())
 			}
 
 		// everything else just drop in the slice directly
@@ -3855,14 +4190,14 @@ func ToStringSliceE(obj interface{}) (val *StringSlice, err error) {
 	return
 }
 
-// ToStringSliceG convert an interface to a []string type.
-func ToStringSliceG(obj interface{}) (val []string) {
-	val, _ = ToStringSliceGE(obj)
+// ToStrs convert an interface to a []string type.
+func ToStrs(obj interface{}) (val []string) {
+	val, _ = ToStrsE(obj)
 	return val
 }
 
-// ToStringSliceGE convert an interface to a []string type.
-func ToStringSliceGE(obj interface{}) (val []string, err error) {
+// ToStrsE convert an interface to a []string type.
+func ToStrsE(obj interface{}) (val []string, err error) {
 	val = []string{}
 	o := DeReference(obj)
 
@@ -4016,7 +4351,7 @@ func ToStringSliceGE(obj interface{}) (val []string, err error) {
 	// Object
 	//----------------------------------------------------------------------------------------------
 	case Object:
-		val, err = ToStringSliceGE(ToString(x))
+		val, err = ToStrsE(ToString(x))
 	case []Object:
 		for i := range x {
 			val = append(val, ToString(x[i]))
@@ -4029,7 +4364,7 @@ func ToStringSliceGE(obj interface{}) (val []string, err error) {
 	// Str
 	//----------------------------------------------------------------------------------------------
 	case Str:
-		val, err = ToStringSliceGE(ToString(x))
+		val, err = ToStrsE(ToString(x))
 	case []Str:
 		for i := range x {
 			val = append(val, ToString(x[i]))

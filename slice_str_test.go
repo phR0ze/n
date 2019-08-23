@@ -214,9 +214,9 @@ package n
 
 // 	// Slice
 // 	{
-// 		assert.True(t, NewStrV("1", "2", "3").AnyS(Slice(NewStrV("1"))))
-// 		assert.True(t, NewStrV("1", "2", "3").AnyS(Slice(NewStrV("4", "3"))))
-// 		assert.False(t, NewStrV("1", "2", "3").AnyS(Slice(NewStrV("4", "5"))))
+// 		assert.True(t, NewStrV("1", "2", "3").AnyS(ISlice(NewStrV("1"))))
+// 		assert.True(t, NewStrV("1", "2", "3").AnyS(ISlice(NewStrV("4", "3"))))
+// 		assert.False(t, NewStrV("1", "2", "3").AnyS(ISlice(NewStrV("4", "5"))))
 // 	}
 
 // 	// StrSlice
@@ -559,7 +559,7 @@ package n
 // 	// Slice
 // 	{
 // 		slice := NewStrV("1")
-// 		concated := slice.Concat(Slice(NewStrV("2", "3")))
+// 		concated := slice.Concat(ISlice(NewStrV("2", "3")))
 // 		assert.Equal(t, NewStrV("1", "2"), slice.Append("2"))
 // 		assert.Equal(t, NewStrV("1", "2", "3"), concated)
 // 	}
@@ -643,7 +643,7 @@ package n
 // 	// Slice
 // 	{
 // 		slice := NewStrV("1")
-// 		concated := slice.ConcatM(Slice(NewStrV("2", "3")))
+// 		concated := slice.ConcatM(ISlice(NewStrV("2", "3")))
 // 		assert.Equal(t, NewStrV("1", "2", "3", "4"), slice.Append("4"))
 // 		assert.Equal(t, NewStrV("1", "2", "3", "4"), concated)
 // 	}

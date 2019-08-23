@@ -85,7 +85,7 @@ package n
 
 // 		q := Q(data)
 // 		assert.True(t, q.Any())
-// 		assert.Equal(t, []string{"1", "2", "3"}, q.M("foo").Strs())
+// 		assert.Equal(t, []string{"1", "2", "3"}, q.M("foo").ToStrs())
 // 	}
 // }
 

@@ -254,9 +254,9 @@ func TestIntSlice_AnyS(t *testing.T) {
 
 	// Slice
 	{
-		assert.True(t, NewIntSliceV(1, 2, 3).AnyS(Slice(NewIntSliceV(1))))
-		assert.True(t, NewIntSliceV(1, 2, 3).AnyS(Slice(NewIntSliceV(4, 3))))
-		assert.False(t, NewIntSliceV(1, 2, 3).AnyS(Slice(NewIntSliceV(4, 5))))
+		assert.True(t, NewIntSliceV(1, 2, 3).AnyS(ISlice(NewIntSliceV(1))))
+		assert.True(t, NewIntSliceV(1, 2, 3).AnyS(ISlice(NewIntSliceV(4, 3))))
+		assert.False(t, NewIntSliceV(1, 2, 3).AnyS(ISlice(NewIntSliceV(4, 5))))
 	}
 
 	// IntSlice
@@ -625,7 +625,7 @@ func TestIntSlice_Concat(t *testing.T) {
 	// Slice
 	{
 		slice := NewIntSliceV(1)
-		concated := slice.Concat(Slice(NewIntSliceV(2, 3)))
+		concated := slice.Concat(ISlice(NewIntSliceV(2, 3)))
 		assert.Equal(t, NewIntSliceV(1, 2), slice.Append(2))
 		assert.Equal(t, NewIntSliceV(1, 2, 3), concated)
 	}
@@ -716,7 +716,7 @@ func TestIntSlice_ConcatM(t *testing.T) {
 	// Slice
 	{
 		slice := NewIntSliceV(1)
-		concated := slice.ConcatM(Slice(NewIntSliceV(2, 3)))
+		concated := slice.ConcatM(ISlice(NewIntSliceV(2, 3)))
 		assert.Equal(t, NewIntSliceV(1, 2, 3, 4), slice.Append(4))
 		assert.Equal(t, NewIntSliceV(1, 2, 3, 4), concated)
 	}

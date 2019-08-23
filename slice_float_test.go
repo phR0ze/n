@@ -250,11 +250,11 @@ func TestFloatSlice_AnyS(t *testing.T) {
 		assert.False(t, NewFloatSliceV(1, 2, 3).AnyS([]Object{{4}, {5}}))
 	}
 
-	// Slice
+	// ISlice
 	{
-		assert.True(t, NewFloatSliceV(1, 2, 3).AnyS(Slice(NewFloatSliceV(1))))
-		assert.True(t, NewFloatSliceV(1, 2, 3).AnyS(Slice(NewFloatSliceV(4, 3))))
-		assert.False(t, NewFloatSliceV(1, 2, 3).AnyS(Slice(NewFloatSliceV(4, 5))))
+		assert.True(t, NewFloatSliceV(1, 2, 3).AnyS(ISlice(NewFloatSliceV(1))))
+		assert.True(t, NewFloatSliceV(1, 2, 3).AnyS(ISlice(NewFloatSliceV(4, 3))))
+		assert.False(t, NewFloatSliceV(1, 2, 3).AnyS(ISlice(NewFloatSliceV(4, 5))))
 	}
 
 	// FloatSlice
@@ -618,10 +618,10 @@ func TestFloatSlice_Concat(t *testing.T) {
 		assert.Equal(t, NewFloatSliceV(1, 2, 3), concated)
 	}
 
-	// Slice
+	// ISlice
 	{
 		slice := NewFloatSliceV(1)
-		concated := slice.Concat(Slice(NewFloatSliceV(2, 3)))
+		concated := slice.Concat(ISlice(NewFloatSliceV(2, 3)))
 		assert.Equal(t, NewFloatSliceV(1, 2), slice.Append(2))
 		assert.Equal(t, NewFloatSliceV(1, 2, 3), concated)
 	}
@@ -709,10 +709,10 @@ func TestFloatSlice_ConcatM(t *testing.T) {
 		assert.Equal(t, NewFloatSliceV(1, 2, 3, 4), concated)
 	}
 
-	// Slice
+	// ISlice
 	{
 		slice := NewFloatSliceV(1)
-		concated := slice.ConcatM(Slice(NewFloatSliceV(2, 3)))
+		concated := slice.ConcatM(ISlice(NewFloatSliceV(2, 3)))
 		assert.Equal(t, NewFloatSliceV(1, 2, 3, 4), slice.Append(4))
 		assert.Equal(t, NewFloatSliceV(1, 2, 3, 4), concated)
 	}

@@ -870,7 +870,7 @@ func TestStr_Concat(t *testing.T) {
 	// Slice
 	{
 		slice := NewStrV("1")
-		concated := slice.Concat(Slice(NewStrV("2", "3")))
+		concated := slice.Concat(ISlice(NewStrV("2", "3")))
 		assert.Equal(t, "12", slice.Append("2").O())
 		assert.Equal(t, "123", concated.O())
 	}
@@ -966,7 +966,7 @@ func TestStr_ConcatM(t *testing.T) {
 	// Slice
 	{
 		slice := NewStrV("1")
-		concated := slice.ConcatM(Slice(NewStrV("2", "3")))
+		concated := slice.ConcatM(ISlice(NewStrV("2", "3")))
 		assert.Equal(t, NewStrV("1", "2", "3", "4"), slice.Append("4"))
 		assert.Equal(t, NewStrV("1", "2", "3", "4"), concated)
 	}
@@ -2987,24 +2987,6 @@ func TestStr_Len(t *testing.T) {
 
 // Less
 //--------------------------------------------------------------------------------------------------
-func BenchmarkStr_Less_Go(t *testing.B) {
-	// src := RangeString(nines6)
-	// for i := 0; i < len(src); i++ {
-	// 	if i+1 < len(src) {
-	// 		_ = src[i] < src[i+1]
-	// 	}
-	// }
-}
-
-func BenchmarkStr_Less_Slice(t *testing.B) {
-	// slice := NewStr(RangeString(nines6))
-	// for i := 0; i < slice.Len(); i++ {
-	// 	if i+1 < slice.Len() {
-	// 		slice.Less(i, i+1)
-	// 	}
-	// }
-}
-
 func ExampleStr_Less() {
 	slice := NewStrV("2", "3", "1")
 	fmt.Println(slice.Less(0, 2))
@@ -3029,6 +3011,26 @@ func TestStr_Less(t *testing.T) {
 	assert.Equal(t, true, NewStrV("0", "1", "2").Less(0, 1))
 	assert.Equal(t, false, NewStrV("0", "1", "2").Less(1, 0))
 	assert.Equal(t, true, NewStrV("0", "1", "2").Less(1, 2))
+}
+
+// Map
+//--------------------------------------------------------------------------------------------------
+func ExampleStr_Map() {
+	slice := NewStrV("1", "2", "3").Map(func(x O) O {
+		return x.(rune) + 1
+	})
+	fmt.Println(slice.O())
+	// Output: 234
+}
+
+func TestStr_Map(t *testing.T) {
+	// int result
+	{
+		slice := NewStrV("1", "2", "3").Map(func(x O) O {
+			return ToInt(string(x.(rune) + 1))
+		})
+		assert.Equal(t, []int{2, 3, 4}, slice.O())
+	}
 }
 
 // Nil

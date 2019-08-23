@@ -31,7 +31,7 @@
 // without the 'R' but reverses the order of operations.
 //
 // • Function names suffixed with 'S' indicates the function is a variation to the function
-// without the 'S' but either accepts a Slice as input or returns a Slice.
+// without the 'S' but either accepts a ISlice as input or returns a ISlice.
 //
 // • Function names suffixed with 'V' indicates the function is a variation to the function
 // • Function names suffixed with 'V' indicates the function is a variation to the function

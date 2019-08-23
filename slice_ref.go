@@ -184,7 +184,7 @@ func (p *RefSlice) AnyS(slice interface{}) bool {
 		if !x.Nil() {
 			v = *(x.v)
 		}
-	} else if x, ok := slice.(Slice); ok {
+	} else if x, ok := slice.(ISlice); ok {
 		if !x.Nil() {
 			v = reflect.ValueOf(x.O())
 		}
@@ -213,7 +213,7 @@ func (p *RefSlice) AnyW(sel func(O) bool) bool {
 }
 
 // Append an element to the end of this Slice and returns a reference to this Slice.
-func (p *RefSlice) Append(elem interface{}) Slice {
+func (p *RefSlice) Append(elem interface{}) ISlice {
 	if p.Nil() {
 		if p == nil {
 			p = newEmptySlice(elem)
@@ -231,7 +231,7 @@ func (p *RefSlice) Append(elem interface{}) Slice {
 }
 
 // AppendV appends the variadic elements to the end of this Slice and returns a reference to this Slice.
-func (p *RefSlice) AppendV(elems ...interface{}) Slice {
+func (p *RefSlice) AppendV(elems ...interface{}) ISlice {
 	if p.Nil() {
 		if p == nil {
 			p = newEmptySlice(elems)
@@ -259,7 +259,7 @@ func (p *RefSlice) At(i int) (elem *Object) {
 }
 
 // Clear modifies this Slice to clear out all elements and returns a reference to this Slice.
-func (p *RefSlice) Clear() Slice {
+func (p *RefSlice) Clear() ISlice {
 	if p.Nil() {
 		if p == nil {
 			p = NewRefSliceV()
@@ -274,13 +274,13 @@ func (p *RefSlice) Clear() Slice {
 
 // Concat returns a new Slice by appending the given Slice to this Slice using variadic expansion.
 // Supports RefSlice, *RefSlice, []int or *[]int
-func (p *RefSlice) Concat(slice interface{}) (new Slice) {
+func (p *RefSlice) Concat(slice interface{}) (new ISlice) {
 	return p.Copy().ConcatM(slice)
 }
 
 // ConcatM modifies this Slice by appending the given Slice using variadic expansion and returns a reference to this Slice.
 // Supports RefSlice, *RefSlice, Slice and Go slice types
-func (p *RefSlice) ConcatM(slice interface{}) Slice {
+func (p *RefSlice) ConcatM(slice interface{}) ISlice {
 
 	// Handle supported types
 	var v reflect.Value
@@ -292,7 +292,7 @@ func (p *RefSlice) ConcatM(slice interface{}) Slice {
 		if !x.Nil() {
 			v = *(x.v)
 		}
-	} else if x, ok := slice.(Slice); ok {
+	} else if x, ok := slice.(ISlice); ok {
 		if !x.Nil() {
 			v = reflect.ValueOf(x.O())
 		}
@@ -328,7 +328,7 @@ func (p *RefSlice) ConcatM(slice interface{}) Slice {
 // bounds indices will be moved within bounds.
 //
 // An empty Slice is returned if indicies are mutually exclusive or nothing can be returned.
-func (p *RefSlice) Copy(indices ...int) (new Slice) {
+func (p *RefSlice) Copy(indices ...int) (new ISlice) {
 	if p.Nil() {
 		return NewRefSliceV()
 	}
@@ -381,7 +381,7 @@ func (p *RefSlice) CountW(sel func(O) bool) (cnt int) {
 // Expects nothing, in which case everything is dropped, or two indices i and j, in which case positive and
 // negative notation is supported and uses an inclusive behavior such that DropAt(0, -1) includes index -1
 // as opposed to Go's exclusive behavior. Out of bounds indices will be moved within bounds.
-func (p *RefSlice) Drop(indices ...int) Slice {
+func (p *RefSlice) Drop(indices ...int) ISlice {
 	l := p.Len()
 	if p == nil || l == 0 {
 		return p
@@ -405,17 +405,17 @@ func (p *RefSlice) Drop(indices ...int) Slice {
 
 // DropAt modifies this Slice to delete the element at the given index location. Allows for negative notation.
 // Returns a reference to this Slice.
-func (p *RefSlice) DropAt(i int) Slice {
+func (p *RefSlice) DropAt(i int) ISlice {
 	return p.Drop(i, i)
 }
 
 // DropFirst modifies this Slice to delete the first element and returns a reference to this Slice.
-func (p *RefSlice) DropFirst() Slice {
+func (p *RefSlice) DropFirst() ISlice {
 	return p.Drop(0, 0)
 }
 
 // DropFirstN modifies this Slice to delete the first n elements and returns a reference to this Slice.
-func (p *RefSlice) DropFirstN(n int) Slice {
+func (p *RefSlice) DropFirstN(n int) ISlice {
 	if n == 0 {
 		return p
 	}
@@ -423,12 +423,12 @@ func (p *RefSlice) DropFirstN(n int) Slice {
 }
 
 // DropLast modifies this Slice to delete the last element and returns a reference to this Slice.
-func (p *RefSlice) DropLast() Slice {
+func (p *RefSlice) DropLast() ISlice {
 	return p.Drop(-1, -1)
 }
 
 // DropLastN modifies thi Slice to delete the last n elements and returns a reference to this Slice.
-func (p *RefSlice) DropLastN(n int) Slice {
+func (p *RefSlice) DropLastN(n int) ISlice {
 	if n == 0 {
 		return p
 	}
@@ -437,7 +437,7 @@ func (p *RefSlice) DropLastN(n int) Slice {
 
 // DropW modifies this Slice to delete the elements that match the lambda selector and returns a reference to this Slice.
 // The slice is updated instantly when lambda expression is evaluated not after DropW completes.
-func (p *RefSlice) DropW(sel func(O) bool) Slice {
+func (p *RefSlice) DropW(sel func(O) bool) ISlice {
 	l := p.Len()
 	if p.Nil() || l == 0 {
 		return p
@@ -455,7 +455,7 @@ func (p *RefSlice) DropW(sel func(O) bool) Slice {
 
 // Each calls the given lambda once for each element in this Slice, passing in that element
 // as a parameter. Returns a reference to this Slice
-func (p *RefSlice) Each(action func(O)) Slice {
+func (p *RefSlice) Each(action func(O)) ISlice {
 	if p.Nil() {
 		return p
 	}
@@ -467,7 +467,7 @@ func (p *RefSlice) Each(action func(O)) Slice {
 
 // EachE calls the given lambda once for each element in this Slice, passing in that element
 // as a parameter. Returns a reference to this Slice and any error from the lambda.
-func (p *RefSlice) EachE(action func(O) error) (Slice, error) {
+func (p *RefSlice) EachE(action func(O) error) (ISlice, error) {
 	var err error
 	if p.Nil() {
 		return p, err
@@ -482,7 +482,7 @@ func (p *RefSlice) EachE(action func(O) error) (Slice, error) {
 
 // EachI calls the given lambda once for each element in this Slice, passing in the index and element
 // as a parameter. Returns a reference to this Slice
-func (p *RefSlice) EachI(action func(int, O)) Slice {
+func (p *RefSlice) EachI(action func(int, O)) ISlice {
 	if p.Nil() {
 		return p
 	}
@@ -494,7 +494,7 @@ func (p *RefSlice) EachI(action func(int, O)) Slice {
 
 // EachIE calls the given lambda once for each element in this Slice, passing in the index and element
 // as a parameter. Returns a reference to this Slice and any error from the lambda.
-func (p *RefSlice) EachIE(action func(int, O) error) (Slice, error) {
+func (p *RefSlice) EachIE(action func(int, O) error) (ISlice, error) {
 	var err error
 	if p.Nil() {
 		return p, err
@@ -509,7 +509,7 @@ func (p *RefSlice) EachIE(action func(int, O) error) (Slice, error) {
 
 // EachR calls the given lambda once for each element in this Slice in reverse, passing in that element
 // as a parameter. Returns a reference to this Slice
-func (p *RefSlice) EachR(action func(O)) Slice {
+func (p *RefSlice) EachR(action func(O)) ISlice {
 	if p.Nil() {
 		return p
 	}
@@ -521,7 +521,7 @@ func (p *RefSlice) EachR(action func(O)) Slice {
 
 // EachRE calls the given lambda once for each element in this Slice in reverse, passing in that element
 // as a parameter. Returns a reference to this Slice and any error from the lambda.
-func (p *RefSlice) EachRE(action func(O) error) (Slice, error) {
+func (p *RefSlice) EachRE(action func(O) error) (ISlice, error) {
 	var err error
 	if p.Nil() {
 		return p, err
@@ -536,7 +536,7 @@ func (p *RefSlice) EachRE(action func(O) error) (Slice, error) {
 
 // EachRI calls the given lambda once for each element in this Slice in reverse, passing in that element
 // as a parameter. Returns a reference to this Slice
-func (p *RefSlice) EachRI(action func(int, O)) Slice {
+func (p *RefSlice) EachRI(action func(int, O)) ISlice {
 	if p.Nil() {
 		return p
 	}
@@ -548,7 +548,7 @@ func (p *RefSlice) EachRI(action func(int, O)) Slice {
 
 // EachRIE calls the given lambda once for each element in this Slice in reverse, passing in that element
 // as a parameter. Returns a reference to this Slice and any error from the lambda.
-func (p *RefSlice) EachRIE(action func(int, O) error) (Slice, error) {
+func (p *RefSlice) EachRIE(action func(int, O) error) (ISlice, error) {
 	var err error
 	if p.Nil() {
 		return p, err
@@ -577,7 +577,7 @@ func (p *RefSlice) First() (elem *Object) {
 
 // FirstN returns the first n elements in this slice as a Slice reference to the original.
 // Best effort is used such that as many as can be will be returned up until the request is satisfied.
-func (p *RefSlice) FirstN(n int) Slice {
+func (p *RefSlice) FirstN(n int) ISlice {
 	if p.Nil() {
 		return NewRefSliceV()
 	}
@@ -609,7 +609,7 @@ func (p *RefSlice) Index(elem interface{}) (loc int) {
 // of -1 will insert the element at the end of the slice. If a Slice is given all elements will be
 // inserted starting from the beging until the end. Slice is returned for chaining. Invalid
 // index locations will not change the slice.
-func (p *RefSlice) Insert(i int, elem interface{}) Slice {
+func (p *RefSlice) Insert(i int, elem interface{}) ISlice {
 	l := p.Len()
 	if p.Nil() || l == 0 {
 		return p.Append(elem)
@@ -648,7 +648,7 @@ func (p *RefSlice) Insert(i int, elem interface{}) Slice {
 // of -1 will insert the element at the end of the slice. If a Slice is given all elements will be
 // inserted starting from the beging until the end. Slice is returned for chaining. Invalid
 // index locations will not change the slice.
-func (p *RefSlice) InsertS(i int, slice interface{}) Slice {
+func (p *RefSlice) InsertS(i int, slice interface{}) ISlice {
 	l := p.Len()
 	if p.Nil() || l == 0 {
 		return p.ConcatM(slice)
@@ -717,7 +717,7 @@ func (p *RefSlice) Last() (elem *Object) {
 
 // LastN returns the last n elements in this Slice as a Slice reference to the original.
 // Best effort is used such that as many as can be will be returned up until the request is satisfied.
-func (p *RefSlice) LastN(n int) Slice {
+func (p *RefSlice) LastN(n int) ISlice {
 	if p.Nil() {
 		return NewRefSliceV()
 	}
@@ -753,9 +753,21 @@ func (p *RefSlice) Less(i, j int) bool {
 }
 
 // Map creates a new slice with the modified elements from the lambda.
-func (p *RefSlice) Map(mod func(O) O) Slice {
-	panic("NOT IMPLEMENTED")
-	return nil
+func (p *RefSlice) Map(mod func(O) O) ISlice {
+	l := p.Len()
+	var slice ISlice
+	if p == nil || l == 0 {
+		return NewRefSliceV()
+	}
+	for i := 0; i < l; i++ {
+		v := mod(p.v.Index(i).Interface())
+		if slice == nil {
+			slice = NewSlice(v)
+		} else {
+			slice.Append(v)
+		}
+	}
+	return slice
 }
 
 // Nil tests if this Slice is nil
@@ -795,7 +807,7 @@ func (p *RefSlice) Pop() (elem *Object) {
 }
 
 // PopN modifies this Slice to remove the last n elements and returns the removed elements as a new Slice.
-func (p *RefSlice) PopN(n int) (new Slice) {
+func (p *RefSlice) PopN(n int) (new ISlice) {
 	if p.Nil() {
 		return NewRefSliceV()
 	}
@@ -808,7 +820,7 @@ func (p *RefSlice) PopN(n int) (new Slice) {
 }
 
 // Prepend modifies this Slice to add the given element at the begining and returns a reference to this Slice.
-func (p *RefSlice) Prepend(elem interface{}) Slice {
+func (p *RefSlice) Prepend(elem interface{}) ISlice {
 	return p.Insert(0, elem)
 }
 
@@ -818,7 +830,7 @@ func (p *RefSlice) RefSlice() bool {
 }
 
 // Reverse returns a new Slice with the order of the elements reversed.
-func (p *RefSlice) Reverse() (new Slice) {
+func (p *RefSlice) Reverse() (new ISlice) {
 	if p.Nil() || p.Len() < 2 {
 		return p.Copy()
 	}
@@ -826,7 +838,7 @@ func (p *RefSlice) Reverse() (new Slice) {
 }
 
 // ReverseM modifies this Slice reversing the order of the elements and returns a reference to this Slice.
-func (p *RefSlice) ReverseM() Slice {
+func (p *RefSlice) ReverseM() ISlice {
 	l := p.Len()
 	if p.Nil() || l == 0 {
 		return p
@@ -842,13 +854,8 @@ func (p *RefSlice) S() (slice *StringSlice) {
 	return ToStringSlice(p.O())
 }
 
-// SG is an alias to ToStringSliceG
-func (p *RefSlice) SG() (slice []string) {
-	return ToStringSliceG(p.O())
-}
-
 // Select creates a new slice with the elements that match the lambda selector.
-func (p *RefSlice) Select(sel func(O) bool) (new Slice) {
+func (p *RefSlice) Select(sel func(O) bool) (new ISlice) {
 	l := p.Len()
 	slice := NewRefSliceV()
 	if p.Nil() || l == 0 {
@@ -865,14 +872,14 @@ func (p *RefSlice) Select(sel func(O) bool) (new Slice) {
 
 // Set the element at the given index location to the given element. Allows for negative notation.
 // Returns a reference to this Slice and swallows any errors.
-func (p *RefSlice) Set(i int, elem interface{}) Slice {
+func (p *RefSlice) Set(i int, elem interface{}) ISlice {
 	slice, _ := p.SetE(i, elem)
 	return slice
 }
 
 // SetE the element at the given index location to the given element. Allows for negative notation.
 // Returns a referenc to this Slice and an error if out of bounds or elem is the wrong type.
-func (p *RefSlice) SetE(i int, elem interface{}) (Slice, error) {
+func (p *RefSlice) SetE(i int, elem interface{}) (ISlice, error) {
 	var err error
 	if p.Nil() {
 		return p, err
@@ -899,7 +906,7 @@ func (p *RefSlice) Shift() (elem *Object) {
 }
 
 // ShiftN modifies this Slice to remove the first n elements and returns the removed elements as a new Slice.
-func (p *RefSlice) ShiftN(n int) (new Slice) {
+func (p *RefSlice) ShiftN(n int) (new ISlice) {
 	if p.Nil() {
 		return NewRefSliceV()
 	}
@@ -924,7 +931,7 @@ func (p *RefSlice) Single() bool {
 // An empty Slice is returned if indicies are mutually exclusive or nothing can be returned.
 //
 // e.g. NewRefSliceV(1,2,3).Slice(0, -1) == [1,2,3] && NewRefSliceV(1,2,3).Slice(1,2) == [2,3]
-func (p *RefSlice) Slice(indices ...int) Slice {
+func (p *RefSlice) Slice(indices ...int) ISlice {
 	if p.Nil() {
 		return NewRefSliceV()
 	}
@@ -940,7 +947,7 @@ func (p *RefSlice) Slice(indices ...int) Slice {
 
 // Sort returns a new Slice with sorted elements.
 // Supports optimized Slice types or Go types that can be converted into an optimized Slice type.
-func (p *RefSlice) Sort() (new Slice) {
+func (p *RefSlice) Sort() (new ISlice) {
 	if p.Nil() || p.Len() < 2 {
 		return p.Copy()
 	}
@@ -949,7 +956,7 @@ func (p *RefSlice) Sort() (new Slice) {
 
 // SortM modifies this Slice sorting the elements and returns a reference to this Slice.
 // Supports optimized Slice types or Go types that can be converted into an optimized Slice type.
-func (p *RefSlice) SortM() Slice {
+func (p *RefSlice) SortM() ISlice {
 	if p.Nil() || p.Len() < 2 {
 		return p
 	}
@@ -968,7 +975,7 @@ func (p *RefSlice) SortM() Slice {
 
 // SortReverse returns a new Slice sorting the elements in reverse.
 // Supports optimized Slice types or Go types that can be converted into an optimized Slice type.
-func (p *RefSlice) SortReverse() (new Slice) {
+func (p *RefSlice) SortReverse() (new ISlice) {
 	if p.Nil() || p.Len() < 2 {
 		return p.Copy()
 	}
@@ -977,7 +984,7 @@ func (p *RefSlice) SortReverse() (new Slice) {
 
 // SortReverseM modifies this Slice sorting the elements in reverse and returns a reference to this Slice.
 // Supports optimized Slice types or Go types that can be converted into an optimized Slice type.
-func (p *RefSlice) SortReverseM() Slice {
+func (p *RefSlice) SortReverseM() ISlice {
 	if p.Nil() || p.Len() < 2 {
 		return p
 	}
@@ -1022,7 +1029,7 @@ func (p *RefSlice) Swap(i, j int) {
 // Expects nothing, in which case everything is taken, or two indices i and j, in which case positive and negative
 // notation is supported and uses an inclusive behavior such that Take(0, -1) includes index -1 as opposed to Go's
 // exclusive behavior. Out of bounds indices will be moved within bounds.
-func (p *RefSlice) Take(indices ...int) (new Slice) {
+func (p *RefSlice) Take(indices ...int) (new ISlice) {
 	new = p.Copy(indices...)
 	p.Drop(indices...)
 	return
@@ -1037,7 +1044,7 @@ func (p *RefSlice) TakeAt(i int) (elem *Object) {
 }
 
 // TakeW modifies this Slice removing the elements that match the lambda selector and returns them as a new Slice.
-func (p *RefSlice) TakeW(sel func(O) bool) (new Slice) {
+func (p *RefSlice) TakeW(sel func(O) bool) (new ISlice) {
 	l := p.Len()
 	slice := NewRefSliceV()
 	if p.Nil() || l == 0 {
@@ -1055,6 +1062,16 @@ func (p *RefSlice) TakeW(sel func(O) bool) (new Slice) {
 	return slice
 }
 
+// ToInts converts the underlying slice into a []int
+func (p *RefSlice) ToInts() (slice []int) {
+	return ToIntSlice(p.O()).G()
+}
+
+// ToIntSlice converts the underlying slice into a *IntSlice
+func (p *RefSlice) ToIntSlice() (slice *IntSlice) {
+	return ToIntSlice(p.O())
+}
+
 // ToInterSlice converts the given slice to a generic []interface{} slice
 func (p *RefSlice) ToInterSlice() (slice []interface{}) {
 	return ToInterSlice(p.O()).G()
@@ -1065,26 +1082,26 @@ func (p *RefSlice) ToStringSlice() (slice *StringSlice) {
 	return ToStringSlice(p.O())
 }
 
-// ToStringSliceG converts the underlying slice into a []string slice
-func (p *RefSlice) ToStringSliceG() (slice []string) {
-	return ToStringSliceG(p.O())
+// ToStrs converts the underlying slice into a []string slice
+func (p *RefSlice) ToStrs() (slice []string) {
+	return ToStrs(p.O())
 }
 
 // Union returns a new Slice by joining uniq elements from this Slice with uniq elements from the given Slice while preserving order.
 // Supports RefSlice, *RefSlice, Slice and Go slice types
-func (p *RefSlice) Union(slice interface{}) (new Slice) {
+func (p *RefSlice) Union(slice interface{}) (new ISlice) {
 	return p.Copy().UnionM(slice)
 }
 
 // UnionM modifies this Slice by joining uniq elements from this Slice with uniq elements from the given Slice while preserving order.
 // Supports RefSlice, *RefSlice, Slice and Go slice types
-func (p *RefSlice) UnionM(slice interface{}) Slice {
+func (p *RefSlice) UnionM(slice interface{}) ISlice {
 	return p.ConcatM(slice).UniqM()
 }
 
 // Uniq returns a new Slice with all non uniq elements removed while preserving element order.
 // Cost for this call vs the UniqM is roughly the same, this one is appending that one dropping.
-func (p *RefSlice) Uniq() (new Slice) {
+func (p *RefSlice) Uniq() (new ISlice) {
 	l := p.Len()
 	if p.Nil() || l < 2 {
 		return p.Copy()
@@ -1105,7 +1122,7 @@ func (p *RefSlice) Uniq() (new Slice) {
 
 // UniqM modifies this Slice to remove all non uniq elements while preserving element order.
 // Cost for this call vs the Uniq is roughly the same, this one is dropping that one appending.
-func (p *RefSlice) UniqM() Slice {
+func (p *RefSlice) UniqM() ISlice {
 	l := p.Len()
 	if p.Nil() || l < 2 {
 		return p

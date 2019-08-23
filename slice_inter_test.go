@@ -48,6 +48,8 @@ func TestInterSlice_NewInterSlice(t *testing.T) {
 	assert.Equal(t, []interface{}{Object{}}, NewInterSlice([]interface{}{Object{}}).O())
 
 	// singles
+	one := 1
+	assert.Equal(t, []interface{}{&one}, NewInterSlice(&one).O())
 	assert.Equal(t, []interface{}{1}, NewInterSlice(1).O())
 	assert.Equal(t, []interface{}{true}, NewInterSlice(true).O())
 	assert.Equal(t, []interface{}{""}, NewInterSlice("").O())
@@ -2333,7 +2335,7 @@ func TestInterSlice_Map(t *testing.T) {
 		slice := NewSlice([]Object{{"1"}, {"2"}, {"3"}})
 		result := slice.Map(func(x O) O {
 			return x.(Object).o
-		}).SG()
+		}).ToStrs()
 		assert.Equal(t, []string{"1", "2", "3"}, result)
 	}
 
@@ -2342,7 +2344,7 @@ func TestInterSlice_Map(t *testing.T) {
 		slice := NewInterSliceV("1", "2", "3")
 		result := slice.Map(func(x O) O {
 			return ToStr(ToInt(x.(string)) + 1).A()
-		}).SG()
+		}).ToStrs()
 		assert.Equal(t, []string{"2", "3", "4"}, result)
 		assert.Equal(t, []interface{}{"1", "2", "3"}, slice.O())
 	}
@@ -3662,20 +3664,6 @@ func TestInterSlice_TakeW(t *testing.T) {
 
 // // // Union
 // // //--------------------------------------------------------------------------------------------------
-// // func BenchmarkInterSlice_Union_Go(t *testing.B) {
-// // 	// ints := Range(0, nines7)
-// // 	// for len(ints) > 10 {
-// // 	// 	ints = ints[10:]
-// // 	// }
-// // }
-
-// // func BenchmarkInterSlice_Union_Slice(t *testing.B) {
-// // 	// slice := NewInterSlice(Range(0, nines7))
-// // 	// for slice.Len() > 0 {
-// // 	// 	slice.PopN(10)
-// // 	// }
-// // }
-
 // // func ExampleInterSlice_Union() {
 // // 	slice := NewInterSliceV(1, 2)
 // // 	fmt.Println(slice.Union([]int{2, 3}))
@@ -3726,20 +3714,6 @@ func TestInterSlice_TakeW(t *testing.T) {
 
 // // // UnionM
 // // //--------------------------------------------------------------------------------------------------
-// // func BenchmarkInterSlice_UnionM_Go(t *testing.B) {
-// // 	// ints := Range(0, nines7)
-// // 	// for len(ints) > 10 {
-// // 	// 	ints = ints[10:]
-// // 	// }
-// // }
-
-// // func BenchmarkInterSlice_UnionM_Slice(t *testing.B) {
-// // 	// slice := NewInterSlice(Range(0, nines7))
-// // 	// for slice.Len() > 0 {
-// // 	// 	slice.PopN(10)
-// // 	// }
-// // }
-
 // // func ExampleInterSlice_UnionM() {
 // // 	slice := NewInterSliceV(1, 2)
 // // 	fmt.Println(slice.UnionM([]int{2, 3}))
@@ -3790,20 +3764,6 @@ func TestInterSlice_TakeW(t *testing.T) {
 
 // // Uniq
 // //--------------------------------------------------------------------------------------------------
-// func BenchmarkInterSlice_Uniq_Go(t *testing.B) {
-// 	// ints := Range(0, nines7)
-// 	// for len(ints) > 10 {
-// 	// 	ints = ints[10:]
-// 	// }
-// }
-
-// func BenchmarkInterSlice_Uniq_Slice(t *testing.B) {
-// 	// slice := NewInterSlice(Range(0, nines7))
-// 	// for slice.Len() > 0 {
-// 	// 	slice.PopN(10)
-// 	// }
-// }
-
 // func ExampleInterSlice_Uniq() {
 // 	slice := NewInterSliceV(1, 2, 3, 3)
 // 	fmt.Println(slice.Uniq())

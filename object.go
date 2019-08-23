@@ -57,11 +57,6 @@ func (p *Object) S() *StringSlice {
 	return p.ToStringSlice()
 }
 
-// SG is an alias to ToStringSliceG for brevity
-func (p *Object) SG() []string {
-	return p.ToStringSliceG()
-}
-
 // String returns a string representation of the Object, implements Stringer interface.
 func (p *Object) String() string {
 	if p == nil {
@@ -623,13 +618,13 @@ func (p *Object) ToStringSliceE() (*StringSlice, error) {
 	return ToStringSliceE(p.o)
 }
 
-// ToStringSliceG casts an interface to a []string type.
-func (p *Object) ToStringSliceG() []string {
+// ToStrs casts an interface to a []string type.
+func (p *Object) ToStrs() []string {
 	return p.ToStringSlice().G()
 }
 
-// ToStringSliceGE casts an interface to a []string type.
-func (p *Object) ToStringSliceGE() ([]string, error) {
+// ToStrsE casts an interface to a []string type.
+func (p *Object) ToStrsE() ([]string, error) {
 	result, err := p.ToStringSliceE()
 	if err != nil {
 		return []string{}, err

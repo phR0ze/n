@@ -28,20 +28,20 @@ type Map interface {
 	Exists(key interface{}) bool // Exists checks if the given key exists in this Map.
 	// DeleteW(sel func(O) bool) Slice                     // DropW modifies this Map to delete the elements that match the lambda selector and returns a reference to this Map.
 	// Each(action func(O)) Slice                        // Each calls the given lambda once for each element in this Map, passing in that element
-	// EachE(action func(O) error) (Slice, error)        // EachE calls the given lambda once for each element in this Map, passing in that element
+	// EachE(action func(O) error) (ISlice, error)        // EachE calls the given lambda once for each element in this Map, passing in that element
 	// EachI(action func(int, O)) Slice                  // EachI calls the given lambda once for each element in this Map, passing in the index and element
-	// EachIE(action func(int, O) error) (Slice, error)  // EachIE calls the given lambda once for each element in this Map, passing in the index and element
+	// EachIE(action func(int, O) error) (ISlice, error)  // EachIE calls the given lambda once for each element in this Map, passing in the index and element
 	// EachR(action func(O)) Slice                       // EachR calls the given lambda once for each element in this Map in reverse, passing in that element
-	// EachRE(action func(O) error) (Slice, error)       // EachRE calls the given lambda once for each element in this Map in reverse, passing in that element
+	// EachRE(action func(O) error) (ISlice, error)       // EachRE calls the given lambda once for each element in this Map in reverse, passing in that element
 	// EachRI(action func(int, O)) Slice                 // EachRI calls the given lambda once for each element in this Map in reverse, passing in that element
-	// EachRIE(action func(int, O) error) (Slice, error) // EachRIE calls the given lambda once for each element in this Map in reverse, passing in that element
+	// EachRIE(action func(int, O) error) (ISlice, error) // EachRIE calls the given lambda once for each element in this Map in reverse, passing in that element
 	// Empty() bool                                      // Empty tests if this Map is empty.
 	Generic() bool                                          // Generic returns true if the underlying implementation uses reflection
 	Get(key interface{}) (val *Object)                      // Get returns the value at the given key location. Returns empty *Object if not found.
 	Inject(key string, val interface{}) Map                 // Inject sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
 	InjectE(key string, val interface{}) (m Map, err error) // InjectE sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
 	// Join(separator ...string) (str *Object)           // Join converts each element into a string then joins them together using the given separator or comma by default.
-	Keys() Slice                         // Keys returns all the keys in this Map as a Slice of the key type.
+	Keys() ISlice                        // Keys returns all the keys in this Map as a Slice of the key type.
 	Len() int                            // Len returns the number of elements in this Map.
 	M() (m *StringMap)                   // M is an alias to ToStringMap
 	MG() (m map[string]interface{})      // MG is an alias to ToStringMapG

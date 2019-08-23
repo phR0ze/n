@@ -947,19 +947,19 @@ func TestLoadYamlE(t *testing.T) {
 
 // 	// 	// Delete the first
 // 	// 	assert.Equal(t, "0", q.DeleteAt(0).A())
-// 	// 	assert.Equal(t, []string{"1", "2", "3", "4", "5"}, q.Strs())
+// 	// 	assert.Equal(t, []string{"1", "2", "3", "4", "5"}, q.ToStrs())
 
 // 	// 	// Delete the last -1
 // 	// 	assert.Equal(t, "5", q.DeleteAt(-1).A())
-// 	// 	assert.Equal(t, []string{"1", "2", "3", "4"}, q.Strs())
+// 	// 	assert.Equal(t, []string{"1", "2", "3", "4"}, q.ToStrs())
 
 // 	// 	// Delete middle pos
 // 	// 	assert.Equal(t, "2", q.DeleteAt(1).A())
-// 	// 	assert.Equal(t, []string{"1", "3", "4"}, q.Strs())
+// 	// 	assert.Equal(t, []string{"1", "3", "4"}, q.ToStrs())
 
 // 	// 	// Delete middle neg
 // 	// 	assert.Equal(t, "3", q.DeleteAt(-2).A())
-// 	// 	assert.Equal(t, []string{"1", "4"}, q.Strs())
+// 	// 	assert.Equal(t, []string{"1", "4"}, q.ToStrs())
 // 	// }
 
 // 	// // Custom type
@@ -1078,19 +1078,19 @@ func TestLoadYamlE(t *testing.T) {
 
 // 		// Delete the first
 // 		assert.Equal(t, "0", q.DeleteAt(0).A())
-// 		assert.Equal(t, []string{"1", "2", "3", "4", "5"}, q.Strs())
+// 		assert.Equal(t, []string{"1", "2", "3", "4", "5"}, q.ToStrs())
 
 // 		// Delete the last -1
 // 		assert.Equal(t, "5", q.DeleteAt(-1).A())
-// 		assert.Equal(t, []string{"1", "2", "3", "4"}, q.Strs())
+// 		assert.Equal(t, []string{"1", "2", "3", "4"}, q.ToStrs())
 
 // 		// Delete middle pos
 // 		assert.Equal(t, "2", q.DeleteAt(1).A())
-// 		assert.Equal(t, []string{"1", "3", "4"}, q.Strs())
+// 		assert.Equal(t, []string{"1", "3", "4"}, q.ToStrs())
 
 // 		// Delete middle neg
 // 		assert.Equal(t, "3", q.DeleteAt(-2).A())
-// 		assert.Equal(t, []string{"1", "4"}, q.Strs())
+// 		assert.Equal(t, []string{"1", "4"}, q.ToStrs())
 // 	}
 
 // 	// map - not allowed
@@ -1520,8 +1520,8 @@ func TestLoadYamlE(t *testing.T) {
 // 		s := q.Map(func(x O) O {
 // 			return A(x.(string)).Split(",").Map(func(y string) O {
 // 				return A(y).Split("=").S()
-// 			}).Flatten().Strs()
-// 		}).Flatten().Strs()
+// 			}).Flatten().ToStrs()
+// 		}).Flatten().ToStrs()
 // 		assert.Equal(t, []string{"k1", "v1", "k2", "v2"}, s)
 // 	}
 // 	{
@@ -1532,7 +1532,7 @@ func TestLoadYamlE(t *testing.T) {
 // 			return A(x.(string)).Split(",").MapF(func(y string) O {
 // 				return A(y).Split("=").S()
 // 			})
-// 		}).Strs()
+// 		}).ToStrs()
 // 		assert.Equal(t, []string{"k1", "v1", "k2", "v2"}, s)
 // 	}
 // }
@@ -1597,7 +1597,7 @@ func TestLoadYamlE(t *testing.T) {
 // 		q := Q([]string{"4", "1", "5", "2"})
 // 		results := q.Select(func(x O) bool {
 // 			return Q(targets).Contains(x.(string))
-// 		}).Strs()
+// 		}).ToStrs()
 // 		assert.Equal(t, targets, results)
 // 	}
 // }
@@ -1666,7 +1666,7 @@ func TestLoadYamlE(t *testing.T) {
 // 	{
 // 		q := Q([]string{"one"})
 // 		assert.Equal(t, "one", q.At(0).A())
-// 		assert.Equal(t, []string{"one"}, q.Strs())
+// 		assert.Equal(t, []string{"one"}, q.ToStrs())
 // 	}
 // 	{
 // 		assert.Equal(t, "1", Q("1").A())
@@ -1972,15 +1972,15 @@ func TestLoadYamlE(t *testing.T) {
 //   - name: three`)
 // 		assert.True(t, q.Any())
 // 		expected := []string{}
-// 		assert.Equal(t, expected, q.M("frodo.baggins").Strs())
+// 		assert.Equal(t, expected, q.M("frodo.baggins").ToStrs())
 // 	}
 // 	{
 // 		q := Q([]string{"one"})
 // 		assert.Equal(t, "one", q.At(0).A())
-// 		assert.Equal(t, []string{"one"}, q.Strs())
+// 		assert.Equal(t, []string{"one"}, q.ToStrs())
 // 	}
 // 	{
-// 		assert.Equal(t, []string{"1", "2", "3"}, Q([]interface{}{"1", "2", "3"}).Strs())
+// 		assert.Equal(t, []string{"1", "2", "3"}, Q([]interface{}{"1", "2", "3"}).ToStrs())
 // 	}
 // }
 

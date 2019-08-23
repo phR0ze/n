@@ -260,9 +260,9 @@ func TestStringSlice_AnyS(t *testing.T) {
 
 	// Slice
 	{
-		assert.True(t, NewStringSliceV("1", "2", "3").AnyS(Slice(NewStringSliceV("1"))))
-		assert.True(t, NewStringSliceV("1", "2", "3").AnyS(Slice(NewStringSliceV("4", "3"))))
-		assert.False(t, NewStringSliceV("1", "2", "3").AnyS(Slice(NewStringSliceV("4", "5"))))
+		assert.True(t, NewStringSliceV("1", "2", "3").AnyS(ISlice(NewStringSliceV("1"))))
+		assert.True(t, NewStringSliceV("1", "2", "3").AnyS(ISlice(NewStringSliceV("4", "3"))))
+		assert.False(t, NewStringSliceV("1", "2", "3").AnyS(ISlice(NewStringSliceV("4", "5"))))
 	}
 
 	// StringSlice
@@ -626,7 +626,7 @@ func TestStringSlice_Concat(t *testing.T) {
 	// Slice
 	{
 		slice := NewStringSliceV("1")
-		concated := slice.Concat(Slice(NewStringSliceV("2", "3")))
+		concated := slice.Concat(ISlice(NewStringSliceV("2", "3")))
 		assert.Equal(t, NewStringSliceV("1", "2"), slice.Append("2"))
 		assert.Equal(t, NewStringSliceV("1", "2", "3"), concated)
 	}
@@ -722,7 +722,7 @@ func TestStringSlice_ConcatM(t *testing.T) {
 	// Slice
 	{
 		slice := NewStringSliceV("1")
-		concated := slice.ConcatM(Slice(NewStringSliceV("2", "3")))
+		concated := slice.ConcatM(ISlice(NewStringSliceV("2", "3")))
 		assert.Equal(t, NewStringSliceV("1", "2", "3", "4"), slice.Append("4"))
 		assert.Equal(t, NewStringSliceV("1", "2", "3", "4"), concated)
 	}
@@ -2195,12 +2195,24 @@ func ExampleStringSlice_Map() {
 }
 
 func TestStringSlice_Map(t *testing.T) {
-	slice := SV("1", "2", "3")
-	slice = slice.Map(func(x O) O {
-		return ToStr(ToInt(x.(string)) + 1).A()
-	}).S()
-	assert.Equal(t, []string{"2", "3", "4"}, slice.G())
-	assert.Equal(t, S([]string{"2", "3", "4"}), slice)
+	// int result
+	{
+		slice := SV("1", "2", "3")
+		new := slice.Map(func(x O) O {
+			return ToInt(x.(string)) + 1
+		})
+		assert.Equal(t, []int{2, 3, 4}, new.O())
+	}
+
+	// string
+	{
+		slice := SV("1", "2", "3")
+		slice = slice.Map(func(x O) O {
+			return ToStr(ToInt(x.(string)) + 1).A()
+		}).S()
+		assert.Equal(t, []string{"2", "3", "4"}, slice.G())
+		assert.Equal(t, S([]string{"2", "3", "4"}), slice)
+	}
 }
 
 // Nil
