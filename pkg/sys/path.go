@@ -205,6 +205,7 @@ func Files(target string) (result []string) {
 
 // Home returns the absolute home directory for the current user
 func Home() (result string, err error) {
+	homedir.DisableCache = true
 	if result, err = homedir.Dir(); err != nil {
 		err = errors.Wrap(err, "failed to determine the user's home directdory")
 		return
