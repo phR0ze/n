@@ -14,8 +14,10 @@ import (
 
 // Create a new zip file at zipfile from the given srcPath directory
 func Create(zipfile, srcPath string) (err error) {
-	var srcAbs string
-	if srcAbs, err = sys.Abs(srcPath); err != nil {
+	if zipfile, err = sys.Abs(zipfile); err != nil {
+		return
+	}
+	if srcPath, err = sys.Abs(srcPath); err != nil {
 		return
 	}
 
@@ -32,7 +34,7 @@ func Create(zipfile, srcPath string) (err error) {
 	defer zw.Close()
 
 	// Add all files recursively
-	if err = addFiles(zw, srcAbs, ""); err != nil {
+	if err = addFiles(zw, srcPath, ""); err != nil {
 		return
 	}
 	return
@@ -83,7 +85,10 @@ func addFiles(zw *zip.Writer, root, base string) (err error) {
 
 // ExtractAll files into given destination directory
 func ExtractAll(zipfile, dest string) (err error) {
-	if _, err = sys.MkdirP(dest); err != nil {
+	if zipfile, err = sys.Abs(zipfile); err != nil {
+		return
+	}
+	if dest, err = sys.MkdirP(dest); err != nil {
 		return
 	}
 
