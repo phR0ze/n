@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/phR0ze/go-errors"
 	"github.com/phR0ze/n/pkg/sys"
@@ -43,7 +44,7 @@ func Unmarshal(y []byte, o interface{}) error {
 
 // WriteJSON converts the given obj interface{} into json then writes to disk
 // with default permissions. Expects obj to be a structure that encoding/json understands
-func WriteJSON(filepath string, obj interface{}, perms ...uint32) (err error) {
+func WriteJSON(filepath string, obj interface{}, indent ...int) (err error) {
 	if filepath, err = sys.Abs(filepath); err != nil {
 		return
 	}
@@ -55,18 +56,28 @@ func WriteJSON(filepath string, obj interface{}, perms ...uint32) (err error) {
 		return
 	}
 
-	// Convert data structure into a json string
-	var data []byte
-	if data, err = json.Marshal(obj); err != nil {
-		err = errors.Wrapf(err, "failed to marshal object %T", obj)
-		return
+	// Set indent level
+	i := 2
+	if len(indent) > 0 {
+		i = indent[0]
 	}
 
-	perm := os.FileMode(0644)
-	if len(perms) > 0 {
-		perm = os.FileMode(perms[0])
+	// Convert data structure into a json string
+	var data []byte
+	if i == 0 {
+		if data, err = json.Marshal(obj); err != nil {
+			err = errors.Wrapf(err, "failed to marshal object %T", obj)
+			return
+		}
+	} else {
+		if data, err = json.MarshalIndent(obj, "", strings.Repeat(" ", i)); err != nil {
+			err = errors.Wrapf(err, "failed to marshal object %T", obj)
+			return
+		}
 	}
-	if err = ioutil.WriteFile(filepath, data, perm); err != nil {
+
+	// Use default permissions for file
+	if err = ioutil.WriteFile(filepath, data, os.FileMode(0644)); err != nil {
 		err = errors.Wrapf(err, "failed to write out json data to file %s", filepath)
 	}
 	return

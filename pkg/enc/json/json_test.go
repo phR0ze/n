@@ -42,7 +42,24 @@ func TestReadJSON(t *testing.T) {
 	assert.Equal(t, data1, data2)
 }
 
-func TestWriteJSON(t *testing.T) {
+func TestWriteJSONCompact(t *testing.T) {
+	cleanTmpDir()
+
+	// Write out the data structure as yaml to disk
+	jsondata1 := "{\n  \"foo\": {\n    \"bar\": [\n      1,\n      2\n    ]\n  }\n}"
+	data1 := &map[string]interface{}{}
+	err := Unmarshal([]byte(jsondata1), data1)
+	assert.Nil(t, err)
+	err = WriteJSON(tmpfile, data1)
+	assert.Nil(t, err)
+
+	// Read the file back into memory and compare data structure
+	data, err := ioutil.ReadFile(tmpfile)
+	assert.Nil(t, err)
+	assert.Equal(t, jsondata1, string(data))
+}
+
+func TestWriteJSONPretty(t *testing.T) {
 	cleanTmpDir()
 
 	// Invalid data structure test
