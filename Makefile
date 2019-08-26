@@ -18,8 +18,10 @@ test: ${NAME}
 	@echo -e "------------------------------------------------------------------------"
 	go test ./pkg/arch/tar
 	go test ./pkg/arch/zip
-	go test ./pkg/bin
-	go test ./pkg/cli
+	go test ./pkg/enc/bin
+	go test ./pkg/enc/json
+	go test ./pkg/enc/unit
+	go test ./pkg/enc/yaml
 	go test ./pkg/errs
 	go test ./pkg/net
 	go test ./pkg/opt
@@ -27,7 +29,6 @@ test: ${NAME}
 	go test ./pkg/term
 	go test ./pkg/time
 	go test ./pkg/tmpl
-	go test ./pkg/unit
 
 bench: ${NAME}
 	@echo -e "\nRunning all go benchmarks:"

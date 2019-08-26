@@ -1,8 +1,7 @@
 package n
 
 import (
-	"github.com/ghodss/yaml"
-	"github.com/phR0ze/n/pkg/sys"
+	"github.com/phR0ze/n/pkg/enc/yaml"
 	"github.com/pkg/errors"
 )
 
@@ -207,7 +206,7 @@ func (p *StringMap) InjectE(key string, val interface{}) (m Map, err error) {
 			create := false
 			if keys.Any() && keys.First().A() != "[]" {
 				if v, ok := (*x)[key.A()]; ok {
-					if YamlCont(v) {
+					if YAMLCont(v) {
 						obj.o = v
 					} else {
 						create = true
@@ -544,7 +543,7 @@ func (p *StringMap) RemoveE(key string) (m Map, err error) {
 			done := false
 			if keys.Any() {
 				if v, ok := (*x)[key.A()]; ok {
-					if YamlCont(v) {
+					if YAMLCont(v) {
 						pobj = obj
 						pk = key.A()
 						obj = v
@@ -650,8 +649,8 @@ func (p *StringMap) ToStringMapG() (m map[string]interface{}) {
 	return p.O().(map[string]interface{})
 }
 
-// WriteYaml converts the *StringMap into a map[string]interface{} then calls
-// sys.WriteYaml on it to write it out to disk.
-func (p *StringMap) WriteYaml(filename string) (err error) {
-	return sys.WriteYaml(filename, p.G())
+// WriteYAML converts the *StringMap into a map[string]interface{} then calls
+// sys.WriteYAML on it to write it out to disk.
+func (p *StringMap) WriteYAML(filename string) (err error) {
+	return yaml.WriteYAML(filename, p.G())
 }

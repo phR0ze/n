@@ -5229,28 +5229,3 @@ func TestStr_UniqM(t *testing.T) {
 		assert.Equal(t, NewStrV("1", "2", "3", "4"), uniq)
 	}
 }
-
-// // // func TestYamlType(t *testing.T) {
-// // // 	{
-// // // 		// string
-// // // 		assert.Equal(t, "test", A("\"test\"").YamlType())
-// // // 		assert.Equal(t, "test", A("'test'").YamlType())
-// // // 		assert.Equal(t, "1", A("\"1\"").YamlType())
-// // // 		assert.Equal(t, "1", A("'1'").YamlType())
-// // // 	}
-// // // 	{
-// // // 		// int
-// // // 		assert.Equal(t, 1.0, A("1").YamlType())
-// // // 		assert.Equal(t, 0.0, A("0").YamlType())
-// // // 		assert.Equal(t, 25.0, A("25").YamlType())
-// // // 	}
-// // // 	{
-// // // 		// bool
-// // // 		assert.Equal(t, true, A("true").YamlType())
-// // // 		assert.Equal(t, false, A("false").YamlType())
-// // // 	}
-// // // 	{
-// // // 		// default
-// // // 		assert.Equal(t, "True", A("True").YamlType())
-// // // 	}
-// // // }

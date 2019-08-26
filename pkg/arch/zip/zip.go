@@ -8,7 +8,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/phR0ze/n/pkg/bin"
+	"github.com/phR0ze/n/pkg/enc/bin"
 	"github.com/phR0ze/n/pkg/sys"
 	"github.com/pkg/errors"
 )

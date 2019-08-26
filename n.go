@@ -62,6 +62,7 @@
 package n
 
 import (
+	"encoding/json"
 	"io/ioutil"
 
 	"github.com/pkg/errors"
@@ -135,25 +136,51 @@ func SetOnTrueB(result *bool, value, exp bool) bool {
 // Load and From helper functions
 //--------------------------------------------------------------------------------------------------
 
-// LoadYaml reads in a yaml file and converts it to a *StringMap
-func LoadYaml(filepath string) (m *StringMap) {
-	m, _ = LoadYamlE(filepath)
+// LoadJSON reads in a json file and converts it to a *StringMap
+func LoadJSON(filepath string) (m *StringMap) {
+	m, _ = LoadJSONE(filepath)
 	return m
 }
 
-// LoadYamlE reads in a yaml file and converts it to a *StringMap
-func LoadYamlE(filepath string) (m *StringMap, err error) {
+// LoadJSONE reads in a json file and converts it to a *StringMap
+func LoadJSONE(filepath string) (m *StringMap, err error) {
 	m = NewStringMapV()
 
 	// Read in the yaml file
-	var bytes []byte
-	if bytes, err = ioutil.ReadFile(filepath); err != nil {
+	var data []byte
+	if data, err = ioutil.ReadFile(filepath); err != nil {
+		err = errors.Wrapf(err, "failed to read in the yaml file %s", filepath)
+		return
+	}
+
+	// Unmarshal the json into a *StringMap
+	if err = json.Unmarshal(data, m); err != nil {
+		err = errors.Wrapf(err, "failed to unmarshal json file %s into a *StringMap", filepath)
+		return
+	}
+
+	return
+}
+
+// LoadYAML reads in a yaml file and converts it to a *StringMap
+func LoadYAML(filepath string) (m *StringMap) {
+	m, _ = LoadYAMLE(filepath)
+	return m
+}
+
+// LoadYAMLE reads in a yaml file and converts it to a *StringMap
+func LoadYAMLE(filepath string) (m *StringMap, err error) {
+	m = NewStringMapV()
+
+	// Read in the yaml file
+	var data []byte
+	if data, err = ioutil.ReadFile(filepath); err != nil {
 		err = errors.Wrapf(err, "failed to read in the yaml file %s", filepath)
 		return
 	}
 
 	// Unmarshal the yaml into a *StringMap
-	m, err = ToStringMapE(bytes)
+	m, err = ToStringMapE(data)
 
 	return
 }

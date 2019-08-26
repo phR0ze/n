@@ -15,7 +15,6 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/ghodss/yaml"
 	"github.com/phR0ze/n/pkg/opt"
 	"github.com/pkg/errors"
 )
@@ -443,28 +442,6 @@ func ReadString(filepath string) (result string, err error) {
 	return
 }
 
-// ReadYaml reads the target file and returns a map[string]interface{} data
-// structure representing the yaml read in.
-func ReadYaml(filepath string) (obj map[string]interface{}, err error) {
-	if filepath, err = Abs(filepath); err != nil {
-		return
-	}
-
-	// Read in the file data
-	var data []byte
-	if data, err = ioutil.ReadFile(filepath); err != nil {
-		err = errors.Wrapf(err, "failed to read the file %s", filepath)
-		return
-	}
-
-	// Convert data structure into a yaml string
-	obj = map[string]interface{}{}
-	if err = yaml.Unmarshal(data, &obj); err != nil {
-		err = errors.Wrapf(err, "failed to marshal object %T", obj)
-	}
-	return
-}
-
 // Remove the given target file or empty directory. If there is an
 // error it will be of type *PathError
 func Remove(target string) error {
@@ -593,37 +570,6 @@ func WriteString(filepath string, data string, perms ...uint32) (err error) {
 	if err = ioutil.WriteFile(filepath, []byte(data), perm); err != nil {
 		err = errors.Wrapf(err, "failed write string to file %s", filepath)
 		return
-	}
-	return
-}
-
-// WriteYaml converts the given obj interface{} into yaml then writes to disk
-// with default permissions. Expects obj to be a structure that github.com/ghodss/yaml understands
-func WriteYaml(filepath string, obj interface{}, perms ...uint32) (err error) {
-	if filepath, err = Abs(filepath); err != nil {
-		return
-	}
-
-	// Ensure we don't have a string
-	switch obj.(type) {
-	case string, []byte:
-		err = errors.Errorf("invalid data structure to marshal - %T", obj)
-		return
-	}
-
-	// Convert data structure into a yaml string
-	var data []byte
-	if data, err = yaml.Marshal(obj); err != nil {
-		err = errors.Wrapf(err, "failed to marshal object %T", obj)
-		return
-	}
-
-	perm := os.FileMode(0644)
-	if len(perms) > 0 {
-		perm = os.FileMode(perms[0])
-	}
-	if err = ioutil.WriteFile(filepath, data, perm); err != nil {
-		err = errors.Wrapf(err, "failed to write out yaml data to file %s", filepath)
 	}
 	return
 }

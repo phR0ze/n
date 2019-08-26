@@ -81,7 +81,7 @@ type Map interface {
 	// UnionM(slice interface{}) Slice                   // UnionM modifies this Map by joining uniq elements from this Map with uniq elements from the given Slice while preserving order.
 	// Uniq() (new Map)                                // Uniq returns a new Map with all non uniq elements removed while preserving element order.
 	// UniqM() Slice                                     // UniqM modifies this Map to remove all non uniq elements while preserving element order.
-	WriteYaml(filename string) (err error) // WriteYaml converts the Map into a map[string]interface{} then calls sys.WriteYaml on it to write it out to disk.
+	WriteYAML(filename string) (err error) // WriteYAML converts the Map into a map[string]interface{} then calls sys.WriteYAML on it to write it out to disk.
 }
 
 // NewMap provides a generic way to work with Map types. It does this by wrapping Go types

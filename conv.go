@@ -4488,8 +4488,8 @@ func ToStrsE(obj interface{}) (val []string, err error) {
 	return
 }
 
-// YamlCont checks if the given value is a valid Yaml container
-func YamlCont(obj interface{}) bool {
+// YAMLCont checks if the given value is a valid YAML container
+func YAMLCont(obj interface{}) bool {
 	switch obj.(type) {
 	case map[string]interface{}, *StringMap:
 		return true

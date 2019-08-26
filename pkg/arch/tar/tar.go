@@ -1,4 +1,4 @@
-// Package tar provides create and extract implementations
+// Package tar provides helper functions for tar archives
 package tar
 
 import (

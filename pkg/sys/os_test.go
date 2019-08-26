@@ -7,7 +7,6 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -535,26 +534,6 @@ func TestReadLines(t *testing.T) {
 	assert.Equal(t, 18, len(lines))
 }
 
-func TestReadYaml(t *testing.T) {
-	cleanTmpDir()
-
-	// Write out a test yaml file
-	yamldata1 := "foo:\n  bar:\n    - 1\n    - 2\n"
-	data1 := map[string]interface{}{}
-	err := yaml.Unmarshal([]byte(yamldata1), &data1)
-	assert.Nil(t, err)
-
-	// Write out the data structure as yaml to disk
-	err = WriteYaml(tmpfile, data1)
-	assert.Nil(t, err)
-
-	// Read the file back into memory and compare data structure
-	var data2 map[string]interface{}
-	data2, err = ReadYaml(tmpfile)
-
-	assert.Equal(t, data1, data2)
-}
-
 func TestSize(t *testing.T) {
 	assert.Equal(t, int64(604), Size(testfile))
 
@@ -639,36 +618,6 @@ func TestWriteLines(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, lines, lines2)
 	}
-}
-
-func TestWriteYaml(t *testing.T) {
-	cleanTmpDir()
-
-	// Invalid data structure test
-	err := WriteYaml(tmpfile, "foo")
-	assert.Equal(t, "invalid data structure to marshal - string", err.Error())
-	err = WriteYaml(tmpfile, []byte("foo"))
-	assert.Equal(t, "invalid data structure to marshal - []uint8", err.Error())
-
-	// Convert yaml string into a data structure
-	yamldata1 := "foo:\n  bar:\n    - 1\n    - 2\n"
-	data1 := &map[string]interface{}{}
-	err = yaml.Unmarshal([]byte(yamldata1), data1)
-	assert.Nil(t, err)
-
-	// Write out the data structure as yaml to disk
-	err = WriteYaml(tmpfile, data1)
-	assert.Nil(t, err)
-
-	// Read the file back into memory and compare data structure
-	var yamldata2 []byte
-	yamldata2, err = ioutil.ReadFile(tmpfile)
-	assert.Nil(t, err)
-	data2 := &map[string]interface{}{}
-	err = yaml.Unmarshal(yamldata2, data2)
-	assert.Nil(t, err)
-
-	assert.Equal(t, data1, data2)
 }
 
 func cleanTmpDir() {
