@@ -13,6 +13,19 @@ const (
 	Fixed16bitDiv = 65536.0
 )
 
+// Equal returns true if the given byte slices are equal in value byte for byte
+func Equal(a, b []byte) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := 0; i < len(a); i++ {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
 // PutUint32BE is just a wrapper around binary.BigEndian for convenience
 func PutUint32BE(data []byte, val uint32) {
 	binary.BigEndian.PutUint32(data, val)

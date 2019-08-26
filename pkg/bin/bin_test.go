@@ -8,6 +8,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestEqual(t *testing.T) {
+	assert.True(t, Equal([]byte{}, []byte{}))
+	assert.False(t, Equal([]byte{0x01}, []byte{}))
+	assert.False(t, Equal([]byte{0x01}, []byte{0x02}))
+	assert.True(t, Equal([]byte{0x01, 0x02}, []byte{0x01, 0x02}))
+}
+
 func TestMediaDuration(t *testing.T) {
 	timeScale := uint32(600)
 

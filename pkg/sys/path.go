@@ -15,15 +15,27 @@ import (
 
 // Abs gets the absolute path, taking into account homedir expansion
 func Abs(target string) (result string, err error) {
+
+	// Check for empty string
 	if target == "" {
 		err = errors.Errorf("empty string is an invalid path")
 		return
 	}
+
+	// Bail out early if the path is rooted
+	if target[0] == '/' {
+		result = target
+		return
+	}
+
+	// Trim protocols and expand
 	target = TrimProtocol(target)
 	if result, err = homedir.Expand(target); err != nil {
 		err = errors.Wrapf(err, "failed to expand the given path %s", target)
 		return
 	}
+
+	// Get the absolute path
 	if result, err = filepath.Abs(result); err != nil {
 		err = errors.Wrapf(err, "failed to compute the absolute path for %s", result)
 		return
