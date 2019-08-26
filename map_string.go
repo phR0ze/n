@@ -1,6 +1,7 @@
 package n
 
 import (
+	"github.com/phR0ze/n/pkg/enc/json"
 	"github.com/phR0ze/n/pkg/enc/yaml"
 	"github.com/pkg/errors"
 )
@@ -649,8 +650,14 @@ func (p *StringMap) ToStringMapG() (m map[string]interface{}) {
 	return p.O().(map[string]interface{})
 }
 
+// WriteJSON converts the *StringMap into a map[string]interface{} then calls
+// json.WriteJSON on it to write it out to disk.
+func (p *StringMap) WriteJSON(filename string) (err error) {
+	return json.WriteJSON(filename, p.G())
+}
+
 // WriteYAML converts the *StringMap into a map[string]interface{} then calls
-// sys.WriteYAML on it to write it out to disk.
+// yaml.WriteYAML on it to write it out to disk.
 func (p *StringMap) WriteYAML(filename string) (err error) {
 	return yaml.WriteYAML(filename, p.G())
 }

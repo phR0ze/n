@@ -1446,6 +1446,25 @@ func TestStringMap_SetM(t *testing.T) {
 	}
 }
 
+// WriteJSON
+//--------------------------------------------------------------------------------------------------
+func TestWriteJSON(t *testing.T) {
+	cleanTmpDir()
+
+	// Convert yaml string into a data structure
+	m1 := NewStringMap(map[string]interface{}{"1": "one"})
+
+	// Write out the data structure as json to disk
+	err := m1.WriteJSON(tmpFile)
+	assert.Nil(t, err)
+
+	// Read the file back into memory and compare data structure
+	m2, err := LoadJSONE(tmpFile)
+	assert.Nil(t, err)
+
+	assert.Equal(t, m1, m2)
+}
+
 // WriteYAML
 //--------------------------------------------------------------------------------------------------
 func TestWriteYAML(t *testing.T) {
