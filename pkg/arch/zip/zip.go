@@ -218,9 +218,7 @@ func TrimPrefix(zipfile string) (err error) {
 			if l, e := rw.ReadAt(chunk, roffset); e != nil && e != io.EOF {
 				err = errors.Wrapf(err, "failed to read from zipfile '%s' to shift data", path.Base(zipfile))
 				return
-			} else if e == io.EOF {
-				break
-			} else {
+			} else if l > 0 {
 				data := chunk[0:l]
 				if _, e := rw.WriteAt(data, woffset); e != nil {
 					err = errors.Wrapf(err, "failed to write shifted data to zipfile '%s'", path.Base(zipfile))
@@ -228,6 +226,11 @@ func TrimPrefix(zipfile string) (err error) {
 				}
 				roffset += int64(l)
 				woffset += int64(l)
+				if e == io.EOF {
+					break
+				}
+			} else {
+				break
 			}
 		}
 

@@ -11,7 +11,8 @@ import (
 
 var tmpDir = "../../../test/temp"
 var tmpfile = "../../../test/temp/.tmp"
-var testZipfile = "../../../test/file.zip"
+var testZipfile1 = "../../../test/file1.zip"
+var testZipfile2 = "../../../test/file2.zip"
 
 func TestCreate(t *testing.T) {
 	prepTmpDir()
@@ -91,10 +92,10 @@ func TestExtractPrefixedZip(t *testing.T) {
 	prepTmpDir()
 
 	// Copy zip to temp dir
-	sys.Copy(testZipfile, tmpDir)
+	sys.Copy(testZipfile1, tmpDir)
 
 	// Now extract the files and validate
-	zipfile := path.Join(tmpDir, "file.zip")
+	zipfile := path.Join(tmpDir, "file1.zip")
 	err := ExtractAll(zipfile, tmpDir)
 	assert.Nil(t, err)
 	paths, err := sys.AllPaths(tmpDir)
@@ -107,7 +108,7 @@ func TestExtractPrefixedZip(t *testing.T) {
 		"test/temp/_metadata",
 		"temp/_metadata/verified_contents.json",
 		"test/temp/contentscript.js",
-		"test/temp/file.zip",
+		"test/temp/file1.zip",
 		"test/temp/icon128.png",
 		"test/temp/icon16.png",
 		"test/temp/icon19.png",
@@ -117,14 +118,26 @@ func TestExtractPrefixedZip(t *testing.T) {
 	assert.Equal(t, expected, result)
 }
 
-func TestTrimPrefix(t *testing.T) {
+func TestExtractPrefixedZip2(t *testing.T) {
 	prepTmpDir()
 
 	// Copy zip to temp dir
-	sys.Copy(testZipfile, tmpDir)
+	sys.Copy(testZipfile2, tmpDir)
+
+	// Now extract the files and validate
+	zipfile := path.Join(tmpDir, "file2.zip")
+	err := ExtractAll(zipfile, tmpDir)
+	assert.Nil(t, err)
+}
+
+func TestTrimPrefix1(t *testing.T) {
+	prepTmpDir()
+
+	// Copy zip to temp dir
+	sys.Copy(testZipfile1, tmpDir)
 
 	// Trim 566 extra bytes at front of zip
-	zipfile := path.Join(tmpDir, "file.zip")
+	zipfile := path.Join(tmpDir, "file1.zip")
 	err := TrimPrefix(zipfile)
 	assert.Nil(t, err)
 
