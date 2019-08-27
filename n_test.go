@@ -49,6 +49,15 @@ func TestSetOnEmpty(t *testing.T) {
 	result := ""
 	assert.Equal(t, "foo", SetOnEmpty(&result, "foo"))
 	assert.Equal(t, "foo", SetOnEmpty(&result, "bar"))
+	assert.Equal(t, "bar", SetOnEmpty(nil, "bar"))
+}
+
+func TestSetOnTrueA(t *testing.T) {
+	result := ""
+	assert.Equal(t, "foo", SetOnTrueA(&result, "foo", true))
+	assert.Equal(t, "foo", SetOnTrueA(&result, "bar", true))
+	assert.Equal(t, "bar", SetOnTrueA(nil, "bar", true))
+	assert.Equal(t, "foo", SetOnTrueA(&result, "bar", false))
 }
 
 func ExampleSetOnFalseB() {

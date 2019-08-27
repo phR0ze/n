@@ -114,12 +114,26 @@ func SetOnFalseB(result *bool, value, exp bool) bool {
 	return false
 }
 
-// SetOnEmpty only updates the given string to the given value if it is empty
+// SetOnEmpty updates the given result string to the given value if it is empty
 func SetOnEmpty(result *string, value string) string {
-	if result != nil && *result == "" {
-		*result = value
+	if result != nil {
+		if *result == "" {
+			*result = value
+		}
+		return *result
 	}
-	return *result
+	return value
+}
+
+// SetOnTrueA updates the given result string to the given value if the exp is true
+func SetOnTrueA(result *string, value string, exp bool) string {
+	if result != nil {
+		if *result == "" {
+			*result = value
+		}
+		return *result
+	}
+	return value
 }
 
 // SetOnTrueB only updates the result to the 'value' if the exp is true

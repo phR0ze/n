@@ -208,14 +208,14 @@ func ExtractString(filepath string, exp string) (match string, err error) {
 	// Read in the file data
 	var data []byte
 	if data, err = ioutil.ReadFile(filepath); err != nil {
-		err = errors.Wrapf(err, "failed to read the file %s", filepath)
+		err = errors.Wrapf(err, "failed reading the file %s", filepath)
 		return
 	}
 
 	// Compile the regular expression
 	var rx *regexp.Regexp
 	if rx, err = regexp.Compile(exp); err != nil {
-		err = errors.Wrapf(err, "failed to compile regex '%s'", exp)
+		err = errors.Wrapf(err, "failed compiling regex '%s'", exp)
 		return
 	}
 
@@ -239,14 +239,14 @@ func ExtractStrings(filepath string, exp string) (matches []string, err error) {
 	// Read in the file data
 	var data []byte
 	if data, err = ioutil.ReadFile(filepath); err != nil {
-		err = errors.Wrapf(err, "failed to read the file %s", filepath)
+		err = errors.Wrapf(err, "failed reading the file %s", filepath)
 		return
 	}
 
 	// Compile the regular expression
 	var rx *regexp.Regexp
 	if rx, err = regexp.Compile(exp); err != nil {
-		err = errors.Wrapf(err, "failed to compile regex '%s'", exp)
+		err = errors.Wrapf(err, "failed compiling regex '%s'", exp)
 		return
 	}
 
@@ -270,7 +270,7 @@ func ExtractStringP(filepath string, exp *regexp.Regexp) (match string, err erro
 	// Read in the file data
 	var data []byte
 	if data, err = ioutil.ReadFile(filepath); err != nil {
-		err = errors.Wrapf(err, "failed to read the file %s", filepath)
+		err = errors.Wrapf(err, "failed reading the file %s", filepath)
 		return
 	}
 
@@ -292,7 +292,7 @@ func ExtractStringsP(filepath string, exp *regexp.Regexp) (matches []string, err
 	// Read in the file data
 	var data []byte
 	if data, err = ioutil.ReadFile(filepath); err != nil {
-		err = errors.Wrapf(err, "failed to read the file %s", filepath)
+		err = errors.Wrapf(err, "failed reading the file %s", filepath)
 		return
 	}
 
@@ -334,7 +334,7 @@ func MD5(target string) (result string, err error) {
 	// Open target file for reading
 	var f *os.File
 	if f, err = os.Open(target); err != nil {
-		err = errors.Wrapf(err, "failed to open target file %s", target)
+		err = errors.Wrapf(err, "failed opening target file %s", target)
 		return
 	}
 	defer f.Close()
@@ -342,7 +342,7 @@ func MD5(target string) (result string, err error) {
 	// Create a new md5 hash and copy in file bits
 	hash := md5.New()
 	if _, err = io.Copy(hash, f); err != nil {
-		err = errors.Wrapf(err, "failed to copy file data into hash from %s", target)
+		err = errors.Wrapf(err, "failed copying file data into hash from %s", target)
 		return
 	}
 
@@ -367,7 +367,7 @@ func MkdirP(target string, perms ...uint32) (dir string, err error) {
 
 	// Create directory
 	if err = os.MkdirAll(dir, perm); err != nil {
-		err = errors.Wrapf(err, "failed to create directories for %s", dir)
+		err = errors.Wrapf(err, "failed creating directories for %s", dir)
 		return
 	}
 
@@ -384,7 +384,7 @@ func Move(src, dst string) (err error) {
 		dst = path.Join(dst, path.Base(src))
 	}
 	if err = os.Rename(src, dst); err != nil {
-		err = errors.Wrapf(err, "failed to rename file %s", src)
+		err = errors.Wrapf(err, "failed renaming file %s", src)
 		return
 	}
 	return
@@ -403,7 +403,7 @@ func ReadBytes(filepath string) (result []byte, err error) {
 	}
 
 	if result, err = ioutil.ReadFile(filepath); err != nil {
-		err = errors.Wrapf(err, "failed to read the file %s", filepath)
+		err = errors.Wrapf(err, "failed reading the file %s", filepath)
 		return
 	}
 	return
@@ -417,7 +417,7 @@ func ReadLines(filepath string) (result []string, err error) {
 
 	var data []byte
 	if data, err = ioutil.ReadFile(filepath); err != nil {
-		err = errors.Wrapf(err, "failed to read the file %s", filepath)
+		err = errors.Wrapf(err, "failed reading the file %s", filepath)
 		return
 	}
 	scanner := bufio.NewScanner(bytes.NewReader(data))
@@ -435,7 +435,7 @@ func ReadString(filepath string) (result string, err error) {
 
 	var data []byte
 	if data, err = ioutil.ReadFile(filepath); err != nil {
-		err = errors.Wrapf(err, "failed to read the file %s", filepath)
+		err = errors.Wrapf(err, "failed reading the file %s", filepath)
 		return
 	}
 	result = string(data)
@@ -469,7 +469,7 @@ func Touch(filepath string) (path string, err error) {
 
 	var f *os.File
 	if f, err = os.Create(path); !os.IsExist(err) {
-		err = errors.Wrapf(err, "failed create file %s", filepath)
+		err = errors.Wrapf(err, "failed creating file %s", filepath)
 		return
 	}
 	if err == nil {
@@ -489,7 +489,7 @@ func WriteBytes(filepath string, data []byte, perms ...uint32) (err error) {
 		perm = os.FileMode(perms[0])
 	}
 	if err = ioutil.WriteFile(filepath, data, perm); err != nil {
-		err = errors.Wrapf(err, "failed write string to file %s", filepath)
+		err = errors.Wrapf(err, "failed writing string to file %s", filepath)
 		return
 	}
 	return
@@ -509,18 +509,18 @@ func WriteLines(filepath string, lines []string, perms ...uint32) (err error) {
 	var writer *os.File
 	flags := os.O_CREATE | os.O_TRUNC | os.O_WRONLY
 	if writer, err = os.OpenFile(filepath, flags, perm); err != nil {
-		err = errors.Wrapf(err, "failed to open file %s for writing", filepath)
+		err = errors.Wrapf(err, "failed opening file %s for writing", filepath)
 		return
 	}
 	defer writer.Close()
 
 	for i := range lines {
 		if _, err = writer.WriteString(lines[i]); err != nil {
-			err = errors.Wrapf(err, "failed to write string to %s", filepath)
+			err = errors.Wrapf(err, "failed writing string to %s", filepath)
 			return
 		}
 		if _, err = writer.WriteString("\n"); err != nil {
-			err = errors.Wrapf(err, "failed to write newline to %s", filepath)
+			err = errors.Wrapf(err, "failed writing newline to %s", filepath)
 			return
 		}
 	}
@@ -540,17 +540,17 @@ func WriteStream(reader io.Reader, filepath string, perms ...uint32) (err error)
 	var writer *os.File
 	flags := os.O_CREATE | os.O_TRUNC | os.O_WRONLY
 	if writer, err = os.OpenFile(filepath, flags, perm); err != nil {
-		err = errors.Wrapf(err, "failed to open file %s for writing", filepath)
+		err = errors.Wrapf(err, "failed opening file %s for writing", filepath)
 		return
 	}
 	defer writer.Close()
 
 	if _, err = io.Copy(writer, reader); err != nil {
-		err = errors.Wrapf(err, "failed to copy stream data to file %s", filepath)
+		err = errors.Wrapf(err, "failed copying stream data to file %s", filepath)
 		return
 	}
 	if err = writer.Sync(); err != nil {
-		err = errors.Wrapf(err, "failed to sync stream to file %s", filepath)
+		err = errors.Wrapf(err, "failed syncing stream to file %s", filepath)
 		return
 	}
 
@@ -568,7 +568,7 @@ func WriteString(filepath string, data string, perms ...uint32) (err error) {
 		perm = os.FileMode(perms[0])
 	}
 	if err = ioutil.WriteFile(filepath, []byte(data), perm); err != nil {
-		err = errors.Wrapf(err, "failed write string to file %s", filepath)
+		err = errors.Wrapf(err, "failed writing string to file %s", filepath)
 		return
 	}
 	return
