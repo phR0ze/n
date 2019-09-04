@@ -33,14 +33,6 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:f9f72e583aaacf1d1ac5d6121abd4afd3c690baa9e14e1d009df26bf831ba347"
-  name = "github.com/mitchellh/go-homedir"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "af06845cf3004701891bf4fdb884bfe4920b3727"
-  version = "v1.1.0"
-
-[[projects]]
   digest = "1:c5e6b121ef3d2043505edaf4c80e5a008cec2513dc8804795eb0479d1555bcf7"
   name = "github.com/phR0ze/cast"
   packages = ["."]
@@ -121,7 +113,6 @@
   input-imports = [
     "github.com/bouk/monkey",
     "github.com/ghodss/yaml",
-    "github.com/mitchellh/go-homedir",
     "github.com/phR0ze/cast",
     "github.com/phR0ze/goquery",
     "github.com/pkg/errors",

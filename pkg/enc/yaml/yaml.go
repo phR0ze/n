@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/ghodss/yaml"
-	"github.com/phR0ze/go-errors"
 	"github.com/phR0ze/n/pkg/sys"
+	"github.com/pkg/errors"
 )
 
 // Marshal wraps the ghodss/yaml.Marshal

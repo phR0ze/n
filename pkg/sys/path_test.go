@@ -46,6 +46,19 @@ func TestAbs(t *testing.T) {
 		fmt.Println(result)
 		assert.Equal(t, "/utils", result)
 	}
+
+	// HOME not set
+	{
+		// unset HOME
+		home := os.Getenv("HOME")
+		os.Unsetenv("HOME")
+		assert.Equal(t, "", os.Getenv("HOME"))
+		defer os.Setenv("HOME", home)
+
+		result, err := Abs("~/")
+		assert.Equal(t, "failed to expand the given path ~/: failed to compute the user's home directory: $HOME is not defined", err.Error())
+		assert.Equal(t, "", result)
+	}
 }
 
 func TestBase(t *testing.T) {
@@ -120,62 +133,6 @@ func TestPaths(t *testing.T) {
 	}
 }
 
-func TestSlicePath(t *testing.T) {
-	assert.Equal(t, "", SlicePath("", 0, -1))
-	assert.Equal(t, "/", SlicePath("/", 0, -1))
-	assert.Equal(t, "/foo", SlicePath("/foo", 0, -1))
-
-	// Handle slash at end
-	assert.Equal(t, "/foo", SlicePath("/foo/bar/one/", 0, 0))
-	assert.Equal(t, "foo/bar", SlicePath("foo/bar/one/", 0, 1))
-	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one/", 0, 2))
-	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one/", 0, 3))
-	assert.Equal(t, "foo/bar/one", SlicePath("foo/bar/one/", 0, 3))
-
-	// Slice first count
-	assert.Equal(t, "", SlicePath("", 0, 1))
-	assert.Equal(t, "/", SlicePath("/", 0, 1))
-	assert.Equal(t, "foo", SlicePath("foo", 0, 1))
-	assert.Equal(t, "/foo", SlicePath("/foo", 0, 1))
-	assert.Equal(t, "/foo/bar", SlicePath("/foo/bar/one", 0, 1))
-
-	assert.Equal(t, "/foo", SlicePath("/foo/bar/one", 0, 0))
-	assert.Equal(t, "/foo/bar", SlicePath("/foo/bar/one", 0, 1))
-	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one", 0, 2))
-	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one", 0, 3))
-	assert.Equal(t, "foo/bar/one", SlicePath("foo/bar/one", 0, 3))
-
-	// Handle slash at end
-	assert.Equal(t, "foo", SlicePath("foo/bar/", 0, -2))
-	assert.Equal(t, "foo/bar", SlicePath("foo/bar/one/", 0, -2))
-
-	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one", 0, -1))
-	assert.Equal(t, "/foo/bar", SlicePath("/foo/bar/one", 0, -2))
-	assert.Equal(t, "/foo", SlicePath("/foo/bar/one", 0, -3))
-	assert.Equal(t, "", SlicePath("/foo/bar/one", 0, -4))
-
-	// Slice last cnt
-	assert.Equal(t, "", SlicePath("", -2, -1))
-	assert.Equal(t, "/", SlicePath("/", -2, -1))
-	assert.Equal(t, "foo", SlicePath("foo", -2, -1))
-	assert.Equal(t, "/foo", SlicePath("/foo", -2, -1))
-	assert.Equal(t, "one", SlicePath("/foo/bar/one", -1, -1))
-	assert.Equal(t, "one", SlicePath("foo/bar/one", -1, -1))
-	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one", -3, -1))
-	assert.Equal(t, "bar/one", SlicePath("/foo/bar/one", -2, -1))
-	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one", -3, -1))
-	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one", -5, 2))
-
-	// Not a path
-	assert.Equal(t, "foobar", SlicePath("foobar", -5, -1))
-}
-
-func TestHome(t *testing.T) {
-	result, err := Home()
-	assert.Nil(t, err)
-	assert.True(t, pathContainsHome(result))
-}
-
 func TestAllFilesWithFileLink(t *testing.T) {
 	cleanTmpDir()
 
@@ -208,6 +165,13 @@ func TestAllFilesWithFileLink(t *testing.T) {
 
 func TestAllDirs(t *testing.T) {
 	cleanTmpDir()
+
+	// invalid dir
+	{
+		paths, err := AllDirs("")
+		assert.Equal(t, ([]string)(nil), paths)
+		assert.Equal(t, "empty string is an invalid path", err.Error())
+	}
 
 	// Single dir
 	// temp/first
@@ -248,6 +212,13 @@ func TestAllDirs(t *testing.T) {
 
 func TestAllFiles(t *testing.T) {
 	cleanTmpDir()
+
+	// invalid dir
+	{
+		paths, err := AllFiles("")
+		assert.Equal(t, ([]string)(nil), paths)
+		assert.Equal(t, "empty string is an invalid path", err.Error())
+	}
 
 	// Single dir of files - No links
 	// temp/first/f0,f1
@@ -338,6 +309,13 @@ func TestAllFiles(t *testing.T) {
 func TestAllPaths(t *testing.T) {
 	cleanTmpDir()
 
+	// invalid dir
+	{
+		paths, err := AllPaths("")
+		assert.Equal(t, ([]string)(nil), paths)
+		assert.Equal(t, "empty string is an invalid path", err.Error())
+	}
+
 	// Single dir no links
 	// temp/first/f0,f1
 	{
@@ -415,6 +393,67 @@ func TestAllPaths(t *testing.T) {
 	}
 }
 
+func TestExpand(t *testing.T) {
+
+	// invalid path
+	{
+		result, err := Expand("~foo")
+		assert.Equal(t, "failed to expand invalid path", err.Error())
+		assert.Equal(t, "", result)
+	}
+
+	// happy
+	{
+		result, err := Expand("~/")
+		assert.Nil(t, err)
+		assert.True(t, pathContainsHome(result))
+	}
+
+	// HOME not set
+	{
+		// unset HOME
+		home := os.Getenv("HOME")
+		os.Unsetenv("HOME")
+		assert.Equal(t, "", os.Getenv("HOME"))
+		defer os.Setenv("HOME", home)
+
+		result, err := Expand("~/")
+		assert.Equal(t, "failed to compute the user's home directory: $HOME is not defined", err.Error())
+		assert.Equal(t, "", result)
+	}
+}
+
+func TestHome(t *testing.T) {
+
+	// happy
+	{
+		result, err := Home()
+		assert.Nil(t, err)
+		assert.True(t, pathContainsHome(result))
+	}
+
+	// HOME not set
+	{
+		// unset HOME
+		home := os.Getenv("HOME")
+		os.Unsetenv("HOME")
+		assert.Equal(t, "", os.Getenv("HOME"))
+		defer os.Setenv("HOME", home)
+
+		home, err := Home()
+		assert.Equal(t, "", home)
+		assert.Equal(t, "failed to compute the user's home directory: $HOME is not defined", err.Error())
+	}
+}
+
+func TestReadDir(t *testing.T) {
+	{
+		dirs, err := ReadDir("")
+		assert.Equal(t, ([]string)(nil), dirs)
+		assert.Equal(t, "failed to read directory : open : no such file or directory", err.Error())
+	}
+}
+
 func TestSharedDir(t *testing.T) {
 	{
 		first := ""
@@ -441,6 +480,56 @@ func TestSharedDir(t *testing.T) {
 		second := "/foo/bar/2"
 		assert.Equal(t, "/foo/bar", SharedDir(first, second))
 	}
+}
+
+func TestSlicePath(t *testing.T) {
+	assert.Equal(t, "", SlicePath("", 0, -1))
+	assert.Equal(t, "/", SlicePath("/", 0, -1))
+	assert.Equal(t, "/foo", SlicePath("/foo", 0, -1))
+
+	// Handle slash at end
+	assert.Equal(t, "/foo", SlicePath("/foo/bar/one/", 0, 0))
+	assert.Equal(t, "foo/bar", SlicePath("foo/bar/one/", 0, 1))
+	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one/", 0, 2))
+	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one/", 0, 3))
+	assert.Equal(t, "foo/bar/one", SlicePath("foo/bar/one/", 0, 3))
+
+	// Slice first count
+	assert.Equal(t, "", SlicePath("", 0, 1))
+	assert.Equal(t, "/", SlicePath("/", 0, 1))
+	assert.Equal(t, "foo", SlicePath("foo", 0, 1))
+	assert.Equal(t, "/foo", SlicePath("/foo", 0, 1))
+	assert.Equal(t, "/foo/bar", SlicePath("/foo/bar/one", 0, 1))
+
+	assert.Equal(t, "/foo", SlicePath("/foo/bar/one", 0, 0))
+	assert.Equal(t, "/foo/bar", SlicePath("/foo/bar/one", 0, 1))
+	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one", 0, 2))
+	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one", 0, 3))
+	assert.Equal(t, "foo/bar/one", SlicePath("foo/bar/one", 0, 3))
+
+	// Handle slash at end
+	assert.Equal(t, "foo", SlicePath("foo/bar/", 0, -2))
+	assert.Equal(t, "foo/bar", SlicePath("foo/bar/one/", 0, -2))
+
+	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one", 0, -1))
+	assert.Equal(t, "/foo/bar", SlicePath("/foo/bar/one", 0, -2))
+	assert.Equal(t, "/foo", SlicePath("/foo/bar/one", 0, -3))
+	assert.Equal(t, "", SlicePath("/foo/bar/one", 0, -4))
+
+	// Slice last cnt
+	assert.Equal(t, "", SlicePath("", -2, -1))
+	assert.Equal(t, "/", SlicePath("/", -2, -1))
+	assert.Equal(t, "foo", SlicePath("foo", -2, -1))
+	assert.Equal(t, "/foo", SlicePath("/foo", -2, -1))
+	assert.Equal(t, "one", SlicePath("/foo/bar/one", -1, -1))
+	assert.Equal(t, "one", SlicePath("foo/bar/one", -1, -1))
+	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one", -3, -1))
+	assert.Equal(t, "bar/one", SlicePath("/foo/bar/one", -2, -1))
+	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one", -3, -1))
+	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one", -5, 2))
+
+	// Not a path
+	assert.Equal(t, "foobar", SlicePath("foobar", -5, -1))
 }
 
 func TestTrimExt(t *testing.T) {

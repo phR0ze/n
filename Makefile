@@ -6,7 +6,6 @@ ${NAME}: vendor
 	@echo "------------------------------------------------------------------------"
 	go build -o bin/${NAME} .
 	
-
 mech: vendor
 	go build -o bin/mech pkg/net/mech/example/mech.go
 
@@ -23,6 +22,7 @@ test: ${NAME}
 	go test ./pkg/enc/unit
 	go test ./pkg/enc/yaml
 	go test ./pkg/errs
+	go test ./pkg/futil
 	go test ./pkg/net
 	go test ./pkg/opt
 	go test ./pkg/sys
@@ -30,7 +30,13 @@ test: ${NAME}
 	go test ./pkg/time
 	go test ./pkg/tmpl
 
-bench: ${NAME}
+cover: ${NAME}
+	@echo -e "\nRunning go coverage tests:"
+	@echo -e "------------------------------------------------------------------------"
+	go test -coverprofile=coverage.out ./pkg/${pkg}
+	go tool cover -html=coverage.out
+
+bench: vendor
 	@echo -e "\nRunning all go benchmarks:"
 	@echo -e "------------------------------------------------------------------------"
 	go test -bench=.

@@ -8,12 +8,11 @@ import (
 	"sort"
 	"strings"
 
-	homedir "github.com/mitchellh/go-homedir"
 	"github.com/phR0ze/n/pkg/opt"
 	"github.com/pkg/errors"
 )
 
-// Abs gets the absolute path, taking into account homedir expansion
+// Abs gets the absolute path, taking into account path expansion and protocols
 func Abs(target string) (result string, err error) {
 
 	// Check for empty string
@@ -30,7 +29,7 @@ func Abs(target string) (result string, err error) {
 
 	// Trim protocols and expand
 	target = TrimProtocol(target)
-	if result, err = homedir.Expand(target); err != nil {
+	if result, err = Expand(target); err != nil {
 		err = errors.Wrapf(err, "failed to expand the given path %s", target)
 		return
 	}
@@ -198,6 +197,32 @@ func Dirs(target string) (result []string) {
 	return
 }
 
+// Expand the path to include the home prefix if necessary
+func Expand(target string) (path string, err error) {
+	path = target
+	if len(path) < 2 || path[0] != '~' {
+		return
+	}
+
+	// Invalid path
+	if path[1] != '/' {
+		path = ""
+		err = errors.Errorf("failed to expand invalid path")
+		return
+	}
+
+	// Get home directory
+	var home string
+	if home, err = Home(); err != nil {
+		path = ""
+		return
+	}
+
+	// Replace prefix with home directory
+	path = filepath.Join(home, path[1:])
+	return
+}
+
 // Files returns all files from the given target path, sorted by filename
 func Files(target string) (result []string) {
 	result = []string{}
@@ -216,12 +241,14 @@ func Files(target string) (result []string) {
 }
 
 // Home returns the absolute home directory for the current user
+// Go 1.12 provides os.UserHomeDir so we can just call that
 func Home() (result string, err error) {
-	homedir.DisableCache = true
-	if result, err = homedir.Dir(); err != nil {
-		err = errors.Wrap(err, "failed to determine the user's home directdory")
+	if result, err = os.UserHomeDir(); err != nil {
+		err = errors.Wrap(err, "failed to compute the user's home directory")
 		return
 	}
+
+	// Now ensure we have an absolute value here, trimming out all redirects
 	if result, err = filepath.Abs(result); err != nil {
 		err = errors.Wrapf(err, "failed to compute the absolute path for %s", result)
 		return

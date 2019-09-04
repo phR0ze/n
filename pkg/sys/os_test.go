@@ -4,7 +4,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"regexp"
+	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -124,6 +125,21 @@ func TestCopyLinksAbsNoFollow(t *testing.T) {
 }
 
 func TestCopy(t *testing.T) {
+	// invalid files
+	{
+		// invalid dst
+		err := Copy("", "")
+		assert.Equal(t, "empty string is an invalid path", err.Error())
+
+		// invalid src
+		err = Copy("", "foo")
+		assert.Equal(t, "empty string is an invalid path", err.Error())
+
+		// invalid file globbing i.e. doesn't exist
+		err = Copy("foo", "bar")
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to get any sources for"))
+	}
+
 	{
 		// test/temp/pkg does not exist
 		// so Copy sys to pkg will be a clone
@@ -162,6 +178,30 @@ func TestCopy(t *testing.T) {
 			dstPaths[i] = path.Base(dstPaths[i])
 		}
 		assert.Equal(t, srcPaths, dstPaths)
+	}
+}
+
+func TestDarwin(t *testing.T) {
+	if runtime.GOOS == "darwin" {
+		assert.True(t, Darwin())
+	} else {
+		assert.False(t, Darwin())
+	}
+}
+
+func TestLinux(t *testing.T) {
+	if runtime.GOOS == "linux" {
+		assert.True(t, Linux())
+	} else {
+		assert.False(t, Linux())
+	}
+}
+
+func TestWindows(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		assert.True(t, Windows())
+	} else {
+		assert.False(t, Windows())
 	}
 }
 
@@ -246,26 +286,57 @@ func TestCopyGlob(t *testing.T) {
 func TestCopyFile(t *testing.T) {
 	cleanTmpDir()
 
-	// Copy regular file
-	foo := path.Join(tmpDir, "foo")
+	// empty source
+	{
+		err := CopyFile("", "")
+		assert.Equal(t, "empty string is an invalid path", err.Error())
+	}
 
-	assert.False(t, Exists(foo))
-	CopyFile(readme, foo)
-	assert.True(t, Exists(foo))
+	// source doesn't exist
+	{
+		err := CopyFile(path.Join(tmpDir, "foo"), path.Join(tmpDir, "bar"))
+		assert.Equal(t, "failed to execute Lstat against ../../test/temp/foo: lstat ../../test/temp/foo: no such file or directory", err.Error())
+	}
 
-	srcMD5, err := MD5(readme)
-	assert.Nil(t, err)
-	dstMD5, err := MD5(foo)
-	assert.Nil(t, err)
-	assert.Equal(t, srcMD5, dstMD5)
+	// pass in bad info
+	{
+		err := CopyFile(path.Join(tmpDir, "foo/foo"), "", newInfoOpt(&FileInfo{}))
+		assert.Equal(t, "failed to execute Lstat against ../../test/temp/foo: lstat ../../test/temp/foo: no such file or directory", err.Error())
+	}
 
-	// Overwrite file
-	CopyFile(testfile, foo)
-	srcMD5, err = MD5(testfile)
-	assert.Nil(t, err)
-	dstMD5, err = MD5(foo)
-	assert.Nil(t, err)
-	assert.Equal(t, srcMD5, dstMD5)
+	// source is a directory
+	{
+		subdir, err := MkdirP(path.Join(tmpDir, "sub"))
+		assert.Nil(t, err)
+		err = CopyFile(subdir, path.Join(tmpDir, "bar"))
+		assert.Equal(t, "src target is not a regular file or a symlink to a file", err.Error())
+	}
+
+	// happy
+	{
+		// Copy regular file
+		foo := path.Join(tmpDir, "foo")
+
+		assert.False(t, Exists(foo))
+		err := CopyFile(readme, foo)
+		assert.Nil(t, err)
+		assert.True(t, Exists(foo))
+
+		srcMD5, err := MD5(readme)
+		assert.Nil(t, err)
+		dstMD5, err := MD5(foo)
+		assert.Nil(t, err)
+		assert.Equal(t, srcMD5, dstMD5)
+
+		// Overwrite file
+		err = CopyFile(testfile, foo)
+		assert.Nil(t, err)
+		srcMD5, err = MD5(testfile)
+		assert.Nil(t, err)
+		dstMD5, err = MD5(foo)
+		assert.Nil(t, err)
+		assert.Equal(t, srcMD5, dstMD5)
+	}
 }
 
 func TestExists(t *testing.T) {
@@ -273,229 +344,128 @@ func TestExists(t *testing.T) {
 	assert.True(t, Exists(readme))
 }
 
-func TestExtractString(t *testing.T) {
-	cleanTmpDir()
-
-	// Write out test data
-	err := WriteString(tmpfile, `# test data
-pkgname=chromium
-pkgver=76.0.3809.100
-  pkgver=foo
-pkgrel=1
-_launcher_ver=6
-pkgdesc="Chromium focused on privacy and the removal of Google Orwellian tracking"
-arch=('x86_64')
-url="https://www.chromium.org/Home"
-`)
-	assert.Nil(t, err)
-
-	// No match
-	match, err := ExtractString(tmpfile, `foobar`)
-	assert.Nil(t, err)
-	assert.Equal(t, "", match)
-
-	// Single Match - whole string
-	match, err = ExtractString(tmpfile, `(?m)^(pkgver=.*)`)
-	assert.Nil(t, err)
-	assert.Equal(t, "pkgver=76.0.3809.100", match)
-
-	// Single Match
-	match, err = ExtractString(tmpfile, `(?m)^pkgver=(.*)`)
-	assert.Nil(t, err)
-	assert.Equal(t, "76.0.3809.100", match)
-
-	// Multiple Match - only sees the first one
-	match, err = ExtractString(tmpfile, `.*pkgver=(.*)`)
-	assert.Nil(t, err)
-	assert.Equal(t, "76.0.3809.100", match)
-}
-
-func TestExtractStrings(t *testing.T) {
-	cleanTmpDir()
-
-	// Write out test data
-	err := WriteString(tmpfile, `# test data
-pkgname=chromium
-pkgver=76.0.3809.100
-  pkgver=foo
-pkgrel=1
-_launcher_ver=6
-pkgdesc="Chromium focused on privacy and the removal of Google Orwellian tracking"
-arch=('x86_64')
-url="https://www.chromium.org/Home"
-`)
-	assert.Nil(t, err)
-
-	// No match
-	matches, err := ExtractStrings(tmpfile, `foobar`)
-	assert.Nil(t, err)
-	assert.Nil(t, matches)
-
-	// Single Match substring
-	matches, err = ExtractStrings(tmpfile, `(?m)^pkgver=(.*)`)
-	assert.Nil(t, err)
-	assert.Equal(t, []string{"76.0.3809.100"}, matches)
-
-	// Single Match wholestring
-	matches, err = ExtractStrings(tmpfile, `(?m)^(pkgver=.*)`)
-	assert.Nil(t, err)
-	assert.Equal(t, []string{"pkgver=76.0.3809.100"}, matches)
-
-	// Multiple Match substrings
-	matches, err = ExtractStrings(tmpfile, `.*pkgver=(.*)`)
-	assert.Nil(t, err)
-	assert.Equal(t, []string{"76.0.3809.100", "foo"}, matches)
-
-	// Multiple Match whole strings
-	matches, err = ExtractStrings(tmpfile, `.*(pkgver=.*)`)
-	assert.Nil(t, err)
-	assert.Equal(t, []string{"pkgver=76.0.3809.100", "pkgver=foo"}, matches)
-}
-
-func TestExtractStringP(t *testing.T) {
-	cleanTmpDir()
-
-	// Write out test data
-	err := WriteString(tmpfile, `# test data
-pkgname=chromium
-pkgver=76.0.3809.100
-  pkgver=foo
-pkgrel=1
-_launcher_ver=6
-pkgdesc="Chromium focused on privacy and the removal of Google Orwellian tracking"
-arch=('x86_64')
-url="https://www.chromium.org/Home"
-`)
-	assert.Nil(t, err)
-
-	// No match
-	rx, err := regexp.Compile(`foobar`)
-	assert.Nil(t, err)
-	match, err := ExtractStringP(tmpfile, rx)
-	assert.Nil(t, err)
-	assert.Equal(t, "", match)
-
-	// Single Match - whole string
-	rx, err = regexp.Compile(`(?m)^(pkgver=.*)`)
-	assert.Nil(t, err)
-	match, err = ExtractStringP(tmpfile, rx)
-	assert.Nil(t, err)
-	assert.Equal(t, "pkgver=76.0.3809.100", match)
-
-	// Single Match
-	rx, err = regexp.Compile(`(?m)^pkgver=(.*)`)
-	assert.Nil(t, err)
-	match, err = ExtractStringP(tmpfile, rx)
-	assert.Nil(t, err)
-	assert.Equal(t, "76.0.3809.100", match)
-
-	// Multiple Match - only sees the first one
-	rx, err = regexp.Compile(`.*pkgver=(.*)`)
-	assert.Nil(t, err)
-	match, err = ExtractStringP(tmpfile, rx)
-	assert.Nil(t, err)
-	assert.Equal(t, "76.0.3809.100", match)
-}
-
-func TestExtractStringsP(t *testing.T) {
-	cleanTmpDir()
-
-	// Write out test data
-	err := WriteString(tmpfile, `# test data
-pkgname=chromium
-pkgver=76.0.3809.100
-  pkgver=foo
-pkgrel=1
-_launcher_ver=6
-pkgdesc="Chromium focused on privacy and the removal of Google Orwellian tracking"
-arch=('x86_64')
-url="https://www.chromium.org/Home"
-`)
-	assert.Nil(t, err)
-
-	// No match
-	rx, err := regexp.Compile(`foobar`)
-	assert.Nil(t, err)
-	matches, err := ExtractStringsP(tmpfile, rx)
-	assert.Nil(t, err)
-	assert.Nil(t, matches)
-
-	// Single Match substring
-	rx, err = regexp.Compile(`(?m)^pkgver=(.*)`)
-	assert.Nil(t, err)
-	matches, err = ExtractStringsP(tmpfile, rx)
-	assert.Nil(t, err)
-	assert.Equal(t, []string{"76.0.3809.100"}, matches)
-
-	// Single Match wholestring
-	rx, err = regexp.Compile(`(?m)^(pkgver=.*)`)
-	assert.Nil(t, err)
-	matches, err = ExtractStringsP(tmpfile, rx)
-	assert.Nil(t, err)
-	assert.Equal(t, []string{"pkgver=76.0.3809.100"}, matches)
-
-	// Multiple Match substrings
-	rx, err = regexp.Compile(`.*pkgver=(.*)`)
-	assert.Nil(t, err)
-	matches, err = ExtractStringsP(tmpfile, rx)
-	assert.Nil(t, err)
-	assert.Equal(t, []string{"76.0.3809.100", "foo"}, matches)
-
-	// Multiple Match whole strings
-	rx, err = regexp.Compile(`.*(pkgver=.*)`)
-	assert.Nil(t, err)
-	matches, err = ExtractStringsP(tmpfile, rx)
-	assert.Nil(t, err)
-	assert.Equal(t, []string{"pkgver=76.0.3809.100", "pkgver=foo"}, matches)
-}
-
 func TestMD5(t *testing.T) {
-	if Exists(tmpfile) {
-		Remove(tmpfile)
-	}
-	f, _ := os.Create(tmpfile)
-	defer f.Close()
-	f.WriteString(`This is a test of the emergency broadcast system.`)
+	cleanTmpDir()
 
-	expected := "067a8c38325b12159844261d16e5cb13"
-	result, _ := MD5(tmpfile)
-	assert.Equal(t, expected, result)
+	// empty string
+	{
+		result, err := MD5("")
+		assert.Equal(t, "", result)
+		assert.Equal(t, "empty string is an invalid path", err.Error())
+	}
+
+	// doesn't exist
+	{
+		result, err := MD5("foo")
+		assert.Equal(t, "", result)
+		assert.Equal(t, "file does not exist", err.Error())
+	}
+
+	// happy
+	{
+		f, _ := os.Create(tmpfile)
+		defer f.Close()
+		f.WriteString(`This is a test of the emergency broadcast system.`)
+
+		expected := "067a8c38325b12159844261d16e5cb13"
+		result, err := MD5(tmpfile)
+		assert.Nil(t, err)
+		assert.Equal(t, expected, result)
+	}
+
+	// Remove read permissions from file
+	{
+		os.Chmod(tmpfile, 0222)
+		result, err := MD5(tmpfile)
+		assert.Equal(t, "", result)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed opening target file"))
+		os.Chmod(tmpfile, 0644)
+	}
 }
 
 func TestMkdirP(t *testing.T) {
-	if Exists(tmpDir) {
-		RemoveAll(tmpDir)
+
+	// happy
+	{
+		result, err := MkdirP(tmpDir)
+		assert.Nil(t, err)
+		assert.Equal(t, SlicePath(tmpDir, -2, -1), SlicePath(result, -2, -1))
+		assert.True(t, Exists(tmpDir))
+		err = RemoveAll(result)
+		assert.Nil(t, err)
 	}
-	MkdirP(tmpDir)
-	assert.True(t, Exists(tmpDir))
+
+	// permissions given
+	{
+		result, err := MkdirP(tmpDir, 0555)
+		assert.Nil(t, err)
+		assert.Equal(t, SlicePath(tmpDir, -2, -1), SlicePath(result, -2, -1))
+		assert.True(t, Exists(tmpDir))
+		mode := Mode(tmpDir)
+		assert.Equal(t, os.ModeDir|os.FileMode(0555), mode)
+	}
+
+	// Remove read permissions from file
+	{
+		os.Chmod(tmpDir, 0222)
+		result, err := MkdirP(path.Join(tmpDir, "foo"))
+		assert.Equal(t, "temp/foo", SlicePath(result, -2, -1))
+		assert.True(t, strings.HasPrefix(err.Error(), "failed creating directories for"))
+		assert.True(t, strings.Contains(err.Error(), "permission denied"))
+		os.Chmod(tmpDir, 0755)
+	}
+
+	// HOME not set
+	{
+		// unset HOME
+		home := os.Getenv("HOME")
+		os.Unsetenv("HOME")
+		assert.Equal(t, "", os.Getenv("HOME"))
+		defer os.Setenv("HOME", home)
+
+		result, err := MkdirP("~/")
+		assert.Equal(t, "failed to expand the given path ~/: failed to compute the user's home directory: $HOME is not defined", err.Error())
+		assert.Equal(t, "", result)
+	}
 }
 
 func TestMove(t *testing.T) {
+	cleanTmpDir()
 
 	// Copy file in to tmpDir then rename in same location
-	cleanTmpDir()
 	Copy(testfile, tmpDir)
 	newTestFile := path.Join(tmpDir, "testfile")
 
 	srcMd5, _ := MD5(newTestFile)
 	assert.True(t, Exists(newTestFile))
 	assert.False(t, Exists(tmpfile))
-	err := Move(newTestFile, tmpfile)
+	result, err := Move(newTestFile, tmpfile)
 	assert.Nil(t, err)
+	assert.Equal(t, tmpfile, result)
 	assert.True(t, Exists(tmpfile))
-	dstMd5, _ := MD5(tmpfile)
+	dstMd5, err := MD5(tmpfile)
+	assert.Nil(t, err)
 	assert.False(t, Exists(newTestFile))
 	assert.Equal(t, srcMd5, dstMd5)
 
 	// Now create a sub directory and move it there
 	subDir := path.Join(tmpDir, "sub")
 	MkdirP(subDir)
-	err = Move(tmpfile, subDir)
+	newfile, err := Move(tmpfile, subDir)
 	assert.Nil(t, err)
+	assert.Equal(t, path.Join(subDir, path.Base(tmpfile)), newfile)
 	assert.False(t, Exists(tmpfile))
-	assert.True(t, Exists(path.Join(subDir, path.Base(tmpfile))))
-	dstMd5, _ = MD5(path.Join(subDir, path.Base(tmpfile)))
+	assert.True(t, Exists(newfile))
+	dstMd5, _ = MD5(newfile)
 	assert.Equal(t, srcMd5, dstMd5)
+
+	// permission denied
+	os.Chmod(subDir, 0222)
+	result, err = Move(newfile, tmpfile)
+	assert.Equal(t, "", result)
+	assert.True(t, strings.HasPrefix(err.Error(), "failed renaming file"))
+	assert.True(t, strings.Contains(err.Error(), "permission denied"))
+	os.Chmod(subDir, 0755)
 }
 
 func TestPwd(t *testing.T) {
@@ -505,52 +475,170 @@ func TestPwd(t *testing.T) {
 func TestReadBytes(t *testing.T) {
 	cleanTmpDir()
 
-	// Write out test data
-	err := WriteString(tmpfile, "this is a test")
-	assert.Nil(t, err)
+	// empty string
+	{
+		data, err := ReadBytes("")
+		assert.Equal(t, ([]byte)(nil), data)
+		assert.Equal(t, "empty string is an invalid path", err.Error())
+	}
 
-	// Read the file back in and validate
-	data, err := ReadBytes(tmpfile)
-	assert.Nil(t, err)
-	assert.Equal(t, "this is a test", string(data))
+	// invalid file
+	{
+		data, err := ReadBytes("foo")
+		assert.Equal(t, ([]byte)(nil), data)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed reading the file"))
+		assert.True(t, strings.Contains(err.Error(), "no such file or directory"))
+	}
+
+	// happy
+	{
+		// Write out test data
+		err := WriteString(tmpfile, "this is a test")
+		assert.Nil(t, err)
+
+		// Read the file back in and validate
+		data, err := ReadBytes(tmpfile)
+		assert.Nil(t, err)
+		assert.Equal(t, "this is a test", string(data))
+	}
+}
+
+func TestReadLines(t *testing.T) {
+	cleanTmpDir()
+
+	// empty string
+	{
+		data, err := ReadLines("")
+		assert.Equal(t, ([]string)(nil), data)
+		assert.Equal(t, "empty string is an invalid path", err.Error())
+	}
+
+	// invalid file
+	{
+		data, err := ReadLines("foo")
+		assert.Equal(t, ([]string)(nil), data)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed reading the file"))
+		assert.True(t, strings.Contains(err.Error(), "no such file or directory"))
+	}
+
+	// happy
+	{
+		lines, err := ReadLines(testfile)
+		assert.Nil(t, err)
+		assert.Equal(t, 18, len(lines))
+	}
 }
 
 func TestReadString(t *testing.T) {
 	cleanTmpDir()
 
+	// empty string
+	{
+		data, err := ReadString("")
+		assert.Equal(t, "", data)
+		assert.Equal(t, "empty string is an invalid path", err.Error())
+	}
+
+	// invalid file
+	{
+		data, err := ReadString("foo")
+		assert.Equal(t, "", data)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed reading the file"))
+		assert.True(t, strings.Contains(err.Error(), "no such file or directory"))
+	}
+
+	// happy
+	{
+		// Write out test data
+		err := WriteString(tmpfile, "this is a test")
+		assert.Nil(t, err)
+
+		// Read the file back in and validate
+		data, err := ReadString(tmpfile)
+		assert.Nil(t, err)
+		assert.Equal(t, "this is a test", data)
+	}
+}
+
+func TestRemove(t *testing.T) {
+	cleanTmpDir()
+
 	// Write out test data
 	err := WriteString(tmpfile, "this is a test")
 	assert.Nil(t, err)
+	assert.True(t, Exists(tmpfile))
 
-	// Read the file back in and validate
-	data, err := ReadString(tmpfile)
+	// Now remove the file and validate
+	err = Remove(tmpfile)
 	assert.Nil(t, err)
-	assert.Equal(t, "this is a test", data)
+	assert.False(t, Exists(tmpfile))
 }
 
-func TestReadLines(t *testing.T) {
-	lines, err := ReadLines(testfile)
+func TestSymlink(t *testing.T) {
+	cleanTmpDir()
+
+	_, err := Touch(tmpfile)
 	assert.Nil(t, err)
-	assert.Equal(t, 18, len(lines))
-}
 
-func TestSize(t *testing.T) {
-	assert.Equal(t, int64(604), Size(testfile))
+	// Create file symlink
+	newfilelink := path.Join(tmpDir, "filelink")
+	err = Symlink(tmpfile, newfilelink)
+	assert.Nil(t, err)
+	assert.True(t, IsSymlink(newfilelink))
+	assert.True(t, IsSymlinkFile(newfilelink))
+	assert.False(t, IsSymlinkDir(newfilelink))
 
+	// Create dir symlink
+	subdir := path.Join(tmpDir, "sub")
+	_, err = MkdirP(subdir)
+	assert.Nil(t, err)
+	newdirlink := path.Join(tmpDir, "sublink")
+	err = Symlink(subdir, newdirlink)
+	assert.Nil(t, err)
+	assert.True(t, IsSymlink(newdirlink))
+	assert.False(t, IsSymlinkFile(newdirlink))
+	assert.True(t, IsSymlinkDir(newdirlink))
 }
 
 func TestTouch(t *testing.T) {
 	cleanTmpDir()
 
-	// Doesn't exist so create
-	assert.False(t, Exists(tmpfile))
-	_, err := Touch(tmpfile)
-	assert.Nil(t, err)
-	assert.True(t, Exists(tmpfile))
+	// empty string
+	{
+		result, err := Touch("")
+		assert.Equal(t, "", result)
+		assert.Equal(t, "empty string is an invalid path", err.Error())
+	}
 
-	// Truncate and re-create it
-	_, err = Touch(tmpfile)
-	assert.Nil(t, err)
+	// permission denied
+	{
+		// Create the tmpfile
+		result, err := Touch(tmpfile)
+		assert.Equal(t, SlicePath(tmpfile, -2, -1), SlicePath(result, -2, -1))
+
+		// Now try to truncate it after setting to readonly
+		os.Chmod(tmpfile, 0444)
+		result, err = Touch(tmpfile)
+		assert.Equal(t, SlicePath(tmpfile, -2, -1), SlicePath(result, -2, -1))
+		assert.True(t, strings.HasPrefix(err.Error(), "failed creating/truncating file"))
+		assert.True(t, strings.Contains(err.Error(), "permission denied"))
+		os.Chmod(tmpfile, 0755)
+		err = Remove(tmpfile)
+		assert.Nil(t, err)
+	}
+
+	// happy
+	{
+		// Doesn't exist so create
+		assert.False(t, Exists(tmpfile))
+		_, err := Touch(tmpfile)
+		assert.Nil(t, err)
+		assert.True(t, Exists(tmpfile))
+
+		// Truncate and re-create it
+		_, err = Touch(tmpfile)
+		assert.Nil(t, err)
+	}
 }
 
 func TestWriteFile(t *testing.T) {

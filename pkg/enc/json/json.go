@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/phR0ze/go-errors"
 	"github.com/phR0ze/n/pkg/sys"
+	"github.com/pkg/errors"
 )
 
 // Marshal wraps the json.Marshal

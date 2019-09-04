@@ -65,6 +65,10 @@ func TestIsFile(t *testing.T) {
 	}
 }
 
+func TestSize(t *testing.T) {
+	assert.Equal(t, int64(604), Size(testfile))
+}
+
 func TestIsSymlink(t *testing.T) {
 	cleanTmpDir()
 

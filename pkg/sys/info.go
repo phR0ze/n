@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"time"
 
-	homedir "github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 )
 
@@ -22,7 +21,7 @@ func Lstat(src string) (result *FileInfo, err error) {
 	result = &FileInfo{path: src}
 	if result.v, err = os.Lstat(src); err != nil {
 		result = nil
-		err = errors.Wrapf(err, "failed to execute Lstate against %s", src)
+		err = errors.Wrapf(err, "failed to execute Lstat against %s", src)
 	}
 	return
 }
@@ -39,7 +38,7 @@ func (info *FileInfo) Path() string {
 
 // AbsPath returns the absolute path for this file
 func (info *FileInfo) AbsPath() (path string, err error) {
-	if path, err = homedir.Expand(info.path); err != nil {
+	if path, err = Expand(info.path); err != nil {
 		return
 	}
 	path, err = filepath.Abs(path)
@@ -51,12 +50,10 @@ func (info *FileInfo) Size() int64 {
 	return info.v.Size()
 }
 
-// Size returns the size of the file in bytes
+// Size returns the size of the file/dir in bytes
 func Size(src string) (size int64) {
 	if info, err := os.Lstat(src); err == nil {
-		if !info.IsDir() {
-			size = info.Size()
-		}
+		size = info.Size()
 	}
 	return
 }
@@ -66,8 +63,16 @@ func (info *FileInfo) Mode() os.FileMode {
 	return info.v.Mode()
 }
 
-// ModeTime implements os.FileInfo and is the modification time of the file
-func (info *FileInfo) ModeTime() time.Time {
+// Mode implements os.FileInfo and returns bits of the file
+func Mode(src string) (mode os.FileMode) {
+	if info, err := os.Lstat(src); err == nil {
+		mode = info.Mode()
+	}
+	return
+}
+
+// ModTime implements os.FileInfo and is the modification time of the file
+func (info *FileInfo) ModTime() time.Time {
 	return info.v.ModTime()
 }
 
@@ -151,7 +156,7 @@ func (info *FileInfo) IsSymlinkFile() bool {
 	return false
 }
 
-// IsSymlinkFile returns true if the given symlink's target is a directory
+// IsSymlinkFile returns true if the given symlink's target is a file
 func IsSymlinkFile(src string) bool {
 	if info, err := Lstat(src); err == nil {
 		return info.IsSymlinkFile()

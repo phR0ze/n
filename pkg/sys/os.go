@@ -11,7 +11,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
 	"runtime"
 	"strings"
 
@@ -42,6 +41,12 @@ func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 	// Handle globbing
 	if sources, err = filepath.Glob(srcAbs); err != nil {
 		err = errors.Wrapf(err, "failed to get glob for %s", srcAbs)
+		return
+	}
+
+	// Fail no sources were found
+	if len(sources) == 0 {
+		err = errors.Errorf("failed to get any sources for %s", srcAbs)
 		return
 	}
 
@@ -97,10 +102,10 @@ func CopyFile(src, dst string, opts ...*opt.Opt) (err error) {
 	if srcInfo = infoOpt(opts); srcInfo != nil {
 		srcPath = srcInfo.path
 	} else {
-		if srcInfo, err = Lstat(src); err != nil {
+		if srcPath, err = Abs(src); err != nil {
 			return
 		}
-		if srcPath, err = Abs(src); err != nil {
+		if srcInfo, err = Lstat(src); err != nil {
 			return
 		}
 	}
@@ -158,6 +163,7 @@ func CopyFile(src, dst string, opts ...*opt.Opt) (err error) {
 		// Open srcPath for reading
 		var fin *os.File
 		if fin, err = os.Open(srcPath); err != nil {
+			err = errors.Wrapf(err, "failed to open file %s for reading", srcPath)
 			return
 		}
 		defer fin.Close()
@@ -165,22 +171,39 @@ func CopyFile(src, dst string, opts ...*opt.Opt) (err error) {
 		// Create dstPath for writing
 		var fout *os.File
 		if fout, err = os.Create(dstPath); err != nil {
+			err = errors.Wrapf(err, "failed to create file %s", dstPath)
 			return
 		}
-		defer fout.Close()
 
 		// Copy srcPath to dstPath
 		if _, err = io.Copy(fout, fin); err != nil {
+			err = errors.Wrapf(err, "failed to copy data to file %s", dstPath)
+			if e := fout.Close(); e != nil {
+				err = errors.Wrapf(err, "failed to close file %s", dstPath)
+			}
 			return
 		}
 
 		// Sync to disk
 		if err = fout.Sync(); err != nil {
+			err = errors.Wrapf(err, "failed to sync data to file %s", dstPath)
+			if e := fout.Close(); e != nil {
+				err = errors.Wrapf(err, "failed to close file %s", dstPath)
+			}
+			return
+		}
+
+		// Close file for writing
+		if err = fout.Close(); err != nil {
+			err = errors.Wrapf(err, "failed to close file %s", dstPath)
 			return
 		}
 
 		// Set permissions of dstPath same as srcPath
-		err = os.Chmod(dstPath, srcInfo.Mode())
+		if err = os.Chmod(dstPath, srcInfo.Mode()); err != nil {
+			err = errors.Wrapf(err, "failed to chmod file %s", dstPath)
+			return
+		}
 	}
 
 	return
@@ -196,127 +219,25 @@ func Exists(src string) bool {
 	return false
 }
 
-// ExtractString reads the filepath data then compiles the given regular
-// expression exp and applies it to the data and returns the results.
-// Match will be empty if no matches were found. Use (?m) to have ^ $ apply
-// to each line in the string. Use (?s) to have . span lines.
-func ExtractString(filepath string, exp string) (match string, err error) {
-	if filepath, err = Abs(filepath); err != nil {
-		return
-	}
-
-	// Read in the file data
-	var data []byte
-	if data, err = ioutil.ReadFile(filepath); err != nil {
-		err = errors.Wrapf(err, "failed reading the file %s", filepath)
-		return
-	}
-
-	// Compile the regular expression
-	var rx *regexp.Regexp
-	if rx, err = regexp.Compile(exp); err != nil {
-		err = errors.Wrapf(err, "failed compiling regex '%s'", exp)
-		return
-	}
-
-	// Apply the regular expression to the data
-	if results := rx.FindStringSubmatch(string(data)); len(results) > 1 {
-		match = results[1]
-	}
-
-	return
-}
-
-// ExtractStrings reads the filepath data then compiles the given regular
-// expression exp and applies it to the data and returns the results.
-// Matches will be nil if no matches were found. Use (?m) to have ^ $ apply
-// to each line in the string. Use (?s) to have . span lines.
-func ExtractStrings(filepath string, exp string) (matches []string, err error) {
-	if filepath, err = Abs(filepath); err != nil {
-		return
-	}
-
-	// Read in the file data
-	var data []byte
-	if data, err = ioutil.ReadFile(filepath); err != nil {
-		err = errors.Wrapf(err, "failed reading the file %s", filepath)
-		return
-	}
-
-	// Compile the regular expression
-	var rx *regexp.Regexp
-	if rx, err = regexp.Compile(exp); err != nil {
-		err = errors.Wrapf(err, "failed compiling regex '%s'", exp)
-		return
-	}
-
-	// Apply the regular expression to the data
-	for _, x := range rx.FindAllStringSubmatch(string(data), -1) {
-		if len(x) > 1 {
-			matches = append(matches, x[1])
-		}
-	}
-
-	return
-}
-
-// ExtractStringP reads the filepath data then applies the given regular
-// expression to the data and returns the results. See ExtractString
-func ExtractStringP(filepath string, exp *regexp.Regexp) (match string, err error) {
-	if filepath, err = Abs(filepath); err != nil {
-		return
-	}
-
-	// Read in the file data
-	var data []byte
-	if data, err = ioutil.ReadFile(filepath); err != nil {
-		err = errors.Wrapf(err, "failed reading the file %s", filepath)
-		return
-	}
-
-	// Apply the regular expression to the data
-	if results := exp.FindStringSubmatch(string(data)); len(results) > 1 {
-		match = results[1]
-	}
-
-	return
-}
-
-// ExtractStringsP reads the filepath data then applies the given regular
-// expression to the data and returns the results. See ExtractStrings
-func ExtractStringsP(filepath string, exp *regexp.Regexp) (matches []string, err error) {
-	if filepath, err = Abs(filepath); err != nil {
-		return
-	}
-
-	// Read in the file data
-	var data []byte
-	if data, err = ioutil.ReadFile(filepath); err != nil {
-		err = errors.Wrapf(err, "failed reading the file %s", filepath)
-		return
-	}
-
-	// Apply the regular expression to the data
-	for _, x := range exp.FindAllStringSubmatch(string(data), -1) {
-		if len(x) > 1 {
-			matches = append(matches, x[1])
-		}
-	}
-
-	return
-}
-
-// IsDarwin returns true if the OS is OSX
-func IsDarwin() (result bool) {
+// Darwin returns true if the OS is OSX
+func Darwin() (result bool) {
 	if runtime.GOOS == "darwin" {
 		result = true
 	}
 	return
 }
 
-// IsLinux returns true if the OS is Linux
-func IsLinux() (result bool) {
+// Linux returns true if the OS is Linux
+func Linux() (result bool) {
 	if runtime.GOOS == "linux" {
+		result = true
+	}
+	return
+}
+
+// Windows returns true if the OS is Windows
+func Windows() (result bool) {
+	if runtime.GOOS == "windows" {
 		result = true
 	}
 	return
@@ -376,8 +297,8 @@ func MkdirP(target string, perms ...uint32) (dir string, err error) {
 
 // Move the src path to the dst path. If the dst already exists and is not a directory
 // src will replace it. If there is an error it will be of type *LinkError. Wraps
-// os.Rename but fixes the issue where dst name is required
-func Move(src, dst string) (err error) {
+// os.Rename but fixes the issue where dst name is required. Returns the new location
+func Move(src, dst string) (result string, err error) {
 
 	// Add src base name to dst directory to fix golang oversight
 	if IsDir(dst) {
@@ -387,6 +308,7 @@ func Move(src, dst string) (err error) {
 		err = errors.Wrapf(err, "failed renaming file %s", src)
 		return
 	}
+	result = dst
 	return
 }
 
@@ -468,12 +390,15 @@ func Touch(filepath string) (path string, err error) {
 	}
 
 	var f *os.File
-	if f, err = os.Create(path); !os.IsExist(err) {
-		err = errors.Wrapf(err, "failed creating file %s", filepath)
+	if f, err = os.Create(path); err != nil {
+		err = errors.Wrapf(err, "failed creating/truncating file %s", filepath)
 		return
 	}
-	if err == nil {
-		defer f.Close()
+
+	// Ignoring close in the error case above is ok as the file pointer will be nil
+	if err = f.Close(); err != nil {
+		err = errors.Wrapf(err, "failed closing file %s", filepath)
+		return
 	}
 	return
 }
@@ -505,33 +430,20 @@ func WriteLines(filepath string, lines []string, perms ...uint32) (err error) {
 	if len(perms) > 0 {
 		perm = os.FileMode(perms[0])
 	}
-
-	var writer *os.File
-	flags := os.O_CREATE | os.O_TRUNC | os.O_WRONLY
-	if writer, err = os.OpenFile(filepath, flags, perm); err != nil {
-		err = errors.Wrapf(err, "failed opening file %s for writing", filepath)
+	if err = ioutil.WriteFile(filepath, []byte(strings.Join(lines, "\n")), perm); err != nil {
+		err = errors.Wrapf(err, "failed writing string to file %s", filepath)
 		return
 	}
-	defer writer.Close()
-
-	for i := range lines {
-		if _, err = writer.WriteString(lines[i]); err != nil {
-			err = errors.Wrapf(err, "failed writing string to %s", filepath)
-			return
-		}
-		if _, err = writer.WriteString("\n"); err != nil {
-			err = errors.Wrapf(err, "failed writing newline to %s", filepath)
-			return
-		}
-	}
-	err = writer.Sync()
-
 	return
 }
 
 // WriteStream reads from the io.Reader and writes to the given file using io.Copy
 // thus never filling memory i.e. streaming.  dest will be overwritten if it exists.
 func WriteStream(reader io.Reader, filepath string, perms ...uint32) (err error) {
+	if filepath, err = Abs(filepath); err != nil {
+		return
+	}
+
 	perm := os.FileMode(0644)
 	if len(perms) > 0 {
 		perm = os.FileMode(perms[0])
@@ -543,17 +455,25 @@ func WriteStream(reader io.Reader, filepath string, perms ...uint32) (err error)
 		err = errors.Wrapf(err, "failed opening file %s for writing", filepath)
 		return
 	}
-	defer writer.Close()
 
 	if _, err = io.Copy(writer, reader); err != nil {
 		err = errors.Wrapf(err, "failed copying stream data to file %s", filepath)
+		if e := writer.Close(); e != nil {
+			err = errors.Wrapf(err, "failed to close file %s", filepath)
+		}
 		return
 	}
 	if err = writer.Sync(); err != nil {
 		err = errors.Wrapf(err, "failed syncing stream to file %s", filepath)
+		if e := writer.Close(); e != nil {
+			err = errors.Wrapf(err, "failed to close file %s", filepath)
+		}
 		return
 	}
 
+	if err = writer.Close(); err != nil {
+		err = errors.Wrapf(err, "failed to close file %s", filepath)
+	}
 	return
 }
 
