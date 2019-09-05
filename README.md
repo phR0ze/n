@@ -7,6 +7,8 @@ tool chain. This package was created to reduce the friction I had adopting Go as
 language of choice. ***n*** is intended to reduce the coding verbosity required by Go via
 convenience functions and the Numerable types.
 
+**Requires Go 1.12**
+
 https://godoc.org/github.com/phR0ze/n
 
 ## Table of Contents
