@@ -10,6 +10,7 @@ import (
 	"testing"
 	"testing/iotest"
 
+	"github.com/phR0ze/n/pkg/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,6 +20,14 @@ var testfile = "../../test/testfile"
 var readme = "../../README.md"
 
 func TestCopyGlob(t *testing.T) {
+
+	// force Glob error
+	{
+		test.OneShotForceFilePathGlobError()
+		err := Copy(testfile, tmpfile)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to get glob for"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	}
 
 	// single file to non-existing dst is a copy to not copy into
 	{
@@ -415,6 +424,50 @@ func TestCopyWithDirParentDoentExist(t *testing.T) {
 func TestCopyFile(t *testing.T) {
 	cleanTmpDir()
 
+	// force chmod error only
+	{
+		test.OneShotForceOSChmodError()
+		result, err := CopyFile(testfile, tmpfile)
+		assert.Equal(t, "", result)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to chmod file"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+		assert.Nil(t, Remove(tmpfile))
+	}
+
+	// force close error only
+	{
+		test.OneShotForceOSCloseError()
+		result, err := CopyFile(testfile, tmpfile)
+		assert.Equal(t, "", result)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to close file"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+		assert.Nil(t, Remove(tmpfile))
+	}
+
+	// force sync error and close error
+	{
+		test.OneShotForceOSSyncError()
+		test.OneShotForceOSCloseError()
+		result, err := CopyFile(testfile, tmpfile)
+		assert.Equal(t, "", result)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to close file"))
+		assert.True(t, strings.Contains(err.Error(), ": failed to sync data to file"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+		assert.Nil(t, Remove(tmpfile))
+	}
+
+	// force copy error and close error
+	{
+		test.OneShotForceIOCopyError()
+		test.OneShotForceOSCloseError()
+		result, err := CopyFile(testfile, tmpfile)
+		assert.Equal(t, "", result)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to close file"))
+		assert.True(t, strings.Contains(err.Error(), ": failed to copy data to file"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+		assert.Nil(t, Remove(tmpfile))
+	}
+
 	// copy symlink to readonly dest - failure
 	{
 		// Create link to a bogus file
@@ -658,6 +711,16 @@ func TestExists(t *testing.T) {
 
 func TestMD5(t *testing.T) {
 	cleanTmpDir()
+
+	// force copy error
+	{
+		test.OneShotForceIOCopyError()
+		assert.Nil(t, WriteString(tmpfile, "test"))
+		result, err := MD5(tmpfile)
+		assert.Equal(t, "", result)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed copying file data into hash from"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	}
 
 	// empty string
 	{
@@ -910,7 +973,7 @@ func TestTouch(t *testing.T) {
 
 	// Force failure of Close via monkey patch
 	{
-		OneShotForceIOCloseError()
+		test.OneShotForceOSCloseError()
 		_, err := Touch(tmpfile)
 		assert.Equal(t, fmt.Sprintf("failed closing file %s: invalid argument", tmpfile), err.Error())
 
@@ -1034,10 +1097,22 @@ func TestWriteLines(t *testing.T) {
 
 func TestWriteStream(t *testing.T) {
 
+	// force close only
+	{
+		test.OneShotForceOSCloseError()
+		reader, err := os.Open(testfile)
+		assert.Nil(t, err)
+		err = WriteStream(reader, tmpfile)
+		assert.Nil(t, reader.Close())
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to close file"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+		assert.Nil(t, os.Remove(tmpfile))
+	}
+
 	// force sync and close errors
 	{
-		OneShotForceIOSyncError()
-		OneShotForceIOCloseError()
+		test.OneShotForceOSSyncError()
+		test.OneShotForceOSCloseError()
 		reader, err := os.Open(testfile)
 		assert.Nil(t, err)
 		err = WriteStream(reader, tmpfile)
@@ -1050,8 +1125,8 @@ func TestWriteStream(t *testing.T) {
 
 	// force sync and close errors
 	{
-		OneShotForceIOSyncError()
-		OneShotForceIOCloseError()
+		test.OneShotForceOSSyncError()
+		test.OneShotForceOSCloseError()
 		reader, err := os.Open(testfile)
 		assert.Nil(t, err)
 		err = WriteStream(reader, tmpfile)
@@ -1064,7 +1139,7 @@ func TestWriteStream(t *testing.T) {
 
 	// attemp to read from iotest TimeoutReader and force failure close
 	{
-		OneShotForceIOCloseError()
+		test.OneShotForceOSCloseError()
 		reader, err := os.Open(testfile)
 		assert.Nil(t, err)
 		testReader := iotest.TimeoutReader(reader)

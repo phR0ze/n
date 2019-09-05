@@ -31,17 +31,16 @@ func (info *FileInfo) Name() string {
 	return info.v.Name()
 }
 
-// Path returns the absolute path for this file
+// Path returns the path for this file
 func (info *FileInfo) Path() string {
 	return info.path
 }
 
 // AbsPath returns the absolute path for this file
 func (info *FileInfo) AbsPath() (path string, err error) {
-	if path, err = Expand(info.path); err != nil {
+	if path, err = Abs(info.path); err != nil {
 		return
 	}
-	path, err = filepath.Abs(path)
 	return
 }
 
@@ -171,6 +170,7 @@ func (info *FileInfo) SymlinkTarget() (target string, err error) {
 		return
 	}
 	if target, err = os.Readlink(info.path); err != nil {
+		err = errors.Errorf("failed to read the link target")
 		return
 	}
 	return

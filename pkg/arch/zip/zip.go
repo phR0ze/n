@@ -18,7 +18,7 @@ var (
 	gZipHeaderSig = []byte{0x50, 0x4B}
 )
 
-// Create a new zip file at zipfile from the given srcPath directory
+// Create a new zipfile at zipfile from the given srcPath directory
 func Create(zipfile, srcPath string) (err error) {
 	if zipfile, err = sys.Abs(zipfile); err != nil {
 		return
@@ -98,7 +98,7 @@ func ExtractAll(zipfile, dest string) (err error) {
 		return
 	}
 
-	// TrimPrefix from the zip file if required
+	// TrimPrefix from the zipfile if required
 	if err = TrimPrefix(zipfile); err != nil {
 		return
 	}
@@ -134,12 +134,12 @@ func ExtractAll(zipfile, dest string) (err error) {
 		if !info.IsDir() {
 			var fw *os.File
 			if fw, err = os.Create(filePath); err != nil {
-				err = errors.Wrapf(err, "failed to create new file %s from zipfile", filePath)
+				err = errors.Wrapf(err, "failed to create file %s from zipfile", filePath)
 				return
 			}
 			var fr io.ReadCloser
 			if fr, err = file.Open(); err != nil {
-				err = errors.Wrapf(err, "failed to open zip file target %s for reading", info.Name())
+				err = errors.Wrapf(err, "failed to open zipfile target %s for reading", info.Name())
 				return
 			}
 			if _, err = io.Copy(fw, fr); err != nil {
@@ -151,14 +151,14 @@ func ExtractAll(zipfile, dest string) (err error) {
 
 			// Set file mode to the original value
 			if err = os.Chmod(filePath, info.Mode()); err != nil {
-				err = errors.Wrapf(err, "failed to set original file mode for %s", filePath)
+				err = errors.Wrapf(err, "failed to set file mode for %s", filePath)
 				return
 			}
 		}
 
 		// Set file access times to the original values
 		if err = os.Chtimes(filePath, info.ModTime(), info.ModTime()); err != nil {
-			err = errors.Wrapf(err, "failed to set original file access times for %s", filePath)
+			err = errors.Wrapf(err, "failed to set file access times for %s", filePath)
 			return
 		}
 	}
@@ -176,12 +176,12 @@ func TrimPrefix(zipfile string) (err error) {
 	// Open the zipfile for reading
 	var rw *os.File
 	if rw, err = os.OpenFile(zipfile, os.O_RDWR, 0644); err != nil {
-		err = errors.Wrapf(err, "failed to open zip file '%s' to detect zip data", path.Base(zipfile))
+		err = errors.Wrapf(err, "failed to open zipfile '%s' to detect zip data", path.Base(zipfile))
 		return
 	}
 	defer rw.Close()
 
-	// Detect begining of zip file identified by PK.. i.e. 50 4B
+	// Detect begining of zipfile identified by PK.. i.e. 50 4B
 	chunk := make([]byte, 1024)
 	loc, roffset := int64(-1), int64(-1)
 	for {

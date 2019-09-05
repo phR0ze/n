@@ -8,10 +8,21 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/phR0ze/n/pkg/test"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestAbs(t *testing.T) {
+
+	// force filepathAbs error
+	{
+		test.OneShotForceFilePathAbsError()
+		result, err := Abs("foo")
+		assert.Empty(t, result)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to compute the absolute path for"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	}
+
 	{
 		result, err := Abs("")
 		assert.NotNil(t, err)
@@ -458,6 +469,15 @@ func TestExpand(t *testing.T) {
 
 func TestHome(t *testing.T) {
 
+	// force filepathAbs error
+	{
+		test.OneShotForceFilePathAbsError()
+		result, err := Home()
+		assert.Empty(t, result)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to compute the absolute path for"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	}
+
 	// happy
 	{
 		result, err := Home()
@@ -480,6 +500,17 @@ func TestHome(t *testing.T) {
 }
 
 func TestReadDir(t *testing.T) {
+
+	// force readdirnames error
+	{
+		test.OneShotForceOSReaddirnamesError()
+		dirs, err := ReadDir(tmpDir)
+		assert.Equal(t, []string{}, dirs)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to read directory names for"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	}
+
+	// happy
 	{
 		dirs, err := ReadDir("")
 		assert.Equal(t, ([]string)(nil), dirs)

@@ -4,9 +4,39 @@ import (
 	"os"
 	"path"
 	"testing"
+	"time"
 
+	"github.com/phR0ze/n/pkg/test"
 	"github.com/stretchr/testify/assert"
 )
+
+var testTime = time.Date(2018, time.May, 13, 1, 2, 3, 4, time.UTC)
+
+func TestPath(t *testing.T) {
+	info, err := Lstat(testfile)
+	assert.Nil(t, err)
+	assert.Equal(t, "../../test/testfile", info.Path())
+}
+
+func TestAbsPath(t *testing.T) {
+
+	// doesn't exist
+	{
+		info := &FileInfo{path: ""}
+		result, err := info.AbsPath()
+		assert.Empty(t, result)
+		assert.Equal(t, "empty string is an invalid path", err.Error())
+	}
+
+	// happy
+	{
+		info, err := Lstat(testfile)
+		assert.Nil(t, err)
+		result, err := info.AbsPath()
+		assert.Nil(t, err)
+		assert.Equal(t, "test/testfile", SlicePath(result, -2, -1))
+	}
+}
 
 func TestFileInfoInterface(t *testing.T) {
 	{
@@ -23,9 +53,6 @@ func TestFileInfoInterface(t *testing.T) {
 		assert.Equal(t, "testfile", info.Name())
 		assert.Equal(t, int64(604), info.Size())
 		assert.Equal(t, os.FileMode(0x1a4), info.Mode())
-		//mst, _ := time.LoadLocation("MST")
-		//expected := time.Date(2018, time.December, 10, 9, 27, 55, 0, mst)
-		//assert.Equal(t, time.Duration(0), expected.Sub(info.ModeTime()))
 	}
 }
 
@@ -48,6 +75,15 @@ func TestIsDir(t *testing.T) {
 }
 
 func TestIsFile(t *testing.T) {
+	cleanTmpDir()
+
+	// sad
+	{
+		// Standalone
+		assert.False(t, IsFile(path.Join(tmpDir, "bogus")))
+	}
+
+	// happy
 	{
 		// FileInfo
 		info, err := Lstat(readme)
@@ -71,6 +107,12 @@ func TestSize(t *testing.T) {
 
 func TestIsSymlink(t *testing.T) {
 	cleanTmpDir()
+
+	// sad
+	{
+		// Standalone
+		assert.False(t, IsSymlink(path.Join(tmpDir, "bogus")))
+	}
 
 	// Standalone
 	{
@@ -110,6 +152,12 @@ func TestIsSymlink(t *testing.T) {
 func TestIsSymlinkDir(t *testing.T) {
 	cleanTmpDir()
 
+	// sad
+	{
+		// Standalone
+		assert.False(t, IsSymlinkDir(path.Join(tmpDir, "bogus")))
+	}
+
 	// Create a directory
 	dir := path.Join(tmpDir, "dir")
 	MkdirP(dir)
@@ -131,6 +179,12 @@ func TestIsSymlinkDir(t *testing.T) {
 func TestIsSymlinkFile(t *testing.T) {
 	cleanTmpDir()
 
+	// sad
+	{
+		// Standalone
+		assert.False(t, IsSymlinkFile(path.Join(tmpDir, "bogus")))
+	}
+
 	// Create a symlink to a file
 	symlink := path.Join(tmpDir, "symlink")
 	os.Symlink(testfile, symlink)
@@ -146,9 +200,40 @@ func TestIsSymlinkFile(t *testing.T) {
 }
 
 func TestSymlinkTarget(t *testing.T) {
+	cleanTmpDir()
+
+	// link doesn't exist
+	{
+		result, err := SymlinkTarget(path.Join(tmpDir, "bogus"))
+		assert.Empty(t, result)
+		assert.Equal(t, "failed to execute Lstat against ../../test/temp/bogus: lstat ../../test/temp/bogus: no such file or directory", err.Error())
+	}
+
+	// Force readlink error
+	{
+		symlink := path.Join(tmpDir, "symlink")
+		assert.Nil(t, os.Symlink(testfile, symlink))
+
+		info, err := Lstat(symlink)
+		assert.Nil(t, err)
+		test.OneShotForceOSReadlinkError()
+		target, err := info.SymlinkTarget()
+		assert.Empty(t, target)
+		assert.Equal(t, "failed to read the link target", err.Error())
+
+		assert.Nil(t, Remove(symlink))
+	}
 
 	// Symlink to a file
-	cleanTmpDir()
+	{
+		info, err := Lstat(testfile)
+		assert.Nil(t, err)
+		target, err := info.SymlinkTarget()
+		assert.Empty(t, target)
+		assert.Equal(t, "not a symlink", err.Error())
+	}
+
+	// Symlink to a file
 	{
 		symlink := path.Join(tmpDir, "symlink")
 		os.Symlink(testfile, symlink)
@@ -160,10 +245,11 @@ func TestSymlinkTarget(t *testing.T) {
 		target, err = SymlinkTarget(symlink)
 		assert.Nil(t, err)
 		assert.Equal(t, "../../test/testfile", target)
+
+		assert.Nil(t, Remove(symlink))
 	}
 
 	// Symlink to a dir
-	cleanTmpDir()
 	{
 		dir := path.Join(tmpDir, "dir")
 		MkdirP(dir)
@@ -177,5 +263,13 @@ func TestSymlinkTarget(t *testing.T) {
 		target, err = SymlinkTarget(symlink)
 		assert.Nil(t, err)
 		assert.Equal(t, "../../test/temp/dir", target)
+	}
+}
+
+func TestSymlinkTargetExists(t *testing.T) {
+
+	// link doesn't exist
+	{
+		assert.False(t, SymlinkTargetExists(path.Join(tmpDir, "bogus")))
 	}
 }

@@ -16,6 +16,9 @@ import (
 // Create a new tar.gz file at tarfile from the given srcPath directory
 func Create(tarfile, srcPath string) (err error) {
 	var srcAbs string
+	if tarfile, err = sys.Abs(tarfile); err != nil {
+		return
+	}
 	if srcAbs, err = sys.Abs(srcPath); err != nil {
 		return
 	}
@@ -81,7 +84,7 @@ func addFiles(tw *tar.Writer, root, base string) (err error) {
 
 			// Stream the data from the reader to the writer
 			if _, err = io.Copy(tw, fr); err != nil {
-				err = errors.Wrapf(err, "failed to copy data from reader to writer for zip target %s", target)
+				err = errors.Wrapf(err, "failed to copy data from reader to writer for tar target %s", target)
 				return
 			}
 		} else {
@@ -96,7 +99,10 @@ func addFiles(tw *tar.Writer, root, base string) (err error) {
 
 // ExtractAll files into given destination directory
 func ExtractAll(tarfile, dest string) (err error) {
-	if _, err = sys.MkdirP(dest); err != nil {
+	if tarfile, err = sys.Abs(tarfile); err != nil {
+		return
+	}
+	if dest, err = sys.MkdirP(dest); err != nil {
 		return
 	}
 
@@ -111,7 +117,7 @@ func ExtractAll(tarfile, dest string) (err error) {
 	// Open gzip reader
 	var gr *gzip.Reader
 	if gr, err = gzip.NewReader(fr); err != nil {
-		err = errors.Wrapf(err, "failed to open gzip reader %s from", tarfile)
+		err = errors.Wrapf(err, "failed to open gzip reader from %s", tarfile)
 		return
 	}
 	defer gr.Close()
@@ -120,56 +126,55 @@ func ExtractAll(tarfile, dest string) (err error) {
 	dirCache := map[string]bool{}
 	tr := tar.NewReader(gr)
 	for {
-		var header *tar.Header
-		if header, err = tr.Next(); err == io.EOF {
+		var info *tar.Header
+		if info, err = tr.Next(); err == io.EOF {
 			err = nil
 			break
 		} else if err != nil {
 			err = errors.Wrapf(err, "failed to extract files from tarfile %s", tarfile)
 			return
 		}
+		filePath := path.Join(dest, info.Name)
 
-		// Create directories
-		if header.Typeflag == tar.TypeDir {
-			dirPath := path.Join(dest, header.Name)
-			if _, exist := dirCache[dirPath]; !exist {
-				if _, err = sys.MkdirP(dirPath, uint32(header.Mode)); err != nil {
-					err = errors.Wrapf(err, "failed to create directory %s", dirPath)
-					return
-				}
-				dirCache[dirPath] = true
+		// Create any directories with default mode
+		dirPath := path.Dir(filePath)
+		if info.Typeflag == tar.TypeDir {
+			dirPath = filePath
+		}
+		if _, exist := dirCache[dirPath]; !exist {
+			if _, err = sys.MkdirP(dirPath); err != nil {
+				err = errors.Wrapf(err, "failed to create directory %s", dirPath)
+				return
 			}
-			continue
+			dirCache[dirPath] = true
 		}
 
-		// Write out files
-		if header.Typeflag == tar.TypeReg {
-			filePath := path.Join(dest, header.Name)
-
-			// Create any directories with default permissions that don't exist
-			dirPath := path.Dir(filePath)
-			if _, exist := dirCache[dirPath]; !exist {
-				if _, err = sys.MkdirP(path.Dir(filePath)); err != nil {
-					err = errors.Wrapf(err, "failed to create directory %s", path.Dir(filePath))
-					return
-				}
-				dirCache[dirPath] = true
-			}
+		// Create file and write content to it
+		if info.Typeflag == tar.TypeReg {
 
 			// Create file and write content to it
 			var fw *os.File
 			if fw, err = os.Create(filePath); err != nil {
-				err = errors.Wrapf(err, "failed to create target file %s from tarfile", filePath)
+				err = errors.Wrapf(err, "failed to create file %s from tarfile", filePath)
 				return
 			}
-			io.Copy(fw, tr)
+			if _, err = io.Copy(fw, fr); err != nil {
+				err = errors.Wrap(err, "failed to copy data from tar to disk")
+				return
+			}
 			fw.Close()
 
 			// Set file mode to the original value
-			if err = os.Chmod(filePath, os.FileMode(header.Mode)); err != nil {
+			if err = os.Chmod(filePath, os.FileMode(info.Mode)); err != nil {
 				err = errors.Wrapf(err, "failed to set file mode for %s", filePath)
 				return
 			}
+		}
+
+		// Set file access times to the original values
+		if err = os.Chtimes(filePath, info.AccessTime, info.ModTime); err != nil {
+			err = errors.Wrapf(err, "failed to set file access times for %s", filePath)
+			return
 		}
 	}
 	return
