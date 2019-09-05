@@ -200,12 +200,14 @@ func Dirs(target string) (result []string) {
 // Expand the path to include the home prefix if necessary
 func Expand(target string) (path string, err error) {
 	path = target
-	if len(path) < 2 || path[0] != '~' {
+
+	// Nothing to do but not invalid
+	if path == "" || !strings.Contains(path, "~") {
 		return
 	}
 
-	// Invalid path
-	if path[1] != '/' {
+	// Invalid expansion requested
+	if path[0] != '~' || len(path) < 2 || path[1] != '/' {
 		path = ""
 		err = errors.Errorf("failed to expand invalid path")
 		return
@@ -220,6 +222,13 @@ func Expand(target string) (path string, err error) {
 
 	// Replace prefix with home directory
 	path = filepath.Join(home, path[1:])
+
+	// Invalid expansion requested
+	if strings.Contains(path, "~") {
+		path = ""
+		err = errors.Errorf("invalid expansion requested")
+		return
+	}
 	return
 }
 
@@ -367,7 +376,8 @@ func walk(root string, info *FileInfo, walkFn WalkFunc, opts []*opt.Opt) (err er
 	targetInfo := info
 	targets := []string{}
 
-	// First thing pass whatever we've got on to user walkFn
+	// First thing pass whatever we've got on to user walkFn so the user has
+	// the ability to skip this path before processing is done on it
 	if err = walkFn(root, info, err); err != nil {
 		return
 	}
@@ -424,9 +434,8 @@ func ReadDir(dirname string) (names []string, err error) {
 		err = errors.Wrapf(err, "failed to read directory %s", dirname)
 		return
 	}
-	names, err = f.Readdirnames(-1)
-	f.Close()
-	if err != nil {
+	defer f.Close()
+	if names, err = f.Readdirnames(-1); err != nil {
 		err = errors.Wrapf(err, "failed to read directory names for %s", dirname)
 		return
 	}

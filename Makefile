@@ -25,7 +25,7 @@ test: ${NAME}
 	go test ./pkg/futil
 	go test ./pkg/net
 	go test ./pkg/opt
-	go test ./pkg/sys
+	go test -gcflags=-l ./pkg/sys
 	go test ./pkg/term
 	go test ./pkg/time
 	go test ./pkg/tmpl
@@ -33,7 +33,7 @@ test: ${NAME}
 cover: ${NAME}
 	@echo -e "\nRunning go coverage tests:"
 	@echo -e "------------------------------------------------------------------------"
-	go test -coverprofile=coverage.out ./pkg/${pkg}
+	go test -gcflags=-l -coverprofile=coverage.out ./pkg/${pkg}
 	go tool cover -html=coverage.out
 
 bench: vendor

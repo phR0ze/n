@@ -166,7 +166,15 @@ func TestAllFilesWithFileLink(t *testing.T) {
 func TestAllDirs(t *testing.T) {
 	cleanTmpDir()
 
-	// invalid dir
+	// doesn't exist
+	{
+		paths, err := AllDirs(path.Join(tmpDir, "foo"))
+		assert.Equal(t, ([]string)(nil), paths)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to execute Lstat against"))
+		assert.True(t, strings.Contains(err.Error(), "no such file or directory"))
+	}
+
+	// empty dir name
 	{
 		paths, err := AllDirs("")
 		assert.Equal(t, ([]string)(nil), paths)
@@ -212,6 +220,14 @@ func TestAllDirs(t *testing.T) {
 
 func TestAllFiles(t *testing.T) {
 	cleanTmpDir()
+
+	// doesn't exist
+	{
+		paths, err := AllFiles(path.Join(tmpDir, "foo"))
+		assert.Equal(t, ([]string)(nil), paths)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to execute Lstat against"))
+		assert.True(t, strings.Contains(err.Error(), "no such file or directory"))
+	}
 
 	// invalid dir
 	{
@@ -309,6 +325,16 @@ func TestAllFiles(t *testing.T) {
 func TestAllPaths(t *testing.T) {
 	cleanTmpDir()
 
+	// doesn't exist
+	{
+		expected, err := Abs(path.Join(tmpDir, "foo"))
+		assert.Nil(t, err)
+		paths, err := AllPaths(path.Join(tmpDir, "foo"))
+		assert.Equal(t, []string{expected}, paths)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to execute Lstat against"))
+		assert.True(t, strings.Contains(err.Error(), "no such file or directory"))
+	}
+
 	// invalid dir
 	{
 		paths, err := AllPaths("")
@@ -394,6 +420,13 @@ func TestAllPaths(t *testing.T) {
 }
 
 func TestExpand(t *testing.T) {
+
+	// More than one ~
+	{
+		result, err := Expand("~/foo~")
+		assert.Equal(t, "invalid expansion requested", err.Error())
+		assert.Equal(t, "", result)
+	}
 
 	// invalid path
 	{
@@ -545,6 +578,60 @@ func TestTrimProtocol(t *testing.T) {
 	assert.Equal(t, "foo/bar", TrimProtocol("http://foo/bar"))
 	assert.Equal(t, "foo/bar", TrimProtocol("https://foo/bar"))
 	assert.Equal(t, "foo://foo/bar", TrimProtocol("foo://foo/bar"))
+}
+
+func TestWalkSkip(t *testing.T) {
+	cleanTmpDir()
+
+	// Create dirs to walk
+	_, err := MkdirP(path.Join(tmpDir, "skipme"))
+	assert.Nil(t, err)
+	_, err = MkdirP(path.Join(tmpDir, "noskipme"))
+	assert.Nil(t, err)
+
+	// Call walk with skip
+	results := []string{}
+	err = Walk(tmpDir, func(p string, i *FileInfo, e error) error {
+		if path.Base(p) == "skipme" {
+			return filepath.SkipDir
+		}
+		results = append(results, path.Base(p))
+		return nil
+	})
+	assert.Equal(t, []string{"temp", "noskipme"}, results)
+}
+
+func TestWalkDirPermissions(t *testing.T) {
+	cleanTmpDir()
+
+	// Create dirs to walk
+	skipMe, err := MkdirP(path.Join(tmpDir, "skipme"))
+	assert.Nil(t, err)
+	_, err = MkdirP(path.Join(tmpDir, "noskipme"))
+	assert.Nil(t, err)
+	err = os.Chmod(skipMe, 0222)
+	defer os.Chmod(skipMe, 0755)
+
+	// Call walk with skip
+	cnt := 0
+	err = Walk(tmpDir, func(p string, i *FileInfo, e error) error {
+		if path.Base(p) == "skipme" {
+			cnt++
+			if cnt == 2 {
+				assert.True(t, strings.HasPrefix(e.Error(), "failed to read directory"))
+				assert.True(t, strings.Contains(e.Error(), "permission denied"))
+				// By passing it back to the walk function we abort
+				return e
+			}
+			// There won't be a failure the first time we get called with skipme as
+			// that is the user opportunity to skip the second call will be the read permissions
+			// error
+			assert.Nil(t, e)
+		} else {
+			assert.Nil(t, e)
+		}
+		return nil
+	})
 }
 
 func pathContainsHome(path string) (result bool) {

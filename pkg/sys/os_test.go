@@ -1,12 +1,14 @@
 package sys
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
 	"runtime"
 	"strings"
 	"testing"
+	"testing/iotest"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -15,6 +17,152 @@ var tmpDir = "../../test/temp"
 var tmpfile = "../../test/temp/.tmp"
 var testfile = "../../test/testfile"
 var readme = "../../README.md"
+
+func TestCopyGlob(t *testing.T) {
+
+	// single file to non-existing dst is a copy to not copy into
+	{
+		cleanTmpDir()
+		// Create src dir and target file
+		srcDir := path.Join(tmpDir, "src")
+		_, err := MkdirP(srcDir)
+		assert.Nil(t, err)
+		_, err = Touch(path.Join(srcDir, "newfile1"))
+		assert.Nil(t, err)
+
+		// Now try to copy with bad glob pattern
+		err = Copy(path.Join(tmpDir, "*/newfile*"), path.Join(tmpDir, "dst"))
+		assert.Nil(t, err)
+
+		// Validate resulting paths
+		results, err := AllPaths(tmpDir)
+		assert.Nil(t, err)
+		tmpDirAbs, err := Abs(tmpDir)
+		for i := range results {
+			results[i] = strings.TrimPrefix(results[i], tmpDirAbs)
+		}
+		assert.Equal(t, []string{"", "/dst", "/src", "/src/newfile1"}, results)
+
+		// Validate resulting file data
+		data1, err := ReadString(path.Join(tmpDir, "src/newfile1"))
+		assert.Nil(t, err)
+		data2, err := ReadString(path.Join(tmpDir, "dst"))
+		assert.Equal(t, data1, data2)
+	}
+
+	// multiple files to non-existing dst
+	{
+		cleanTmpDir()
+		// Create src dir and target file
+		srcDir := path.Join(tmpDir, "src")
+		_, err := MkdirP(srcDir)
+		assert.Nil(t, err)
+		_, err = Touch(path.Join(srcDir, "newfile1"))
+		assert.Nil(t, err)
+		_, err = Touch(path.Join(srcDir, "newfile2"))
+		assert.Nil(t, err)
+
+		// Now try to copy with bad glob pattern
+		err = Copy(path.Join(tmpDir, "*/newfile*"), path.Join(tmpDir, "dst"))
+		assert.Nil(t, err)
+		assert.FileExists(t, path.Join(tmpDir, "dst/newfile1"))
+		assert.FileExists(t, path.Join(tmpDir, "dst/newfile2"))
+	}
+
+	// multiple files to pre-existing directory
+	{
+		cleanTmpDir()
+		dst := path.Join(tmpDir)
+		err := Copy("./*", dst)
+		assert.Nil(t, err)
+
+		expected, err := AllPaths(".")
+		assert.Nil(t, err)
+		results, err := AllPaths(tmpDir)
+		assert.Nil(t, err)
+
+		for i := range results {
+			expected[i] = path.Base(expected[i])
+			results[i] = path.Base(results[i])
+		}
+		assert.Equal(t, "sys", expected[0])
+		assert.Equal(t, "temp", results[0])
+		assert.Equal(t, expected[1:], results[1:])
+	}
+}
+
+func TestCopyWithPermissionFailures(t *testing.T) {
+
+	// try to create destination dirs in no write destination
+	{
+		cleanTmpDir()
+
+		// Create src dir with no read permissions
+		srcDir := path.Join(tmpDir, "src")
+		_, err := MkdirP(srcDir)
+		assert.Nil(t, err)
+		_, err = Touch(path.Join(srcDir, "file"))
+		assert.Nil(t, err)
+
+		// Create dst dir with no write permissions
+		dstDir := path.Join(tmpDir, "dst")
+		_, err = MkdirP(dstDir)
+		assert.Nil(t, err)
+		assert.Nil(t, os.Chmod(dstDir, 0444))
+
+		// Now copy from src to sub dir under dst
+		err = Copy(srcDir, path.Join(dstDir, "sub/file"))
+		assert.True(t, strings.HasPrefix(err.Error(), "mkdir"))
+		assert.True(t, strings.Contains(err.Error(), "permission denied"))
+
+		// Fix the permission on the dstDir
+		assert.Nil(t, os.Chmod(dstDir, 0755))
+	}
+
+	// read from no read permission source failure
+	{
+		cleanTmpDir()
+
+		// Create src dir with no read permissions
+		srcDir := path.Join(tmpDir, "src")
+		_, err := MkdirP(srcDir)
+		assert.Nil(t, err)
+		assert.Nil(t, os.Chmod(srcDir, 0222))
+
+		// Now try to copy from src
+		err = Copy(srcDir, path.Join(tmpDir, "dst"))
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to read directory"))
+		assert.True(t, strings.Contains(err.Error(), "permission denied"))
+
+		// Fix the permission on the dstDir
+		assert.Nil(t, os.Chmod(srcDir, 0755))
+	}
+}
+
+func TestCopyDirLinksFailure(t *testing.T) {
+	cleanTmpDir()
+
+	// Create sub dir with link to it
+	srcDir := path.Join(tmpDir, "src")
+	_, err := MkdirP(srcDir)
+	assert.Nil(t, err)
+	linkDir := path.Join(tmpDir, "link")
+	assert.Nil(t, os.Symlink(srcDir, linkDir))
+
+	// Now create the destination with readonly permissions
+	dstDir := path.Join(tmpDir, "dst")
+	_, err = MkdirP(dstDir)
+	assert.Nil(t, err)
+	assert.Nil(t, os.Chmod(dstDir, 0444))
+
+	// Now try to copy the linkDir to the dstDir
+	err = Copy(linkDir, dstDir)
+	assert.True(t, strings.HasPrefix(err.Error(), "symlink"))
+	assert.True(t, strings.Contains(err.Error(), "permission denied"))
+
+	// Fix the permission on the dstDir
+	assert.Nil(t, os.Chmod(dstDir, 0755))
+}
 
 func TestCopyLinksRelativeNoFollow(t *testing.T) {
 	cleanTmpDir()
@@ -32,7 +180,7 @@ func TestCopyLinksRelativeNoFollow(t *testing.T) {
 	// Create sysmlink in first dir to second dir
 	// temp/first/second => temp/second
 	symlink := path.Join(tmpDir, "first", "second")
-	os.Symlink("../second", symlink)
+	assert.Nil(t, os.Symlink("../second", symlink))
 
 	// Copy first dir to dst without following links
 	{
@@ -40,7 +188,7 @@ func TestCopyLinksRelativeNoFollow(t *testing.T) {
 		assert.Nil(t, err)
 
 		dstDir, _ := Abs(path.Join(tmpDir, "dst"))
-		Copy(firstDir, dstDir)
+		assert.Nil(t, Copy(firstDir, dstDir))
 
 		// Compute results
 		results, _ := AllPaths(dstDir)
@@ -86,7 +234,7 @@ func TestCopyLinksAbsNoFollow(t *testing.T) {
 	// Create sysmlink in first dir to second dir
 	// temp/first/second => temp/second
 	symlink := path.Join(tmpDir, "first", "second")
-	os.Symlink(secondDir, symlink)
+	assert.Nil(t, os.Symlink(secondDir, symlink))
 
 	// Copy first dir to dst without following links
 	{
@@ -94,7 +242,7 @@ func TestCopyLinksAbsNoFollow(t *testing.T) {
 		assert.Nil(t, err)
 
 		dstDir, _ := Abs(path.Join(tmpDir, "dst"))
-		Copy(firstDir, dstDir)
+		assert.Nil(t, Copy(firstDir, dstDir))
 
 		// Compute results
 		results, _ := AllPaths(dstDir)
@@ -125,6 +273,7 @@ func TestCopyLinksAbsNoFollow(t *testing.T) {
 }
 
 func TestCopy(t *testing.T) {
+
 	// invalid files
 	{
 		// invalid dst
@@ -147,7 +296,7 @@ func TestCopy(t *testing.T) {
 		src := "."
 		dst := path.Join(tmpDir, "pkg")
 
-		Copy(src, dst)
+		assert.Nil(t, Copy(src, dst))
 		srcPaths, err := AllPaths(src)
 		assert.Nil(t, err)
 		dstPaths, err := AllPaths(dst)
@@ -168,7 +317,7 @@ func TestCopy(t *testing.T) {
 		dst := path.Join(tmpDir, "pkg")
 		MkdirP(dst)
 
-		Copy(src, dst)
+		assert.Nil(t, Copy(src, dst))
 		srcPaths, err := AllPaths(src)
 		assert.Nil(t, err)
 		dstPaths, err := AllPaths(path.Join(dst, "sys"))
@@ -213,7 +362,7 @@ func TestCopyWithFileParentDoentExist(t *testing.T) {
 	dst := path.Join(tmpDir, "foo/bar/readme")
 
 	assert.False(t, Exists(dst))
-	Copy(src, dst)
+	assert.Nil(t, Copy(src, dst))
 	assert.True(t, Exists(dst))
 
 	srcMD5, err := MD5(src)
@@ -231,7 +380,8 @@ func TestCopyFileParentDoentExist(t *testing.T) {
 	dst := path.Join(tmpDir, "foo/bar/readme")
 
 	assert.False(t, Exists(dst))
-	CopyFile(src, dst)
+	_, err := CopyFile(src, dst)
+	assert.Nil(t, err)
 	assert.True(t, Exists(dst))
 
 	srcMD5, err := MD5(src)
@@ -248,7 +398,7 @@ func TestCopyWithDirParentDoentExist(t *testing.T) {
 	src := "."
 	dst := path.Join(tmpDir, "foo/bar/pkg")
 
-	Copy(src, dst)
+	assert.Nil(t, Copy(src, dst))
 	srcPaths, err := AllPaths(src)
 	assert.Nil(t, err)
 	dstPaths, err := AllPaths(dst)
@@ -262,54 +412,214 @@ func TestCopyWithDirParentDoentExist(t *testing.T) {
 	assert.Equal(t, srcPaths[1:], dstPaths[1:])
 }
 
-func TestCopyGlob(t *testing.T) {
-	{
-		cleanTmpDir()
-		dst := path.Join(tmpDir)
-		Copy("./*", dst)
-
-		expected, err := AllPaths(".")
-		assert.Nil(t, err)
-		results, err := AllPaths(tmpDir)
-		assert.Nil(t, err)
-
-		for i := range results {
-			expected[i] = path.Base(expected[i])
-			results[i] = path.Base(results[i])
-		}
-		assert.Equal(t, "sys", expected[0])
-		assert.Equal(t, "temp", results[0])
-		assert.Equal(t, expected[1:], results[1:])
-	}
-}
-
 func TestCopyFile(t *testing.T) {
 	cleanTmpDir()
 
+	// copy symlink to readonly dest - failure
+	{
+		// Create link to a bogus file
+		link := path.Join(tmpDir, "link")
+		err := Symlink(path.Join(tmpDir, "bogus"), link)
+		assert.Nil(t, err)
+
+		// Create dst dir with readonly permissions
+		dstDir, err := MkdirP(path.Join(tmpDir, "dst"))
+		assert.Nil(t, err)
+		err = os.Chmod(dstDir, 0444)
+		assert.Nil(t, err)
+
+		// Copy link to dst with readonly permssions and see failure
+		result, err := CopyFile(link, dstDir)
+		assert.Equal(t, "", result)
+		assert.True(t, strings.HasPrefix(err.Error(), "symlink"))
+		assert.True(t, strings.Contains(err.Error(), "permission denied"))
+
+		// Reset permission so dst dir
+		err = os.Chmod(dstDir, 0755)
+		assert.Nil(t, err)
+	}
+	cleanTmpDir()
+
+	// CopyFile symlink
+	{
+		// Create link to a bogus file
+		link := path.Join(tmpDir, "link")
+		err := Symlink(path.Join(tmpDir, "bogus"), link)
+		assert.Nil(t, err)
+
+		newlink := path.Join(tmpDir, "newlink")
+		result, err := CopyFile(link, newlink)
+		assert.Equal(t, SlicePath(newlink, -2, -1), SlicePath(result, -2, -1))
+		assert.Nil(t, err)
+
+		// Validate files and link locations
+		linkInfo, err := Lstat(link)
+		assert.Nil(t, err)
+		assert.True(t, linkInfo.IsSymlink())
+		assert.False(t, linkInfo.SymlinkTargetExists())
+		linkTarget, err := linkInfo.SymlinkTarget()
+		assert.Nil(t, err)
+		assert.Equal(t, "../../test/temp/bogus", linkTarget)
+
+		newlinkInfo, err := Lstat(newlink)
+		assert.Nil(t, err)
+		assert.True(t, newlinkInfo.IsSymlink())
+		assert.False(t, newlinkInfo.SymlinkTargetExists())
+		assert.False(t, SymlinkTargetExists(newlink))
+		newlinkTarget, err := newlinkInfo.SymlinkTarget()
+		assert.Nil(t, err)
+		assert.Equal(t, "../../test/temp/bogus", newlinkTarget)
+
+		// Create bogus file and test that symlink target exists
+		_, err = Touch(path.Join(tmpDir, "bogus"))
+		assert.Nil(t, err)
+		assert.True(t, newlinkInfo.SymlinkTargetExists())
+		assert.True(t, SymlinkTargetExists(newlink))
+	}
+	cleanTmpDir()
+
+	// target file is not readable via permissions
+	{
+		// Write out a temp file
+		err := WriteString(tmpfile, `This is a test of the emergency broadcast system.`)
+		assert.Nil(t, err)
+
+		// Revoke read permissions
+		assert.Nil(t, os.Chmod(tmpfile, 0222))
+
+		// Try to copy it and fail
+		result, err := CopyFile(tmpfile, path.Join(tmpDir, "new"))
+		assert.Equal(t, "", result)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to open file"))
+		assert.True(t, strings.Contains(err.Error(), "permission denied"))
+		assert.Nil(t, os.Chmod(tmpfile, 0644))
+		assert.Nil(t, Remove(tmpfile))
+	}
+
+	// source symlink and target doesn't exist
+	{
+		// Setup link to bogus file
+		subDir, err := MkdirP(path.Join(tmpDir, "sub"))
+		assert.Nil(t, err)
+		linkDir := path.Join(tmpDir, "link")
+		assert.Nil(t, Symlink(subDir, linkDir))
+
+		result, err := CopyFile(linkDir, "new")
+		assert.Equal(t, "", result)
+		assert.Equal(t, "src target is not a regular file or a symlink to a file", err.Error())
+	}
+
+	cleanTmpDir()
+
+	// empty destination
+	{
+		result, err := CopyFile(readme, "")
+		assert.Equal(t, "", result)
+		assert.Equal(t, "empty string is an invalid path", err.Error())
+	}
+
 	// empty source
 	{
-		err := CopyFile("", "")
+		result, err := CopyFile("", "")
+		assert.Equal(t, "", result)
 		assert.Equal(t, "empty string is an invalid path", err.Error())
 	}
 
 	// source doesn't exist
 	{
-		err := CopyFile(path.Join(tmpDir, "foo"), path.Join(tmpDir, "bar"))
-		assert.Equal(t, "failed to execute Lstat against ../../test/temp/foo: lstat ../../test/temp/foo: no such file or directory", err.Error())
+		result, err := CopyFile(path.Join(tmpDir, "foo"), path.Join(tmpDir, "bar"))
+		assert.Equal(t, "", result)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to execute Lstat against"))
+		assert.True(t, strings.Contains(err.Error(), "no such file or directory"))
+	}
+
+	// empty info path
+	{
+		result, err := CopyFile(path.Join(tmpDir, "foo/foo"), "", newInfoOpt(&FileInfo{}))
+		assert.Equal(t, "", result)
+		assert.Equal(t, "empty string is an invalid path", err.Error())
 	}
 
 	// pass in bad info
 	{
-		err := CopyFile(path.Join(tmpDir, "foo/foo"), "", newInfoOpt(&FileInfo{}))
-		assert.Equal(t, "failed to execute Lstat against ../../test/temp/foo: lstat ../../test/temp/foo: no such file or directory", err.Error())
+		result, err := CopyFile(path.Join(tmpDir, "foo/foo"), "", newInfoOpt(&FileInfo{path: "foo/foo"}))
+		assert.Equal(t, "", result)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to execute Lstat against"))
+		assert.True(t, strings.Contains(err.Error(), "no such file or directory"))
 	}
 
 	// source is a directory
 	{
 		subdir, err := MkdirP(path.Join(tmpDir, "sub"))
 		assert.Nil(t, err)
-		err = CopyFile(subdir, path.Join(tmpDir, "bar"))
+		result, err := CopyFile(subdir, path.Join(tmpDir, "bar"))
+		assert.Equal(t, "", result)
 		assert.Equal(t, "src target is not a regular file or a symlink to a file", err.Error())
+	}
+
+	// new destination name
+	{
+		result, err := CopyFile(readme, path.Join(tmpDir, "foo"))
+		assert.Nil(t, err)
+		assert.Equal(t, "temp/foo", SlicePath(result, -2, -1))
+		assert.Nil(t, Remove(result))
+	}
+
+	// failed to create destination sub directory
+	{
+		subdir, err := MkdirP(path.Join(tmpDir, "sub"))
+		assert.Nil(t, err)
+
+		// Now make subdir readonly
+		assert.Nil(t, os.Chmod(subdir, 0555))
+
+		// Try to copy to a readonly directory
+		result, err := CopyFile(readme, path.Join(subdir, "foo/bar"))
+		assert.Equal(t, "", result)
+		assert.True(t, strings.HasPrefix(err.Error(), "mkdir"))
+		assert.True(t, strings.Contains(err.Error(), "permission denied"))
+
+		// Fix permissions on subdir and remove it
+		assert.Nil(t, os.Chmod(subdir, 0755))
+		assert.Nil(t, RemoveAll(subdir))
+	}
+
+	// failed to stat destination
+	{
+		subdir, err := MkdirP(path.Join(tmpDir, "sub"))
+		assert.Nil(t, err)
+
+		// Now make subdir readonly
+		assert.Nil(t, os.Chmod(subdir, 0444))
+
+		// Try to copy to a readonly directory
+		result, err := CopyFile(readme, path.Join(subdir, "foo/bar"))
+		assert.Equal(t, "", result)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to Stat destination"))
+		assert.True(t, strings.Contains(err.Error(), "permission denied"))
+
+		// Fix permissions on subdir and remove it
+		assert.Nil(t, os.Chmod(subdir, 0755))
+		assert.Nil(t, RemoveAll(subdir))
+	}
+
+	// failed to create new file permission denied
+	{
+		subdir, err := MkdirP(path.Join(tmpDir, "sub"))
+		assert.Nil(t, err)
+
+		// Now make subdir readonly
+		assert.Nil(t, os.Chmod(subdir, 0444))
+
+		// Try to copy to a readonly directory
+		result, err := CopyFile(readme, subdir)
+		assert.Equal(t, "", result)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to create file"))
+		assert.True(t, strings.Contains(err.Error(), "permission denied"))
+
+		// Fix permissions on subdir and remove it
+		assert.Nil(t, os.Chmod(subdir, 0755))
+		assert.Nil(t, RemoveAll(subdir))
 	}
 
 	// happy
@@ -318,8 +628,9 @@ func TestCopyFile(t *testing.T) {
 		foo := path.Join(tmpDir, "foo")
 
 		assert.False(t, Exists(foo))
-		err := CopyFile(readme, foo)
+		result, err := CopyFile(readme, foo)
 		assert.Nil(t, err)
+		assert.Equal(t, SlicePath(foo, -2, -1), SlicePath(result, -2, -1))
 		assert.True(t, Exists(foo))
 
 		srcMD5, err := MD5(readme)
@@ -329,8 +640,9 @@ func TestCopyFile(t *testing.T) {
 		assert.Equal(t, srcMD5, dstMD5)
 
 		// Overwrite file
-		err = CopyFile(testfile, foo)
+		result, err = CopyFile(testfile, foo)
 		assert.Nil(t, err)
+		assert.Equal(t, SlicePath(foo, -2, -1), SlicePath(result, -2, -1))
 		srcMD5, err = MD5(testfile)
 		assert.Nil(t, err)
 		dstMD5, err = MD5(foo)
@@ -375,11 +687,11 @@ func TestMD5(t *testing.T) {
 
 	// Remove read permissions from file
 	{
-		os.Chmod(tmpfile, 0222)
+		assert.Nil(t, os.Chmod(tmpfile, 0222))
 		result, err := MD5(tmpfile)
 		assert.Equal(t, "", result)
 		assert.True(t, strings.HasPrefix(err.Error(), "failed opening target file"))
-		os.Chmod(tmpfile, 0644)
+		assert.Nil(t, os.Chmod(tmpfile, 0644))
 	}
 }
 
@@ -391,8 +703,7 @@ func TestMkdirP(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, SlicePath(tmpDir, -2, -1), SlicePath(result, -2, -1))
 		assert.True(t, Exists(tmpDir))
-		err = RemoveAll(result)
-		assert.Nil(t, err)
+		assert.Nil(t, RemoveAll(result))
 	}
 
 	// permissions given
@@ -407,12 +718,12 @@ func TestMkdirP(t *testing.T) {
 
 	// Remove read permissions from file
 	{
-		os.Chmod(tmpDir, 0222)
+		assert.Nil(t, os.Chmod(tmpDir, 0222))
 		result, err := MkdirP(path.Join(tmpDir, "foo"))
 		assert.Equal(t, "temp/foo", SlicePath(result, -2, -1))
 		assert.True(t, strings.HasPrefix(err.Error(), "failed creating directories for"))
 		assert.True(t, strings.Contains(err.Error(), "permission denied"))
-		os.Chmod(tmpDir, 0755)
+		assert.Nil(t, os.Chmod(tmpDir, 0755))
 	}
 
 	// HOME not set
@@ -433,7 +744,7 @@ func TestMove(t *testing.T) {
 	cleanTmpDir()
 
 	// Copy file in to tmpDir then rename in same location
-	Copy(testfile, tmpDir)
+	assert.Nil(t, Copy(testfile, tmpDir))
 	newTestFile := path.Join(tmpDir, "testfile")
 
 	srcMd5, _ := MD5(newTestFile)
@@ -460,12 +771,12 @@ func TestMove(t *testing.T) {
 	assert.Equal(t, srcMd5, dstMd5)
 
 	// permission denied
-	os.Chmod(subDir, 0222)
+	assert.Nil(t, os.Chmod(subDir, 0222))
 	result, err = Move(newfile, tmpfile)
 	assert.Equal(t, "", result)
 	assert.True(t, strings.HasPrefix(err.Error(), "failed renaming file"))
 	assert.True(t, strings.Contains(err.Error(), "permission denied"))
-	os.Chmod(subDir, 0755)
+	assert.Nil(t, os.Chmod(subDir, 0755))
 }
 
 func TestPwd(t *testing.T) {
@@ -493,8 +804,7 @@ func TestReadBytes(t *testing.T) {
 	// happy
 	{
 		// Write out test data
-		err := WriteString(tmpfile, "this is a test")
-		assert.Nil(t, err)
+		assert.Nil(t, WriteString(tmpfile, "this is a test"))
 
 		// Read the file back in and validate
 		data, err := ReadBytes(tmpfile)
@@ -550,8 +860,7 @@ func TestReadString(t *testing.T) {
 	// happy
 	{
 		// Write out test data
-		err := WriteString(tmpfile, "this is a test")
-		assert.Nil(t, err)
+		assert.Nil(t, WriteString(tmpfile, "this is a test"))
 
 		// Read the file back in and validate
 		data, err := ReadString(tmpfile)
@@ -564,13 +873,11 @@ func TestRemove(t *testing.T) {
 	cleanTmpDir()
 
 	// Write out test data
-	err := WriteString(tmpfile, "this is a test")
-	assert.Nil(t, err)
+	assert.Nil(t, WriteString(tmpfile, "this is a test"))
 	assert.True(t, Exists(tmpfile))
 
 	// Now remove the file and validate
-	err = Remove(tmpfile)
-	assert.Nil(t, err)
+	assert.Nil(t, Remove(tmpfile))
 	assert.False(t, Exists(tmpfile))
 }
 
@@ -582,8 +889,7 @@ func TestSymlink(t *testing.T) {
 
 	// Create file symlink
 	newfilelink := path.Join(tmpDir, "filelink")
-	err = Symlink(tmpfile, newfilelink)
-	assert.Nil(t, err)
+	assert.Nil(t, Symlink(tmpfile, newfilelink))
 	assert.True(t, IsSymlink(newfilelink))
 	assert.True(t, IsSymlinkFile(newfilelink))
 	assert.False(t, IsSymlinkDir(newfilelink))
@@ -593,8 +899,7 @@ func TestSymlink(t *testing.T) {
 	_, err = MkdirP(subdir)
 	assert.Nil(t, err)
 	newdirlink := path.Join(tmpDir, "sublink")
-	err = Symlink(subdir, newdirlink)
-	assert.Nil(t, err)
+	assert.Nil(t, Symlink(subdir, newdirlink))
 	assert.True(t, IsSymlink(newdirlink))
 	assert.False(t, IsSymlinkFile(newdirlink))
 	assert.True(t, IsSymlinkDir(newdirlink))
@@ -602,6 +907,17 @@ func TestSymlink(t *testing.T) {
 
 func TestTouch(t *testing.T) {
 	cleanTmpDir()
+
+	// Force failure of Close via monkey patch
+	{
+		OneShotForceIOCloseError()
+		_, err := Touch(tmpfile)
+		assert.Equal(t, fmt.Sprintf("failed closing file %s: invalid argument", tmpfile), err.Error())
+
+		// Clean up
+		err = Remove(tmpfile)
+		assert.Nil(t, err)
+	}
 
 	// empty string
 	{
@@ -617,14 +933,13 @@ func TestTouch(t *testing.T) {
 		assert.Equal(t, SlicePath(tmpfile, -2, -1), SlicePath(result, -2, -1))
 
 		// Now try to truncate it after setting to readonly
-		os.Chmod(tmpfile, 0444)
+		assert.Nil(t, os.Chmod(tmpfile, 0444))
 		result, err = Touch(tmpfile)
 		assert.Equal(t, SlicePath(tmpfile, -2, -1), SlicePath(result, -2, -1))
 		assert.True(t, strings.HasPrefix(err.Error(), "failed creating/truncating file"))
 		assert.True(t, strings.Contains(err.Error(), "permission denied"))
-		os.Chmod(tmpfile, 0755)
-		err = Remove(tmpfile)
-		assert.Nil(t, err)
+		assert.Nil(t, os.Chmod(tmpfile, 0755))
+		assert.Nil(t, Remove(tmpfile))
 	}
 
 	// happy
@@ -641,22 +956,145 @@ func TestTouch(t *testing.T) {
 	}
 }
 
-func TestWriteFile(t *testing.T) {
+func TestWriteBytes(t *testing.T) {
 	cleanTmpDir()
 
-	// Read and write file
-	data, err := ioutil.ReadFile(testfile)
-	assert.Nil(t, err)
-	err = WriteBytes(tmpfile, data)
-	assert.Nil(t, err)
+	// attemp to write to a readonly dst
+	{
+		dstDir, err := MkdirP(path.Join(tmpDir, "dst"))
+		assert.Nil(t, err)
+		assert.Nil(t, os.Chmod(dstDir, 0444))
 
-	// Test the resulting file
-	data2, err := ioutil.ReadFile(tmpfile)
-	assert.Nil(t, err)
-	assert.Equal(t, data, data2)
+		err = WriteBytes(path.Join(dstDir, "file"), []byte("test"))
+		assert.True(t, strings.HasPrefix(err.Error(), "failed writing bytes to file"))
+		assert.True(t, strings.Contains(err.Error(), "permission denied"))
+
+		assert.Nil(t, os.Chmod(dstDir, 0444))
+		assert.Nil(t, Remove(dstDir))
+	}
+
+	// empty target
+	{
+		err := WriteBytes("", []byte("test"))
+		assert.Equal(t, "empty string is an invalid path", err.Error())
+	}
+
+	// happy
+	{
+		// Read and write file
+		data, err := ioutil.ReadFile(testfile)
+		assert.Nil(t, err)
+		err = WriteBytes(tmpfile, data, 0644)
+		assert.Nil(t, err)
+
+		// Test the resulting file
+		data2, err := ioutil.ReadFile(tmpfile)
+		assert.Nil(t, err)
+		assert.Equal(t, data, data2)
+	}
+}
+
+func TestWriteLines(t *testing.T) {
+	cleanTmpDir()
+
+	// attemp to write to a readonly dst
+	{
+		dstDir, err := MkdirP(path.Join(tmpDir, "dst"))
+		assert.Nil(t, err)
+		assert.Nil(t, os.Chmod(dstDir, 0444))
+
+		err = WriteLines(path.Join(dstDir, "file"), []string{"test"})
+		assert.True(t, strings.HasPrefix(err.Error(), "failed writing lines to file"))
+		assert.True(t, strings.Contains(err.Error(), "permission denied"))
+
+		assert.Nil(t, os.Chmod(dstDir, 0444))
+		assert.Nil(t, Remove(dstDir))
+	}
+
+	// empty target
+	{
+		err := WriteLines("", []string{"test"})
+		assert.Equal(t, "empty string is an invalid path", err.Error())
+	}
+
+	// happy
+	{
+		lines, err := ReadLines(testfile)
+		assert.Nil(t, err)
+		assert.Equal(t, 18, len(lines))
+		err = WriteLines(tmpfile, lines, 0644)
+		assert.Nil(t, err)
+		{
+			lines2, err := ReadLines(tmpfile)
+			assert.Nil(t, err)
+			assert.Equal(t, lines, lines2)
+		}
+	}
 }
 
 func TestWriteStream(t *testing.T) {
+
+	// force sync and close errors
+	{
+		OneShotForceIOSyncError()
+		OneShotForceIOCloseError()
+		reader, err := os.Open(testfile)
+		assert.Nil(t, err)
+		err = WriteStream(reader, tmpfile)
+		assert.Nil(t, reader.Close())
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to close file"))
+		assert.True(t, strings.Contains(err.Error(), ": failed syncing stream to file"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+		assert.Nil(t, os.Remove(tmpfile))
+	}
+
+	// force sync and close errors
+	{
+		OneShotForceIOSyncError()
+		OneShotForceIOCloseError()
+		reader, err := os.Open(testfile)
+		assert.Nil(t, err)
+		err = WriteStream(reader, tmpfile)
+		assert.Nil(t, reader.Close())
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to close file"))
+		assert.True(t, strings.Contains(err.Error(), ": failed syncing stream to file"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+		assert.Nil(t, os.Remove(tmpfile))
+	}
+
+	// attemp to read from iotest TimeoutReader and force failure close
+	{
+		OneShotForceIOCloseError()
+		reader, err := os.Open(testfile)
+		assert.Nil(t, err)
+		testReader := iotest.TimeoutReader(reader)
+		err = WriteStream(testReader, tmpfile)
+		assert.Nil(t, reader.Close())
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to close file"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": failed copying stream data: timeout"))
+		assert.Nil(t, os.Remove(tmpfile))
+	}
+
+	// attemp to write to a readonly dst
+	{
+		dstDir, err := MkdirP(path.Join(tmpDir, "dst"))
+		assert.Nil(t, err)
+		assert.Nil(t, os.Chmod(dstDir, 0444))
+
+		err = WriteStream(&os.File{}, path.Join(dstDir, "file"))
+		assert.True(t, strings.HasPrefix(err.Error(), "failed opening file"))
+		assert.True(t, strings.Contains(err.Error(), "permission denied"))
+
+		assert.Nil(t, os.Chmod(dstDir, 0444))
+		assert.Nil(t, Remove(dstDir))
+	}
+
+	// empty destination file
+	{
+		err := WriteStream(&os.File{}, "")
+		assert.Equal(t, "empty string is an invalid path", err.Error())
+	}
+
 	var expectedData []byte
 	expectedData, err := ioutil.ReadFile(testfile)
 	assert.Nil(t, err)
@@ -668,7 +1106,8 @@ func TestWriteStream(t *testing.T) {
 		// Read and write file
 		reader, err := os.Open(testfile)
 		assert.Nil(t, err)
-		err = WriteStream(reader, tmpfile)
+		err = WriteStream(reader, tmpfile, 0644)
+		assert.Nil(t, reader.Close())
 		assert.Nil(t, err)
 
 		// Test the resulting file
@@ -676,6 +1115,7 @@ func TestWriteStream(t *testing.T) {
 		data, err = ioutil.ReadFile(tmpfile)
 		assert.Nil(t, err)
 		assert.Equal(t, expectedData, data)
+		assert.Nil(t, os.Remove(tmpfile))
 	}
 
 	// Overwrite and truncate file
@@ -684,6 +1124,7 @@ func TestWriteStream(t *testing.T) {
 		reader, err := os.Open(testfile)
 		assert.Nil(t, err)
 		err = WriteStream(reader, tmpfile)
+		assert.Nil(t, reader.Close())
 		assert.Nil(t, err)
 
 		// Test the resulting file
@@ -691,20 +1132,45 @@ func TestWriteStream(t *testing.T) {
 		data, err = ioutil.ReadFile(testfile)
 		assert.Nil(t, err)
 		assert.Equal(t, expectedData, data)
+		assert.Nil(t, os.Remove(tmpfile))
 	}
 }
 
-func TestWriteLines(t *testing.T) {
+func TestWriteString(t *testing.T) {
 	cleanTmpDir()
-	lines, err := ReadLines(testfile)
-	assert.Nil(t, err)
-	assert.Equal(t, 18, len(lines))
-	err = WriteLines(tmpfile, lines)
-	assert.Nil(t, err)
+
+	// attemp to write to a readonly dst
 	{
-		lines2, err := ReadLines(tmpfile)
+		dstDir, err := MkdirP(path.Join(tmpDir, "dst"))
 		assert.Nil(t, err)
-		assert.Equal(t, lines, lines2)
+		assert.Nil(t, os.Chmod(dstDir, 0444))
+
+		err = WriteString(path.Join(dstDir, "file"), "test")
+		assert.True(t, strings.HasPrefix(err.Error(), "failed writing string to file"))
+		assert.True(t, strings.Contains(err.Error(), "permission denied"))
+
+		assert.Nil(t, os.Chmod(dstDir, 0444))
+		assert.Nil(t, Remove(dstDir))
+	}
+
+	// empty target
+	{
+		err := WriteString("", "test")
+		assert.Equal(t, "empty string is an invalid path", err.Error())
+	}
+
+	// happy
+	{
+		// Read and write file
+		data, err := ioutil.ReadFile(testfile)
+		assert.Nil(t, err)
+		err = WriteString(tmpfile, string(data), 0644)
+		assert.Nil(t, err)
+
+		// Test the resulting file
+		data2, err := ioutil.ReadFile(tmpfile)
+		assert.Nil(t, err)
+		assert.Equal(t, data, data2)
 	}
 }
 

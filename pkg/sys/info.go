@@ -176,11 +176,31 @@ func (info *FileInfo) SymlinkTarget() (target string, err error) {
 	return
 }
 
-// SymlinkTarget follows the symlink to get the path for the target
+// SymlinkTarget follows the symlink to get the path for the target.
+// Will get the path regardless if the target actually exists.
 func SymlinkTarget(src string) (target string, err error) {
 	var info *FileInfo
 	if info, err = Lstat(src); err != nil {
 		return
 	}
 	return info.SymlinkTarget()
+}
+
+// SymlinkTargetExists returns true if the symlink's target exists
+func (info *FileInfo) SymlinkTargetExists() bool {
+	if info.v.Mode()&os.ModeSymlink != 0 {
+		if _, err := filepath.EvalSymlinks(info.path); err == nil {
+			return true
+		}
+	}
+	return false
+}
+
+// SymlinkTargetExists returns true if the symlink's target exists
+func SymlinkTargetExists(src string) bool {
+	info, err := Lstat(src)
+	if err != nil {
+		return false
+	}
+	return info.SymlinkTargetExists()
 }

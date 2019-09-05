@@ -24,6 +24,7 @@ import (
 // The dst will be a clone of the src if it doesn't exist.
 // Doesn't follow links by default but can be turned on with &Opt{"follow", true}
 func Copy(src, dst string, opts ...*opt.Opt) (err error) {
+	clone := true
 	var sources []string
 
 	// Set following links to off by default
@@ -51,8 +52,7 @@ func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 	}
 
 	// Clone given src as dst vs copy into dst
-	clone := true
-	if IsDir(dstAbs) {
+	if IsDir(dstAbs) || len(sources) > 1 {
 		clone = false
 	}
 
@@ -73,12 +73,27 @@ func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 				dstPath = path.Join(dstAbs, strings.TrimPrefix(srcPath, path.Dir(srcRoot)))
 			}
 
+			// Handle individual copies
+			switch {
+
 			// Create destination directories as needed
-			if srcInfo.IsDir() {
+			case srcInfo.IsDir():
 				if e = os.MkdirAll(dstPath, srcInfo.Mode()); e != nil {
 					return e
 				}
-			} else {
+
+			// Copy dir links
+			case srcInfo.IsSymlinkDir():
+				var target string
+				if target, e = srcInfo.SymlinkTarget(); e != nil {
+					return e
+				}
+				if e = os.Symlink(target, dstPath); e != nil {
+					return e
+				}
+
+			// Copy file
+			default:
 				CopyFile(srcPath, dstPath, newInfoOpt(srcInfo))
 			}
 			return nil
@@ -91,7 +106,8 @@ func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 // The dst will be copied to if it is an existing directory.
 // The dst will be a clone of the src if it doesn't exist.
 // Doesn't follow links by default but can be turned on with &Opt{"follow", true}
-func CopyFile(src, dst string, opts ...*opt.Opt) (err error) {
+// Returns the destination path for copied file
+func CopyFile(src, dst string, opts ...*opt.Opt) (result string, err error) {
 	var srcPath, dstPath string
 	var srcInfo, srcDirInfo *FileInfo
 
@@ -100,53 +116,51 @@ func CopyFile(src, dst string, opts ...*opt.Opt) (err error) {
 
 	// Check the source for issues
 	if srcInfo = infoOpt(opts); srcInfo != nil {
-		srcPath = srcInfo.path
+		if srcPath, err = Abs(srcInfo.path); err != nil {
+			return
+		}
 	} else {
 		if srcPath, err = Abs(src); err != nil {
 			return
 		}
-		if srcInfo, err = Lstat(src); err != nil {
+		if srcInfo, err = Lstat(srcPath); err != nil {
 			return
 		}
 	}
 
 	// Source dir permissions to use for destination directories
-	if srcDirInfo, err = Lstat(path.Dir(src)); err != nil {
+	if srcDirInfo, err = Lstat(path.Dir(srcPath)); err != nil {
 		return
 	}
 
 	// Error out if not a regular file or symlink
-	if srcInfo.IsDir() {
+	if srcInfo.IsDir() || srcInfo.IsSymlinkDir() {
 		err = errors.Errorf("src target is not a regular file or a symlink to a file")
 		return
 	}
 
 	// Get correct destination path
-	dstInfo, e := os.Stat(dst)
+	if dstPath, err = Abs(dst); err != nil {
+		return
+	}
+	dstInfo, e := os.Stat(dstPath)
 	switch {
 
-	// Doesn't exist so this is the new destination name
+	// Doesn't exist so this is the new destination name, ensure all paths exist
 	case os.IsNotExist(e):
-		if e = os.MkdirAll(path.Dir(dst), srcDirInfo.Mode()); e != nil {
-			return e
-		}
-		if dstPath, err = Abs(path.Dir(dst)); err != nil {
+		if err = os.MkdirAll(path.Dir(dstPath), srcDirInfo.Mode()); err != nil {
 			return
 		}
-		dstPath = path.Join(dstPath, path.Base(dst))
 
 	// Destination exists and is either a file to overwrite or a dir to copy into
 	case e == nil:
-		if dstPath, err = Abs(dst); err != nil {
-			return
-		}
 		if dstInfo.IsDir() {
 			dstPath = path.Join(dstPath, path.Base(srcPath))
 		}
 
 	// unknown error case
 	default:
-		err = e
+		err = errors.Wrapf(e, "failed to Stat destination %s", dst)
 		return
 	}
 
@@ -206,6 +220,7 @@ func CopyFile(src, dst string, opts ...*opt.Opt) (err error) {
 		}
 	}
 
+	result = dstPath
 	return
 }
 
@@ -377,10 +392,10 @@ func RemoveAll(target string) error {
 	return os.RemoveAll(target)
 }
 
-// Symlink creates newname as a symbolic link to oldname. If there is an error,
-// it will be of type *LinkError. newname is created as ???
-func Symlink(oldname, newname string) error {
-	return os.Symlink(oldname, newname)
+// Symlink creates newname as a symbolic link to link. If there is an error,
+// it will be of type *LinkError.
+func Symlink(src, link string) error {
+	return os.Symlink(src, link)
 }
 
 // Touch creates an empty text file similar to the linux touch command
@@ -414,7 +429,7 @@ func WriteBytes(filepath string, data []byte, perms ...uint32) (err error) {
 		perm = os.FileMode(perms[0])
 	}
 	if err = ioutil.WriteFile(filepath, data, perm); err != nil {
-		err = errors.Wrapf(err, "failed writing string to file %s", filepath)
+		err = errors.Wrapf(err, "failed writing bytes to file %s", filepath)
 		return
 	}
 	return
@@ -431,7 +446,7 @@ func WriteLines(filepath string, lines []string, perms ...uint32) (err error) {
 		perm = os.FileMode(perms[0])
 	}
 	if err = ioutil.WriteFile(filepath, []byte(strings.Join(lines, "\n")), perm); err != nil {
-		err = errors.Wrapf(err, "failed writing string to file %s", filepath)
+		err = errors.Wrapf(err, "failed writing lines to file %s", filepath)
 		return
 	}
 	return
@@ -457,7 +472,7 @@ func WriteStream(reader io.Reader, filepath string, perms ...uint32) (err error)
 	}
 
 	if _, err = io.Copy(writer, reader); err != nil {
-		err = errors.Wrapf(err, "failed copying stream data to file %s", filepath)
+		err = errors.Wrap(err, "failed copying stream data")
 		if e := writer.Close(); e != nil {
 			err = errors.Wrapf(err, "failed to close file %s", filepath)
 		}
