@@ -4,9 +4,9 @@ package zip
 import (
 	"archive/zip"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/phR0ze/n/pkg/enc/bin"
 	"github.com/phR0ze/n/pkg/sys"
@@ -19,11 +19,12 @@ var (
 )
 
 // Create a new zipfile at zipfile from the given srcPath directory
-func Create(zipfile, srcPath string) (err error) {
+// Handles file globbing in the source path.
+func Create(zipfile, glob string) (err error) {
 	if zipfile, err = sys.Abs(zipfile); err != nil {
 		return
 	}
-	if srcPath, err = sys.Abs(srcPath); err != nil {
+	if glob, err = sys.Abs(glob); err != nil {
 		return
 	}
 
@@ -53,30 +54,59 @@ func Create(zipfile, srcPath string) (err error) {
 		}
 	}()
 
+	// Handle globbing
+	var sources []string
+	if sources, err = filepath.Glob(glob); err != nil {
+		err = errors.Wrapf(err, "failed to get glob for %s", glob)
+		return
+	}
+
+	// Fail no sources were found
+	if len(sources) == 0 {
+		err = errors.Errorf("failed to get any sources for %s", glob)
+		return
+	}
+
+	// Get the source file infos
+	infos := []*sys.FileInfo{}
+	for _, source := range sources {
+		var info *sys.FileInfo
+		if info, err = sys.Lstat(source); err != nil {
+			return
+		}
+		infos = append(infos, info)
+	}
+
 	// Add all files recursively
-	if err = addFiles(zw, srcPath, ""); err != nil {
+	if err = addFiles(zw, infos, ""); err != nil {
 		return
 	}
 
 	return
 }
 
-// AddFiles to the given zip writer recursively where root is the directory
-// to recurse on and base is the path the zip files should be based on in the zip
-func addFiles(zw *zip.Writer, root, base string) (err error) {
-	var infos []os.FileInfo
-	if infos, err = ioutil.ReadDir(root); err != nil {
-		err = errors.Wrapf(err, "failed to read directory %s to add files from", root)
-		return
-	}
+// AddFiles to the given zip writer recursively where infos are the paths to
+// recurse on and base is the path the zip files should be based on in the zip
+func addFiles(zw *zip.Writer, infos []*sys.FileInfo, base string) (err error) {
 	for _, info := range infos {
-		if !info.IsDir() {
-			target := path.Join(root, info.Name())
+
+		// Recurse on directory
+		if info.IsDir() {
+			var newInfos []*sys.FileInfo
+			if newInfos, err = sys.ReadDir(info.Path); err != nil {
+				err = errors.Wrapf(err, "failed to read directory %s to add files from", info.Path)
+				return
+			}
+			newBase := path.Join(base, info.Name())
+			if err = addFiles(zw, newInfos, newBase); err != nil {
+				return
+			}
+		} else {
 
 			// Open the target file for reading
 			var fr *os.File
-			if fr, err = os.Open(target); err != nil {
-				err = errors.Wrapf(err, "failed to open target file %s for zip", target)
+			if fr, err = os.Open(info.Path); err != nil {
+				err = errors.Wrapf(err, "failed to open target file %s for zip", info.Path)
 				return
 			}
 
@@ -84,25 +114,20 @@ func addFiles(zw *zip.Writer, root, base string) (err error) {
 			var fw io.Writer
 			zipPath := path.Join(base, info.Name())
 			if fw, err = zw.Create(zipPath); err != nil {
-				err = errors.Wrapf(err, "failed to add target file %s to zip", target)
+				err = errors.Wrapf(err, "failed to add target file %s to zip", info.Path)
 				fr.Close()
 				return
 			}
 
 			// Stream the data from the reader to the writer
 			if _, err = io.Copy(fw, fr); err != nil {
-				err = errors.Wrapf(err, "failed to copy data from reader to writer for zip target %s", target)
+				err = errors.Wrapf(err, "failed to copy data from reader to writer for zip target %s", info.Path)
 				fr.Close()
 				return
 			}
 
 			// Close the file reader/writers here as were in a loop
 			fr.Close()
-
-		} else {
-			newRoot := path.Join(root, info.Name())
-			newBase := path.Join(base, info.Name())
-			addFiles(zw, newRoot, newBase)
 		}
 	}
 
@@ -226,10 +251,10 @@ func TrimPrefix(zipfile string) (err error) {
 		l, e := rw.Read(chunk)
 		if e != nil {
 			if e != io.EOF {
-				err = errors.Wrapf(err, "failed to read from zipfile '%s' for zip identification", path.Base(zipfile))
+				err = errors.Wrapf(e, "failed to read from zipfile '%s' for zip identification", path.Base(zipfile))
 				return
 			} else if roffset == -1 {
-				err = errors.Wrapf(err, "unable to identify '%s' as a valid zipfile", path.Base(zipfile))
+				err = errors.Errorf("unable to identify '%s' as a valid zipfile", path.Base(zipfile))
 				return
 			}
 			break
@@ -254,12 +279,12 @@ func TrimPrefix(zipfile string) (err error) {
 		woffset := int64(0)
 		for {
 			if l, e := rw.ReadAt(chunk, roffset); e != nil && e != io.EOF {
-				err = errors.Wrapf(err, "failed to read from zipfile '%s' to shift data", path.Base(zipfile))
+				err = errors.Wrapf(e, "failed to read from zipfile '%s' to shift data", path.Base(zipfile))
 				return
 			} else if l > 0 {
 				data := chunk[0:l]
 				if _, e := rw.WriteAt(data, woffset); e != nil {
-					err = errors.Wrapf(err, "failed to write shifted data to zipfile '%s'", path.Base(zipfile))
+					err = errors.Wrapf(e, "failed to write shifted data to zipfile '%s'", path.Base(zipfile))
 					return
 				}
 				roffset += int64(l)

@@ -13,7 +13,7 @@ var tmpfile = "../../../test/temp/.tmp"
 var testfile = "../../../test/testfile"
 
 func TestReadYAML(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// Write out a test yaml file
 	yamldata1 := "foo:\n  bar:\n    - 1\n    - 2\n"
@@ -33,7 +33,7 @@ func TestReadYAML(t *testing.T) {
 }
 
 func TestWriteYAML(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// Invalid data structure test
 	err := WriteYAML(tmpfile, "foo")
@@ -62,7 +62,7 @@ func TestWriteYAML(t *testing.T) {
 	assert.Equal(t, data1, data2)
 }
 
-func cleanTmpDir() {
+func clearTmpDir() {
 	if sys.Exists(tmpDir) {
 		sys.RemoveAll(tmpDir)
 	}

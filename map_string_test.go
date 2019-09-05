@@ -1449,7 +1449,7 @@ func TestStringMap_SetM(t *testing.T) {
 // WriteJSON
 //--------------------------------------------------------------------------------------------------
 func TestWriteJSON(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// Convert yaml string into a data structure
 	m1 := NewStringMap(map[string]interface{}{"1": "one"})
@@ -1468,7 +1468,7 @@ func TestWriteJSON(t *testing.T) {
 // WriteYAML
 //--------------------------------------------------------------------------------------------------
 func TestWriteYAML(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// Convert yaml string into a data structure
 	m1 := NewStringMap(map[string]interface{}{"1": "one"})

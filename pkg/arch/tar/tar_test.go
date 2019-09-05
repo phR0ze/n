@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"github.com/bouk/monkey"
-	"github.com/phR0ze/n"
 	"github.com/phR0ze/n/pkg/sys"
 	"github.com/phR0ze/n/pkg/test"
 	"github.com/stretchr/testify/assert"
@@ -19,68 +18,33 @@ import (
 
 var tmpDir = "../../../test/temp"
 var tmpfile = "../../../test/temp/.tmp"
+var testfile = "../../../test/testfile"
 
 func TestCreate(t *testing.T) {
 	prepTmpDir()
 
-	// force tar InfoHeader error
+	// force io.Copy failure
 	{
-		// Create new source directory/file
-		srcDir := path.Join(tmpDir, "src")
-		_, err := sys.MkdirP(srcDir)
-		assert.Nil(t, err)
-		_, err = sys.Touch(path.Join(srcDir, "file"))
-		assert.Nil(t, err)
-
-		// Now attempt to create the tar but force the io.Copy error
-		OneShotForceTarHeaderError()
-		err = Create(tmpfile, srcDir)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to create target file header"))
-		assert.True(t, strings.HasSuffix(err.Error(), "for tarball: invalid argument"))
-
-		// Clean up
-		assert.Nil(t, sys.RemoveAll(srcDir))
-		assert.Nil(t, sys.Remove(tmpfile))
-	}
-
-	// force tar WriteHeader error
-	{
-		// Create new source directory/file
-		srcDir := path.Join(tmpDir, "src")
-		_, err := sys.MkdirP(srcDir)
-		assert.Nil(t, err)
-		_, err = sys.Touch(path.Join(srcDir, "file"))
-		assert.Nil(t, err)
-
-		// Now attempt to create the tar but force the io.Copy error
-		OneShotForceTarWriterError()
-		err = Create(tmpfile, srcDir)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to write target file header"))
-		assert.True(t, strings.HasSuffix(err.Error(), "for tarball: invalid argument"))
-
-		// Clean up
-		assert.Nil(t, sys.RemoveAll(srcDir))
-		assert.Nil(t, sys.Remove(tmpfile))
-	}
-
-	// force io.Copy error
-	{
-		// Create new source directory/file
-		srcDir := path.Join(tmpDir, "src")
-		_, err := sys.MkdirP(srcDir)
-		assert.Nil(t, err)
-		_, err = sys.Touch(path.Join(srcDir, "file"))
-		assert.Nil(t, err)
-
-		// Now attempt to create the tar but force the io.Copy error
 		test.OneShotForceIOCopyError()
-		err = Create(tmpfile, srcDir)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to copy data from reader to writer for tar target"))
+		err := Create(tmpfile, testfile)
+		assert.True(t, strings.Contains(err.Error(), "failed to copy data from reader to writer for tar target"))
 		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	}
 
-		// Clean up
-		assert.Nil(t, sys.RemoveAll(srcDir))
-		assert.Nil(t, sys.Remove(tmpfile))
+	// force write header failure
+	{
+		OneShotForceTarWriterError()
+		err := Create(tmpfile, testfile)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to write target file header"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	}
+
+	// force file info header error
+	{
+		OneShotForceTarHeaderError()
+		err := Create(tmpfile, testfile)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to create target file"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
 	}
 
 	// attempt to read writeonly source file
@@ -98,11 +62,8 @@ func TestCreate(t *testing.T) {
 		assert.Nil(t, os.Chmod(srcfile, 0222))
 
 		// Now attempt to read from the write only source file
-		test.OneShotForceOSCloseError()
-		OneShotForceGzipCloseError()
-		OneShotForceTarCloseError()
 		err = Create(tmpfile, srcDir)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to close file writer: failed to close gzip writer: failed to close tarball writer: failed to open target file"))
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to open target file"))
 		assert.True(t, strings.Contains(err.Error(), "for tarball: open"))
 		assert.True(t, strings.HasSuffix(err.Error(), ": permission denied"))
 
@@ -127,9 +88,13 @@ func TestCreate(t *testing.T) {
 		assert.Nil(t, os.Chmod(srcDir, 0222))
 
 		// Now attempt to read from the write only source
+		patch := test.ForceOSCloseError()
+		OneShotForceGzipCloseError()
+		OneShotForceTarCloseError()
 		err = Create(tmpfile, srcDir)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to read directory"))
-		assert.True(t, strings.Contains(err.Error(), "to add files from: open"))
+		patch.Unpatch()
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to close file writer: failed to close gzip writer: failed to close tarball writer: failed to read directory"))
+		assert.True(t, strings.Contains(err.Error(), "to add files from: failed to open directory"))
 		assert.True(t, strings.HasSuffix(err.Error(), ": permission denied"))
 
 		// Correct permission and remove
@@ -159,6 +124,27 @@ func TestCreate(t *testing.T) {
 		assert.Nil(t, sys.RemoveAll(dstDir))
 	}
 
+	// force glob failure
+	{
+		dstDir := path.Join(tmpDir, "dst")
+		_, err := sys.MkdirP(dstDir)
+		assert.Nil(t, err)
+
+		test.OneShotForceFilePathGlobError()
+		err = Create(path.Join(dstDir, "tar"), tmpfile)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to get glob for"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+
+		// Correct permission and remove
+		assert.Nil(t, sys.RemoveAll(dstDir))
+	}
+
+	// no sources found
+	{
+		err := Create(tmpfile, path.Join(tmpDir, "bogus"))
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to get any sources for"))
+	}
+
 	// source empty
 	{
 		err := Create(tmpfile, "")
@@ -170,40 +156,150 @@ func TestCreate(t *testing.T) {
 		err := Create("", "")
 		assert.Equal(t, "empty string is an invalid path", err.Error())
 	}
+}
 
-	// happy
+func TestCreateFromGlobWithExtractCheck(t *testing.T) {
+	clearTmpDir()
+
+	// Create target files in dir
+	dir1, err := sys.MkdirP(path.Join(tmpDir, "dir1"))
+	assert.Nil(t, err)
+	file1, err := sys.CopyFile(testfile, path.Join(dir1, "file1"))
+	assert.Nil(t, err)
+	_, err = sys.CopyFile(testfile, path.Join(dir1, "file2"))
+	assert.Nil(t, err)
+	bob1, err := sys.CopyFile(testfile, path.Join(dir1, "bob1"))
+	assert.Nil(t, err)
+
+	tarball := path.Join(tmpDir, "test.tgz")
+	assert.False(t, sys.Exists(tarball))
+	err = Create(tarball, path.Join(dir1, "*1"))
+	assert.Nil(t, err)
+	assert.True(t, sys.Exists(tarball))
+
+	// Now extract the newly created tarball
+	dir2 := path.Join(tmpDir, "dir2")
+	err = ExtractAll(tarball, dir2)
+	assert.Nil(t, err)
+
+	// Now validate the new files
+	newfiles, err := sys.AllFiles(dir2)
+	assert.Nil(t, err)
+	assert.Len(t, newfiles, 2)
+	assert.True(t, strings.HasSuffix(newfiles[0], "bob1"))
+	assert.True(t, strings.HasSuffix(newfiles[1], "file1"))
+
+	// Now do an MD5 sum of all files
 	{
-		// Create the new tarball
-		src := path.Join(tmpDir, "net")
-		err := Create(tmpfile, src)
+		md5new, err := sys.MD5(newfiles[0])
 		assert.Nil(t, err)
-		assert.True(t, sys.Exists(tmpfile))
+		md5old, err := sys.MD5(bob1)
+		assert.Nil(t, err)
+		assert.Equal(t, md5new, md5old)
+	}
+	{
+		md5new, err := sys.MD5(newfiles[1])
+		assert.Nil(t, err)
+		md5old, err := sys.MD5(file1)
+		assert.Nil(t, err)
+		assert.Equal(t, md5new, md5old)
+	}
+}
 
-		// Remove tarball target files
-		sys.RemoveAll(src)
-		assert.False(t, sys.Exists(src))
+func TestCreateFromDirectoryOfFilesWithExtractCheck(t *testing.T) {
+	prepTmpDir()
 
-		// Extract tarball
-		err = ExtractAll(tmpfile, tmpDir)
+	// Create a tarball to work with
+	newsrc := path.Join(tmpDir, "net")
+	tarball := path.Join(tmpDir, "test.tgz")
+	assert.False(t, sys.Exists(tarball))
+	err := Create(tarball, newsrc)
+	assert.Nil(t, err)
+	assert.True(t, sys.Exists(tarball))
+
+	// Rename the original source files to old
+	oldsrc := path.Join(tmpDir, "old")
+	_, err = sys.Move(newsrc, oldsrc)
+	assert.Nil(t, err)
+
+	// Now extract the newly created tarball
+	err = ExtractAll(tarball, tmpDir)
+	assert.Nil(t, err)
+
+	// Now do a MD5 sum of all files and ensure integrity exists
+	newfiles, err := sys.AllFiles(newsrc)
+	assert.Nil(t, err)
+	oldfiles, err := sys.AllFiles(oldsrc)
+	assert.Nil(t, err)
+	assert.Equal(t, len(newfiles), len(oldfiles))
+	for i := 0; i < len(newfiles); i++ {
+		md5new, err := sys.MD5(newfiles[i])
 		assert.Nil(t, err)
-		paths, err := sys.AllPaths(tmpDir)
+		md5old, err := sys.MD5(oldfiles[i])
 		assert.Nil(t, err)
-		result := n.S(paths).Map(func(x n.O) n.O { return sys.SlicePath(x.(string), -3, -1) }).ToStrs()
-		expected := []string{
-			"n/test/temp",
-			"test/temp/.tmp",
-			"test/temp/agent",
-			"temp/agent/agent.go",
-			"test/temp/mech",
-			"temp/mech/example",
-			"mech/example/mech.go",
-			"temp/mech/mech.go",
-			"temp/mech/mech_test.go",
-			"temp/mech/page.go",
-			"test/temp/net.go",
-			"test/temp/net_test.go",
-		}
-		assert.Equal(t, expected, result)
+		assert.Equal(t, md5new, md5old)
+	}
+}
+
+func TestCreateFromSingleFileWithExtractCheck(t *testing.T) {
+	clearTmpDir()
+
+	tarball := path.Join(tmpDir, "test.tgz")
+	assert.False(t, sys.Exists(tarball))
+	err := Create(tarball, testfile)
+	assert.Nil(t, err)
+	assert.True(t, sys.Exists(tarball))
+
+	// Now extract the newly created tarball
+	err = ExtractAll(tarball, tmpDir)
+	assert.Nil(t, err)
+
+	// Now validate the new files
+	newfiles, err := sys.AllFiles(tmpDir)
+	assert.Nil(t, err)
+	assert.Len(t, newfiles, 2)
+	assert.True(t, strings.HasSuffix(newfiles[0], "test.tgz"))
+	assert.True(t, strings.HasSuffix(newfiles[1], "testfile"))
+
+	// Now do an MD5 sum of all files
+	md5new, err := sys.MD5(newfiles[1])
+	assert.Nil(t, err)
+	md5old, err := sys.MD5(testfile)
+	assert.Nil(t, err)
+	assert.Equal(t, md5new, md5old)
+}
+
+func TestExtractAllIntegrityCheckExternal(t *testing.T) {
+	prepTmpDir()
+
+	// Create a tarball to work with
+	newsrc := path.Join(tmpDir, "net")
+	tarball := path.Join(tmpDir, "test.tgz")
+	assert.False(t, sys.Exists(tarball))
+	sys.ExecOut(`tar -C %s -cvzf %s net`, tmpDir, tarball)
+	assert.True(t, sys.Exists(tarball))
+
+	// Rename the original source files to old
+	oldsrc := path.Join(tmpDir, "old")
+	_, err := sys.Move(newsrc, oldsrc)
+	assert.Nil(t, err)
+
+	// Now extract the newly created tarball
+	err = ExtractAll(tarball, tmpDir)
+	assert.Nil(t, err)
+
+	// Now do a MD5 sum of all files and ensure integrity exists
+	newfiles, err := sys.AllFiles(newsrc)
+	assert.Nil(t, err)
+	oldfiles, err := sys.AllFiles(oldsrc)
+	assert.Nil(t, err)
+	assert.Equal(t, len(newfiles), len(oldfiles))
+	for i := 0; i < len(newfiles); i++ {
+		md5new, err := sys.MD5(newfiles[i])
+		assert.Nil(t, err)
+		md5old, err := sys.MD5(oldfiles[i])
+		assert.Nil(t, err)
+		assert.Equal(t, md5new, md5old)
 	}
 }
 
@@ -286,14 +382,17 @@ func TestExtractAll(t *testing.T) {
 		err := ExtractAll("", "")
 		assert.Equal(t, "empty string is an invalid path", err.Error())
 	}
-
 }
 
-func prepTmpDir() {
+func clearTmpDir() {
 	if sys.Exists(tmpDir) {
 		sys.RemoveAll(tmpDir)
 	}
 	sys.MkdirP(tmpDir)
+}
+
+func prepTmpDir() {
+	clearTmpDir()
 	sys.Copy("../../net", tmpDir)
 }
 

@@ -5,21 +5,21 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/phR0ze/n/pkg/sys"
 	"github.com/pkg/errors"
 )
 
-// Create a new tar.gz file at tarfile from the given srcPath directory
-func Create(tarfile, srcPath string) (err error) {
-	var srcAbs string
+// Create a new tar.gz file at tarfile from the given srcPath directory.
+// Handles file globbing in the source path.
+func Create(tarfile, glob string) (err error) {
 	if tarfile, err = sys.Abs(tarfile); err != nil {
 		return
 	}
-	if srcAbs, err = sys.Abs(srcPath); err != nil {
+	if glob, err = sys.Abs(glob); err != nil {
 		return
 	}
 
@@ -60,37 +60,66 @@ func Create(tarfile, srcPath string) (err error) {
 		}
 	}()
 
+	// Handle globbing
+	var sources []string
+	if sources, err = filepath.Glob(glob); err != nil {
+		err = errors.Wrapf(err, "failed to get glob for %s", glob)
+		return
+	}
+
+	// Fail no sources were found
+	if len(sources) == 0 {
+		err = errors.Errorf("failed to get any sources for %s", glob)
+		return
+	}
+
+	// Get the source file infos
+	infos := []*sys.FileInfo{}
+	for _, source := range sources {
+		var info *sys.FileInfo
+		if info, err = sys.Lstat(source); err != nil {
+			return
+		}
+		infos = append(infos, info)
+	}
+
 	// Add all files recursively
-	if err = addFiles(tw, srcAbs, ""); err != nil {
+	if err = addFiles(tw, infos, ""); err != nil {
 		return
 	}
 
 	return
 }
 
-// AddFiles to the given zip writer recursively where root is the directory
-// to recurse on and base is the path the zip files should be based on in the zip
-func addFiles(tw *tar.Writer, root, base string) (err error) {
-	var infos []os.FileInfo
-	if infos, err = ioutil.ReadDir(root); err != nil {
-		err = errors.Wrapf(err, "failed to read directory %s to add files from", root)
-		return
-	}
+// AddFiles to the given tar writer recursively where infos are the paths to
+// recurse on and base is the path the tar files should be based on in the tar
+func addFiles(tw *tar.Writer, infos []*sys.FileInfo, base string) (err error) {
 	for _, info := range infos {
-		if !info.IsDir() {
-			target := path.Join(root, info.Name())
 
-			// Open the target file for reading
+		// Recurse on directory
+		if info.IsDir() {
+			var newInfos []*sys.FileInfo
+			if newInfos, err = sys.ReadDir(info.Path); err != nil {
+				err = errors.Wrapf(err, "failed to read directory %s to add files from", info.Path)
+				return
+			}
+			newBase := path.Join(base, info.Name())
+			if err = addFiles(tw, newInfos, newBase); err != nil {
+				return
+			}
+		} else {
+
+			// Open the file for reading
 			var fr *os.File
-			if fr, err = os.Open(target); err != nil {
-				err = errors.Wrapf(err, "failed to open target file %s for tarball", target)
+			if fr, err = os.Open(info.Path); err != nil {
+				err = errors.Wrapf(err, "failed to open target file %s for tarball", info.Path)
 				return
 			}
 
 			// Add the files to the tar
 			var header *tar.Header
-			if header, err = tar.FileInfoHeader(info, ""); err != nil {
-				err = errors.Wrapf(err, "failed to create target file header %s for tarball", target)
+			if header, err = tar.FileInfoHeader(info.Val, ""); err != nil {
+				err = errors.Wrapf(err, "failed to create target file header %s for tarball", info.Path)
 				fr.Close()
 				return
 			}
@@ -100,24 +129,20 @@ func addFiles(tw *tar.Writer, root, base string) (err error) {
 
 			// Write header to tarball
 			if err = tw.WriteHeader(header); err != nil {
-				err = errors.Wrapf(err, "failed to write target file header %s for tarball", target)
+				err = errors.Wrapf(err, "failed to write target file header %s for tarball", info.Path)
 				fr.Close()
 				return
 			}
 
 			// Stream the data from the reader to the writer
 			if _, err = io.Copy(tw, fr); err != nil {
-				err = errors.Wrapf(err, "failed to copy data from reader to writer for tar target %s", target)
+				err = errors.Wrapf(err, "failed to copy data from reader to writer for tar target %s", info.Path)
 				fr.Close()
 				return
 			}
 
 			// Close reader on success
 			fr.Close()
-		} else {
-			newRoot := path.Join(root, info.Name())
-			newBase := path.Join(base, info.Name())
-			addFiles(tw, newRoot, newBase)
 		}
 	}
 
@@ -185,7 +210,7 @@ func ExtractAll(tarfile, dest string) (err error) {
 				err = errors.Wrapf(err, "failed to create file %s from tarfile", filePath)
 				return
 			}
-			if _, err = io.Copy(fw, fr); err != nil {
+			if _, err = io.Copy(fw, tr); err != nil {
 				err = errors.Wrap(err, "failed to copy data from tar to disk")
 				if e := fw.Close(); e != nil {
 					err = errors.Wrap(err, "failed to close file")

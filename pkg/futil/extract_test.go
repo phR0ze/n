@@ -16,7 +16,7 @@ var testfile = "../../test/testfile"
 var readme = "../../README.md"
 
 func TestExtractString(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// Write out test data
 	err := sys.WriteString(tmpfile, `# test data
@@ -85,7 +85,7 @@ url="https://www.chromium.org/Home"
 }
 
 func TestExtractStrings(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// Write out test data
 	err := sys.WriteString(tmpfile, `# test data
@@ -161,7 +161,7 @@ url="https://www.chromium.org/Home"
 }
 
 func TestExtractStringP(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// Write out test data
 	err := sys.WriteString(tmpfile, `# test data
@@ -235,7 +235,7 @@ url="https://www.chromium.org/Home"
 }
 
 func TestExtractStringsP(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// Write out test data
 	err := sys.WriteString(tmpfile, `# test data
@@ -317,7 +317,7 @@ url="https://www.chromium.org/Home"
 	}
 }
 
-func cleanTmpDir() {
+func clearTmpDir() {
 	if sys.Exists(tmpDir) {
 		sys.RemoveAll(tmpDir)
 	}

@@ -280,6 +280,61 @@ func Paths(target string) (result []string) {
 	return
 }
 
+// ReadDir reads the directory named by dirname and returns a list of directory entries
+// sorted by filename. Similar to ioutil.ReadDir but using internal FileInfo types.
+func ReadDir(dirname string) (infos []*FileInfo, err error) {
+	if dirname, err = Abs(dirname); err != nil {
+		return
+	}
+
+	var fr *os.File
+	if fr, err = os.Open(dirname); err != nil {
+		err = errors.Wrapf(err, "failed to open directory %s", dirname)
+		return
+	}
+	defer fr.Close()
+
+	// Read in os.FileInfo types as a sorted list
+	var list []os.FileInfo
+	if list, err = fr.Readdir(-1); err != nil {
+		err = errors.Wrapf(err, "failed to read directory %s", dirname)
+		return
+	}
+	sort.Slice(list, func(i, j int) bool { return list[i].Name() < list[j].Name() })
+
+	// Create internal FileInfo types with path
+	for _, info := range list {
+		infos = append(infos, &FileInfo{Val: info, Path: path.Join(dirname, info.Name())})
+	}
+
+	return
+}
+
+// ReadDirnames reads the directory named by dirname and returns
+// a list of directory entries sorted by filename.
+func ReadDirnames(dirname string) (names []string, err error) {
+	if dirname, err = Abs(dirname); err != nil {
+		return
+	}
+
+	// Open the directory for reading
+	var fr *os.File
+	if fr, err = os.Open(dirname); err != nil {
+		err = errors.Wrapf(err, "failed to open directory %s", dirname)
+		return
+	}
+	defer fr.Close()
+
+	// Read the directory names as strings and sort
+	if names, err = fr.Readdirnames(-1); err != nil {
+		err = errors.Wrapf(err, "failed to read directory names for %s", dirname)
+		return
+	}
+	sort.Strings(names)
+
+	return
+}
+
 // SharedDir returns the dir portion that two paths share
 func SharedDir(first, second string) (result string) {
 	sharedParts := []string{}
@@ -390,7 +445,7 @@ func walk(root string, info *FileInfo, walkFn WalkFunc, opts []*opt.Opt) (err er
 	// Links and directories are similar in that they have other paths to deal with
 	if info.IsDir() {
 		var names []string
-		if names, err = ReadDir(root); err == nil {
+		if names, err = ReadDirnames(root); err == nil {
 			for _, name := range names {
 				target = filepath.Join(root, name)
 				targets = append(targets, target)
@@ -423,22 +478,5 @@ func walk(root string, info *FileInfo, walkFn WalkFunc, opts []*opt.Opt) (err er
 			}
 		}
 	}
-	return
-}
-
-// ReadDir reads the directory named by dirname and returns
-// a list of directory entries sorted by filename.
-func ReadDir(dirname string) (names []string, err error) {
-	var fr *os.File
-	if fr, err = os.Open(dirname); err != nil {
-		err = errors.Wrapf(err, "failed to read directory %s", dirname)
-		return
-	}
-	defer fr.Close()
-	if names, err = fr.Readdirnames(-1); err != nil {
-		err = errors.Wrapf(err, "failed to read directory names for %s", dirname)
-		return
-	}
-	sort.Strings(names)
 	return
 }

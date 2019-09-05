@@ -10,16 +10,18 @@ import (
 
 // FileInfo wraps the os.FileInfo interface and provide additional helper functions
 type FileInfo struct {
-	v os.FileInfo
-
-	path string // path used to create the info file
+	Path string      // absolute path to the file set when created
+	Val  os.FileInfo // handle on the actual OS object to use where needed
 }
 
 // Lstat wraps os.Lstate to give back a FileInfo
 // Resolves home dir and relative dir pathing into absolute paths
 func Lstat(src string) (result *FileInfo, err error) {
-	result = &FileInfo{path: src}
-	if result.v, err = os.Lstat(src); err != nil {
+	if src, err = Abs(src); err != nil {
+		return
+	}
+	result = &FileInfo{Path: src}
+	if result.Val, err = os.Lstat(src); err != nil {
 		result = nil
 		err = errors.Wrapf(err, "failed to execute Lstat against %s", src)
 	}
@@ -28,25 +30,12 @@ func Lstat(src string) (result *FileInfo, err error) {
 
 // Name implements os.FileInfo and returns the base name of the file
 func (info *FileInfo) Name() string {
-	return info.v.Name()
-}
-
-// Path returns the path for this file
-func (info *FileInfo) Path() string {
-	return info.path
-}
-
-// AbsPath returns the absolute path for this file
-func (info *FileInfo) AbsPath() (path string, err error) {
-	if path, err = Abs(info.path); err != nil {
-		return
-	}
-	return
+	return info.Val.Name()
 }
 
 // Size implements os.FileInfo and returns the size of file in bytes
 func (info *FileInfo) Size() int64 {
-	return info.v.Size()
+	return info.Val.Size()
 }
 
 // Size returns the size of the file/dir in bytes
@@ -59,7 +48,7 @@ func Size(src string) (size int64) {
 
 // Mode implements os.FileInfo and returns bits of the file
 func (info *FileInfo) Mode() os.FileMode {
-	return info.v.Mode()
+	return info.Val.Mode()
 }
 
 // Mode implements os.FileInfo and returns bits of the file
@@ -72,17 +61,17 @@ func Mode(src string) (mode os.FileMode) {
 
 // ModTime implements os.FileInfo and is the modification time of the file
 func (info *FileInfo) ModTime() time.Time {
-	return info.v.ModTime()
+	return info.Val.ModTime()
 }
 
 // Sys implements os.FileInfo and provides access to the underlying data source
 func (info *FileInfo) Sys() interface{} {
-	return info.v.Sys()
+	return info.Val.Sys()
 }
 
 // IsDir returns true if the info is a directory
 func (info *FileInfo) IsDir() bool {
-	return info.v.IsDir()
+	return info.Val.IsDir()
 }
 
 // IsDir returns true if the given path is a directory
@@ -95,7 +84,7 @@ func IsDir(src string) bool {
 
 // IsFile returns true if the info is a file
 func (info *FileInfo) IsFile() bool {
-	return !info.v.IsDir() && info.v.Mode()&os.ModeSymlink == 0
+	return !info.Val.IsDir() && info.Val.Mode()&os.ModeSymlink == 0
 }
 
 // IsFile returns true if the given path is a file
@@ -108,7 +97,7 @@ func IsFile(src string) bool {
 
 // IsSymlink returns true if the info is a symlink
 func (info *FileInfo) IsSymlink() bool {
-	return info.v.Mode()&os.ModeSymlink != 0
+	return info.Val.Mode()&os.ModeSymlink != 0
 }
 
 // IsSymlink returns true if the given path is a symlink
@@ -121,8 +110,8 @@ func IsSymlink(src string) bool {
 
 // IsSymlinkDir returns true if the symlink's target is a directory
 func (info *FileInfo) IsSymlinkDir() bool {
-	if info.v.Mode()&os.ModeSymlink != 0 {
-		if target, err := filepath.EvalSymlinks(info.path); err == nil {
+	if info.Val.Mode()&os.ModeSymlink != 0 {
+		if target, err := filepath.EvalSymlinks(info.Path); err == nil {
 			if subinfo, err := os.Lstat(target); err == nil {
 				if subinfo.IsDir() {
 					return true
@@ -143,8 +132,8 @@ func IsSymlinkDir(src string) bool {
 
 // IsSymlinkFile returns true if the symlink's target is a file
 func (info *FileInfo) IsSymlinkFile() bool {
-	if info.v.Mode()&os.ModeSymlink != 0 {
-		if target, err := filepath.EvalSymlinks(info.path); err == nil {
+	if info.Val.Mode()&os.ModeSymlink != 0 {
+		if target, err := filepath.EvalSymlinks(info.Path); err == nil {
 			if subinfo, err := os.Lstat(target); err == nil {
 				if !subinfo.IsDir() {
 					return true
@@ -165,11 +154,11 @@ func IsSymlinkFile(src string) bool {
 
 // SymlinkTarget follows the symlink to get the path for the target
 func (info *FileInfo) SymlinkTarget() (target string, err error) {
-	if info.v.Mode()&os.ModeSymlink == 0 {
+	if info.Val.Mode()&os.ModeSymlink == 0 {
 		err = errors.Errorf("not a symlink")
 		return
 	}
-	if target, err = os.Readlink(info.path); err != nil {
+	if target, err = os.Readlink(info.Path); err != nil {
 		err = errors.Errorf("failed to read the link target")
 		return
 	}
@@ -188,8 +177,8 @@ func SymlinkTarget(src string) (target string, err error) {
 
 // SymlinkTargetExists returns true if the symlink's target exists
 func (info *FileInfo) SymlinkTargetExists() bool {
-	if info.v.Mode()&os.ModeSymlink != 0 {
-		if _, err := filepath.EvalSymlinks(info.path); err == nil {
+	if info.Val.Mode()&os.ModeSymlink != 0 {
+		if _, err := filepath.EvalSymlinks(info.Path); err == nil {
 			return true
 		}
 	}

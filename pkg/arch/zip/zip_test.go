@@ -23,267 +23,350 @@ var tmpDir = "../../../test/temp"
 var tmpfile = "../../../test/temp/.tmp"
 var tempZipfile1 = "../../../test/temp/file1.zip"
 var tempZipfile2 = "../../../test/temp/file2.zip"
+var testfile = "../../../test/testfile"
 
 func TestCreateSad(t *testing.T) {
-	prepTmpDir()
+	clearTmpDir()
 
-	// force zip.Create error
+	// // force zip.Create error
+	// {
+	// 	// Create new source directory/file
+	// 	srcDir := path.Join(tmpDir, "src")
+	// 	_, err := sys.MkdirP(srcDir)
+	// 	assert.Nil(t, err)
+	// 	_, err = sys.Touch(path.Join(srcDir, "file"))
+	// 	assert.Nil(t, err)
+
+	// 	// Now attempt to create th zip but force the io.Copy error
+	// 	OneShotForceZipCreateError()
+	// 	err = Create(tmpfile, srcDir)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to add target file"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), "to zip: invalid argument"))
+
+	// 	// Clean up
+	// 	assert.Nil(t, sys.RemoveAll(srcDir))
+	// 	assert.Nil(t, sys.Remove(tmpfile))
+	// }
+
+	// // force io.Copy error
+	// {
+	// 	// Create new source directory/file
+	// 	srcDir := path.Join(tmpDir, "src")
+	// 	_, err := sys.MkdirP(srcDir)
+	// 	assert.Nil(t, err)
+	// 	_, err = sys.Touch(path.Join(srcDir, "file"))
+	// 	assert.Nil(t, err)
+
+	// 	// Now attempt to create th zip but force the io.Copy error
+	// 	test.OneShotForceIOCopyError()
+	// 	err = Create(tmpfile, srcDir)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to copy data from reader to writer for zip target"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+
+	// 	// Clean up
+	// 	assert.Nil(t, sys.RemoveAll(srcDir))
+	// 	assert.Nil(t, sys.Remove(tmpfile))
+	// }
+
+	// // attempt to read writeonly source file
+	// {
+	// 	// Create new source directory
+	// 	srcDir := path.Join(tmpDir, "src")
+	// 	_, err := sys.MkdirP(srcDir)
+	// 	assert.Nil(t, err)
+
+	// 	// Add a file to the source directory
+	// 	srcfile, err := sys.Touch(path.Join(srcDir, "file"))
+	// 	assert.Nil(t, err)
+
+	// 	// Now set the source file to be write only
+	// 	assert.Nil(t, os.Chmod(srcfile, 0222))
+
+	// 	// Now attempt to read from the write only source file
+	// 	err = Create(tmpfile, srcDir)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to open target file"))
+	// 	assert.True(t, strings.Contains(err.Error(), "for zip: open"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": permission denied"))
+
+	// 	// Correct permission and remove
+	// 	assert.Nil(t, os.Chmod(srcDir, 0755))
+	// 	assert.Nil(t, sys.RemoveAll(srcDir))
+	// 	assert.Nil(t, sys.Remove(tmpfile))
+	// }
+
+	// // attempt to read writeonly source directory
+	// {
+	// 	// Create new source directory
+	// 	srcDir := path.Join(tmpDir, "src")
+	// 	_, err := sys.MkdirP(srcDir)
+	// 	assert.Nil(t, err)
+
+	// 	// Add a file to the source directory
+	// 	_, err = sys.Touch(path.Join(srcDir, "file"))
+	// 	assert.Nil(t, err)
+
+	// 	// Now set the source directory to be write only
+	// 	assert.Nil(t, os.Chmod(srcDir, 0222))
+
+	// 	// Now attempt to read from the write only source
+	// 	err = Create(tmpfile, srcDir)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to read directory"))
+	// 	assert.True(t, strings.Contains(err.Error(), "to add files from: open"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": permission denied"))
+
+	// 	// Correct permission and remove
+	// 	assert.Nil(t, os.Chmod(srcDir, 0755))
+	// 	assert.Nil(t, sys.RemoveAll(srcDir))
+	// 	assert.Nil(t, sys.Remove(tmpfile))
+	// }
+
+	// // attempt to create zip in read only directory
+	// {
+	// 	// Create new destination directory
+	// 	dstDir := path.Join(tmpDir, "dst")
+	// 	_, err := sys.MkdirP(dstDir)
+	// 	assert.Nil(t, err)
+
+	// 	// Now set the destination to be readonly
+	// 	assert.Nil(t, os.Chmod(dstDir, 0444))
+
+	// 	// Now attempt to create the zip in the read only directory
+	// 	err = Create(path.Join(dstDir, "zip"), tmpfile)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to create zipfile"))
+	// 	assert.True(t, strings.Contains(err.Error(), ": open /"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": permission denied"))
+
+	// 	// Correct permission and remove
+	// 	assert.Nil(t, os.Chmod(dstDir, 0755))
+	// 	assert.Nil(t, sys.RemoveAll(dstDir))
+	// }
+
+	// // source path is empty
+	// {
+	// 	assert.Equal(t, "empty string is an invalid path", Create(tmpfile, "").Error())
+	// }
+
+	// // target zipfile is empty
+	// {
+	// 	assert.Equal(t, "empty string is an invalid path", Create("", "").Error())
+	// }
+}
+
+func TestCreateFromGlobWithExtractCheck(t *testing.T) {
+	clearTmpDir()
+
+	// Create target files in dir
+	dir1, err := sys.MkdirP(path.Join(tmpDir, "dir1"))
+	assert.Nil(t, err)
+	file1, err := sys.CopyFile(testfile, path.Join(dir1, "file1"))
+	assert.Nil(t, err)
+	_, err = sys.CopyFile(testfile, path.Join(dir1, "file2"))
+	assert.Nil(t, err)
+	bob1, err := sys.CopyFile(testfile, path.Join(dir1, "bob1"))
+	assert.Nil(t, err)
+
+	zipfile := path.Join(tmpDir, "test.zip")
+	assert.False(t, sys.Exists(zipfile))
+	err = Create(zipfile, path.Join(dir1, "*1"))
+	assert.Nil(t, err)
+	assert.True(t, sys.Exists(zipfile))
+
+	// Now extract the newly created tarball
+	dir2 := path.Join(tmpDir, "dir2")
+	err = ExtractAll(zipfile, dir2)
+	assert.Nil(t, err)
+
+	// Now validate the new files
+	newfiles, err := sys.AllFiles(dir2)
+	assert.Nil(t, err)
+	assert.Len(t, newfiles, 2)
+	assert.True(t, strings.HasSuffix(newfiles[0], "bob1"))
+	assert.True(t, strings.HasSuffix(newfiles[1], "file1"))
+
+	// Now do an MD5 sum of all files
 	{
-		// Create new source directory/file
-		srcDir := path.Join(tmpDir, "src")
-		_, err := sys.MkdirP(srcDir)
+		md5new, err := sys.MD5(newfiles[0])
 		assert.Nil(t, err)
-		_, err = sys.Touch(path.Join(srcDir, "file"))
+		md5old, err := sys.MD5(bob1)
 		assert.Nil(t, err)
-
-		// Now attempt to create th zip but force the io.Copy error
-		OneShotForceZipCreateError()
-		err = Create(tmpfile, srcDir)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to add target file"))
-		assert.True(t, strings.HasSuffix(err.Error(), "to zip: invalid argument"))
-
-		// Clean up
-		assert.Nil(t, sys.RemoveAll(srcDir))
-		assert.Nil(t, sys.Remove(tmpfile))
+		assert.Equal(t, md5new, md5old)
 	}
-
-	// force io.Copy error
 	{
-		// Create new source directory/file
-		srcDir := path.Join(tmpDir, "src")
-		_, err := sys.MkdirP(srcDir)
+		md5new, err := sys.MD5(newfiles[1])
 		assert.Nil(t, err)
-		_, err = sys.Touch(path.Join(srcDir, "file"))
+		md5old, err := sys.MD5(file1)
 		assert.Nil(t, err)
-
-		// Now attempt to create th zip but force the io.Copy error
-		test.OneShotForceIOCopyError()
-		err = Create(tmpfile, srcDir)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to copy data from reader to writer for zip target"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
-
-		// Clean up
-		assert.Nil(t, sys.RemoveAll(srcDir))
-		assert.Nil(t, sys.Remove(tmpfile))
-	}
-
-	// attempt to read writeonly source file
-	{
-		// Create new source directory
-		srcDir := path.Join(tmpDir, "src")
-		_, err := sys.MkdirP(srcDir)
-		assert.Nil(t, err)
-
-		// Add a file to the source directory
-		srcfile, err := sys.Touch(path.Join(srcDir, "file"))
-		assert.Nil(t, err)
-
-		// Now set the source file to be write only
-		assert.Nil(t, os.Chmod(srcfile, 0222))
-
-		// Now attempt to read from the write only source file
-		err = Create(tmpfile, srcDir)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to open target file"))
-		assert.True(t, strings.Contains(err.Error(), "for zip: open"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": permission denied"))
-
-		// Correct permission and remove
-		assert.Nil(t, os.Chmod(srcDir, 0755))
-		assert.Nil(t, sys.RemoveAll(srcDir))
-		assert.Nil(t, sys.Remove(tmpfile))
-	}
-
-	// attempt to read writeonly source directory
-	{
-		// Create new source directory
-		srcDir := path.Join(tmpDir, "src")
-		_, err := sys.MkdirP(srcDir)
-		assert.Nil(t, err)
-
-		// Add a file to the source directory
-		_, err = sys.Touch(path.Join(srcDir, "file"))
-		assert.Nil(t, err)
-
-		// Now set the source directory to be write only
-		assert.Nil(t, os.Chmod(srcDir, 0222))
-
-		// Now attempt to read from the write only source
-		err = Create(tmpfile, srcDir)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to read directory"))
-		assert.True(t, strings.Contains(err.Error(), "to add files from: open"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": permission denied"))
-
-		// Correct permission and remove
-		assert.Nil(t, os.Chmod(srcDir, 0755))
-		assert.Nil(t, sys.RemoveAll(srcDir))
-		assert.Nil(t, sys.Remove(tmpfile))
-	}
-
-	// attempt to create zip in read only directory
-	{
-		// Create new destination directory
-		dstDir := path.Join(tmpDir, "dst")
-		_, err := sys.MkdirP(dstDir)
-		assert.Nil(t, err)
-
-		// Now set the destination to be readonly
-		assert.Nil(t, os.Chmod(dstDir, 0444))
-
-		// Now attempt to create the zip in the read only directory
-		err = Create(path.Join(dstDir, "zip"), tmpfile)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to create zipfile"))
-		assert.True(t, strings.Contains(err.Error(), ": open /"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": permission denied"))
-
-		// Correct permission and remove
-		assert.Nil(t, os.Chmod(dstDir, 0755))
-		assert.Nil(t, sys.RemoveAll(dstDir))
-	}
-
-	// source path is empty
-	{
-		assert.Equal(t, "empty string is an invalid path", Create(tmpfile, "").Error())
-	}
-
-	// target zipfile is empty
-	{
-		assert.Equal(t, "empty string is an invalid path", Create("", "").Error())
+		assert.Equal(t, md5new, md5old)
 	}
 }
 
-func TestCreateHappy(t *testing.T) {
+func TestCreateFromDirectoryOfFilesWithExtractCheck(t *testing.T) {
 	prepTmpDir()
 
-	sys.Copy("../../net", tmpDir)
-
-	// Create the new zipfile
-	src := path.Join(tmpDir, "net")
-	err := Create(tmpfile, src)
+	// Create a zipfile to work with
+	newsrc := path.Join(tmpDir, "net")
+	zipfile := path.Join(tmpDir, "test.zip")
+	assert.False(t, sys.Exists(zipfile))
+	err := Create(zipfile, newsrc)
 	assert.Nil(t, err)
-	assert.True(t, sys.Exists(tmpfile))
+	assert.True(t, sys.Exists(zipfile))
 
-	// Remove zip target files
-	sys.RemoveAll(src)
-	assert.False(t, sys.Exists(src))
+	// Rename the original source files to old
+	oldsrc := path.Join(tmpDir, "old")
+	_, err = sys.Move(newsrc, oldsrc)
+	assert.Nil(t, err)
 
-	// Call out and extract the files
-	_, err = sys.ExecOut("unzip %s -d %s", tmpfile, tmpDir)
+	// Now extract the newly created zipfile
+	err = ExtractAll(zipfile, tmpDir)
 	assert.Nil(t, err)
-	paths, err := sys.AllPaths(tmpDir)
+
+	// Now do a MD5 sum of all files and ensure integrity exists
+	newfiles, err := sys.AllFiles(newsrc)
 	assert.Nil(t, err)
-	result := n.S(paths).Map(func(x n.O) n.O { return sys.SlicePath(x.(string), -3, -1) }).ToStrs()
-	expected := []string{
-		"n/test/temp",
-		"test/temp/.tmp",
-		"test/temp/agent",
-		"temp/agent/agent.go",
-		"test/temp/mech",
-		"temp/mech/example",
-		"mech/example/mech.go",
-		"temp/mech/mech.go",
-		"temp/mech/mech_test.go",
-		"temp/mech/page.go",
-		"test/temp/net.go",
-		"test/temp/net_test.go",
+	oldfiles, err := sys.AllFiles(oldsrc)
+	assert.Nil(t, err)
+	assert.Equal(t, len(newfiles), len(oldfiles))
+	for i := 0; i < len(newfiles); i++ {
+		md5new, err := sys.MD5(newfiles[i])
+		assert.Nil(t, err)
+		md5old, err := sys.MD5(oldfiles[i])
+		assert.Nil(t, err)
+		assert.Equal(t, md5new, md5old)
 	}
-	assert.Equal(t, expected, result)
+}
+
+func TestCreateFromSingleFileWithExtractCheck(t *testing.T) {
+	clearTmpDir()
+
+	zipfile := path.Join(tmpDir, "test.zip")
+	assert.False(t, sys.Exists(zipfile))
+	err := Create(zipfile, testfile)
+	assert.Nil(t, err)
+	assert.True(t, sys.Exists(zipfile))
+
+	// Now extract the newly created zipfile
+	err = ExtractAll(zipfile, tmpDir)
+	assert.Nil(t, err)
+
+	// Now validate the new files
+	newfiles, err := sys.AllFiles(tmpDir)
+	assert.Nil(t, err)
+	assert.Len(t, newfiles, 2)
+	assert.True(t, strings.HasSuffix(newfiles[0], "test.zip"))
+	assert.True(t, strings.HasSuffix(newfiles[1], "testfile"))
+
+	// Now do an MD5 sum of all files
+	md5new, err := sys.MD5(newfiles[1])
+	assert.Nil(t, err)
+	md5old, err := sys.MD5(testfile)
+	assert.Nil(t, err)
+	assert.Equal(t, md5new, md5old)
 }
 
 func TestExtractAllSad(t *testing.T) {
-	prepTmpDir()
+	// clearTmpDir()
 
-	// force os.Chtimes error
+	// // force os.Chtimes error
+	// {
+	// 	// Copy over zipfile
+	// 	assert.Nil(t, sys.Copy(testZipfile1, tempZipfile1))
+
+	// 	test.OneShotForceOSChtimesError()
+	// 	err := ExtractAll(tempZipfile1, tmpDir)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to set file access times for"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	// }
+
+	// // force os.Chmod error
+	// {
+	// 	test.OneShotForceOSChmodError()
+	// 	err := ExtractAll(tempZipfile1, tmpDir)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to set file mode for"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	// }
+
+	// // force os.Copy error
+	// {
+	// 	test.OneShotForceIOCopyError()
+	// 	err := ExtractAll(tempZipfile1, tmpDir)
+	// 	assert.Equal(t, "failed to copy data from zip to disk: invalid argument", err.Error())
+	// }
+
+	// // force zip.FileOpen error
+	// {
+	// 	OneShotForceZipFileOpenError()
+	// 	err := ExtractAll(tempZipfile1, tmpDir)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to open zipfile target"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), "for reading: invalid argument"))
+	// }
+
+	// // force os.Create error
+	// {
+	// 	test.OneShotForceOSCreateError()
+	// 	err := ExtractAll(tempZipfile1, tmpDir)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to create file"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), "from zipfile: invalid argument"))
+	// }
+
+	// // force zip.OpenReader error
+	// {
+	// 	OneShotForceZipOpenReaderError()
+	// 	err := ExtractAll(tempZipfile1, tmpDir)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to open zipfile"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), "for reading: invalid argument"))
+	// }
+
+	// // attempt to read writeonly source file
+	// {
+	// 	// Create new source directory
+	// 	srcDir := path.Join(tmpDir, "src")
+	// 	_, err := sys.MkdirP(srcDir)
+	// 	assert.Nil(t, err)
+
+	// 	// Add a file to the source directory
+	// 	srcfile, err := sys.Touch(path.Join(srcDir, "file"))
+	// 	assert.Nil(t, err)
+
+	// 	// Now set the source file to be write only
+	// 	assert.Nil(t, os.Chmod(srcfile, 0222))
+
+	// 	// Now attempt to read from the write only source file
+	// 	test.OneShotForceOSCloseError()
+	// 	OneShotForceZipCloseError()
+	// 	err = Create(tmpfile, srcDir)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to close file writer: failed to close zipfile writer: failed to open target file"))
+	// 	assert.True(t, strings.Contains(err.Error(), "for zip: open"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": permission denied"))
+
+	// 	// Correct permission and remove
+	// 	assert.Nil(t, os.Chmod(srcDir, 0755))
+	// 	assert.Nil(t, sys.RemoveAll(srcDir))
+	// 	assert.Nil(t, sys.Remove(tmpfile))
+	// }
+	// assert.Equal(t, "", err.Error())
+
+	// attempt to write to writeonly destination path
 	{
-		// Copy over zipfile
-		assert.Nil(t, sys.Copy(testZipfile1, tempZipfile1))
-
-		test.OneShotForceOSChtimesError()
-		err := ExtractAll(tempZipfile1, tmpDir)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to set file access times for"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
-	}
-
-	// force os.Chmod error
-	{
-		test.OneShotForceOSChmodError()
-		err := ExtractAll(tempZipfile1, tmpDir)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to set file mode for"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
-	}
-
-	// force os.Copy error
-	{
-		test.OneShotForceIOCopyError()
-		err := ExtractAll(tempZipfile1, tmpDir)
-		assert.Equal(t, "failed to copy data from zip to disk: invalid argument", err.Error())
-	}
-
-	// force zip.FileOpen error
-	{
-		OneShotForceZipFileOpenError()
-		err := ExtractAll(tempZipfile1, tmpDir)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to open zipfile target"))
-		assert.True(t, strings.HasSuffix(err.Error(), "for reading: invalid argument"))
-	}
-
-	// force os.Create error
-	{
-		test.OneShotForceOSCreateError()
-		err := ExtractAll(tempZipfile1, tmpDir)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to create file"))
-		assert.True(t, strings.HasSuffix(err.Error(), "from zipfile: invalid argument"))
-	}
-
-	// force zip.OpenReader error
-	{
-		OneShotForceZipOpenReaderError()
-		err := ExtractAll(tempZipfile1, tmpDir)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to open zipfile"))
-		assert.True(t, strings.HasSuffix(err.Error(), "for reading: invalid argument"))
-	}
-
-	// attempt to read writeonly source file
-	{
-		// Create new source directory
-		srcDir := path.Join(tmpDir, "src")
-		_, err := sys.MkdirP(srcDir)
+		// Create write only destination
+		dir, err := sys.MkdirP(path.Join(tmpDir, "dir"))
 		assert.Nil(t, err)
-
-		// Add a file to the source directory
-		srcfile, err := sys.Touch(path.Join(srcDir, "file"))
-		assert.Nil(t, err)
-
-		// Now set the source file to be write only
-		assert.Nil(t, os.Chmod(srcfile, 0222))
-
-		// Now attempt to read from the write only source file
-		test.OneShotForceOSCloseError()
-		OneShotForceZipCloseError()
-		err = Create(tmpfile, srcDir)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to close file writer: failed to close zipfile writer: failed to open target file"))
-		assert.True(t, strings.Contains(err.Error(), "for zip: open"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": permission denied"))
-
-		// Correct permission and remove
-		assert.Nil(t, os.Chmod(srcDir, 0755))
-		assert.Nil(t, sys.RemoveAll(srcDir))
-		assert.Nil(t, sys.Remove(tmpfile))
-	}
-
-	// attempt to read writeonly zipfile
-	{
-		// Copy over zipfile and set as write only
-		assert.Nil(t, sys.Copy(testZipfile1, tempZipfile1))
-		assert.Nil(t, os.Chmod(tempZipfile1, 0222))
+		assert.Nil(t, os.Chmod(dir, 0222))
 
 		// Now attempt to read the write only zip
-		err := ExtractAll(tempZipfile1, tmpDir)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to open zipfile 'file1.zip' to detect zip data:"))
+		err = ExtractAll(testZipfile1, dir)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to create file"))
 		assert.True(t, strings.HasSuffix(err.Error(), "file1.zip: permission denied"))
 
 		// Correct permission and remove
-		assert.Nil(t, os.Chmod(tempZipfile1, 0644))
-		assert.Nil(t, sys.Remove(tempZipfile1))
+		assert.Nil(t, os.Chmod(dir, 0755))
+		assert.Nil(t, sys.RemoveAll(dir))
+	}
+
+	// invalid zipfile
+	{
+		err := ExtractAll(tmpfile, tmpDir)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to open zipfile '.tmp' to detect zip data"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": no such file or directory"))
 	}
 
 	// Destination path is empty
@@ -297,45 +380,8 @@ func TestExtractAllSad(t *testing.T) {
 	}
 }
 
-func TestExtractAll(t *testing.T) {
-	prepTmpDir()
-	sys.Copy("../../net", tmpDir)
-
-	// Create the new zipfile
-	src := path.Join(tmpDir, "net")
-	err := Create(tmpfile, src)
-	assert.Nil(t, err)
-	assert.True(t, sys.Exists(tmpfile))
-
-	// Remove zip target files
-	sys.RemoveAll(src)
-	assert.False(t, sys.Exists(src))
-
-	// Now extract the files and validate
-	err = ExtractAll(tmpfile, tmpDir)
-	assert.Nil(t, err)
-	paths, err := sys.AllPaths(tmpDir)
-	assert.Nil(t, err)
-	result := n.S(paths).Map(func(x n.O) n.O { return sys.SlicePath(x.(string), -3, -1) }).ToStrs()
-	expected := []string{
-		"n/test/temp",
-		"test/temp/.tmp",
-		"test/temp/agent",
-		"temp/agent/agent.go",
-		"test/temp/mech",
-		"temp/mech/example",
-		"mech/example/mech.go",
-		"temp/mech/mech.go",
-		"temp/mech/mech_test.go",
-		"temp/mech/page.go",
-		"test/temp/net.go",
-		"test/temp/net_test.go",
-	}
-	assert.Equal(t, expected, result)
-}
-
 func TestExtractPrefixedZip(t *testing.T) {
-	prepTmpDir()
+	clearTmpDir()
 
 	// Copy zip to temp dir
 	sys.Copy(testZipfile1, tmpDir)
@@ -365,7 +411,7 @@ func TestExtractPrefixedZip(t *testing.T) {
 }
 
 func TestExtractPrefixedZip2(t *testing.T) {
-	prepTmpDir()
+	clearTmpDir()
 
 	// Copy zip to temp dir
 	sys.Copy(testZipfile2, tmpDir)
@@ -377,13 +423,8 @@ func TestExtractPrefixedZip2(t *testing.T) {
 }
 
 func TestTrimPrefix(t *testing.T) {
-	prepTmpDir()
+	clearTmpDir()
 	assert.Nil(t, sys.Copy(testZipfile1, tempZipfile1))
-
-	// empty target name
-	{
-		assert.Equal(t, "empty string is an invalid path", TrimPrefix("").Error())
-	}
 
 	// happy
 	{
@@ -395,14 +436,72 @@ func TestTrimPrefix(t *testing.T) {
 		data, err := sys.ReadBytes(tempZipfile1)
 		assert.Nil(t, err)
 		assert.Equal(t, []byte{0x50, 0x4B}, data[0:2])
+		assert.Nil(t, sys.Copy(testZipfile1, tempZipfile1))
+	}
+
+	// force os.File.Truncate failure and fail close
+	{
+		test.OneShotForceOSCloseError()
+		test.OneShotForceOSTruncateError(os.ErrInvalid)
+		err := TrimPrefix(tempZipfile1)
+		assert.Equal(t, "failed to close file writer: failed to truncate zipfile 'file1.zip': invalid argument", err.Error())
+		assert.Nil(t, sys.Copy(testZipfile1, tempZipfile1))
+	}
+
+	// force os.File.WriteAt failure
+	{
+		test.OneShotForceOSWriteAtError(os.ErrInvalid)
+		err := TrimPrefix(tempZipfile1)
+		assert.Equal(t, "failed to write shifted data to zipfile 'file1.zip': invalid argument", err.Error())
+		assert.Nil(t, sys.Copy(testZipfile1, tempZipfile1))
+	}
+
+	// force os.File.ReadAt failure
+	{
+		test.OneShotForceOSReadAtError(os.ErrInvalid)
+		err := TrimPrefix(tempZipfile1)
+		assert.Equal(t, "failed to read from zipfile 'file1.zip' to shift data: invalid argument", err.Error())
+	}
+
+	// force os.File.Read failure io.EOF
+	{
+		test.OneShotForceOSReadError(io.EOF)
+		err := TrimPrefix(tempZipfile1)
+		assert.Equal(t, "unable to identify 'file1.zip' as a valid zipfile", err.Error())
+	}
+
+	// force io.Read failure non io.EOF
+	{
+		test.OneShotForceOSReadError(os.ErrInvalid)
+		err := TrimPrefix(tempZipfile1)
+		assert.Equal(t, "failed to read from zipfile 'file1.zip' for zip identification: invalid argument", err.Error())
+	}
+
+	// try to open a write only file
+	{
+		assert.Nil(t, os.Chmod(tempZipfile1, 0222))
+		err := TrimPrefix(tempZipfile1)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to open zipfile 'file1.zip'"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": permission denied"))
+		assert.Nil(t, os.Chmod(tempZipfile1, 0644))
+	}
+
+	// empty target name
+	{
+		assert.Equal(t, "empty string is an invalid path", TrimPrefix("").Error())
 	}
 }
 
-func prepTmpDir() {
+func clearTmpDir() {
 	if sys.Exists(tmpDir) {
 		sys.RemoveAll(tmpDir)
 	}
 	sys.MkdirP(tmpDir)
+}
+
+func prepTmpDir() {
+	clearTmpDir()
+	sys.Copy("../../net", tmpDir)
 }
 
 // OneShotForceZipCloseError patches *archive/zip.Writer.Close to return an error. Once it has been triggered it

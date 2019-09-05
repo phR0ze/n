@@ -145,7 +145,7 @@ func TestPaths(t *testing.T) {
 }
 
 func TestAllFilesWithFileLink(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// temp/first/f0,f1
 	firstDir, _ := MkdirP(path.Join(tmpDir, "first"))
@@ -175,7 +175,7 @@ func TestAllFilesWithFileLink(t *testing.T) {
 }
 
 func TestAllDirs(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// doesn't exist
 	{
@@ -230,7 +230,7 @@ func TestAllDirs(t *testing.T) {
 }
 
 func TestAllFiles(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// doesn't exist
 	{
@@ -334,7 +334,7 @@ func TestAllFiles(t *testing.T) {
 }
 
 func TestAllPaths(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// doesn't exist
 	{
@@ -500,21 +500,120 @@ func TestHome(t *testing.T) {
 }
 
 func TestReadDir(t *testing.T) {
+	clearTmpDir()
 
-	// force readdirnames error
+	// read dirnames from valid directory
 	{
-		test.OneShotForceOSReaddirnamesError()
-		dirs, err := ReadDir(tmpDir)
-		assert.Equal(t, []string{}, dirs)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to read directory names for"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+		// crate a directory and test files to check
+		dirname, err := MkdirP(path.Join(tmpDir, "dir"))
+		assert.Nil(t, err)
+		expected := []string{}
+		for i := 0; i < 10; i++ {
+			file, err := Touch(path.Join(dirname, fmt.Sprintf("file%d", i)))
+			assert.Nil(t, err)
+			expected = append(expected, SlicePath(file, -1, -1))
+		}
+
+		// Pull in the dir's filenames
+		dirs, err := ReadDir(dirname)
+		assert.Nil(t, err)
+		results := []string{}
+		for _, info := range dirs {
+			results = append(results, info.Name())
+		}
+		assert.Equal(t, expected, results)
+
+		// clean up
+		assert.Nil(t, RemoveAll(dirname))
 	}
 
-	// happy
+	// try a file
+	{
+		dirs, err := ReadDir(testfile)
+		assert.Equal(t, ([]*FileInfo)(nil), dirs)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to read directory"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": readdirent: not a directory"))
+	}
+
+	// writeonly directory
+	{
+		// Create writeonly directory
+		dirname, err := MkdirP(path.Join(tmpDir, "dir"))
+		assert.Nil(t, err)
+		assert.Nil(t, os.Chmod(dirname, 0222))
+
+		dirs, err := ReadDir(dirname)
+		assert.Equal(t, ([]*FileInfo)(nil), dirs)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to open directory"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": permission denied"))
+
+		// Reset the permissions and remove the dir
+		assert.Nil(t, os.Chmod(dirname, 0755))
+		assert.Nil(t, RemoveAll(dirname))
+	}
+
+	// empty dirname
 	{
 		dirs, err := ReadDir("")
+		assert.Equal(t, ([]*FileInfo)(nil), dirs)
+		assert.Equal(t, "empty string is an invalid path", err.Error())
+	}
+}
+
+func TestReadDirnames(t *testing.T) {
+	clearTmpDir()
+
+	// read dirnames from valid directory
+	{
+		// crate a directory and test files to check
+		dirname, err := MkdirP(path.Join(tmpDir, "dir"))
+		assert.Nil(t, err)
+		expected := []string{}
+		for i := 0; i < 10; i++ {
+			file, err := Touch(path.Join(dirname, fmt.Sprintf("file%d", i)))
+			assert.Nil(t, err)
+			expected = append(expected, SlicePath(file, -1, -1))
+		}
+
+		// Pull in the dir's filenames
+		dirs, err := ReadDirnames(dirname)
+		assert.Nil(t, err)
+		assert.Equal(t, expected, dirs)
+
+		// clean up
+		assert.Nil(t, RemoveAll(dirname))
+	}
+
+	// try a file
+	{
+		dirs, err := ReadDirnames(testfile)
+		assert.Equal(t, []string{}, dirs)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to read directory names for"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": readdirent: not a directory"))
+	}
+
+	// writeonly directory
+	{
+		// Create writeonly directory
+		dirname, err := MkdirP(path.Join(tmpDir, "dir"))
+		assert.Nil(t, err)
+		assert.Nil(t, os.Chmod(dirname, 0222))
+
+		dirs, err := ReadDirnames(dirname)
 		assert.Equal(t, ([]string)(nil), dirs)
-		assert.Equal(t, "failed to read directory : open : no such file or directory", err.Error())
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to open directory"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": permission denied"))
+
+		// Reset the permissions and remove the dir
+		assert.Nil(t, os.Chmod(dirname, 0755))
+		assert.Nil(t, RemoveAll(dirname))
+	}
+
+	// empty dirname
+	{
+		dirs, err := ReadDirnames("")
+		assert.Equal(t, ([]string)(nil), dirs)
+		assert.Equal(t, "empty string is an invalid path", err.Error())
 	}
 }
 
@@ -612,7 +711,7 @@ func TestTrimProtocol(t *testing.T) {
 }
 
 func TestWalkSkip(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// Create dirs to walk
 	_, err := MkdirP(path.Join(tmpDir, "skipme"))
@@ -633,7 +732,7 @@ func TestWalkSkip(t *testing.T) {
 }
 
 func TestWalkDirPermissions(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// Create dirs to walk
 	skipMe, err := MkdirP(path.Join(tmpDir, "skipme"))
@@ -649,7 +748,7 @@ func TestWalkDirPermissions(t *testing.T) {
 		if path.Base(p) == "skipme" {
 			cnt++
 			if cnt == 2 {
-				assert.True(t, strings.HasPrefix(e.Error(), "failed to read directory"))
+				assert.True(t, strings.HasPrefix(e.Error(), "failed to open directory"))
 				assert.True(t, strings.Contains(e.Error(), "permission denied"))
 				// By passing it back to the walk function we abort
 				return e

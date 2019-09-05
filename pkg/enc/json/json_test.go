@@ -14,7 +14,7 @@ var tmpfile = "../../../test/temp/.tmp"
 var testfile = "../../../test/testfile"
 
 func TestReadJSON(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// Write out a test json file
 	jsondata := `{
@@ -43,7 +43,7 @@ func TestReadJSON(t *testing.T) {
 }
 
 func TestWriteJSONCompact(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// Write out the data structure as yaml to disk
 	jsondata1 := "{\n  \"foo\": {\n    \"bar\": [\n      1,\n      2\n    ]\n  }\n}"
@@ -60,7 +60,7 @@ func TestWriteJSONCompact(t *testing.T) {
 }
 
 func TestWriteJSONPretty(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// Invalid data structure test
 	err := WriteJSON(tmpfile, "foo")
@@ -89,7 +89,7 @@ func TestWriteJSONPretty(t *testing.T) {
 	assert.Equal(t, data1, data2)
 }
 
-func cleanTmpDir() {
+func clearTmpDir() {
 	if sys.Exists(tmpDir) {
 		sys.RemoveAll(tmpDir)
 	}

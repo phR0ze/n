@@ -116,7 +116,7 @@ func CopyFile(src, dst string, opts ...*opt.Opt) (result string, err error) {
 
 	// Check the source for issues
 	if srcInfo = infoOpt(opts); srcInfo != nil {
-		if srcPath, err = Abs(srcInfo.path); err != nil {
+		if srcPath, err = Abs(srcInfo.Path); err != nil {
 			return
 		}
 	} else {
@@ -259,18 +259,18 @@ func Windows() (result bool) {
 }
 
 // MD5 returns the md5 of the given file
-func MD5(target string) (result string, err error) {
-	if target, err = Abs(target); err != nil {
+func MD5(filename string) (result string, err error) {
+	if filename, err = Abs(filename); err != nil {
 		return
 	}
-	if !Exists(target) {
+	if !Exists(filename) {
 		return "", os.ErrNotExist
 	}
 
-	// Open target file for reading
+	// Open file for reading
 	var fr *os.File
-	if fr, err = os.Open(target); err != nil {
-		err = errors.Wrapf(err, "failed opening target file %s", target)
+	if fr, err = os.Open(filename); err != nil {
+		err = errors.Wrapf(err, "failed opening target file %s", filename)
 		return
 	}
 	defer fr.Close()
@@ -278,7 +278,7 @@ func MD5(target string) (result string, err error) {
 	// Create a new md5 hash and copy in file bits
 	hash := md5.New()
 	if _, err = io.Copy(hash, fr); err != nil {
-		err = errors.Wrapf(err, "failed copying file data into hash from %s", target)
+		err = errors.Wrapf(err, "failed copying file data into hash from %s", filename)
 		return
 	}
 
@@ -290,8 +290,8 @@ func MD5(target string) (result string, err error) {
 
 // MkdirP creates the target directory and any parent directories needed
 // and returns the ABS path of the created directory
-func MkdirP(target string, perms ...uint32) (dir string, err error) {
-	if dir, err = Abs(target); err != nil {
+func MkdirP(dirname string, perms ...uint32) (dir string, err error) {
+	if dir, err = Abs(dirname); err != nil {
 		return
 	}
 

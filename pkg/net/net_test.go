@@ -13,7 +13,7 @@ var testfile = "../../test/testfile"
 var readme = "../../README.md"
 
 func TestDownloadFile(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 	dst, err := DownloadFile("https://www.google.com", tmpfile)
 	assert.Nil(t, err)
 	assert.True(t, sys.Exists(dst))
@@ -56,7 +56,7 @@ func TestSplitURL(t *testing.T) {
 	assert.Equal(t, []string{"http://", "foobar.com", "blah", "bar"}, SplitURL("HttP://foobar.com/blah/bar"))
 }
 
-func cleanTmpDir() {
+func clearTmpDir() {
 	if sys.Exists(tmpDir) {
 		sys.RemoveAll(tmpDir)
 	}

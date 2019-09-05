@@ -11,7 +11,7 @@ var tmpDir = "../../test/temp"
 var tmpFile = "../../test/temp/.tmp"
 
 func TestLoad(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	data := `labels:
   chart: {{ name }}:{{ version }}
@@ -36,7 +36,7 @@ func TestLoad(t *testing.T) {
 
 func TestNoTemplatVariablesFound(t *testing.T) {
 	// When no template varibles are found the file should simple be returned as is
-	cleanTmpDir()
+	clearTmpDir()
 
 	data := `labels:
   chart: foo
@@ -323,7 +323,7 @@ func testProcess(t *testing.T, template, expected string, shouldErr bool) {
 	}
 }
 
-func cleanTmpDir() {
+func clearTmpDir() {
 	if sys.Exists(tmpDir) {
 		sys.RemoveAll(tmpDir)
 	}

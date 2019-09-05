@@ -93,7 +93,7 @@ func TestRange(t *testing.T) {
 }
 
 func TestLoadJSON(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// Load simple file
 	{
@@ -119,7 +119,7 @@ func TestLoadJSON(t *testing.T) {
 }
 
 func TestLoadJSONE(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// Load simple file
 	{
@@ -147,7 +147,7 @@ func TestLoadJSONE(t *testing.T) {
 }
 
 func TestLoadYAML(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// Load yaml file
 	{
@@ -162,7 +162,7 @@ func TestLoadYAML(t *testing.T) {
 }
 
 func TestLoadYAMLE(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// Load yaml file
 	{
@@ -202,7 +202,7 @@ func rangeO(min, max int) []interface{} {
 	return result
 }
 
-func cleanTmpDir() {
+func clearTmpDir() {
 	if sys.Exists(tmpDir) {
 		sys.RemoveAll(tmpDir)
 	}

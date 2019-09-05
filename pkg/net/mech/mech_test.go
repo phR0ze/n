@@ -14,14 +14,14 @@ var testfile = "../../../test/testfile"
 var readme = "../../../README.md"
 
 func TestDownload(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 	dst, err := Download("https://www.google.com", tmpfile)
 	assert.Nil(t, err)
 	assert.True(t, sys.Exists(dst))
 }
 
 func TestPageLinks(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	page, err := Get("https://www.google.com")
 	assert.Nil(t, err)
@@ -32,7 +32,7 @@ func TestPageLinks(t *testing.T) {
 	}
 }
 
-func cleanTmpDir() {
+func clearTmpDir() {
 	if sys.Exists(tmpDir) {
 		sys.RemoveAll(tmpDir)
 	}

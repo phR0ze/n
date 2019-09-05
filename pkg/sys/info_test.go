@@ -3,6 +3,7 @@ package sys
 import (
 	"os"
 	"path"
+	"strings"
 	"testing"
 	"time"
 
@@ -15,27 +16,7 @@ var testTime = time.Date(2018, time.May, 13, 1, 2, 3, 4, time.UTC)
 func TestPath(t *testing.T) {
 	info, err := Lstat(testfile)
 	assert.Nil(t, err)
-	assert.Equal(t, "../../test/testfile", info.Path())
-}
-
-func TestAbsPath(t *testing.T) {
-
-	// doesn't exist
-	{
-		info := &FileInfo{path: ""}
-		result, err := info.AbsPath()
-		assert.Empty(t, result)
-		assert.Equal(t, "empty string is an invalid path", err.Error())
-	}
-
-	// happy
-	{
-		info, err := Lstat(testfile)
-		assert.Nil(t, err)
-		result, err := info.AbsPath()
-		assert.Nil(t, err)
-		assert.Equal(t, "test/testfile", SlicePath(result, -2, -1))
-	}
+	assert.Equal(t, "test/testfile", SlicePath(info.Path, -2, -1))
 }
 
 func TestFileInfoInterface(t *testing.T) {
@@ -75,7 +56,7 @@ func TestIsDir(t *testing.T) {
 }
 
 func TestIsFile(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// sad
 	{
@@ -106,7 +87,7 @@ func TestSize(t *testing.T) {
 }
 
 func TestIsSymlink(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// sad
 	{
@@ -150,7 +131,7 @@ func TestIsSymlink(t *testing.T) {
 }
 
 func TestIsSymlinkDir(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// sad
 	{
@@ -177,7 +158,7 @@ func TestIsSymlinkDir(t *testing.T) {
 }
 
 func TestIsSymlinkFile(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// sad
 	{
@@ -200,13 +181,14 @@ func TestIsSymlinkFile(t *testing.T) {
 }
 
 func TestSymlinkTarget(t *testing.T) {
-	cleanTmpDir()
+	clearTmpDir()
 
 	// link doesn't exist
 	{
 		result, err := SymlinkTarget(path.Join(tmpDir, "bogus"))
 		assert.Empty(t, result)
-		assert.Equal(t, "failed to execute Lstat against ../../test/temp/bogus: lstat ../../test/temp/bogus: no such file or directory", err.Error())
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to execute Lstat against"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": no such file or directory"))
 	}
 
 	// Force readlink error
