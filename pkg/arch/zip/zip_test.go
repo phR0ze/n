@@ -242,6 +242,34 @@ func TestExtractAllSad(t *testing.T) {
 		assert.True(t, strings.HasSuffix(err.Error(), "for reading: invalid argument"))
 	}
 
+	// attempt to read writeonly source file
+	{
+		// Create new source directory
+		srcDir := path.Join(tmpDir, "src")
+		_, err := sys.MkdirP(srcDir)
+		assert.Nil(t, err)
+
+		// Add a file to the source directory
+		srcfile, err := sys.Touch(path.Join(srcDir, "file"))
+		assert.Nil(t, err)
+
+		// Now set the source file to be write only
+		assert.Nil(t, os.Chmod(srcfile, 0222))
+
+		// Now attempt to read from the write only source file
+		test.OneShotForceOSCloseError()
+		OneShotForceZipCloseError()
+		err = Create(tmpfile, srcDir)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to close file writer: failed to close zipfile writer: failed to open target file"))
+		assert.True(t, strings.Contains(err.Error(), "for zip: open"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": permission denied"))
+
+		// Correct permission and remove
+		assert.Nil(t, os.Chmod(srcDir, 0755))
+		assert.Nil(t, sys.RemoveAll(srcDir))
+		assert.Nil(t, sys.Remove(tmpfile))
+	}
+
 	// attempt to read writeonly zipfile
 	{
 		// Copy over zipfile and set as write only
@@ -375,6 +403,17 @@ func prepTmpDir() {
 		sys.RemoveAll(tmpDir)
 	}
 	sys.MkdirP(tmpDir)
+}
+
+// OneShotForceZipCloseError patches *archive/zip.Writer.Close to return an error. Once it has been triggered it
+// removes the patch and operates as per normal. This patch requires the -gcflags=-l to operate correctly
+// e.g. go test -gcflags=-l ./pkg/sys
+func OneShotForceZipCloseError() {
+	var patch *monkey.PatchGuard
+	patch = monkey.PatchInstanceMethod(reflect.TypeOf((*zip.Writer)(nil)), "Close", func(*zip.Writer) error {
+		patch.Unpatch()
+		return os.ErrInvalid
+	})
 }
 
 // OneShotForceZipCreateError patches *archive/zip.Writer.Create to return an error. Once it has been triggered it

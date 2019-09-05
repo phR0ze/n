@@ -29,20 +29,42 @@ func Create(tarfile, srcPath string) (err error) {
 		err = errors.Wrapf(err, "failed to create tarfile %s", tarfile)
 		return
 	}
-	defer fw.Close()
+	defer func() {
+		if e := fw.Close(); e != nil {
+			if err == nil {
+				err = e
+			}
+			err = errors.Wrap(err, "failed to close file writer")
+		}
+	}()
 
 	// Open gzip writer
 	gw := gzip.NewWriter(fw)
-	defer gw.Close()
+	defer func() {
+		if e := gw.Close(); e != nil {
+			if err == nil {
+				err = e
+			}
+			err = errors.Wrap(err, "failed to close gzip writer")
+		}
+	}()
 
 	// Open tarball writer
 	tw := tar.NewWriter(gw)
-	defer tw.Close()
+	defer func() {
+		if e := tw.Close(); e != nil {
+			if err == nil {
+				err = e
+			}
+			err = errors.Wrap(err, "failed to close tarball writer")
+		}
+	}()
 
 	// Add all files recursively
 	if err = addFiles(tw, srcAbs, ""); err != nil {
 		return
 	}
+
 	return
 }
 
@@ -61,15 +83,15 @@ func addFiles(tw *tar.Writer, root, base string) (err error) {
 			// Open the target file for reading
 			var fr *os.File
 			if fr, err = os.Open(target); err != nil {
-				err = errors.Wrapf(err, "failed to open target file %s for tar", target)
+				err = errors.Wrapf(err, "failed to open target file %s for tarball", target)
 				return
 			}
-			defer fr.Close()
 
 			// Add the files to the tar
 			var header *tar.Header
 			if header, err = tar.FileInfoHeader(info, ""); err != nil {
-				err = errors.Wrapf(err, "failed to create target file header %s for tar", target)
+				err = errors.Wrapf(err, "failed to create target file header %s for tarball", target)
+				fr.Close()
 				return
 			}
 
@@ -78,15 +100,20 @@ func addFiles(tw *tar.Writer, root, base string) (err error) {
 
 			// Write header to tarball
 			if err = tw.WriteHeader(header); err != nil {
-				err = errors.Wrapf(err, "failed to write target file header %s for tar", target)
+				err = errors.Wrapf(err, "failed to write target file header %s for tarball", target)
+				fr.Close()
 				return
 			}
 
 			// Stream the data from the reader to the writer
 			if _, err = io.Copy(tw, fr); err != nil {
 				err = errors.Wrapf(err, "failed to copy data from reader to writer for tar target %s", target)
+				fr.Close()
 				return
 			}
+
+			// Close reader on success
+			fr.Close()
 		} else {
 			newRoot := path.Join(root, info.Name())
 			newBase := path.Join(base, info.Name())
@@ -160,9 +187,15 @@ func ExtractAll(tarfile, dest string) (err error) {
 			}
 			if _, err = io.Copy(fw, fr); err != nil {
 				err = errors.Wrap(err, "failed to copy data from tar to disk")
+				if e := fw.Close(); e != nil {
+					err = errors.Wrap(err, "failed to close file")
+				}
 				return
 			}
-			fw.Close()
+			if err = fw.Close(); err != nil {
+				err = errors.Wrap(err, "failed to close file")
+				return
+			}
 
 			// Set file mode to the original value
 			if err = os.Chmod(filePath, os.FileMode(info.Mode)); err != nil {

@@ -33,16 +33,31 @@ func Create(zipfile, srcPath string) (err error) {
 		err = errors.Wrapf(err, "failed to create zipfile %s", zipfile)
 		return
 	}
-	defer fw.Close()
+	defer func() {
+		if e := fw.Close(); e != nil {
+			if err == nil {
+				err = e
+			}
+			err = errors.Wrap(err, "failed to close file writer")
+		}
+	}()
 
 	// Open zip writer
 	zw := zip.NewWriter(fw)
-	defer zw.Close()
+	defer func() {
+		if e := zw.Close(); e != nil {
+			if err == nil {
+				err = e
+			}
+			err = errors.Wrap(err, "failed to close zipfile writer")
+		}
+	}()
 
 	// Add all files recursively
 	if err = addFiles(zw, srcPath, ""); err != nil {
 		return
 	}
+
 	return
 }
 
@@ -64,21 +79,26 @@ func addFiles(zw *zip.Writer, root, base string) (err error) {
 				err = errors.Wrapf(err, "failed to open target file %s for zip", target)
 				return
 			}
-			defer fr.Close()
 
 			// Add the files to the zip
 			var fw io.Writer
 			zipPath := path.Join(base, info.Name())
 			if fw, err = zw.Create(zipPath); err != nil {
 				err = errors.Wrapf(err, "failed to add target file %s to zip", target)
+				fr.Close()
 				return
 			}
 
 			// Stream the data from the reader to the writer
 			if _, err = io.Copy(fw, fr); err != nil {
 				err = errors.Wrapf(err, "failed to copy data from reader to writer for zip target %s", target)
+				fr.Close()
 				return
 			}
+
+			// Close the file reader/writers here as were in a loop
+			fr.Close()
+
 		} else {
 			newRoot := path.Join(root, info.Name())
 			newBase := path.Join(base, info.Name())
@@ -140,14 +160,25 @@ func ExtractAll(zipfile, dest string) (err error) {
 			var fr io.ReadCloser
 			if fr, err = file.Open(); err != nil {
 				err = errors.Wrapf(err, "failed to open zipfile target %s for reading", info.Name())
+				if e := fw.Close(); e != nil {
+					err = errors.Wrap(err, "failed to close zipfile writer")
+				}
 				return
 			}
 			if _, err = io.Copy(fw, fr); err != nil {
 				err = errors.Wrap(err, "failed to copy data from zip to disk")
+				if e := fw.Close(); e != nil {
+					err = errors.Wrap(err, "failed to close zipfile writer")
+				}
+				fr.Close()
+				return
+			}
+			if err = fw.Close(); err != nil {
+				err = errors.Wrap(err, "failed to close zipfile writer")
+				fr.Close()
 				return
 			}
 			fr.Close()
-			fw.Close()
 
 			// Set file mode to the original value
 			if err = os.Chmod(filePath, info.Mode()); err != nil {
@@ -179,7 +210,14 @@ func TrimPrefix(zipfile string) (err error) {
 		err = errors.Wrapf(err, "failed to open zipfile '%s' to detect zip data", path.Base(zipfile))
 		return
 	}
-	defer rw.Close()
+	defer func() {
+		if e := rw.Close(); e != nil {
+			if err == nil {
+				err = e
+			}
+			err = errors.Wrap(err, "failed to close file writer")
+		}
+	}()
 
 	// Detect begining of zipfile identified by PK.. i.e. 50 4B
 	chunk := make([]byte, 1024)

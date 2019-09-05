@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/phR0ze/n"
+	"github.com/phR0ze/go-errors"
 	"github.com/phR0ze/n/pkg/sys"
 )
 
@@ -45,22 +45,36 @@ func DownloadFile(url, dst string, perms ...uint32) (result string, err error) {
 	sys.MkdirP(path.Dir(result))
 
 	// Open destination truncating if it exists
-	var f *os.File
+	var fw *os.File
 	flags := os.O_CREATE | os.O_TRUNC | os.O_WRONLY
-	if f, err = os.OpenFile(result, flags, os.FileMode(perm)); err != nil {
+	if fw, err = os.OpenFile(result, flags, os.FileMode(perm)); err != nil {
 
 	}
-	defer f.Close()
+	defer func() {
+		if e := fw.Close(); e != nil {
+			if err == nil {
+				err = e
+			}
+			err = errors.Wrap(err, "failed to close file writer")
+		}
+	}()
 
 	// Download the file to memory via GET
 	var res *http.Response
 	if res, err = http.Get(url); err != nil {
 		return
 	}
-	defer res.Body.Close()
+	defer func() {
+		if e := res.Body.Close(); e != nil {
+			if err == nil {
+				err = e
+			}
+			err = errors.Wrap(err, "failed to close http response")
+		}
+	}()
 
 	// Write streamed http bits to the file
-	_, err = io.Copy(f, res.Body)
+	_, err = io.Copy(fw, res.Body)
 
 	return
 }
@@ -75,20 +89,25 @@ func DirURL(uri string) (result string) {
 func JoinURL(elems ...string) (result string) {
 
 	// Drop empty strings
-	q := n.S(elems).DropW(func(x n.O) bool {
-		return n.ExB(x.(string) == "")
-	})
+	for i := len(elems) - 1; i >= 0; i-- {
+		if elems[i] == "" {
+			if i+1 < len(elems) {
+				elems = append(elems[:i], elems[i+1:]...)
+			} else {
+				elems = elems[:i]
+			}
+		}
+	}
 
 	// Normalize schema and join with / skipping the path.Join's Clean call
-	if q.Len() > 0 {
-		schema := NormalizeURL(q.First().A())
-		q.Set(0, schema)
+	if len(elems) > 0 {
+		elems[0] = NormalizeURL(elems[0])
 
 		// Drop path absolute slash
-		if q.Len() > 1 && strings.HasPrefix(q.At(1).A(), "/") {
-			q.Set(1, q.At(1).A()[1:])
+		if len(elems) > 1 && strings.HasPrefix(elems[1], "/") {
+			elems[1] = elems[1][1:]
 		}
-		result = q.Join("/").A()
+		result = strings.Join(elems, "/")
 	}
 	return
 }
@@ -116,7 +135,6 @@ func Ping(proto, addr string, timeout ...int) (err error) {
 	dialer := net.Dialer{Timeout: time.Duration(_timeout) * time.Second}
 	if conn, err = dialer.Dial(proto, addr); err == nil {
 		conn.Close()
-		return
 	}
 	return
 }

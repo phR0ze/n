@@ -11,8 +11,8 @@ import (
 )
 
 // ForceTimeNow patches time.Now to return the given value. Once it has been triggered it removes the patch and
-// operates as per normal. The patch requires the -gcflags=-l during testing to operate correctly
-// e.g. go test -gcflags=-l ./pkg/sys
+// operates as per normal.
+// This patch requires the -gcflags=-l to operate correctly e.g. go test -gcflags=-l ./pkg/sys
 func ForceTimeNow(val time.Time) (patch *monkey.PatchGuard) {
 	patch = monkey.Patch(time.Now, func() time.Time {
 		return val
@@ -21,8 +21,8 @@ func ForceTimeNow(val time.Time) (patch *monkey.PatchGuard) {
 }
 
 // OneShotForceFilePathAbsError patches filepath.Abs to return an error. Once it has been triggered it
-// removes the patch and operates as per normal. This patch requires the -gcflags=-l to operate correctly
-// e.g. go test -gcflags=-l ./pkg/sys
+// removes the patch and operates as per normal.
+// This patch requires the -gcflags=-l to operate correctly e.g. go test -gcflags=-l ./pkg/sys
 func OneShotForceFilePathAbsError() {
 	var patch *monkey.PatchGuard
 	patch = monkey.Patch(filepath.Abs, func(path string) (string, error) {
@@ -32,8 +32,8 @@ func OneShotForceFilePathAbsError() {
 }
 
 // OneShotForceFilePathGlobError patches filepath.Chmod to return an error. Once it has been triggered it
-// removes the patch and operates as per normal. This patch requires the -gcflags=-l to operate correctly
-// e.g. go test -gcflags=-l ./pkg/sys
+// removes the patch and operates as per normal.
+// This patch requires the -gcflags=-l to operate correctly e.g. go test -gcflags=-l ./pkg/sys
 func OneShotForceFilePathGlobError() {
 	var patch *monkey.PatchGuard
 	patch = monkey.Patch(filepath.Glob, func(pattern string) ([]string, error) {
@@ -43,8 +43,8 @@ func OneShotForceFilePathGlobError() {
 }
 
 // OneShotForceIOCopyError patches io.Copy to return an error. Once it has been triggered it
-// removes the patch and operates as per normal. This patch requires the -gcflags=-l to operate correctly
-// e.g. go test -gcflags=-l ./pkg/sys
+// removes the patch and operates as per normal.
+// This patch requires the -gcflags=-l to operate correctly e.g. go test -gcflags=-l ./pkg/sys
 func OneShotForceIOCopyError() {
 	var patch *monkey.PatchGuard
 	patch = monkey.Patch(io.Copy, func(io.Writer, io.Reader) (int64, error) {
@@ -54,22 +54,20 @@ func OneShotForceIOCopyError() {
 }
 
 // OneShotForceOSCloseError patches *os.File.Close to Close the file then return an error. Once it has been triggered it
-// removes the patch and operates as per normal. This patch requires the -gcflags=-l to operate correctly
-// e.g. go test -gcflags=-l ./pkg/sys
+// removes the patch and operates as per normal.
+// This patch requires the -gcflags=-l to operate correctly e.g. go test -gcflags=-l ./pkg/sys
 func OneShotForceOSCloseError() {
 	var patch *monkey.PatchGuard
 	patch = monkey.PatchInstanceMethod(reflect.TypeOf((*os.File)(nil)), "Close", func(f *os.File) error {
 		patch.Unpatch()
-		if err := f.Close(); err != nil {
-			return err
-		}
+		f.Close()
 		return os.ErrInvalid
 	})
 }
 
 // OneShotForceOSChmodError patches os.Chmod to return an error. Once it has been triggered it
-// removes the patch and operates as per normal. This patch requires the -gcflags=-l to operate correctly
-// e.g. go test -gcflags=-l ./pkg/sys
+// removes the patch and operates as per normal.
+// This patch requires the -gcflags=-l to operate correctly e.g. go test -gcflags=-l ./pkg/sys
 func OneShotForceOSChmodError() {
 	var patch *monkey.PatchGuard
 	patch = monkey.Patch(os.Chmod, func(dstPath string, mode os.FileMode) error {
@@ -79,8 +77,8 @@ func OneShotForceOSChmodError() {
 }
 
 // OneShotForceOSChtimesError patches os.Chtimesto return an error. Once it has been triggered it
-// removes the patch and operates as per normal. This patch requires the -gcflags=-l to operate correctly
-// e.g. go test -gcflags=-l ./pkg/sys
+// removes the patch and operates as per normal.
+// This patch requires the -gcflags=-l to operate correctly e.g. go test -gcflags=-l ./pkg/sys
 func OneShotForceOSChtimesError() {
 	var patch *monkey.PatchGuard
 	patch = monkey.Patch(os.Chtimes, func(name string, _, _ time.Time) error {
@@ -90,8 +88,8 @@ func OneShotForceOSChtimesError() {
 }
 
 // OneShotForceOSCreateError patches os.Create to return an error. Once it has been triggered it
-// removes the patch and operates as per normal. This patch requires the -gcflags=-l to operate correctly
-// e.g. go test -gcflags=-l ./pkg/sys
+// removes the patch and operates as per normal.
+// This patch requires the -gcflags=-l to operate correctly e.g. go test -gcflags=-l ./pkg/sys
 func OneShotForceOSCreateError() {
 	var patch *monkey.PatchGuard
 	patch = monkey.Patch(os.Create, func(name string) (*os.File, error) {
@@ -101,8 +99,8 @@ func OneShotForceOSCreateError() {
 }
 
 // OneShotForceOSReaddirnamesError patches *os.File.Readdirnames to return an error. Once it has been triggered it
-// removes the patch and operates as per normal. This patch requires the -gcflags=-l to operate correctly
-// e.g. go test -gcflags=-l ./pkg/sys
+// removes the patch and operates as per normal.
+// This patch requires the -gcflags=-l to operate correctly e.g. go test -gcflags=-l ./pkg/sys
 func OneShotForceOSReaddirnamesError() {
 	var patch *monkey.PatchGuard
 	patch = monkey.PatchInstanceMethod(reflect.TypeOf((*os.File)(nil)), "Readdirnames", func(*os.File, int) ([]string, error) {
@@ -112,8 +110,8 @@ func OneShotForceOSReaddirnamesError() {
 }
 
 // OneShotForceOSReadlinkError patches os.Readlink to return an error. Once it has been triggered it
-// removes the patch and operates as per normal. This patch requires the -gcflags=-l to operate correctly
-// e.g. go test -gcflags=-l ./pkg/sys
+// removes the patch and operates as per normal.
+// This patch requires the -gcflags=-l to operate correctly e.g. go test -gcflags=-l ./pkg/sys
 func OneShotForceOSReadlinkError() {
 	var patch *monkey.PatchGuard
 	patch = monkey.Patch(os.Readlink, func(name string) (string, error) {
@@ -123,15 +121,13 @@ func OneShotForceOSReadlinkError() {
 }
 
 // OneShotForceOSSyncError patches *os.File.Sync to Sync the file then return an error. Once it has been triggered it
-// removes the patch and operates as per normal. This patch requires the -gcflags=-l to operate correctly
-// e.g. go test -gcflags=-l ./pkg/sys
+// removes the patch and operates as per normal.
+// This patch requires the -gcflags=-l to operate correctly e.g. go test -gcflags=-l ./pkg/sys
 func OneShotForceOSSyncError() {
 	var patch *monkey.PatchGuard
 	patch = monkey.PatchInstanceMethod(reflect.TypeOf((*os.File)(nil)), "Sync", func(f *os.File) error {
 		patch.Unpatch()
-		if err := f.Sync(); err != nil {
-			return err
-		}
+		f.Sync()
 		return os.ErrInvalid
 	})
 }

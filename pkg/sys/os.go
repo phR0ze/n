@@ -175,40 +175,40 @@ func CopyFile(src, dst string, opts ...*opt.Opt) (result string, err error) {
 		}
 	} else {
 		// Open srcPath for reading
-		var fin *os.File
-		if fin, err = os.Open(srcPath); err != nil {
+		var fr *os.File
+		if fr, err = os.Open(srcPath); err != nil {
 			err = errors.Wrapf(err, "failed to open file %s for reading", srcPath)
 			return
 		}
-		defer fin.Close()
+		defer fr.Close()
 
 		// Create dstPath for writing
-		var fout *os.File
-		if fout, err = os.Create(dstPath); err != nil {
+		var fw *os.File
+		if fw, err = os.Create(dstPath); err != nil {
 			err = errors.Wrapf(err, "failed to create file %s", dstPath)
 			return
 		}
 
 		// Copy srcPath to dstPath
-		if _, err = io.Copy(fout, fin); err != nil {
+		if _, err = io.Copy(fw, fr); err != nil {
 			err = errors.Wrapf(err, "failed to copy data to file %s", dstPath)
-			if e := fout.Close(); e != nil {
+			if e := fw.Close(); e != nil {
 				err = errors.Wrapf(err, "failed to close file %s", dstPath)
 			}
 			return
 		}
 
 		// Sync to disk
-		if err = fout.Sync(); err != nil {
+		if err = fw.Sync(); err != nil {
 			err = errors.Wrapf(err, "failed to sync data to file %s", dstPath)
-			if e := fout.Close(); e != nil {
+			if e := fw.Close(); e != nil {
 				err = errors.Wrapf(err, "failed to close file %s", dstPath)
 			}
 			return
 		}
 
 		// Close file for writing
-		if err = fout.Close(); err != nil {
+		if err = fw.Close(); err != nil {
 			err = errors.Wrapf(err, "failed to close file %s", dstPath)
 			return
 		}
@@ -268,16 +268,16 @@ func MD5(target string) (result string, err error) {
 	}
 
 	// Open target file for reading
-	var f *os.File
-	if f, err = os.Open(target); err != nil {
+	var fr *os.File
+	if fr, err = os.Open(target); err != nil {
 		err = errors.Wrapf(err, "failed opening target file %s", target)
 		return
 	}
-	defer f.Close()
+	defer fr.Close()
 
 	// Create a new md5 hash and copy in file bits
 	hash := md5.New()
-	if _, err = io.Copy(hash, f); err != nil {
+	if _, err = io.Copy(hash, fr); err != nil {
 		err = errors.Wrapf(err, "failed copying file data into hash from %s", target)
 		return
 	}
@@ -404,14 +404,14 @@ func Touch(filepath string) (path string, err error) {
 		return
 	}
 
-	var f *os.File
-	if f, err = os.Create(path); err != nil {
+	var fw *os.File
+	if fw, err = os.Create(path); err != nil {
 		err = errors.Wrapf(err, "failed creating/truncating file %s", filepath)
 		return
 	}
 
 	// Ignoring close in the error case above is ok as the file pointer will be nil
-	if err = f.Close(); err != nil {
+	if err = fw.Close(); err != nil {
 		err = errors.Wrapf(err, "failed closing file %s", filepath)
 		return
 	}
@@ -464,29 +464,29 @@ func WriteStream(reader io.Reader, filepath string, perms ...uint32) (err error)
 		perm = os.FileMode(perms[0])
 	}
 
-	var writer *os.File
+	var fw *os.File
 	flags := os.O_CREATE | os.O_TRUNC | os.O_WRONLY
-	if writer, err = os.OpenFile(filepath, flags, perm); err != nil {
+	if fw, err = os.OpenFile(filepath, flags, perm); err != nil {
 		err = errors.Wrapf(err, "failed opening file %s for writing", filepath)
 		return
 	}
 
-	if _, err = io.Copy(writer, reader); err != nil {
+	if _, err = io.Copy(fw, reader); err != nil {
 		err = errors.Wrap(err, "failed copying stream data")
-		if e := writer.Close(); e != nil {
+		if e := fw.Close(); e != nil {
 			err = errors.Wrapf(err, "failed to close file %s", filepath)
 		}
 		return
 	}
-	if err = writer.Sync(); err != nil {
+	if err = fw.Sync(); err != nil {
 		err = errors.Wrapf(err, "failed syncing stream to file %s", filepath)
-		if e := writer.Close(); e != nil {
+		if e := fw.Close(); e != nil {
 			err = errors.Wrapf(err, "failed to close file %s", filepath)
 		}
 		return
 	}
 
-	if err = writer.Close(); err != nil {
+	if err = fw.Close(); err != nil {
 		err = errors.Wrapf(err, "failed to close file %s", filepath)
 	}
 	return

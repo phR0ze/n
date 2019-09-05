@@ -429,13 +429,13 @@ func walk(root string, info *FileInfo, walkFn WalkFunc, opts []*opt.Opt) (err er
 // ReadDir reads the directory named by dirname and returns
 // a list of directory entries sorted by filename.
 func ReadDir(dirname string) (names []string, err error) {
-	var f *os.File
-	if f, err = os.Open(dirname); err != nil {
+	var fr *os.File
+	if fr, err = os.Open(dirname); err != nil {
 		err = errors.Wrapf(err, "failed to read directory %s", dirname)
 		return
 	}
-	defer f.Close()
-	if names, err = f.Readdirnames(-1); err != nil {
+	defer fr.Close()
+	if names, err = fr.Readdirnames(-1); err != nil {
 		err = errors.Wrapf(err, "failed to read directory names for %s", dirname)
 		return
 	}

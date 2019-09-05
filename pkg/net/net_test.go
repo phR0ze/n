@@ -25,7 +25,16 @@ func TestDirURL(t *testing.T) {
 }
 
 func TestJoinURL(t *testing.T) {
+
+	// Empty pieces should be dropped
+	assert.Equal(t, "http://foobar.com/blah/bar", JoinURL("", "HttP://foobar.com", "", "/blah", "bar", ""))
+	assert.Equal(t, "http://foobar.com/blah/bar", JoinURL("HttP://foobar.com", "", "/blah", "bar", ""))
+	assert.Equal(t, "http://foobar.com/blah/bar", JoinURL("HttP://foobar.com", "", "/blah", "", "bar"))
+
+	// Extra slashes should be dropped
 	assert.Equal(t, "http://foobar.com/blah/bar", JoinURL("HttP://foobar.com", "/blah", "bar"))
+
+	// Protocol case should be normalized
 	assert.Equal(t, "http://foobar.com/blah/bar", JoinURL("HttP://foobar.com", "blah", "bar"))
 	assert.Equal(t, "https://foobar.com/blah/bar", JoinURL("HttPs://foobar.com", "blah", "bar"))
 	assert.Equal(t, "ftp://foobar.com/blah/bar", JoinURL("FTP://foobar.com", "blah", "bar"))

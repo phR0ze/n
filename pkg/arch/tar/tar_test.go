@@ -36,7 +36,7 @@ func TestCreate(t *testing.T) {
 		OneShotForceTarHeaderError()
 		err = Create(tmpfile, srcDir)
 		assert.True(t, strings.HasPrefix(err.Error(), "failed to create target file header"))
-		assert.True(t, strings.HasSuffix(err.Error(), "for tar: invalid argument"))
+		assert.True(t, strings.HasSuffix(err.Error(), "for tarball: invalid argument"))
 
 		// Clean up
 		assert.Nil(t, sys.RemoveAll(srcDir))
@@ -56,7 +56,7 @@ func TestCreate(t *testing.T) {
 		OneShotForceTarWriterError()
 		err = Create(tmpfile, srcDir)
 		assert.True(t, strings.HasPrefix(err.Error(), "failed to write target file header"))
-		assert.True(t, strings.HasSuffix(err.Error(), "for tar: invalid argument"))
+		assert.True(t, strings.HasSuffix(err.Error(), "for tarball: invalid argument"))
 
 		// Clean up
 		assert.Nil(t, sys.RemoveAll(srcDir))
@@ -98,9 +98,12 @@ func TestCreate(t *testing.T) {
 		assert.Nil(t, os.Chmod(srcfile, 0222))
 
 		// Now attempt to read from the write only source file
+		test.OneShotForceOSCloseError()
+		OneShotForceGzipCloseError()
+		OneShotForceTarCloseError()
 		err = Create(tmpfile, srcDir)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to open target file"))
-		assert.True(t, strings.Contains(err.Error(), "for tar: open"))
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to close file writer: failed to close gzip writer: failed to close tarball writer: failed to open target file"))
+		assert.True(t, strings.Contains(err.Error(), "for tarball: open"))
 		assert.True(t, strings.HasSuffix(err.Error(), ": permission denied"))
 
 		// Correct permission and remove
@@ -229,11 +232,19 @@ func TestExtractAll(t *testing.T) {
 		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
 	}
 
+	// force os.Close error
+	{
+		test.OneShotForceOSCloseError()
+		err := ExtractAll(tmpfile, tmpDir)
+		assert.Equal(t, "failed to close file: invalid argument", err.Error())
+	}
+
 	// force os.Copy error
 	{
+		test.OneShotForceOSCloseError()
 		test.OneShotForceIOCopyError()
 		err := ExtractAll(tmpfile, tmpDir)
-		assert.Equal(t, "failed to copy data from tar to disk: invalid argument", err.Error())
+		assert.Equal(t, "failed to close file: failed to copy data from tar to disk: invalid argument", err.Error())
 	}
 
 	// force os.Create error
@@ -286,6 +297,17 @@ func prepTmpDir() {
 	sys.Copy("../../net", tmpDir)
 }
 
+// OneShotForceGzipCloseError patches *compress/gzip.Writer.Close to return an error. Once it has been triggered it
+// removes the patch and operates as per normal. This patch requires the -gcflags=-l to operate correctly
+// e.g. go test -gcflags=-l ./pkg/sys
+func OneShotForceGzipCloseError() {
+	var patch *monkey.PatchGuard
+	patch = monkey.PatchInstanceMethod(reflect.TypeOf((*gzip.Writer)(nil)), "Close", func(*gzip.Writer) error {
+		patch.Unpatch()
+		return os.ErrInvalid
+	})
+}
+
 // OneShotForceGzipReaderError patches *compress/gzip.NewReader to return an error. Once it has been triggered it
 // removes the patch and operates as per normal. This patch requires the -gcflags=-l to operate correctly
 // e.g. go test -gcflags=-l ./pkg/sys
@@ -294,6 +316,17 @@ func OneShotForceGzipReaderError() {
 	patch = monkey.Patch(gzip.NewReader, func(io.Reader) (*gzip.Reader, error) {
 		patch.Unpatch()
 		return nil, os.ErrInvalid
+	})
+}
+
+// OneShotForceTarCloseError patches *archive/tar.Writer.Close to return an error. Once it has been triggered it
+// removes the patch and operates as per normal. This patch requires the -gcflags=-l to operate correctly
+// e.g. go test -gcflags=-l ./pkg/sys
+func OneShotForceTarCloseError() {
+	var patch *monkey.PatchGuard
+	patch = monkey.PatchInstanceMethod(reflect.TypeOf((*tar.Writer)(nil)), "Close", func(*tar.Writer) error {
+		patch.Unpatch()
+		return os.ErrInvalid
 	})
 }
 
