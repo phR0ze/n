@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/phR0ze/go-errors"
 	"github.com/phR0ze/n/pkg/sys"
+	"github.com/pkg/errors"
 )
 
 const (
