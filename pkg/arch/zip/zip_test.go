@@ -506,9 +506,7 @@ func TestTrimPrefix(t *testing.T) {
 }
 
 func clearTmpDir() {
-	if sys.Exists(tmpDir) {
-		sys.RemoveAll(tmpDir)
-	}
+	sys.RemoveAll(tmpDir)
 	sys.MkdirP(tmpDir)
 }
 

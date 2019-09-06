@@ -342,7 +342,14 @@ func CopyFile(src, dst string, opts ...*opt.Opt) (result string, err error) {
 // Exists return true if the given path exists
 func Exists(src string) bool {
 	if target, err := Abs(src); err == nil {
-		if _, err := os.Stat(target); err == nil {
+		if _, err := os.Stat(target); err != nil {
+
+			// If we got permission denied then the file probably exists
+			if strings.HasSuffix(err.Error(), ": permission denied") {
+				return true
+			}
+
+		} else {
 			return true
 		}
 	}
@@ -496,15 +503,26 @@ func ReadString(filepath string) (result string, err error) {
 
 // Remove the given target file or empty directory. If there is an
 // error it will be of type *PathError
-func Remove(target string) error {
-	return os.Remove(target)
+func Remove(target string) (err error) {
+	if err = os.Remove(target); err != nil {
+		err = errors.Wrapf(err, "failed removing %s", target)
+		return
+	}
+	return
 }
 
-// RemoveAll removes the target path and any children it contains.
-// It removes everything it can but returns the first error it encounters.
+// RemoveAll removes the target path and any children it contains attempting
+// to add permissions recursively on target and try again if failure occurs
+// before giving up and returning.
 // If the target path does not exist nil is returned
-func RemoveAll(target string) error {
-	return os.RemoveAll(target)
+func RemoveAll(target string) (err error) {
+	if err = os.RemoveAll(target); err != nil {
+		Chmod(target, 0777, RecurseOpt(true))
+		if err = os.RemoveAll(target); err != nil {
+			err = errors.Wrapf(err, "failed removing %s", target)
+		}
+	}
+	return
 }
 
 // Symlink creates newname as a symbolic link to link. If there is an error,

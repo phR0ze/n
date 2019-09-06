@@ -115,7 +115,7 @@ func TestFiles(t *testing.T) {
 }
 
 func TestGlob(t *testing.T) {
-	clearTmpDir()
+	clearTempDir()
 
 	// Create test files in dir for globbing and valide modes
 	dir, err := MkdirP(path.Join(tmpDir, "dir"))
@@ -218,7 +218,7 @@ func TestPaths(t *testing.T) {
 }
 
 func TestAllFilesWithFileLink(t *testing.T) {
-	clearTmpDir()
+	clearTempDir()
 
 	// temp/first/f0,f1
 	firstDir, _ := MkdirP(path.Join(tmpDir, "first"))
@@ -248,7 +248,7 @@ func TestAllFilesWithFileLink(t *testing.T) {
 }
 
 func TestAllDirs(t *testing.T) {
-	clearTmpDir()
+	clearTempDir()
 
 	// doesn't exist
 	{
@@ -303,7 +303,7 @@ func TestAllDirs(t *testing.T) {
 }
 
 func TestAllFiles(t *testing.T) {
-	clearTmpDir()
+	clearTempDir()
 
 	// doesn't exist
 	{
@@ -407,7 +407,7 @@ func TestAllFiles(t *testing.T) {
 }
 
 func TestAllPaths(t *testing.T) {
-	clearTmpDir()
+	clearTempDir()
 
 	// doesn't exist
 	{
@@ -573,7 +573,7 @@ func TestHome(t *testing.T) {
 }
 
 func TestReadDir(t *testing.T) {
-	clearTmpDir()
+	clearTempDir()
 
 	// read dirnames from valid directory
 	{
@@ -634,7 +634,7 @@ func TestReadDir(t *testing.T) {
 }
 
 func TestReadDirnames(t *testing.T) {
-	clearTmpDir()
+	clearTempDir()
 
 	// read dirnames from valid directory
 	{
@@ -784,7 +784,7 @@ func TestTrimProtocol(t *testing.T) {
 }
 
 func TestWalkSkip(t *testing.T) {
-	clearTmpDir()
+	clearTempDir()
 
 	// Create dirs to walk
 	_, err := MkdirP(path.Join(tmpDir, "skipme"))
@@ -805,7 +805,7 @@ func TestWalkSkip(t *testing.T) {
 }
 
 func TestWalkDirPermissions(t *testing.T) {
-	clearTmpDir()
+	clearTempDir()
 
 	// Create dirs to walk
 	skipMe, err := MkdirP(path.Join(tmpDir, "skipme"))

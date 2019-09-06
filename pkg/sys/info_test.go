@@ -56,7 +56,7 @@ func TestIsDir(t *testing.T) {
 }
 
 func TestIsFile(t *testing.T) {
-	clearTmpDir()
+	clearTempDir()
 
 	// sad
 	{
@@ -87,7 +87,7 @@ func TestSize(t *testing.T) {
 }
 
 func TestIsSymlink(t *testing.T) {
-	clearTmpDir()
+	clearTempDir()
 
 	// sad
 	{
@@ -131,7 +131,7 @@ func TestIsSymlink(t *testing.T) {
 }
 
 func TestIsSymlinkDir(t *testing.T) {
-	clearTmpDir()
+	clearTempDir()
 
 	// sad
 	{
@@ -158,7 +158,7 @@ func TestIsSymlinkDir(t *testing.T) {
 }
 
 func TestIsSymlinkFile(t *testing.T) {
-	clearTmpDir()
+	clearTempDir()
 
 	// sad
 	{
@@ -181,7 +181,7 @@ func TestIsSymlinkFile(t *testing.T) {
 }
 
 func TestSymlinkTarget(t *testing.T) {
-	clearTmpDir()
+	clearTempDir()
 
 	// link doesn't exist
 	{
