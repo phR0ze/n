@@ -19,6 +19,80 @@ var tmpfile = "../../test/temp/.tmp"
 var testfile = "../../test/testfile"
 var readme = "../../README.md"
 
+func TestChmod(t *testing.T) {
+	clearTmpDir()
+
+	// Create test files in dir for globbing and valide modes
+	dir, err := MkdirP(path.Join(tmpDir, "dir"))
+	assert.Equal(t, os.ModeDir|os.FileMode(0755), Mode(dir))
+	assert.Nil(t, err)
+	file1, err := CopyFile(testfile, path.Join(dir, "file1"))
+	assert.Nil(t, err)
+	assert.Equal(t, os.FileMode(0644), Mode(file1))
+	file2, err := CopyFile(testfile, path.Join(dir, "file2"))
+	assert.Nil(t, err)
+	assert.Equal(t, os.FileMode(0644), Mode(file2))
+	bob1, err := CopyFile(testfile, path.Join(dir, "bob1"))
+	assert.Nil(t, err)
+	assert.Equal(t, os.FileMode(0644), Mode(bob1))
+
+	// force chmod to fail
+	{
+		test.OneShotForceOSChmodError()
+		err := Chmod(dir, 0644)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to chmod"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	}
+
+	// glob and recurse means globbing wins when working with files
+	// but recursion wins when working with dirs
+	{
+		err := Chmod(path.Join(dir, "*1"), 0444, RecurseOpt(true))
+		assert.Nil(t, err)
+		assert.Equal(t, os.ModeDir|os.FileMode(0755), Mode(dir))
+		assert.Equal(t, os.FileMode(0444), Mode(file1))
+		assert.Equal(t, os.FileMode(0644), Mode(file2))
+		assert.Equal(t, os.FileMode(0444), Mode(bob1))
+	}
+
+	// recurse
+	{
+		err := Chmod(dir, 0755, RecurseOpt(true))
+		assert.Nil(t, err)
+		assert.Equal(t, os.ModeDir|os.FileMode(0755), Mode(dir))
+		assert.Equal(t, os.FileMode(0755), Mode(file1))
+		assert.Equal(t, os.FileMode(0755), Mode(file2))
+		assert.Equal(t, os.FileMode(0755), Mode(bob1))
+	}
+
+	// invalid file globbing i.e. doesn't exist
+	{
+		err := Chmod(path.Join(tmpDir, "bogus"), 0644)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to get any sources for"))
+	}
+
+	// No path given
+	{
+		err := Chmod("", 0644)
+		assert.Equal(t, "empty string is an invalid path", err.Error())
+	}
+}
+
+func TestChown(t *testing.T) {
+	clearTmpDir()
+
+	// // Invalid file
+	// err := Chown(path.Join(tmpDir, "bogus"), 50, 50)
+	// assert.True(t, strings.HasPrefix(err.Error(), "chown"))
+	// assert.True(t, strings.HasSuffix(err.Error(), ": no such file or directory"))
+
+	// No path given
+	{
+		err := Chown("", 50, 50)
+		assert.Equal(t, "empty string is an invalid path", err.Error())
+	}
+}
+
 func TestCopyGlob(t *testing.T) {
 
 	// force Glob error
@@ -588,14 +662,14 @@ func TestCopyFile(t *testing.T) {
 
 	// empty info path
 	{
-		result, err := CopyFile(path.Join(tmpDir, "foo/foo"), "", newInfoOpt(&FileInfo{}))
+		result, err := CopyFile(path.Join(tmpDir, "foo/foo"), "", InfoOpt(&FileInfo{}))
 		assert.Equal(t, "", result)
 		assert.Equal(t, "empty string is an invalid path", err.Error())
 	}
 
 	// pass in bad info
 	{
-		result, err := CopyFile(path.Join(tmpDir, "foo/foo"), "", newInfoOpt(&FileInfo{Path: "foo/foo"}))
+		result, err := CopyFile(path.Join(tmpDir, "foo/foo"), "", InfoOpt(&FileInfo{Path: "foo/foo"}))
 		assert.Equal(t, "", result)
 		assert.True(t, strings.HasPrefix(err.Error(), "failed to execute Lstat against"))
 		assert.True(t, strings.Contains(err.Error(), "no such file or directory"))
@@ -1251,7 +1325,10 @@ func TestWriteString(t *testing.T) {
 
 func clearTmpDir() {
 	if Exists(tmpDir) {
-		RemoveAll(tmpDir)
+		if err := RemoveAll(tmpDir); err != nil {
+			ExecOut("chmod -R 0777 %s", tmpDir)
+			RemoveAll(tmpDir)
+		}
 	}
 	MkdirP(tmpDir)
 }

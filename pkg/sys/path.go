@@ -44,7 +44,7 @@ func Abs(target string) (result string, err error) {
 
 // AllDirs returns a list of all dirs recursively for the given root path
 // in a deterministic order. Follows links by default, but can be stopped
-// with &Opt{"follow", false}. Paths are distinct.
+// by passing FollowOpt(false). Paths are distinct.
 func AllDirs(root string, opts ...*opt.Opt) (result []string, err error) {
 	distinct := map[string]bool{}
 	if root, err = Abs(root); err != nil {
@@ -79,7 +79,7 @@ func AllDirs(root string, opts ...*opt.Opt) (result []string, err error) {
 
 // AllFiles returns a list of all files recursively for the given root path
 // in a deterministic order. Follows links by default, but can be stopped
-// with &Opt{"follow", false}. Paths are distinct.
+// by passing FollowOpt(false). Paths are distinct.
 func AllFiles(root string, opts ...*opt.Opt) (result []string, err error) {
 	distinct := map[string]bool{}
 	if root, err = Abs(root); err != nil {
@@ -113,9 +113,8 @@ func AllFiles(root string, opts ...*opt.Opt) (result []string, err error) {
 }
 
 // AllPaths returns a list of all paths recursively for the given root path
-// in a deterministic order including the root path as first entry.
-// Follows links by default, but can be stopped with &Opt{"follow", false}.
-// Paths are distinct.
+// in a deterministic order including the root path as first entry. Follows links
+// by default, but can be stopped by passing FollowOpt(false). Paths are distinct.
 func AllPaths(root string, opts ...*opt.Opt) (result []string, err error) {
 	distinct := map[string]bool{}
 	if root, err = Abs(root); err != nil {
@@ -180,10 +179,11 @@ func Dir(src string) (result string) {
 }
 
 // Dirs returns all directories from the given target path, sorted by filename
+// Doesn't include the target itself only its children nor is this recursive.
 func Dirs(target string) (result []string) {
 	result = []string{}
-	if target != "" && IsDir(target) {
-		if target, err := Abs(target); err == nil {
+	if target, err := Abs(target); err == nil {
+		if IsDir(target) {
 			if items, err := ioutil.ReadDir(target); err == nil {
 				for _, item := range items {
 					if item.IsDir() {
@@ -232,17 +232,50 @@ func Expand(target string) (path string, err error) {
 	return
 }
 
-// Files returns all files from the given target path, sorted by filename
+// Files returns all files from the given target path, sorted by filename.
+// Doesn't include the target itself only its children nor is this recursive.
 func Files(target string) (result []string) {
 	result = []string{}
-	if target != "" && IsDir(target) {
-		if target, err := Abs(target); err == nil {
+	if target, err := Abs(target); err == nil {
+		if IsDir(target) {
 			if items, err := ioutil.ReadDir(target); err == nil {
 				for _, item := range items {
 					if !item.IsDir() {
 						result = append(result, path.Join(target, item.Name()))
 					}
 				}
+			}
+		}
+	}
+	return
+}
+
+// Glob wraps filepath.Glob but provides path expansion, recursion and error tracing.
+// If no sources are found an empty string slice will be returned and a nil error.
+// Enable recursion by passing in the option RecurseOpt(true).
+func Glob(path string, opts ...*opt.Opt) (sources []string, err error) {
+	recurse := getRecurseOpt(opts)
+
+	// Path expansion
+	if path, err = Abs(path); err != nil {
+		return
+	}
+
+	// Handle globbing
+	if sources, err = filepath.Glob(path); err != nil {
+		err = errors.Wrapf(err, "failed to get glob for %s", path)
+		return
+	}
+
+	// Execute the recursion if requested
+	if recurse {
+		for _, source := range sources {
+			if IsDir(source) {
+				var paths []string
+				if paths, err = AllPaths(source); err != nil {
+					return
+				}
+				sources = append(sources, paths[1:]...)
 			}
 		}
 	}
@@ -265,11 +298,12 @@ func Home() (result string, err error) {
 	return
 }
 
-// Paths returns all directories/files from the given target path, sorted by filename
+// Paths returns all directories/files from the given target path, sorted by filename.
+// Doesn't include the target itself only its children nor is this recursive.
 func Paths(target string) (result []string) {
 	result = []string{}
-	if target != "" && IsDir(target) {
-		if target, err := Abs(target); err == nil {
+	if target, err := Abs(target); err == nil {
+		if IsDir(target) {
 			if items, err := ioutil.ReadDir(target); err == nil {
 				for _, item := range items {
 					result = append(result, path.Join(target, item.Name()))
@@ -406,7 +440,7 @@ func TrimProtocol(target string) string {
 type WalkFunc func(path string, info *FileInfo, err error) error
 
 // Walk extends the filepath.Walk to allow for it to walk symlinks
-// by default but can be turned off with &Opt{"follow", false}
+// by default but can be turned off by passing in FollowOpt(false)
 func Walk(root string, walkFn WalkFunc, opts ...*opt.Opt) (err error) {
 
 	// Set following links by default
@@ -438,7 +472,7 @@ func walk(root string, info *FileInfo, walkFn WalkFunc, opts []*opt.Opt) (err er
 	}
 
 	// Were done if it was a regular file or link and were not following
-	if info.IsFile() || (info.IsSymlink() && !followOpt(opts)) {
+	if info.IsFile() || (info.IsSymlink() && !getFollowOpt(opts)) {
 		return
 	}
 

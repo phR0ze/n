@@ -9,7 +9,7 @@ import (
 
 func TestDefaultFollowOpt(t *testing.T) {
 	opts := []*opt.Opt{}
-	assert.False(t, followOpt(opts))
+	assert.False(t, getFollowOpt(opts))
 	defaultFollowOpt(&opts, true)
-	assert.True(t, followOpt(opts))
+	assert.True(t, getFollowOpt(opts))
 }

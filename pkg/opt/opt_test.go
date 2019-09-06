@@ -8,7 +8,7 @@ import (
 
 func TestDefaultDebugOpt(t *testing.T) {
 	opts := []*Opt{}
-	assert.False(t, DebugOpt(opts))
+	assert.False(t, GetDebugOpt(opts))
 	DefaultDebugOpt(&opts, true)
-	assert.True(t, DebugOpt(opts))
+	assert.True(t, GetDebugOpt(opts))
 }

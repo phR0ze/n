@@ -18,16 +18,88 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Chmod wraps os.Chmod but provides path expansion, globbing, recursion and error tracing.
+// For each resulting path if the file is a symbolic link, it changes the mode of the link's
+// target. Recursively apply chmod to all files and directories by passing in RecurseOpt(true)
+func Chmod(path string, mode os.FileMode, opts ...*opt.Opt) (err error) {
+
+	// Glob the path
+	var paths []string
+	if paths, err = Glob(path, opts...); err != nil {
+		return
+	}
+
+	// Fail if no sources were found
+	if len(paths) == 0 {
+		err = errors.Errorf("failed to get any sources for %s", path)
+		return
+	}
+
+	// Execute the chmod for all sources
+	for _, path := range paths {
+		if err = os.Chmod(path, mode); err != nil {
+			err = errors.Wrapf(err, "failed to chmod %s", path)
+			return
+		}
+	}
+	return
+}
+
+// Chown wraps os.Chown but provides path expansion, globbing, recursion and error tracing.
+// For each resulting path change the numeric uid and gid. If the file is a symbolic link,
+// it changes the uid and gid of the link's target. A uid or gid of -1 means to not change
+// that value. Recursively apply chown to all files and directories by passing in RecurseOpt(true)
+func Chown(path string, uid, gid int, opts ...*opt.Opt) (err error) {
+	recurse := getRecurseOpt(opts)
+
+	// Path expansion
+	if path, err = Abs(path); err != nil {
+		return
+	}
+
+	// Handle globbing
+	var sources []string
+	if sources, err = filepath.Glob(path); err != nil {
+		err = errors.Wrapf(err, "failed to get glob for %s", path)
+		return
+	}
+
+	// Fail if no sources were found
+	if len(sources) == 0 {
+		err = errors.Errorf("failed to get any sources for %s", path)
+		return
+	}
+
+	// Execute the chown for all sources
+	for _, source := range sources {
+		paths := []string{source}
+
+		// Handle recursion
+		if recurse {
+			paths = Paths(source)
+		}
+
+		// Execute chown for all paths
+		for _, path := range paths {
+			if err = os.Chown(path, uid, gid); err != nil {
+				err = errors.Wrapf(err, "failed to chown %s", path)
+				return
+			}
+		}
+	}
+	return
+}
+
 // Copy copies src to dst recursively, creating destination directories as needed.
 // Handles globbing e.g. Copy("./*", "../")
 // The dst will be copied to if it is an existing directory.
 // The dst will be a clone of the src if it doesn't exist.
-// Doesn't follow links by default but can be turned on with &Opt{"follow", true}
+// Doesn't follow links by default but can be turned by passing in FollowOpt(true)
 func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 	clone := true
 	var sources []string
 
-	// Set following links to off by default
+	// Set following links to false by default
 	defaultFollowOpt(&opts, false)
 
 	// Get Abs src and dst roots
@@ -94,10 +166,10 @@ func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 
 			// Copy file
 			default:
-				CopyFile(srcPath, dstPath, newInfoOpt(srcInfo))
+				CopyFile(srcPath, dstPath, InfoOpt(srcInfo))
 			}
 			return nil
-		}, newFollowOpt(false))
+		}, opts...)
 	}
 	return
 }
@@ -105,17 +177,17 @@ func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 // CopyFile copies a single file from src to dsty, creating destination directories as needed.
 // The dst will be copied to if it is an existing directory.
 // The dst will be a clone of the src if it doesn't exist.
-// Doesn't follow links by default but can be turned on with &Opt{"follow", true}
+// Supports passing in the FileInfo object directly with FollowOpt(true)
 // Returns the destination path for copied file
 func CopyFile(src, dst string, opts ...*opt.Opt) (result string, err error) {
 	var srcPath, dstPath string
 	var srcInfo, srcDirInfo *FileInfo
 
-	// Set following links to off by default
+	// Set following links to false by default
 	defaultFollowOpt(&opts, false)
 
 	// Check the source for issues
-	if srcInfo = infoOpt(opts); srcInfo != nil {
+	if srcInfo = getInfoOpt(opts); srcInfo != nil {
 		if srcPath, err = Abs(srcInfo.Path); err != nil {
 			return
 		}

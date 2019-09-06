@@ -114,10 +114,83 @@ func TestFiles(t *testing.T) {
 	}
 }
 
+func TestGlob(t *testing.T) {
+	clearTmpDir()
+
+	// Create test files in dir for globbing and valide modes
+	dir, err := MkdirP(path.Join(tmpDir, "dir"))
+	assert.Nil(t, err)
+	file1, err := CopyFile(testfile, path.Join(dir, "file1"))
+	assert.Nil(t, err)
+	assert.Equal(t, os.FileMode(0644), Mode(file1))
+	file2, err := CopyFile(testfile, path.Join(dir, "file2"))
+	assert.Nil(t, err)
+	assert.Equal(t, os.FileMode(0644), Mode(file2))
+	bob1, err := CopyFile(testfile, path.Join(dir, "bob1"))
+	assert.Nil(t, err)
+	assert.Equal(t, os.FileMode(0644), Mode(bob1))
+
+	// glob single file pattern
+	{
+		sources, err := Glob(path.Join(dir, "bob*"))
+		assert.Nil(t, err)
+		assert.Len(t, sources, 1)
+		assert.Equal(t, bob1, sources[0])
+	}
+
+	// glob single file by full path
+	{
+		sources, err := Glob(testfile)
+		assert.Nil(t, err)
+		assert.Len(t, sources, 1)
+		assert.Equal(t, path.Base(testfile), path.Base(sources[0]))
+	}
+
+	// glob pattern
+	{
+		sources, err := Glob(path.Join(dir, "*1"))
+		assert.Nil(t, err)
+		assert.Len(t, sources, 2)
+		assert.Equal(t, bob1, sources[0])
+		assert.Equal(t, file1, sources[1])
+	}
+
+	// recurse
+	{
+		sources, err := Glob(dir, RecurseOpt(true))
+		assert.Nil(t, err)
+		assert.Len(t, sources, 4)
+		assert.Equal(t, dir, sources[0])
+		assert.Equal(t, bob1, sources[1])
+		assert.Equal(t, file1, sources[2])
+		assert.Equal(t, file2, sources[3])
+	}
+
+	// force Glob error
+	{
+		test.OneShotForceFilePathGlobError()
+		sources, err := Glob(testfile)
+		assert.Len(t, sources, 0)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to get glob for"))
+		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	}
+
+	// empty path
+	{
+		sources, err := Glob("")
+		assert.Len(t, sources, 0)
+		assert.Equal(t, "empty string is an invalid path", err.Error())
+	}
+}
+
 func TestPaths(t *testing.T) {
+
+	// an invalid path should return nothing
 	{
 		assert.Len(t, Paths(""), 0)
 	}
+
+	// get files recursively
 	{
 		paths := Paths("../../")
 		assert.NotEmpty(t, paths)
@@ -305,7 +378,7 @@ func TestAllFiles(t *testing.T) {
 		os.Symlink(path.Join(thirdDir, "t0"), symlink)
 
 		// Compute results using AllFiles
-		paths, err := AllFiles(secondDir, newFollowOpt(false))
+		paths, err := AllFiles(secondDir, FollowOpt(false))
 		assert.Nil(t, err)
 		for i := range paths {
 			paths[i] = SlicePath(paths[i], -2, -1)
@@ -421,7 +494,7 @@ func TestAllPaths(t *testing.T) {
 		assert.Equal(t, []string{"temp/second", "second/s0", "second/s1", "second/t0", "third/t0", "second/third", "temp/third", "third/t1"}, paths)
 
 		// Don't follow links now
-		paths, err = AllPaths(secondDir, newFollowOpt(false))
+		paths, err = AllPaths(secondDir, FollowOpt(false))
 		assert.Nil(t, err)
 		for i := range paths {
 			paths[i] = SlicePath(paths[i], -2, -1)
