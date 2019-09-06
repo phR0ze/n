@@ -21,36 +21,11 @@ import (
 // Chmod wraps os.Chmod but provides path expansion, globbing, recursion and error tracing.
 // For each resulting path if the file is a symbolic link, it changes the mode of the link's
 // target. Recursively apply chmod to all files and directories by passing in RecurseOpt(true)
+// Apply chmod to only directories or files with OnlyDirsOpt(true) and/or OnlyFilesOpt(true)
 func Chmod(path string, mode os.FileMode, opts ...*opt.Opt) (err error) {
-
-	// Glob the path
-	var paths []string
-	if paths, err = Glob(path, opts...); err != nil {
-		return
-	}
-
-	// Fail if no sources were found
-	if len(paths) == 0 {
-		err = errors.Errorf("failed to get any sources for %s", path)
-		return
-	}
-
-	// Execute the chmod for all sources
-	for _, path := range paths {
-		if err = os.Chmod(path, mode); err != nil {
-			err = errors.Wrapf(err, "failed to chmod %s", path)
-			return
-		}
-	}
-	return
-}
-
-// Chown wraps os.Chown but provides path expansion, globbing, recursion and error tracing.
-// For each resulting path change the numeric uid and gid. If the file is a symbolic link,
-// it changes the uid and gid of the link's target. A uid or gid of -1 means to not change
-// that value. Recursively apply chown to all files and directories by passing in RecurseOpt(true)
-func Chown(path string, uid, gid int, opts ...*opt.Opt) (err error) {
 	recurse := getRecurseOpt(opts)
+	onlyDirs := getOnlyDirsOpt(opts)
+	onlyFiles := getOnlyFilesOpt(opts)
 
 	// Path expansion
 	if path, err = Abs(path); err != nil {
@@ -70,21 +45,89 @@ func Chown(path string, uid, gid int, opts ...*opt.Opt) (err error) {
 		return
 	}
 
-	// Execute the chown for all sources
+	// Execute the chmod for all sources
 	for _, source := range sources {
-		paths := []string{source}
 
-		// Handle recursion
-		if recurse {
-			paths = Paths(source)
+		// Only check if dir if we are required to
+		isDir := false
+		if onlyDirs || onlyFiles || recurse {
+			isDir = IsDir(source)
 		}
 
-		// Execute chown for all paths
-		for _, path := range paths {
-			if err = os.Chown(path, uid, gid); err != nil {
-				err = errors.Wrapf(err, "failed to chown %s", path)
-				return
+		// Only get old mode if we have to
+		var oldMode os.FileMode
+		if recurse {
+			oldMode = Mode(source)
+		}
+
+		// We have to be careful of the order of applying permissions we'll get into a
+		// scenario where we are revoking read/execute on a dir before we get to the
+		// bottom of the stack. Like wise when adding permissions we have to
+		// do it on the way in or we won't be able to read to get there.
+		if (!onlyDirs && !onlyFiles) || (onlyDirs && isDir) || (onlyFiles && !isDir) {
+
+			// Chmod on the way in if not recursing or recursing and adding permissions
+			if !recurse || !isDir || (recurse && !revokingMode(oldMode, mode)) {
+				if err = os.Chmod(source, mode); err != nil {
+					err = errors.Wrapf(err, "failed to add permissions with chmod %s", path)
+					return
+				}
 			}
+		}
+
+		// Handle recursion only one dir at a time as permissions need set first
+		// incase we are adding read/execute permissions as we go.
+		if recurse && isDir {
+			for _, path := range Paths(source) {
+				if err = Chmod(path, mode, opts...); err != nil {
+					return
+				}
+			}
+		}
+
+		// Chmod on the way out if recursing and revoking permissions
+		if (!onlyDirs && !onlyFiles) || (onlyDirs && isDir) || (onlyFiles && !isDir) {
+			if recurse && isDir && revokingMode(oldMode, mode) {
+				if err = os.Chmod(source, mode); err != nil {
+					err = errors.Wrapf(err, "failed to revoke permissions with chmod %s", path)
+					return
+				}
+			}
+		}
+	}
+
+	return
+}
+
+// determine if the mode change is revoking permissions or adding permissions.
+// only taking into account read/execute on the directory
+func revokingMode(old, new os.FileMode) bool {
+	return old&0500 > new&0500 || old&0050 > new&0050 || old&0005 > new&0005
+}
+
+// Chown wraps os.Chown but provides path expansion, globbing, recursion and error tracing.
+// For each resulting path change the numeric uid and gid. If the file is a symbolic link,
+// it changes the uid and gid of the link's target. A uid or gid of -1 means to not change
+// that value. Recursively apply chown to all files and directories by passing in RecurseOpt(true)
+func Chown(path string, uid, gid int, opts ...*opt.Opt) (err error) {
+
+	// Glob the path
+	var paths []string
+	if paths, err = Glob(path, opts...); err != nil {
+		return
+	}
+
+	// Fail if no sources were found
+	if len(paths) == 0 {
+		err = errors.Errorf("failed to get any sources for %s", path)
+		return
+	}
+
+	// Execute the chown for all sources
+	for _, path := range paths {
+		if err = os.Chown(path, uid, gid); err != nil {
+			err = errors.Wrapf(err, "failed to chown %s", path)
+			return
 		}
 	}
 	return

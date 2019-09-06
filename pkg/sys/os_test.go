@@ -40,7 +40,7 @@ func TestChmod(t *testing.T) {
 	{
 		test.OneShotForceOSChmodError()
 		err := Chmod(dir, 0644)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to chmod"))
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to add permissions with chmod"))
 		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
 	}
 
@@ -55,14 +55,29 @@ func TestChmod(t *testing.T) {
 		assert.Equal(t, os.FileMode(0444), Mode(bob1))
 	}
 
-	// recurse
+	// recurse and try only opts
 	{
-		err := Chmod(dir, 0755, RecurseOpt(true))
+		// Apply to all files/dirs
+		err := Chmod(dir, 0600, RecurseOpt(true))
+		assert.Nil(t, err)
+		assert.Equal(t, os.ModeDir|os.FileMode(0600), Mode(dir))
+		// Now we can't validate these yet as we lost execute on the dir
+
+		// Now fix the dirs only
+		err = Chmod(dir, 0755, RecurseOpt(true), OnlyDirsOpt(true))
 		assert.Nil(t, err)
 		assert.Equal(t, os.ModeDir|os.FileMode(0755), Mode(dir))
-		assert.Equal(t, os.FileMode(0755), Mode(file1))
-		assert.Equal(t, os.FileMode(0755), Mode(file2))
-		assert.Equal(t, os.FileMode(0755), Mode(bob1))
+		assert.Equal(t, os.FileMode(0600), Mode(file1))
+		assert.Equal(t, os.FileMode(0600), Mode(file2))
+		assert.Equal(t, os.FileMode(0600), Mode(bob1))
+
+		// Now change just the files back to 644
+		err = Chmod(dir, 0644, RecurseOpt(true), OnlyFilesOpt(true))
+		assert.Nil(t, err)
+		assert.Equal(t, os.ModeDir|os.FileMode(0755), Mode(dir))
+		assert.Equal(t, os.FileMode(0644), Mode(file1))
+		assert.Equal(t, os.FileMode(0644), Mode(file2))
+		assert.Equal(t, os.FileMode(0644), Mode(bob1))
 	}
 
 	// invalid file globbing i.e. doesn't exist
@@ -78,13 +93,42 @@ func TestChmod(t *testing.T) {
 	}
 }
 
+func TestRevokingMode(t *testing.T) {
+
+	// Test other octect
+	assert.False(t, revokingMode(0777, 0777))
+	assert.False(t, revokingMode(0776, 0775))
+	assert.False(t, revokingMode(0770, 0771))
+	assert.True(t, revokingMode(0776, 0772))
+	assert.True(t, revokingMode(0775, 0776))
+	assert.True(t, revokingMode(0775, 0774))
+
+	// Test group octect
+	assert.False(t, revokingMode(0777, 0777))
+	assert.False(t, revokingMode(0767, 0757))
+	assert.False(t, revokingMode(0707, 0717))
+	assert.True(t, revokingMode(0767, 0727))
+	assert.True(t, revokingMode(0757, 0767))
+	assert.True(t, revokingMode(0757, 0747))
+
+	// Test owner octect
+	assert.False(t, revokingMode(0777, 0777))
+	assert.False(t, revokingMode(0677, 0577))
+	assert.False(t, revokingMode(0077, 0177))
+	assert.True(t, revokingMode(0677, 0277))
+	assert.True(t, revokingMode(0577, 0677))
+	assert.True(t, revokingMode(0577, 0477))
+	assert.True(t, revokingMode(0577, 0177))
+}
+
 func TestChown(t *testing.T) {
 	clearTmpDir()
 
-	// // Invalid file
-	// err := Chown(path.Join(tmpDir, "bogus"), 50, 50)
-	// assert.True(t, strings.HasPrefix(err.Error(), "chown"))
-	// assert.True(t, strings.HasSuffix(err.Error(), ": no such file or directory"))
+	// invalid file globbing i.e. doesn't exist
+	{
+		err := Chown(path.Join(tmpDir, "bogus"), 50, 50)
+		assert.True(t, strings.HasPrefix(err.Error(), "failed to get any sources for"))
+	}
 
 	// No path given
 	{
@@ -1326,7 +1370,7 @@ func TestWriteString(t *testing.T) {
 func clearTmpDir() {
 	if Exists(tmpDir) {
 		if err := RemoveAll(tmpDir); err != nil {
-			ExecOut("chmod -R 0777 %s", tmpDir)
+			Chmod(tmpDir, 0777, RecurseOpt(true))
 			RemoveAll(tmpDir)
 		}
 	}
