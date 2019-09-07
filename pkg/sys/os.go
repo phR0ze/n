@@ -18,6 +18,21 @@ import (
 	"github.com/pkg/errors"
 )
 
+// // Capture the output of a function as a string
+// func Capture(f func()) string {
+// 	var buf bytes.Buffer // create a buffer to store your data
+// 	stdout := os.Stdout  // save off original stdout to replace
+// 	r, w, _ := os.Pipe() // create a pipe to be able to read what the function writes
+// 	os.Stdout = w        // pass the pipe write to stdout for the function to write to
+
+// 	// call the function
+// 	f()
+
+// 	// Clean up
+// 	os.Stdout = stdout // restore stdout to its original
+// 	return bufout.String()
+// }
+
 // Chmod wraps os.Chmod but provides path expansion, globbing, recursion and error tracing.
 // For each resulting path if the file is a symbolic link, it changes the mode of the link's
 // target. Recursively apply chmod to all files and directories by passing in RecurseOpt(true)
@@ -511,9 +526,8 @@ func Remove(target string) (err error) {
 	return
 }
 
-// RemoveAll removes the target path and any children it contains attempting
-// to add permissions recursively on target and try again if failure occurs
-// before giving up and returning.
+// RemoveAll removes the target path and any children it contains. It will
+// retry the operation after attempting to correct file permissions on failure.
 // If the target path does not exist nil is returned
 func RemoveAll(target string) (err error) {
 	if err = os.RemoveAll(target); err != nil {

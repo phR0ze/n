@@ -5,6 +5,15 @@
 // help function implementations for options rather than using magic strings.
 package opt
 
+import "io"
+
+// StdStreamOpts provides a way to pass system io around
+type StdStreamOpts struct {
+	In  io.Reader // input stream
+	Out io.Writer // output stream
+	Err io.Writer // error stream
+}
+
 // Opt provides a mechanism for passing in optional options to functions.
 type Opt struct {
 	Key string      // name of the option
