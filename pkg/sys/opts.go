@@ -12,7 +12,7 @@ func InfoOpt(val *FileInfo) *opt.Opt {
 
 // get the info option from the options slice defaulting to nil
 func getInfoOpt(opts []*opt.Opt) *FileInfo {
-	if o := opt.Find(opts, "info"); o != nil {
+	if o := opt.Get(opts, "info"); o != nil {
 		if val, ok := o.Val.(*FileInfo); ok {
 			return val
 		}
@@ -28,7 +28,7 @@ func FollowOpt(val bool) *opt.Opt {
 
 // get the follow option from the options slice defaulting to false
 func getFollowOpt(opts []*opt.Opt) (result bool) {
-	if o := opt.Find(opts, "follow"); o != nil {
+	if o := opt.Get(opts, "follow"); o != nil {
 		if val, ok := o.Val.(bool); ok {
 			result = val
 		}
@@ -38,7 +38,7 @@ func getFollowOpt(opts []*opt.Opt) (result bool) {
 
 // adds a follow option to the options slice if not found with the given value
 func defaultFollowOpt(opts *[]*opt.Opt, val bool) {
-	if o := opt.Find(*opts, "follow"); o == nil {
+	if o := opt.Get(*opts, "follow"); o == nil {
 		*opts = append(*opts, &opt.Opt{Key: "follow", Val: val})
 	}
 }
@@ -51,7 +51,7 @@ func OnlyDirsOpt(val bool) *opt.Opt {
 
 // get the only dirs option from the options slice defaulting to false
 func getOnlyDirsOpt(opts []*opt.Opt) (result bool) {
-	if o := opt.Find(opts, "onlyDirs"); o != nil {
+	if o := opt.Get(opts, "onlyDirs"); o != nil {
 		if val, ok := o.Val.(bool); ok {
 			result = val
 		}
@@ -67,7 +67,7 @@ func OnlyFilesOpt(val bool) *opt.Opt {
 
 // get the only dirs option from the options slice defaulting to false
 func getOnlyFilesOpt(opts []*opt.Opt) (result bool) {
-	if o := opt.Find(opts, "onlyFiles"); o != nil {
+	if o := opt.Get(opts, "onlyFiles"); o != nil {
 		if val, ok := o.Val.(bool); ok {
 			result = val
 		}
@@ -83,7 +83,7 @@ func RecurseOpt(val bool) *opt.Opt {
 
 // get the recurse option from the options slice defaulting to false
 func getRecurseOpt(opts []*opt.Opt) (result bool) {
-	if o := opt.Find(opts, "recurse"); o != nil {
+	if o := opt.Get(opts, "recurse"); o != nil {
 		if val, ok := o.Val.(bool); ok {
 			result = val
 		}
