@@ -98,9 +98,7 @@ func GetInOpt(opts []*Opt) io.Reader {
 // DefaultInOpt sets the default value for the option if it doesn't exist already.
 // Use this when the Get's default is not desirable.
 func DefaultInOpt(opts *[]*Opt, val io.Reader) {
-	if option := Find(*opts, "in"); option == nil {
-		*opts = append(*opts, &Opt{Key: "in", Val: val})
-	}
+	Add(opts, InOpt(val))
 }
 
 // Out Option
@@ -124,9 +122,7 @@ func GetOutOpt(opts []*Opt) io.Writer {
 // DefaultOutOpt sets the default value for the option if it doesn't exist already.
 // Use this when the Get's default is not desirable.
 func DefaultOutOpt(opts *[]*Opt, val io.Writer) {
-	if option := Find(*opts, "out"); option == nil {
-		*opts = append(*opts, &Opt{Key: "out", Val: val})
-	}
+	Add(opts, OutOpt(val))
 }
 
 // Err Option
@@ -150,9 +146,7 @@ func GetErrOpt(opts []*Opt) io.Writer {
 // DefaultErrOpt sets the default value for the option if it doesn't exist already.
 // Use this when the Get's default is not desirable.
 func DefaultErrOpt(opts *[]*Opt, val io.Writer) {
-	if option := Find(*opts, "err"); option == nil {
-		*opts = append(*opts, &Opt{Key: "err", Val: val})
-	}
+	Add(opts, ErrOpt(val))
 }
 
 // Home Option
@@ -176,9 +170,7 @@ func GetHomeOpt(opts []*Opt) string {
 // DefaultHomeOpt sets the default value for the option if it doesn't exist already.
 // Use this when the Get's default is not desirable.
 func DefaultHomeOpt(opts *[]*Opt, val string) {
-	if option := Find(*opts, "home"); option == nil {
-		*opts = append(*opts, &Opt{Key: "home", Val: val})
-	}
+	Add(opts, HomeOpt(val))
 }
 
 // Quiet Option
@@ -202,9 +194,7 @@ func GetQuietOpt(opts []*Opt) (result bool) {
 // DefaultQuietOpt sets the default value for the option if it doesn't exist already.
 // Use this when the Get's default is not desirable.
 func DefaultQuietOpt(opts *[]*Opt, val bool) {
-	if option := Find(*opts, "quiet"); option == nil {
-		*opts = append(*opts, &Opt{Key: "quiet", Val: val})
-	}
+	Add(opts, QuietOpt(val))
 }
 
 // Debug Option
@@ -228,9 +218,7 @@ func GetDebugOpt(opts []*Opt) (result bool) {
 // DefaultDebugOpt sets the default value for the option if it doesn't exist already.
 // Use this when the Get's default is not desirable.
 func DefaultDebugOpt(opts *[]*Opt, val bool) {
-	if option := Find(*opts, "debug"); option == nil {
-		*opts = append(*opts, &Opt{Key: "debug", Val: val})
-	}
+	Add(opts, DebugOpt(val))
 }
 
 // DryRun Option
@@ -254,9 +242,7 @@ func GetDryRunOpt(opts []*Opt) (result bool) {
 // DefaultDryRunOpt sets the default value for the option if it doesn't exist already.
 // Use this when the Get's default is not desirable.
 func DefaultDryRunOpt(opts *[]*Opt, val bool) {
-	if option := Find(*opts, "dry-run"); option == nil {
-		*opts = append(*opts, &Opt{Key: "dry-run", Val: val})
-	}
+	Add(opts, DryRunOpt(val))
 }
 
 // Testing Option
@@ -280,7 +266,5 @@ func GetTestingOpt(opts []*Opt) (result bool) {
 // DefaultTestingOpt sets the default value for the option if it doesn't exist already.
 // Use this when the Get's default is not desirable.
 func DefaultTestingOpt(opts *[]*Opt, val bool) {
-	if option := Find(*opts, "testing"); option == nil {
-		*opts = append(*opts, &Opt{Key: "testing", Val: val})
-	}
+	Add(opts, TestingOpt(val))
 }
