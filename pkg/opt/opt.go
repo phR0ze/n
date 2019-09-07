@@ -52,9 +52,20 @@ type Opt struct {
 }
 
 // Add an option to the options slice if it doesn't exist.
+// Just an alias to Default, but the alternate naming is more intuitive in
+// different scenarios.
+func Add(opts *[]*Opt, opt *Opt) bool {
+	if opts == nil || opt == nil || Exists(*opts, opt.Key) {
+		return false
+	}
+	*opts = append(*opts, opt)
+	return true
+}
+
+// Default adds an option to the options slice if it doesn't exist.
 // Returns true the option was added to the options slice or false if
 // the given slice or option are nil or the option already exists in the slice.
-func Add(opts *[]*Opt, opt *Opt) bool {
+func Default(opts *[]*Opt, opt *Opt) bool {
 	if opts == nil || opt == nil || Exists(*opts, opt.Key) {
 		return false
 	}
@@ -75,6 +86,33 @@ func Get(opts []*Opt, key string) *Opt {
 		}
 	}
 	return nil
+}
+
+// Overwrite replaces an existing option or adds the option if it doesn't exist.
+func Overwrite(opts *[]*Opt, opt *Opt) {
+	if opts != nil && opt != nil {
+		if Exists(*opts, opt.Key) {
+			Get(*opts, opt.Key).Val = opt.Val
+		} else {
+			Add(opts, opt)
+		}
+	}
+}
+
+// Remove an existing option from the options slice if found
+func Remove(opts *[]*Opt, opt *Opt) {
+	if opts != nil && opt != nil {
+		for i := len(*opts) - 1; i >= 0; i-- {
+			if (*opts)[i] != nil && (*opts)[i].Key == opt.Key {
+				if i+1 < len(*opts) {
+					*opts = append((*opts)[:i], (*opts)[i+1:]...)
+				} else {
+					*opts = (*opts)[:i]
+				}
+				return
+			}
+		}
+	}
 }
 
 // In Option
