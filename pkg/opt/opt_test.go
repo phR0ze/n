@@ -29,6 +29,20 @@ func TestAdd(t *testing.T) {
 	}
 }
 
+func TestCopy(t *testing.T) {
+
+	// Ensure original isn't affected by copy changes
+	{
+		opts1 := []*Opt{&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}}
+		opts2 := Copy(opts1)
+		assert.Equal(t, []*Opt{&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}}, opts1)
+		assert.Equal(t, []*Opt{&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}}, opts2)
+		Remove(&opts2, &Opt{"1", 1})
+		assert.Equal(t, []*Opt{&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}}, opts1)
+		assert.Equal(t, []*Opt{&Opt{"2", 2}, &Opt{"3", 3}}, opts2)
+	}
+}
+
 func TestDefault(t *testing.T) {
 
 	// option is nil

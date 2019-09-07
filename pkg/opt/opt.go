@@ -62,6 +62,18 @@ func Add(opts *[]*Opt, opt *Opt) bool {
 	return true
 }
 
+// Copy the given options slice removing nil options. Although the slice and
+// options are new distinct objects the Values are the original objects.
+func Copy(opts []*Opt) []*Opt {
+	newOpts := []*Opt{}
+	for _, o := range opts {
+		if o != nil {
+			newOpts = append(newOpts, &Opt{Key: o.Key, Val: o.Val})
+		}
+	}
+	return newOpts
+}
+
 // Default adds an option to the options slice if it doesn't exist.
 // Returns true the option was added to the options slice or false if
 // the given slice or option are nil or the option already exists in the slice.
