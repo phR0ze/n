@@ -37,7 +37,7 @@ func TestCopy(t *testing.T) {
 		opts2 := Copy(opts1)
 		assert.Equal(t, []*Opt{&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}}, opts1)
 		assert.Equal(t, []*Opt{&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}}, opts2)
-		Remove(&opts2, &Opt{"1", 1})
+		Remove(&opts2, "1")
 		assert.Equal(t, []*Opt{&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}}, opts1)
 		assert.Equal(t, []*Opt{&Opt{"2", 2}, &Opt{"3", 3}}, opts2)
 	}
@@ -84,44 +84,44 @@ func TestRemove(t *testing.T) {
 	{
 		// removing the first should force check on middle before iterating past
 		opts := []*Opt{&Opt{"1", 1}, (*Opt)(nil), &Opt{"3", 3}}
-		Remove(&opts, &Opt{"1", 1})
+		Remove(&opts, "1")
 		assert.Equal(t, []*Opt{(*Opt)(nil), &Opt{"3", 3}}, opts)
 
 		// Remove end of slice
-		Remove(&opts, &Opt{"3", 3})
+		Remove(&opts, "3")
 		assert.Equal(t, []*Opt{(*Opt)(nil)}, opts)
 	}
 
 	// nil opt
 	{
 		opts := []*Opt{&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}}
-		Remove(&opts, (*Opt)(nil))
+		Remove(&opts, "")
 		assert.Equal(t, []*Opt{&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}}, opts)
 	}
 
 	// nil opts
 	{
-		Remove((*[]*Opt)(nil), &Opt{"2", 2})
+		Remove((*[]*Opt)(nil), "2")
 	}
 
 	// remove the middle
 	{
 		opts := []*Opt{&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}}
-		Remove(&opts, &Opt{"2", 2})
+		Remove(&opts, "2")
 		assert.Equal(t, []*Opt{&Opt{"1", 1}, &Opt{"3", 3}}, opts)
 	}
 
 	// remove the end
 	{
 		opts := []*Opt{&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}}
-		Remove(&opts, &Opt{"3", 3})
+		Remove(&opts, "3")
 		assert.Equal(t, []*Opt{&Opt{"1", 1}, &Opt{"2", 2}}, opts)
 	}
 
 	// remove the begining
 	{
 		opts := []*Opt{&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}}
-		Remove(&opts, &Opt{"1", 1})
+		Remove(&opts, "1")
 		assert.Equal(t, []*Opt{&Opt{"2", 2}, &Opt{"3", 3}}, opts)
 	}
 }

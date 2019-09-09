@@ -111,11 +111,11 @@ func Overwrite(opts *[]*Opt, opt *Opt) {
 	}
 }
 
-// Remove an existing option from the options slice if found
-func Remove(opts *[]*Opt, opt *Opt) {
-	if opts != nil && opt != nil {
+// Remove an existing option by key from the options list
+func Remove(opts *[]*Opt, key string) {
+	if opts != nil && key != "" {
 		for i := len(*opts) - 1; i >= 0; i-- {
-			if (*opts)[i] != nil && (*opts)[i].Key == opt.Key {
+			if (*opts)[i] != nil && (*opts)[i].Key == key {
 				if i+1 < len(*opts) {
 					*opts = append((*opts)[:i], (*opts)[i+1:]...)
 				} else {
