@@ -145,12 +145,13 @@ func TestInOpt(t *testing.T) {
 		buf := &bytes.Buffer{}
 		opts := []*Opt{}
 		assert.Equal(t, os.Stdin, GetInOpt(opts))
-		assert.Equal(t, buf, DefaultInOpt((*[]*Opt)(nil), buf))
-		assert.Equal(t, buf, DefaultInOpt(&opts, buf))
+		assert.False(t, InOptExists(opts))
+		assert.Equal(t, buf, DefaultInOpt(opts, buf))
 		assert.Equal(t, os.Stdin, GetInOpt(opts))
 		assert.True(t, Default(&opts, InOpt(buf)))
 		assert.Equal(t, buf, GetInOpt(opts))
-		assert.Equal(t, buf, DefaultInOpt(&opts, os.Stdin))
+		assert.True(t, InOptExists(opts))
+		assert.Equal(t, buf, DefaultInOpt(opts, os.Stdin))
 	}
 }
 
@@ -173,12 +174,13 @@ func TestOutOpt(t *testing.T) {
 		buf := &bytes.Buffer{}
 		opts := []*Opt{}
 		assert.Equal(t, os.Stdout, GetOutOpt(opts))
-		assert.Equal(t, buf, DefaultOutOpt((*[]*Opt)(nil), buf))
-		assert.Equal(t, buf, DefaultOutOpt(&opts, buf))
+		assert.False(t, OutOptExists(opts))
+		assert.Equal(t, buf, DefaultOutOpt(opts, buf))
 		assert.Equal(t, os.Stdout, GetOutOpt(opts))
 		assert.True(t, Default(&opts, OutOpt(buf)))
 		assert.Equal(t, buf, GetOutOpt(opts))
-		assert.Equal(t, buf, DefaultOutOpt(&opts, os.Stdout))
+		assert.True(t, OutOptExists(opts))
+		assert.Equal(t, buf, DefaultOutOpt(opts, os.Stdout))
 	}
 }
 
@@ -201,12 +203,13 @@ func TestErrOpt(t *testing.T) {
 		buf := &bytes.Buffer{}
 		opts := []*Opt{}
 		assert.Equal(t, os.Stderr, GetErrOpt(opts))
-		assert.Equal(t, buf, DefaultErrOpt((*[]*Opt)(nil), buf))
-		assert.Equal(t, buf, DefaultErrOpt(&opts, buf))
+		assert.False(t, ErrOptExists(opts))
+		assert.Equal(t, buf, DefaultErrOpt(opts, buf))
 		assert.Equal(t, os.Stderr, GetErrOpt(opts))
 		assert.True(t, Default(&opts, ErrOpt(buf)))
 		assert.Equal(t, buf, GetErrOpt(opts))
-		assert.Equal(t, buf, DefaultErrOpt(&opts, os.Stderr))
+		assert.True(t, ErrOptExists(opts))
+		assert.Equal(t, buf, DefaultErrOpt(opts, os.Stderr))
 	}
 }
 
@@ -227,12 +230,13 @@ func TestHomeOpt(t *testing.T) {
 	{
 		opts := []*Opt{}
 		assert.Equal(t, "", GetHomeOpt(opts))
-		assert.Equal(t, "foobar", DefaultHomeOpt((*[]*Opt)(nil), "foobar"))
-		assert.Equal(t, "foobar", DefaultHomeOpt(&opts, "foobar"))
+		assert.False(t, HomeOptExists(opts))
+		assert.Equal(t, "foobar", DefaultHomeOpt(opts, "foobar"))
 		assert.Equal(t, "", GetHomeOpt(opts))
 		assert.True(t, Default(&opts, HomeOpt("foobar")))
 		assert.Equal(t, "foobar", GetHomeOpt(opts))
-		assert.Equal(t, "foobar", DefaultHomeOpt(&opts, "blah"))
+		assert.True(t, HomeOptExists(opts))
+		assert.Equal(t, "foobar", DefaultHomeOpt(opts, "blah"))
 	}
 }
 
@@ -253,12 +257,13 @@ func TestQuietOpt(t *testing.T) {
 	{
 		opts := []*Opt{}
 		assert.False(t, GetQuietOpt(opts))
-		assert.True(t, DefaultQuietOpt((*[]*Opt)(nil), true))
-		assert.True(t, DefaultQuietOpt(&opts, true))
+		assert.False(t, QuietOptExists(opts))
+		assert.True(t, DefaultQuietOpt(opts, true))
 		assert.False(t, GetQuietOpt(opts))
 		assert.True(t, Default(&opts, QuietOpt(true)))
 		assert.True(t, GetQuietOpt(opts))
-		assert.True(t, DefaultQuietOpt(&opts, false))
+		assert.True(t, QuietOptExists(opts))
+		assert.True(t, DefaultQuietOpt(opts, false))
 	}
 }
 
@@ -279,12 +284,13 @@ func TestDebugOpt(t *testing.T) {
 	{
 		opts := []*Opt{}
 		assert.False(t, GetDebugOpt(opts))
-		assert.True(t, DefaultDebugOpt((*[]*Opt)(nil), true))
-		assert.True(t, DefaultDebugOpt(&opts, true))
+		assert.False(t, DebugOptExists(opts))
+		assert.True(t, DefaultDebugOpt(opts, true))
 		assert.False(t, GetDebugOpt(opts))
 		assert.True(t, Default(&opts, DebugOpt(true)))
 		assert.True(t, GetDebugOpt(opts))
-		assert.True(t, DefaultDebugOpt(&opts, false))
+		assert.True(t, DebugOptExists(opts))
+		assert.True(t, DefaultDebugOpt(opts, false))
 	}
 }
 
@@ -305,12 +311,13 @@ func TestDryRunOpt(t *testing.T) {
 	{
 		opts := []*Opt{}
 		assert.False(t, GetDryRunOpt(opts))
-		assert.True(t, DefaultDryRunOpt((*[]*Opt)(nil), true))
-		assert.True(t, DefaultDryRunOpt(&opts, true))
+		assert.False(t, DryRunOptExists(opts))
+		assert.True(t, DefaultDryRunOpt(opts, true))
 		assert.False(t, GetDryRunOpt(opts))
 		assert.True(t, Default(&opts, DryRunOpt(true)))
 		assert.True(t, GetDryRunOpt(opts))
-		assert.True(t, DefaultDryRunOpt(&opts, false))
+		assert.True(t, DryRunOptExists(opts))
+		assert.True(t, DefaultDryRunOpt(opts, false))
 	}
 }
 
@@ -327,15 +334,16 @@ func TestTestingOpt(t *testing.T) {
 		assert.True(t, GetTestingOpt(opts))
 	}
 
-	// default
+	// default/exists
 	{
 		opts := []*Opt{}
 		assert.False(t, GetTestingOpt(opts))
-		assert.True(t, DefaultTestingOpt((*[]*Opt)(nil), true))
-		assert.True(t, DefaultTestingOpt(&opts, true))
+		assert.False(t, TestingOptExists(opts))
+		assert.True(t, DefaultTestingOpt(opts, true))
 		assert.False(t, GetTestingOpt(opts))
 		assert.True(t, Default(&opts, TestingOpt(true)))
 		assert.True(t, GetTestingOpt(opts))
-		assert.True(t, DefaultTestingOpt(&opts, false))
+		assert.True(t, TestingOptExists(opts))
+		assert.True(t, DefaultTestingOpt(opts, false))
 	}
 }
