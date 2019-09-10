@@ -1,16 +1,13 @@
 NAME := n
 
 default: ${NAME}
-${NAME}: vendor
+${NAME}:
 	@echo "Building..."
 	@echo "------------------------------------------------------------------------"
 	go build -o bin/${NAME} .
 	
-mech: vendor
+mech:
 	go build -o bin/mech pkg/net/mech/example/mech.go
-
-vendor:
-	dep ensure -v
 
 test: ${NAME}
 	@echo -e "\nRunning all go tests:"
@@ -36,11 +33,10 @@ cover: ${NAME}
 	go test -gcflags=-l -coverprofile=coverage.out ./pkg/${pkg}
 	go tool cover -html=coverage.out
 
-bench: vendor
+bench:
 	@echo -e "\nRunning all go benchmarks:"
 	@echo -e "------------------------------------------------------------------------"
 	go test -bench=.
 
 clean:
-	rm -rf ./vendor
 	rm -f ./bin/${NAME}
