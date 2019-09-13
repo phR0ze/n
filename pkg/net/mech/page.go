@@ -3,7 +3,7 @@ package mech
 import (
 	"io"
 
-	"github.com/phR0ze/goquery"
+  "github.com/PuerkitoBio/goquery"
 	"github.com/pkg/errors"
 )
 
