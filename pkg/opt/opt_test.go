@@ -69,12 +69,16 @@ func TestOverwrite(t *testing.T) {
 	// happy
 	{
 		opts := []*Opt{}
-		Overwrite(&opts, &Opt{"1", 1})
-		Overwrite(&opts, &Opt{"2", 2})
-		Overwrite(&opts, &Opt{"3", 3})
+		result := Overwrite(&opts, &Opt{"1", 1})
+		assert.Equal(t, &Opt{"1", 1}, result)
+		result = Overwrite(&opts, &Opt{"2", 2})
+		assert.Equal(t, &Opt{"2", 2}, result)
+		result = Overwrite(&opts, &Opt{"3", 3})
+		assert.Equal(t, &Opt{"3", 3}, result)
 		assert.Equal(t, []*Opt{&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}}, opts)
 
-		Overwrite(&opts, &Opt{"2", 5})
+		result = Overwrite(&opts, &Opt{"2", 5})
+		assert.Equal(t, &Opt{"2", 5}, result)
 		assert.Equal(t, []*Opt{&Opt{"1", 1}, &Opt{"2", 5}, &Opt{"3", 3}}, opts)
 	}
 }
@@ -153,6 +157,16 @@ func TestInOpt(t *testing.T) {
 		assert.True(t, InOptExists(opts))
 		assert.Equal(t, buf, DefaultInOpt(opts, os.Stdin))
 	}
+
+	// overwrite
+	{
+		buf := &bytes.Buffer{}
+		opts := []*Opt{}
+		assert.Equal(t, true, Default(&opts, InOpt(buf)))
+		assert.Equal(t, buf, GetInOpt(opts))
+		assert.Equal(t, os.Stdin, OverwriteInOpt(&opts, os.Stdin))
+		assert.Equal(t, os.Stdin, GetInOpt(opts))
+	}
 }
 
 // Out
@@ -181,6 +195,16 @@ func TestOutOpt(t *testing.T) {
 		assert.Equal(t, buf, GetOutOpt(opts))
 		assert.True(t, OutOptExists(opts))
 		assert.Equal(t, buf, DefaultOutOpt(opts, os.Stdout))
+	}
+
+	// overwrite
+	{
+		buf := &bytes.Buffer{}
+		opts := []*Opt{}
+		assert.Equal(t, true, Default(&opts, OutOpt(buf)))
+		assert.Equal(t, buf, GetOutOpt(opts))
+		assert.Equal(t, os.Stdout, OverwriteOutOpt(&opts, os.Stdout))
+		assert.Equal(t, os.Stdout, GetOutOpt(opts))
 	}
 }
 
@@ -211,6 +235,16 @@ func TestErrOpt(t *testing.T) {
 		assert.True(t, ErrOptExists(opts))
 		assert.Equal(t, buf, DefaultErrOpt(opts, os.Stderr))
 	}
+
+	// overwrite
+	{
+		buf := &bytes.Buffer{}
+		opts := []*Opt{}
+		assert.Equal(t, true, Default(&opts, ErrOpt(buf)))
+		assert.Equal(t, buf, GetErrOpt(opts))
+		assert.Equal(t, os.Stderr, OverwriteErrOpt(&opts, os.Stderr))
+		assert.Equal(t, os.Stderr, GetErrOpt(opts))
+	}
 }
 
 // Home
@@ -237,6 +271,15 @@ func TestHomeOpt(t *testing.T) {
 		assert.Equal(t, "foobar", GetHomeOpt(opts))
 		assert.True(t, HomeOptExists(opts))
 		assert.Equal(t, "foobar", DefaultHomeOpt(opts, "blah"))
+	}
+
+	// overwrite
+	{
+		opts := []*Opt{}
+		assert.Equal(t, true, Default(&opts, HomeOpt("foo")))
+		assert.Equal(t, "foo", GetHomeOpt(opts))
+		assert.Equal(t, "bar", OverwriteHomeOpt(&opts, "bar"))
+		assert.Equal(t, "bar", GetHomeOpt(opts))
 	}
 }
 
@@ -265,6 +308,15 @@ func TestQuietOpt(t *testing.T) {
 		assert.True(t, QuietOptExists(opts))
 		assert.True(t, DefaultQuietOpt(opts, false))
 	}
+
+	// overwrite
+	{
+		opts := []*Opt{}
+		assert.Equal(t, true, Default(&opts, QuietOpt(true)))
+		assert.Equal(t, true, GetQuietOpt(opts))
+		assert.Equal(t, false, OverwriteQuietOpt(&opts, false))
+		assert.Equal(t, false, GetQuietOpt(opts))
+	}
 }
 
 // Debug
@@ -291,6 +343,15 @@ func TestDebugOpt(t *testing.T) {
 		assert.True(t, GetDebugOpt(opts))
 		assert.True(t, DebugOptExists(opts))
 		assert.True(t, DefaultDebugOpt(opts, false))
+	}
+
+	// overwrite
+	{
+		opts := []*Opt{}
+		assert.Equal(t, true, Default(&opts, DebugOpt(true)))
+		assert.Equal(t, true, GetDebugOpt(opts))
+		assert.Equal(t, false, OverwriteDebugOpt(&opts, false))
+		assert.Equal(t, false, GetDebugOpt(opts))
 	}
 }
 
@@ -319,6 +380,15 @@ func TestDryRunOpt(t *testing.T) {
 		assert.True(t, DryRunOptExists(opts))
 		assert.True(t, DefaultDryRunOpt(opts, false))
 	}
+
+	// overwrite
+	{
+		opts := []*Opt{}
+		assert.Equal(t, true, Default(&opts, DryRunOpt(true)))
+		assert.Equal(t, true, GetDryRunOpt(opts))
+		assert.Equal(t, false, OverwriteDryRunOpt(&opts, false))
+		assert.Equal(t, false, GetDryRunOpt(opts))
+	}
 }
 
 // Testing
@@ -345,5 +415,14 @@ func TestTestingOpt(t *testing.T) {
 		assert.True(t, GetTestingOpt(opts))
 		assert.True(t, TestingOptExists(opts))
 		assert.True(t, DefaultTestingOpt(opts, false))
+	}
+
+	// overwrite
+	{
+		opts := []*Opt{}
+		assert.Equal(t, true, Default(&opts, TestingOpt(true)))
+		assert.Equal(t, true, GetTestingOpt(opts))
+		assert.Equal(t, false, OverwriteTestingOpt(&opts, false))
+		assert.Equal(t, false, GetTestingOpt(opts))
 	}
 }

@@ -113,7 +113,7 @@ func Get(opts []*Opt, key string) *Opt {
 }
 
 // Overwrite replaces an existing option or adds the option if it doesn't exist.
-func Overwrite(opts *[]*Opt, opt *Opt) {
+func Overwrite(opts *[]*Opt, opt *Opt) *Opt {
 	if opts != nil && opt != nil {
 		if Exists(*opts, opt.Key) {
 			Get(*opts, opt.Key).Val = opt.Val
@@ -121,6 +121,7 @@ func Overwrite(opts *[]*Opt, opt *Opt) {
 			Add(opts, opt)
 		}
 	}
+	return opt
 }
 
 // Remove an existing option by key from the options list
@@ -171,6 +172,12 @@ func DefaultInOpt(opts []*Opt, val io.Reader) io.Reader {
 	return GetInOpt(opts)
 }
 
+// OverwriteInOpt sets the value for the option to the given value.
+// Use this when the new value needs set regardless if the option exists or not.
+func OverwriteInOpt(opts *[]*Opt, val io.Reader) io.Reader {
+	return Overwrite(opts, InOpt(val)).Val.(io.Reader)
+}
+
 // Out Option
 // -------------------------------------------------------------------------------------------------
 
@@ -201,6 +208,12 @@ func DefaultOutOpt(opts []*Opt, val io.Writer) io.Writer {
 		return val
 	}
 	return GetOutOpt(opts)
+}
+
+// OverwriteOutOpt sets the value for the option to the given value.
+// Use this when the new value needs set regardless if the option exists or not.
+func OverwriteOutOpt(opts *[]*Opt, val io.Writer) io.Writer {
+	return Overwrite(opts, OutOpt(val)).Val.(io.Writer)
 }
 
 // Err Option
@@ -235,6 +248,12 @@ func DefaultErrOpt(opts []*Opt, val io.Writer) io.Writer {
 	return GetErrOpt(opts)
 }
 
+// OverwriteErrOpt sets the value for the option to the given value.
+// Use this when the new value needs set regardless if the option exists or not.
+func OverwriteErrOpt(opts *[]*Opt, val io.Writer) io.Writer {
+	return Overwrite(opts, ErrOpt(val)).Val.(io.Writer)
+}
+
 // Home Option
 // -------------------------------------------------------------------------------------------------
 
@@ -265,6 +284,12 @@ func DefaultHomeOpt(opts []*Opt, val string) string {
 		return val
 	}
 	return GetHomeOpt(opts)
+}
+
+// OverwriteHomeOpt sets the value for the option to the given value.
+// Use this when the new value needs set regardless if the option exists or not.
+func OverwriteHomeOpt(opts *[]*Opt, val string) string {
+	return Overwrite(opts, HomeOpt(val)).Val.(string)
 }
 
 // Quiet Option
@@ -299,6 +324,12 @@ func DefaultQuietOpt(opts []*Opt, val bool) bool {
 	return GetQuietOpt(opts)
 }
 
+// OverwriteQuietOpt sets the value for the option to the given value.
+// Use this when the new value needs set regardless if the option exists or not.
+func OverwriteQuietOpt(opts *[]*Opt, val bool) bool {
+	return Overwrite(opts, QuietOpt(val)).Val.(bool)
+}
+
 // Debug Option
 //--------------------------------------------------------------------------------------------------
 
@@ -329,6 +360,12 @@ func DefaultDebugOpt(opts []*Opt, val bool) bool {
 		return val
 	}
 	return GetDebugOpt(opts)
+}
+
+// OverwriteDebugOpt sets the value for the option to the given value.
+// Use this when the new value needs set regardless if the option exists or not.
+func OverwriteDebugOpt(opts *[]*Opt, val bool) bool {
+	return Overwrite(opts, DebugOpt(val)).Val.(bool)
 }
 
 // DryRun Option
@@ -363,6 +400,12 @@ func DefaultDryRunOpt(opts []*Opt, val bool) bool {
 	return GetDryRunOpt(opts)
 }
 
+// OverwriteDryRunOpt sets the value for the option to the given value.
+// Use this when the new value needs set regardless if the option exists or not.
+func OverwriteDryRunOpt(opts *[]*Opt, val bool) bool {
+	return Overwrite(opts, DryRunOpt(val)).Val.(bool)
+}
+
 // Testing Option
 //--------------------------------------------------------------------------------------------------
 
@@ -393,4 +436,10 @@ func DefaultTestingOpt(opts []*Opt, val bool) bool {
 		return val
 	}
 	return GetTestingOpt(opts)
+}
+
+// OverwriteTestingOpt sets the value for the option to the given value.
+// Use this when the new value needs set regardless if the option exists or not.
+func OverwriteTestingOpt(opts *[]*Opt, val bool) bool {
+	return Overwrite(opts, TestingOpt(val)).Val.(bool)
 }
