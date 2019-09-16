@@ -650,12 +650,24 @@ func (p *StringMap) ToStringMapG() (m map[string]interface{}) {
 	return p.O().(map[string]interface{})
 }
 
-// YAML converts the Map into YAML []bytes
-func (p *StringMap) YAML() (data []byte, err error) {
-	if data, err = yaml.Marshal(p.G()); err != nil {
+// YAML converts the Map into a YAML string
+func (p *StringMap) YAML() (data string) {
+	_data, err := yaml.Marshal(p.G())
+	if err != nil {
+		return
+	}
+	data = string(_data)
+	return
+}
+
+// YAMLE converts the Map into a YAML string
+func (p *StringMap) YAMLE() (data string, err error) {
+	var _data []byte
+	if _data, err = yaml.Marshal(p.G()); err != nil {
 		err = errors.Wrapf(err, "failed to marshal map[string]interface{}")
 		return
 	}
+	data = string(_data)
 	return
 }
 
