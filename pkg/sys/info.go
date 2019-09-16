@@ -40,7 +40,7 @@ func (info *FileInfo) Size() int64 {
 
 // Size returns the size of the file/dir in bytes
 func Size(src string) (size int64) {
-	if info, err := os.Lstat(src); err == nil {
+	if info, err := Lstat(src); err == nil {
 		size = info.Size()
 	}
 	return
@@ -53,7 +53,7 @@ func (info *FileInfo) Mode() os.FileMode {
 
 // Mode implements os.FileInfo and returns bits of the file
 func Mode(src string) (mode os.FileMode) {
-	if info, err := os.Lstat(src); err == nil {
+	if info, err := Lstat(src); err == nil {
 		mode = info.Mode()
 	}
 	return
@@ -76,7 +76,7 @@ func (info *FileInfo) IsDir() bool {
 
 // IsDir returns true if the given path is a directory
 func IsDir(src string) bool {
-	if info, err := os.Lstat(src); err == nil {
+	if info, err := Lstat(src); err == nil {
 		return info.IsDir()
 	}
 	return false
@@ -89,7 +89,7 @@ func (info *FileInfo) IsFile() bool {
 
 // IsFile returns true if the given path is a file
 func IsFile(src string) bool {
-	if info, err := os.Lstat(src); err == nil {
+	if info, err := Lstat(src); err == nil {
 		return !info.IsDir() && info.Mode()&os.ModeSymlink == 0
 	}
 	return false
@@ -112,7 +112,7 @@ func IsSymlink(src string) bool {
 func (info *FileInfo) IsSymlinkDir() bool {
 	if info.Val.Mode()&os.ModeSymlink != 0 {
 		if target, err := filepath.EvalSymlinks(info.Path); err == nil {
-			if subinfo, err := os.Lstat(target); err == nil {
+			if subinfo, err := Lstat(target); err == nil {
 				if subinfo.IsDir() {
 					return true
 				}
@@ -134,7 +134,7 @@ func IsSymlinkDir(src string) bool {
 func (info *FileInfo) IsSymlinkFile() bool {
 	if info.Val.Mode()&os.ModeSymlink != 0 {
 		if target, err := filepath.EvalSymlinks(info.Path); err == nil {
-			if subinfo, err := os.Lstat(target); err == nil {
+			if subinfo, err := Lstat(target); err == nil {
 				if !subinfo.IsDir() {
 					return true
 				}

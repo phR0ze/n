@@ -37,9 +37,65 @@ func TestFileInfoInterface(t *testing.T) {
 	}
 }
 
-func TestIsDir(t *testing.T) {
+func TestSize(t *testing.T) {
+
+	// class
 	{
-		// FileInfo
+		info, err := Lstat(testfile)
+		assert.Nil(t, err)
+		assert.Equal(t, int64(604), info.Size())
+	}
+
+	// relative path file
+	{
+		assert.Equal(t, int64(604), Size(testfile))
+	}
+
+	// Ensure expansion is happening
+	{
+		home, err := Home()
+		assert.Nil(t, err)
+		target, err := Abs(testfile)
+		assert.Nil(t, err)
+		target = "~" + strings.TrimPrefix(target, home)
+
+		assert.Equal(t, int64(604), Size(target))
+	}
+}
+
+func TestMode(t *testing.T) {
+
+	// class
+	{
+		assert.Nil(t, Copy(testfile, tmpfile))
+		assert.Nil(t, os.Chmod(tmpfile, 0644))
+
+		info, err := Lstat(testfile)
+		assert.Nil(t, err)
+		assert.Equal(t, os.FileMode(0644), info.Mode())
+	}
+
+	// relative path file
+	{
+		assert.Equal(t, os.FileMode(0644), Mode(testfile))
+	}
+
+	// Ensure expansion is happening
+	{
+		home, err := Home()
+		assert.Nil(t, err)
+		target, err := Abs(tmpfile)
+		assert.Nil(t, err)
+		target = "~" + strings.TrimPrefix(target, home)
+
+		assert.Equal(t, os.FileMode(0644), Mode(target))
+	}
+}
+
+func TestIsDir(t *testing.T) {
+
+	// FileInfo
+	{
 		info, err := Lstat(readme)
 		assert.Nil(t, err)
 		assert.False(t, info.IsDir())
@@ -48,10 +104,18 @@ func TestIsDir(t *testing.T) {
 		assert.Nil(t, err)
 		assert.True(t, info.IsDir())
 	}
+
+	// Standalone
 	{
-		// Standalone
-		assert.False(t, IsDir(readme))
-		assert.True(t, IsDir("../.."))
+		// Ensure expansion is happening
+		home, err := Home()
+		assert.Nil(t, err)
+		target, err := Abs(readme)
+		assert.Nil(t, err)
+		target = "~" + strings.TrimPrefix(target, home)
+
+		assert.False(t, IsDir(target))
+		assert.True(t, IsDir(path.Dir(target)))
 	}
 }
 
@@ -75,15 +139,19 @@ func TestIsFile(t *testing.T) {
 		assert.Nil(t, err)
 		assert.False(t, info.IsFile())
 	}
-	{
-		// Standalone
-		assert.True(t, IsFile(readme))
-		assert.False(t, IsFile("../.."))
-	}
-}
 
-func TestSize(t *testing.T) {
-	assert.Equal(t, int64(604), Size(testfile))
+	// Standalone
+	{
+		// Ensure expansion is happening
+		home, err := Home()
+		assert.Nil(t, err)
+		target, err := Abs(readme)
+		assert.Nil(t, err)
+		target = "~" + strings.TrimPrefix(target, home)
+
+		assert.True(t, IsFile(target))
+		assert.False(t, IsFile(path.Dir(target)))
+	}
 }
 
 func TestIsSymlink(t *testing.T) {
