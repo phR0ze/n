@@ -650,6 +650,15 @@ func (p *StringMap) ToStringMapG() (m map[string]interface{}) {
 	return p.O().(map[string]interface{})
 }
 
+// YAML converts the Map into YAML []bytes
+func (p *StringMap) YAML() (data []byte, err error) {
+	if data, err = yaml.Marshal(p.G()); err != nil {
+		err = errors.Wrapf(err, "failed to marshal map[string]interface{}")
+		return
+	}
+	return
+}
+
 // WriteJSON converts the *StringMap into a map[string]interface{} then calls
 // json.WriteJSON on it to write it out to disk.
 func (p *StringMap) WriteJSON(filename string) (err error) {

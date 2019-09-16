@@ -81,6 +81,7 @@ type Map interface {
 	// UnionM(slice interface{}) Slice                   // UnionM modifies this Map by joining uniq elements from this Map with uniq elements from the given Slice while preserving order.
 	// Uniq() (new Map)                                // Uniq returns a new Map with all non uniq elements removed while preserving element order.
 	// UniqM() Slice                                     // UniqM modifies this Map to remove all non uniq elements while preserving element order.
+	YAML() (data []byte, err error)                     // YAML converts the Map into YAML []bytes
 	WriteJSON(filename string) (err error) // WriteJSON converts the Map into a map[string]interface{} then calls json.WriteJSON on it to write it out to disk.
 	WriteYAML(filename string) (err error) // WriteYAML converts the Map into a map[string]interface{} then calls yaml.WriteYAML on it to write it out to disk.
 }
