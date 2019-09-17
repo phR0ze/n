@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/bouk/monkey"
-	"github.com/phR0ze/n"
 	"github.com/phR0ze/n/pkg/sys"
 	"github.com/phR0ze/n/pkg/test"
 	"github.com/stretchr/testify/assert"
@@ -405,7 +404,12 @@ func TestExtractPrefixedZip(t *testing.T) {
 	assert.Nil(t, err)
 	paths, err := sys.AllPaths(tmpDir)
 	assert.Nil(t, err)
-	result := n.S(paths).Map(func(x n.O) n.O { return sys.SlicePath(x.(string), -3, -1) }).ToStrs()
+
+	result := []string{}
+	for _, path := range paths {
+		result = append(result, sys.SlicePath(path, -3, -1))
+	}
+
 	expected := []string{
 		"n/test/temp",
 		"test/temp/LICENSE.txt",
