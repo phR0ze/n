@@ -850,7 +850,7 @@ func (p *Str) Map(mod func(O) O) ISlice {
 	for i := range *p {
 		v := mod((*p)[i])
 		if slice == nil {
-			slice = NewSlice(v)
+			slice = Slice(v)
 		} else {
 			slice.Append(v)
 		}

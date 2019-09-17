@@ -115,7 +115,7 @@ func BenchmarkSlice_SliceOfInterface(t *testing.B) {
 }
 
 func BenchmarkSlice_IntSlice(t *testing.B) {
-	ints := NewSlice(Range(0, 999999)).Map(func(x O) O {
+	ints := Slice(Range(0, 999999)).Map(func(x O) O {
 		return x.(int) + 1
 	}).ToInts()
 	assert.Equal(t, 3, ints[2])
@@ -123,7 +123,7 @@ func BenchmarkSlice_IntSlice(t *testing.B) {
 }
 
 func BenchmarkSlice_RefSlice(t *testing.B) {
-	ints := NewSlice(RangeInteger(0, 999999)).Map(func(x O) O {
+	ints := Slice(RangeInteger(0, 999999)).Map(func(x O) O {
 		return x.(Integer).Value
 	}).ToInts()
 	assert.Equal(t, 2, ints[2])
@@ -134,35 +134,35 @@ func TestSlice_NewSlice(t *testing.T) {
 
 	// float
 	{
-		assert.Equal(t, NewFloatSliceV(3), NewSlice([]float32{3}))
-		assert.Equal(t, NewFloatSliceV(3), NewSlice([]float64{3}))
+		assert.Equal(t, NewFloatSliceV(3), Slice([]float32{3}))
+		assert.Equal(t, NewFloatSliceV(3), Slice([]float64{3}))
 	}
 
 	// int
 	{
-		assert.Equal(t, NewIntSliceV(3), NewSlice([]int{3}))
-		assert.Equal(t, NewIntSliceV(3), NewSlice(&([]int{3})))
-		assert.Equal(t, NewIntSliceV(3), NewSlice([]int8{3}))
-		assert.Equal(t, NewIntSliceV(3), NewSlice([]int16{3}))
-		assert.Equal(t, NewIntSliceV(3), NewSlice([]int64{3}))
-		assert.Equal(t, NewIntSliceV(3), NewSlice([]uint16{3}))
-		assert.Equal(t, NewIntSliceV(3), NewSlice([]uint32{3}))
-		assert.Equal(t, NewIntSliceV(3), NewSlice([]uint64{3}))
+		assert.Equal(t, NewIntSliceV(3), Slice([]int{3}))
+		assert.Equal(t, NewIntSliceV(3), Slice(&([]int{3})))
+		assert.Equal(t, NewIntSliceV(3), Slice([]int8{3}))
+		assert.Equal(t, NewIntSliceV(3), Slice([]int16{3}))
+		assert.Equal(t, NewIntSliceV(3), Slice([]int64{3}))
+		assert.Equal(t, NewIntSliceV(3), Slice([]uint16{3}))
+		assert.Equal(t, NewIntSliceV(3), Slice([]uint32{3}))
+		assert.Equal(t, NewIntSliceV(3), Slice([]uint64{3}))
 	}
 
 	// string
 	{
-		assert.Equal(t, NewStringSliceV("1", "2", "3"), NewSlice([]string{"1", "2", "3"}))
-		assert.Equal(t, NewStringSliceV("1", "2", "3"), NewSlice(&([]string{"1", "2", "3"})))
-		assert.Equal(t, NewStringSliceV("3"), NewSlice([][]byte{{'3'}}))
-		assert.Equal(t, NewStringSliceV("3"), NewSlice([][]rune{{'3'}}))
+		assert.Equal(t, NewStringSliceV("1", "2", "3"), Slice([]string{"1", "2", "3"}))
+		assert.Equal(t, NewStringSliceV("1", "2", "3"), Slice(&([]string{"1", "2", "3"})))
+		assert.Equal(t, NewStringSliceV("3"), Slice([][]byte{{'3'}}))
+		assert.Equal(t, NewStringSliceV("3"), Slice([][]rune{{'3'}}))
 	}
 
 	// Str
 	{
-		assert.Equal(t, NewStrV("3"), NewSlice([]rune{'3'}))
-		assert.Equal(t, NewStrV("3"), NewSlice([]byte{'3'}))
-		assert.Equal(t, NewStrV("3"), NewSlice([]Char{'3'}))
+		assert.Equal(t, NewStrV("3"), Slice([]rune{'3'}))
+		assert.Equal(t, NewStrV("3"), Slice([]byte{'3'}))
+		assert.Equal(t, NewStrV("3"), Slice([]Char{'3'}))
 	}
 }
 

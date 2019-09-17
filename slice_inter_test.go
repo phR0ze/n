@@ -2332,7 +2332,7 @@ func ExampleInterSlice_Map() {
 func TestInterSlice_Map(t *testing.T) {
 	// Extract property from object
 	{
-		slice := NewSlice([]Object{{"1"}, {"2"}, {"3"}})
+		slice := Slice([]Object{{"1"}, {"2"}, {"3"}})
 		result := slice.Map(func(x O) O {
 			return x.(Object).o
 		}).ToStrs()

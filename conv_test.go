@@ -4129,7 +4129,7 @@ func TestToStringSliceE(t *testing.T) {
 
 	// ISlice
 	{
-		val, err := ToStringSliceE(NewSlice([]string{"1", "2"}))
+		val, err := ToStringSliceE(Slice([]string{"1", "2"}))
 		assert.Nil(t, err)
 		assert.Equal(t, &StringSlice{"1", "2"}, val)
 		assert.Equal(t, []string{"1", "2"}, val.G())

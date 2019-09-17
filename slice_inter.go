@@ -500,7 +500,7 @@ func (p *InterSlice) Less(i, j int) bool {
 	}
 
 	// Handle supported types
-	slice := NewSlice(*p)
+	slice := Slice(*p)
 	if !slice.RefSlice() {
 		return slice.Less(i, j)
 	}
@@ -517,7 +517,7 @@ func (p *InterSlice) Map(mod func(O) O) ISlice {
 	for i := range *p {
 		v := mod((*p)[i])
 		if slice == nil {
-			slice = NewSlice(v)
+			slice = Slice(v)
 		} else {
 			slice.Append(v)
 		}

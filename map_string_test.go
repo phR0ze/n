@@ -21,7 +21,7 @@ func BenchmarkStringMap_SetValueToFromInterfaceSlice(t *testing.B) {
 	}
 
 	// Convert to ints
-	s := NewSlice(slice)
+	s := Slice(slice)
 	s.Set(1000, 5)
 
 	// Convert back to interface

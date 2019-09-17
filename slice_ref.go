@@ -744,7 +744,7 @@ func (p *RefSlice) Less(i, j int) bool {
 	}
 
 	// Handle supported types
-	slice := NewSlice(p.v.Interface())
+	slice := Slice(p.v.Interface())
 	if !slice.RefSlice() {
 		return slice.Less(i, j)
 	}
@@ -762,7 +762,7 @@ func (p *RefSlice) Map(mod func(O) O) ISlice {
 	for i := 0; i < l; i++ {
 		v := mod(p.v.Index(i).Interface())
 		if slice == nil {
-			slice = NewSlice(v)
+			slice = Slice(v)
 		} else {
 			slice.Append(v)
 		}
@@ -962,7 +962,7 @@ func (p *RefSlice) SortM() ISlice {
 	}
 
 	// Handle supported types
-	slice := NewSlice(p.v.Interface())
+	slice := Slice(p.v.Interface())
 	if !slice.RefSlice() {
 		slice.SortM()
 		*p = *NewRefSlice(slice.O())
@@ -990,7 +990,7 @@ func (p *RefSlice) SortReverseM() ISlice {
 	}
 
 	// Handle supported types
-	slice := NewSlice(p.v.Interface())
+	slice := Slice(p.v.Interface())
 	if !slice.RefSlice() {
 		slice.SortReverseM()
 		*p = *NewRefSlice(slice.O())

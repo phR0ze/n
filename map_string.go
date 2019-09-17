@@ -483,7 +483,7 @@ func (p *StringMap) QueryE(key string) (val *Object, err error) {
 
 			// Select by key==value, e.g. .[k==v]
 			if k != "" && v != "" {
-				m := NewSlice(x).Select(func(x O) bool {
+				m := Slice(x).Select(func(x O) bool {
 					return ToStringMap(x).Get(k).A() == v
 				})
 				if m.Any() {
@@ -494,7 +494,7 @@ func (p *StringMap) QueryE(key string) (val *Object, err error) {
 			// Index in if the value is a valid integer, e.g. .[2], .[-1]
 			// -1 indicates all should be selected.
 			if i != -1 {
-				if val.o = NewSlice(x).At(i).o; val.Nil() {
+				if val.o = Slice(x).At(i).o; val.Nil() {
 					err = errors.Errorf("invalid array index %v", i)
 					val.o = nil
 					return

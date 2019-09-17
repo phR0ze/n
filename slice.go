@@ -86,13 +86,13 @@ type ISlice interface {
 	UniqM() ISlice                                     // UniqM modifies this Slice to remove all non uniq elements while preserving element order.
 }
 
-// NewSlice provides a generic way to work with Slice types. It does this by wrapping Go types
+// Slice provides a generic way to work with Slice types. It does this by wrapping Go types
 // directly for optimized types thus avoiding reflection processing overhead and making a plethora
 // of Slice methods available. Non optimized types will fall back on reflection to generically
 // handle the type incurring the full 10x reflection processing overhead.
 //
 // Optimized: []int, []string, StrSlice
-func NewSlice(obj interface{}) (new ISlice) {
+func Slice(obj interface{}) (new ISlice) {
 	ref := Reference(obj)
 	switch o := ref.(type) {
 
