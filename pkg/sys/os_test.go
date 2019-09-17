@@ -416,9 +416,8 @@ func TestCopy(t *testing.T) {
 		assert.True(t, strings.HasPrefix(err.Error(), "failed to get any sources for"))
 	}
 
+	// test/temp/pkg does not exist so copy sys contents to pkg i.e. test/temp/pkg
 	{
-		// test/temp/pkg does not exist
-		// so Copy sys to pkg will be a clone
 		clearTempDir()
 		src := "."
 		dst := path.Join(tmpDir, "pkg")
@@ -436,12 +435,19 @@ func TestCopy(t *testing.T) {
 		assert.Equal(t, "pkg", dstPaths[0])
 		assert.Equal(t, srcPaths[1:], dstPaths[1:])
 	}
+
+	// test/temp/pkg does exist so copy sys dir into pkg i.e. test/temp/pkg/sys
 	{
-		// test/temp/pkg does exist
-		// so Copy sys to pkg will be an into op
 		clearTempDir()
-		src := "."
-		dst := path.Join(tmpDir, "pkg")
+
+		src, err := Abs(".")
+		assert.Nil(t, err)
+		src += "/" // trailing slashes on an abs path seem to change behavior
+
+		dst, err := Abs(path.Join(tmpDir, "pkg"))
+		assert.Nil(t, err)
+		dst += "/" // trailing slashes on an abs path seem to change behavior
+
 		MkdirP(dst)
 
 		assert.Nil(t, Copy(src, dst))

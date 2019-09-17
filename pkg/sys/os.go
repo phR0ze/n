@@ -157,6 +157,9 @@ func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 	clone := true
 	var sources []string
 
+	// Trim trailing slashes
+	src = strings.TrimSuffix(src, "/")
+
 	// Set following links to false by default
 	defaultFollowOpt(&opts, false)
 
