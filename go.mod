@@ -5,8 +5,8 @@ go 1.13
 require (
 	github.com/PuerkitoBio/goquery v1.5.0
 	github.com/bouk/monkey v1.0.0
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/ghodss/yaml v1.0.0
-	github.com/phR0ze/cast v1.4.0
 	github.com/pkg/errors v0.8.1
 	github.com/stretchr/testify v1.4.0
 	github.com/valyala/bytebufferpool v1.0.0

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -4647,5 +4648,90 @@ func TestToStrsE(t *testing.T) {
 		val, err = ToStrsE((*uint64)(nil))
 		assert.Nil(t, err)
 		assert.Equal(t, []string{"0"}, val)
+	}
+}
+
+// ToTime
+//--------------------------------------------------------------------------------------------------
+func ExampleToTime() {
+	fmt.Println(ToTime("2008-01-10"))
+	// Output: 2008-01-10 00:00:00 +0000 UTC
+}
+
+func TestTime(t *testing.T) {
+
+	// 	time.RFC3339,  // "2006-01-02T15:04:05Z07:00" // ISO8601
+	// 	time.RFC1123Z, // "Mon, 02 Jan 2006 15:04:05 -0700" // RFC1123 with numeric zone
+	// 	time.RFC1123,  // "Mon, 02 Jan 2006 15:04:05 MST"
+	// 	time.RFC822Z,  // "02 Jan 06 15:04 -0700" // RFC822 with numeric zone
+	// 	time.RFC822,   // "02 Jan 06 15:04 MST"
+	// 	time.RFC850,   // "Monday, 02-Jan-06 15:04:05 MST"
+	// 	time.ANSIC,    // "Mon Jan _2 15:04:05 2006"
+	// 	time.UnixDate, // "Mon Jan _2 15:04:05 MST 2006"
+
+	// 	time.RubyDate, // "Mon Jan 02 15:04:05 -0700 2006"
+	{
+	}
+
+	// US: Month Day, Year
+	{
+		assert.Equal(t, time.Date(2008, 10, 2, 0, 0, 0, 0, time.UTC), ToTime("October 2, 2008"))
+	}
+
+	// 	"02 Jan 2006", // Day Month Year
+	{
+		assert.Equal(t, time.Date(2008, 12, 10, 0, 0, 0, 0, time.UTC), ToTime("10 Dec 2008"))
+	}
+
+	// 	"2006-01-02",  // Year-Month-Day
+	{
+		assert.Equal(t, time.Date(2008, 01, 10, 0, 0, 0, 0, time.UTC), ToTime("2008-01-10"))
+	}
+
+	// 	time.Kitchen,  // "3:04PM"
+	{
+		assert.Equal(t, time.Date(0, 1, 1, 23, 4, 0, 0, time.UTC), ToTime("11:04PM"))
+	}
+
+	// 	time.Stamp,      // "Jan _2 15:04:05"
+	{
+		assert.Equal(t, time.Date(0, 12, 1, 11, 4, 5, 0, time.UTC), ToTime("Dec 1 11:04:05"))
+	}
+
+	// 	time.StampMilli, // "Jan _2 15:04:05.000"
+	{
+		assert.Equal(t, time.Date(0, 12, 1, 11, 4, 5, 0, time.UTC), ToTime("Dec 1 11:04:05.000"))
+	}
+
+	// 	time.StampMicro, // "Jan _2 15:04:05.000000"
+	{
+		assert.Equal(t, time.Date(0, 12, 1, 11, 4, 5, 0, time.UTC), ToTime("Dec 1 11:04:05.000000"))
+	}
+
+	// 	time.StampNano,  // "Jan _2 15:04:05.000000000"
+	{
+		assert.Equal(t, time.Date(0, 12, 1, 11, 4, 5, 0, time.UTC), ToTime("Dec 1 11:04:05.000000000"))
+	}
+
+	// ints and uints
+	{
+		assert.Equal(t, time.Date(2019, 9, 18, 11, 58, 56, 0, time.Local), ToTime("1568829536"))
+		assert.Equal(t, time.Date(2019, 9, 18, 11, 58, 56, 0, time.Local), ToTime(int(1568829536)))
+		assert.Equal(t, time.Date(2019, 9, 18, 11, 58, 56, 0, time.Local), ToTime(int32(1568829536)))
+		assert.Equal(t, time.Date(2019, 9, 18, 11, 58, 56, 0, time.Local), ToTime(int64(1568829536)))
+		assert.Equal(t, time.Date(2019, 9, 18, 11, 58, 56, 0, time.Local), ToTime(uint(1568829536)))
+		assert.Equal(t, time.Date(2019, 9, 18, 11, 58, 56, 0, time.Local), ToTime(uint32(1568829536)))
+		assert.Equal(t, time.Date(2019, 9, 18, 11, 58, 56, 0, time.Local), ToTime(uint64(1568829536)))
+	}
+
+	// time pointer
+	{
+		result := time.Date(2008, 01, 10, 0, 0, 0, 0, time.UTC)
+		assert.Equal(t, time.Date(2008, 01, 10, 0, 0, 0, 0, time.UTC), ToTime(&result))
+	}
+
+	// nil time
+	{
+		assert.Equal(t, time.Time{}, ToTime(nil))
 	}
 }

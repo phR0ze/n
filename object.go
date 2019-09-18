@@ -3,7 +3,6 @@ package n
 import (
 	"time"
 
-	"github.com/phR0ze/cast"
 	"github.com/pkg/errors"
 )
 
@@ -68,7 +67,7 @@ func (p *Object) String() string {
 // Bool
 //--------------------------------------------------------------------------------------------------
 
-// ToBool casts an interface to a bool type.
+// ToBool converts an interface to a bool type.
 func (p *Object) ToBool() bool {
 	if p == nil {
 		return false
@@ -77,7 +76,7 @@ func (p *Object) ToBool() bool {
 	return v
 }
 
-// ToBoolE casts an interface to a bool type.
+// ToBoolE converts an interface to a bool type.
 func (p *Object) ToBoolE() (bool, error) {
 	if p == nil {
 		return false, nil
@@ -93,7 +92,7 @@ func (p *Object) C() *Char {
 	return p.ToChar()
 }
 
-// ToChar casts an interface to a *Char type.
+// ToChar converts an interface to a *Char type.
 func (p *Object) ToChar() *Char {
 	if p == nil {
 		val := Char(0)
@@ -107,7 +106,7 @@ func (p *Object) R() rune {
 	return p.ToRune()
 }
 
-// ToRune casts an interface to a rune type.
+// ToRune converts an interface to a rune type.
 func (p *Object) ToRune() rune {
 	if p == nil {
 		return rune(0)
@@ -146,32 +145,32 @@ func (p *Object) QueryE(key string) (obj *Object, err error) {
 // Time related
 //--------------------------------------------------------------------------------------------------
 
-// ToTime casts an interface to a time.Time type.
+// ToTime converts an interface to a time.Time type.
 func (p *Object) ToTime() time.Time {
-	v, _ := cast.ToTimeE(p.o)
+	v, _ := ToTimeE(p.o)
 	return v
 }
 
-// ToTimeE casts an interface to a time.Time type.
+// ToTimeE converts an interface to a time.Time type.
 func (p *Object) ToTimeE() (time.Time, error) {
-	return cast.ToTimeE(p.o)
+	return ToTimeE(p.o)
 }
 
-// ToDuration casts an interface to a time.Duration type.
+// ToDuration converts an interface to a time.Duration type.
 func (p *Object) ToDuration() time.Duration {
-	v, _ := cast.ToDurationE(p.o)
+	v, _ := ToDurationE(p.o)
 	return v
 }
 
-// ToDurationE casts an interface to a time.Duration type.
+// ToDurationE converts an interface to a time.Duration type.
 func (p *Object) ToDurationE() (time.Duration, error) {
-	return cast.ToDurationE(p.o)
+	return ToDurationE(p.o)
 }
 
 // Float related
 //--------------------------------------------------------------------------------------------------
 
-// ToFloat32 casts an interface to a float32 type.
+// ToFloat32 converts an interface to a float32 type.
 func (p *Object) ToFloat32() float32 {
 	if p == nil {
 		return float32(0)
@@ -179,7 +178,7 @@ func (p *Object) ToFloat32() float32 {
 	return ToFloat32(p.o)
 }
 
-// ToFloat32E casts an interface to a float32 type.
+// ToFloat32E converts an interface to a float32 type.
 func (p *Object) ToFloat32E() (float32, error) {
 	if p == nil {
 		return float32(0), nil
@@ -206,7 +205,7 @@ func (p *Object) ToFloat64E() (float64, error) {
 // Int related
 //--------------------------------------------------------------------------------------------------
 
-// ToInt casts an interface to an int type.
+// ToInt converts an interface to an int type.
 func (p *Object) ToInt() int {
 	if p == nil {
 		return 0
@@ -215,7 +214,7 @@ func (p *Object) ToInt() int {
 	return v
 }
 
-// ToIntE casts an interface to an int type.
+// ToIntE converts an interface to an int type.
 func (p *Object) ToIntE() (int, error) {
 	if p == nil {
 		return 0, nil
@@ -223,157 +222,157 @@ func (p *Object) ToIntE() (int, error) {
 	return ToIntE(p.o)
 }
 
-// ToInt8 casts an interface to an int8 type.
+// ToInt8 converts an interface to an int8 type.
 func (p *Object) ToInt8() int8 {
 	if p == nil {
 		return 0
 	}
-	v, _ := cast.ToInt8E(p.o)
+	v, _ := ToInt8E(p.o)
 	return v
 }
 
-// ToInt8E casts an interface to an int8 type.
+// ToInt8E converts an interface to an int8 type.
 func (p *Object) ToInt8E() (int8, error) {
 	if p == nil {
 		return 0, nil
 	}
-	return cast.ToInt8E(p.o)
+	return ToInt8E(p.o)
 }
 
-// ToInt16 casts an interface to an int16 type.
+// ToInt16 converts an interface to an int16 type.
 func (p *Object) ToInt16() int16 {
 	if p == nil {
 		return 0
 	}
-	v, _ := cast.ToInt16E(p.o)
+	v, _ := ToInt16E(p.o)
 	return v
 }
 
-// ToInt16E casts an interface to an int16 type.
+// ToInt16E converts an interface to an int16 type.
 func (p *Object) ToInt16E() (int16, error) {
 	if p == nil {
 		return 0, nil
 	}
-	return cast.ToInt16E(p.o)
+	return ToInt16E(p.o)
 }
 
-// ToInt32 casts an interface to an int32 type.
+// ToInt32 converts an interface to an int32 type.
 func (p *Object) ToInt32() int32 {
 	if p == nil {
 		return 0
 	}
-	v, _ := cast.ToInt32E(p.o)
+	v, _ := ToInt32E(p.o)
 	return v
 }
 
-// ToInt32E casts an interface to an int32 type.
+// ToInt32E converts an interface to an int32 type.
 func (p *Object) ToInt32E() (int32, error) {
 	if p == nil {
 		return 0, nil
 	}
-	return cast.ToInt32E(p.o)
+	return ToInt32E(p.o)
 }
 
-// ToInt64 casts an interface to an int64 type.
+// ToInt64 converts an interface to an int64 type.
 func (p *Object) ToInt64() int64 {
 	if p == nil {
 		return 0
 	}
-	v, _ := cast.ToInt64E(p.o)
+	v, _ := ToInt64E(p.o)
 	return v
 }
 
-// ToInt64E casts an interface to an int64 type.
+// ToInt64E converts an interface to an int64 type.
 func (p *Object) ToInt64E() (int64, error) {
 	if p == nil {
 		return 0, nil
 	}
-	return cast.ToInt64E(p.o)
+	return ToInt64E(p.o)
 }
 
-// ToUint casts an interface to a uint type.
+// ToUint converts an interface to a uint type.
 func (p *Object) ToUint() uint {
 	if p == nil {
 		return 0
 	}
-	v, _ := cast.ToUintE(p.o)
+	v, _ := ToUintE(p.o)
 	return v
 }
 
-// ToUintE casts an interface to a uint type.
+// ToUintE converts an interface to a uint type.
 func (p *Object) ToUintE() (uint, error) {
 	if p == nil {
 		return 0, nil
 	}
-	return cast.ToUintE(p.o)
+	return ToUintE(p.o)
 }
 
-// ToUint8 casts an interface to a uint8 type.
+// ToUint8 converts an interface to a uint8 type.
 func (p *Object) ToUint8() uint8 {
 	if p == nil {
 		return 0
 	}
-	v, _ := cast.ToUint8E(p.o)
+	v, _ := ToUint8E(p.o)
 	return v
 }
 
-// ToUint8E casts an interface to a uint8 type.
+// ToUint8E converts an interface to a uint8 type.
 func (p *Object) ToUint8E() (uint8, error) {
 	if p == nil {
 		return 0, nil
 	}
-	return cast.ToUint8E(p.o)
+	return ToUint8E(p.o)
 }
 
-// ToUint16 casts an interface to a uint16 type.
+// ToUint16 converts an interface to a uint16 type.
 func (p *Object) ToUint16() uint16 {
 	if p == nil {
 		return 0
 	}
-	v, _ := cast.ToUint16E(p.o)
+	v, _ := ToUint16E(p.o)
 	return v
 }
 
-// ToUint16E casts an interface to a uint16 type.
+// ToUint16E converts an interface to a uint16 type.
 func (p *Object) ToUint16E() (uint16, error) {
 	if p == nil {
 		return 0, nil
 	}
-	return cast.ToUint16E(p.o)
+	return ToUint16E(p.o)
 }
 
-// ToUint32 casts an interface to a uint32 type.
+// ToUint32 converts an interface to a uint32 type.
 func (p *Object) ToUint32() uint32 {
 	if p == nil {
 		return 0
 	}
-	v, _ := cast.ToUint32E(p.o)
+	v, _ := ToUint32E(p.o)
 	return v
 }
 
-// ToUint32E casts an interface to a uint32 type.
+// ToUint32E converts an interface to a uint32 type.
 func (p *Object) ToUint32E() (uint32, error) {
 	if p == nil {
 		return 0, nil
 	}
-	return cast.ToUint32E(p.o)
+	return ToUint32E(p.o)
 }
 
-// ToUint64 casts an interface to a uint64 type.
+// ToUint64 converts an interface to a uint64 type.
 func (p *Object) ToUint64() uint64 {
 	if p == nil {
 		return 0
 	}
-	v, _ := cast.ToUint64E(p.o)
+	v, _ := ToUint64E(p.o)
 	return v
 }
 
-// ToUint64E casts an interface to a uint64 type.
+// ToUint64E converts an interface to a uint64 type.
 func (p *Object) ToUint64E() (uint64, error) {
 	if p == nil {
 		return 0, nil
 	}
-	return cast.ToUint64E(p.o)
+	return ToUint64E(p.o)
 }
 
 // String related
@@ -387,7 +386,7 @@ func (p *Object) ToStr() *Str {
 	return ToStr(p.o)
 }
 
-// ToString casts an interface to a string type.
+// ToString converts an interface to a string type.
 func (p *Object) ToString() string {
 	if p == nil {
 		return ""
@@ -395,7 +394,7 @@ func (p *Object) ToString() string {
 	return p.String()
 }
 
-// ToStringE casts an interface to a string type.
+// ToStringE converts an interface to a string type.
 func (p *Object) ToStringE() (string, error) {
 	if p == nil {
 		return "", nil
@@ -444,127 +443,8 @@ func (p *Object) ToStringMapGE() (map[string]interface{}, error) {
 	return v.G(), err
 }
 
-// ToStringMapString casts an interface to a map[string]string type.
-func (p *Object) ToStringMapString() map[string]string {
-	if p == nil {
-		return map[string]string{}
-	}
-	v, _ := cast.ToStringMapStringE(p.o)
-	return v
-}
-
-// ToStringMapStringE casts an interface to a map[string]string type.
-func (p *Object) ToStringMapStringE() (map[string]string, error) {
-	if p == nil {
-		return map[string]string{}, nil
-	}
-	return cast.ToStringMapStringE(p.o)
-}
-
-// ToStringMapStringSlice casts an interface to a map[string][]string type.
-func (p *Object) ToStringMapStringSlice() map[string][]string {
-	if p == nil {
-		return map[string][]string{}
-	}
-	v, _ := cast.ToStringMapStringSliceE(p.o)
-	return v
-}
-
-// ToStringMapStringSliceE casts an interface to a map[string][]string type.
-func (p *Object) ToStringMapStringSliceE() (map[string][]string, error) {
-	if p == nil {
-		return map[string][]string{}, nil
-	}
-	return cast.ToStringMapStringSliceE(p.o)
-}
-
-// ToStringMapBool casts an interface to a map[string]bool type.
-func (p *Object) ToStringMapBool() map[string]bool {
-	if p == nil {
-		return map[string]bool{}
-	}
-	v, _ := cast.ToStringMapBoolE(p.o)
-	return v
-}
-
-// ToStringMapBoolE casts an interface to a map[string]bool type.
-func (p *Object) ToStringMapBoolE() (map[string]bool, error) {
-	if p == nil {
-		return map[string]bool{}, nil
-	}
-	return cast.ToStringMapBoolE(p.o)
-}
-
-// ToStringMapInt casts an interface to a map[string]int type.
-func (p *Object) ToStringMapInt() map[string]int {
-	if p == nil {
-		return map[string]int{}
-	}
-	v, _ := cast.ToStringMapIntE(p.o)
-	return v
-}
-
-// ToStringMapIntE casts an interface to a map[string]int type.
-func (p *Object) ToStringMapIntE() (map[string]int, error) {
-	if p == nil {
-		return map[string]int{}, nil
-	}
-	return cast.ToStringMapIntE(p.o)
-}
-
-// ToStringMapInt64 casts an interface to a map[string]int64 type.
-func (p *Object) ToStringMapInt64() map[string]int64 {
-	if p == nil {
-		return map[string]int64{}
-	}
-	v, _ := cast.ToStringMapInt64E(p.o)
-	return v
-}
-
-// ToStringMapInt64E casts an interface to a map[string]int64 type.
-func (p *Object) ToStringMapInt64E() (map[string]int64, error) {
-	if p == nil {
-		return map[string]int64{}, nil
-	}
-	return cast.ToStringMapInt64E(p.o)
-}
-
 // Slice related
 //--------------------------------------------------------------------------------------------------
-
-// ToSlice casts an interface to a []interface{} type.
-func (p *Object) ToSlice() []interface{} {
-	if p == nil {
-		return []interface{}{}
-	}
-	v, _ := cast.ToSliceE(p.o)
-	return v
-}
-
-// ToSliceE casts an interface to a []interface{} type.
-func (p *Object) ToSliceE() ([]interface{}, error) {
-	if p == nil {
-		return []interface{}{}, nil
-	}
-	return cast.ToSliceE(p.o)
-}
-
-// ToBoolSlice casts an interface to a []bool type.
-func (p *Object) ToBoolSlice() []bool {
-	if p == nil {
-		return []bool{}
-	}
-	v, _ := cast.ToBoolSliceE(p.o)
-	return v
-}
-
-// ToBoolSliceE casts an interface to a []bool type.
-func (p *Object) ToBoolSliceE() ([]bool, error) {
-	if p == nil {
-		return []bool{}, nil
-	}
-	return cast.ToBoolSliceE(p.o)
-}
 
 // ToMapSlice converts an interface to a *MapSlice type.
 func (p *Object) ToMapSlice() *MapSlice {
@@ -618,12 +498,12 @@ func (p *Object) ToStringSliceE() (*StringSlice, error) {
 	return ToStringSliceE(p.o)
 }
 
-// ToStrs casts an interface to a []string type.
+// ToStrs converts an interface to a []string type.
 func (p *Object) ToStrs() []string {
 	return p.ToStringSlice().G()
 }
 
-// ToStrsE casts an interface to a []string type.
+// ToStrsE converts an interface to a []string type.
 func (p *Object) ToStrsE() ([]string, error) {
 	result, err := p.ToStringSliceE()
 	if err != nil {
@@ -673,21 +553,4 @@ func (p *Object) ToIntSliceGE() ([]int, error) {
 		return result, err
 	}
 	return v.G(), err
-}
-
-// ToDurationSlice casts an interface to a []time.Duration type.
-func (p *Object) ToDurationSlice() []time.Duration {
-	if p == nil {
-		return []time.Duration{}
-	}
-	v, _ := cast.ToDurationSliceE(p.o)
-	return v
-}
-
-// ToDurationSliceE casts an interface to a []time.Duration type.
-func (p *Object) ToDurationSliceE() ([]time.Duration, error) {
-	if p == nil {
-		return []time.Duration{}, nil
-	}
-	return cast.ToDurationSliceE(p.o)
 }

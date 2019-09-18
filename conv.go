@@ -6,11 +6,37 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 )
+
+// TimeLayouts is just a simple wrapper around popular time layouts for time.Parse
+var TimeLayouts = []string{
+	time.RFC3339,  // "2006-01-02T15:04:05Z07:00" // ISO8601
+	time.RFC1123Z, // "Mon, 02 Jan 2006 15:04:05 -0700" // RFC1123 with numeric zone
+	time.RFC1123,  // "Mon, 02 Jan 2006 15:04:05 MST"
+	time.RFC822Z,  // "02 Jan 06 15:04 -0700" // RFC822 with numeric zone
+	time.RFC822,   // "02 Jan 06 15:04 MST"
+	time.RFC850,   // "Monday, 02-Jan-06 15:04:05 MST"
+	time.ANSIC,    // "Mon Jan _2 15:04:05 2006"
+	time.UnixDate, // "Mon Jan _2 15:04:05 MST 2006"
+	time.RubyDate, // "Mon Jan 02 15:04:05 -0700 2006"
+
+	// Human formats based on Golang's magic value "Mon Jan 2 15:04:05 MST 2006" or 1136239445
+	"January 2, 2006", // US: Month Day, Year
+	"02 Jan 2006",     // Day Month Year
+	"2006-01-02",      // ISO: Year-Month-Day
+	time.Kitchen,      // "3:04PM"
+
+	// Time stamps
+	time.StampNano,  // "Jan _2 15:04:05.000000000"
+	time.StampMicro, // "Jan _2 15:04:05.000000"
+	time.StampMilli, // "Jan _2 15:04:05.000"
+	time.Stamp,      // "Jan _2 15:04:05"
+}
 
 // DeReference dereferences the interface if needed returning a non-pointer type
 func DeReference(obj interface{}) interface{} {
@@ -1352,6 +1378,30 @@ func ToBoolE(obj interface{}) (val bool, err error) {
 	return
 }
 
+// ToDuration converts an interface to a time.Duration type.
+func ToDuration(obj interface{}) (val time.Duration) {
+	x, _ := ToDurationE(obj)
+	return x
+}
+
+// ToDurationE converts an interface to a time.Duration type.
+func ToDurationE(obj interface{}) (val time.Duration, err error) {
+	o := DeReference(obj)
+
+	switch x := o.(type) {
+	case nil:
+	case time.Duration:
+		val = x
+	case int, int64, int32, int16, int8, uint, uint64, uint32, uint16, uint8:
+		val = time.Duration(ToInt64(x))
+	case float32, float64:
+		val = time.Duration(ToFloat64(x))
+	default:
+		err = errors.Errorf("failed to convert type %T to time.Duration", obj)
+	}
+	return
+}
+
 // C is an alias to ToChar for brevity
 func C(obj interface{}) *Char {
 	return ToChar(obj)
@@ -1634,73 +1684,6 @@ func ToFloat64E(obj interface{}) (val float64, err error) {
 					val = 1
 				}
 			}
-		}
-	default:
-		err = errors.Errorf("unable to convert type %T to int", x)
-	}
-	return
-}
-
-// ToInt convert an interface to an int type.
-func ToInt(obj interface{}) int {
-	x, _ := ToIntE(obj)
-	return x
-}
-
-// ToIntE convert an interface to an int type.
-func ToIntE(obj interface{}) (val int, err error) {
-	o := DeReference(obj)
-
-	switch x := o.(type) {
-	case nil:
-	case bool:
-		if x {
-			val = 1
-		}
-	case Char:
-		val, err = ToIntE(x.A())
-	case float32:
-		val = int(x)
-	case float64:
-		val = int(x)
-	case int:
-		val = x
-	case int8:
-		val = int(x)
-	case int16:
-		val = int(x)
-	case int32:
-		val = int(x)
-	case int64:
-		val = int(x)
-	case Object:
-		val, err = x.ToIntE()
-	case uint:
-		val = int(x)
-	case uint8:
-		val = int(x)
-	case uint16:
-		val = int(x)
-	case uint32:
-		val = int(x)
-	case uint64:
-		val = int(x)
-	case Str:
-		return ToIntE(string(x))
-	case string:
-		var v int64
-		if v, err = strconv.ParseInt(x, 0, 0); err != nil {
-			err = errors.Wrapf(err, "failed to convert string to int")
-
-			// Also convert true|false|TRUE|FALSE
-			if b, e := strconv.ParseBool(x); e == nil {
-				err = nil
-				if b {
-					val = 1
-				}
-			}
-		} else {
-			val = int(v)
 		}
 	default:
 		err = errors.Errorf("unable to convert type %T to int", x)
@@ -2076,6 +2059,341 @@ func ToFloatSliceE(obj interface{}) (val *FloatSlice, err error) {
 			err = errors.Errorf("unable to convert type %T to []float64", x)
 			return
 		}
+	}
+	return
+}
+
+// ToInt convert an interface to an int type.
+func ToInt(obj interface{}) int {
+	x, _ := ToIntE(obj)
+	return x
+}
+
+// ToIntE convert an interface to an int type.
+func ToIntE(obj interface{}) (val int, err error) {
+	o := DeReference(obj)
+
+	switch x := o.(type) {
+	case nil:
+	case bool:
+		if x {
+			val = 1
+		}
+	case Char:
+		val, err = ToIntE(x.A())
+	case float32:
+		val = int(x)
+	case float64:
+		val = int(x)
+	case int:
+		val = x
+	case int8:
+		val = int(x)
+	case int16:
+		val = int(x)
+	case int32:
+		val = int(x)
+	case int64:
+		val = int(x)
+	case Object:
+		val, err = x.ToIntE()
+	case uint:
+		val = int(x)
+	case uint8:
+		val = int(x)
+	case uint16:
+		val = int(x)
+	case uint32:
+		val = int(x)
+	case uint64:
+		val = int(x)
+	case Str:
+		return ToIntE(string(x))
+	case string:
+		var v int64
+		if v, err = strconv.ParseInt(x, 10, 64); err != nil {
+			err = errors.Wrapf(err, "failed to convert string to int")
+
+			// Also convert true|false|TRUE|FALSE
+			if b, e := strconv.ParseBool(x); e == nil {
+				err = nil
+				if b {
+					val = 1
+				}
+			}
+		} else {
+			val = int(v)
+		}
+	default:
+		err = errors.Errorf("unable to convert type %T to int", x)
+	}
+	return
+}
+
+// ToInt8 convert an interface to an int8 type.
+func ToInt8(obj interface{}) int8 {
+	x, _ := ToInt8E(obj)
+	return x
+}
+
+// ToInt8E convert an interface to an int8 type.
+func ToInt8E(obj interface{}) (val int8, err error) {
+	o := DeReference(obj)
+
+	switch x := o.(type) {
+	case nil:
+	case bool:
+		if x {
+			val = 1
+		}
+	case Char:
+		val, err = ToInt8E(x.A())
+	case float32:
+		val = int8(x)
+	case float64:
+		val = int8(x)
+	case int:
+		val = int8(x)
+	case int8:
+		val = x
+	case int16:
+		val = int8(x)
+	case int32:
+		val = int8(x)
+	case int64:
+		val = int8(x)
+	case Object:
+		val, err = x.ToInt8E()
+	case uint:
+		val = int8(x)
+	case uint8:
+		val = int8(x)
+	case uint16:
+		val = int8(x)
+	case uint32:
+		val = int8(x)
+	case uint64:
+		val = int8(x)
+	case Str:
+		return ToInt8E(string(x))
+	case string:
+		var v int64
+		if v, err = strconv.ParseInt(x, 10, 64); err != nil {
+			err = errors.Wrapf(err, "failed to convert string to int8")
+
+			// Also convert true|false|TRUE|FALSE
+			if b, e := strconv.ParseBool(x); e == nil {
+				err = nil
+				if b {
+					val = 1
+				}
+			}
+		} else {
+			val = int8(v)
+		}
+	default:
+		err = errors.Errorf("unable to convert type %T to int8", x)
+	}
+	return
+}
+
+// ToInt16 convert an interface to an int16 type.
+func ToInt16(obj interface{}) int16 {
+	x, _ := ToInt16E(obj)
+	return x
+}
+
+// ToInt16E convert an interface to an int16 type.
+func ToInt16E(obj interface{}) (val int16, err error) {
+	o := DeReference(obj)
+
+	switch x := o.(type) {
+	case nil:
+	case bool:
+		if x {
+			val = 1
+		}
+	case Char:
+		val, err = ToInt16E(x.A())
+	case float32:
+		val = int16(x)
+	case float64:
+		val = int16(x)
+	case int:
+		val = int16(x)
+	case int8:
+		val = int16(x)
+	case int16:
+		val = x
+	case int32:
+		val = int16(x)
+	case int64:
+		val = int16(x)
+	case Object:
+		val, err = x.ToInt16E()
+	case uint:
+		val = int16(x)
+	case uint8:
+		val = int16(x)
+	case uint16:
+		val = int16(x)
+	case uint32:
+		val = int16(x)
+	case uint64:
+		val = int16(x)
+	case Str:
+		return ToInt16E(string(x))
+	case string:
+		var v int64
+		if v, err = strconv.ParseInt(x, 10, 64); err != nil {
+			err = errors.Wrapf(err, "failed to convert string to int16")
+
+			// Also convert true|false|TRUE|FALSE
+			if b, e := strconv.ParseBool(x); e == nil {
+				err = nil
+				if b {
+					val = 1
+				}
+			}
+		} else {
+			val = int16(v)
+		}
+	default:
+		err = errors.Errorf("unable to convert type %T to int16", x)
+	}
+	return
+}
+
+// ToInt32 convert an interface to an int32 type.
+func ToInt32(obj interface{}) int32 {
+	x, _ := ToInt32E(obj)
+	return x
+}
+
+// ToInt32E convert an interface to an int32 type.
+func ToInt32E(obj interface{}) (val int32, err error) {
+	o := DeReference(obj)
+
+	switch x := o.(type) {
+	case nil:
+	case bool:
+		if x {
+			val = 1
+		}
+	case Char:
+		val, err = ToInt32E(x.A())
+	case float32:
+		val = int32(x)
+	case float64:
+		val = int32(x)
+	case int:
+		val = int32(x)
+	case int8:
+		val = int32(x)
+	case int16:
+		val = int32(x)
+	case int32:
+		val = x
+	case int64:
+		val = int32(x)
+	case Object:
+		val, err = x.ToInt32E()
+	case uint:
+		val = int32(x)
+	case uint8:
+		val = int32(x)
+	case uint16:
+		val = int32(x)
+	case uint32:
+		val = int32(x)
+	case uint64:
+		val = int32(x)
+	case Str:
+		return ToInt32E(string(x))
+	case string:
+		var v int64
+		if v, err = strconv.ParseInt(x, 10, 64); err != nil {
+			err = errors.Wrapf(err, "failed to convert string to int32")
+
+			// Also convert true|false|TRUE|FALSE
+			if b, e := strconv.ParseBool(x); e == nil {
+				err = nil
+				if b {
+					val = 1
+				}
+			}
+		} else {
+			val = int32(v)
+		}
+	default:
+		err = errors.Errorf("unable to convert type %T to int32", x)
+	}
+	return
+}
+
+// ToInt64 convert an interface to an int64 type.
+func ToInt64(obj interface{}) int64 {
+	x, _ := ToInt64E(obj)
+	return x
+}
+
+// ToInt64E convert an interface to an int64 type.
+func ToInt64E(obj interface{}) (val int64, err error) {
+	o := DeReference(obj)
+
+	switch x := o.(type) {
+	case nil:
+	case bool:
+		if x {
+			val = 1
+		}
+	case Char:
+		val, err = ToInt64E(x.A())
+	case float32:
+		val = int64(x)
+	case float64:
+		val = int64(x)
+	case int:
+		val = int64(x)
+	case int8:
+		val = int64(x)
+	case int16:
+		val = int64(x)
+	case int32:
+		val = int64(x)
+	case int64:
+		val = x
+	case Object:
+		val, err = x.ToInt64E()
+	case uint:
+		val = int64(x)
+	case uint8:
+		val = int64(x)
+	case uint16:
+		val = int64(x)
+	case uint32:
+		val = int64(x)
+	case uint64:
+		val = int64(x)
+	case Str:
+		return ToInt64E(string(x))
+	case string:
+		var v int64
+		if v, err = strconv.ParseInt(x, 10, 64); err != nil {
+			err = errors.Wrapf(err, "failed to convert string to int64")
+
+			// Also convert true|false|TRUE|FALSE
+			if b, e := strconv.ParseBool(x); e == nil {
+				err = nil
+				if b {
+					val = 1
+				}
+			}
+		} else {
+			val = int64(v)
+		}
+	default:
+		err = errors.Errorf("unable to convert type %T to int64", x)
 	}
 	return
 }
@@ -4484,6 +4802,401 @@ func ToStrsE(obj interface{}) (val []string, err error) {
 			err = errors.Errorf("unable to convert type %T to []int", x)
 			return
 		}
+	}
+	return
+}
+
+// ToTime converts an interface to a time.Time type, invalid types will simply return the default time.Time
+func ToTime(obj interface{}) time.Time {
+	x, _ := ToTimeE(obj)
+	return x
+}
+
+// ToTimeE converts an interface to a time.Time type.
+func ToTimeE(obj interface{}) (val time.Time, err error) {
+	o := DeReference(obj)
+
+	switch x := o.(type) {
+	case nil:
+
+	// time.Time
+	//----------------------------------------------------------------------------------------------
+	case time.Time:
+		val = x
+
+	// string
+	// Parse the string trying popular layouts
+	//----------------------------------------------------------------------------------------------
+	case string:
+
+		// Try int conversion first
+		if v, e := strconv.ParseInt(x, 0, 0); e == nil {
+			return ToTimeE(v)
+		}
+
+		// Parse string time formats
+		for _, layout := range TimeLayouts {
+			if val, err = time.Parse(layout, x); err == nil {
+				return val, nil
+			}
+		}
+		err = errors.Errorf("failed to parse time %s", x)
+
+	// int
+	//----------------------------------------------------------------------------------------------
+	case int:
+		val = time.Unix(int64(x), 0)
+	case int32:
+		val = time.Unix(int64(x), 0)
+	case int64:
+		val = time.Unix(x, 0)
+
+	// uint
+	//----------------------------------------------------------------------------------------------
+	case uint:
+		val = time.Unix(int64(x), 0)
+	case uint32:
+		val = time.Unix(int64(x), 0)
+	case uint64:
+		val = time.Unix(int64(x), 0)
+	default:
+		err = errors.Errorf("failed to convert type %T to time.Time", obj)
+	}
+
+	return
+}
+
+// ToUint convert an interface to an uint type.
+func ToUint(obj interface{}) uint {
+	x, _ := ToUintE(obj)
+	return x
+}
+
+// ToUintE convert an interface to an uint type.
+func ToUintE(obj interface{}) (val uint, err error) {
+	o := DeReference(obj)
+
+	switch x := o.(type) {
+	case nil:
+	case bool:
+		if x {
+			val = 1
+		}
+	case Char:
+		val, err = ToUintE(x.A())
+	case float32:
+		val = uint(x)
+	case float64:
+		val = uint(x)
+	case int:
+		val = uint(x)
+	case int8:
+		val = uint(x)
+	case int16:
+		val = uint(x)
+	case int32:
+		val = uint(x)
+	case int64:
+		val = uint(x)
+	case Object:
+		val, err = x.ToUintE()
+	case uint:
+		val = x
+	case uint8:
+		val = uint(x)
+	case uint16:
+		val = uint(x)
+	case uint32:
+		val = uint(x)
+	case uint64:
+		val = uint(x)
+	case Str:
+		return ToUintE(string(x))
+	case string:
+		var v uint64
+		if v, err = strconv.ParseUint(x, 10, 64); err != nil {
+			err = errors.Wrapf(err, "failed to convert string to uint")
+
+			// Also convert true|false|TRUE|FALSE
+			if b, e := strconv.ParseBool(x); e == nil {
+				err = nil
+				if b {
+					val = 1
+				}
+			}
+		} else {
+			val = uint(v)
+		}
+	default:
+		err = errors.Errorf("unable to convert type %T to uint", x)
+	}
+	return
+}
+
+// ToUint8 convert an interface to an uint8 type.
+func ToUint8(obj interface{}) uint8 {
+	x, _ := ToUint8E(obj)
+	return x
+}
+
+// ToUint8E convert an interface to an uint8 type.
+func ToUint8E(obj interface{}) (val uint8, err error) {
+	o := DeReference(obj)
+
+	switch x := o.(type) {
+	case nil:
+	case bool:
+		if x {
+			val = 1
+		}
+	case Char:
+		val, err = ToUint8E(x.A())
+	case float32:
+		val = uint8(x)
+	case float64:
+		val = uint8(x)
+	case int:
+		val = uint8(x)
+	case int8:
+		val = uint8(x)
+	case int16:
+		val = uint8(x)
+	case int32:
+		val = uint8(x)
+	case int64:
+		val = uint8(x)
+	case Object:
+		val, err = x.ToUint8E()
+	case uint:
+		val = uint8(x)
+	case uint8:
+		val = x
+	case uint16:
+		val = uint8(x)
+	case uint32:
+		val = uint8(x)
+	case uint64:
+		val = uint8(x)
+	case Str:
+		return ToUint8E(string(x))
+	case string:
+		var v uint64
+		if v, err = strconv.ParseUint(x, 10, 64); err != nil {
+			err = errors.Wrapf(err, "failed to convert string to uint8")
+
+			// Also convert true|false|TRUE|FALSE
+			if b, e := strconv.ParseBool(x); e == nil {
+				err = nil
+				if b {
+					val = 1
+				}
+			}
+		} else {
+			val = uint8(v)
+		}
+	default:
+		err = errors.Errorf("unable to convert type %T to uint8", x)
+	}
+	return
+}
+
+// ToUint16 convert an interface to an uint16 type.
+func ToUint16(obj interface{}) uint16 {
+	x, _ := ToUint16E(obj)
+	return x
+}
+
+// ToUint16E convert an interface to an uint16 type.
+func ToUint16E(obj interface{}) (val uint16, err error) {
+	o := DeReference(obj)
+
+	switch x := o.(type) {
+	case nil:
+	case bool:
+		if x {
+			val = 1
+		}
+	case Char:
+		val, err = ToUint16E(x.A())
+	case float32:
+		val = uint16(x)
+	case float64:
+		val = uint16(x)
+	case int:
+		val = uint16(x)
+	case int8:
+		val = uint16(x)
+	case int16:
+		val = uint16(x)
+	case int32:
+		val = uint16(x)
+	case int64:
+		val = uint16(x)
+	case Object:
+		val, err = x.ToUint16E()
+	case uint:
+		val = uint16(x)
+	case uint8:
+		val = uint16(x)
+	case uint16:
+		val = x
+	case uint32:
+		val = uint16(x)
+	case uint64:
+		val = uint16(x)
+	case Str:
+		return ToUint16E(string(x))
+	case string:
+		var v uint64
+		if v, err = strconv.ParseUint(x, 10, 64); err != nil {
+			err = errors.Wrapf(err, "failed to convert string to uint16")
+
+			// Also convert true|false|TRUE|FALSE
+			if b, e := strconv.ParseBool(x); e == nil {
+				err = nil
+				if b {
+					val = 1
+				}
+			}
+		} else {
+			val = uint16(v)
+		}
+	default:
+		err = errors.Errorf("unable to convert type %T to uint16", x)
+	}
+	return
+}
+
+// ToUint32 convert an interface to an uint32 type.
+func ToUint32(obj interface{}) uint32 {
+	x, _ := ToUint32E(obj)
+	return x
+}
+
+// ToUint32E convert an interface to an uint32 type.
+func ToUint32E(obj interface{}) (val uint32, err error) {
+	o := DeReference(obj)
+
+	switch x := o.(type) {
+	case nil:
+	case bool:
+		if x {
+			val = 1
+		}
+	case Char:
+		val, err = ToUint32E(x.A())
+	case float32:
+		val = uint32(x)
+	case float64:
+		val = uint32(x)
+	case int:
+		val = uint32(x)
+	case int8:
+		val = uint32(x)
+	case int16:
+		val = uint32(x)
+	case int32:
+		val = uint32(x)
+	case int64:
+		val = uint32(x)
+	case Object:
+		val, err = x.ToUint32E()
+	case uint:
+		val = uint32(x)
+	case uint8:
+		val = uint32(x)
+	case uint16:
+		val = uint32(x)
+	case uint32:
+		val = x
+	case uint64:
+		val = uint32(x)
+	case Str:
+		return ToUint32E(string(x))
+	case string:
+		var v uint64
+		if v, err = strconv.ParseUint(x, 10, 64); err != nil {
+			err = errors.Wrapf(err, "failed to convert string to uint32")
+
+			// Also convert true|false|TRUE|FALSE
+			if b, e := strconv.ParseBool(x); e == nil {
+				err = nil
+				if b {
+					val = 1
+				}
+			}
+		} else {
+			val = uint32(v)
+		}
+	default:
+		err = errors.Errorf("unable to convert type %T to uint32", x)
+	}
+	return
+}
+
+// ToUint64 convert an interface to an uint64 type.
+func ToUint64(obj interface{}) uint64 {
+	x, _ := ToUint64E(obj)
+	return x
+}
+
+// ToUint64E convert an interface to an uint64 type.
+func ToUint64E(obj interface{}) (val uint64, err error) {
+	o := DeReference(obj)
+
+	switch x := o.(type) {
+	case nil:
+	case bool:
+		if x {
+			val = 1
+		}
+	case Char:
+		val, err = ToUint64E(x.A())
+	case float32:
+		val = uint64(x)
+	case float64:
+		val = uint64(x)
+	case int:
+		val = uint64(x)
+	case int8:
+		val = uint64(x)
+	case int16:
+		val = uint64(x)
+	case int32:
+		val = uint64(x)
+	case int64:
+		val = uint64(x)
+	case Object:
+		val, err = x.ToUint64E()
+	case uint:
+		val = uint64(x)
+	case uint8:
+		val = uint64(x)
+	case uint16:
+		val = uint64(x)
+	case uint32:
+		val = uint64(x)
+	case uint64:
+		val = x
+	case Str:
+		return ToUint64E(string(x))
+	case string:
+		var v uint64
+		if v, err = strconv.ParseUint(x, 10, 64); err != nil {
+			err = errors.Wrapf(err, "failed to convert string to uint64")
+
+			// Also convert true|false|TRUE|FALSE
+			if b, e := strconv.ParseBool(x); e == nil {
+				err = nil
+				if b {
+					val = 1
+				}
+			}
+		} else {
+			val = v
+		}
+	default:
+		err = errors.Errorf("unable to convert type %T to uint64", x)
 	}
 	return
 }
