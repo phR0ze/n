@@ -20,7 +20,7 @@ var testfile = "../../test/testfile"
 var readme = "../../README.md"
 
 func TestChmod(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// Create test files in dir for globbing and valide modes
 	dir, err := MkdirP(path.Join(tmpDir, "dir"))
@@ -122,7 +122,7 @@ func TestRevokingMode(t *testing.T) {
 }
 
 func TestChown(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// invalid file globbing i.e. doesn't exist
 	{
@@ -149,7 +149,7 @@ func TestCopyGlob(t *testing.T) {
 
 	// single file to non-existing dst is a copy to not copy into
 	{
-		clearTempDir()
+		resetTest()
 		// Create src dir and target file
 		srcDir := path.Join(tmpDir, "src")
 		_, err := MkdirP(srcDir)
@@ -179,7 +179,7 @@ func TestCopyGlob(t *testing.T) {
 
 	// multiple files to non-existing dst
 	{
-		clearTempDir()
+		resetTest()
 		// Create src dir and target file
 		srcDir := path.Join(tmpDir, "src")
 		_, err := MkdirP(srcDir)
@@ -198,7 +198,7 @@ func TestCopyGlob(t *testing.T) {
 
 	// multiple files to pre-existing directory
 	{
-		clearTempDir()
+		resetTest()
 		dst := path.Join(tmpDir)
 		err := Copy("./*", dst)
 		assert.Nil(t, err)
@@ -222,7 +222,7 @@ func TestCopyWithPermissionFailures(t *testing.T) {
 
 	// try to create destination dirs in no write destination
 	{
-		clearTempDir()
+		resetTest()
 
 		// Create src dir with no read permissions
 		srcDir := path.Join(tmpDir, "src")
@@ -248,7 +248,7 @@ func TestCopyWithPermissionFailures(t *testing.T) {
 
 	// read from no read permission source failure
 	{
-		clearTempDir()
+		resetTest()
 
 		// Create src dir with no read permissions
 		srcDir := path.Join(tmpDir, "src")
@@ -267,7 +267,7 @@ func TestCopyWithPermissionFailures(t *testing.T) {
 }
 
 func TestCopyDirLinksFailure(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// Create sub dir with link to it
 	srcDir := path.Join(tmpDir, "src")
@@ -292,7 +292,7 @@ func TestCopyDirLinksFailure(t *testing.T) {
 }
 
 func TestCopyLinksRelativeNoFollow(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// temp/first/f0,f1
 	firstDir, _ := MkdirP(path.Join(tmpDir, "first"))
@@ -346,7 +346,7 @@ func TestCopyLinksRelativeNoFollow(t *testing.T) {
 }
 
 func TestCopyLinksAbsNoFollow(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// temp/first/f0,f1
 	firstDir, _ := MkdirP(path.Join(tmpDir, "first"))
@@ -418,7 +418,7 @@ func TestCopy(t *testing.T) {
 
 	// test/temp/pkg does not exist so copy sys contents to pkg i.e. test/temp/pkg
 	{
-		clearTempDir()
+		resetTest()
 		src := "."
 		dst := path.Join(tmpDir, "pkg")
 
@@ -438,7 +438,7 @@ func TestCopy(t *testing.T) {
 
 	// test/temp/pkg does exist so copy sys dir into pkg i.e. test/temp/pkg/sys
 	{
-		clearTempDir()
+		resetTest()
 
 		src, err := Abs(".")
 		assert.Nil(t, err)
@@ -490,7 +490,7 @@ func TestWindows(t *testing.T) {
 func TestCopyWithFileParentDoentExist(t *testing.T) {
 	// test/temp/foo/bar/README.md does not exist and neither does its parent
 	// so foo/bar will be created then Copy README.md to bar will be a clone
-	clearTempDir()
+	resetTest()
 	src := "./README.md"
 	dst := path.Join(tmpDir, "foo/bar/readme")
 
@@ -508,7 +508,7 @@ func TestCopyWithFileParentDoentExist(t *testing.T) {
 func TestCopyFileParentDoentExist(t *testing.T) {
 	// test/temp/foo/bar/README.md does not exist and neither does its parent
 	// so foo/bar will be created then Copy README.md to bar will be a clone
-	clearTempDir()
+	resetTest()
 	src := "./README.md"
 	dst := path.Join(tmpDir, "foo/bar/readme")
 
@@ -527,7 +527,7 @@ func TestCopyFileParentDoentExist(t *testing.T) {
 func TestCopyWithDirParentDoentExist(t *testing.T) {
 	// test/temp/foo/bar/pkg does not exist and neither does its parent
 	// so foo/bar will be created then Copy sys to pkg will be a clone
-	clearTempDir()
+	resetTest()
 	src := "."
 	dst := path.Join(tmpDir, "foo/bar/pkg")
 
@@ -546,7 +546,7 @@ func TestCopyWithDirParentDoentExist(t *testing.T) {
 }
 
 func TestCopyFile(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// force chmod error only
 	{
@@ -615,7 +615,7 @@ func TestCopyFile(t *testing.T) {
 		err = os.Chmod(dstDir, 0755)
 		assert.Nil(t, err)
 	}
-	clearTempDir()
+	resetTest()
 
 	// CopyFile symlink
 	{
@@ -653,7 +653,7 @@ func TestCopyFile(t *testing.T) {
 		assert.True(t, newlinkInfo.SymlinkTargetExists())
 		assert.True(t, SymlinkTargetExists(newlink))
 	}
-	clearTempDir()
+	resetTest()
 
 	// target file is not readable via permissions
 	{
@@ -686,7 +686,7 @@ func TestCopyFile(t *testing.T) {
 		assert.Equal(t, "src target is not a regular file or a symlink to a file", err.Error())
 	}
 
-	clearTempDir()
+	resetTest()
 
 	// empty destination
 	{
@@ -829,7 +829,7 @@ func TestCopyFile(t *testing.T) {
 }
 
 func TestExists(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// now try a permissions denied check
 	{
@@ -852,7 +852,7 @@ func TestExists(t *testing.T) {
 }
 
 func TestMD5(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// force copy error
 	{
@@ -946,7 +946,7 @@ func TestMkdirP(t *testing.T) {
 }
 
 func TestMove(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// Copy file in to tmpDir then rename in same location
 	assert.Nil(t, Copy(testfile, tmpDir))
@@ -989,7 +989,7 @@ func TestPwd(t *testing.T) {
 }
 
 func TestReadBytes(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// empty string
 	{
@@ -1019,7 +1019,7 @@ func TestReadBytes(t *testing.T) {
 }
 
 func TestReadLines(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// empty string
 	{
@@ -1045,7 +1045,7 @@ func TestReadLines(t *testing.T) {
 }
 
 func TestReadString(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// empty string
 	{
@@ -1075,7 +1075,7 @@ func TestReadString(t *testing.T) {
 }
 
 func TestRemove(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// Write out test data
 	assert.Nil(t, WriteString(tmpfile, "this is a test"))
@@ -1087,7 +1087,7 @@ func TestRemove(t *testing.T) {
 }
 
 func TestSymlink(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	_, err := Touch(tmpfile)
 	assert.Nil(t, err)
@@ -1111,7 +1111,7 @@ func TestSymlink(t *testing.T) {
 }
 
 func TestTouch(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// Force failure of Close via monkey patch
 	{
@@ -1162,7 +1162,7 @@ func TestTouch(t *testing.T) {
 }
 
 func TestWriteBytes(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// attemp to write to a readonly dst
 	{
@@ -1200,7 +1200,7 @@ func TestWriteBytes(t *testing.T) {
 }
 
 func TestWriteLines(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// attemp to write to a readonly dst
 	{
@@ -1318,7 +1318,7 @@ func TestWriteStream(t *testing.T) {
 
 	// No file exists
 	{
-		clearTempDir()
+		resetTest()
 
 		// Read and write file
 		reader, err := os.Open(testfile)
@@ -1354,7 +1354,7 @@ func TestWriteStream(t *testing.T) {
 }
 
 func TestWriteString(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// attemp to write to a readonly dst
 	{
@@ -1391,7 +1391,7 @@ func TestWriteString(t *testing.T) {
 	}
 }
 
-func clearTempDir() {
+func resetTest() {
 	RemoveAll(tmpDir)
 	MkdirP(tmpDir)
 }

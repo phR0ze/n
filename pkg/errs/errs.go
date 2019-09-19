@@ -7,6 +7,7 @@ import "fmt"
 type ErrorType string
 
 const (
+
 	// ErrorTypeTmplEndTagNotFound indicates that a start tag was found but not an end tag or a template variable
 	ErrorTypeTmplEndTagNotFound ErrorType = "TmplEndTagNotFound"
 
@@ -27,48 +28,51 @@ func (e Error) Error() string {
 	return e.Message
 }
 
-// IsTmplEndTagNotFound returns true if the given err was created by NewTmplEndTagNotFound
-func IsTmplEndTagNotFound(err error) bool {
-	if nerr, ok := err.(Error); ok {
-		return nerr.Type == ErrorTypeTmplEndTagNotFound
+// Tmpl Erros
+//--------------------------------------------------------------------------------------------------
+
+// TmplEndTagNotFoundError returns true if the given err was created by NewTmplEndTagNotFound
+func TmplEndTagNotFoundError(err error) bool {
+	if e, ok := err.(Error); ok {
+		return e.Type == ErrorTypeTmplEndTagNotFound
 	}
 	return false
 }
 
-// IsTmplTagsInvalid returns true if the given err was created by NewTmplTagsInvalid
-func IsTmplTagsInvalid(err error) bool {
-	if nerr, ok := err.(Error); ok {
-		return nerr.Type == ErrorTypeTmplTagsInvalid
+// TmplTagsInvalidError returns true if the given err was created by NewTmplTagsInvalid
+func TmplTagsInvalidError(err error) bool {
+	if e, ok := err.(Error); ok {
+		return e.Type == ErrorTypeTmplTagsInvalid
 	}
 	return false
 }
 
-// IsTmplVarsNotFound returns true if the given err was created by NewTmplVarsNotFound
-func IsTmplVarsNotFound(err error) bool {
-	if nerr, ok := err.(Error); ok {
-		return nerr.Type == ErrorTypeTmplVarsNotFound
+// TmplVarsNotFoundError returns true if the given err was created by NewTmplVarsNotFound
+func TmplVarsNotFoundError(err error) bool {
+	if e, ok := err.(Error); ok {
+		return e.Type == ErrorTypeTmplVarsNotFound
 	}
 	return false
 }
 
-// NewTmplEndTagNotFound indicates that a start tag was found but not an end tag or a template variable
-func NewTmplEndTagNotFound(endTag string, starting []byte) Error {
+// NewTmplEndTagNotFoundError indicates that a start tag was found but not an end tag or a template variable
+func NewTmplEndTagNotFoundError(endTag string, starting []byte) Error {
 	return Error{
 		Message: fmt.Sprintf("cannot find end tag=%s starting from %s", endTag, starting),
 		Type:    ErrorTypeTmplEndTagNotFound,
 	}
 }
 
-// NewTmplTagsInvalid indicates that the template start and/or end tags were invalid
-func NewTmplTagsInvalid() Error {
+// NewTmplTagsInvalidError indicates that the template start and/or end tags were invalid
+func NewTmplTagsInvalidError() Error {
 	return Error{
 		Message: "start and/or end tag are invalid",
 		Type:    ErrorTypeTmplTagsInvalid,
 	}
 }
 
-// NewTmplVarsNotFound indicates that template variables were not found
-func NewTmplVarsNotFound() Error {
+// NewTmplVarsNotFoundError indicates that template variables were not found
+func NewTmplVarsNotFoundError() Error {
 	return Error{
 		Message: "template variables were not found",
 		Type:    ErrorTypeTmplVarsNotFound,

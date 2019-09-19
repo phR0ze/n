@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/phR0ze/n/pkg/sys"
-
 	"github.com/stretchr/testify/assert"
 )
 

@@ -115,7 +115,7 @@ func TestFiles(t *testing.T) {
 }
 
 func TestGlob(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// Create test files in dir for globbing and valide modes
 	dir, err := MkdirP(path.Join(tmpDir, "dir"))
@@ -218,7 +218,7 @@ func TestPaths(t *testing.T) {
 }
 
 func TestAllFilesWithFileLink(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// temp/first/f0,f1
 	firstDir, _ := MkdirP(path.Join(tmpDir, "first"))
@@ -248,7 +248,7 @@ func TestAllFilesWithFileLink(t *testing.T) {
 }
 
 func TestAllDirs(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// doesn't exist
 	{
@@ -303,7 +303,7 @@ func TestAllDirs(t *testing.T) {
 }
 
 func TestAllFiles(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// doesn't exist
 	{
@@ -407,7 +407,7 @@ func TestAllFiles(t *testing.T) {
 }
 
 func TestAllPaths(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// doesn't exist
 	{
@@ -545,7 +545,7 @@ func TestHome(t *testing.T) {
 	// force filepathAbs error
 	{
 		test.OneShotForceFilePathAbsError()
-		result, err := Home()
+		result, err := UserHome()
 		assert.Empty(t, result)
 		assert.True(t, strings.HasPrefix(err.Error(), "failed to compute the absolute path for"))
 		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
@@ -553,7 +553,7 @@ func TestHome(t *testing.T) {
 
 	// happy
 	{
-		result, err := Home()
+		result, err := UserHome()
 		assert.Nil(t, err)
 		assert.True(t, pathContainsHome(result))
 	}
@@ -566,14 +566,14 @@ func TestHome(t *testing.T) {
 		assert.Equal(t, "", os.Getenv("HOME"))
 		defer os.Setenv("HOME", home)
 
-		home, err := Home()
+		home, err := UserHome()
 		assert.Equal(t, "", home)
 		assert.Equal(t, "failed to compute the user's home directory: $HOME is not defined", err.Error())
 	}
 }
 
 func TestReadDir(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// read dirnames from valid directory
 	{
@@ -634,7 +634,7 @@ func TestReadDir(t *testing.T) {
 }
 
 func TestReadDirnames(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// read dirnames from valid directory
 	{
@@ -784,7 +784,7 @@ func TestTrimProtocol(t *testing.T) {
 }
 
 func TestWalkSkip(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// Create dirs to walk
 	_, err := MkdirP(path.Join(tmpDir, "skipme"))
@@ -805,7 +805,7 @@ func TestWalkSkip(t *testing.T) {
 }
 
 func TestWalkDirPermissions(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// Create dirs to walk
 	skipMe, err := MkdirP(path.Join(tmpDir, "skipme"))

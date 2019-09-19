@@ -118,7 +118,7 @@ func addFiles(tw *tar.Writer, infos []*sys.FileInfo, base string) (err error) {
 
 			// Add the files to the tar
 			var header *tar.Header
-			if header, err = tar.FileInfoHeader(info.Val, ""); err != nil {
+			if header, err = tar.FileInfoHeader(info.Obj, ""); err != nil {
 				err = errors.Wrapf(err, "failed to create target file header %s for tarball", info.Path)
 				fr.Close()
 				return

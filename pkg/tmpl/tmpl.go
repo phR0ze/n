@@ -30,7 +30,7 @@ func Load(filepath string, startTag, endTag string, vars map[string]string) (res
 			if result, err = tpl.Process(vars); err == nil {
 				return
 			}
-		} else if errs.IsTmplVarsNotFound(err) {
+		} else if errs.TmplVarsNotFoundError(err) {
 			err = nil
 			result = string(data)
 		}
@@ -50,7 +50,7 @@ func New(data, startTag, endTag string) (*Engine, error) {
 
 	// Check that we have valid tags
 	if startTag == "" || endTag == "" {
-		return nil, errs.NewTmplTagsInvalid()
+		return nil, errs.NewTmplTagsInvalidError()
 	}
 
 	s := []byte(data)
@@ -60,7 +60,7 @@ func New(data, startTag, endTag string) (*Engine, error) {
 	// Done if there are no template variables
 	tagsCount := bytes.Count(s, a)
 	if tagsCount == 0 {
-		return nil, errs.NewTmplVarsNotFound()
+		return nil, errs.NewTmplVarsNotFoundError()
 	}
 
 	if tagsCount+1 > cap(tpl.texts) {
@@ -82,7 +82,7 @@ func New(data, startTag, endTag string) (*Engine, error) {
 		s = s[n+len(a):]
 		n = bytes.Index(s, b)
 		if n < 0 {
-			return nil, errs.NewTmplEndTagNotFound(endTag, s)
+			return nil, errs.NewTmplEndTagNotFoundError(endTag, s)
 		}
 
 		// Fix bug in original code to remove wrapping spaces

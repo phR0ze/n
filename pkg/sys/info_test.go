@@ -53,7 +53,7 @@ func TestSize(t *testing.T) {
 
 	// Ensure expansion is happening
 	{
-		home, err := Home()
+		home, err := UserHome()
 		assert.Nil(t, err)
 		target, err := Abs(testfile)
 		assert.Nil(t, err)
@@ -82,7 +82,7 @@ func TestMode(t *testing.T) {
 
 	// Ensure expansion is happening
 	{
-		home, err := Home()
+		home, err := UserHome()
 		assert.Nil(t, err)
 		target, err := Abs(tmpfile)
 		assert.Nil(t, err)
@@ -108,7 +108,7 @@ func TestIsDir(t *testing.T) {
 	// Standalone
 	{
 		// Ensure expansion is happening
-		home, err := Home()
+		home, err := UserHome()
 		assert.Nil(t, err)
 		target, err := Abs(readme)
 		assert.Nil(t, err)
@@ -120,7 +120,7 @@ func TestIsDir(t *testing.T) {
 }
 
 func TestIsFile(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// sad
 	{
@@ -143,7 +143,7 @@ func TestIsFile(t *testing.T) {
 	// Standalone
 	{
 		// Ensure expansion is happening
-		home, err := Home()
+		home, err := UserHome()
 		assert.Nil(t, err)
 		target, err := Abs(readme)
 		assert.Nil(t, err)
@@ -155,7 +155,7 @@ func TestIsFile(t *testing.T) {
 }
 
 func TestIsSymlink(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// sad
 	{
@@ -199,7 +199,7 @@ func TestIsSymlink(t *testing.T) {
 }
 
 func TestIsSymlinkDir(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// sad
 	{
@@ -226,7 +226,7 @@ func TestIsSymlinkDir(t *testing.T) {
 }
 
 func TestIsSymlinkFile(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// sad
 	{
@@ -249,7 +249,7 @@ func TestIsSymlinkFile(t *testing.T) {
 }
 
 func TestSymlinkTarget(t *testing.T) {
-	clearTempDir()
+	resetTest()
 
 	// link doesn't exist
 	{

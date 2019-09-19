@@ -1,5 +1,4 @@
-bin/mech
-bin/n
+bin/*
 vendor
 .vendor-new
 test/temp/*

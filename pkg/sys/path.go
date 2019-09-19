@@ -215,7 +215,7 @@ func Expand(target string) (path string, err error) {
 
 	// Get home directory
 	var home string
-	if home, err = Home(); err != nil {
+	if home, err = UserHome(); err != nil {
 		path = ""
 		return
 	}
@@ -282,22 +282,6 @@ func Glob(path string, opts ...*opt.Opt) (sources []string, err error) {
 	return
 }
 
-// Home returns the absolute home directory for the current user
-// Go 1.12 provides os.UserHomeDir so we can just call that
-func Home() (result string, err error) {
-	if result, err = os.UserHomeDir(); err != nil {
-		err = errors.Wrap(err, "failed to compute the user's home directory")
-		return
-	}
-
-	// Now ensure we have an absolute value here, trimming out all redirects
-	if result, err = filepath.Abs(result); err != nil {
-		err = errors.Wrapf(err, "failed to compute the absolute path for %s", result)
-		return
-	}
-	return
-}
-
 // Paths returns all directories/files from the given target path, sorted by filename.
 // Doesn't include the target itself only its children nor is this recursive.
 func Paths(target string) (result []string) {
@@ -338,7 +322,7 @@ func ReadDir(dirname string) (infos []*FileInfo, err error) {
 
 	// Create internal FileInfo types with path
 	for _, info := range list {
-		infos = append(infos, &FileInfo{Val: info, Path: path.Join(dirname, info.Name())})
+		infos = append(infos, &FileInfo{Obj: info, Path: path.Join(dirname, info.Name())})
 	}
 
 	return
