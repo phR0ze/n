@@ -64,7 +64,7 @@ func TestNewStringMap(t *testing.T) {
 	{
 		m := NewStringMapV()
 		m.Set("k", "v")
-		assert.Equal(t, m, NewMap(m))
+		assert.Equal(t, m, Map(m))
 	}
 }
 
@@ -87,7 +87,7 @@ func TestNewStringMapV(t *testing.T) {
 	{
 		m := NewStringMapV()
 		m.Set("k", "v")
-		assert.Equal(t, m, NewMap(m))
+		assert.Equal(t, m, Map(m))
 	}
 }
 

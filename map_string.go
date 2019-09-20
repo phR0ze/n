@@ -56,7 +56,7 @@ func (p *StringMap) Any(keys ...interface{}) bool {
 }
 
 // Clear modifies this Map to clear out all key-value pairs and returns a reference to this Map.
-func (p *StringMap) Clear() Map {
+func (p *StringMap) Clear() IMap {
 	if p == nil {
 		p = NewStringMapV()
 	} else if len(*p) > 0 {
@@ -66,7 +66,7 @@ func (p *StringMap) Clear() Map {
 }
 
 // Copy returns a new Map with the indicated key-value pairs copied from this Map or all if not given.
-func (p *StringMap) Copy(keys ...interface{}) (new Map) {
+func (p *StringMap) Copy(keys ...interface{}) (new IMap) {
 	val := NewStringMapV()
 	if p == nil || len(*p) == 0 {
 		return val
@@ -101,7 +101,7 @@ func (p *StringMap) Delete(key interface{}) (val *Object) {
 }
 
 // DeleteM modifies this Map to delete the indicated key-value pair and returns a reference to this Map rather than the key-value pair.
-func (p *StringMap) DeleteM(key interface{}) Map {
+func (p *StringMap) DeleteM(key interface{}) IMap {
 	if p == nil {
 		return p
 	}
@@ -157,13 +157,13 @@ func (p *StringMap) Get(key interface{}) (val *Object) {
 }
 
 // Inject sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
-func (p *StringMap) Inject(key string, val interface{}) Map {
+func (p *StringMap) Inject(key string, val interface{}) IMap {
 	m, _ := p.InjectE(key, val)
 	return m
 }
 
 // InjectE sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
-func (p *StringMap) InjectE(key string, val interface{}) (m Map, err error) {
+func (p *StringMap) InjectE(key string, val interface{}) (m IMap, err error) {
 	if p == nil {
 		p = NewStringMapV()
 	}
@@ -298,7 +298,7 @@ func (p *StringMap) MG() (m map[string]interface{}) {
 
 // Merge modifies this Map by overriding its values at location with the given map where they both exist and returns a reference to this Map.
 // Converting all string maps into *StringMap instances.
-func (p *StringMap) Merge(m Map, location ...string) Map {
+func (p *StringMap) Merge(m IMap, location ...string) IMap {
 	p2 := p
 
 	// 1. Handle location if given
@@ -379,7 +379,7 @@ func (p *StringMap) Merge(m Map, location ...string) Map {
 }
 
 // MergeG modifies this Map by overriding its values with the given map location where they both exist and returns the Go type
-func (p *StringMap) MergeG(m Map, location ...string) map[string]interface{} {
+func (p *StringMap) MergeG(m IMap, location ...string) map[string]interface{} {
 	p2 := p
 
 	// 1. Handle location if given
@@ -508,7 +508,7 @@ func (p *StringMap) QueryE(key string) (val *Object, err error) {
 // Remove modifies this Map to delete the given key location, using jq type selectors
 // and returns a reference to this Map rather than the deleted value.
 // see dot notation from https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
-func (p *StringMap) Remove(key string) Map {
+func (p *StringMap) Remove(key string) IMap {
 	_, _ = p.RemoveE(key)
 	return p
 }
@@ -516,7 +516,7 @@ func (p *StringMap) Remove(key string) Map {
 // RemoveE modifies this Map to delete the given key location, using jq type selectors
 // and returns a reference to this Map rather than the deleted value.
 // see dot notation from https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
-func (p *StringMap) RemoveE(key string) (m Map, err error) {
+func (p *StringMap) RemoveE(key string) (m IMap, err error) {
 	if p == nil {
 		p = NewStringMapV()
 	}
@@ -632,7 +632,7 @@ func (p *StringMap) Set(key, val interface{}) (new bool) {
 }
 
 // SetM the value for the given key to the given val creating map if necessary. Returns a reference to this Map.
-func (p *StringMap) SetM(key, val interface{}) Map {
+func (p *StringMap) SetM(key, val interface{}) IMap {
 	if p == nil {
 		p = NewStringMapV()
 	}

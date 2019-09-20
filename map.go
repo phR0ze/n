@@ -7,23 +7,23 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Map provides a generic way to work with map types providing convenience methods
-// on par with rapid development languages. 'this Map' refers to the current map
-// instance being operated on.  'new Map' refers to a copy of the map.
-type Map interface {
+// IMap provides a generic way to work with map types providing convenience methods
+// on par with rapid development languages. 'this IMap' refers to the current map
+// instance being operated on.  'new IMap' refers to a copy of the map.
+type IMap interface {
 	Any(keys ...interface{}) bool // Any tests if this Map is not empty or optionally if it contains any of the given variadic keys.
 	// AnyS(slice interface{}) bool                      // AnyS tests if this Map contains any of the given Slice's elements.
 	// AnyW(sel func(O) bool) bool                       // AnyW tests if this Map contains any that match the lambda selector.
 	// Append(elem interface{}) Slice                    // Append an element to the end of this Map and returns a reference to this Map.
 	// AppendV(elems ...interface{}) Slice               // AppendV appends the variadic elements to the end of this Map and returns a reference to this Map.
-	Clear() Map // Clear modifies this Map to clear out all key-value pairs and returns a reference to this Map.
+	Clear() IMap // Clear modifies this Map to clear out all key-value pairs and returns a reference to this Map.
 	// Concat(slice interface{}) (new Slice)             // Concat returns a new Slice by appending the given Slice to this Map using variadic expansion.
 	// ConcatM(slice interface{}) Slice                  // ConcatM modifies this Map by appending the given Slice using variadic expansion and returns a reference to this Map.
-	Copy(keys ...interface{}) (new Map) // Copy returns a new Map with the indicated key-value pairs copied from this Map or all if not given.
+	Copy(keys ...interface{}) (new IMap) // Copy returns a new Map with the indicated key-value pairs copied from this Map or all if not given.
 	// Count(elem interface{}) (cnt int)                 // Count the number of elements in this Map equal to the given element.
 	// CountW(sel func(O) bool) (cnt int)                // CountW counts the number of elements in this Map that match the lambda selector.
 	Delete(key interface{}) (val *Object) // Delete modifies this Map to delete the indicated key-value pair and returns the value from the Map.
-	DeleteM(key interface{}) Map          // DeleteM modifies this Map to delete the indicated key-value pair and returns a reference to this Map rather than the key-value pair.
+	DeleteM(key interface{}) IMap         // DeleteM modifies this Map to delete the indicated key-value pair and returns a reference to this Map rather than the key-value pair.
 	//DeleteS(keys interface{}) (obj *Object) // DeleteS modifies this Map to delete the indicated key-value pairs and returns the values from the Map as a Slice.
 	Exists(key interface{}) bool // Exists checks if the given key exists in this Map.
 	// DeleteW(sel func(O) bool) Slice                     // DropW modifies this Map to delete the elements that match the lambda selector and returns a reference to this Map.
@@ -36,16 +36,16 @@ type Map interface {
 	// EachRI(action func(int, O)) Slice                 // EachRI calls the given lambda once for each element in this Map in reverse, passing in that element
 	// EachRIE(action func(int, O) error) (ISlice, error) // EachRIE calls the given lambda once for each element in this Map in reverse, passing in that element
 	// Empty() bool                                      // Empty tests if this Map is empty.
-	Generic() bool                                          // Generic returns true if the underlying implementation uses reflection
-	Get(key interface{}) (val *Object)                      // Get returns the value at the given key location. Returns empty *Object if not found.
-	Inject(key string, val interface{}) Map                 // Inject sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
-	InjectE(key string, val interface{}) (m Map, err error) // InjectE sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
+	Generic() bool                                           // Generic returns true if the underlying implementation uses reflection
+	Get(key interface{}) (val *Object)                       // Get returns the value at the given key location. Returns empty *Object if not found.
+	Inject(key string, val interface{}) IMap                 // Inject sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
+	InjectE(key string, val interface{}) (m IMap, err error) // InjectE sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
 	// Join(separator ...string) (str *Object)           // Join converts each element into a string then joins them together using the given separator or comma by default.
-	Keys() ISlice                        // Keys returns all the keys in this Map as a Slice of the key type.
-	Len() int                            // Len returns the number of elements in this Map.
-	M() (m *StringMap)                   // M is an alias to ToStringMap
-	MG() (m map[string]interface{})      // MG is an alias to ToStringMapG
-	Merge(m Map, location ...string) Map // Merge modifies this Map by overriding its values at location with the given map where they both exist and returns a reference to this Map.
+	Keys() ISlice                          // Keys returns all the keys in this Map as a Slice of the key type.
+	Len() int                              // Len returns the number of elements in this Map.
+	M() (m *StringMap)                     // M is an alias to ToStringMap
+	MG() (m map[string]interface{})        // MG is an alias to ToStringMapG
+	Merge(m IMap, location ...string) IMap // Merge modifies this Map by overriding its values at location with the given map where they both exist and returns a reference to this Map.
 	// Less(i, j int) bool                               // Less returns true if the element indexed by i is less than the element indexed by j.
 	// Nil() bool                                        // Nil tests if this Map is nil.
 	O() interface{} // O returns the underlying data structure as is.
@@ -55,13 +55,13 @@ type Map interface {
 	// Prepend(elem interface{}) Slice                   // Prepend modifies this Map to add the given element at the begining and returns a reference to this Map.
 	Query(key string) (val *Object)             // Query returns the value at the given key location, using jq type selectors. Returns empty *Object if not found.
 	QueryE(key string) (val *Object, err error) // Query returns the value at the given key location, using jq type selectors. Returns empty *Object if not found.
-	Remove(key string) Map                      // Remove modifies this map to remove the value at the given key location, using jq type selectors. Returns a reference to this Map
-	RemoveE(key string) (m Map, err error)      // RemoveE modifies this map to remove the value at the given key location, using jq type selectors. Returns a reference to this Map
+	Remove(key string) IMap                     // Remove modifies this map to remove the value at the given key location, using jq type selectors. Returns a reference to this Map
+	RemoveE(key string) (m IMap, err error)     // RemoveE modifies this map to remove the value at the given key location, using jq type selectors. Returns a reference to this Map
 	// Reverse() (new Map)                             // Reverse returns a new Map with the order of the elements reversed.
 	// ReverseM() Slice                                  // ReverseM modifies this Map reversing the order of the elements and returns a reference to this Map.
 	// Select(sel func(O) bool) (new Map)              // Select creates a new Map with the elements that match the lambda selector.
-	Set(key, val interface{}) bool // Set the value for the given key to the given val. Returns true if the key did not yet exists in this Map.
-	SetM(key, val interface{}) Map // SetM the value for the given key to the given val creating map if necessary. Returns a reference to this Map.
+	Set(key, val interface{}) bool  // Set the value for the given key to the given val. Returns true if the key did not yet exists in this Map.
+	SetM(key, val interface{}) IMap // SetM the value for the given key to the given val creating map if necessary. Returns a reference to this Map.
 	// Shift() (elem *Object)                            // Shift modifies this Map to remove the first element and returns the removed element as an Object.
 	// ShiftN(n int) (new Map)                         // ShiftN modifies this Map to remove the first n elements and returns the removed elements as a new Map.
 	// Single() bool                                     // Single reports true if there is only one element in this Map.
@@ -87,14 +87,14 @@ type Map interface {
 	WriteYAML(filename string) (err error) // WriteYAML converts the Map into a map[string]interface{} then calls yaml.WriteYAML on it to write it out to disk.
 }
 
-// NewMap provides a generic way to work with Map types. It does this by wrapping Go types
+// Map provides a generic way to work with Map types. It does this by wrapping Go types
 // directly for optimized types thus avoiding reflection processing overhead and making a plethora
 // of Map methods available. Non optimized types will fall back on reflection to generically
 // handle the type incurring the full 10x reflection processing overhead. Defaults to StringMap
 // type if nothing is given.
 //
 // Optimized: map[string]interface{}
-func NewMap(obj interface{}) (new Map) {
+func Map(obj interface{}) (new IMap) {
 	o := Reference(obj)
 	switch x := o.(type) {
 
