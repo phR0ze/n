@@ -1,18 +1,18 @@
 # n
-***Numerable*** is a collection of missing Go convenience functions reminiscent of Ruby/C#. I love
+***Nub*** is a collection of missing Go convenience functions reminiscent of Ruby/C#. I love
 the elegance of Ruby's plethera of descriptive chainable methods while C# has some awesome deferred
 execution. Why not stay with Ruby or C# then? Well I like Go's ability to generate a single
 statically linked binary, Go's concurrancy model, Go's performance, Go's package ecosystem and Go's
 tool chain. This package was created to reduce the friction I had adopting Go as my primary
 language of choice. ***n*** is intended to reduce the coding verbosity required by Go via
-convenience functions and the Numerable types.
+convenience functions and the Nub types.
 
 **Requires Go 1.13 and only supports POSIX systems**
 
 https://godoc.org/github.com/phR0ze/n
 
 ## Table of Contents
-* [Numerable](#Numerable)
+* [Nub](#Nub)
   * [Requirements](#requirements)
 * [Background](#background)
   * [Resources](#resources)
@@ -26,10 +26,10 @@ https://godoc.org/github.com/phR0ze/n
   * [Deferred Execution](#deferred-execution)
     * [Iterator Pattern](#iterator-pattern)
 
-# Numerable <a name="numerable"></a>
-***Numerable*** provides a way to generically handle various types in Go with the convenience
+# Nub <a name="nub"></a>
+***Nub*** provides a way to generically handle various types in Go with the convenience
 methods you would expect similar to Ruby or C#, making life a little easier. I've gone to great
-lengths to implement Numerable types for all common Go types and only fall back on Reflection
+lengths to implement Nub types for all common Go types and only fall back on Reflection
 for custom types. This means that in many cases no Reflection is used at all. In the cases where
 Reflection is used it obviously comes at a cost, which in some cases won't be worth it. However
 even then as found in many cases, the actual work being done far out ways the bookkeeping overhead
@@ -38,7 +38,7 @@ re-implement a Delete or Contains function for the millionth time far out weighs
 cost.
 
 ## Requirements <a name="requirements"></a>
-The Numerable types have been designed to accomplish the following requirements:
+The Nub types have been designed to accomplish the following requirements:
 
 * ***Chaining*** - the ability to call additional methods via a returned reference to the type
 * ***Brevity*** - keep the naming as concise as possible while not infringing on clarity
@@ -289,7 +289,7 @@ func BenchmarkSlice_RefSlice(t *testing.B) {
 }
 ```
 
-***6x*** hit from 3 runs after cache warm up using IntSlice Numberable type:
+***6x*** hit from 3 runs after cache warm up using IntSlice Nub type:
 ```
 BenchmarkSlice_IntSlice-16    	2000000000	         0.06 ns/op	       0 B/op	       0 allocs/op
 BenchmarkSlice_IntSlice-16    	2000000000	         0.07 ns/op	       0 B/op	       0 allocs/op
@@ -311,7 +311,7 @@ C# has some excellent defferred execution and the concept is really slick. I hav
 need for it yet and thus haven't gotten around to it, but it's fun to research how it's done.
 
 ### Iterator Pattern <a name="iterator-pattern"></a>
-Since Numerable is fundamentally based on the notion of iterables, iterating over collections, that
+Since Nub is fundamentally based on the notion of iterables, iterating over collections, that
 was the first challenge to solve. How do you generically iterate over all primitive Go types.
 
 I implemented the iterator pattern based off of the iterator closure pattern disscussed by blog
