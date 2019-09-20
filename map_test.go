@@ -7,26 +7,26 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// NewMap
+// Map
 //--------------------------------------------------------------------------------------------------
-func ExampleNewMap() {
+func ExampleMap() {
 	fmt.Println(Map(map[string]interface{}{"k": "v"}))
 	// Output: &map[k:v]
 }
 
-func TestNewMap(t *testing.T) {
+func TestMap(t *testing.T) {
 
-	// []byte
+	// map[string]bool
 	{
-		assert.Equal(t, &StringMap{"foo": map[string]interface{}{"bar": float64(1)}}, Map([]byte("foo:\n bar: 1\n")))
+		assert.Equal(t, &StringMap{"1": true}, Map(map[string]bool{"1": true}))
 	}
 
-	// string
+	// float64: map[string]interface{}
 	{
 		assert.Equal(t, &StringMap{"foo": map[string]interface{}{"bar": float64(1)}}, Map("foo:\n bar: 1\n"))
 	}
 
-	// string interface
+	// string: map[string]interface{}
 	{
 		m := map[string]interface{}{"k": "v"}
 		assert.Equal(t, NewStringMapV(m), Map(m))

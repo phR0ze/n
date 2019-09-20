@@ -12,6 +12,7 @@ mech:
 test: ${NAME}
 	@echo -e "\nRunning all go tests:"
 	@echo -e "------------------------------------------------------------------------"
+	go test .
 	go test -gcflags=-l ./pkg/arch/tar
 	go test -gcflags=-l ./pkg/arch/zip
 	go test ./pkg/enc/bin

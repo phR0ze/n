@@ -517,6 +517,341 @@ func DeReference(obj interface{}) interface{} {
 		}
 		return *x
 
+	// map[interface{}]interface{}
+	//----------------------------------------------------------------------------------------------
+	case []map[interface{}]interface{}:
+		return x
+	case *[]map[interface{}]interface{}:
+		if x == nil {
+			return []map[interface{}]interface{}{}
+		}
+		return *x
+	case map[interface{}]interface{}:
+		return x
+	case []map[interface{}]*interface{}:
+		return x
+	case *[]map[interface{}]*interface{}:
+		if x == nil {
+			return []map[interface{}]*interface{}{}
+		}
+		return *x
+	case map[interface{}]*interface{}:
+		return x
+	case []*map[interface{}]interface{}:
+		return x
+	case *[]*map[interface{}]interface{}:
+		if x == nil {
+			return []*map[interface{}]interface{}{}
+		}
+		return *x
+	case *map[interface{}]interface{}:
+		if x == nil {
+			return map[interface{}]interface{}{}
+		}
+		return *x
+	case []*map[interface{}]*interface{}:
+		return x
+	case *[]*map[interface{}]*interface{}:
+		if x == nil {
+			return []*map[interface{}]*interface{}{}
+		}
+		return *x
+	case *map[interface{}]*interface{}:
+		if x == nil {
+			return map[interface{}]*interface{}{}
+		}
+		return *x
+
+	// map[string]interface{}
+	//----------------------------------------------------------------------------------------------
+	case []map[string]interface{}:
+		return x
+	case *[]map[string]interface{}:
+		if x == nil {
+			return []map[string]interface{}{}
+		}
+		return *x
+	case map[string]interface{}:
+		return x
+	case []map[string]*interface{}:
+		return x
+	case *[]map[string]*interface{}:
+		if x == nil {
+			return []map[string]*interface{}{}
+		}
+		return *x
+	case map[string]*interface{}:
+		return x
+	case []*map[string]interface{}:
+		return x
+	case *[]*map[string]interface{}:
+		if x == nil {
+			return []*map[string]interface{}{}
+		}
+		return *x
+	case *map[string]interface{}:
+		if x == nil {
+			return map[string]interface{}{}
+		}
+		return *x
+	case []*map[string]*interface{}:
+		return x
+	case *[]*map[string]*interface{}:
+		if x == nil {
+			return []*map[string]*interface{}{}
+		}
+		return *x
+	case *map[string]*interface{}:
+		if x == nil {
+			return map[string]*interface{}{}
+		}
+		return *x
+
+	// map[string]string
+	//----------------------------------------------------------------------------------------------
+	case []map[string]string:
+		return x
+	case *[]map[string]string:
+		if x == nil {
+			return []map[string]string{}
+		}
+		return *x
+	case map[string]string:
+		return x
+	case map[string]*string:
+		return x
+	case *map[string]string:
+		if x == nil {
+			return map[string]string{}
+		}
+		return *x
+	case *map[string]*string:
+		if x == nil {
+			return map[string]*string{}
+		}
+		return *x
+
+	// map[string]bool
+	//----------------------------------------------------------------------------------------------
+	case map[string]bool:
+		return x
+	case map[string]*bool:
+		return x
+	case *map[string]bool:
+		if x == nil {
+			return map[string]bool{}
+		}
+		return *x
+	case *map[string]*bool:
+		if x == nil {
+			return map[string]*bool{}
+		}
+		return *x
+
+	// map[string]float32
+	//----------------------------------------------------------------------------------------------
+	case map[string]float32:
+		return x
+	case map[string]*float32:
+		return x
+	case *map[string]float32:
+		if x == nil {
+			return map[string]float32{}
+		}
+		return *x
+	case *map[string]*float32:
+		if x == nil {
+			return map[string]*float32{}
+		}
+		return *x
+
+	// map[string]float64
+	//----------------------------------------------------------------------------------------------
+	case map[string]float64:
+		return x
+	case map[string]*float64:
+		return x
+	case *map[string]float64:
+		if x == nil {
+			return map[string]float64{}
+		}
+		return *x
+	case *map[string]*float64:
+		if x == nil {
+			return map[string]*float64{}
+		}
+		return *x
+
+	// map[string]int
+	//----------------------------------------------------------------------------------------------
+	case map[string]int:
+		return x
+	case map[string]*int:
+		return x
+	case *map[string]int:
+		if x == nil {
+			return map[string]int{}
+		}
+		return *x
+	case *map[string]*int:
+		if x == nil {
+			return map[string]*int{}
+		}
+		return *x
+
+	// map[string]int8
+	//----------------------------------------------------------------------------------------------
+	case map[string]int8:
+		return x
+	case map[string]*int8:
+		return x
+	case *map[string]int8:
+		if x == nil {
+			return map[string]int8{}
+		}
+		return *x
+	case *map[string]*int8:
+		if x == nil {
+			return map[string]*int8{}
+		}
+		return *x
+
+	// map[string]int16
+	//----------------------------------------------------------------------------------------------
+	case map[string]int16:
+		return x
+	case map[string]*int16:
+		return x
+	case *map[string]int16:
+		if x == nil {
+			return map[string]int16{}
+		}
+		return *x
+	case *map[string]*int16:
+		if x == nil {
+			return map[string]*int16{}
+		}
+		return *x
+
+	// map[string]int32
+	//----------------------------------------------------------------------------------------------
+	case map[string]int32:
+		return x
+	case map[string]*int32:
+		return x
+	case *map[string]int32:
+		if x == nil {
+			return map[string]int32{}
+		}
+		return *x
+	case *map[string]*int32:
+		if x == nil {
+			return map[string]*int32{}
+		}
+		return *x
+
+	// map[string]int64
+	//----------------------------------------------------------------------------------------------
+	case map[string]int64:
+		return x
+	case map[string]*int64:
+		return x
+	case *map[string]int64:
+		if x == nil {
+			return map[string]int64{}
+		}
+		return *x
+	case *map[string]*int64:
+		if x == nil {
+			return map[string]*int64{}
+		}
+		return *x
+
+	// map[string]uint
+	//----------------------------------------------------------------------------------------------
+	case map[string]uint:
+		return x
+	case map[string]*uint:
+		return x
+	case *map[string]uint:
+		if x == nil {
+			return map[string]uint{}
+		}
+		return *x
+	case *map[string]*uint:
+		if x == nil {
+			return map[string]*uint{}
+		}
+		return *x
+
+	// map[string]uint8
+	//----------------------------------------------------------------------------------------------
+	case map[string]uint8:
+		return x
+	case map[string]*uint8:
+		return x
+	case *map[string]uint8:
+		if x == nil {
+			return map[string]uint8{}
+		}
+		return *x
+	case *map[string]*uint8:
+		if x == nil {
+			return map[string]*uint8{}
+		}
+		return *x
+
+	// map[string]uint8
+	//----------------------------------------------------------------------------------------------
+	case map[string]uint16:
+		return x
+	case map[string]*uint16:
+		return x
+	case *map[string]uint16:
+		if x == nil {
+			return map[string]uint16{}
+		}
+		return *x
+	case *map[string]*uint16:
+		if x == nil {
+			return map[string]*uint16{}
+		}
+		return *x
+
+	// map[string]uint32
+	//----------------------------------------------------------------------------------------------
+	case map[string]uint32:
+		return x
+	case map[string]*uint32:
+		return x
+	case *map[string]uint32:
+		if x == nil {
+			return map[string]uint32{}
+		}
+		return *x
+	case *map[string]*uint32:
+		if x == nil {
+			return map[string]*uint32{}
+		}
+		return *x
+
+	// map[string]uint64
+	//----------------------------------------------------------------------------------------------
+	case map[string]uint64:
+		return x
+	case map[string]*uint64:
+		return x
+	case *map[string]uint64:
+		if x == nil {
+			return map[string]uint64{}
+		}
+		return *x
+	case *map[string]*uint64:
+		if x == nil {
+			return map[string]*uint64{}
+		}
+		return *x
+
 	// template.CSS
 	//----------------------------------------------------------------------------------------------
 	case template.CSS:
@@ -1065,6 +1400,8 @@ func Reference(obj interface{}) interface{} {
 	case *[]*StringSlice:
 		return x
 
+	// map[interface{}]interface{}
+	//----------------------------------------------------------------------------------------------
 	case []map[interface{}]interface{}:
 		return &x
 	case *[]map[interface{}]interface{}:
@@ -1089,6 +1426,9 @@ func Reference(obj interface{}) interface{} {
 		return x
 	case *map[interface{}]*interface{}:
 		return x
+
+	// map[string]interface{}
+	//----------------------------------------------------------------------------------------------
 	case []map[string]interface{}:
 		return &x
 	case *[]map[string]interface{}:
@@ -1113,6 +1453,9 @@ func Reference(obj interface{}) interface{} {
 		return x
 	case *map[string]*interface{}:
 		return x
+
+	// map[string]string
+	//----------------------------------------------------------------------------------------------
 	case []map[string]string:
 		return &x
 	case *[]map[string]string:
@@ -1125,6 +1468,20 @@ func Reference(obj interface{}) interface{} {
 		return x
 	case *map[string]*string:
 		return x
+
+	// map[string]bool
+	//----------------------------------------------------------------------------------------------
+	case map[string]bool:
+		return &x
+	case map[string]*bool:
+		return &x
+	case *map[string]bool:
+		return x
+	case *map[string]*bool:
+		return x
+
+	// map[string]float32
+	//----------------------------------------------------------------------------------------------
 	case map[string]float32:
 		return &x
 	case map[string]*float32:
@@ -1133,6 +1490,9 @@ func Reference(obj interface{}) interface{} {
 		return x
 	case *map[string]*float32:
 		return x
+
+	// map[string]float64
+	//----------------------------------------------------------------------------------------------
 	case map[string]float64:
 		return &x
 	case map[string]*float64:
@@ -1141,6 +1501,9 @@ func Reference(obj interface{}) interface{} {
 		return x
 	case *map[string]*float64:
 		return x
+
+	// map[string]int
+	//----------------------------------------------------------------------------------------------
 	case map[string]int:
 		return &x
 	case map[string]*int:
@@ -1149,6 +1512,42 @@ func Reference(obj interface{}) interface{} {
 		return x
 	case *map[string]*int:
 		return x
+
+	// map[string]int8
+	//----------------------------------------------------------------------------------------------
+	case map[string]int8:
+		return &x
+	case map[string]*int8:
+		return &x
+	case *map[string]int8:
+		return x
+	case *map[string]*int8:
+		return x
+
+	// map[string]int16
+	//----------------------------------------------------------------------------------------------
+	case map[string]int16:
+		return &x
+	case map[string]*int16:
+		return &x
+	case *map[string]int16:
+		return x
+	case *map[string]*int16:
+		return x
+
+	// map[string]int32
+	//----------------------------------------------------------------------------------------------
+	case map[string]int32:
+		return &x
+	case map[string]*int32:
+		return &x
+	case *map[string]int32:
+		return x
+	case *map[string]*int32:
+		return x
+
+	// map[string]int64
+	//----------------------------------------------------------------------------------------------
 	case map[string]int64:
 		return &x
 	case map[string]*int64:
@@ -1156,6 +1555,61 @@ func Reference(obj interface{}) interface{} {
 	case *map[string]int64:
 		return x
 	case *map[string]*int64:
+		return x
+
+	// map[string]uint
+	//----------------------------------------------------------------------------------------------
+	case map[string]uint:
+		return &x
+	case map[string]*uint:
+		return &x
+	case *map[string]uint:
+		return x
+	case *map[string]*uint:
+		return x
+
+	// map[string]uint8
+	//----------------------------------------------------------------------------------------------
+	case map[string]uint8:
+		return &x
+	case map[string]*uint8:
+		return &x
+	case *map[string]uint8:
+		return x
+	case *map[string]*uint8:
+		return x
+
+	// map[string]uint8
+	//----------------------------------------------------------------------------------------------
+	case map[string]uint16:
+		return &x
+	case map[string]*uint16:
+		return &x
+	case *map[string]uint16:
+		return x
+	case *map[string]*uint16:
+		return x
+
+	// map[string]uint32
+	//----------------------------------------------------------------------------------------------
+	case map[string]uint32:
+		return &x
+	case map[string]*uint32:
+		return &x
+	case *map[string]uint32:
+		return x
+	case *map[string]*uint32:
+		return x
+
+	// map[string]uint64
+	//----------------------------------------------------------------------------------------------
+	case map[string]uint64:
+		return &x
+	case map[string]*uint64:
+		return &x
+	case *map[string]uint64:
+		return x
+	case *map[string]*uint64:
 		return x
 
 	// template.CSS
@@ -4126,6 +4580,84 @@ func ToStringMapE(obj interface{}) (val *StringMap, err error) {
 				val.Set(k, v)
 			}
 		}
+	case *map[string]bool:
+		if x != nil {
+			for k, v := range *x {
+				val.Set(k, v)
+			}
+		}
+	case *map[string]float32:
+		if x != nil {
+			for k, v := range *x {
+				val.Set(k, v)
+			}
+		}
+	case *map[string]float64:
+		if x != nil {
+			for k, v := range *x {
+				val.Set(k, v)
+			}
+		}
+	case *map[string]int:
+		if x != nil {
+			for k, v := range *x {
+				val.Set(k, v)
+			}
+		}
+	case *map[string]int8:
+		if x != nil {
+			for k, v := range *x {
+				val.Set(k, v)
+			}
+		}
+	case *map[string]int16:
+		if x != nil {
+			for k, v := range *x {
+				val.Set(k, v)
+			}
+		}
+	case *map[string]int32:
+		if x != nil {
+			for k, v := range *x {
+				val.Set(k, v)
+			}
+		}
+	case *map[string]int64:
+		if x != nil {
+			for k, v := range *x {
+				val.Set(k, v)
+			}
+		}
+	case *map[string]uint:
+		if x != nil {
+			for k, v := range *x {
+				val.Set(k, v)
+			}
+		}
+	case *map[string]uint8:
+		if x != nil {
+			for k, v := range *x {
+				val.Set(k, v)
+			}
+		}
+	case *map[string]uint16:
+		if x != nil {
+			for k, v := range *x {
+				val.Set(k, v)
+			}
+		}
+	case *map[string]uint32:
+		if x != nil {
+			for k, v := range *x {
+				val.Set(k, v)
+			}
+		}
+	case *map[string]uint64:
+		if x != nil {
+			for k, v := range *x {
+				val.Set(k, v)
+			}
+		}
 
 	// Object
 	//----------------------------------------------------------------------------------------------
@@ -4153,8 +4685,24 @@ func ToStringMapE(obj interface{}) (val *StringMap, err error) {
 			val = x
 		}
 
+	// fall back on reflection
+	//----------------------------------------------------------------------------------------------
 	default:
-		err = errors.Errorf("failed to convert type %T to a StringMap", obj)
+		v := reflect.ValueOf(DeReference(obj))
+		k := v.Kind()
+
+		switch {
+
+		// generically convert map
+		case k == reflect.Map:
+			for _, k := range v.MapKeys() {
+				val.Set(k.Interface(), v.MapIndex(k).Interface())
+			}
+
+		default:
+			err = errors.Errorf("unable to convert type %T to a StringMap", x)
+			return
+		}
 	}
 
 	return

@@ -3817,6 +3817,126 @@ func ExampleToStringMapE() {
 
 func TestToStringMapE(t *testing.T) {
 
+	// map[string]uint64
+	{
+		val, err := ToStringMapE(map[string]uint64{"1": uint64(1)})
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"1": uint64(1)}, val)
+	}
+
+	// map[string]uint32
+	{
+		val, err := ToStringMapE(map[string]uint32{"1": uint32(1)})
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"1": uint32(1)}, val)
+	}
+
+	// map[string]uint16
+	{
+		val, err := ToStringMapE(map[string]uint16{"1": uint16(1)})
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"1": uint16(1)}, val)
+	}
+
+	// map[string]uint8
+	{
+		val, err := ToStringMapE(map[string]uint8{"1": uint8(1)})
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"1": uint8(1)}, val)
+	}
+
+	// map[string]uint
+	{
+		val, err := ToStringMapE(map[string]uint{"1": uint(1)})
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"1": uint(1)}, val)
+	}
+
+	// map[string]int64
+	{
+		val, err := ToStringMapE(map[string]int64{"1": int64(1)})
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"1": int64(1)}, val)
+	}
+
+	// map[string]int32
+	{
+		val, err := ToStringMapE(map[string]int32{"1": int32(1)})
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"1": int32(1)}, val)
+	}
+
+	// map[string]int16
+	{
+		val, err := ToStringMapE(map[string]int16{"1": int16(1)})
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"1": int16(1)}, val)
+	}
+
+	// map[string]int8
+	{
+		val, err := ToStringMapE(map[string]int8{"1": int8(1)})
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"1": int8(1)}, val)
+	}
+
+	// map[string]int
+	{
+		val, err := ToStringMapE(map[string]int{"1": 1})
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"1": 1}, val)
+	}
+
+	// map[string]float64
+	{
+		val, err := ToStringMapE(map[string]float64{"1": float64(2.0)})
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"1": float64(2.0)}, val)
+	}
+
+	// map[string]bool
+	{
+		val, err := ToStringMapE(map[string]bool{"1": true})
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"1": true}, val)
+	}
+
+	// map[string]string
+	{
+		val, err := ToStringMapE(map[string]string{"1": "one"})
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"1": "one"}, val)
+		assert.Equal(t, map[string]interface{}{"1": "one"}, val.G())
+
+		val, err = ToStringMapE(&map[string]string{"1": "one", "2": "two"})
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"1": "one", "2": "two"}, val)
+		assert.Equal(t, map[string]interface{}{"1": "one", "2": "two"}, val.G())
+	}
+
+	// map[string]interface{}
+	{
+		val, err := ToStringMapE(map[interface{}]interface{}{"1": "one"})
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"1": "one"}, val)
+		assert.Equal(t, map[string]interface{}{"1": "one"}, val.G())
+
+		val, err = ToStringMapE(&map[interface{}]interface{}{"1": "one"})
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"1": "one"}, val)
+		assert.Equal(t, map[string]interface{}{"1": "one"}, val.G())
+
+		val, err = ToStringMapE(map[string]interface{}{"1": "one"})
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"1": "one"}, val)
+		assert.Equal(t, map[string]interface{}{"1": "one"}, val.G())
+
+		val, err = ToStringMapE(&map[interface{}]interface{}{"1": "one"})
+		assert.Nil(t, err)
+		assert.Equal(t, &StringMap{"1": "one"}, val)
+		assert.Equal(t, map[string]interface{}{"1": "one"}, val.G())
+	}
+
 	// invalid
 	{
 		val, err := ToStringMapE(nil)
@@ -3824,7 +3944,7 @@ func TestToStringMapE(t *testing.T) {
 		assert.Equal(t, &StringMap{}, val)
 
 		val, err = ToStringMapE(&TestObj{})
-		assert.Equal(t, "failed to convert type *n.TestObj to a StringMap", err.Error())
+		assert.Equal(t, "unable to convert type *n.TestObj to a StringMap", err.Error())
 		assert.Equal(t, &StringMap{}, val)
 	}
 
@@ -3902,42 +4022,6 @@ foo3: bar3
 		assert.Nil(t, err)
 		assert.Equal(t, &StringMap{"foo": []interface{}{map[string]interface{}{"name": "foo1", "val": map[string]interface{}{"bar1": float64(1)}}, map[string]interface{}{"name": "foo2", "val": map[string]interface{}{"bar2": float64(1)}}}}, val)
 		assert.Equal(t, map[string]interface{}{"foo": []interface{}{map[string]interface{}{"name": "foo1", "val": map[string]interface{}{"bar1": float64(1)}}, map[string]interface{}{"name": "foo2", "val": map[string]interface{}{"bar2": float64(1)}}}}, val.G())
-	}
-
-	// map[string]string
-	{
-		val, err := ToStringMapE(map[string]string{"1": "one"})
-		assert.Nil(t, err)
-		assert.Equal(t, &StringMap{"1": "one"}, val)
-		assert.Equal(t, map[string]interface{}{"1": "one"}, val.G())
-
-		val, err = ToStringMapE(&map[string]string{"1": "one", "2": "two"})
-		assert.Nil(t, err)
-		assert.Equal(t, &StringMap{"1": "one", "2": "two"}, val)
-		assert.Equal(t, map[string]interface{}{"1": "one", "2": "two"}, val.G())
-	}
-
-	// map[string]interface{}
-	{
-		val, err := ToStringMapE(map[interface{}]interface{}{"1": "one"})
-		assert.Nil(t, err)
-		assert.Equal(t, &StringMap{"1": "one"}, val)
-		assert.Equal(t, map[string]interface{}{"1": "one"}, val.G())
-
-		val, err = ToStringMapE(&map[interface{}]interface{}{"1": "one"})
-		assert.Nil(t, err)
-		assert.Equal(t, &StringMap{"1": "one"}, val)
-		assert.Equal(t, map[string]interface{}{"1": "one"}, val.G())
-
-		val, err = ToStringMapE(map[string]interface{}{"1": "one"})
-		assert.Nil(t, err)
-		assert.Equal(t, &StringMap{"1": "one"}, val)
-		assert.Equal(t, map[string]interface{}{"1": "one"}, val.G())
-
-		val, err = ToStringMapE(&map[interface{}]interface{}{"1": "one"})
-		assert.Nil(t, err)
-		assert.Equal(t, &StringMap{"1": "one"}, val)
-		assert.Equal(t, map[string]interface{}{"1": "one"}, val.G())
 	}
 }
 

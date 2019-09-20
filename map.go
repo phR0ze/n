@@ -100,8 +100,10 @@ func Map(obj interface{}) (new IMap) {
 
 	// StringMap
 	// ---------------------------------------------------------------------------------------------
-	case []byte, *[]byte, string, *string, *StringMap, *map[string]interface{}, *map[string]string, *map[string]float32,
-		*map[string]float64, *map[string]int, *map[string]int64:
+	case []byte, *[]byte, string, *string, *StringMap, *map[string]interface{}, *map[string]string,
+		*map[string]bool, *map[string]float32, *map[string]float64,
+		*map[string]int, *map[string]int8, *map[string]int16, *map[string]int32, *map[string]int64,
+		*map[string]uint, *map[string]uint8, *map[string]uint16, *map[string]uint32, *map[string]uint64:
 		new, _ = ToStringMapE(x)
 
 	// RefMap
