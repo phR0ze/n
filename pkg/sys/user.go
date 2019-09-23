@@ -6,9 +6,9 @@ import (
 	"os/user"
 	"path/filepath"
 	"strconv"
-	"syscall"
 
 	"github.com/pkg/errors"
+	"golang.org/x/sys/unix"
 )
 
 // User wraps the os.User interface and provide additional helper functions
@@ -179,11 +179,11 @@ func Sudo() (err error) {
 // http://timetobleed.com/5-things-you-dont-know-about-user-ids-that-will-destroy-you/
 // requires you drop the group before the user and use a safe solution
 func SwitchUser(uid, euid, suid, gid, egid, sgid int) (err error) {
-	if err = syscall.Setresgid(gid, egid, sgid); err != nil {
+	if err = unix.Setresgid(gid, egid, sgid); err != nil {
 		err = errors.Wrap(err, "failed to set gid while switching user")
 		return
 	}
-	if err = syscall.Setresuid(uid, euid, suid); err != nil {
+	if err = unix.Setresuid(uid, euid, suid); err != nil {
 		err = errors.Wrap(err, "failed to set uid while switching user")
 		return
 	}
