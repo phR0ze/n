@@ -7,7 +7,7 @@ ${NAME}:
 	go build -o bin/${NAME} .
 	
 mech:
-	go build -o bin/mech pkg/net/mech/example/mech.go
+	go build -o bin/mech pkg/net/mech/test/mech.go
 
 test: ${NAME}
 	@echo -e "\nRunning all go tests:"
@@ -25,6 +25,7 @@ test: ${NAME}
 	go test ./pkg/opt
 	go test -gcflags=-l ./pkg/sys
 	go test ./pkg/term
+	go test ./pkg/term/color
 	go test -gcflags=-l ./pkg/time
 	go test ./pkg/tmpl
 

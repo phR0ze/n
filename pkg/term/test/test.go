@@ -18,7 +18,7 @@ func main() {
 	//test_Size()
 	//test_Prompt()
 	//test_PromptRes()
-	test_PromptResClass()
+	//test_PromptResClass()
 }
 
 func test_Prompt() {
