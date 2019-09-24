@@ -719,9 +719,14 @@ func TestSharedDir(t *testing.T) {
 }
 
 func TestSlicePath(t *testing.T) {
-	assert.Equal(t, "", SlicePath("", 0, -1))
+	// simply return the value
+	assert.Equal(t, "", SlicePath("", -4, -1))
 	assert.Equal(t, "/", SlicePath("/", 0, -1))
 	assert.Equal(t, "/foo", SlicePath("/foo", 0, -1))
+
+	// Ensure that asking for more than exists drops to what is available not one item
+	assert.Equal(t, "/foo/bar/one", SlicePath("/foo/bar/one", -5, -1))
+	assert.Equal(t, "foo/bar/one/sub", SlicePath("foo/bar/one/sub", -5, -1))
 
 	// Handle slash at end
 	assert.Equal(t, "/foo", SlicePath("/foo/bar/one/", 0, 0))

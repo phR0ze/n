@@ -375,32 +375,36 @@ func SharedDir(first, second string) (result string) {
 
 // SlicePath provides a ruby like slice function for path manipulation
 func SlicePath(target string, i, j int) (result string) {
-
-	// Drop the trailing slash if it exists
-	if len(target) > 1 && rune(target[len(target)-1]) == '/' {
-		target = target[:len(target)-1]
-	}
-
+	root := false
 	x := strings.Split(target, "/")
 
-	// Convert to positive notation to simplify logic
+	// Drop leading/trailing slashes
+	if len(x) > 1 && x[len(x)-1] == "" {
+		x = x[:len(x)-1]
+	}
+	if len(x) > 1 && x[0] == "" {
+		root = true
+		x = x[1:len(x)]
+	}
+
+	// Bail if there is nothing to do
+	if len(x) < 2 {
+		return target
+	}
+
+	// Slice and include root
 	if i < 0 {
 		i = len(x) + i
-	}
-
-	// Offset indices to include root
-	if target != "" && rune(target[0]) == '/' {
-		if i == 1 {
-			i--
-		} else if i == 0 && j >= 0 {
-			j++
-		} else if j > 0 {
-			i, j = i+1, j+1
+		if i < 0 {
+			i = 0
 		}
 	}
+	y := slice(x, i, j)
+	if root && i == 0 {
+		y = append([]string{""}, y...)
+	}
 
-	result = strings.Join(slice(x, i, j), "/")
-
+	result = strings.Join(y, "/")
 	return
 }
 
