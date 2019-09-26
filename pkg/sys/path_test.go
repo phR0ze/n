@@ -605,7 +605,6 @@ func TestReadDir(t *testing.T) {
 		dirs, err := ReadDir(testfile)
 		assert.Equal(t, ([]*FileInfo)(nil), dirs)
 		assert.True(t, strings.HasPrefix(err.Error(), "failed to read directory"))
-		assert.True(t, strings.Contains(err.Error(), ": readdirent"))
 	}
 
 	// writeonly directory
@@ -660,9 +659,8 @@ func TestReadDirnames(t *testing.T) {
 	// try a file
 	{
 		dirs, err := ReadDirnames(testfile)
-		assert.Equal(t, []string{}, dirs)
+		assert.True(t, len(dirs) == 0)
 		assert.True(t, strings.HasPrefix(err.Error(), "failed to read directory names for"))
-		assert.True(t, strings.Contains(err.Error(), ": readdirent"))
 	}
 
 	// writeonly directory
