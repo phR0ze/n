@@ -27,6 +27,43 @@ func (p *MapSlice) A() string {
 	return p.String()
 }
 
+// All tests if this Slice is not empty or optionally if it contains
+// all of the given variadic elements. Incompatible types will return false.
+func (p *MapSlice) All(elems ...interface{}) bool {
+	if p == nil || len(*p) == 0 {
+		return false
+	}
+
+	// Not looking for anything
+	if len(elems) == 0 {
+		return true
+	}
+
+	// Looking for something specific returns false if incompatible type
+	return p.AllS(elems)
+}
+
+// AllS tests if this Slice contains all of the given Slice's elements;
+// Incompatible types will return false;
+// Supports MapSlice, *MapSlice, []string or *[]string
+func (p *MapSlice) AllS(slice interface{}) bool {
+	if p == nil || len(*p) == 0 {
+		return false
+	}
+
+	panic("NOT IMPLEMENTED")
+	// if elems, err := ToMapSliceE(slice); err == nil {
+	// 	for i := range *elems {
+	// 		for j := range *p {
+	// 			if (*p)[j] == (*elems)[i] {
+	// 				return true
+	// 			}
+	// 		}
+	// 	}
+	// }
+	// return false
+}
+
 // Any tests if this Slice is not empty or optionally if it contains
 // any of the given variadic elements. Incompatible types will return false.
 func (p *MapSlice) Any(elems ...interface{}) bool {

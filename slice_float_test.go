@@ -102,6 +102,138 @@ func TestFloatSlice_NewFloatSliceV(t *testing.T) {
 	}
 }
 
+// All
+//--------------------------------------------------------------------------------------------------
+func ExampleFloatSlice_All_empty() {
+	slice := NewFloatSliceV()
+	fmt.Println(slice.All())
+	// Output: false
+}
+
+func ExampleFloatSlice_All_notEmpty() {
+	slice := NewFloatSliceV(1, 2, 3)
+	fmt.Println(slice.All())
+	// Output: true
+}
+
+func ExampleFloatSlice_All_contains() {
+	slice := NewFloatSliceV(1, 2, 3)
+	fmt.Println(slice.All(1))
+	// Output: true
+}
+
+func ExampleFloatSlice_All_containsAll() {
+	slice := NewFloatSliceV(1, 2, 3)
+	fmt.Println(slice.All(2, 1))
+	// Output: true
+}
+
+func TestFloatSlice_All(t *testing.T) {
+
+	// empty
+	var nilSlice *FloatSlice
+	assert.False(t, nilSlice.All())
+	assert.False(t, NewFloatSliceV().All())
+
+	// single
+	assert.True(t, NewFloatSliceV(2).All())
+
+	// invalid
+	assert.False(t, NewFloatSliceV(1, 2).All(TestObj{2}))
+
+	assert.True(t, NewFloatSliceV(1, 2, 3).All(2))
+	assert.False(t, NewFloatSliceV(1, 2, 3).All(4))
+	assert.True(t, NewFloatSliceV(1, 2, 3).All(2, 3))
+	assert.False(t, NewFloatSliceV(1, 2, 3).All(2, 5))
+
+	// conversion
+	assert.True(t, NewFloatSliceV(1, 2).All(Object{2}))
+	assert.True(t, NewFloatSliceV(1, 2, 3).All(int8(2)))
+	assert.True(t, NewFloatSliceV(1, 2, 3).All(int16(2)))
+	assert.True(t, NewFloatSliceV(1, 2, 3).All(int32(2)))
+	assert.True(t, NewFloatSliceV(1, 2, 3).All(int64(2)))
+	assert.True(t, NewFloatSliceV(1, 2, 3).All(uint8(2)))
+	assert.True(t, NewFloatSliceV(1, 2, 3).All(uint16(2)))
+	assert.True(t, NewFloatSliceV(1, 2, 3).All(uint32(2)))
+	assert.True(t, NewFloatSliceV(1, 2, 3).All(uint64(2)))
+	assert.True(t, NewFloatSliceV(1, 2, 3).All(uint64(2)))
+}
+
+// AllS
+//--------------------------------------------------------------------------------------------------
+func ExampleFloatSlice_AllS() {
+	slice := NewFloatSliceV(1, 2, 3)
+	fmt.Println(slice.AllS([]float64{2, 1}))
+	// Output: true
+}
+
+func TestFloatSlice_AllS(t *testing.T) {
+	// nil
+	{
+		var slice *FloatSlice
+		assert.False(t, slice.AllS([]float64{1}))
+		assert.True(t, NewFloatSliceV(1.0).AllS(nil))
+	}
+
+	// []float64
+	{
+		assert.True(t, NewFloatSliceV(1.0, 2.0, 3.0).AllS([]float64{1}))
+		assert.True(t, NewFloatSliceV(1.0, 2.0, 3.0).AllS([]float64{2, 3}))
+		assert.False(t, NewFloatSliceV(1, 2, 3).AllS([]float64{2, 5}))
+	}
+
+	// *[]float64
+	{
+		assert.True(t, NewFloatSliceV(1, 2, 3).AllS(&([]float64{1})))
+		assert.True(t, NewFloatSliceV(1, 2, 3).AllS(&([]float64{2, 3})))
+		assert.False(t, NewFloatSliceV(1, 2, 3).AllS(&([]float64{2, 5})))
+	}
+
+	// Object
+	{
+		assert.True(t, NewFloatSliceV(1, 2, 3).AllS([]Object{{1}, {2}}))
+		assert.True(t, NewFloatSliceV(1, 2, 3).AllS([]Object{{1}, {3}}))
+		assert.False(t, NewFloatSliceV(1, 2, 3).AllS([]Object{{2}, {5}}))
+	}
+
+	// ISlice
+	{
+		assert.True(t, NewFloatSliceV(1, 2, 3).AllS(ISlice(NewFloatSliceV(1))))
+		assert.True(t, NewFloatSliceV(1, 2, 3).AllS(ISlice(NewFloatSliceV(2, 3))))
+		assert.False(t, NewFloatSliceV(1, 2, 3).AllS(ISlice(NewFloatSliceV(2, 5))))
+	}
+
+	// FloatSlice
+	{
+		assert.True(t, NewFloatSliceV(1, 2, 3).AllS(*NewFloatSliceV(1)))
+		assert.True(t, NewFloatSliceV(1, 2, 3).AllS(*NewFloatSliceV(2, 3)))
+		assert.False(t, NewFloatSliceV(1, 2, 3).AllS(*NewFloatSliceV(2, 5)))
+	}
+
+	// *FloatSlice
+	{
+		assert.True(t, NewFloatSliceV(1, 2, 3).AllS(NewFloatSliceV(1)))
+		assert.True(t, NewFloatSliceV(1, 2, 3).AllS(NewFloatSliceV(2, 3)))
+		assert.False(t, NewFloatSliceV(1, 2, 3).AllS(NewFloatSliceV(2, 5)))
+	}
+
+	// nothing to find
+	assert.True(t, NewFloatSliceV(1, 2).AllS(nil))
+	assert.True(t, NewFloatSliceV(1, 2).AllS((*[]float64)(nil)))
+	assert.True(t, NewFloatSliceV(1, 2).AllS((*FloatSlice)(nil)))
+
+	// invalid typek
+	assert.False(t, NewFloatSliceV(1, 2).AllS([]string{"bob"}))
+
+	// Conversion
+	{
+		assert.True(t, NewFloatSliceV(1, 2, 3).AllS(NewFloatSliceV(int64(1))))
+		assert.True(t, NewFloatSliceV(1, 2, 3).AllS(NewFloatSliceV("2")))
+		assert.True(t, NewFloatSliceV(1, 2, 3).AllS(NewFloatSliceV(true)))
+		assert.True(t, NewFloatSliceV(1, 2, 3).AllS(NewFloatSliceV(Str("3"))))
+	}
+}
+
 // Any
 //--------------------------------------------------------------------------------------------------
 // func BenchmarkFloatSlice_Any_Go(t *testing.B) {

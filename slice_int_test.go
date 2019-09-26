@@ -104,6 +104,137 @@ func TestIntSlice_NewIntSliceV(t *testing.T) {
 	}
 }
 
+// All
+//--------------------------------------------------------------------------------------------------
+func ExampleIntSlice_All_empty() {
+	slice := NewIntSliceV()
+	fmt.Println(slice.All())
+	// Output: false
+}
+
+func ExampleIntSlice_All_notEmpty() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.All())
+	// Output: true
+}
+
+func ExampleIntSlice_All_contains() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.All(1))
+	// Output: true
+}
+
+func ExampleIntSlice_All_containsAll() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.All(2, 1))
+	// Output: true
+}
+
+func TestIntSlice_All(t *testing.T) {
+
+	// empty
+	var nilSlice *IntSlice
+	assert.False(t, nilSlice.All())
+	assert.False(t, NewIntSliceV().All())
+
+	// single
+	assert.True(t, NewIntSliceV(2).All())
+
+	// invalid
+	assert.False(t, NewIntSliceV(1, 2).All(TestObj{2}))
+
+	assert.True(t, NewIntSliceV(1, 2, 3).All(2))
+	assert.False(t, NewIntSliceV(1, 2, 3).All(4))
+	assert.True(t, NewIntSliceV(1, 2, 3).All(2, 3))
+	assert.False(t, NewIntSliceV(1, 2, 3).All(2, 5))
+
+	// conversion
+	assert.True(t, NewIntSliceV(1, 2).All(Object{2}))
+	assert.True(t, NewIntSliceV(1, 2, 3).All(int8(2)))
+	assert.True(t, NewIntSliceV(1, 2, 3).All(int16(2)))
+	assert.True(t, NewIntSliceV(1, 2, 3).All(int32(2)))
+	assert.True(t, NewIntSliceV(1, 2, 3).All(int64(2)))
+	assert.True(t, NewIntSliceV(1, 2, 3).All(uint8(2)))
+	assert.True(t, NewIntSliceV(1, 2, 3).All(uint16(2)))
+	assert.True(t, NewIntSliceV(1, 2, 3).All(uint32(2)))
+	assert.True(t, NewIntSliceV(1, 2, 3).All(uint64(2)))
+	assert.True(t, NewIntSliceV(1, 2, 3).All(uint64(2)))
+}
+
+// AllS
+//--------------------------------------------------------------------------------------------------
+func ExampleIntSlice_AllS() {
+	slice := NewIntSliceV(1, 2, 3)
+	fmt.Println(slice.AllS([]int{2, 1}))
+	// Output: true
+}
+
+func TestIntSlice_AllS(t *testing.T) {
+	// nil
+	{
+		var slice *IntSlice
+		assert.False(t, slice.AllS([]int{1}))
+		assert.True(t, NewIntSliceV(1).AllS(nil))
+	}
+
+	// []int
+	{
+		assert.True(t, NewIntSliceV(1, 2, 3).AllS([]int{1}))
+		assert.True(t, NewIntSliceV(1, 2, 3).AllS([]int{2, 3}))
+		assert.False(t, NewIntSliceV(1, 2, 3).AllS([]int{2, 5}))
+	}
+
+	// *[]int
+	{
+		assert.True(t, NewIntSliceV(1, 2, 3).AllS(&([]int{1})))
+		assert.True(t, NewIntSliceV(1, 2, 3).AllS(&([]int{2, 3})))
+		assert.False(t, NewIntSliceV(1, 2, 3).AllS(&([]int{2, 5})))
+	}
+
+	// Object
+	{
+		assert.True(t, NewIntSliceV(1, 2, 3).AllS([]Object{{1}, {2}}))
+		assert.True(t, NewIntSliceV(1, 2, 3).AllS([]Object{{1}, {3}}))
+		assert.False(t, NewIntSliceV(1, 2, 3).AllS([]Object{{2}, {5}}))
+	}
+
+	// Slice
+	{
+		assert.True(t, NewIntSliceV(1, 2, 3).AllS(ISlice(NewIntSliceV(1))))
+		assert.True(t, NewIntSliceV(1, 2, 3).AllS(ISlice(NewIntSliceV(2, 3))))
+		assert.False(t, NewIntSliceV(1, 2, 3).AllS(ISlice(NewIntSliceV(2, 5))))
+	}
+
+	// IntSlice
+	{
+		assert.True(t, NewIntSliceV(1, 2, 3).AllS(*NewIntSliceV(1)))
+		assert.True(t, NewIntSliceV(1, 2, 3).AllS(*NewIntSliceV(2, 3)))
+		assert.False(t, NewIntSliceV(1, 2, 3).AllS(*NewIntSliceV(2, 5)))
+	}
+
+	// *IntSlice
+	{
+		assert.True(t, NewIntSliceV(1, 2, 3).AllS(NewIntSliceV(1)))
+		assert.True(t, NewIntSliceV(1, 2, 3).AllS(NewIntSliceV(2, 3)))
+		assert.False(t, NewIntSliceV(1, 2, 3).AllS(NewIntSliceV(2, 5)))
+	}
+
+	// nothing to find
+	assert.True(t, NewIntSliceV(1, 2).AllS(nil))
+	assert.True(t, NewIntSliceV(1, 2).AllS((*[]int)(nil)))
+	assert.True(t, NewIntSliceV(1, 2).AllS((*IntSlice)(nil)))
+
+	assert.False(t, NewIntSliceV(1, 2).AllS([]string{"bob"}))
+
+	// Conversion
+	{
+		assert.True(t, NewIntSliceV(1, 2, 3).AllS(NewIntSliceV(int64(1))))
+		assert.True(t, NewIntSliceV(1, 2, 3).AllS(NewIntSliceV("2")))
+		assert.True(t, NewIntSliceV(1, 2, 3).AllS(NewIntSliceV(true)))
+		assert.True(t, NewIntSliceV(1, 2, 3).AllS(NewIntSliceV(Str("3"))))
+	}
+}
+
 // Any
 //--------------------------------------------------------------------------------------------------
 func BenchmarkIntSlice_Any_Go(t *testing.B) {

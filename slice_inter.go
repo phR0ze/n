@@ -39,6 +39,47 @@ func (p *InterSlice) A() string {
 	return p.String()
 }
 
+// All tests if this Slice is not empty or optionally if it contains
+// all of the given variadic elements. Incompatible types will return false.
+func (p *InterSlice) All(elems ...interface{}) bool {
+
+	// No elements
+	if p.Nil() || p.Len() == 0 {
+		return false
+	}
+
+	// Not looking for anything
+	if len(elems) == 0 {
+		return true
+	}
+
+	// Looking for something specific returns false if incompatible type
+	return p.AllS(elems)
+}
+
+// AllS tests if this Slice contains all of the given Slice's elements.
+// Incompatible types will return false.
+// Supports InterSlice, *InterSlice, Slice and Go slice types
+func (p *InterSlice) AllS(slice interface{}) bool {
+	if p == nil || len(*p) == 0 {
+		return false
+	}
+	elems := ToInterSlice(slice)
+	for i := range *elems {
+		found := false
+		for j := range *p {
+			if (*p)[j] == (*elems)[i] {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
+}
+
 // Any tests if this Slice is not empty or optionally if it contains
 // any of the given variadic elements. Incompatible types will return false.
 func (p *InterSlice) Any(elems ...interface{}) bool {

@@ -10,6 +10,8 @@ import (
 // underlying Array.
 type ISlice interface {
 	A() string                                         // A is an alias to String for brevity
+	All(elems ...interface{}) bool                     // All tests if this Slice is not empty or optionally if it contains all of the given variadic elements.
+	AllS(slice interface{}) bool                       // AnyS tests if this Slice contains all of the given Slice's elements.
 	Any(elems ...interface{}) bool                     // Any tests if this Slice is not empty or optionally if it contains any of the given variadic elements.
 	AnyS(slice interface{}) bool                       // AnyS tests if this Slice contains any of the given Slice's elements.
 	AnyW(sel func(O) bool) bool                        // AnyW tests if this Slice contains any that match the lambda selector.

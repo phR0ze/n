@@ -134,6 +134,79 @@ func (p *RefSlice) A() string {
 	return p.String()
 }
 
+// All tests if this Slice is not empty or optionally if it contains
+// all of the given variadic elements; Incompatible types will return false.
+func (p *RefSlice) All(elems ...interface{}) bool {
+
+	// No elements
+	if p.Nil() || p.Len() == 0 {
+		return false
+	}
+
+	// Not looking for anything
+	if len(elems) == 0 {
+		return true
+	}
+
+	// Looking for something specific returns false if incompatible type
+	for i := range elems {
+		x := reflect.ValueOf(elems[i])
+		if p.v.Type().Elem() != x.Type() {
+			break
+		} else {
+			for j := 0; j < p.v.Len(); j++ {
+				if p.v.Index(j).Interface() == x.Interface() {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+// AllS tests if this Slice contains all of the given Slice's elements;
+// Incompatible types will return false;
+// Supports RefSlice, *RefSlice, Slice and Go slice types
+func (p *RefSlice) AllS(slice interface{}) bool {
+
+	// No elements
+	if p.Nil() || p.Len() == 0 {
+		return false
+	}
+
+	// Handle supported types
+	var v reflect.Value
+	if x, ok := slice.(RefSlice); ok {
+		if !x.Nil() {
+			v = *(x.v)
+		}
+	} else if x, ok := slice.(*RefSlice); ok {
+		if !x.Nil() {
+			v = *(x.v)
+		}
+	} else if x, ok := slice.(ISlice); ok {
+		if !x.Nil() {
+			v = reflect.ValueOf(x.O())
+		}
+	} else {
+		v = reflect.ValueOf(slice)
+	}
+	if !v.IsValid() {
+		return false
+	}
+
+	if p.v.Type() == v.Type() {
+		for i := 0; i < v.Len(); i++ {
+			for j := 0; j < p.v.Len(); j++ {
+				if p.v.Index(j).Interface() == v.Index(i).Interface() {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
 // Any tests if this Slice is not empty or optionally if it contains
 // any of the given variadic elements. Incompatible types will return false.
 func (p *RefSlice) Any(elems ...interface{}) bool {

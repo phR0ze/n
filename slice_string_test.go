@@ -115,6 +115,130 @@ func TestStringSlice_NewStringSliceV(t *testing.T) {
 	}
 }
 
+// All
+//--------------------------------------------------------------------------------------------------
+func ExampleStringSlice_All_empty() {
+	slice := NewStringSliceV()
+	fmt.Println(slice.All())
+	// Output: false
+}
+
+func ExampleStringSlice_All_notEmpty() {
+	slice := NewStringSliceV("1", "2", "3")
+	fmt.Println(slice.All())
+	// Output: true
+}
+
+func ExampleStringSlice_All_contains() {
+	slice := NewStringSliceV("1", "2", "3")
+	fmt.Println(slice.All("1"))
+	// Output: true
+}
+
+func ExampleStringSlice_All_containsAll() {
+	slice := NewStringSliceV("1", "2", "3")
+	fmt.Println(slice.All("3", "1"))
+	// Output: true
+}
+
+func TestStringSlice_All(t *testing.T) {
+
+	// empty
+	var nilSlice *StringSlice
+	assert.False(t, nilSlice.All())
+	assert.False(t, NewStringSliceV().All())
+
+	// single
+	assert.True(t, NewStringSliceV("2").All())
+
+	// invalid
+	assert.False(t, NewStringSliceV("1", "2").All(TestObj{"2"}))
+
+	assert.True(t, NewStringSliceV("1", "2", "3").All("2"))
+	assert.False(t, NewStringSliceV("1", "2", "3").All(4))
+	assert.True(t, NewStringSliceV("1", "2", "3").All(2, "3"))
+	assert.False(t, NewStringSliceV("1", "2", "3").All(4, 5))
+
+	// conversion
+	assert.True(t, NewStringSliceV("1", "2").All(Object{2}))
+	assert.True(t, NewStringSliceV("1", "2", "3").All(int8(2)))
+	assert.True(t, NewStringSliceV("1", "2", "3").All(int16(2)))
+	assert.True(t, NewStringSliceV("1", "2", "3").All(int32('2')))
+	assert.False(t, NewStringSliceV("1", "2", "3").All(int32(2)))
+	assert.True(t, NewStringSliceV("1", "2", "3").All(int64(2)))
+	assert.True(t, NewStringSliceV("1", "2", "3").All(uint8('2')))
+	assert.False(t, NewStringSliceV("1", "2", "3").All(uint8(2)))
+	assert.True(t, NewStringSliceV("1", "2", "3").All(uint16(2)))
+	assert.True(t, NewStringSliceV("1", "2", "3").All(uint32(2)))
+	assert.True(t, NewStringSliceV("1", "2", "3").All(uint64(2)))
+	assert.True(t, NewStringSliceV("1", "2", "3").All(uint64(2)))
+}
+
+// AllS
+//--------------------------------------------------------------------------------------------------
+func ExampleStringSlice_AllS() {
+	slice := NewStringSliceV("1", "2", "3")
+	fmt.Println(slice.AllS([]string{"2", "1"}))
+	// Output: true
+}
+
+func TestStringSlice_AllS(t *testing.T) {
+	// nil
+	{
+		var slice *StringSlice
+		assert.False(t, slice.AllS([]string{"1"}))
+		assert.True(t, NewStringSliceV("1").AllS(nil))
+	}
+
+	// []string
+	{
+		assert.True(t, NewStringSliceV("1", "2", "3").AllS([]string{"1"}))
+		assert.True(t, NewStringSliceV("1", "2", "3").AllS([]string{"2", "3"}))
+		assert.False(t, NewStringSliceV("1", "2", "3").AllS([]string{"2", "5"}))
+	}
+
+	// *[]string
+	{
+		assert.True(t, NewStringSliceV("1", "2", "3").AllS(&([]string{"1"})))
+		assert.True(t, NewStringSliceV("1", "2", "3").AllS(&([]string{"2", "3"})))
+		assert.False(t, NewStringSliceV("1", "2", "3").AllS(&([]string{"2", "5"})))
+	}
+
+	// Slice
+	{
+		assert.True(t, NewStringSliceV("1", "2", "3").AllS(ISlice(NewStringSliceV("1"))))
+		assert.True(t, NewStringSliceV("1", "2", "3").AllS(ISlice(NewStringSliceV("2", "3"))))
+		assert.False(t, NewStringSliceV("1", "2", "3").AllS(ISlice(NewStringSliceV("2", "5"))))
+	}
+
+	// StringSlice
+	{
+		assert.True(t, NewStringSliceV("1", "2", "3").AllS(*NewStringSliceV("1")))
+		assert.True(t, NewStringSliceV("1", "2", "3").AllS(*NewStringSliceV("2", "3")))
+		assert.False(t, NewStringSliceV("1", "2", "3").AllS(*NewStringSliceV("2", "5")))
+	}
+
+	// *StringSlice
+	{
+		assert.True(t, NewStringSliceV("1", "2", "3").AllS(NewStringSliceV("1")))
+		assert.True(t, NewStringSliceV("1", "2", "3").AllS(NewStringSliceV("2", "3")))
+		assert.False(t, NewStringSliceV("1", "2", "3").AllS(NewStringSliceV("2", "5")))
+	}
+
+	// nothing to find to found
+	assert.True(t, NewStringSliceV("1", "2").AllS(nil))
+	assert.True(t, NewStringSliceV("1", "2").AllS((*[]string)(nil)))
+	assert.True(t, NewStringSliceV("1", "2").AllS((*StringSlice)(nil)))
+
+	// Conversion
+	{
+		assert.True(t, NewStringSliceV("1", "2", "3").AllS(NewStringSliceV(int64(1))))
+		assert.True(t, NewStringSliceV("1", "2", "3").AllS(NewStringSliceV(2)))
+		assert.False(t, NewStringSliceV("1", "2", "3").AllS(NewStringSliceV(true)))
+		assert.True(t, NewStringSliceV("1", "2", "3").AllS(NewStringSliceV(Char('3'))))
+	}
+}
+
 // Any
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Any_Go(t *testing.B) {

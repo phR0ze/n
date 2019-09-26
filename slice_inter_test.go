@@ -132,6 +132,121 @@ func TestInterSlice_NewInterSliceV(t *testing.T) {
 	}
 }
 
+// All
+//--------------------------------------------------------------------------------------------------
+func ExampleInterSlice_All_empty() {
+	slice := NewInterSliceV()
+	fmt.Println(slice.All())
+	// Output: false
+}
+
+func ExampleInterSlice_All_notEmpty() {
+	slice := NewInterSliceV(1, 2, 3)
+	fmt.Println(slice.All())
+	// Output: true
+}
+
+func ExampleInterSlice_All_contains() {
+	slice := NewInterSliceV(1, 2, 3)
+	fmt.Println(slice.All(1))
+	// Output: true
+}
+
+func ExampleInterSlice_All_containsAll() {
+	slice := NewInterSliceV(1, 2, 3)
+	fmt.Println(slice.All(2, 1))
+	// Output: true
+}
+
+func TestInterSlice_All(t *testing.T) {
+	var slice *InterSlice
+	assert.False(t, slice.All())
+	assert.False(t, NewInterSliceV().All())
+	assert.True(t, NewInterSliceV().Append("2").All())
+
+	// bool
+	assert.True(t, NewInterSliceV(false, true).All(true))
+	assert.False(t, NewInterSliceV(true, true).All(false))
+	assert.True(t, NewInterSliceV(true, true).All(true, true))
+	assert.False(t, NewInterSliceV(true, true).All(false, false))
+
+	// int
+	assert.True(t, NewInterSliceV(1, 2, 3).All(2))
+	assert.False(t, NewInterSliceV(1, 2, 3).All(4))
+	assert.True(t, NewInterSliceV(1, 2, 3).All(2, 3))
+	assert.False(t, NewInterSliceV(1, 2, 3).All(2, 5))
+
+	// int64
+	assert.True(t, NewInterSliceV(int64(1), int64(2), int64(3)).All(int64(2)))
+	assert.False(t, NewInterSliceV(int64(1), int64(2), int64(3)).All(int64(4)))
+	assert.True(t, NewInterSliceV(int64(1), int64(2), int64(3)).All(int64(3), int64(2)))
+	assert.False(t, NewInterSliceV(int64(1), int64(2), int64(3)).All(int64(4), int64(5)))
+
+	// string
+	assert.True(t, NewInterSliceV("1", "2", "3").All("2"))
+	assert.False(t, NewInterSliceV("1", "2", "3").All("4"))
+	assert.True(t, NewInterSliceV("1", "2", "3").All("3", "2"))
+	assert.False(t, NewInterSliceV("1", "2", "3").All("2", "5"))
+
+	// custom
+	assert.True(t, NewInterSliceV(Object{1}, Object{2}).All(Object{1}))
+	assert.False(t, NewInterSliceV(Object{1}, Object{2}).All(Object{3}))
+	assert.True(t, NewInterSliceV(Object{1}, Object{2}).All(Object{2}, Object{1}))
+	assert.False(t, NewInterSliceV(Object{1}, Object{2}).All(Object{2}, Object{5}))
+}
+
+// AllS
+//--------------------------------------------------------------------------------------------------
+func ExampleInterSlice_AllS() {
+	slice := NewInterSliceV(1, 2, 3)
+	fmt.Println(slice.AllS([]int{2, 1}))
+	// Output: true
+}
+
+func TestInterSlice_AllS(t *testing.T) {
+	var nilSlice *InterSlice
+	assert.False(t, nilSlice.AllS([]bool{true}))
+
+	// bool
+	assert.True(t, NewInterSliceV(true, true).AllS([]bool{true}))
+	assert.True(t, NewInterSliceV(true, true).AllS([]bool{true, true}))
+	assert.False(t, NewInterSliceV(true, true).AllS([]bool{false, false}))
+
+	// int
+	assert.True(t, NewInterSliceV(1, 2, 3).AllS([]int{1}))
+	assert.True(t, NewInterSliceV(1, 2, 3).AllS([]int{2, 3}))
+	assert.False(t, NewInterSliceV(1, 2, 3).AllS([]int{4, 5}))
+
+	// int64
+	assert.True(t, NewInterSliceV(int64(1), int64(2), int64(3)).AllS([]int64{int64(2)}))
+	assert.True(t, NewInterSliceV(int64(1), int64(2), int64(3)).AllS([]int64{int64(2), int64(2)}))
+	assert.False(t, NewInterSliceV(int64(1), int64(2), int64(3)).AllS([]int64{int64(2), int64(5)}))
+
+	// string
+	assert.True(t, NewInterSliceV("1", "2", "3").AllS([]string{"2"}))
+	assert.True(t, NewInterSliceV("1", "2", "3").AllS([]string{"2", "2"}))
+	assert.False(t, NewInterSliceV("1", "2", "3").AllS([]string{"2", "5"}))
+
+	// custom
+	assert.True(t, NewInterSliceV(Object{1}, Object{2}).AllS([]Object{{2}}))
+	assert.True(t, NewInterSliceV(Object{1}, Object{2}).AllS([]Object{{2}, {2}}))
+	assert.False(t, NewInterSliceV(Object{1}, Object{2}).AllS([]Object{{4}, {5}}))
+
+	// NewInterSliceV
+	assert.True(t, NewInterSliceV(1, 2).AllS(NewInterSliceV(2, 1)))
+	assert.False(t, NewInterSliceV(1, 2).AllS(NewInterSliceV(4, 3)))
+
+	// NewIntSliceV
+	assert.True(t, NewInterSliceV(1, 2).AllS(NewIntSliceV(2, 1)))
+	assert.False(t, NewInterSliceV(1, 2).AllS(NewIntSliceV(4, 3)))
+
+	// nothing to match
+	assert.True(t, NewInterSliceV(1, 2).AllS(nil))
+	assert.True(t, NewInterSliceV(1, 2).AllS((*[]int)(nil)))
+	assert.True(t, NewInterSliceV(1, 2).AllS((*IntSlice)(nil)))
+	assert.True(t, NewInterSliceV(1, 2).AllS((*InterSlice)(nil)))
+}
+
 // Any
 //--------------------------------------------------------------------------------------------------
 func ExampleInterSlice_Any_empty() {
