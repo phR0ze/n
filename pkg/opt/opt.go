@@ -1,13 +1,12 @@
-// Package opt provides a simple struct for options that can be passed in as an optional last
-// variadic parameter.
+// Package opt provides common properties for custom types and support for the options pattern.
 //
 // Opt was created with the intent of promoting a pattern for handling optional parameters to
-// functions. By making a parameter optional we effectively proved a third value of unset for
+// functions. By making a parameter optional we effectively provide a third value of unset for
 // a given param which other patterns don't have. For instance by passing in a struct as
 // options, you get the value and Go's default if not set, but you don't know if the not set
-// value was intentional where as with an option not existing know the user intended to not set
-// that option. This is an important distinction that the struct based option pattern does not
-// have.
+// value was intentional where as with an option not existing you know the user intended to not
+// set that option. This is an important distinction that the struct based option pattern does
+// not have.
 //
 // Options Pattern:
 //
@@ -15,12 +14,14 @@
 // supported and clearly call out in function comments which options are supported.
 //
 // Create helper functions that wrap your constants to allow the compiler to assist. The creation
-// functions should be called <option>Opt, getters Get<option>Opt and default helper
-// Default<option>Opt. e.g. DebugOpt, GetDebugOpt and DefaultDebugOpt
+// functions should be called <option>Opt, checkers <option>OptExists, getters Get<option>Opt
+// and default helper Default<option>Opt. e.g. DebugOpt, DebugOptExists, GetDebugOpt and
+// DefaultDebugOpt
 //
-// Properties Pattern:
+// Common Properties:
 //
-// Custom types often need similar properties and the <properties>Props helper structs
+// To support the options pattern I've included some common reusable properties that custom types
+// can inherit from and their supporting option helper functions.
 package opt
 
 import (
