@@ -44,9 +44,9 @@ func New(obj interface{}) (new *Struct) {
 	return
 }
 
-// Init all the string fields to the names of the fields;
+// Init all the string fields to the names of the fields and returns a reference to the struct;
 // panics if obj is not a non nil struct/*struct type.
-func Init(obj interface{}) {
+func Init(obj interface{}) interface{} {
 	st := New(obj)
 	strtype := reflect.TypeOf("")
 	for i, field := range st.Fields() {
@@ -54,6 +54,8 @@ func Init(obj interface{}) {
 			st.SetFieldByIndex(i, field.Name, strtype, field.Type)
 		}
 	}
+
+	return st.p.Interface()
 }
 
 // Fields returns all the field names as a []string

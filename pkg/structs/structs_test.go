@@ -40,9 +40,11 @@ func TestInitStrs(t *testing.T) {
 	foo := &Foo{}
 	assert.Equal(t, "", foo.Bob)
 	assert.Equal(t, "", foo.foo)
-	Init(foo)
+	ref := Init(foo)
 	assert.Equal(t, "Bob", foo.Bob)
 	assert.Equal(t, "foo", foo.foo)
+
+	assert.Equal(t, &Foo{Bob: "Bob", foo: "foo"}, ref.(*Foo))
 }
 
 func TestInit_Nil(t *testing.T) {
