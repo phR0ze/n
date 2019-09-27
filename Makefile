@@ -23,6 +23,7 @@ test: ${NAME}
 	go test ./pkg/futil
 	go test ./pkg/net
 	go test ./pkg/opt
+	go test ./pkg/structs
 	go test -gcflags=-l ./pkg/sys
 	go test ./pkg/term
 	go test ./pkg/term/color
