@@ -197,6 +197,11 @@ func Dirs(target string) (result []string) {
 	return
 }
 
+// Executable simply wraps os.Executable for convenience
+func Executable() (string, error) {
+	return os.Executable()
+}
+
 // Expand the path to include the home prefix if necessary
 func Expand(target string) (path string, err error) {
 	path = target
