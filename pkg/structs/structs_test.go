@@ -9,7 +9,7 @@ import (
 type Foo struct {
 	Bob string
 	foo string
-	bar int
+	i   int
 }
 
 func TestNew(t *testing.T) {
@@ -54,15 +54,6 @@ func TestInit_Nil(t *testing.T) {
 	Init((*Foo)(nil))
 }
 
-func TestInit_Panic(t *testing.T) {
-	defer func() {
-		if msg := recover(); msg != nil {
-			assert.Equal(t, "structs.InitStrs requires a struct pointer type not a struct", msg)
-		}
-	}()
-	Init(Foo{})
-}
-
 func TestFields(t *testing.T) {
 	st := New(Foo{})
 	assert.NotNil(t, st)
@@ -70,5 +61,28 @@ func TestFields(t *testing.T) {
 	assert.Len(t, fields, 3)
 	assert.Equal(t, "Bob", fields[0].Name)
 	assert.Equal(t, "foo", fields[1].Name)
-	assert.Equal(t, "bar", fields[2].Name)
+	assert.Equal(t, "i", fields[2].Name)
+}
+
+func TestSetFieldByIndex(t *testing.T) {
+
+	// int64 - not set as not same type
+	{
+		foo := &Foo{}
+		st := New(foo)
+		assert.NotNil(t, st)
+		assert.Equal(t, 0, foo.i)
+		st.SetFieldByIndex(2, int64(1))
+		assert.Equal(t, 0, foo.i)
+	}
+
+	// int - set as same type
+	{
+		foo := &Foo{}
+		st := New(foo)
+		assert.NotNil(t, st)
+		assert.Equal(t, 0, foo.i)
+		st.SetFieldByIndex(2, 1)
+		assert.Equal(t, 1, foo.i)
+	}
 }

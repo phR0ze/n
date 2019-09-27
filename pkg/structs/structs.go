@@ -15,30 +15,26 @@ import (
 
 // Struct provides a reflection wrapper for structs
 type Struct struct {
-	o  interface{}   // struct object were working with
-	v  reflect.Value // value to object
-	ov reflect.Value // value of original object
-	k  reflect.Kind  // kind of the object
-	ok reflect.Kind  // kind of original object
+	v reflect.Value // value to object
+	k reflect.Kind  // kind of the object
+	p reflect.Value // pointer to object
 }
 
 // New converts a given struct to a *Struct to work with it in reflection;
-// panics if obj is not a struct type.
+// panics if obj is not a non nil struct/*struct type.
 func New(obj interface{}) (new *Struct) {
-	new = &Struct{o: obj}
+	new = &Struct{}
 
-	// Get reflection handles
-	new.ov = reflect.ValueOf(obj)
-	new.ok = new.ov.Kind()
-
-	// Dereference pointers
-	if new.ok == reflect.Ptr {
-		new.v = new.ov.Elem()
-		new.k = new.v.Kind()
-	} else {
-		new.v = new.ov
-		new.k = new.ok
+	// Ensure we always have an addressible type
+	new.v = reflect.ValueOf(obj)
+	if new.v.Kind() != reflect.Ptr {
+		v := reflect.New(new.v.Type())
+		v.Elem().Set(new.v)
+		new.v = v
 	}
+	new.p = new.v
+	new.v = new.v.Elem()
+	new.k = new.v.Kind()
 
 	// Panic if we don't have the right kind
 	if new.k != reflect.Struct {
@@ -49,24 +45,13 @@ func New(obj interface{}) (new *Struct) {
 }
 
 // Init all the string fields to the names of the fields;
-// panics if obj is not a struct pointer type or is nil.
+// panics if obj is not a non nil struct/*struct type.
 func Init(obj interface{}) {
 	st := New(obj)
-	if st.ok != reflect.Ptr {
-		panic(fmt.Sprintf("structs.InitStrs requires a struct pointer type not a %v", st.ok))
-	}
-
 	strtype := reflect.TypeOf("")
 	for i, field := range st.Fields() {
 		if field.Type == strtype {
-			vfield := st.v.Field(i)
-
-			// Get the masked value of private fields via its address
-			if field.PkgPath != "" {
-				vfield = reflect.NewAt(field.Type, unsafe.Pointer(vfield.UnsafeAddr())).Elem()
-			}
-
-			vfield.SetString(field.Name)
+			st.SetFieldByIndex(i, field.Name, strtype, field.Type)
 		}
 	}
 }
@@ -81,7 +66,66 @@ func (st *Struct) Fields() (fields []reflect.StructField) {
 	return
 }
 
-// SetField sets the value of the field to the given value if they are the same type
-func (st *Struct) SetField() {
+// SetFieldByIndex sets the value of the field to the given value if they are the same type;
+// Sets private or public fields as called out by the index i. Optionially takes the value's
+// type and the field's value.
+func (st *Struct) SetFieldByIndex(i int, value interface{}, typ ...reflect.Type) {
+	vfield := st.v.Field(i)
 
+	// Determine value type
+	var valueType reflect.Type
+	if len(typ) != 0 {
+		valueType = typ[0]
+	} else {
+		valueType = reflect.TypeOf(value)
+	}
+
+	// Determine the field type
+	var fieldType reflect.Type
+	if len(typ) > 1 {
+		fieldType = typ[1]
+	} else {
+		fieldType = vfield.Type()
+	}
+
+	// Ensure we have the same types
+	if fieldType == valueType {
+
+		// Get the masked value of private fields via its address
+		if !vfield.CanSet() {
+			vfield = reflect.NewAt(fieldType, unsafe.Pointer(vfield.UnsafeAddr())).Elem()
+		}
+
+		// Set the value according to type
+		switch x := value.(type) {
+		case bool:
+			vfield.SetBool(x)
+		case float32:
+			vfield.SetFloat(float64(x))
+		case float64:
+			vfield.SetFloat(x)
+		case int:
+			vfield.SetInt(int64(x))
+		case int8:
+			vfield.SetInt(int64(x))
+		case int16:
+			vfield.SetInt(int64(x))
+		case int32:
+			vfield.SetInt(int64(x))
+		case int64:
+			vfield.SetInt(x)
+		case uint:
+			vfield.SetUint(uint64(x))
+		case uint8:
+			vfield.SetUint(uint64(x))
+		case uint16:
+			vfield.SetUint(uint64(x))
+		case uint32:
+			vfield.SetUint(uint64(x))
+		case uint64:
+			vfield.SetUint(x)
+		case string:
+			vfield.SetString(x)
+		}
+	}
 }
