@@ -1039,6 +1039,26 @@ func TestReadLines(t *testing.T) {
 	}
 }
 
+func TestReadLinesP(t *testing.T) {
+	resetTest()
+
+	// empty string
+	{
+		data, err := ReadLinesP(strings.NewReader(""))
+		assert.Nil(t, err)
+		assert.Equal(t, ([]string)(nil), data)
+	}
+
+	// happy
+	{
+		data, err := ReadString(testfile)
+		assert.Nil(t, err)
+		lines, err := ReadLinesP(strings.NewReader(data))
+		assert.Nil(t, err)
+		assert.Equal(t, 18, len(lines))
+	}
+}
+
 func TestReadString(t *testing.T) {
 	resetTest()
 

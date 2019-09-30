@@ -463,6 +463,15 @@ func ReadLines(filepath string) (result []string, err error) {
 	return
 }
 
+// ReadLinesP returns a new slice of string representing lines
+func ReadLinesP(reader io.Reader) (result []string, err error) {
+	scanner := bufio.NewScanner(reader)
+	for scanner.Scan() {
+		result = append(result, scanner.Text())
+	}
+	return
+}
+
 // ReadString returns the entire file as a string
 func ReadString(filepath string) (result string, err error) {
 	if filepath, err = Abs(filepath); err != nil {
