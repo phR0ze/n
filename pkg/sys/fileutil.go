@@ -464,7 +464,7 @@ func ReadLines(filepath string) (result []string, err error) {
 }
 
 // ReadLinesP returns a new slice of string representing lines
-func ReadLinesP(reader io.Reader) (result []string, err error) {
+func ReadLinesP(reader io.Reader) (result []string) {
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
 		result = append(result, scanner.Text())

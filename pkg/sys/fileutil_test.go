@@ -1044,8 +1044,7 @@ func TestReadLinesP(t *testing.T) {
 
 	// empty string
 	{
-		data, err := ReadLinesP(strings.NewReader(""))
-		assert.Nil(t, err)
+		data := ReadLinesP(strings.NewReader(""))
 		assert.Equal(t, ([]string)(nil), data)
 	}
 
@@ -1053,8 +1052,7 @@ func TestReadLinesP(t *testing.T) {
 	{
 		data, err := ReadString(testfile)
 		assert.Nil(t, err)
-		lines, err := ReadLinesP(strings.NewReader(data))
-		assert.Nil(t, err)
+		lines := ReadLinesP(strings.NewReader(data))
 		assert.Equal(t, 18, len(lines))
 	}
 }
