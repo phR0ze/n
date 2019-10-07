@@ -1,7 +1,25 @@
 // Package errs provides a common set of error for the pkg n
 package errs
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
+
+var (
+
+	// EOF indicates the end of a file equal to io.EOF
+	EOF = errors.New("EOF")
+
+	// BOF indicates the begining of a file
+	BOF = errors.New("BOF")
+
+	// TmplVarsNotFoundError indicates that template variables were not found
+	TmplVarsNotFoundError = Error{Message: "template variables were not found", Type: ErrorTypeTmplVarsNotFound}
+
+	// TmplTagsInvalidError indicates that the template start and/or end tags were invalid
+	TmplTagsInvalidError = Error{Message: "start and/or end tag are invalid", Type: ErrorTypeTmplTagsInvalid}
+)
 
 // ErrorType is an enumeration of well known error types
 type ErrorType string
@@ -39,42 +57,10 @@ func TmplEndTagNotFoundError(err error) bool {
 	return false
 }
 
-// TmplTagsInvalidError returns true if the given err was created by NewTmplTagsInvalid
-func TmplTagsInvalidError(err error) bool {
-	if e, ok := err.(Error); ok {
-		return e.Type == ErrorTypeTmplTagsInvalid
-	}
-	return false
-}
-
-// TmplVarsNotFoundError returns true if the given err was created by NewTmplVarsNotFound
-func TmplVarsNotFoundError(err error) bool {
-	if e, ok := err.(Error); ok {
-		return e.Type == ErrorTypeTmplVarsNotFound
-	}
-	return false
-}
-
 // NewTmplEndTagNotFoundError indicates that a start tag was found but not an end tag or a template variable
 func NewTmplEndTagNotFoundError(endTag string, starting []byte) Error {
 	return Error{
 		Message: fmt.Sprintf("cannot find end tag=%s starting from %s", endTag, starting),
 		Type:    ErrorTypeTmplEndTagNotFound,
-	}
-}
-
-// NewTmplTagsInvalidError indicates that the template start and/or end tags were invalid
-func NewTmplTagsInvalidError() Error {
-	return Error{
-		Message: "start and/or end tag are invalid",
-		Type:    ErrorTypeTmplTagsInvalid,
-	}
-}
-
-// NewTmplVarsNotFoundError indicates that template variables were not found
-func NewTmplVarsNotFoundError() Error {
-	return Error{
-		Message: "template variables were not found",
-		Type:    ErrorTypeTmplVarsNotFound,
 	}
 }

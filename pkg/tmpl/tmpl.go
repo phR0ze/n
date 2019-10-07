@@ -30,7 +30,7 @@ func Load(filepath string, startTag, endTag string, vars map[string]string) (res
 			if result, err = tpl.Process(vars); err == nil {
 				return
 			}
-		} else if errs.TmplVarsNotFoundError(err) {
+		} else if err == errs.TmplVarsNotFoundError {
 			err = nil
 			result = string(data)
 		}
@@ -50,7 +50,7 @@ func New(data, startTag, endTag string) (*Engine, error) {
 
 	// Check that we have valid tags
 	if startTag == "" || endTag == "" {
-		return nil, errs.NewTmplTagsInvalidError()
+		return nil, errs.TmplTagsInvalidError
 	}
 
 	s := []byte(data)
@@ -60,7 +60,7 @@ func New(data, startTag, endTag string) (*Engine, error) {
 	// Done if there are no template variables
 	tagsCount := bytes.Count(s, a)
 	if tagsCount == 0 {
-		return nil, errs.NewTmplVarsNotFoundError()
+		return nil, errs.TmplVarsNotFoundError
 	}
 
 	if tagsCount+1 > cap(tpl.texts) {

@@ -15,8 +15,7 @@ func TestTmplEndTagNotFound(t *testing.T) {
 	}
 	{
 		// Invalid errs type
-		err := NewTmplVarsNotFoundError()
-		assert.False(t, TmplEndTagNotFoundError(err))
+		assert.False(t, TmplTagsInvalidError == NewTmplEndTagNotFoundError("foo", []byte("1")))
 	}
 	{
 		// Valid test case
@@ -26,37 +25,29 @@ func TestTmplEndTagNotFound(t *testing.T) {
 }
 
 func TestTmplTagsInvalid(t *testing.T) {
+
+	// Invalid cast
 	{
-		// Invalid cast
 		err := errors.New("foo bar")
-		assert.False(t, TmplTagsInvalidError(err))
+		assert.False(t, err == TmplTagsInvalidError)
 	}
+
+	// Valid test case
 	{
-		// Invalid errs type
-		err := NewTmplVarsNotFoundError()
-		assert.False(t, TmplTagsInvalidError(err))
-	}
-	{
-		// Valid test case
-		err := NewTmplTagsInvalidError()
-		assert.True(t, TmplTagsInvalidError(err))
+		assert.True(t, TmplTagsInvalidError == TmplTagsInvalidError)
 	}
 }
 
 func TestTmplVarsNotFound(t *testing.T) {
+
+	// Invalid cast
 	{
-		// Invalid cast
 		err := errors.New("foo bar")
-		assert.False(t, TmplVarsNotFoundError(err))
+		assert.False(t, err == TmplVarsNotFoundError)
 	}
+
+	// Valid test case
 	{
-		// Invalid errs type
-		err := NewTmplTagsInvalidError()
-		assert.False(t, TmplVarsNotFoundError(err))
-	}
-	{
-		// Valid test case
-		err := NewTmplVarsNotFoundError()
-		assert.True(t, TmplVarsNotFoundError(err))
+		assert.True(t, TmplVarsNotFoundError == TmplVarsNotFoundError)
 	}
 }
