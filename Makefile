@@ -15,6 +15,7 @@ test: ${NAME}
 	go test .
 	go test -gcflags=-l ./pkg/arch/tar
 	go test -gcflags=-l ./pkg/arch/zip
+	go test ./pkg/buf/runes
 	go test ./pkg/enc/bin
 	go test ./pkg/enc/json
 	go test ./pkg/enc/unit
