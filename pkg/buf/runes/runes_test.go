@@ -173,6 +173,83 @@ func TestReadUnreadline(t *testing.T) {
 	assert.Equal(t, buf.Position{0, 0, 0}, scanner.Pos)
 }
 
+func TestPeek(t *testing.T) {
+	scanner := NewScanner(strings.NewReader("f\no"))
+
+	// peek with offset 1
+	r, err := scanner.Peek(1)
+	assert.Nil(t, err)
+	assert.Equal(t, "\n", string(r.Val))
+	assert.Equal(t, buf.Position{0, 1, 1}, r.Pos)
+	assert.Equal(t, buf.Position{0, 0, 0}, scanner.Pos)
+
+	// peek with offset 0
+	r, err = scanner.Peek(0)
+	assert.Nil(t, err)
+	assert.Equal(t, "f", string(r.Val))
+	assert.Equal(t, buf.Position{0, 0, 0}, r.Pos)
+	assert.Equal(t, buf.Position{0, 0, 0}, scanner.Pos)
+
+	// peek with offset 2
+	r, err = scanner.Peek(2)
+	assert.Nil(t, err)
+	assert.Equal(t, "o", string(r.Val))
+	assert.Equal(t, buf.Position{1, 0, 2}, r.Pos)
+	assert.Equal(t, buf.Position{0, 0, 0}, scanner.Pos)
+
+	// peek off the edge
+	r, err = scanner.Peek(3)
+	assert.Equal(t, errs.EOF, err)
+	assert.Equal(t, int32(0), r.Val)
+	assert.Equal(t, buf.Position{1, 1, 3}, r.Pos)
+	assert.Equal(t, buf.Position{0, 0, 0}, scanner.Pos)
+
+	// peek with offset 2
+	r, err = scanner.Read()
+	r, err = scanner.Read()
+	r, err = scanner.Read()
+	r, err = scanner.Peek(2)
+	assert.Equal(t, errs.EOF, err)
+	assert.Equal(t, int32(0), r.Val)
+	assert.Equal(t, buf.Position{1, 1, 3}, r.Pos)
+	assert.Equal(t, buf.Position{1, 1, 3}, scanner.Pos)
+}
+
+func TestPeekPrev(t *testing.T) {
+	scanner := NewScanner(strings.NewReader("f\no"))
+	r, err := scanner.Read()
+	r, err = scanner.Read()
+	r, err = scanner.Read()
+
+	// peek prev with offset 1
+	r, err = scanner.PeekPrev(1)
+	assert.Nil(t, err)
+	assert.Equal(t, "\n", string(r.Val))
+	assert.Equal(t, buf.Position{0, 1, 1}, r.Pos)
+	assert.Equal(t, buf.Position{1, 1, 3}, scanner.Pos)
+
+	// peek prev with offset 0
+	r, err = scanner.PeekPrev(0)
+	assert.Nil(t, err)
+	assert.Equal(t, "o", string(r.Val))
+	assert.Equal(t, buf.Position{1, 0, 2}, r.Pos)
+	assert.Equal(t, buf.Position{1, 1, 3}, scanner.Pos)
+
+	// peek prev with offset 2
+	r, err = scanner.PeekPrev(2)
+	assert.Nil(t, err)
+	assert.Equal(t, "f", string(r.Val))
+	assert.Equal(t, buf.Position{0, 0, 0}, r.Pos)
+	assert.Equal(t, buf.Position{1, 1, 3}, scanner.Pos)
+
+	// // peek off the edge
+	// r, err = scanner.Peek(3)
+	// assert.Equal(t, errs.EOF, err)
+	// assert.Equal(t, int32(0), r.Val)
+	// assert.Equal(t, buf.Position{1, 1, 3}, r.Pos)
+	// assert.Equal(t, buf.Position{0, 0, 0}, scanner.Pos)
+}
+
 func TestPeekAndPrevPeek(t *testing.T) {
 	scanner := NewScanner(strings.NewReader("f\no"))
 

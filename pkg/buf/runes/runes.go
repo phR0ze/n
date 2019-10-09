@@ -166,27 +166,42 @@ func (s *Scanner) Unreadline() (line Runes, err error) {
 	return
 }
 
-// Peek the rune at the current location don't adjust positioning
-func (s *Scanner) Peek() (r Rune, err error) {
-	r = Rune{Pos: s.Pos}
+// Peek the rune at the given offset, offset must be positive values, 0 being the
+// current rune; don't adjust positioning
+func (s *Scanner) Peek(offset ...int) (r Rune, err error) {
 	if err = s.readAll(); err != nil {
 		return
 	}
 	if len(s.runes) == 0 {
 		return
 	}
-	if len(s.runes) <= s.Pos.Offset {
+
+	// Calculate correct position based on offset
+	_offset := 0
+	if len(offset) > 0 {
+		if offset[0] >= 0 {
+			_offset = offset[0]
+		}
+	}
+	r = Rune{Pos: s.Pos}
+	for range make([]int, _offset) {
+		r.Pos = s.incPos(r.Pos)
+	}
+
+	// Handle safty checks
+	if len(s.runes) <= r.Pos.Offset {
 		err = errs.EOF
 		return
 	}
 
 	// Read the current rune
-	r.Val = s.runes[s.Pos.Offset]
+	r.Val = s.runes[r.Pos.Offset]
 	return
 }
 
-// PeekPrev the rune at the previous location don't adjust positioning
-func (s *Scanner) PeekPrev() (r Rune, err error) {
+// PeekPrev the rune at the given offset, offset must be positive values, 0 being the
+// previous rune, 1 being the one before the previous; don't adjust positioning
+func (s *Scanner) PeekPrev(offset ...int) (r Rune, err error) {
 	if err = s.readAll(); err != nil {
 		return
 	}
@@ -198,16 +213,30 @@ func (s *Scanner) PeekPrev() (r Rune, err error) {
 		return
 	}
 
+	// Calculate correct position based on offset
+	_offset := 0
+	if len(offset) > 0 {
+		if offset[0] >= 0 {
+			_offset = offset[0]
+		}
+	}
+	r = Rune{Pos: s.decPos(s.Pos)}
+	for range make([]int, _offset) {
+		r.Pos = s.decPos(r.Pos)
+	}
+
 	// Read the previous rune
-	pos := s.decPos(s.Pos)
-	r = Rune{Val: s.runes[pos.Offset], Pos: pos}
+	r.Val = s.runes[r.Pos.Offset]
 	return
 }
 
 // increment the position based on the given rune
 func (s *Scanner) incPos(pos buf.Position) buf.Position {
 	val := pos
-	r := s.runes[pos.Offset]
+	if val.Offset >= len(s.runes) {
+		return s.Pos
+	}
+	r := s.runes[val.Offset]
 	if r == '\n' {
 		val.Line++
 		val.Col = 0
@@ -222,6 +251,8 @@ func (s *Scanner) incPos(pos buf.Position) buf.Position {
 // the previous line to get the correct column position.
 func (s *Scanner) decPos(pos buf.Position) buf.Position {
 	val := pos
+
+	// Decrement col and offset and safty check
 	val.Col--
 	val.Offset--
 	if val.Col < 0 {
@@ -231,7 +262,8 @@ func (s *Scanner) decPos(pos buf.Position) buf.Position {
 		return buf.Position{}
 	}
 
-	r := s.runes[pos.Offset-1]
+	// Decrement line and col
+	r := s.runes[val.Offset]
 	if r == '\n' {
 		val.Line--
 		if val.Line < 0 {
@@ -239,7 +271,7 @@ func (s *Scanner) decPos(pos buf.Position) buf.Position {
 		}
 
 		// Column needs to take into account the previous line
-		i := pos.Offset - 1
+		i := val.Offset
 		runes := []rune{'\n'}
 		for {
 			i--
@@ -252,7 +284,7 @@ func (s *Scanner) decPos(pos buf.Position) buf.Position {
 			}
 			runes = append([]rune{r}, runes...)
 		}
-		val.Col = (pos.Offset + 1) - len(runes)
+		val.Col = (val.Offset + 2) - len(runes)
 	}
 	return val
 }
