@@ -59,7 +59,13 @@ func (s *Scanner) Size() int {
 }
 
 // Read the rune at the current location and adjust positioning
-func (s *Scanner) Read() (r Rune, err error) {
+func (s *Scanner) Read() rune {
+	r, _ := s.ReadE()
+	return r.Val
+}
+
+// ReadE the rune at the current location and adjust positioning
+func (s *Scanner) ReadE() (r Rune, err error) {
 	r = Rune{Pos: s.Pos}
 	if err = s.readAll(); err != nil {
 		return
@@ -111,7 +117,13 @@ func (s *Scanner) Readline() (line Runes, err error) {
 }
 
 // Unread the rune at the current location and adjust positioning
-func (s *Scanner) Unread() (r Rune, err error) {
+func (s *Scanner) Unread() rune {
+	r, _ := s.UnreadE()
+	return r.Val
+}
+
+// UnreadE the rune at the current location and adjust positioning
+func (s *Scanner) UnreadE() (r Rune, err error) {
 	if err = s.readAll(); err != nil {
 		return
 	}
@@ -168,7 +180,14 @@ func (s *Scanner) Unreadline() (line Runes, err error) {
 
 // Peek the rune at the given offset, offset must be positive values, 0 being the
 // current rune; don't adjust positioning
-func (s *Scanner) Peek(offset ...int) (r Rune, err error) {
+func (s *Scanner) Peek(offset ...int) rune {
+	r, _ := s.PeekE(offset...)
+	return r.Val
+}
+
+// PeekE the rune at the given offset, offset must be positive values, 0 being the
+// current rune; don't adjust positioning
+func (s *Scanner) PeekE(offset ...int) (r Rune, err error) {
 	if err = s.readAll(); err != nil {
 		return
 	}
@@ -201,7 +220,14 @@ func (s *Scanner) Peek(offset ...int) (r Rune, err error) {
 
 // PeekPrev the rune at the given offset, offset must be positive values, 0 being the
 // previous rune, 1 being the one before the previous; don't adjust positioning
-func (s *Scanner) PeekPrev(offset ...int) (r Rune, err error) {
+func (s *Scanner) PeekPrev(offset ...int) rune {
+	r, _ := s.PeekPrevE(offset...)
+	return r.Val
+}
+
+// PeekPrevE the rune at the given offset, offset must be positive values, 0 being the
+// previous rune, 1 being the one before the previous; don't adjust positioning
+func (s *Scanner) PeekPrevE(offset ...int) (r Rune, err error) {
 	if err = s.readAll(); err != nil {
 		return
 	}
