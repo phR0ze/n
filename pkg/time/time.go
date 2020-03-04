@@ -29,21 +29,40 @@ func MediaTime(sec uint64) (result time.Time, err error) {
 }
 
 // Age calculates the elapse time in days from a time.Time object
-func Age(other time.Time) string {
-	days := int(time.Since(other).Hours()) / 24
-	hours := int(time.Since(other).Hours())
-	mins := int(time.Since(other).Minutes())
-	secs := int(time.Since(other).Seconds())
+func Age(other time.Time) (result string) {
+	duration := time.Since(other)
 
-	switch {
-	case days > 0:
-		return fmt.Sprintf("%dd", days)
-	case hours > 0:
-		return fmt.Sprintf("%dh", hours)
-	case mins > 0:
-		return fmt.Sprintf("%dm", mins)
-	case secs > 0:
-		return fmt.Sprintf("%ds", secs)
+	// Determin how many days elapsed
+	days := int(duration.Hours()) / 24
+	if days > 0 {
+		result = fmt.Sprintf("%dd", days)
+		duration = duration - time.Duration(days*24)*time.Hour
 	}
-	return "0s"
+
+	// Determin how many hours elapsed beyond days
+	hours := int(duration.Hours())
+	if hours > 0 {
+		result = result + fmt.Sprintf("%dh", hours)
+		duration = duration - time.Duration(hours)*time.Hour
+	}
+
+	// Determin how many mins elapsed beyond hours
+	mins := int(duration.Minutes())
+	if mins > 0 {
+		result = result + fmt.Sprintf("%dm", mins)
+		duration = duration - time.Duration(mins)*time.Minute
+	}
+
+	// Determin how many secs elapsed beyond mins
+	secs := int(duration.Seconds())
+	if secs > 0 {
+		result = result + fmt.Sprintf("%ds", secs)
+		duration = duration - time.Duration(secs)*time.Second
+	}
+
+	// Default to 0s
+	if result == "" {
+		result = "0s"
+	}
+	return
 }

@@ -40,11 +40,11 @@ func TestAge(t *testing.T) {
 		patch.Unpatch()
 	}
 	{
-		// 3 days and hours don't matter
+		// 3 days and 9 hours
 		then := time.Date(2018, time.May, 10, 1, 2, 3, 4, time.UTC)
 		now := time.Date(2018, time.May, 13, 10, 2, 3, 4, time.UTC)
 		patch := test.ForceTimeNow(now)
-		assert.Equal(t, "3d", Age(then))
+		assert.Equal(t, "3d9h", Age(then))
 		patch.Unpatch()
 	}
 	{
@@ -76,6 +76,14 @@ func TestAge(t *testing.T) {
 		now := time.Date(2018, time.May, 10, 1, 2, 3, 14, time.UTC)
 		patch := test.ForceTimeNow(now)
 		assert.Equal(t, "0s", Age(then))
+		patch.Unpatch()
+	}
+	{
+		// 3 days, 9 hours, 10 min, 20 sec
+		then := time.Date(2018, time.May, 10, 1, 2, 3, 4, time.UTC)
+		now := time.Date(2018, time.May, 13, 10, 12, 23, 4, time.UTC)
+		patch := test.ForceTimeNow(now)
+		assert.Equal(t, "3d9h10m20s", Age(then))
 		patch.Unpatch()
 	}
 }
