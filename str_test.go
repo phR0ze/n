@@ -1143,7 +1143,7 @@ func TestStr_Copy(t *testing.T) {
 func BenchmarkStr_Count_Go(t *testing.B) {
 	src := RangeString(nines5)
 	for _, x := range src {
-		if x == string(nines4) {
+		if x == fmt.Sprint(nines4) {
 			break
 		}
 	}
@@ -1182,7 +1182,7 @@ func TestStr_Count(t *testing.T) {
 func BenchmarkStr_CountW_Go(t *testing.B) {
 	src := RangeString(nines5)
 	for _, x := range src {
-		if x == string(nines4) {
+		if x == fmt.Sprint(nines4) {
 			break
 		}
 	}

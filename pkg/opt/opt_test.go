@@ -2,11 +2,140 @@ package opt
 
 import (
 	"bytes"
+	"io"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+type TestStd struct {
+	in      io.Reader
+	out     io.Writer
+	err     io.Writer
+	home    string
+	quiet   bool
+	debug   bool
+	dryrun  bool
+	testing bool
+}
+
+func (s *TestStd) In(in ...io.Reader) io.Reader {
+	if s != nil {
+		if len(in) > 0 {
+			s.in = in[0]
+		}
+		return s.in
+	}
+	return nil
+}
+
+func (s *TestStd) Out(out ...io.Writer) io.Writer {
+	if s != nil {
+		if len(out) > 0 {
+			s.out = out[0]
+		}
+		return s.out
+	}
+	return nil
+}
+
+func (s *TestStd) Err(err ...io.Writer) io.Writer {
+	if s != nil {
+		if len(err) > 0 {
+			s.err = err[0]
+		}
+		return s.err
+	}
+	return nil
+}
+
+func (s *TestStd) Home(home ...string) string {
+	if s != nil {
+		if len(home) > 0 {
+			s.home = home[0]
+		}
+		return s.home
+	}
+	return ""
+}
+
+func (s *TestStd) Quiet(quiet ...bool) bool {
+	if s != nil {
+		if len(quiet) > 0 {
+			s.quiet = quiet[0]
+		}
+		return s.quiet
+	}
+	return false
+}
+
+func (s *TestStd) Debug(debug ...bool) bool {
+	if s != nil {
+		if len(debug) > 0 {
+			s.debug = debug[0]
+		}
+		return s.debug
+	}
+	return false
+}
+
+func (s *TestStd) DryRun(dryrun ...bool) bool {
+	if s != nil {
+		if len(dryrun) > 0 {
+			s.dryrun = dryrun[0]
+		}
+		return s.dryrun
+	}
+	return false
+}
+
+func (s *TestStd) Testing(testing ...bool) bool {
+	if s != nil {
+		if len(testing) > 0 {
+			s.testing = testing[0]
+		}
+		return s.testing
+	}
+	return false
+}
+
+func TestStdStreamInterface(t *testing.T) {
+	var strm Std
+	strm = &TestStd{}
+
+	assert.Equal(t, strm.In(), nil)
+	strm.In(os.Stdin)
+	assert.Equal(t, strm.In(), os.Stdin)
+
+	assert.Equal(t, strm.Out(), nil)
+	strm.Out(os.Stdout)
+	assert.Equal(t, strm.Out(), os.Stdout)
+
+	assert.Equal(t, strm.Err(), nil)
+	strm.Err(os.Stderr)
+	assert.Equal(t, strm.Err(), os.Stderr)
+
+	assert.Equal(t, strm.Home(), "")
+	strm.Home("foo")
+	assert.Equal(t, strm.Home(), "foo")
+
+	assert.Equal(t, strm.Quiet(), false)
+	strm.Quiet(true)
+	assert.Equal(t, strm.Quiet(), true)
+
+	assert.Equal(t, strm.Debug(), false)
+	strm.Debug(true)
+	assert.Equal(t, strm.Debug(), true)
+
+	assert.Equal(t, strm.DryRun(), false)
+	strm.DryRun(true)
+	assert.Equal(t, strm.DryRun(), true)
+
+	assert.Equal(t, strm.Testing(), false)
+	strm.Testing(true)
+	assert.Equal(t, strm.Testing(), true)
+}
 
 func TestAdd(t *testing.T) {
 

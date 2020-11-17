@@ -25,14 +25,14 @@ func TestStringSlice_Methods(t *testing.T) {
 func BenchmarkNewStringSlice_Go(t *testing.B) {
 	src := RangeString(nines6)
 	for i := 0; i < len(src); i += 10 {
-		_ = []string{src[i], src[i] + string(1), src[i] + string(2), src[i] + string(3), src[i] + string(4), src[i] + string(5), src[i] + string(6), src[i] + string(7), src[i] + string(8), src[i] + string(9)}
+		_ = []string{src[i], src[i] + fmt.Sprint(1), src[i] + fmt.Sprint(2), src[i] + fmt.Sprint(3), src[i] + fmt.Sprint(4), src[i] + fmt.Sprint(5), src[i] + fmt.Sprint(6), src[i] + fmt.Sprint(7), src[i] + fmt.Sprint(8), src[i] + fmt.Sprint(9)}
 	}
 }
 
 func BenchmarkNewStringSlice_Slice(t *testing.B) {
 	src := RangeString(nines6)
 	for i := 0; i < len(src); i += 10 {
-		_ = NewStringSlice([]string{src[i], src[i] + string(1), src[i] + string(2), src[i] + string(3), src[i] + string(4), src[i] + string(5), src[i] + string(6), src[i] + string(7), src[i] + string(8), src[i] + string(9)})
+		_ = NewStringSlice([]string{src[i], src[i] + fmt.Sprint(1), src[i] + fmt.Sprint(2), src[i] + fmt.Sprint(3), src[i] + fmt.Sprint(4), src[i] + fmt.Sprint(5), src[i] + fmt.Sprint(6), src[i] + fmt.Sprint(7), src[i] + fmt.Sprint(8), src[i] + fmt.Sprint(9)})
 	}
 }
 
@@ -74,14 +74,14 @@ func TestStringSlice_NewStringSlice(t *testing.T) {
 func BenchmarkNewStringSliceV_Go(t *testing.B) {
 	src := RangeString(nines6)
 	for i := 0; i < len(src); i += 10 {
-		_ = append([]string{}, src[i], src[i]+string(1), src[i]+string(2), src[i]+string(3), src[i]+string(4), src[i]+string(5), src[i]+string(6), src[i]+string(7), src[i]+string(8), src[i]+string(9))
+		_ = append([]string{}, src[i], src[i]+fmt.Sprint(1), src[i]+fmt.Sprint(2), src[i]+fmt.Sprint(3), src[i]+fmt.Sprint(4), src[i]+fmt.Sprint(5), src[i]+fmt.Sprint(6), src[i]+fmt.Sprint(7), src[i]+fmt.Sprint(8), src[i]+fmt.Sprint(9))
 	}
 }
 
 func BenchmarkNewStringSliceV_Slice(t *testing.B) {
 	src := RangeString(nines6)
 	for i := 0; i < len(src); i += 10 {
-		_ = NewStringSliceV(src[i], src[i]+string(1), src[i]+string(2), src[i]+string(3), src[i]+string(4), src[i]+string(5), src[i]+string(6), src[i]+string(7), src[i]+string(8), src[i]+string(9))
+		_ = NewStringSliceV(src[i], src[i]+fmt.Sprint(1), src[i]+fmt.Sprint(2), src[i]+fmt.Sprint(3), src[i]+fmt.Sprint(4), src[i]+fmt.Sprint(5), src[i]+fmt.Sprint(6), src[i]+fmt.Sprint(7), src[i]+fmt.Sprint(8), src[i]+fmt.Sprint(9))
 	}
 }
 
@@ -422,7 +422,7 @@ func TestStringSlice_AnyS(t *testing.T) {
 func BenchmarkStringSlice_AnyW_Go(t *testing.B) {
 	src := RangeString(nines5)
 	for _, x := range src {
-		if x == string(nines4) {
+		if x == fmt.Sprint(nines4) {
 			break
 		}
 	}
@@ -431,7 +431,7 @@ func BenchmarkStringSlice_AnyW_Go(t *testing.B) {
 func BenchmarkStringSlice_AnyW_Slice(t *testing.B) {
 	src := RangeString(nines5)
 	NewStringSlice(src).AnyW(func(x O) bool {
-		return ExB(x.(string) == string(nines4))
+		return ExB(x.(string) == fmt.Sprint(nines4))
 	})
 }
 
@@ -987,7 +987,7 @@ func TestStringSlice_Copy(t *testing.T) {
 func BenchmarkStringSlice_Count_Go(t *testing.B) {
 	src := RangeString(nines5)
 	for _, x := range src {
-		if x == string(nines4) {
+		if x == fmt.Sprint(nines4) {
 			break
 		}
 	}
@@ -1023,7 +1023,7 @@ func TestStringSlice_Count(t *testing.T) {
 func BenchmarkStringSlice_CountW_Go(t *testing.B) {
 	src := RangeString(nines5)
 	for _, x := range src {
-		if x == string(nines4) {
+		if x == fmt.Sprint(nines4) {
 			break
 		}
 	}
@@ -1032,7 +1032,7 @@ func BenchmarkStringSlice_CountW_Go(t *testing.B) {
 func BenchmarkStringSlice_CountW_Slice(t *testing.B) {
 	src := RangeString(nines5)
 	NewStringSlice(src).CountW(func(x O) bool {
-		return ExB(x.(string) == string(nines4))
+		return ExB(x.(string) == fmt.Sprint(nines4))
 	})
 }
 
@@ -1959,7 +1959,7 @@ func ExampleStringSlice_Generic() {
 //--------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Index_Go(t *testing.B) {
 	for _, x := range RangeString(nines5) {
-		if x == string(nines4) {
+		if x == fmt.Sprint(nines4) {
 			break
 		}
 	}
@@ -3998,7 +3998,7 @@ func TestStringSlice_UniqM(t *testing.T) {
 
 func RangeString(size int) (new []string) {
 	for _, x := range Range(0, size) {
-		new = append(new, string(x))
+		new = append(new, fmt.Sprint(x))
 	}
 	return
 }

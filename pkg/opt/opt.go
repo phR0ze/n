@@ -41,6 +41,23 @@ var (
 	TestingOptKey = "testing"
 )
 
+// Std provides an interface for the standard properties
+type Std interface {
+	StdStream
+	Home(home ...string) string   // Home path to use
+	Quiet(quiet ...bool) bool     // Quiet mode when true
+	Debug(debug ...bool) bool     // Debug mode when true
+	DryRun(dryrun ...bool) bool   // Dryrun mode when true
+	Testing(testing ...bool) bool // Testing mode when true
+}
+
+// StdStream provides an interface for the standard streams
+type StdStream interface {
+	In(in ...io.Reader) io.Reader   // Input stream to use
+	Out(out ...io.Writer) io.Writer // Output stream to use
+	Err(err ...io.Writer) io.Writer // Error stream to use
+}
+
 // StdProps provides common properties for custom types
 type StdProps struct {
 	StdStreamProps
