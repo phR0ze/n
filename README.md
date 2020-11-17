@@ -1,4 +1,7 @@
-# n
+n
+====================================================================================================
+[![build-badge](https://github.com/phR0ze/n/workflows/build/badge.svg)](https://github.com/phR0ze/n/actions)
+
 ***Nub*** is a collection of missing Go convenience functions reminiscent of Ruby/C#. I love
 the elegance of Ruby's plethera of descriptive chainable methods while C# has some awesome deferred
 execution. Why not stay with Ruby or C# then? Well I like Go's ability to generate a single
