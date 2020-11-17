@@ -4759,59 +4759,60 @@ func TestTime(t *testing.T) {
 
 	// US: Month Day, Year
 	{
-		assert.Equal(t, time.Date(2008, 10, 2, 0, 0, 0, 0, time.Local), ToTime("October 2, 2008"))
+		assert.Equal(t, time.Date(2008, 10, 2, 0, 0, 0, 0, time.UTC), ToTime("October 2, 2008"))
 	}
 
 	// 	"02 Jan 2006", // Day Month Year
 	{
-		assert.Equal(t, time.Date(2008, 12, 10, 0, 0, 0, 0, time.Local), ToTime("10 Dec 2008"))
+		assert.Equal(t, time.Date(2008, 12, 10, 0, 0, 0, 0, time.UTC), ToTime("10 Dec 2008"))
 	}
 
 	// 	"2006-01-02",  // Year-Month-Day
 	{
-		assert.Equal(t, time.Date(2008, 01, 10, 0, 0, 0, 0, time.Local), ToTime("2008-01-10"))
+		assert.Equal(t, time.Date(2008, 01, 10, 0, 0, 0, 0, time.UTC), ToTime("2008-01-10"))
 	}
 
 	// 	time.Kitchen,  // "3:04PM"
 	{
-		assert.Equal(t, time.Date(0, 1, 1, 23, 4, 0, 0, time.Local), ToTime("11:04PM"))
+		assert.Equal(t, time.Date(0, 1, 1, 23, 4, 0, 0, time.UTC), ToTime("11:04PM"))
 	}
 
 	// 	time.Stamp,      // "Jan _2 15:04:05"
 	{
-		assert.Equal(t, time.Date(0, 12, 1, 11, 4, 5, 0, time.Local), ToTime("Dec 1 11:04:05"))
+		assert.Equal(t, time.Date(0, 12, 1, 11, 4, 5, 0, time.UTC), ToTime("Dec 1 11:04:05"))
 	}
 
 	// 	time.StampMilli, // "Jan _2 15:04:05.000"
 	{
-		assert.Equal(t, time.Date(0, 12, 1, 11, 4, 5, 0, time.Local), ToTime("Dec 1 11:04:05.000"))
+		assert.Equal(t, time.Date(0, 12, 1, 11, 4, 5, 0, time.UTC), ToTime("Dec 1 11:04:05.000"))
 	}
 
 	// 	time.StampMicro, // "Jan _2 15:04:05.000000"
 	{
-		assert.Equal(t, time.Date(0, 12, 1, 11, 4, 5, 0, time.Local), ToTime("Dec 1 11:04:05.000000"))
+		assert.Equal(t, time.Date(0, 12, 1, 11, 4, 5, 0, time.UTC), ToTime("Dec 1 11:04:05.000000"))
 	}
 
 	// 	time.StampNano,  // "Jan _2 15:04:05.000000000"
 	{
-		assert.Equal(t, time.Date(0, 12, 1, 11, 4, 5, 0, time.Local), ToTime("Dec 1 11:04:05.000000000"))
+		assert.Equal(t, time.Date(0, 12, 1, 11, 4, 5, 0, time.UTC), ToTime("Dec 1 11:04:05.000000000"))
 	}
 
 	// ints and uints
 	{
-		assert.Equal(t, time.Date(2019, 9, 18, 11, 58, 56, 0, time.Local), ToTime("1568829536"))
-		assert.Equal(t, time.Date(2019, 9, 18, 11, 58, 56, 0, time.Local), ToTime(int(1568829536)))
-		assert.Equal(t, time.Date(2019, 9, 18, 11, 58, 56, 0, time.Local), ToTime(int32(1568829536)))
-		assert.Equal(t, time.Date(2019, 9, 18, 11, 58, 56, 0, time.Local), ToTime(int64(1568829536)))
-		assert.Equal(t, time.Date(2019, 9, 18, 11, 58, 56, 0, time.Local), ToTime(uint(1568829536)))
-		assert.Equal(t, time.Date(2019, 9, 18, 11, 58, 56, 0, time.Local), ToTime(uint32(1568829536)))
-		assert.Equal(t, time.Date(2019, 9, 18, 11, 58, 56, 0, time.Local), ToTime(uint64(1568829536)))
+
+		assert.Equal(t, time.Date(2019, 9, 18, 11, 58, 56, 0, time.UTC), ToTime("1568807936"))
+		assert.Equal(t, time.Date(2019, 9, 18, 11, 58, 56, 0, time.UTC), ToTime(int(1568807936)))
+		assert.Equal(t, time.Date(2019, 9, 18, 11, 58, 56, 0, time.UTC), ToTime(int32(1568807936)))
+		assert.Equal(t, time.Date(2019, 9, 18, 11, 58, 56, 0, time.UTC), ToTime(int64(1568807936)))
+		assert.Equal(t, time.Date(2019, 9, 18, 11, 58, 56, 0, time.UTC), ToTime(uint(1568807936)))
+		assert.Equal(t, time.Date(2019, 9, 18, 11, 58, 56, 0, time.UTC), ToTime(uint32(1568807936)))
+		assert.Equal(t, time.Date(2019, 9, 18, 11, 58, 56, 0, time.UTC), ToTime(uint64(1568807936)))
 	}
 
 	// time pointer
 	{
-		result := time.Date(2008, 01, 10, 0, 0, 0, 0, time.Local)
-		assert.Equal(t, time.Date(2008, 01, 10, 0, 0, 0, 0, time.Local), ToTime(&result))
+		result := time.Date(2008, 01, 10, 0, 0, 0, 0, time.UTC)
+		assert.Equal(t, time.Date(2008, 01, 10, 0, 0, 0, 0, time.UTC), ToTime(&result))
 	}
 
 	// nil time

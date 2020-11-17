@@ -13,6 +13,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+var gUseLocalTime bool
+
 // TimeLayouts is just a simple wrapper around popular time layouts for time.Parse
 var TimeLayouts = []string{
 	time.RFC3339,  // "2006-01-02T15:04:05Z07:00" // ISO8601
@@ -36,6 +38,11 @@ var TimeLayouts = []string{
 	time.StampMicro, // "Jan _2 15:04:05.000000"
 	time.StampMilli, // "Jan _2 15:04:05.000"
 	time.Stamp,      // "Jan _2 15:04:05"
+}
+
+// UseLocalTime controls whether the ToTime functions will use UTC or Local for Unix functions
+func UseLocalTime(useLocal bool) {
+	gUseLocalTime = useLocal
 }
 
 // DeReference dereferences the interface if needed returning a non-pointer type
@@ -5409,6 +5416,11 @@ func ToTimeE(obj interface{}) (val time.Time, err error) {
 		val = time.Unix(int64(x), 0)
 	default:
 		err = errors.Errorf("failed to convert type %T to time.Time", obj)
+	}
+
+	// Use UTC if set to false
+	if !gUseLocalTime {
+		val = val.UTC()
 	}
 
 	return
