@@ -37,7 +37,7 @@ var (
 	HomeOptKey    = "home"
 	QuietOptKey   = "quiet"
 	DebugOptKey   = "debug"
-	DryRunOptKey  = "dry-run"
+	DryrunOptKey  = "dry-run"
 	TestingOptKey = "testing"
 )
 
@@ -47,7 +47,7 @@ type Std interface {
 	Home(home ...string) string   // Home path to use
 	Quiet(quiet ...bool) bool     // Quiet mode when true
 	Debug(debug ...bool) bool     // Debug mode when true
-	DryRun(dryrun ...bool) bool   // Dryrun mode when true
+	Dryrun(dryrun ...bool) bool   // Dryrun mode when true
 	Testing(testing ...bool) bool // Testing mode when true
 }
 
@@ -64,7 +64,7 @@ type StdProps struct {
 	Home    string // Home path to use
 	Quiet   bool   // Quiet mode when true
 	Debug   bool   // Debug mode when true
-	DryRun  bool   // Dryrun mode when true
+	Dryrun  bool   // Dryrun mode when true
 	Testing bool   // Testing mode when true
 }
 
@@ -386,22 +386,22 @@ func OverwriteDebugOpt(opts *[]*Opt, val bool) bool {
 	return Overwrite(opts, DebugOpt(val)).Val.(bool)
 }
 
-// DryRun Option
+// Dryrun Option
 //--------------------------------------------------------------------------------------------------
 
-// DryRunOpt creates the new option with the given value
-func DryRunOpt(val bool) *Opt {
-	return &Opt{Key: DryRunOptKey, Val: val}
+// DryrunOpt creates the new option with the given value
+func DryrunOpt(val bool) *Opt {
+	return &Opt{Key: DryrunOptKey, Val: val}
 }
 
-// DryRunOptExists determines if the option exists in the given options
-func DryRunOptExists(opts []*Opt) bool {
-	return Exists(opts, DryRunOptKey)
+// DryrunOptExists determines if the option exists in the given options
+func DryrunOptExists(opts []*Opt) bool {
+	return Exists(opts, DryrunOptKey)
 }
 
-// GetDryRunOpt finds and returns the option's value or defaults to false
-func GetDryRunOpt(opts []*Opt) (result bool) {
-	if option := Get(opts, DryRunOptKey); option != nil {
+// GetDryrunOpt finds and returns the option's value or defaults to false
+func GetDryrunOpt(opts []*Opt) (result bool) {
+	if option := Get(opts, DryrunOptKey); option != nil {
 		if val, ok := option.Val.(bool); ok {
 			result = val
 		}
@@ -409,19 +409,19 @@ func GetDryRunOpt(opts []*Opt) (result bool) {
 	return
 }
 
-// DefaultDryRunOpt sets the default value for the option if it doesn't exist already.
+// DefaultDryrunOpt sets the default value for the option if it doesn't exist already.
 // Use this when the Get's default is not desirable.
-func DefaultDryRunOpt(opts []*Opt, val bool) bool {
-	if !Exists(opts, DryRunOptKey) {
+func DefaultDryrunOpt(opts []*Opt, val bool) bool {
+	if !Exists(opts, DryrunOptKey) {
 		return val
 	}
-	return GetDryRunOpt(opts)
+	return GetDryrunOpt(opts)
 }
 
-// OverwriteDryRunOpt sets the value for the option to the given value.
+// OverwriteDryrunOpt sets the value for the option to the given value.
 // Use this when the new value needs set regardless if the option exists or not.
-func OverwriteDryRunOpt(opts *[]*Opt, val bool) bool {
-	return Overwrite(opts, DryRunOpt(val)).Val.(bool)
+func OverwriteDryrunOpt(opts *[]*Opt, val bool) bool {
+	return Overwrite(opts, DryrunOpt(val)).Val.(bool)
 }
 
 // Testing Option

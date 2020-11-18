@@ -80,7 +80,7 @@ func (s *TestStd) Debug(debug ...bool) bool {
 	return false
 }
 
-func (s *TestStd) DryRun(dryrun ...bool) bool {
+func (s *TestStd) Dryrun(dryrun ...bool) bool {
 	if s != nil {
 		if len(dryrun) > 0 {
 			s.dryrun = dryrun[0]
@@ -128,9 +128,9 @@ func TestStdStreamInterface(t *testing.T) {
 	strm.Debug(true)
 	assert.Equal(t, strm.Debug(), true)
 
-	assert.Equal(t, strm.DryRun(), false)
-	strm.DryRun(true)
-	assert.Equal(t, strm.DryRun(), true)
+	assert.Equal(t, strm.Dryrun(), false)
+	strm.Dryrun(true)
+	assert.Equal(t, strm.Dryrun(), true)
 
 	assert.Equal(t, strm.Testing(), false)
 	strm.Testing(true)
@@ -484,39 +484,39 @@ func TestDebugOpt(t *testing.T) {
 	}
 }
 
-// DryRun
+// Dryrun
 // -------------------------------------------------------------------------------------------------
 
-func TestDryRunOpt(t *testing.T) {
+func TestDryrunOpt(t *testing.T) {
 
 	// create
 	{
 		opts := []*Opt{}
-		assert.False(t, GetDryRunOpt(opts))
-		assert.True(t, Default(&opts, DryRunOpt(true)))
-		assert.True(t, GetDryRunOpt(opts))
+		assert.False(t, GetDryrunOpt(opts))
+		assert.True(t, Default(&opts, DryrunOpt(true)))
+		assert.True(t, GetDryrunOpt(opts))
 	}
 
 	// default
 	{
 		opts := []*Opt{}
-		assert.False(t, GetDryRunOpt(opts))
-		assert.False(t, DryRunOptExists(opts))
-		assert.True(t, DefaultDryRunOpt(opts, true))
-		assert.False(t, GetDryRunOpt(opts))
-		assert.True(t, Default(&opts, DryRunOpt(true)))
-		assert.True(t, GetDryRunOpt(opts))
-		assert.True(t, DryRunOptExists(opts))
-		assert.True(t, DefaultDryRunOpt(opts, false))
+		assert.False(t, GetDryrunOpt(opts))
+		assert.False(t, DryrunOptExists(opts))
+		assert.True(t, DefaultDryrunOpt(opts, true))
+		assert.False(t, GetDryrunOpt(opts))
+		assert.True(t, Default(&opts, DryrunOpt(true)))
+		assert.True(t, GetDryrunOpt(opts))
+		assert.True(t, DryrunOptExists(opts))
+		assert.True(t, DefaultDryrunOpt(opts, false))
 	}
 
 	// overwrite
 	{
 		opts := []*Opt{}
-		assert.Equal(t, true, Default(&opts, DryRunOpt(true)))
-		assert.Equal(t, true, GetDryRunOpt(opts))
-		assert.Equal(t, false, OverwriteDryRunOpt(&opts, false))
-		assert.Equal(t, false, GetDryRunOpt(opts))
+		assert.Equal(t, true, Default(&opts, DryrunOpt(true)))
+		assert.Equal(t, true, GetDryrunOpt(opts))
+		assert.Equal(t, false, OverwriteDryrunOpt(&opts, false))
+		assert.Equal(t, false, GetDryrunOpt(opts))
 	}
 }
 
