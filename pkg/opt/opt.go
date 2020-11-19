@@ -81,15 +81,52 @@ type Opt struct {
 	Val interface{} // value of the option
 }
 
+// Opts provides some convenience methods for working with options
+type Opts []*Opt
+
+// New is a conveniance function to new up an Opts
+func New(o ...*Opt) (opts *Opts) {
+	opts = &Opts{}
+	for _, opt := range o {
+		opts.Add(opt)
+	}
+	return
+}
+
+// Len provides the length of the options
+func (x *Opts) Len() int {
+	if x != nil {
+		return len(*x)
+	}
+	return 0
+}
+
 // Add an option to the options slice if it doesn't exist.
 // Just an alias to Default, but the alternate naming is more intuitive in
 // different scenarios.
-func Add(opts *[]*Opt, opt *Opt) bool {
-	if opts == nil || opt == nil || Exists(*opts, opt.Key) {
-		return false
+func (x *Opts) Add(o ...*Opt) (result bool) {
+	return x.Default(o...)
+}
+
+// Add an option to the options slice if it doesn't exist.
+// Just an alias to Default, but the alternate naming is more intuitive in
+// different scenarios.
+func Add(opts *[]*Opt, o ...*Opt) (result bool) {
+	return Default(opts, o...)
+}
+
+// Copy the given options slice removing nil options. Although the slice and
+// options are new distinct objects the Values are the original objects.
+func (x *Opts) Copy() []*Opt {
+	newOpts := []*Opt{}
+	if x != nil {
+		for _, o := range *x {
+			if o != nil {
+				newOpts = append(newOpts, &Opt{Key: o.Key, Val: o.Val})
+			}
+		}
 	}
-	*opts = append(*opts, opt)
-	return true
+	return newOpts
 }
 
 // Copy the given options slice removing nil options. Although the slice and
@@ -107,17 +144,57 @@ func Copy(opts []*Opt) []*Opt {
 // Default adds an option to the options slice if it doesn't exist.
 // Returns true the option was added to the options slice or false if
 // the given slice or option are nil or the option already exists in the slice.
-func Default(opts *[]*Opt, opt *Opt) bool {
-	if opts == nil || opt == nil || Exists(*opts, opt.Key) {
-		return false
+func (x *Opts) Default(o ...*Opt) (result bool) {
+	if x != nil && len(o) > 0 {
+		result = true
+		for _, opt := range o {
+			if opt == nil || x.Exists(opt.Key) {
+				result = false
+				continue
+			}
+			*x = append(*x, opt)
+		}
 	}
-	*opts = append(*opts, opt)
-	return true
+	return
+}
+
+// Default adds an option to the options slice if it doesn't exist.
+// Returns true the option was added to the options slice or false if
+// the given slice or option are nil or the option already exists in the slice.
+func Default(opts *[]*Opt, o ...*Opt) (result bool) {
+	if opts != nil && len(o) > 0 {
+		result = true
+		for _, opt := range o {
+			if opt == nil || Exists(*opts, opt.Key) {
+				result = false
+				continue
+			}
+			*opts = append(*opts, opt)
+		}
+	}
+	return
+}
+
+// Exists checks if the given opt exists in the opts slice by key
+func (x *Opts) Exists(key string) bool {
+	return x.Get(key) != nil
 }
 
 // Exists checks if the given opt exists in the opts slice by key
 func Exists(opts []*Opt, key string) bool {
 	return Get(opts, key) != nil
+}
+
+// Get simply calls the function Get as a helper
+func (x *Opts) Get(key string) *Opt {
+	if x != nil {
+		for _, o := range *x {
+			if o != nil && o.Key == key {
+				return o
+			}
+		}
+	}
+	return nil
 }
 
 // Get an option by the given key
@@ -131,6 +208,18 @@ func Get(opts []*Opt, key string) *Opt {
 }
 
 // Overwrite replaces an existing option or adds the option if it doesn't exist.
+func (x *Opts) Overwrite(opt *Opt) *Opt {
+	if x != nil && opt != nil {
+		if x.Exists(opt.Key) {
+			x.Get(opt.Key).Val = opt.Val
+		} else {
+			x.Add(opt)
+		}
+	}
+	return opt
+}
+
+// Overwrite replaces an existing option or adds the option if it doesn't exist.
 func Overwrite(opts *[]*Opt, opt *Opt) *Opt {
 	if opts != nil && opt != nil {
 		if Exists(*opts, opt.Key) {
@@ -140,6 +229,22 @@ func Overwrite(opts *[]*Opt, opt *Opt) *Opt {
 		}
 	}
 	return opt
+}
+
+// Remove an existing option by key from the options list
+func (x *Opts) Remove(key string) {
+	if x != nil && key != "" {
+		for i := len(*x) - 1; i >= 0; i-- {
+			if (*x)[i] != nil && (*x)[i].Key == key {
+				if i+1 < len(*x) {
+					*x = append((*x)[:i], (*x)[i+1:]...)
+				} else {
+					*x = (*x)[:i]
+				}
+				return
+			}
+		}
+	}
 }
 
 // Remove an existing option by key from the options list

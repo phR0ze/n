@@ -137,66 +137,180 @@ func TestStdStreamInterface(t *testing.T) {
 	assert.Equal(t, strm.Testing(), true)
 }
 
+func TestNew(t *testing.T) {
+	t.Run("New creates a new empty Opts", func(t *testing.T) {
+		opts := New()
+		assert.NotNil(t, opts)
+		assert.Equal(t, 0, opts.Len())
+	})
+
+	t.Run("New with an opt creates a new Opts with one Opt", func(t *testing.T) {
+		opt := TestingOpt(true)
+		opts := New(opt)
+		assert.NotNil(t, opts)
+		assert.Equal(t, 1, opts.Len())
+		assert.Equal(t, opt, opts.Get(TestingOptKey))
+	})
+
+	t.Run("New with more than one opt creates a new Opts with the same", func(t *testing.T) {
+		opt1 := DebugOpt(true)
+		opt2 := TestingOpt(true)
+		opts := New(opt1, opt2)
+		assert.NotNil(t, opts)
+		assert.Equal(t, 2, opts.Len())
+		assert.Equal(t, opt1, opts.Get(DebugOptKey))
+		assert.Equal(t, opt2, opts.Get(TestingOptKey))
+	})
+}
+
 func TestAdd(t *testing.T) {
 
-	// option is nil
-	{
+	t.Run("option is nil for function", func(t *testing.T) {
 		opts := []*Opt{}
 		assert.False(t, Add(&opts, nil))
-	}
+	})
 
-	// slice is nil
-	{
+	t.Run("option is nil for method", func(t *testing.T) {
+		opts := New()
+		assert.False(t, opts.Add(nil))
+	})
+
+	t.Run("slice is nil for function", func(t *testing.T) {
 		var opts *[]*Opt
 		assert.False(t, Add(opts, nil))
-	}
+	})
 
-	// add a new option
-	{
+	t.Run("slice is nil for method", func(t *testing.T) {
+		var opts Opts
+		assert.False(t, opts.Add())
+	})
+
+	t.Run("Add a new option via the function", func(t *testing.T) {
+		opt1 := TestingOpt(true)
 		opts := []*Opt{}
-		assert.True(t, Add(&opts, TestingOpt(true)))
-	}
+		assert.True(t, Add(&opts, opt1))
+		assert.Equal(t, 1, len(opts))
+		assert.Equal(t, opt1, Get(opts, TestingOptKey))
+	})
+
+	t.Run("Add two options via the function", func(t *testing.T) {
+		opt1 := TestingOpt(true)
+		opt2 := DebugOpt(true)
+		opts := []*Opt{}
+		assert.True(t, Add(&opts, opt1))
+		assert.True(t, Add(&opts, opt2))
+		assert.Equal(t, 2, len(opts))
+		assert.Equal(t, opt1, Get(opts, TestingOptKey))
+		assert.Equal(t, opt2, Get(opts, DebugOptKey))
+	})
+
+	t.Run("Add a new option via the method", func(t *testing.T) {
+		opt1 := TestingOpt(true)
+		opts := New()
+		opts.Add(opt1)
+		assert.Equal(t, 1, opts.Len())
+		assert.Equal(t, opt1, opts.Get(TestingOptKey))
+	})
+
+	t.Run("Add two options via the methd", func(t *testing.T) {
+		opt1 := TestingOpt(true)
+		opt2 := DebugOpt(true)
+		opts := New()
+		opts.Add(opt1)
+		opts.Add(opt2)
+		assert.Equal(t, 2, opts.Len())
+		assert.Equal(t, opt1, opts.Get(TestingOptKey))
+		assert.Equal(t, opt2, opts.Get(DebugOptKey))
+	})
 }
 
 func TestCopy(t *testing.T) {
 
-	// Ensure original isn't affected by copy changes
-	{
-		opts1 := []*Opt{&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}}
+	t.Run("Ensure original isn't affected by copy changes function", func(t *testing.T) {
+		opts1 := []*Opt{{"1", 1}, {"2", 2}, {"3", 3}}
 		opts2 := Copy(opts1)
-		assert.Equal(t, []*Opt{&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}}, opts1)
-		assert.Equal(t, []*Opt{&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}}, opts2)
+		assert.Equal(t, []*Opt{{"1", 1}, {"2", 2}, {"3", 3}}, opts1)
+		assert.Equal(t, []*Opt{{"1", 1}, {"2", 2}, {"3", 3}}, opts2)
 		Remove(&opts2, "1")
-		assert.Equal(t, []*Opt{&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}}, opts1)
-		assert.Equal(t, []*Opt{&Opt{"2", 2}, &Opt{"3", 3}}, opts2)
-	}
+		assert.Equal(t, []*Opt{{"1", 1}, {"2", 2}, {"3", 3}}, opts1)
+		assert.Equal(t, []*Opt{{"2", 2}, {"3", 3}}, opts2)
+	})
+
+	t.Run("Ensure original isn't affected by copy changes via method", func(t *testing.T) {
+		opts1 := New(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3})
+		opts2 := New(opts1.Copy()...)
+		assert.Equal(t, New(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}), opts1)
+		assert.Equal(t, New(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}), opts2)
+		opts2.Remove("1")
+		assert.Equal(t, New(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}), opts1)
+		assert.Equal(t, New(&Opt{"2", 2}, &Opt{"3", 3}), opts2)
+	})
 }
 
 func TestDefault(t *testing.T) {
 
-	// option is nil
-	{
+	t.Run("option is nil for function", func(t *testing.T) {
 		opts := []*Opt{}
 		assert.False(t, Default(&opts, nil))
-	}
+	})
 
-	// slice is nil
-	{
+	t.Run("option is nil for method", func(t *testing.T) {
+		opts := New()
+		assert.False(t, opts.Default(nil))
+	})
+
+	t.Run("slice is nil for function", func(t *testing.T) {
 		var opts *[]*Opt
 		assert.False(t, Default(opts, nil))
-	}
+	})
 
-	// add a new option
-	{
+	t.Run("slice is nil for method", func(t *testing.T) {
+		var opts Opts
+		assert.False(t, opts.Default())
+	})
+
+	t.Run("Default a new option via the function", func(t *testing.T) {
+		opt1 := TestingOpt(true)
 		opts := []*Opt{}
-		assert.True(t, Default(&opts, TestingOpt(true)))
-	}
+		assert.True(t, Default(&opts, opt1))
+		assert.Equal(t, 1, len(opts))
+		assert.Equal(t, opt1, Get(opts, TestingOptKey))
+	})
+
+	t.Run("Default two options via the function", func(t *testing.T) {
+		opt1 := TestingOpt(true)
+		opt2 := DebugOpt(true)
+		opts := []*Opt{}
+		assert.True(t, Default(&opts, opt1))
+		assert.True(t, Default(&opts, opt2))
+		assert.Equal(t, 2, len(opts))
+		assert.Equal(t, opt1, Get(opts, TestingOptKey))
+		assert.Equal(t, opt2, Get(opts, DebugOptKey))
+	})
+
+	t.Run("Default a new option via the method", func(t *testing.T) {
+		opt1 := TestingOpt(true)
+		opts := New()
+		opts.Default(opt1)
+		assert.Equal(t, 1, opts.Len())
+		assert.Equal(t, opt1, opts.Get(TestingOptKey))
+	})
+
+	t.Run("Default two options via the methd", func(t *testing.T) {
+		opt1 := TestingOpt(true)
+		opt2 := DebugOpt(true)
+		opts := New()
+		opts.Default(opt1)
+		opts.Default(opt2)
+		assert.Equal(t, 2, opts.Len())
+		assert.Equal(t, opt1, opts.Get(TestingOptKey))
+		assert.Equal(t, opt2, opts.Get(DebugOptKey))
+	})
 }
 
 func TestOverwrite(t *testing.T) {
 
-	// happy
-	{
+	t.Run("Overwrite an option in the list via function", func(t *testing.T) {
 		opts := []*Opt{}
 		result := Overwrite(&opts, &Opt{"1", 1})
 		assert.Equal(t, &Opt{"1", 1}, result)
@@ -204,59 +318,86 @@ func TestOverwrite(t *testing.T) {
 		assert.Equal(t, &Opt{"2", 2}, result)
 		result = Overwrite(&opts, &Opt{"3", 3})
 		assert.Equal(t, &Opt{"3", 3}, result)
-		assert.Equal(t, []*Opt{&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}}, opts)
+		assert.Equal(t, []*Opt{{"1", 1}, {"2", 2}, {"3", 3}}, opts)
 
 		result = Overwrite(&opts, &Opt{"2", 5})
 		assert.Equal(t, &Opt{"2", 5}, result)
-		assert.Equal(t, []*Opt{&Opt{"1", 1}, &Opt{"2", 5}, &Opt{"3", 3}}, opts)
-	}
+		assert.Equal(t, []*Opt{{"1", 1}, {"2", 5}, {"3", 3}}, opts)
+	})
+
+	t.Run("Overwrite an option in the list via function", func(t *testing.T) {
+		opts := New()
+		result := opts.Overwrite(&Opt{"1", 1})
+		assert.Equal(t, &Opt{"1", 1}, result)
+		result = opts.Overwrite(&Opt{"2", 2})
+		assert.Equal(t, &Opt{"2", 2}, result)
+		result = opts.Overwrite(&Opt{"3", 3})
+		assert.Equal(t, &Opt{"3", 3}, result)
+		assert.Equal(t, New(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}), opts)
+
+		result = opts.Overwrite(&Opt{"2", 5})
+		assert.Equal(t, &Opt{"2", 5}, result)
+		assert.Equal(t, New(&Opt{"1", 1}, &Opt{"2", 5}, &Opt{"3", 3}), opts)
+	})
 }
 
 func TestRemove(t *testing.T) {
-	// nil opt in slice
-	{
+	t.Run("nil opt in slice via function", func(t *testing.T) {
 		// removing the first should force check on middle before iterating past
-		opts := []*Opt{&Opt{"1", 1}, (*Opt)(nil), &Opt{"3", 3}}
+		opts := []*Opt{{"1", 1}, (*Opt)(nil), {"3", 3}}
 		Remove(&opts, "1")
-		assert.Equal(t, []*Opt{(*Opt)(nil), &Opt{"3", 3}}, opts)
+		assert.Equal(t, []*Opt{(*Opt)(nil), {"3", 3}}, opts)
 
 		// Remove end of slice
 		Remove(&opts, "3")
 		assert.Equal(t, []*Opt{(*Opt)(nil)}, opts)
-	}
+	})
 
-	// nil opt
-	{
-		opts := []*Opt{&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}}
+	t.Run("nil opt via function", func(t *testing.T) {
+		opts := []*Opt{{"1", 1}, {"2", 2}, {"3", 3}}
 		Remove(&opts, "")
-		assert.Equal(t, []*Opt{&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}}, opts)
-	}
+		assert.Equal(t, []*Opt{{"1", 1}, {"2", 2}, {"3", 3}}, opts)
+	})
 
-	// nil opts
-	{
+	t.Run("nil opts via function", func(t *testing.T) {
 		Remove((*[]*Opt)(nil), "2")
-	}
+	})
 
-	// remove the middle
-	{
-		opts := []*Opt{&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}}
+	t.Run("remove middle via function", func(t *testing.T) {
+		opts := []*Opt{{"1", 1}, {"2", 2}, {"3", 3}}
 		Remove(&opts, "2")
-		assert.Equal(t, []*Opt{&Opt{"1", 1}, &Opt{"3", 3}}, opts)
-	}
+		assert.Equal(t, []*Opt{{"1", 1}, {"3", 3}}, opts)
+	})
 
-	// remove the end
-	{
-		opts := []*Opt{&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}}
+	t.Run("remove end via function", func(t *testing.T) {
+		opts := []*Opt{{"1", 1}, {"2", 2}, {"3", 3}}
 		Remove(&opts, "3")
-		assert.Equal(t, []*Opt{&Opt{"1", 1}, &Opt{"2", 2}}, opts)
-	}
+		assert.Equal(t, []*Opt{{"1", 1}, {"2", 2}}, opts)
+	})
 
-	// remove the begining
-	{
-		opts := []*Opt{&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}}
+	t.Run("remove begining via function", func(t *testing.T) {
+		opts := []*Opt{{"1", 1}, {"2", 2}, {"3", 3}}
 		Remove(&opts, "1")
-		assert.Equal(t, []*Opt{&Opt{"2", 2}, &Opt{"3", 3}}, opts)
-	}
+		assert.Equal(t, []*Opt{{"2", 2}, {"3", 3}}, opts)
+	})
+
+	t.Run("remove middle via method", func(t *testing.T) {
+		opts := New(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3})
+		opts.Remove("2")
+		assert.Equal(t, New(&Opt{"1", 1}, &Opt{"3", 3}), opts)
+	})
+
+	t.Run("remove end via method", func(t *testing.T) {
+		opts := New(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3})
+		opts.Remove("3")
+		assert.Equal(t, New(&Opt{"1", 1}, &Opt{"2", 2}), opts)
+	})
+
+	t.Run("remove begining via method", func(t *testing.T) {
+		opts := New(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3})
+		opts.Remove("1")
+		assert.Equal(t, New(&Opt{"2", 2}, &Opt{"3", 3}), opts)
+	})
 }
 
 // In
