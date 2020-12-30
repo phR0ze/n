@@ -84,8 +84,13 @@ type Opt struct {
 // Opts provides some convenience methods for working with options
 type Opts []*Opt
 
-// New is a conveniance function to new up an Opts
-func New(o ...*Opt) (opts *Opts) {
+// New is a conveniance function to new up an Opt
+func New(key string, val interface{}) *Opt {
+	return &Opt{Key: key, Val: val}
+}
+
+// NewOpts is a conveniance function to new up an Opts
+func NewOpts(o ...*Opt) (opts *Opts) {
 	opts = &Opts{}
 	for _, opt := range o {
 		opts.Add(opt)

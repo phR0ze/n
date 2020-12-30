@@ -139,14 +139,14 @@ func TestStdStreamInterface(t *testing.T) {
 
 func TestNew(t *testing.T) {
 	t.Run("New creates a new empty Opts", func(t *testing.T) {
-		opts := New()
+		opts := NewOpts()
 		assert.NotNil(t, opts)
 		assert.Equal(t, 0, opts.Len())
 	})
 
 	t.Run("New with an opt creates a new Opts with one Opt", func(t *testing.T) {
 		opt := TestingOpt(true)
-		opts := New(opt)
+		opts := NewOpts(opt)
 		assert.NotNil(t, opts)
 		assert.Equal(t, 1, opts.Len())
 		assert.Equal(t, opt, opts.Get(TestingOptKey))
@@ -155,7 +155,7 @@ func TestNew(t *testing.T) {
 	t.Run("New with more than one opt creates a new Opts with the same", func(t *testing.T) {
 		opt1 := DebugOpt(true)
 		opt2 := TestingOpt(true)
-		opts := New(opt1, opt2)
+		opts := NewOpts(opt1, opt2)
 		assert.NotNil(t, opts)
 		assert.Equal(t, 2, opts.Len())
 		assert.Equal(t, opt1, opts.Get(DebugOptKey))
@@ -171,7 +171,7 @@ func TestAdd(t *testing.T) {
 	})
 
 	t.Run("option is nil for method", func(t *testing.T) {
-		opts := New()
+		opts := NewOpts()
 		assert.False(t, opts.Add(nil))
 	})
 
@@ -206,7 +206,7 @@ func TestAdd(t *testing.T) {
 
 	t.Run("Add a new option via the method", func(t *testing.T) {
 		opt1 := TestingOpt(true)
-		opts := New()
+		opts := NewOpts()
 		opts.Add(opt1)
 		assert.Equal(t, 1, opts.Len())
 		assert.Equal(t, opt1, opts.Get(TestingOptKey))
@@ -215,7 +215,7 @@ func TestAdd(t *testing.T) {
 	t.Run("Add two options via the methd", func(t *testing.T) {
 		opt1 := TestingOpt(true)
 		opt2 := DebugOpt(true)
-		opts := New()
+		opts := NewOpts()
 		opts.Add(opt1)
 		opts.Add(opt2)
 		assert.Equal(t, 2, opts.Len())
@@ -237,13 +237,13 @@ func TestCopy(t *testing.T) {
 	})
 
 	t.Run("Ensure original isn't affected by copy changes via method", func(t *testing.T) {
-		opts1 := New(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3})
-		opts2 := New(opts1.Copy()...)
-		assert.Equal(t, New(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}), opts1)
-		assert.Equal(t, New(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}), opts2)
+		opts1 := NewOpts(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3})
+		opts2 := NewOpts(opts1.Copy()...)
+		assert.Equal(t, NewOpts(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}), opts1)
+		assert.Equal(t, NewOpts(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}), opts2)
 		opts2.Remove("1")
-		assert.Equal(t, New(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}), opts1)
-		assert.Equal(t, New(&Opt{"2", 2}, &Opt{"3", 3}), opts2)
+		assert.Equal(t, NewOpts(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}), opts1)
+		assert.Equal(t, NewOpts(&Opt{"2", 2}, &Opt{"3", 3}), opts2)
 	})
 }
 
@@ -255,7 +255,7 @@ func TestDefault(t *testing.T) {
 	})
 
 	t.Run("option is nil for method", func(t *testing.T) {
-		opts := New()
+		opts := NewOpts()
 		assert.False(t, opts.Default(nil))
 	})
 
@@ -290,7 +290,7 @@ func TestDefault(t *testing.T) {
 
 	t.Run("Default a new option via the method", func(t *testing.T) {
 		opt1 := TestingOpt(true)
-		opts := New()
+		opts := NewOpts()
 		opts.Default(opt1)
 		assert.Equal(t, 1, opts.Len())
 		assert.Equal(t, opt1, opts.Get(TestingOptKey))
@@ -299,7 +299,7 @@ func TestDefault(t *testing.T) {
 	t.Run("Default two options via the methd", func(t *testing.T) {
 		opt1 := TestingOpt(true)
 		opt2 := DebugOpt(true)
-		opts := New()
+		opts := NewOpts()
 		opts.Default(opt1)
 		opts.Default(opt2)
 		assert.Equal(t, 2, opts.Len())
@@ -326,18 +326,18 @@ func TestOverwrite(t *testing.T) {
 	})
 
 	t.Run("Overwrite an option in the list via function", func(t *testing.T) {
-		opts := New()
+		opts := NewOpts()
 		result := opts.Overwrite(&Opt{"1", 1})
 		assert.Equal(t, &Opt{"1", 1}, result)
 		result = opts.Overwrite(&Opt{"2", 2})
 		assert.Equal(t, &Opt{"2", 2}, result)
 		result = opts.Overwrite(&Opt{"3", 3})
 		assert.Equal(t, &Opt{"3", 3}, result)
-		assert.Equal(t, New(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}), opts)
+		assert.Equal(t, NewOpts(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3}), opts)
 
 		result = opts.Overwrite(&Opt{"2", 5})
 		assert.Equal(t, &Opt{"2", 5}, result)
-		assert.Equal(t, New(&Opt{"1", 1}, &Opt{"2", 5}, &Opt{"3", 3}), opts)
+		assert.Equal(t, NewOpts(&Opt{"1", 1}, &Opt{"2", 5}, &Opt{"3", 3}), opts)
 	})
 }
 
@@ -382,21 +382,21 @@ func TestRemove(t *testing.T) {
 	})
 
 	t.Run("remove middle via method", func(t *testing.T) {
-		opts := New(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3})
+		opts := NewOpts(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3})
 		opts.Remove("2")
-		assert.Equal(t, New(&Opt{"1", 1}, &Opt{"3", 3}), opts)
+		assert.Equal(t, NewOpts(&Opt{"1", 1}, &Opt{"3", 3}), opts)
 	})
 
 	t.Run("remove end via method", func(t *testing.T) {
-		opts := New(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3})
+		opts := NewOpts(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3})
 		opts.Remove("3")
-		assert.Equal(t, New(&Opt{"1", 1}, &Opt{"2", 2}), opts)
+		assert.Equal(t, NewOpts(&Opt{"1", 1}, &Opt{"2", 2}), opts)
 	})
 
 	t.Run("remove begining via method", func(t *testing.T) {
-		opts := New(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3})
+		opts := NewOpts(&Opt{"1", 1}, &Opt{"2", 2}, &Opt{"3", 3})
 		opts.Remove("1")
-		assert.Equal(t, New(&Opt{"2", 2}, &Opt{"3", 3}), opts)
+		assert.Equal(t, NewOpts(&Opt{"2", 2}, &Opt{"3", 3}), opts)
 	})
 }
 
@@ -689,18 +689,19 @@ func TestTestingOpt(t *testing.T) {
 
 	// gets generically
 	{
-		opts := New()
+		opts := NewOpts()
 		assert.Equal(t, false, GetBool(*opts, "testing"))
 		assert.Equal(t, false, opts.GetBool("testing"))
 		assert.True(t, Add((*[]*Opt)(opts), TestingOpt(true)))
 		assert.Equal(t, true, GetBool(*opts, "testing"))
 		assert.Equal(t, true, opts.GetBool("testing"))
 
-		assert.Equal(t, "", GetString(*opts, "home"))
-		assert.Equal(t, "", opts.GetString("home"))
-		assert.True(t, Add((*[]*Opt)(opts), HomeOpt("foo")))
-		assert.Equal(t, "foo", GetString(*opts, "home"))
-		assert.Equal(t, "foo", opts.GetString("home"))
+		assert.Equal(t, "", GetString(*opts, "generic"))
+		assert.Equal(t, "", opts.GetString("generic"))
+		assert.Equal(t, &Opt{Key: "generic", Val: "foo"}, New("generic", "foo"))
+		assert.True(t, Add((*[]*Opt)(opts), New("generic", "foo")))
+		assert.Equal(t, "foo", GetString(*opts, "generic"))
+		assert.Equal(t, "foo", opts.GetString("generic"))
 	}
 
 	// overwrite
