@@ -687,6 +687,22 @@ func TestTestingOpt(t *testing.T) {
 		assert.True(t, DefaultTestingOpt(opts, false))
 	}
 
+	// gets generically
+	{
+		opts := New()
+		assert.Equal(t, false, GetBool(*opts, "testing"))
+		assert.Equal(t, false, opts.GetBool("testing"))
+		assert.True(t, Add((*[]*Opt)(opts), TestingOpt(true)))
+		assert.Equal(t, true, GetBool(*opts, "testing"))
+		assert.Equal(t, true, opts.GetBool("testing"))
+
+		assert.Equal(t, "", GetString(*opts, "home"))
+		assert.Equal(t, "", opts.GetString("home"))
+		assert.True(t, Add((*[]*Opt)(opts), HomeOpt("foo")))
+		assert.Equal(t, "foo", GetString(*opts, "home"))
+		assert.Equal(t, "foo", opts.GetString("home"))
+	}
+
 	// overwrite
 	{
 		opts := []*Opt{}

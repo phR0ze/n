@@ -185,7 +185,7 @@ func Exists(opts []*Opt, key string) bool {
 	return Get(opts, key) != nil
 }
 
-// Get simply calls the function Get as a helper
+// Get an option by the given key
 func (x *Opts) Get(key string) *Opt {
 	if x != nil {
 		for _, o := range *x {
@@ -205,6 +205,50 @@ func Get(opts []*Opt, key string) *Opt {
 		}
 	}
 	return nil
+}
+
+// GetBool gets an option by key and casts it to a bool type.
+func (x *Opts) GetBool(key string) (result bool) {
+	if o := x.Get(key); o != nil {
+		if val, ok := o.Val.(bool); ok {
+			result = val
+			return
+		}
+	}
+	return
+}
+
+// GetBool gets an option by key and casts it to a bool type.
+func GetBool(opts []*Opt, key string) (result bool) {
+	if o := Get(opts, key); o != nil {
+		if val, ok := o.Val.(bool); ok {
+			result = val
+			return
+		}
+	}
+	return
+}
+
+// GetString gets an option by key and casts it to a string type.
+func (x *Opts) GetString(key string) (result string) {
+	if o := x.Get(key); o != nil {
+		if val, ok := o.Val.(string); ok {
+			result = val
+			return
+		}
+	}
+	return
+}
+
+// GetString gets an option by key and casts it to a string type.
+func GetString(opts []*Opt, key string) (result string) {
+	if o := Get(opts, key); o != nil {
+		if val, ok := o.Val.(string); ok {
+			result = val
+			return
+		}
+	}
+	return
 }
 
 // Overwrite replaces an existing option or adds the option if it doesn't exist.
