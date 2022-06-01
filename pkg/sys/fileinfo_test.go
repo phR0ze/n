@@ -3,6 +3,7 @@ package sys
 import (
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -119,6 +120,56 @@ func TestIsDir(t *testing.T) {
 	}
 }
 
+func TestAnyDir(t *testing.T) {
+	// reset state
+	dir := filepath.Join(tmpDir, "AnyDir")
+	RemoveAll(dir)
+	dir, err := MkdirP(dir)
+	assert.NoError(t, err)
+
+	// create a dir to test
+	dir1, err := MkdirP(filepath.Join(dir, "dir1"))
+	assert.NoError(t, err)
+
+	// create a link to test
+	link1 := filepath.Join(dir, "link1")
+	err = Symlink(dir1, link1)
+	assert.NoError(t, err)
+
+	// error case
+	{
+		assert.False(t, AnyDir(path.Join(tmpDir, "bogus")))
+	}
+
+	// FileInfo
+	{
+		// regular dir
+		info, err := Lstat(dir1)
+		assert.NoError(t, err)
+		assert.True(t, info.AnyDir())
+
+		// link not a dir
+		info, err = Lstat(link1)
+		assert.NoError(t, err)
+		assert.False(t, info.IsDir())
+
+		// link points to dir
+		assert.True(t, info.AnyDir())
+	}
+
+	// Standalone
+	{
+		// regular dir
+		assert.True(t, AnyDir(dir1))
+
+		// link not a dir
+		assert.False(t, IsDir(link1))
+
+		// link points to dir
+		assert.True(t, AnyDir(link1))
+	}
+}
+
 func TestIsFile(t *testing.T) {
 	resetTest()
 
@@ -151,6 +202,57 @@ func TestIsFile(t *testing.T) {
 
 		assert.True(t, IsFile(target))
 		assert.False(t, IsFile(path.Dir(target)))
+	}
+}
+
+func TestAnyFile(t *testing.T) {
+	// reset state
+	dir := filepath.Join(tmpDir, "AnyFile")
+	RemoveAll(dir)
+	dir, err := MkdirP(dir)
+	assert.NoError(t, err)
+
+	// create a file to test
+	file1 := filepath.Join(dir, "file1")
+	file1, err = Touch(file1)
+	assert.NoError(t, err)
+
+	// create a link to test
+	link1 := filepath.Join(dir, "link1")
+	err = Symlink(file1, link1)
+	assert.NoError(t, err)
+
+	// error case
+	{
+		assert.False(t, AnyFile(path.Join(tmpDir, "bogus")))
+	}
+
+	// FileInfo
+	{
+		// regular file
+		info, err := Lstat(file1)
+		assert.NoError(t, err)
+		assert.True(t, info.AnyFile())
+
+		// link not a file
+		info, err = Lstat(link1)
+		assert.NoError(t, err)
+		assert.False(t, info.IsFile())
+
+		// link points to file
+		assert.True(t, info.AnyFile())
+	}
+
+	// Standalone
+	{
+		// regular file
+		assert.True(t, AnyFile(file1))
+
+		// link not a file
+		assert.False(t, IsFile(link1))
+
+		// link points to file
+		assert.True(t, AnyFile(link1))
 	}
 }
 

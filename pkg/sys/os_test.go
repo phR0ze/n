@@ -95,14 +95,6 @@ func TestShell(t *testing.T) {
 		assert.Equal(t, "invalid empty command", err.Error())
 	}
 
-	// Invalid command
-	{
-		result, err := Shell("blah")
-		expected := "bash: blah: command not found\n"
-		assert.Equal(t, expected, result)
-		assert.Equal(t, `failed to execute system command: exit status 127`, err.Error())
-	}
-
 	// Valid listing of a directory
 	{
 		result, err := Shell("ls -1 ../net")

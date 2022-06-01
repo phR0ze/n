@@ -14,7 +14,7 @@ type FileInfo struct {
 	Obj  os.FileInfo // handle on the actual OS object to use where needed
 }
 
-// Lstat wraps os.Lstate to give back a FileInfo
+// Lstat wraps os.Lstat to give back a FileInfo
 // Resolves home dir and relative dir pathing into absolute paths
 func Lstat(src string) (result *FileInfo, err error) {
 	if src, err = Abs(src); err != nil {
@@ -82,6 +82,23 @@ func IsDir(src string) bool {
 	return false
 }
 
+// AnyDir returns true if the given path is a directory or a symlink to a directory
+func (info *FileInfo) AnyDir() bool {
+	if info.Obj.Mode()&os.ModeSymlink != 0 {
+		return info.IsSymlinkDir()
+	} else {
+		return info.IsDir()
+	}
+}
+
+// AnyDir returns true if the given path is a directory or a symlink to a directory
+func AnyDir(src string) bool {
+	if info, err := Lstat(src); err == nil {
+		return info.AnyDir()
+	}
+	return false
+}
+
 // IsFile returns true if the info is a file
 func (info *FileInfo) IsFile() bool {
 	return !info.Obj.IsDir() && info.Obj.Mode()&os.ModeSymlink == 0
@@ -91,6 +108,23 @@ func (info *FileInfo) IsFile() bool {
 func IsFile(src string) bool {
 	if info, err := Lstat(src); err == nil {
 		return !info.IsDir() && info.Mode()&os.ModeSymlink == 0
+	}
+	return false
+}
+
+// AnyFile returns true if the given path is a file or a symlink to a file
+func (info *FileInfo) AnyFile() bool {
+	if info.Obj.Mode()&os.ModeSymlink != 0 {
+		return info.IsSymlinkFile()
+	} else {
+		return info.IsFile()
+	}
+}
+
+// AnyFile returns true if the given path is a file or a symlink to a file
+func AnyFile(src string) bool {
+	if info, err := Lstat(src); err == nil {
+		return info.AnyFile()
 	}
 	return false
 }
