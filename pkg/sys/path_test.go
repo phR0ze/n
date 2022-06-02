@@ -373,7 +373,7 @@ func TestAllFiles(t *testing.T) {
 		symlink := path.Join(tmpDir, "second", "third")
 		os.Symlink(thirdDir, symlink)
 
-		// Create sysmlink in second dir to third dir file third-0
+		// Create sysmlink in second dir to third dir file t0
 		symlink = path.Join(tmpDir, "second", "t0")
 		os.Symlink(path.Join(thirdDir, "t0"), symlink)
 
@@ -784,6 +784,14 @@ func TestTrimProtocol(t *testing.T) {
 	assert.Equal(t, "foo/bar", TrimProtocol("http://foo/bar"))
 	assert.Equal(t, "foo/bar", TrimProtocol("https://foo/bar"))
 	assert.Equal(t, "foo://foo/bar", TrimProtocol("foo://foo/bar"))
+}
+
+func TestTrimShared(t *testing.T) {
+	assert.Equal(t, "", TrimShared("", ""))
+	assert.Equal(t, "", TrimShared("/", "/"))
+	assert.Equal(t, "", TrimShared("/foo", "/foo"))
+	assert.Equal(t, "bar", TrimShared("/foo/bar", "/foo"))
+	assert.Equal(t, "bar/blah", TrimShared("/foo/bar/blah", "/foo"))
 }
 
 func TestWalkSkip(t *testing.T) {

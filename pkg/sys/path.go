@@ -59,7 +59,7 @@ func AllDirs(root string, opts ...*opt.Opt) (result []string, err error) {
 			return e
 		}
 
-		// IsDir will ignore files
+		// IsDir will ignore files and links
 		if p != root && p != "." && p != ".." && i.IsDir() {
 			absPath, e := Abs(p)
 			if e != nil {
@@ -429,6 +429,28 @@ func TrimProtocol(target string) string {
 	return target
 }
 
+// TrimShared returns portion of target that isn't in shared
+func TrimShared(target, shared string) string {
+	results := []string{}
+
+	targetParts := strings.Split(target, "/")
+	sharedParts := strings.Split(shared, "/")
+	secondLen := len(sharedParts)
+	for i := range targetParts {
+		if i < secondLen {
+			if targetParts[i] != sharedParts[i] {
+				results = targetParts[i:]
+				break
+			}
+		} else {
+			results = targetParts[i:]
+			break
+		}
+	}
+
+	return strings.Join(results, "/")
+}
+
 // WalkFunc works the same as the filepath.WalkFunc
 type WalkFunc func(path string, info *FileInfo, err error) error
 
@@ -454,8 +476,6 @@ func Walk(root string, walkFn WalkFunc, opts ...*opt.Opt) (err error) {
 // walk supports the public Walk function to allow for recursively walking a tree
 // and following links unlike the filepath.Walk which doesn't follow links.
 func walk(root string, info *FileInfo, walkFn WalkFunc, opts []*opt.Opt) (err error) {
-	target := root
-	targetInfo := info
 	targets := []string{}
 
 	// First thing pass whatever we've got on to user walkFn so the user has
@@ -474,11 +494,12 @@ func walk(root string, info *FileInfo, walkFn WalkFunc, opts []*opt.Opt) (err er
 		var names []string
 		if names, err = ReadDirnames(root); err == nil {
 			for _, name := range names {
-				target = filepath.Join(root, name)
-				targets = append(targets, target)
+				targets = append(targets, filepath.Join(root, name))
 			}
 		}
 	} else {
+		// Update target to the link's target path
+		var target string
 		if target, err = filepath.EvalSymlinks(root); err == nil {
 			targets = append(targets, target)
 		}
@@ -486,12 +507,13 @@ func walk(root string, info *FileInfo, walkFn WalkFunc, opts []*opt.Opt) (err er
 
 	// Return errors to the user walkFn, return error from user means skip else continue
 	if err != nil {
-		if err = walkFn(target, targetInfo, err); err != nil {
+		if err = walkFn(root, info, err); err != nil {
 			return
 		}
 	}
 
 	// Recurse on target paths
+	var targetInfo *FileInfo
 	for _, target := range targets {
 		if targetInfo, err = Lstat(target); err != nil {
 			// Return errors to the user walkFn

@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
@@ -456,6 +457,84 @@ func TestCopy(t *testing.T) {
 		}
 		assert.Equal(t, srcPaths, dstPaths)
 	}
+}
+
+func TestCopyLinkedDir(t *testing.T) {
+	// reset state
+	dir := filepath.Join(tmpDir, "LinkedDir")
+	RemoveAll(dir)
+	dir, err := MkdirP(dir)
+	assert.NoError(t, err)
+
+	// create a dir to test
+	dir1, err := MkdirP(filepath.Join(dir, "dir1"))
+	assert.NoError(t, err)
+
+	// create a link to test
+	link1 := filepath.Join(dir, "link1")
+	err = Symlink(dir1, link1)
+	assert.NoError(t, err)
+
+	// create test files
+	file1, err := Touch(filepath.Join(dir1, "file1"))
+	assert.NoError(t, err)
+	assert.FileExists(t, file1)
+	file2, err := Touch(filepath.Join(dir1, "file2"))
+	assert.NoError(t, err)
+	assert.FileExists(t, file2)
+
+	// Copy dir1 to dir2 via link1
+	dir2 := filepath.Join(dir, "dir2")
+	err = Copy(link1, dir2, FollowOpt(true))
+	assert.NoError(t, err)
+
+	results, err := AllPaths(dir2)
+	assert.NoError(t, err)
+	files := []string{}
+	for _, result := range results {
+		files = append(files, SlicePath(result, -3, -1))
+	}
+	assert.Equal(t, []string{"temp/LinkedDir/dir2", "LinkedDir/dir2/file1", "LinkedDir/dir2/file2"}, files)
+}
+
+func TestCopyLinkedDirNested(t *testing.T) {
+	// reset state
+	dir := filepath.Join(tmpDir, "LinkedDirNested")
+	RemoveAll(dir)
+	dir, err := MkdirP(dir)
+	assert.NoError(t, err)
+
+	// create dirs to test with
+	dir1, err := MkdirP(filepath.Join(dir, "dir1"))
+	assert.NoError(t, err)
+	dir2, err := MkdirP(filepath.Join(dir, "dir2"))
+	assert.NoError(t, err)
+
+	// create a link to test with
+	link1 := filepath.Join(dir1, "link1")
+	err = Symlink(dir2, link1)
+	assert.NoError(t, err)
+
+	// create test files
+	file1, err := Touch(filepath.Join(dir2, "file1"))
+	assert.NoError(t, err)
+	assert.FileExists(t, file1)
+	file2, err := Touch(filepath.Join(dir2, "file2"))
+	assert.NoError(t, err)
+	assert.FileExists(t, file2)
+
+	// Copy dir1 to dir2 via link1
+	dir3 := filepath.Join(dir, "dir3")
+	err = Copy(dir1, dir3, FollowOpt(true))
+	assert.NoError(t, err)
+
+	results, err := AllPaths(dir3)
+	assert.NoError(t, err)
+	files := []string{}
+	for _, result := range results {
+		files = append(files, SlicePath(result, -3, -1))
+	}
+	assert.Equal(t, []string{"temp/LinkedDirNested/dir3", "LinkedDirNested/dir3/dir2", "dir3/dir2/file1", "dir3/dir2/file2"}, files)
 }
 
 func TestDarwin(t *testing.T) {

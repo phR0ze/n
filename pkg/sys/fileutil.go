@@ -173,21 +173,22 @@ func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 	}
 
 	// Copy all sources to dst
-	for _, srcRoot := range sources {
+	for _, root := range sources {
+
+		// Special case root links if following
+		// var rootInfo *FileInfo
+		// if rootInfo, err = Lstat(root); err != nil {
+		// 	return err
+		// }
 
 		// Walk over file structure
-		err = Walk(srcRoot, func(srcPath string, srcInfo *FileInfo, e error) error {
+		err = Walk(root, func(srcPath string, srcInfo *FileInfo, e error) error {
 			if e != nil {
 				return e
 			}
 
 			// Set proper dst path
-			var dstPath string
-			if clone {
-				dstPath = path.Join(dstAbs, strings.TrimPrefix(srcPath, srcRoot))
-			} else {
-				dstPath = path.Join(dstAbs, strings.TrimPrefix(srcPath, path.Dir(srcRoot)))
-			}
+			dstPath := computeDestPath(clone, dstAbs, srcPath, root)
 
 			// Handle individual copies
 			switch {
@@ -198,14 +199,19 @@ func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 					return e
 				}
 
-			// Copy dir links
+			// Re-create dir links to link target path
 			case srcInfo.IsSymlinkDir():
 				var target string
 				if target, e = srcInfo.SymlinkTarget(); e != nil {
 					return e
 				}
-				if e = os.Symlink(target, dstPath); e != nil {
-					return e
+
+				// Ignoring symlinked dirs if following as these will be queued up in the Walk list already
+				if getFollowOpt(opts) {
+				} else {
+					if e = os.Symlink(target, dstPath); e != nil {
+						return e
+					}
 				}
 
 			// Copy file
@@ -216,6 +222,15 @@ func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 		}, opts...)
 	}
 	return
+}
+
+// compute destination path
+func computeDestPath(clone bool, dstAbs, srcPath, root string) string {
+	if clone {
+		return path.Join(dstAbs, TrimShared(srcPath, root))
+	} else {
+		return path.Join(dstAbs, TrimShared(srcPath, path.Dir(root)))
+	}
 }
 
 // CopyFile copies a single file from src to dsty, creating destination directories as needed.
