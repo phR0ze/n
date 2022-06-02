@@ -534,7 +534,7 @@ func TestCopyLinkedDirNested(t *testing.T) {
 	for _, result := range results {
 		files = append(files, SlicePath(result, -3, -1))
 	}
-	assert.Equal(t, []string{"temp/LinkedDirNested/dir3", "LinkedDirNested/dir3/dir2", "dir3/dir2/file1", "dir3/dir2/file2"}, files)
+	assert.Equal(t, []string{"temp/LinkedDirNested/dir3", "LinkedDirNested/dir3/link1", "dir3/link1/file1", "dir3/link1/file2"}, files)
 }
 
 func TestDarwin(t *testing.T) {

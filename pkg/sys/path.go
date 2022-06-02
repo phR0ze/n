@@ -498,7 +498,6 @@ func walk(root string, info *FileInfo, walkFn WalkFunc, opts []*opt.Opt) (err er
 			}
 		}
 	} else {
-		// Update target to the link's target path
 		var target string
 		if target, err = filepath.EvalSymlinks(root); err == nil {
 			targets = append(targets, target)

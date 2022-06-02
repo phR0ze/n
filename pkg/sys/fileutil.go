@@ -132,10 +132,11 @@ func Chown(path string, uid, gid int, opts ...*opt.Opt) (err error) {
 }
 
 // Copy copies src to dst recursively, creating destination directories as needed.
-// Handles globbing e.g. Copy("./*", "../")
-// The dst will be copied to if it is an existing directory.
-// The dst will be a clone of the src if it doesn't exist.
-// Doesn't follow links by default but can be turned by passing in FollowOpt(true)
+// * Handles globbing e.g. Copy("./*", "../")
+// * The dst will be copied to if it is an existing directory.
+// * The dst will be a clone of the src if it doesn't exist.
+// * Doesn't follow links by default but can be turned by passing in FollowOpt(true)
+// * Following links will use the link name but replace its content with the target linked to
 func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 	clone := true
 	var sources []string
@@ -174,47 +175,62 @@ func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 
 	// Copy all sources to dst
 	for _, root := range sources {
-
-		// Special case root links if following
-		// var rootInfo *FileInfo
-		// if rootInfo, err = Lstat(root); err != nil {
-		// 	return err
-		// }
+		// Stack of [target, link] pairs to consume
+		links := [][]string{}
 
 		// Walk over file structure
 		err = Walk(root, func(srcPath string, srcInfo *FileInfo, e error) error {
 			if e != nil {
 				return e
 			}
+			follow := getFollowOpt(opts)
 
 			// Set proper dst path
-			dstPath := computeDestPath(clone, dstAbs, srcPath, root)
+			var dstPath string
+			if follow && len(links) > 0 {
+				i := len(links) - 1 // always grab the most recent i.e. top of stack
+				if strings.HasPrefix(srcPath, links[i][0]) {
+					srcPath = path.Join(links[i][1], strings.TrimPrefix(srcPath, links[i][0]))
+				} else {
+					// pop off the stack if no match as we have moved on
+					links = links[:i-1]
+				}
+			}
+			if clone {
+				dstPath = path.Join(dstAbs, TrimShared(srcPath, root))
+			} else {
+				dstPath = path.Join(dstAbs, TrimShared(srcPath, path.Dir(root)))
+			}
 
-			// Handle individual copies
 			switch {
 
-			// Create destination directories as needed
+			// Dirs
 			case srcInfo.IsDir():
 				if e = os.MkdirAll(dstPath, srcInfo.Mode()); e != nil {
 					return e
 				}
 
-			// Re-create dir links to link target path
+			// Links
 			case srcInfo.IsSymlinkDir():
-				var target string
-				if target, e = srcInfo.SymlinkTarget(); e != nil {
-					return e
-				}
-
-				// Ignoring symlinked dirs if following as these will be queued up in the Walk list already
-				if getFollowOpt(opts) {
+				if follow {
+					// Using EvalSymlinks to get full abs path to actual target for path replacement
+					var target string
+					if target, e = filepath.EvalSymlinks(srcPath); e != nil {
+						return e
+					}
+					links = append(links, []string{target, srcPath})
 				} else {
+					// Re-create link using SymlinkTarget to retain relative links
+					var target string
+					if target, e = srcInfo.SymlinkTarget(); e != nil {
+						return e
+					}
 					if e = os.Symlink(target, dstPath); e != nil {
 						return e
 					}
 				}
 
-			// Copy file
+			// Files
 			default:
 				CopyFile(srcPath, dstPath, InfoOpt(srcInfo))
 			}
@@ -222,15 +238,6 @@ func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 		}, opts...)
 	}
 	return
-}
-
-// compute destination path
-func computeDestPath(clone bool, dstAbs, srcPath, root string) string {
-	if clone {
-		return path.Join(dstAbs, TrimShared(srcPath, root))
-	} else {
-		return path.Join(dstAbs, TrimShared(srcPath, path.Dir(root)))
-	}
 }
 
 // CopyFile copies a single file from src to dsty, creating destination directories as needed.
