@@ -175,7 +175,10 @@ func Copy(src, dst string, opts ...*opt.Opt) (err error) {
 
 	// Copy all sources to dst
 	for _, root := range sources {
-		// Stack of [target, link] pairs to consume
+		// Stack of [target, link] pairs to consume.  This provides the ability
+		// to rename source dirs/files based on the link name and effectively
+		// replaces the link with the original target using the link name when
+		// following links.
 		links := [][]string{}
 
 		// Walk over file structure
