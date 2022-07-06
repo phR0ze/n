@@ -23,7 +23,7 @@ func TestMap(t *testing.T) {
 
 	// float64: map[string]interface{}
 	{
-		assert.Equal(t, &StringMap{"foo": map[string]interface{}{"bar": float64(1)}}, Map("foo:\n bar: 1\n"))
+		assert.Equal(t, &StringMap{"foo": map[string]interface{}{"bar": int(1)}}, Map("foo:\n bar: 1\n"))
 	}
 
 	// string: map[string]interface{}

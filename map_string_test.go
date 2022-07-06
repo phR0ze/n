@@ -258,8 +258,8 @@ func TestStringMap_Dump(t *testing.T) {
 	{
 		m := NewStringMapV(map[string]interface{}{"1": map[string]interface{}{"2": "two", "3": "three"}})
 		assert.Equal(t, `"1":
-  "2": two
-  "3": three
+    "2": two
+    "3": three
 `, m.Dump())
 	}
 }

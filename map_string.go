@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// StringMap implements the Map interface providing a generic way to work with map types
+// StringMap implements the IMap interface providing a generic way to work with map types
 // including convenience methods on par with rapid development languages. This type is
 // also specifically designed to handle YAML constructs.
 type StringMap map[string]interface{}
@@ -434,14 +434,14 @@ func (p *StringMap) O() interface{} {
 	return map[string]interface{}(*p)
 }
 
-// Query returns the value at the given key location, using a jq type selectors. Returns empty *Object if not found.
+// Query returns the value at the given key location, using jq type selectors. Returns empty *Object if not found.
 // see dot notation from https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
 func (p *StringMap) Query(key string) (val *Object) {
 	val, _ = p.QueryE(key)
 	return val
 }
 
-// QueryE returns the value at the given key location, using a jq type selectors. Returns empty *Object if not found.
+// QueryE returns the value at the given key location, using jq type selectors. Returns empty *Object if not found.
 // see dot notation from https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
 func (p *StringMap) QueryE(key string) (val *Object, err error) {
 	if p == nil || len(*p) == 0 {

@@ -3969,7 +3969,6 @@ func TestToStringMapE(t *testing.T) {
 
 	// []byte
 	{
-		// int list is interpretted as []interface{} float64
 		yml := `foo:
   - 1
   - 2
@@ -3977,8 +3976,8 @@ func TestToStringMapE(t *testing.T) {
 `
 		val, err := ToStringMapE([]byte(yml))
 		assert.Nil(t, err)
-		assert.Equal(t, &StringMap{"foo": []interface{}{float64(1), float64(2), float64(3)}}, val)
-		assert.Equal(t, map[string]interface{}{"foo": []interface{}{float64(1), float64(2), float64(3)}}, val.G())
+		assert.Equal(t, &StringMap{"foo": []interface{}{int(1), int(2), int(3)}}, val)
+		assert.Equal(t, map[string]interface{}{"foo": []interface{}{int(1), int(2), int(3)}}, val.G())
 	}
 
 	// object
@@ -3988,7 +3987,6 @@ func TestToStringMapE(t *testing.T) {
 
 	// string
 	{
-		// int list is interpretted as []interface{} float64
 		yml := `foo:
   - 1
   - 2
@@ -3996,8 +3994,8 @@ func TestToStringMapE(t *testing.T) {
 `
 		val, err := ToStringMapE(yml)
 		assert.Nil(t, err)
-		assert.Equal(t, &StringMap{"foo": []interface{}{float64(1), float64(2), float64(3)}}, val)
-		assert.Equal(t, map[string]interface{}{"foo": []interface{}{float64(1), float64(2), float64(3)}}, val.G())
+		assert.Equal(t, &StringMap{"foo": []interface{}{int(1), int(2), int(3)}}, val)
+		assert.Equal(t, map[string]interface{}{"foo": []interface{}{int(1), int(2), int(3)}}, val.G())
 
 		// string map
 		yml = `foo1: bar1
@@ -4020,8 +4018,8 @@ foo3: bar3
 `
 		val, err = ToStringMapE(yml)
 		assert.Nil(t, err)
-		assert.Equal(t, &StringMap{"foo": []interface{}{map[string]interface{}{"name": "foo1", "val": map[string]interface{}{"bar1": float64(1)}}, map[string]interface{}{"name": "foo2", "val": map[string]interface{}{"bar2": float64(1)}}}}, val)
-		assert.Equal(t, map[string]interface{}{"foo": []interface{}{map[string]interface{}{"name": "foo1", "val": map[string]interface{}{"bar1": float64(1)}}, map[string]interface{}{"name": "foo2", "val": map[string]interface{}{"bar2": float64(1)}}}}, val.G())
+		assert.Equal(t, &StringMap{"foo": []interface{}{map[string]interface{}{"name": "foo1", "val": map[string]interface{}{"bar1": int(1)}}, map[string]interface{}{"name": "foo2", "val": map[string]interface{}{"bar2": int(1)}}}}, val)
+		assert.Equal(t, map[string]interface{}{"foo": []interface{}{map[string]interface{}{"name": "foo1", "val": map[string]interface{}{"bar1": int(1)}}, map[string]interface{}{"name": "foo2", "val": map[string]interface{}{"bar2": int(1)}}}}, val.G())
 	}
 }
 

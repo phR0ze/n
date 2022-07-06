@@ -5,12 +5,13 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/ghodss/yaml"
 	"github.com/phR0ze/n/pkg/sys"
 	"github.com/pkg/errors"
+
+	yaml "gopkg.in/yaml.v2"
 )
 
-// Marshal wraps the ghodss/yaml.Marshal
+// Marshal wraps the yaml.Marshal
 func Marshal(o interface{}) ([]byte, error) {
 	return yaml.Marshal(o)
 }
@@ -39,6 +40,9 @@ func ReadYAML(filepath string) (obj map[string]interface{}, err error) {
 
 // Unmarshal wraps the ghodss/yaml.Unmarshal
 func Unmarshal(y []byte, o interface{}) error {
+	if v, ok := o.(*yaml.MapSlice); ok {
+		return yaml.Unmarshal(y, v)
+	}
 	return yaml.Unmarshal(y, o)
 }
 
