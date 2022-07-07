@@ -4578,8 +4578,9 @@ func ToStringMapE(obj interface{}) (val *StringMap, err error) {
 		}
 	case *map[string]interface{}:
 		if x != nil {
-			y := StringMap(*x)
-			val = &y
+			for k, v := range *x {
+				val.Set(ToString(k), v)
+			}
 		}
 	case *map[string]string:
 		if x != nil {
@@ -4687,6 +4688,11 @@ func ToStringMapE(obj interface{}) (val *StringMap, err error) {
 
 	// StringMap
 	//----------------------------------------------------------------------------------------------
+	case *yaml.MapSlice:
+		if x != nil {
+			y := StringMap(*x)
+			val = &y
+		}
 	case *StringMap:
 		if x != nil {
 			val = x

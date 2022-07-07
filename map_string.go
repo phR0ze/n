@@ -2,14 +2,18 @@ package n
 
 import (
 	"github.com/phR0ze/n/pkg/enc/json"
-	"github.com/phR0ze/n/pkg/enc/yaml"
+	yaml_enc "github.com/phR0ze/n/pkg/enc/yaml"
 	"github.com/pkg/errors"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // StringMap implements the IMap interface providing a generic way to work with map types
 // including convenience methods on par with rapid development languages. This type is
-// also specifically designed to handle YAML constructs.
-type StringMap map[string]interface{}
+// also specifically designed to handle ordered YAML constructs to work with YAML files
+// with minimal structural changes i.e. no mass sorting changes.
+type StringMap yaml.MapSlice
+
+//type StringMap map[string]interface{}
 
 // M is an alias to NewStringMap
 func M(obj interface{}) *StringMap {
@@ -43,12 +47,12 @@ func (p *StringMap) Any(keys ...interface{}) bool {
 	if p == nil || len(*p) == 0 {
 		return false
 	}
-	if len(keys) == 0 {
+	ks := ToStrs(keys)
+	if len(ks) == 0 {
 		return true
 	}
-	for i := 0; i < len(keys); i++ {
-		key := ToString(keys[i])
-		if _, ok := (*p)[key]; ok {
+	for _, k := range ks {
+		if p.Exists(k) {
 			return true
 		}
 	}
@@ -75,12 +79,15 @@ func (p *StringMap) Copy(keys ...interface{}) (new IMap) {
 	// Copy target keys or all keys
 	ks := ToStrs(keys)
 	if len(ks) == 0 {
-		for k := range *p {
-			(*val)[k] = (*p)[k]
-		}
+		(*val) = append(*val, (*p)...)
 	} else {
 		for _, k := range ks {
-			(*val)[k] = (*p)[k]
+			for i := 0; i < len(*p); i++ {
+				if k == ToString((*p)[i].Key) {
+					(*val) = append(*val, (*p)[i])
+					break
+				}
+			}
 		}
 	}
 	return val
@@ -93,26 +100,32 @@ func (p *StringMap) Delete(key interface{}) (val *Object) {
 		return
 	}
 	k := ToString(key)
-	if v, ok := (*p)[k]; ok {
-		val.o = v
-		delete(*p, k)
+	for i := 0; i < len(*p); i++ {
+		if k == ToString((*p)[i].Key) {
+			val.o = (*p)[i].Value
+			if i+1 < len(*p) {
+				*p = append((*p)[:i], (*p)[i+1:]...)
+			} else {
+				*p = (*p)[:i]
+			}
+			break
+		}
 	}
 	return
 }
 
 // DeleteM modifies this Map to delete the indicated key-value pair and returns a reference to this Map rather than the key-value pair.
 func (p *StringMap) DeleteM(key interface{}) IMap {
-	if p == nil {
-		return p
-	}
-	k := ToString(key)
-	delete(*p, k)
+	p.Delete(key)
 	return p
 }
 
 // Dump convert the StringMap into a pretty printed yaml string
 func (p *StringMap) Dump() (pretty string) {
-	if yml, err := yaml.Marshal(p.G()); err == nil {
+	if p == nil {
+		return
+	}
+	if yml, err := yaml.Marshal(yaml.MapSlice(*p)); err == nil {
 		pretty = string(yml)
 	}
 	return
@@ -120,14 +133,7 @@ func (p *StringMap) Dump() (pretty string) {
 
 // Exists checks if the given key exists in this Map.
 func (p *StringMap) Exists(key interface{}) bool {
-	if p == nil {
-		return false
-	}
-	k := ToString(key)
-	if _, ok := (*p)[k]; ok {
-		return true
-	}
-	return false
+	return !p.Get(key).Nil()
 }
 
 // G returns the underlying data structure as a Go type.
@@ -135,7 +141,8 @@ func (p *StringMap) G() map[string]interface{} {
 	if p == nil {
 		return map[string]interface{}{}
 	}
-	return map[string]interface{}(*p)
+	// TODO: fix return map[string]interface{}(*p)
+	return map[string]interface{}{}
 }
 
 // Generic returns true if the underlying implementation uses reflection
@@ -150,8 +157,11 @@ func (p *StringMap) Get(key interface{}) (val *Object) {
 		return
 	}
 	k := ToString(key)
-	if v, ok := (*p)[k]; ok {
-		val.o = v
+	for _, x := range *p {
+		if k == ToString(x.Key) {
+			val.o = x.Value
+			break
+		}
 	}
 	return
 }
@@ -178,8 +188,13 @@ func (p *StringMap) InjectE(key string, val interface{}) (m IMap, err error) {
 	// Inject at root as no keys were given
 	if !keys.Any() {
 		if x, e := ToStringMapE(val); e == nil {
-			for k, v := range *x {
-				(*p)[k] = v
+			for i := 0; i < len(*x); i++ {
+				for j := 0; j < len(*p); j++ {
+					if ToString((*x)[i].Key) == ToString((*p)[j].Key) {
+						(*p)[j].Value = (*x)[i].Value
+						break
+					}
+				}
 			}
 		} else {
 			err = errors.Errorf("invalid selector for the type of value given, '%T'", val)
@@ -206,9 +221,9 @@ func (p *StringMap) InjectE(key string, val interface{}) (m IMap, err error) {
 			// Continue to drill or update and done
 			create := false
 			if keys.Any() && keys.First().A() != "[]" {
-				if v, ok := (*x)[key.A()]; ok {
-					if YAMLCont(v) {
-						obj.o = v
+				if v := x.Get(key); !v.Nil() {
+					if YAMLCont(v.O()) {
+						obj.o = v.O()
 					} else {
 						create = true
 					}
@@ -222,7 +237,7 @@ func (p *StringMap) InjectE(key string, val interface{}) (m IMap, err error) {
 			// Doesn't exist so create and drill further
 			if create {
 				x.Set(key.A(), map[string]interface{}{})
-				obj.o = (*x)[key.A()]
+				obj.o = x.Get(key).O()
 			}
 
 		// Array Index/Iterator: .[2], .[-1], .[], .[key==val]
@@ -271,8 +286,8 @@ func (p *StringMap) InjectE(key string, val interface{}) (m IMap, err error) {
 func (p *StringMap) Keys() ISlice {
 	keys := NewStringSliceV()
 	if p != nil {
-		for key := range *p {
-			*keys = append(*keys, key)
+		for i := 0; i < len(*p); i++ {
+			*keys = append(*keys, ToString((*p)[i].Key))
 		}
 	}
 	return keys
@@ -299,139 +314,140 @@ func (p *StringMap) MG() (m map[string]interface{}) {
 // Merge modifies this Map by overriding its values at location with the given map where they both exist and returns a reference to this Map.
 // Converting all string maps into *StringMap instances.
 func (p *StringMap) Merge(m IMap, location ...string) IMap {
-	p2 := p
+	// p2 := p
 
-	// 1. Handle location if given
-	key := ""
-	if len(location) > 0 {
-		key = location[0]
-		var val interface{}
-		val = *p
+	// // 1. Handle location if given
+	// key := ""
+	// if len(location) > 0 {
+	// 	key = location[0]
+	// 	var val interface{}
+	// 	val = *p
 
-		// Process keys from left to right
-		keys, err := KeysFromSelector(key)
-		if err == nil {
-			for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
-				key := ko.ToString()
-				m := ToStringMap(val)
+	// 	// Process keys from left to right
+	// 	keys, err := KeysFromSelector(key)
+	// 	if err == nil {
+	// 		for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
+	// 			key := ko.ToString()
+	// 			m := ToStringMap(val)
 
-				// Set a new map as the value if not a map
-				if v, ok := (*m)[key]; ok {
-					if !ToStringMap(v).Any() {
-						m.Set(key, map[string]interface{}{})
-					}
-				} else {
-					m.Set(key, map[string]interface{}{})
-				}
-				val = (*m)[key]
-			}
-		}
-		p2 = ToStringMap(val)
-	}
+	// 			// Set a new map as the value if not a map
+	// 			v := m.Get(key)
+	// 			if !v.Nil() {
+	// 				if !ToStringMap(v.O()).Any() {
+	// 					m.Set(key, map[string]interface{}{})
+	// 				}
+	// 			} else {
+	// 				m.Set(key, map[string]interface{}{})
+	// 			}
+	// 			val = v.O()
+	// 		}
+	// 	}
+	// 	p2 = ToStringMap(val)
+	// }
 
-	// 2. Merge at location
-	x, err := ToStringMapE(m)
-	switch {
-	case p2 == nil && (err != nil || m == nil):
-		return NewStringMapV()
-	case p2 == nil:
-		return x
-	case err != nil || m == nil:
-		return p2
-	}
+	// // 2. Merge at location
+	// x, err := ToStringMapE(m)
+	// switch {
+	// case p2 == nil && (err != nil || m == nil):
+	// 	return NewStringMapV()
+	// case p2 == nil:
+	// 	return x
+	// case err != nil || m == nil:
+	// 	return p2
+	// }
 
-	for k, v := range *x {
-		var av, bv interface{}
+	// for _, o := range *x {
+	// 	var av, bv interface{}
 
-		// Ensure b value is n type
-		if val, ok := v.(map[string]interface{}); ok {
-			bv = ToStringMap(val)
-		} else {
-			bv = v
-		}
+	// 	// Ensure b value is n type
+	// 	if val, ok := o.(map[string]interface{}); ok {
+	// 		bv = ToStringMap(val)
+	// 	} else {
+	// 		bv = v
+	// 	}
 
-		// a doesn't have the key so just set b's value
-		if val, exists := (*p2)[k]; !exists {
-			(*p2)[k] = bv
-		} else {
-			if _val, ok := val.(map[string]interface{}); ok {
-				av = ToStringMap(_val)
-			} else {
-				av = val
-			}
+	// 	// a doesn't have the key so just set b's value
+	// 	if val, exists := (*p2)[k]; !exists {
+	// 		(*p2)[k] = bv
+	// 	} else {
+	// 		if _val, ok := val.(map[string]interface{}); ok {
+	// 			av = ToStringMap(_val)
+	// 		} else {
+	// 			av = val
+	// 		}
 
-			if bc, ok := bv.(*StringMap); ok {
-				if ac, ok := av.(*StringMap); ok {
-					// a and b both contain the key and are both submaps so recurse
-					(*p2)[k] = ac.Merge(bc)
-				} else {
-					// a is not a map so just override with b
-					(*p2)[k] = bv
-				}
-			} else {
-				// b is not a map so just override a, no need to recurse
-				(*p2)[k] = bv
-			}
-		}
-	}
+	// 		if bc, ok := bv.(*StringMap); ok {
+	// 			if ac, ok := av.(*StringMap); ok {
+	// 				// a and b both contain the key and are both submaps so recurse
+	// 				(*p2)[k] = ac.Merge(bc)
+	// 			} else {
+	// 				// a is not a map so just override with b
+	// 				(*p2)[k] = bv
+	// 			}
+	// 		} else {
+	// 			// b is not a map so just override a, no need to recurse
+	// 			(*p2)[k] = bv
+	// 		}
+	// 	}
+	// }
 
 	return p
 }
 
 // MergeG modifies this Map by overriding its values with the given map location where they both exist and returns the Go type
 func (p *StringMap) MergeG(m IMap, location ...string) map[string]interface{} {
-	p2 := p
+	// p2 := p
 
-	// 1. Handle location if given
-	key := ""
-	if len(location) > 0 {
-		key = location[0]
-		var val interface{}
-		val = *p
+	// // 1. Handle location if given
+	// key := ""
+	// if len(location) > 0 {
+	// 	key = location[0]
+	// 	var val interface{}
+	// 	val = *p
 
-		// Process keys from left to right
-		keys, err := KeysFromSelector(key)
-		if err == nil {
-			for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
-				key := ko.ToString()
-				m := ToStringMap(val)
+	// 	// Process keys from left to right
+	// 	keys, err := KeysFromSelector(key)
+	// 	if err == nil {
+	// 		for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
+	// 			key := ko.ToString()
+	// 			m := ToStringMap(val)
 
-				// Set a new map as the value if not a map
-				if v, ok := (*m)[key]; ok {
-					if !ToStringMap(v).Any() {
-						m.Set(key, map[string]interface{}{})
-					}
-				} else {
-					m.Set(key, map[string]interface{}{})
-				}
-				val = (*m)[key]
-			}
-		}
-		p2 = ToStringMap(val)
-	}
+	// 			// Set a new map as the value if not a map
+	// 			if v, ok := (*m)[key]; ok {
+	// 				if !ToStringMap(v).Any() {
+	// 					m.Set(key, map[string]interface{}{})
+	// 				}
+	// 			} else {
+	// 				m.Set(key, map[string]interface{}{})
+	// 			}
+	// 			val = (*m)[key]
+	// 		}
+	// 	}
+	// 	p2 = ToStringMap(val)
+	// }
 
-	// 2. Merge at location
-	x, err := ToStringMapE(m)
-	switch {
-	case p2 == nil && (err != nil || m == nil):
-		return NewStringMapV().G()
-	case p2 == nil:
-		return x.G()
-	case err != nil || m == nil:
-		return p2.G()
-	}
+	// // 2. Merge at location
+	// x, err := ToStringMapE(m)
+	// switch {
+	// case p2 == nil && (err != nil || m == nil):
+	// 	return NewStringMapV().G()
+	// case p2 == nil:
+	// 	return x.G()
+	// case err != nil || m == nil:
+	// 	return p2.G()
+	// }
 
-	// Call type specific function helper
-	*p2 = MergeStringMap(*p2, *x)
+	// // Call type specific function helper
+	// *p2 = MergeStringMap(*p2, *x)
 	return p.G()
 }
 
 // O returns the underlying data structure as is.
 func (p *StringMap) O() interface{} {
-	if p == nil {
-		return map[string]interface{}{}
-	}
-	return map[string]interface{}(*p)
+	// if p == nil {
+	// 	return map[string]interface{}{}
+	// }
+	return map[string]interface{}{}
 }
 
 // Query returns the value at the given key location, using jq type selectors. Returns empty *Object if not found.
@@ -468,7 +484,7 @@ func (p *StringMap) QueryE(key string) (val *Object, err error) {
 		// Identifier Index: .foo, .foo.bar
 		case map[string]interface{}, *StringMap:
 			m := ToStringMap(x)
-			val.o = (*m)[key.A()]
+			val.o = m.Get(key).O()
 
 		// Array Index/Iterator: .[2], .[-1], .[], .[key==val]
 		case []interface{}:
@@ -543,11 +559,11 @@ func (p *StringMap) RemoveE(key string) (m IMap, err error) {
 			// Continue to drill or remove and done
 			done := false
 			if keys.Any() {
-				if v, ok := (*x)[key.A()]; ok {
-					if YAMLCont(v) {
+				if v := x.Get(key); !v.Nil() {
+					if YAMLCont(v.O()) {
 						pobj = obj
 						pk = key.A()
-						obj = v
+						obj = v.O()
 					} else {
 						done = true
 					}
@@ -624,10 +640,15 @@ func (p *StringMap) Set(key, val interface{}) (new bool) {
 		return
 	}
 	k := ToString(key)
-	if _, ok := (*p)[k]; !ok {
-		new = true
+	for i := 0; i < len(*p); i++ {
+		if k == ToString((*p)[i].Key) {
+			new = false
+			(*p)[i].Value = val
+			break
+		}
 	}
-	(*p)[k] = val
+	new = true
+	*p = append(*p, yaml.MapItem{k, val})
 	return
 }
 
@@ -680,5 +701,5 @@ func (p *StringMap) WriteJSON(filename string) (err error) {
 // WriteYAML converts the *StringMap into a map[string]interface{} then calls
 // yaml.WriteYAML on it to write it out to disk.
 func (p *StringMap) WriteYAML(filename string) (err error) {
-	return yaml.WriteYAML(filename, p.G())
+	return yaml_enc.WriteYAML(filename, p.G())
 }

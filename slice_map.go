@@ -111,7 +111,7 @@ func (p *MapSlice) Append(elem interface{}) ISlice {
 	if p == nil {
 		p = NewMapSliceV()
 	}
-	*p = append(*p, *ToStringMap(elem))
+	*p = append(*p, ToStringMap(elem).G())
 	return p
 }
 
@@ -121,7 +121,7 @@ func (p *MapSlice) AppendV(elems ...interface{}) ISlice {
 		p = NewMapSliceV()
 	}
 	for _, elem := range elems {
-		*p = append(*p, *ToStringMap(elem))
+		*p = append(*p, ToStringMap(elem).G())
 	}
 	return p
 }

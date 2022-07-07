@@ -117,80 +117,80 @@ func Map(obj interface{}) (new IMap) {
 // MergeStringMap b into a at location and returns the new modified a, b takes higher precedence and will override a.
 // Only merges map types by key recursively, does not attempt to merge lists.
 func MergeStringMap(a, b map[string]interface{}, location ...string) map[string]interface{} {
-	a2 := a
+	// a2 := a
 
-	// 1. Handle location if given
-	key := ""
-	if len(location) > 0 {
-		key = location[0]
-		var val interface{}
-		val = a
+	// // 1. Handle location if given
+	// key := ""
+	// if len(location) > 0 {
+	// 	key = location[0]
+	// 	var val interface{}
+	// 	val = a
 
-		// Process keys from left to right
-		keys, err := KeysFromSelector(key)
-		if err == nil {
-			for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
-				key := ko.ToString()
-				m := ToStringMap(val)
+	// 	// Process keys from left to right
+	// 	keys, err := KeysFromSelector(key)
+	// 	if err == nil {
+	// 		for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
+	// 			key := ko.ToString()
+	// 			m := ToStringMap(val)
 
-				// Set a new map as the value if not a map
-				if v, ok := (*m)[key]; ok {
-					if !ToStringMap(v).Any() {
-						m.Set(key, map[string]interface{}{})
-					}
-				} else {
-					m.Set(key, map[string]interface{}{})
-				}
-				val = (*m)[key]
-			}
-		}
-		a2 = ToStringMap(val).G()
-	}
+	// 			// Set a new map as the value if not a map
+	// 			if v, ok := (*m)[key]; ok {
+	// 				if !ToStringMap(v).Any() {
+	// 					m.Set(key, map[string]interface{}{})
+	// 				}
+	// 			} else {
+	// 				m.Set(key, map[string]interface{}{})
+	// 			}
+	// 			val = (*m)[key]
+	// 		}
+	// 	}
+	// 	a2 = ToStringMap(val).G()
+	// }
 
-	// 2. Merge at location
-	switch {
-	case a2 == nil && b == nil:
-		return map[string]interface{}{}
-	case a2 == nil:
-		return b
-	case b == nil:
-		return a2
-	}
+	// // 2. Merge at location
+	// switch {
+	// case a2 == nil && b == nil:
+	// 	return map[string]interface{}{}
+	// case a2 == nil:
+	// 	return b
+	// case b == nil:
+	// 	return a2
+	// }
 
-	for k, v := range b {
-		var av, bv interface{}
+	// for k, v := range b {
+	// 	var av, bv interface{}
 
-		// Ensure b value is Go type
-		if val, ok := v.(*StringMap); ok {
-			bv = val.G()
-		} else {
-			bv = v
-		}
+	// 	// Ensure b value is Go type
+	// 	if val, ok := v.(*StringMap); ok {
+	// 		bv = val.G()
+	// 	} else {
+	// 		bv = v
+	// 	}
 
-		// a doesn't have the key so just set b's value
-		if val, exists := a2[k]; !exists {
-			a2[k] = bv
-		} else {
-			if _val, ok := val.(*StringMap); ok {
-				av = _val.G()
-			} else {
-				av = val
-			}
+	// 	// a doesn't have the key so just set b's value
+	// 	if val, exists := a2[k]; !exists {
+	// 		a2[k] = bv
+	// 	} else {
+	// 		if _val, ok := val.(*StringMap); ok {
+	// 			av = _val.G()
+	// 		} else {
+	// 			av = val
+	// 		}
 
-			if bc, ok := bv.(map[string]interface{}); ok {
-				if ac, ok := av.(map[string]interface{}); ok {
-					// a and b both contain the key and are both submaps so recurse
-					a2[k] = MergeStringMap(ac, bc)
-				} else {
-					// a is not a map so just override with b
-					a2[k] = bv
-				}
-			} else {
-				// b is not a map so just override a, no need to recurse
-				a2[k] = bv
-			}
-		}
-	}
+	// 		if bc, ok := bv.(map[string]interface{}); ok {
+	// 			if ac, ok := av.(map[string]interface{}); ok {
+	// 				// a and b both contain the key and are both submaps so recurse
+	// 				a2[k] = MergeStringMap(ac, bc)
+	// 			} else {
+	// 				// a is not a map so just override with b
+	// 				a2[k] = bv
+	// 			}
+	// 		} else {
+	// 			// b is not a map so just override a, no need to recurse
+	// 			a2[k] = bv
+	// 		}
+	// 	}
+	// }
 
 	return a
 }
