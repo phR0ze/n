@@ -39,11 +39,11 @@ func ReadYAML(filepath string) (obj map[string]interface{}, err error) {
 }
 
 // Unmarshal wraps the ghodss/yaml.Unmarshal
-func Unmarshal(y []byte, o interface{}) error {
-	if v, ok := o.(*yaml.MapSlice); ok {
+func Unmarshal(y []byte, obj interface{}) error {
+	if v, ok := obj.(*yaml.MapSlice); ok {
 		return yaml.Unmarshal(y, v)
 	}
-	return yaml.Unmarshal(y, o)
+	return yaml.Unmarshal(y, obj)
 }
 
 // WriteYAML converts the given obj interface{} into yaml then writes to disk
@@ -62,7 +62,12 @@ func WriteYAML(filepath string, obj interface{}, perms ...uint32) (err error) {
 
 	// Convert data structure into a yaml string
 	var data []byte
-	if data, err = yaml.Marshal(obj); err != nil {
+	if v, ok := obj.(yaml.MapSlice); ok {
+		data, err = yaml.Marshal(v)
+	} else {
+		data, err = yaml.Marshal(obj)
+	}
+	if err != nil {
 		err = errors.Wrapf(err, "failed to marshal object %T", obj)
 		return
 	}

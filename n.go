@@ -158,7 +158,6 @@ func LoadJSON(filepath string) (m *StringMap) {
 
 // LoadJSONE reads in a json file and converts it to a *StringMap
 func LoadJSONE(filepath string) (m *StringMap, err error) {
-	m = NewStringMapV()
 
 	// Read in the yaml file
 	var data []byte
@@ -168,10 +167,12 @@ func LoadJSONE(filepath string) (m *StringMap, err error) {
 	}
 
 	// Unmarshal the json into a *StringMap
-	if err = json.Unmarshal(data, m); err != nil {
+	buff := map[string]interface{}{}
+	if err = json.Unmarshal(data, &buff); err != nil {
 		err = errors.Wrapf(err, "failed to unmarshal json file %s into a *StringMap", filepath)
 		return
 	}
+	m = MV(buff)
 
 	return
 }

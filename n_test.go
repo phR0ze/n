@@ -102,7 +102,7 @@ func TestLoadJSON(t *testing.T) {
 
 		// Load the json and validate
 		m := LoadJSON(tmpFile)
-		assert.Equal(t, &StringMap{"foo": "bar"}, m)
+		assert.Equal(t, M().Add("foo", "bar"), m)
 	}
 
 	// More complicated file
@@ -113,7 +113,7 @@ func TestLoadJSON(t *testing.T) {
 
 		// Load the json and validate
 		m := LoadJSON(tmpFile)
-		assert.Equal(t, &StringMap{"foo": map[string]interface{}{"value": float64(1)}}, m)
+		assert.Equal(t, M().Add("foo", map[string]interface{}{"value": float64(1)}), m)
 	}
 }
 
@@ -129,7 +129,7 @@ func TestLoadJSONE(t *testing.T) {
 		// Load the json and validate
 		m, err := LoadJSONE(tmpFile)
 		assert.Nil(t, err)
-		assert.Equal(t, &StringMap{"foo": "bar"}, m)
+		assert.Equal(t, M().Add("foo", "bar"), m)
 	}
 
 	// More complicated file
@@ -141,7 +141,7 @@ func TestLoadJSONE(t *testing.T) {
 		// Load the json and validate
 		m, err := LoadJSONE(tmpFile)
 		assert.Nil(t, err)
-		assert.Equal(t, &StringMap{"foo": map[string]interface{}{"value": float64(1)}}, m)
+		assert.Equal(t, M().Add("foo", map[string]interface{}{"value": float64(1)}), m)
 	}
 }
 
@@ -156,7 +156,7 @@ func TestLoadYAML(t *testing.T) {
 
 		// Load the yaml and validate
 		m := LoadYAML(tmpFile)
-		assert.Equal(t, &StringMap{"foo": map[string]interface{}{"bar": int(1)}}, m)
+		assert.Equal(t, M().Add("foo", map[interface{}]interface{}{"bar": int(1)}), m)
 	}
 }
 
@@ -172,7 +172,7 @@ func TestLoadYAMLE(t *testing.T) {
 		// Load the yaml and validate
 		m, err := LoadYAMLE(tmpFile)
 		assert.Nil(t, err)
-		assert.Equal(t, &StringMap{"foo": map[string]interface{}{"bar": int(1)}}, m)
+		assert.Equal(t, M().Add("foo", map[interface{}]interface{}{"bar": int(1)}), m)
 	}
 }
 

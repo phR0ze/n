@@ -13,15 +13,13 @@ import (
 // with minimal structural changes i.e. no mass sorting changes.
 type StringMap yaml.MapSlice
 
-//type StringMap map[string]interface{}
-
 // M is an alias to NewStringMap
-func M(obj interface{}) *StringMap {
-	return ToStringMap(obj)
+func M() *StringMap {
+	return &StringMap{}
 }
 
 // MV is an alias to NewStringMapV
-func MV(m ...map[string]interface{}) *StringMap {
+func MV(m ...interface{}) *StringMap {
 	return NewStringMapV(m...)
 }
 
@@ -30,16 +28,16 @@ func NewStringMap(obj interface{}) *StringMap {
 	return ToStringMap(obj)
 }
 
-// NewStringMapV creates a new empty StringMap if nothing given else simply
-// casts the given map to StringMap.
-func NewStringMapV(m ...map[string]interface{}) *StringMap {
-	var new StringMap
+// NewStringMapV creates a new empty StringMap if nothing given else
+// converts the given value into a StringMap.
+func NewStringMapV(m ...interface{}) *StringMap {
+	var new *StringMap
 	if len(m) == 0 {
-		new = StringMap{}
+		new = &StringMap{}
 	} else {
-		new = *ToStringMap(m[0])
+		new = ToStringMap(m[0])
 	}
-	return &new
+	return new
 }
 
 // Any tests if this Map is not empty or optionally if it contains any of the given variadic keys.
@@ -57,6 +55,12 @@ func (p *StringMap) Any(keys ...interface{}) bool {
 		}
 	}
 	return false
+}
+
+// Add the value to the map if it doesn't exist or update value if it does
+func (p *StringMap) Add(key, val interface{}) *StringMap {
+	p.Set(key, val)
+	return p
 }
 
 // Clear modifies this Map to clear out all key-value pairs and returns a reference to this Map.
@@ -138,11 +142,36 @@ func (p *StringMap) Exists(key interface{}) bool {
 
 // G returns the underlying data structure as a Go type.
 func (p *StringMap) G() map[string]interface{} {
+	val, _ := p.GE()
+	return val
+}
+
+// GE returns the underlying data structure as a Go type
+func (p *StringMap) GE() (val map[string]interface{}, err error) {
+	val = map[string]interface{}{}
 	if p == nil {
-		return map[string]interface{}{}
+		return
 	}
-	// TODO: fix return map[string]interface{}(*p)
-	return map[string]interface{}{}
+	for _, o := range *p {
+		k := ToString(o.Key)
+		v := DeReference(o.Value)
+		var m map[string]interface{}
+		if x, ok := v.(StringMap); ok {
+			if m, err = (&x).GE(); err != nil {
+				return
+			}
+			val[k] = m
+		} else if x, ok := v.(yaml.MapSlice); ok {
+			m2 := StringMap(x)
+			if m, err = m2.GE(); err != nil {
+				return
+			}
+			val[k] = m
+		} else {
+			val[k] = v
+		}
+	}
+	return
 }
 
 // Generic returns true if the underlying implementation uses reflection
@@ -308,7 +337,7 @@ func (p *StringMap) M() (m *StringMap) {
 
 // MG is an alias ToStringMapG
 func (p *StringMap) MG() (m map[string]interface{}) {
-	return p.O().(map[string]interface{})
+	return p.G()
 }
 
 // Merge modifies this Map by overriding its values at location with the given map where they both exist and returns a reference to this Map.
@@ -444,10 +473,7 @@ func (p *StringMap) MergeG(m IMap, location ...string) map[string]interface{} {
 
 // O returns the underlying data structure as is.
 func (p *StringMap) O() interface{} {
-	// if p == nil {
-	// 	return map[string]interface{}{}
-	// }
-	return map[string]interface{}{}
+	return p.G()
 }
 
 // Query returns the value at the given key location, using jq type selectors. Returns empty *Object if not found.
@@ -648,7 +674,7 @@ func (p *StringMap) Set(key, val interface{}) (new bool) {
 		}
 	}
 	new = true
-	*p = append(*p, yaml.MapItem{k, val})
+	*p = append(*p, yaml.MapItem{Key: k, Value: val})
 	return
 }
 
@@ -673,7 +699,7 @@ func (p *StringMap) ToStringMapG() (m map[string]interface{}) {
 
 // YAML converts the Map into a YAML string
 func (p *StringMap) YAML() (data string) {
-	_data, err := yaml.Marshal(p.G())
+	_data, err := yaml.Marshal(yaml.MapSlice(*p))
 	if err != nil {
 		return
 	}
@@ -684,7 +710,7 @@ func (p *StringMap) YAML() (data string) {
 // YAMLE converts the Map into a YAML string
 func (p *StringMap) YAMLE() (data string, err error) {
 	var _data []byte
-	if _data, err = yaml.Marshal(p.G()); err != nil {
+	if _data, err = yaml.Marshal(yaml.MapSlice(*p)); err != nil {
 		err = errors.Wrapf(err, "failed to marshal map[string]interface{}")
 		return
 	}
@@ -701,5 +727,5 @@ func (p *StringMap) WriteJSON(filename string) (err error) {
 // WriteYAML converts the *StringMap into a map[string]interface{} then calls
 // yaml.WriteYAML on it to write it out to disk.
 func (p *StringMap) WriteYAML(filename string) (err error) {
-	return yaml_enc.WriteYAML(filename, p.G())
+	return yaml_enc.WriteYAML(filename, yaml.MapSlice(*p))
 }

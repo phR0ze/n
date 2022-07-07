@@ -89,12 +89,11 @@ type IMap interface {
 
 // Map provides a generic way to work with Map types. It does this by wrapping Go types
 // directly for optimized types thus avoiding reflection processing overhead and making a plethora
-// of Map methods available. Non optimized types will fall back on reflection to generically
-// handle the type incurring the full 10x reflection processing overhead. Defaults to StringMap
-// type if nothing is given.
+// of Map methods available. Non-optimized types will fall back on reflection to generically
+// handle the type incurring the full 10x reflection processing overhead.
 //
 // Optimized: map[string]interface{}
-func Map(obj interface{}) (new IMap) {
+func Map(obj interface{}) (new *StringMap) {
 	o := Reference(obj)
 	switch x := o.(type) {
 
