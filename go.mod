@@ -9,7 +9,7 @@ require (
 	github.com/stretchr/testify v1.5.0
 	github.com/valyala/bytebufferpool v1.0.0
 	golang.org/x/sys v0.0.0-20190813064441-fde4db37ae7a
-	gopkg.in/yaml.v2 v2.2.2
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
