@@ -38,8 +38,8 @@ type IMap interface {
 	// Empty() bool                                      // Empty tests if this Map is empty.
 	Generic() bool                                           // Generic returns true if the underlying implementation uses reflection
 	Get(key interface{}) (val *Object)                       // Get returns the value at the given key location. Returns empty *Object if not found.
-	Inject(key string, val interface{}) IMap                 // Inject sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
-	InjectE(key string, val interface{}) (m IMap, err error) // InjectE sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
+	Update(key string, val interface{}) IMap                 // Update sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
+	UpdateE(key string, val interface{}) (m IMap, err error) // UpdateE sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
 	// Join(separator ...string) (str *Object)           // Join converts each element into a string then joins them together using the given separator or comma by default.
 	Keys() ISlice                          // Keys returns all the keys in this Map as a Slice of the key type.
 	Len() int                              // Len returns the number of elements in this Map.

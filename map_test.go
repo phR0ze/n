@@ -11,7 +11,7 @@ import (
 //--------------------------------------------------------------------------------------------------
 func ExampleMap() {
 	fmt.Println(Map(map[string]interface{}{"k": "v"}))
-	// Output: &map[k:v]
+	// Output: &[{k v}]
 }
 
 func TestMap(t *testing.T) {
@@ -23,7 +23,7 @@ func TestMap(t *testing.T) {
 
 	// float64: map[string]interface{}
 	{
-		assert.Equal(t, M().Add("foo", map[interface{}]interface{}{"bar": int(1)}), Map("foo:\n bar: 1\n"))
+		assert.Equal(t, M().Add("foo", M().Add("bar", int(1))), Map("foo:\n bar: 1\n"))
 	}
 
 	// string: map[string]interface{}
@@ -44,7 +44,7 @@ func TestMap(t *testing.T) {
 //--------------------------------------------------------------------------------------------------
 func ExampleMergeStringMap() {
 	fmt.Println(MergeStringMap(map[string]interface{}{"1": "two"}, map[string]interface{}{"1": "one"}))
-	// Output: map[1:one]
+	// Output: [{1 one}]
 }
 
 func TestMergeStringMap(t *testing.T) {

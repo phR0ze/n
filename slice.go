@@ -2,6 +2,7 @@ package n
 
 import (
 	"github.com/pkg/errors"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // ISlice provides a generic way to work with slice types providing convenience methods
@@ -123,7 +124,7 @@ func Slice(obj interface{}) (new ISlice) {
 
 			// MapSlice
 			//----------------------------------------------------------------------------------------------
-			case *map[string]interface{}, *map[string]string:
+			case *yaml.MapSlice, *map[string]interface{}, *map[string]string:
 				new = ToMapSlice(*x)
 
 			// RefSlice

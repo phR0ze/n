@@ -3973,9 +3973,7 @@ func ToMapSliceE(obj interface{}) (val *MapSlice, err error) {
 				if m, err = ToMapSliceE(raw); err != nil {
 					return
 				}
-				for _, v := range *m {
-					*val = append(*val, v)
-				}
+				*val = append(*val, *m...)
 			}
 		}
 
@@ -3988,9 +3986,7 @@ func ToMapSliceE(obj interface{}) (val *MapSlice, err error) {
 				if m, err = ToMapSliceE(raw); err != nil {
 					return
 				}
-				for _, v := range *m {
-					*val = append(*val, v)
-				}
+				*val = append(*val, *m...)
 			}
 		}
 	case *[]InterSlice:
@@ -4001,9 +3997,7 @@ func ToMapSliceE(obj interface{}) (val *MapSlice, err error) {
 					if m, err = ToMapSliceE(raw); err != nil {
 						return
 					}
-					for _, v := range *m {
-						*val = append(*val, v)
-					}
+					*val = append(*val, *m...)
 				}
 			}
 		}
@@ -4016,9 +4010,7 @@ func ToMapSliceE(obj interface{}) (val *MapSlice, err error) {
 						if m, err = ToMapSliceE(raw); err != nil {
 							return
 						}
-						for _, v := range *m {
-							*val = append(*val, v)
-						}
+						*val = append(*val, *m...)
 					}
 				}
 			}
@@ -4057,9 +4049,7 @@ func ToMapSliceE(obj interface{}) (val *MapSlice, err error) {
 				if m, err = ToMapSliceE(raw); err != nil {
 					return
 				}
-				for _, v := range *m {
-					*val = append(*val, v)
-				}
+				*val = append(*val, *m...)
 			}
 		}
 
@@ -5788,16 +5778,4 @@ func ToUint64E(obj interface{}) (val uint64, err error) {
 		err = errors.Errorf("unable to convert type %T to uint64", x)
 	}
 	return
-}
-
-// YAMLCont checks if the given value is a valid YAML container
-func YAMLCont(obj interface{}) bool {
-	switch obj.(type) {
-	case map[string]interface{}, *StringMap:
-		return true
-	case []interface{}, []string, []int:
-		return true
-	default:
-		return false
-	}
 }

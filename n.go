@@ -66,6 +66,7 @@ import (
 	"io/ioutil"
 
 	"github.com/pkg/errors"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // Misc convenience type/functions
@@ -198,4 +199,39 @@ func LoadYAMLE(filepath string) (m *StringMap, err error) {
 	m, err = ToStringMapE(data)
 
 	return
+}
+
+// YAMLCont checks if the given value is a valid YAML container
+func YAMLCont(obj interface{}) bool {
+	o := DeReference(obj)
+	switch o.(type) {
+	case map[string]interface{}, StringMap, yaml.MapSlice:
+		return true
+	case []interface{}, []string, []int:
+		return true
+	default:
+		return false
+	}
+}
+
+// YAMLMap checks if the given value is map compatible
+func YAMLMap(obj interface{}) bool {
+	o := DeReference(obj)
+	switch o.(type) {
+	case map[string]interface{}, StringMap, yaml.MapSlice:
+		return true
+	default:
+		return false
+	}
+}
+
+// YAMLArray checks if the given value is array compatible
+func YAMLArray(obj interface{}) bool {
+	o := DeReference(obj)
+	switch o.(type) {
+	case []interface{}, []string, []int:
+		return true
+	default:
+		return false
+	}
 }

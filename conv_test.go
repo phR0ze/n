@@ -3008,13 +3008,13 @@ func TestToInterSlice(t *testing.T) {
 		assert.Equal(t, &InterSlice{"1", "2", "3"}, ToInterSlice([]string{"1", "2", "3"}))
 	}
 
-	// // StringMap
-	// {
-	// 	assert.Equal(t, &InterSlice{map[string]interface{}{}}, ToInterSlice(&StringMap{}))
-	// 	assert.Equal(t, &InterSlice{map[string]interface{}{"2": "two"}}, ToInterSlice(&StringMap{"2": "two"}))
-	// 	assert.Equal(t, &InterSlice{map[string]interface{}{}}, ToInterSlice((*StringMap)(nil)))
-	// 	assert.Equal(t, &InterSlice{map[string]interface{}{"1": "one", "2": "two"}}, ToInterSlice(&StringMap{"1": "one", "2": "two"}))
-	// }
+	// StringMap
+	{
+		assert.Equal(t, &InterSlice{map[string]interface{}{}}, ToInterSlice(&StringMap{}))
+		assert.Equal(t, &InterSlice{map[string]interface{}{"2": "two"}}, ToInterSlice(M().Add("2", "two")))
+		assert.Equal(t, &InterSlice{map[string]interface{}{}}, ToInterSlice((*StringMap)(nil)))
+		assert.Equal(t, &InterSlice{map[string]interface{}{"1": "one", "2": "two"}}, ToInterSlice(M().Add("1", "one").Add("2", "two")))
+	}
 
 	// StringSlice
 	{
@@ -3810,7 +3810,7 @@ func TestToString(t *testing.T) {
 //--------------------------------------------------------------------------------------------------
 func ExampleToStringMapE() {
 	fmt.Println(ToStringMapE(map[interface{}]interface{}{"1": "one"}))
-	// Output: &map[1:one] <nil>
+	// Output: &[{1 one}] <nil>
 }
 
 func TestToStringMapE(t *testing.T) {
@@ -3908,117 +3908,117 @@ func TestToStringMapE(t *testing.T) {
 
 		val, err = ToStringMapE(&map[string]string{"1": "one", "2": "two"})
 		assert.Nil(t, err)
-		assert.Equal(t, M().Add("1", "one").Add("2", "two"), val)
+		assert.Equal(t, M().Add("1", "one").Add("2", "two").G(), val.G())
 		assert.Equal(t, map[string]interface{}{"1": "one", "2": "two"}, val.G())
 	}
 
-	// 	// map[string]interface{}
-	// 	{
-	// 		val, err := ToStringMapE(map[interface{}]interface{}{"1": "one"})
-	// 		assert.Nil(t, err)
-	// 		assert.Equal(t, M().Add("1": "one"}, val)
-	// 		assert.Equal(t, map[string]interface{}{"1": "one"}, val.G())
+	// map[string]interface{}
+	{
+		val, err := ToStringMapE(map[interface{}]interface{}{"1": "one"})
+		assert.Nil(t, err)
+		assert.Equal(t, M().Add("1", "one"), val)
+		assert.Equal(t, map[string]interface{}{"1": "one"}, val.G())
 
-	// 		val, err = ToStringMapE(&map[interface{}]interface{}{"1": "one"})
-	// 		assert.Nil(t, err)
-	// 		assert.Equal(t, M().Add("1": "one"}, val)
-	// 		assert.Equal(t, map[string]interface{}{"1": "one"}, val.G())
+		val, err = ToStringMapE(&map[interface{}]interface{}{"1": "one"})
+		assert.Nil(t, err)
+		assert.Equal(t, M().Add("1", "one"), val)
+		assert.Equal(t, map[string]interface{}{"1": "one"}, val.G())
 
-	// 		val, err = ToStringMapE(map[string]interface{}{"1": "one"})
-	// 		assert.Nil(t, err)
-	// 		assert.Equal(t, M().Add("1": "one"}, val)
-	// 		assert.Equal(t, map[string]interface{}{"1": "one"}, val.G())
+		val, err = ToStringMapE(map[string]interface{}{"1": "one"})
+		assert.Nil(t, err)
+		assert.Equal(t, M().Add("1", "one"), val)
+		assert.Equal(t, map[string]interface{}{"1": "one"}, val.G())
 
-	// 		val, err = ToStringMapE(&map[interface{}]interface{}{"1": "one"})
-	// 		assert.Nil(t, err)
-	// 		assert.Equal(t, M().Add("1": "one"}, val)
-	// 		assert.Equal(t, map[string]interface{}{"1": "one"}, val.G())
-	// 	}
+		val, err = ToStringMapE(&map[interface{}]interface{}{"1": "one"})
+		assert.Nil(t, err)
+		assert.Equal(t, M().Add("1", "one"), val)
+		assert.Equal(t, map[string]interface{}{"1": "one"}, val.G())
+	}
 
-	// 	// invalid
-	// 	{
-	// 		val, err := ToStringMapE(nil)
-	// 		assert.Nil(t, err)
-	// 		assert.Equal(t, M().Add(}, val)
+	// invalid
+	{
+		val, err := ToStringMapE(nil)
+		assert.Nil(t, err)
+		assert.Equal(t, M(), val)
 
-	// 		val, err = ToStringMapE(&TestObj{})
-	// 		assert.Equal(t, "unable to convert type *n.TestObj to a StringMap", err.Error())
-	// 		assert.Equal(t, M().Add(}, val)
-	// 	}
+		val, err = ToStringMapE(&TestObj{})
+		assert.Equal(t, "unable to convert type *n.TestObj to a StringMap", err.Error())
+		assert.Equal(t, M(), val)
+	}
 
-	// 	// Object
-	// 	{
-	// 		val, err := ToStringMapE(Object{map[string]interface{}{"foo": "bar"}})
-	// 		assert.Nil(t, err)
-	// 		assert.Equal(t, M().Add("foo": "bar"}, val)
+	// Object
+	{
+		val, err := ToStringMapE(Object{map[string]interface{}{"foo": "bar"}})
+		assert.Nil(t, err)
+		assert.Equal(t, M().Add("foo", "bar"), val)
 
-	// 		val, err = ToStringMapE(Object{map[string]interface{}{"foo1": "bar1", "foo2": "bar2"}})
-	// 		assert.Nil(t, err)
-	// 		assert.Equal(t, M().Add("foo1": "bar1", "foo2": "bar2"}, val)
+		val, err = ToStringMapE(Object{map[string]interface{}{"foo1": "bar1", "foo2": "bar2"}})
+		assert.Nil(t, err)
+		assert.Equal(t, M().Add("foo1", "bar1").Add("foo2", "bar2"), val)
 
-	// 		val, err = ToStringMapE(&Object{})
-	// 		assert.Nil(t, err)
-	// 		assert.Equal(t, M().Add(}, val)
+		val, err = ToStringMapE(&Object{})
+		assert.Nil(t, err)
+		assert.Equal(t, M(), val)
 
-	// 		val, err = ToStringMapE((*Object)(nil))
-	// 		assert.Nil(t, err)
-	// 		assert.Equal(t, M().Add(}, val)
-	// 	}
+		val, err = ToStringMapE((*Object)(nil))
+		assert.Nil(t, err)
+		assert.Equal(t, M(), val)
+	}
 
-	// 	// []byte
-	// 	{
-	// 		yml := `foo:
-	//   - 1
-	//   - 2
-	//   - 3
-	// `
-	// 		val, err := ToStringMapE([]byte(yml))
-	// 		assert.Nil(t, err)
-	// 		assert.Equal(t, M().Add("foo": []interface{}{int(1), int(2), int(3)}}, val)
-	// 		assert.Equal(t, map[string]interface{}{"foo": []interface{}{int(1), int(2), int(3)}}, val.G())
-	// 	}
+	// []byte
+	{
+		yml := `foo:
+  - 1
+  - 2
+  - 3
+`
+		val, err := ToStringMapE([]byte(yml))
+		assert.Nil(t, err)
+		assert.Equal(t, M().Add("foo", []interface{}{int(1), int(2), int(3)}), val)
+		assert.Equal(t, map[string]interface{}{"foo": []interface{}{int(1), int(2), int(3)}}, val.G())
+	}
 
-	// 	// object
-	// 	{
+	// object
+	{
 
-	// 	}
+	}
 
-	// 	// string
-	// 	{
-	// 		yml := `foo:
-	//   - 1
-	//   - 2
-	//   - 3
-	// `
-	// 		val, err := ToStringMapE(yml)
-	// 		assert.Nil(t, err)
-	// 		assert.Equal(t, M().Add("foo": []interface{}{int(1), int(2), int(3)}}, val)
-	// 		assert.Equal(t, map[string]interface{}{"foo": []interface{}{int(1), int(2), int(3)}}, val.G())
+	// string
+	{
+		yml := `foo:
+  - 1
+  - 2
+  - 3
+`
+		val, err := ToStringMapE(yml)
+		assert.Nil(t, err)
+		assert.Equal(t, M().Add("foo", []interface{}{int(1), int(2), int(3)}), val)
+		assert.Equal(t, map[string]interface{}{"foo": []interface{}{int(1), int(2), int(3)}}, val.G())
 
-	// 		// string map
-	// 		yml = `foo1: bar1
-	// foo2: bar2
-	// foo3: bar3
-	// `
-	// 		val, err = ToStringMapE(yml)
-	// 		assert.Nil(t, err)
-	// 		assert.Equal(t, M().Add("foo1": "bar1", "foo2": "bar2", "foo3": "bar3"}, val)
-	// 		assert.Equal(t, map[string]interface{}{"foo1": "bar1", "foo2": "bar2", "foo3": "bar3"}, val.G())
+		// string map
+		yml = `foo1: bar1
+foo2: bar2
+foo3: bar3
+`
+		val, err = ToStringMapE(yml)
+		assert.Nil(t, err)
+		assert.Equal(t, M().Add("foo1", "bar1").Add("foo2", "bar2").Add("foo3", "bar3"), val)
+		assert.Equal(t, map[string]interface{}{"foo1": "bar1", "foo2": "bar2", "foo3": "bar3"}, val.G())
 
-	// 		// string map nested
-	// 		yml = `foo:
-	//   - name: foo1
-	//     val:
-	//       bar1: 1
-	//   - name: foo2
-	//     val:
-	//       bar2: 1
-	// `
-	// 		val, err = ToStringMapE(yml)
-	// 		assert.Nil(t, err)
-	// 		assert.Equal(t, M().Add("foo": []interface{}{map[string]interface{}{"name": "foo1", "val": map[string]interface{}{"bar1": int(1)}}, map[string]interface{}{"name": "foo2", "val": map[string]interface{}{"bar2": int(1)}}}}, val)
-	// 		assert.Equal(t, map[string]interface{}{"foo": []interface{}{map[string]interface{}{"name": "foo1", "val": map[string]interface{}{"bar1": int(1)}}, map[string]interface{}{"name": "foo2", "val": map[string]interface{}{"bar2": int(1)}}}}, val.G())
-	// 	}
+		// string map nested
+		yml = `foo:
+  - name: foo1
+    val:
+      bar1: 1
+  - name: foo2
+    val:
+      bar2: 1
+`
+		val, err = ToStringMapE(yml)
+		assert.Nil(t, err)
+		assert.Equal(t, M().Add("foo", []interface{}{map[string]interface{}{"name": "foo1", "val": map[string]interface{}{"bar1": int(1)}}, map[string]interface{}{"name": "foo2", "val": map[string]interface{}{"bar2": int(1)}}}), val)
+		assert.Equal(t, map[string]interface{}{"foo": []interface{}{map[string]interface{}{"name": "foo1", "val": map[string]interface{}{"bar1": int(1)}}, map[string]interface{}{"name": "foo2", "val": map[string]interface{}{"bar2": int(1)}}}}, val.G())
+	}
 }
 
 // ToStringSliceE

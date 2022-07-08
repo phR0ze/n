@@ -52,7 +52,7 @@ func BenchmarkStringMap_SetValueRefSlice(t *testing.B) {
 //--------------------------------------------------------------------------------------------------
 func ExampleNewStringMap() {
 	fmt.Println(NewStringMap(map[string]interface{}{"k": "v"}))
-	// Output: &map[k:v]
+	// Output: &[{k v}]
 }
 
 func TestNewStringMap(t *testing.T) {
@@ -403,530 +403,530 @@ func TestStringMap_Get(t *testing.T) {
 	assert.Equal(t, 3, m.Len())
 }
 
-// // Inject
-// //--------------------------------------------------------------------------------------------------
-// func ExampleStringMap_Inject() {
-// 	fmt.Println(NewStringMapV().Inject(".", map[string]interface{}{"1": "one"}))
-// 	// Output: &map[1:one]
-// }
+// Update
+//--------------------------------------------------------------------------------------------------
+func ExampleStringMap_Update() {
+	fmt.Println(NewStringMapV().Update(".", map[string]interface{}{"1": "one"}))
+	// Output: &[{1 one}]
+}
 
-// func TestStringMap_Inject(t *testing.T) {
+func TestStringMap_Update(t *testing.T) {
 
-// 	// Move through list
-// 	{
-// 		// Move through by name and change order
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []interface{}{
-// 				map[string]interface{}{"name": "foo", "order": "1"},
-// 				map[string]interface{}{"name": "bar", "order": "2"},
-// 				map[string]interface{}{"name": "bob", "order": "3"},
-// 			},
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []interface{}{
-// 				map[string]interface{}{"name": "foo", "order": "1"},
-// 				map[string]interface{}{"name": "bar", "order": "4"},
-// 				map[string]interface{}{"name": "bob", "order": "3"},
-// 			},
-// 		}
-// 		assert.Equal(t, expected, M(a).Inject("2.[name==bar].order", "4").MG())
-// 	}
-// 	{
-// 		// Move through and change name
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []interface{}{
-// 				map[string]interface{}{"name": "foo"},
-// 				map[string]interface{}{"name": "bar"},
-// 			},
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []interface{}{
-// 				map[string]interface{}{"name": "foo"},
-// 				map[string]interface{}{"name": "blah"},
-// 			},
-// 		}
-// 		assert.Equal(t, expected, M(a).Inject("2.[1].name", "blah").MG())
-// 	}
+	// Move through list
+	{
+		// Move through by name and change order
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo", "order": "1"},
+				map[string]interface{}{"name": "bar", "order": "2"},
+				map[string]interface{}{"name": "bob", "order": "3"},
+			},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo", "order": "1"},
+				map[string]interface{}{"name": "bar", "order": "4"},
+				map[string]interface{}{"name": "bob", "order": "3"},
+			},
+		}
+		assert.Equal(t, expected, MV(a).Update("2.[name==bar].order", "4").MG())
+	}
+	{
+		// Move through and change name
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo"},
+				map[string]interface{}{"name": "bar"},
+			},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo"},
+				map[string]interface{}{"name": "blah"},
+			},
+		}
+		assert.Equal(t, expected, MV(a).Update("2.[1].name", "blah").MG())
+	}
 
-// 	// Inject into list
-// 	{
-// 		// Replace specific map by key value pair
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []interface{}{
-// 				map[string]interface{}{"name": "foo"},
-// 				map[string]interface{}{"name": "bar"},
-// 				map[string]interface{}{"name": "bob"},
-// 			},
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []interface{}{
-// 				map[string]interface{}{"name": "foo"},
-// 				map[string]interface{}{"name": "blah"},
-// 				map[string]interface{}{"name": "bob"},
-// 			},
-// 		}
-// 		assert.Equal(t, expected, M(a).Inject("2.[name==bar]", map[string]interface{}{"name": "blah"}).MG())
-// 	}
-// 	{
-// 		// Replace element in list
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []interface{}{"1", "2"},
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []interface{}{"1", "3"},
-// 		}
-// 		assert.Equal(t, expected, M(a).Inject("2.[1]", "3").MG())
-// 	}
-// 	{
-// 		// Replace the whole list as we gave the whole list selector
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []string{"1", "2"},
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": "3",
-// 		}
-// 		assert.Equal(t, expected, M(a).Inject("2.[]", "3").MG())
-// 	}
+	// Update into list
+	{
+		// Replace specific map by key value pair
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo"},
+				map[string]interface{}{"name": "bar"},
+				map[string]interface{}{"name": "bob"},
+			},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo"},
+				map[string]interface{}{"name": "blah"},
+				map[string]interface{}{"name": "bob"},
+			},
+		}
+		assert.Equal(t, expected, MV(a).Update("2.[name==bar]", map[string]interface{}{"name": "blah"}).MG())
+	}
+	{
+		// Replace element in list
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{"1", "2"},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{"1", "3"},
+		}
+		assert.Equal(t, expected, MV(a).Update("2.[1]", "3").MG())
+	}
+	{
+		// Replace the whole list
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []string{"1", "2"},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": "3",
+		}
+		assert.Equal(t, expected, MV(a).Update("2", "3").MG())
+	}
 
-// 	// Simple key indexing
-// 	{
-// 		// Nesting - merge
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{
-// 				"3": "three",
-// 				"4": "five",
-// 			},
-// 		}
-// 		b := map[string]interface{}{
-// 			"4": "four",
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{
-// 				"4": "four",
-// 			},
-// 		}
-// 		assert.Equal(t, expected, M(a).Inject("2", b).MG())
-// 	}
-// 	{
-// 		// Nesting - two
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": "2",
-// 		}
-// 		b := map[string]interface{}{
-// 			"4": "four",
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{
-// 				"3": map[string]interface{}{
-// 					"4": "four",
-// 				},
-// 			},
-// 		}
-// 		assert.Equal(t, expected, M(a).Inject("2.3", b).MG())
-// 	}
-// 	{
-// 		// Nesting - one
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": "2",
-// 		}
-// 		b := map[string]interface{}{
-// 			"3": "three",
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{
-// 				"3": "three",
-// 			},
-// 		}
-// 		assert.Equal(t, expected, M(a).Inject("2", b).MG())
-// 	}
-// 	{
-// 		// Nesting - doesn't exist two
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 		}
-// 		b := map[string]interface{}{
-// 			"4": "four",
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{
-// 				"3": map[string]interface{}{
-// 					"4": "four",
-// 				},
-// 			},
-// 		}
-// 		assert.Equal(t, expected, M(a).Inject("2.3", b).MG())
-// 	}
+	// Simple key indexing
+	{
+		// Nesting - merge
+		a := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+				"4": "five",
+			},
+		}
+		b := map[string]interface{}{
+			"4": "four",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"4": "four",
+			},
+		}
+		assert.Equal(t, expected, MV(a).Update("2", b).MG())
+	}
+	{
+		// Nesting - two
+		a := map[string]interface{}{
+			"1": "one",
+			"2": "2",
+		}
+		b := map[string]interface{}{
+			"4": "four",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": map[string]interface{}{
+					"4": "four",
+				},
+			},
+		}
+		assert.Equal(t, expected, MV(a).Update("2.3", b).MG())
+	}
+	{
+		// Nesting - one
+		a := map[string]interface{}{
+			"1": "one",
+			"2": "2",
+		}
+		b := map[string]interface{}{
+			"3": "three",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+			},
+		}
+		assert.Equal(t, expected, MV(a).Update("2", b).MG())
+	}
+	{
+		// Nesting - doesn't exist two
+		a := map[string]interface{}{
+			"1": "one",
+		}
+		b := map[string]interface{}{
+			"4": "four",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": map[string]interface{}{
+					"4": "four",
+				},
+			},
+		}
+		assert.Equal(t, expected, MV(a).Update("2.3", b).MG())
+	}
 
-// 	// Nesting - doesn't exist one
-// 	{
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 		}
-// 		b := map[string]interface{}{
-// 			"3": "three",
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{
-// 				"3": "three",
-// 			},
-// 		}
-// 		assert.Equal(t, expected, M(a).Inject("2", b).MG())
-// 	}
+	// Nesting - doesn't exist one
+	{
+		a := map[string]interface{}{
+			"1": "one",
+		}
+		b := map[string]interface{}{
+			"3": "three",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+			},
+		}
+		assert.Equal(t, expected, MV(a).Update("2", b).MG())
+	}
 
-// 	// Root injection - override
-// 	{
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": "2",
-// 		}
-// 		b := map[string]interface{}{
-// 			"2": "two",
-// 			"3": "three",
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": "two",
-// 			"3": "three",
-// 		}
-// 		assert.Equal(t, expected, M(a).Inject(".", b).MG())
-// 	}
+	// Root Update - merge
+	{
+		a := map[string]interface{}{
+			"1": "one",
+			"2": "2",
+		}
+		b := map[string]interface{}{
+			"2": "two",
+			"3": "three",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": "two",
+			"3": "three",
+		}
+		assert.Equal(t, expected, MV(a).Update(".", b).MG())
+	}
 
-// 	// Root injections - empty
-// 	{
-// 		b := map[string]interface{}{
-// 			"foo": "bar",
-// 		}
-// 		expected := map[string]interface{}{
-// 			"foo": "bar",
-// 		}
-// 		// map[string]interface{}
-// 		assert.Equal(t, expected, MV().Inject("", b).MG())
-// 		assert.Equal(t, expected, MV().Inject(".", b).MG())
+	// Root Update - empty
+	{
+		b := map[string]interface{}{
+			"foo": "bar",
+		}
+		expected := map[string]interface{}{
+			"foo": "bar",
+		}
+		// map[string]interface{}
+		assert.Equal(t, expected, MV().Update("", b).MG())
+		assert.Equal(t, expected, MV().Update(".", b).MG())
 
-// 		// *StringMap
-// 		assert.Equal(t, expected, MV().Inject("", M(b)).MG())
-// 		assert.Equal(t, expected, MV().Inject(".", M(b)).MG())
+		// *StringMap
+		assert.Equal(t, expected, MV().Update("", MV(b)).MG())
+		assert.Equal(t, expected, MV().Update(".", MV(b)).MG())
 
-// 		// string
-// 		m, err := MV().InjectE("", "foo")
-// 		assert.Equal(t, &StringMap{}, m)
-// 		assert.Equal(t, "invalid selector for the type of value given, 'string'", err.Error())
+		// string
+		m, err := MV().UpdateE("", "foo")
+		assert.Equal(t, &StringMap{}, m)
+		assert.Equal(t, "invalid selector for the type of value given, 'string'", err.Error())
 
-// 		// int
-// 		m, err = MV().InjectE("", 2)
-// 		assert.Equal(t, &StringMap{}, m)
-// 		assert.Equal(t, "invalid selector for the type of value given, 'int'", err.Error())
-// 	}
-// }
+		// int
+		m, err = MV().UpdateE("", 2)
+		assert.Equal(t, &StringMap{}, m)
+		assert.Equal(t, "invalid selector for the type of value given, 'int'", err.Error())
+	}
+}
 
-// // Keys
-// //--------------------------------------------------------------------------------------------------
-// func ExampleStringMap_Keys() {
-// 	m := NewStringMapV(map[string]interface{}{"1": "one"})
-// 	fmt.Println(m.Keys().O())
-// 	// Output: [1]
-// }
+// Keys
+//--------------------------------------------------------------------------------------------------
+func ExampleStringMap_Keys() {
+	m := NewStringMapV(map[string]interface{}{"1": "one"})
+	fmt.Println(m.Keys().O())
+	// Output: [1]
+}
 
-// func TestStringMap_Keys(t *testing.T) {
-// 	// nil or empty
-// 	{
-// 		assert.Equal(t, []string{}, (*StringMap)(nil).Keys().O())
-// 		assert.Equal(t, []string{}, NewStringMapV().Keys().O())
-// 	}
+func TestStringMap_Keys(t *testing.T) {
+	// nil or empty
+	{
+		assert.Equal(t, []string{}, (*StringMap)(nil).Keys().O())
+		assert.Equal(t, []string{}, NewStringMapV().Keys().O())
+	}
 
-// 	// many
-// 	{
-// 		m := NewStringMapV(map[string]interface{}{"1": "one", "2": "two", "3": "three"})
-// 		keys := m.Keys().O()
-// 		assert.Len(t, keys, 3)
-// 		assert.Contains(t, keys, "1")
-// 		assert.Contains(t, keys, "2")
-// 		assert.Contains(t, keys, "3")
-// 	}
-// }
+	// many
+	{
+		m := NewStringMapV(map[string]interface{}{"1": "one", "2": "two", "3": "three"})
+		keys := m.Keys().O()
+		assert.Len(t, keys, 3)
+		assert.Contains(t, keys, "1")
+		assert.Contains(t, keys, "2")
+		assert.Contains(t, keys, "3")
+	}
+}
 
-// // Len
-// //--------------------------------------------------------------------------------------------------
-// func ExampleStringMap_Len() {
-// 	fmt.Println(NewStringMapV().SetM("k", "v").Len())
-// 	// Output: 1
-// }
+// Len
+//--------------------------------------------------------------------------------------------------
+func ExampleStringMap_Len() {
+	fmt.Println(NewStringMapV().SetM("k", "v").Len())
+	// Output: 1
+}
 
-// func TestStringMap_Len(t *testing.T) {
-// 	m := NewStringMapV()
-// 	assert.Equal(t, 0, m.Len())
-// 	assert.Equal(t, 1, m.SetM("1", "one").Len())
-// 	assert.Equal(t, 2, m.SetM("2", "two").Len())
-// 	assert.Equal(t, 1, m.DeleteM("2").Len())
-// 	assert.Equal(t, 0, m.DeleteM("1").Len())
-// }
+func TestStringMap_Len(t *testing.T) {
+	m := NewStringMapV()
+	assert.Equal(t, 0, m.Len())
+	assert.Equal(t, 1, m.SetM("1", "one").Len())
+	assert.Equal(t, 2, m.SetM("2", "two").Len())
+	assert.Equal(t, 1, m.DeleteM("2").Len())
+	assert.Equal(t, 0, m.DeleteM("1").Len())
+}
 
-// // Merge
-// //--------------------------------------------------------------------------------------------------
-// func ExampleStringMap_Merge() {
-// 	fmt.Println(NewStringMapV(map[string]interface{}{"1": "two"}).Merge(NewStringMapV(map[string]interface{}{"1": "one"})))
-// 	// Output: &map[1:one]
-// }
+// Merge
+//--------------------------------------------------------------------------------------------------
+func ExampleStringMap_Merge() {
+	fmt.Println(M().Add("1", "two").Merge(M().Add("1", "one")))
+	// Output: &[{1 one}]
+}
 
-// func TestStringMap_Merge(t *testing.T) {
+func TestStringMap_Merge(t *testing.T) {
 
-// 	// Location tests
-// 	{
-// 		// Nesting - merge advanced
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{
-// 				"3": "three",
-// 				"4": "five",
-// 			},
-// 		}
-// 		b := map[string]interface{}{
-// 			"4": "four",
-// 			"5": "five",
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{
-// 				"3": "three",
-// 				"4": "four",
-// 				"5": "five",
-// 			},
-// 		}
-// 		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), "2").MG())
-// 	}
-// 	{
-// 		// Nesting - merge
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{
-// 				"3": "three",
-// 				"4": "five",
-// 			},
-// 		}
-// 		b := map[string]interface{}{
-// 			"4": "four",
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{
-// 				"3": "three",
-// 				"4": "four",
-// 			},
-// 		}
-// 		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), "2").MG())
-// 	}
-// 	{
-// 		// Nesting - two
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": "2",
-// 		}
-// 		b := map[string]interface{}{
-// 			"4": "four",
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{
-// 				"3": map[string]interface{}{
-// 					"4": "four",
-// 				},
-// 			},
-// 		}
-// 		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), "2.3").MG())
-// 	}
-// 	{
-// 		// Nesting - one
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": "2",
-// 		}
-// 		b := map[string]interface{}{
-// 			"3": "three",
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{
-// 				"3": "three",
-// 			},
-// 		}
-// 		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), "2").MG())
-// 	}
-// 	{
-// 		// Nesting - doesn't exist two
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 		}
-// 		b := map[string]interface{}{
-// 			"4": "four",
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{
-// 				"3": map[string]interface{}{
-// 					"4": "four",
-// 				},
-// 			},
-// 		}
-// 		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), "2.3").MG())
-// 	}
-// 	{
-// 		// Nesting - doesn't exist one
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 		}
-// 		b := map[string]interface{}{
-// 			"3": "three",
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{
-// 				"3": "three",
-// 			},
-// 		}
-// 		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), "2").MG())
-// 	}
-// 	{
-// 		// root indicator
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": "2",
-// 		}
-// 		b := map[string]interface{}{
-// 			"2": "two",
-// 			"3": "three",
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": "two",
-// 			"3": "three",
-// 		}
-// 		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), ".").MG())
-// 	}
+	// Location tests
+	{
+		// Nesting - merge advanced
+		a := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+				"4": "five",
+			},
+		}
+		b := map[string]interface{}{
+			"4": "four",
+			"5": "five",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+				"4": "four",
+				"5": "five",
+			},
+		}
+		assert.Equal(t, expected, MV(a).Merge(MV(b), "2").MG())
+	}
+	// 	{
+	// 		// Nesting - merge
+	// 		a := map[string]interface{}{
+	// 			"1": "one",
+	// 			"2": map[string]interface{}{
+	// 				"3": "three",
+	// 				"4": "five",
+	// 			},
+	// 		}
+	// 		b := map[string]interface{}{
+	// 			"4": "four",
+	// 		}
+	// 		expected := map[string]interface{}{
+	// 			"1": "one",
+	// 			"2": map[string]interface{}{
+	// 				"3": "three",
+	// 				"4": "four",
+	// 			},
+	// 		}
+	// 		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), "2").MG())
+	// 	}
+	// 	{
+	// 		// Nesting - two
+	// 		a := map[string]interface{}{
+	// 			"1": "one",
+	// 			"2": "2",
+	// 		}
+	// 		b := map[string]interface{}{
+	// 			"4": "four",
+	// 		}
+	// 		expected := map[string]interface{}{
+	// 			"1": "one",
+	// 			"2": map[string]interface{}{
+	// 				"3": map[string]interface{}{
+	// 					"4": "four",
+	// 				},
+	// 			},
+	// 		}
+	// 		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), "2.3").MG())
+	// 	}
+	// 	{
+	// 		// Nesting - one
+	// 		a := map[string]interface{}{
+	// 			"1": "one",
+	// 			"2": "2",
+	// 		}
+	// 		b := map[string]interface{}{
+	// 			"3": "three",
+	// 		}
+	// 		expected := map[string]interface{}{
+	// 			"1": "one",
+	// 			"2": map[string]interface{}{
+	// 				"3": "three",
+	// 			},
+	// 		}
+	// 		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), "2").MG())
+	// 	}
+	// 	{
+	// 		// Nesting - doesn't exist two
+	// 		a := map[string]interface{}{
+	// 			"1": "one",
+	// 		}
+	// 		b := map[string]interface{}{
+	// 			"4": "four",
+	// 		}
+	// 		expected := map[string]interface{}{
+	// 			"1": "one",
+	// 			"2": map[string]interface{}{
+	// 				"3": map[string]interface{}{
+	// 					"4": "four",
+	// 				},
+	// 			},
+	// 		}
+	// 		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), "2.3").MG())
+	// 	}
+	// 	{
+	// 		// Nesting - doesn't exist one
+	// 		a := map[string]interface{}{
+	// 			"1": "one",
+	// 		}
+	// 		b := map[string]interface{}{
+	// 			"3": "three",
+	// 		}
+	// 		expected := map[string]interface{}{
+	// 			"1": "one",
+	// 			"2": map[string]interface{}{
+	// 				"3": "three",
+	// 			},
+	// 		}
+	// 		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), "2").MG())
+	// 	}
+	// 	{
+	// 		// root indicator
+	// 		a := map[string]interface{}{
+	// 			"1": "one",
+	// 			"2": "2",
+	// 		}
+	// 		b := map[string]interface{}{
+	// 			"2": "two",
+	// 			"3": "three",
+	// 		}
+	// 		expected := map[string]interface{}{
+	// 			"1": "one",
+	// 			"2": "two",
+	// 			"3": "three",
+	// 		}
+	// 		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), ".").MG())
+	// 	}
 
-// 	// nil or empty
-// 	{
-// 		assert.Equal(t, NewStringMapV(), (*StringMap)(nil).Merge(nil))
-// 		assert.Equal(t, NewStringMapV(), NewStringMapV().Merge(nil))
-// 		assert.Equal(t, map[string]interface{}{}, NewStringMapV().Merge(nil).O())
-// 		assert.Equal(t, NewStringMapV(), NewStringMapV().Merge(NewStringMapV()))
-// 		assert.Equal(t, map[string]interface{}{}, NewStringMapV().Merge(NewStringMapV()).O())
-// 	}
-// 	{
-// 		a := NewStringMapV(map[string]interface{}{})
-// 		b := NewStringMapV(map[string]interface{}{"1": "one"})
-// 		assert.Equal(t, b, a.Merge(b))
-// 	}
-// 	{
-// 		a := NewStringMapV(map[string]interface{}{"1": "one"})
-// 		b := NewStringMapV(map[string]interface{}{})
-// 		assert.Equal(t, a, a.Merge(b))
-// 	}
-// 	{
-// 		a := NewStringMapV(map[string]interface{}{
-// 			"1": "one",
-// 		})
-// 		b := NewStringMapV(map[string]interface{}{
-// 			"2": "two",
-// 		})
-// 		expected := NewStringMapV(map[string]interface{}{
-// 			"1": "one",
-// 			"2": "two",
-// 		})
-// 		assert.Equal(t, expected, a.Merge(b))
-// 	}
-// 	{
-// 		// Override string in a with string in b
-// 		a := NewStringMapV(map[string]interface{}{
-// 			"1": "one",
-// 			"2": "2",
-// 		})
-// 		b := NewStringMapV(map[string]interface{}{
-// 			"2": "two",
-// 			"3": "three",
-// 		})
-// 		expected := NewStringMapV(map[string]interface{}{
-// 			"1": "one",
-// 			"2": "two",
-// 			"3": "three",
-// 		})
-// 		assert.Equal(t, expected, a.Merge(b))
-// 	}
-// 	{
-// 		// Override string in a with map from b
-// 		a := NewStringMapV(map[string]interface{}{
-// 			"1": "one",
-// 			"2": "two",
-// 		})
-// 		b := NewStringMapV(map[string]interface{}{
-// 			"2": NewStringMapV(map[string]interface{}{"foo": "bar"}),
-// 			"3": "three",
-// 		})
-// 		expected := NewStringMapV(map[string]interface{}{
-// 			"1": "one",
-// 			"2": NewStringMapV(map[string]interface{}{"foo": "bar"}),
-// 			"3": "three",
-// 		})
-// 		assert.Equal(t, expected, a.Merge(b))
-// 	}
-// 	{
-// 		// Override map in a with string from b
-// 		a := NewStringMapV(map[string]interface{}{
-// 			"1": "one",
-// 			"2": NewStringMapV(map[string]interface{}{"foo": "bar"}),
-// 		})
-// 		b := NewStringMapV(map[string]interface{}{
-// 			"2": "two",
-// 			"3": "three",
-// 		})
-// 		expected := NewStringMapV(map[string]interface{}{
-// 			"1": "one",
-// 			"2": "two",
-// 			"3": "three",
-// 		})
-// 		assert.Equal(t, expected, a.Merge(b))
-// 	}
-// 	{
-// 		// Override sub map string in a with sub map string from b
-// 		a := NewStringMapV(map[string]interface{}{
-// 			"1": "one",
-// 			"2": NewStringMapV(map[string]interface{}{"foo": "bar1"}),
-// 		})
-// 		b := NewStringMapV(map[string]interface{}{
-// 			"2": NewStringMapV(map[string]interface{}{
-// 				"foo":  "bar2",
-// 				"foo2": "bar2",
-// 			}),
-// 			"3": "three",
-// 		})
-// 		expected := NewStringMapV(map[string]interface{}{
-// 			"1": "one",
-// 			"2": NewStringMapV(map[string]interface{}{
-// 				"foo":  "bar2",
-// 				"foo2": "bar2",
-// 			}),
-// 			"3": "three",
-// 		})
-// 		assert.Equal(t, expected, a.Merge(b))
-// 	}
-// }
+	// 	// nil or empty
+	// 	{
+	// 		assert.Equal(t, NewStringMapV(), (*StringMap)(nil).Merge(nil))
+	// 		assert.Equal(t, NewStringMapV(), NewStringMapV().Merge(nil))
+	// 		assert.Equal(t, map[string]interface{}{}, NewStringMapV().Merge(nil).O())
+	// 		assert.Equal(t, NewStringMapV(), NewStringMapV().Merge(NewStringMapV()))
+	// 		assert.Equal(t, map[string]interface{}{}, NewStringMapV().Merge(NewStringMapV()).O())
+	// 	}
+	// 	{
+	// 		a := NewStringMapV(map[string]interface{}{})
+	// 		b := NewStringMapV(map[string]interface{}{"1": "one"})
+	// 		assert.Equal(t, b, a.Merge(b))
+	// 	}
+	// 	{
+	// 		a := NewStringMapV(map[string]interface{}{"1": "one"})
+	// 		b := NewStringMapV(map[string]interface{}{})
+	// 		assert.Equal(t, a, a.Merge(b))
+	// 	}
+	// 	{
+	// 		a := NewStringMapV(map[string]interface{}{
+	// 			"1": "one",
+	// 		})
+	// 		b := NewStringMapV(map[string]interface{}{
+	// 			"2": "two",
+	// 		})
+	// 		expected := NewStringMapV(map[string]interface{}{
+	// 			"1": "one",
+	// 			"2": "two",
+	// 		})
+	// 		assert.Equal(t, expected, a.Merge(b))
+	// 	}
+	// 	{
+	// 		// Override string in a with string in b
+	// 		a := NewStringMapV(map[string]interface{}{
+	// 			"1": "one",
+	// 			"2": "2",
+	// 		})
+	// 		b := NewStringMapV(map[string]interface{}{
+	// 			"2": "two",
+	// 			"3": "three",
+	// 		})
+	// 		expected := NewStringMapV(map[string]interface{}{
+	// 			"1": "one",
+	// 			"2": "two",
+	// 			"3": "three",
+	// 		})
+	// 		assert.Equal(t, expected, a.Merge(b))
+	// 	}
+	// 	{
+	// 		// Override string in a with map from b
+	// 		a := NewStringMapV(map[string]interface{}{
+	// 			"1": "one",
+	// 			"2": "two",
+	// 		})
+	// 		b := NewStringMapV(map[string]interface{}{
+	// 			"2": NewStringMapV(map[string]interface{}{"foo": "bar"}),
+	// 			"3": "three",
+	// 		})
+	// 		expected := NewStringMapV(map[string]interface{}{
+	// 			"1": "one",
+	// 			"2": NewStringMapV(map[string]interface{}{"foo": "bar"}),
+	// 			"3": "three",
+	// 		})
+	// 		assert.Equal(t, expected, a.Merge(b))
+	// 	}
+	// 	{
+	// 		// Override map in a with string from b
+	// 		a := NewStringMapV(map[string]interface{}{
+	// 			"1": "one",
+	// 			"2": NewStringMapV(map[string]interface{}{"foo": "bar"}),
+	// 		})
+	// 		b := NewStringMapV(map[string]interface{}{
+	// 			"2": "two",
+	// 			"3": "three",
+	// 		})
+	// 		expected := NewStringMapV(map[string]interface{}{
+	// 			"1": "one",
+	// 			"2": "two",
+	// 			"3": "three",
+	// 		})
+	// 		assert.Equal(t, expected, a.Merge(b))
+	// 	}
+	// 	{
+	// 		// Override sub map string in a with sub map string from b
+	// 		a := NewStringMapV(map[string]interface{}{
+	// 			"1": "one",
+	// 			"2": NewStringMapV(map[string]interface{}{"foo": "bar1"}),
+	// 		})
+	// 		b := NewStringMapV(map[string]interface{}{
+	// 			"2": NewStringMapV(map[string]interface{}{
+	// 				"foo":  "bar2",
+	// 				"foo2": "bar2",
+	// 			}),
+	// 			"3": "three",
+	// 		})
+	// 		expected := NewStringMapV(map[string]interface{}{
+	// 			"1": "one",
+	// 			"2": NewStringMapV(map[string]interface{}{
+	// 				"foo":  "bar2",
+	// 				"foo2": "bar2",
+	// 			}),
+	// 			"3": "three",
+	// 		})
+	// 		assert.Equal(t, expected, a.Merge(b))
+	// 	}
+}
 
 // // MergeG
 // //--------------------------------------------------------------------------------------------------
@@ -1175,305 +1175,344 @@ func TestStringMap_Get(t *testing.T) {
 // 	}
 // }
 
-// // O
-// //--------------------------------------------------------------------------------------------------
-// func ExampleStringMap_O() {
-// 	fmt.Println(NewStringMapV(map[string]interface{}{"1": "one"}).O())
-// 	// Output: map[1:one]
-// }
+// O
+//--------------------------------------------------------------------------------------------------
+func ExampleStringMap_O() {
+	fmt.Println(NewStringMapV(map[string]interface{}{"1": "one"}).O())
+	// Output: map[1:one]
+}
 
-// func TestStringMap_O(t *testing.T) {
-// 	assert.Equal(t, map[string]interface{}{}, (*StringMap)(nil).O())
-// 	assert.Equal(t, map[string]interface{}{}, NewStringMapV().O())
-// 	assert.Equal(t, map[string]interface{}{"1": "one"}, NewStringMapV(map[string]interface{}{"1": "one"}).O())
-// }
+func TestStringMap_O(t *testing.T) {
+	assert.Equal(t, map[string]interface{}{}, (*StringMap)(nil).O())
+	assert.Equal(t, map[string]interface{}{}, NewStringMapV().O())
+	assert.Equal(t, map[string]interface{}{"1": "one"}, NewStringMapV(map[string]interface{}{"1": "one"}).O())
+}
 
-// // Query
-// //--------------------------------------------------------------------------------------------------
-// func ExampleStringMap_Query() {
-// 	fmt.Println(ToStringMap("foo:\n  bar: 1\n").Query("foo.bar"))
-// 	// Output: 1
-// }
+// Query
+//--------------------------------------------------------------------------------------------------
+func ExampleStringMap_Query() {
+	fmt.Println(ToStringMap("foo:\n  bar: 1\n").Query("foo.bar"))
+	// Output: 1
+}
 
-// func TestStringMap_Query(t *testing.T) {
+func TestStringMap_Query(t *testing.T) {
 
-// 	// malformed yaml
-// 	{
-// 		_, err := NewStringMap("foo:\n\t- 1\n").QueryE("foo.[0]")
-// 		assert.Equal(t, "failed to query empty map", err.Error())
-// 	}
+	// malformed yaml
+	{
+		_, err := NewStringMap("foo:\n\t- 1\n").QueryE("foo.[0]")
+		assert.Equal(t, "failed to query empty map", err.Error())
+	}
 
-// 	// dot notation
-// 	{
-// 		// Identity: .
-// 		assert.Equal(t, &StringMap{"one": "1"}, NewStringMapV(map[string]interface{}{"one": "1"}).Query(``).ToStringMap())
-// 		assert.Equal(t, &StringMap{"one": "1"}, NewStringMapV(map[string]interface{}{"one": "1"}).Query(`.`).ToStringMap())
+	// dot notation
+	{
+		// Identity: .
+		assert.Equal(t, M().Add("one", "1"), NewStringMapV(map[string]interface{}{"one": "1"}).Query(``).ToStringMap())
+		assert.Equal(t, M().Add("one", "1"), NewStringMapV(map[string]interface{}{"one": "1"}).Query(`.`).ToStringMap())
 
-// 		// Object Identifier-Index: .foo, .foo.bar
-// 		assert.Equal(t, "1", NewStringMapV(map[string]interface{}{"one": "1"}).Query(`one`).ToString())
-// 		assert.Equal(t, "1", NewStringMapV(map[string]interface{}{"one": "1"}).Query(`.one`).ToString())
-// 		assert.Equal(t, "1", NewStringMapV(map[string]interface{}{"one": "1"}).Query(`."one"`).ToString())
-// 		assert.Equal(t, "2", NewStringMapV(map[string]interface{}{"one": map[string]interface{}{"two": "2"}}).Query(`one.two`).ToString())
-// 		assert.Equal(t, "3", NewStringMapV(map[string]interface{}{"one": map[string]interface{}{"two": map[string]interface{}{"three": "3"}}}).Query(`one.two.three`).ToString())
-// 		assert.Equal(t, "foo", NewStringMapV(map[string]interface{}{"one": map[string]interface{}{"two.three": "foo"}}).Query(`one."two.three"`).ToString())
+		// Object Identifier-Index: .foo, .foo.bar
+		assert.Equal(t, "1", NewStringMapV(map[string]interface{}{"one": "1"}).Query(`one`).ToString())
+		assert.Equal(t, "1", NewStringMapV(map[string]interface{}{"one": "1"}).Query(`.one`).ToString())
+		assert.Equal(t, "1", NewStringMapV(map[string]interface{}{"one": "1"}).Query(`."one"`).ToString())
+		assert.Equal(t, "2", NewStringMapV(map[string]interface{}{"one": map[string]interface{}{"two": "2"}}).Query(`one.two`).ToString())
+		assert.Equal(t, "3", NewStringMapV(map[string]interface{}{"one": map[string]interface{}{"two": map[string]interface{}{"three": "3"}}}).Query(`one.two.three`).ToString())
+		assert.Equal(t, "foo", NewStringMapV(map[string]interface{}{"one": map[string]interface{}{"two.three": "foo"}}).Query(`one."two.three"`).ToString())
 
-// 		// Array Index: empty array
-// 		assert.True(t, ToStringMap("foo: []\n").Query(`foo.[0]`).Nil())
+		// Array Index: empty array
+		assert.True(t, ToStringMap("foo: []\n").Query(`foo.[0]`).Nil())
 
-// 		// Array Index: move through index
-// 		assert.Equal(t, 1.1, ToStringMap("items:\n  - item: 1\n    val: 1.1\n  - item: 2\n    val: 2.2\n  - item: 3\n    val: 3.3\n").Query("items.[0].val").ToFloat64())
+		// Array Index: move through index
+		assert.Equal(t, 1.1, ToStringMap("items:\n  - item: 1\n    val: 1.1\n  - item: 2\n    val: 2.2\n  - item: 3\n    val: 3.3\n").Query("items.[0].val").ToFloat64())
 
-// 		// Array Index: .[2], .[-1]
-// 		assert.Equal(t, 0, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[0]`).ToInt())
-// 		assert.Equal(t, 1, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[1]`).ToInt())
-// 		assert.Equal(t, 2, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[2]`).ToInt())
-// 		assert.Equal(t, 2, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[-1]`).ToInt())
-// 		assert.Equal(t, 1, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[-2]`).ToInt())
-// 		assert.Equal(t, 0, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[-3]`).ToInt())
-// 		assert.Equal(t, float32(2.2), ToStringMap("foo:\n  - 0.5\n  - 1.1\n  - 2.2\n").Query(`foo.[-1]`).ToFloat32())
-// 		assert.Equal(t, float64(2.2), ToStringMap("foo:\n  - 0.5\n  - 1.1\n  - 2.2\n").Query(`foo.[-1]`).ToFloat64())
-// 		assert.Equal(t, "0", NewStringMapV(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[0]`).ToString())
-// 		assert.Equal(t, "1", NewStringMapV(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[1]`).ToString())
-// 		assert.Equal(t, "2", NewStringMapV(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[2]`).ToString())
-// 		assert.Equal(t, "2", NewStringMapV(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[-1]`).ToString())
-// 		assert.Equal(t, "1", NewStringMapV(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[-2]`).ToString())
-// 		assert.Equal(t, "0", NewStringMapV(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[-3]`).ToString())
-// 		assert.Equal(t, "", NewStringMapV(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[-5]`).ToString())
+		// Array Index: .[2], .[-1]
+		assert.Equal(t, 0, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[0]`).ToInt())
+		assert.Equal(t, 1, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[1]`).ToInt())
+		assert.Equal(t, 2, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[2]`).ToInt())
+		assert.Equal(t, 2, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[-1]`).ToInt())
+		assert.Equal(t, 1, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[-2]`).ToInt())
+		assert.Equal(t, 0, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[-3]`).ToInt())
+		assert.Equal(t, float32(2.2), ToStringMap("foo:\n  - 0.5\n  - 1.1\n  - 2.2\n").Query(`foo.[-1]`).ToFloat32())
+		assert.Equal(t, float64(2.2), ToStringMap("foo:\n  - 0.5\n  - 1.1\n  - 2.2\n").Query(`foo.[-1]`).ToFloat64())
+		assert.Equal(t, "0", NewStringMapV(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[0]`).ToString())
+		assert.Equal(t, "1", NewStringMapV(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[1]`).ToString())
+		assert.Equal(t, "2", NewStringMapV(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[2]`).ToString())
+		assert.Equal(t, "2", NewStringMapV(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[-1]`).ToString())
+		assert.Equal(t, "1", NewStringMapV(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[-2]`).ToString())
+		assert.Equal(t, "0", NewStringMapV(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[-3]`).ToString())
+		assert.Equal(t, "", NewStringMapV(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[-5]`).ToString())
 
-// 		// Array Interator: .[]
-// 		assert.Equal(t, []int{0, 1, 2}, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[]`).ToIntSliceG())
-// 		assert.Equal(t, []int{0, 1, 2}, NewStringMapV(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[]`).ToIntSliceG())
+		// Array Interator: .[]
+		assert.Equal(t, []int{0, 1, 2}, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[]`).ToIntSliceG())
+		assert.Equal(t, []int{0, 1, 2}, NewStringMapV(map[string]interface{}{"foo": []interface{}{float64(0), float64(1), float64(2)}}).Query(`foo.[]`).ToIntSliceG())
 
-// 		// Array Slice: .[1:]
+		// Array Slice: .[1:]
 
-// 		// Array element selection based on element value
-// 		yml := `one:
-//   - name: foo
-//     val:
-//       - 3.3
-//       - 1.1
-//       - 2.2
-//   - name: bar
-//     val: 3
-// `
-// 		assert.Equal(t, 3, NewStringMap(yml).Query(`one.[name==bar].val`).ToInt())
-// 		assert.Equal(t, 2, NewStringMap(yml).Query(`one.[name==foo].val.[-1]`).ToInt())
-// 		assert.Equal(t, 1.1, NewStringMap(yml).Query(`one.[name==foo].val.[-2]`).ToFloat64())
-// 		assert.Equal(t, "3.3", NewStringMap(yml).Query(`one.[name==foo].val.[-3]`).ToString())
-// 	}
+		// Array element selection based on element value
+		yml := `one:
+  - name: foo
+    val:
+      - 3.3
+      - 1.1
+      - 2.2
+  - name: bar
+    val: 3
+`
+		assert.Equal(t, 3, NewStringMap(yml).Query(`one.[name==bar].val`).ToInt())
+		assert.Equal(t, 2, NewStringMap(yml).Query(`one.[name==foo].val.[-1]`).ToInt())
+		assert.Equal(t, 1.1, NewStringMap(yml).Query(`one.[name==foo].val.[-2]`).ToFloat64())
+		assert.Equal(t, "3.3", NewStringMap(yml).Query(`one.[name==foo].val.[-3]`).ToString())
+	}
 
-// 	// no dot notation
-// 	{
-// 		// floats
-// 		assert.Equal(t, float32(1.2), NewStringMapV(map[string]interface{}{"1": 1.2}).Query("1").ToFloat32())
-// 		assert.Equal(t, float64(1.2), NewStringMapV(map[string]interface{}{"1": 1.2}).Query("1").ToFloat64())
+	// no dot notation
+	{
+		// floats
+		assert.Equal(t, float32(1.2), NewStringMapV(map[string]interface{}{"1": 1.2}).Query("1").ToFloat32())
+		assert.Equal(t, float64(1.2), NewStringMapV(map[string]interface{}{"1": 1.2}).Query("1").ToFloat64())
 
-// 		// ints
-// 		assert.Equal(t, int(1), NewStringMapV(map[string]interface{}{"1": 1}).Query("1").ToInt())
-// 		assert.Equal(t, int8(1), NewStringMapV(map[string]interface{}{"1": 1}).Query("1").ToInt8())
-// 		assert.Equal(t, int16(1), NewStringMapV(map[string]interface{}{"1": 1}).Query("1").ToInt16())
-// 		assert.Equal(t, int32(1), NewStringMapV(map[string]interface{}{"1": 1}).Query("1").ToInt32())
-// 		assert.Equal(t, int64(1), NewStringMapV(map[string]interface{}{"1": 1}).Query("1").ToInt64())
-// 		assert.Equal(t, uint(1), NewStringMapV(map[string]interface{}{"1": 1}).Query("1").ToUint())
+		// ints
+		assert.Equal(t, int(1), NewStringMapV(map[string]interface{}{"1": 1}).Query("1").ToInt())
+		assert.Equal(t, int8(1), NewStringMapV(map[string]interface{}{"1": 1}).Query("1").ToInt8())
+		assert.Equal(t, int16(1), NewStringMapV(map[string]interface{}{"1": 1}).Query("1").ToInt16())
+		assert.Equal(t, int32(1), NewStringMapV(map[string]interface{}{"1": 1}).Query("1").ToInt32())
+		assert.Equal(t, int64(1), NewStringMapV(map[string]interface{}{"1": 1}).Query("1").ToInt64())
+		assert.Equal(t, uint(1), NewStringMapV(map[string]interface{}{"1": 1}).Query("1").ToUint())
 
-// 		// string
-// 		assert.Equal(t, "one", NewStringMapV(map[string]interface{}{"1": "one"}).Query("1").ToString())
+		// string
+		assert.Equal(t, "one", NewStringMapV(map[string]interface{}{"1": "one"}).Query("1").ToString())
 
-// 		// maps
-// 		assert.Equal(t, &StringMap{"2": "two"}, NewStringMapV(map[string]interface{}{"1": map[string]interface{}{"2": "two"}}).Query("1").ToStringMap())
-// 		assert.Equal(t, map[string]interface{}{"2": "two"}, NewStringMapV(map[string]interface{}{"1": map[string]interface{}{"2": "two"}}).Query("1").ToStringMapG())
+		// maps
+		assert.Equal(t, M().Add("2", "two"), NewStringMapV(map[string]interface{}{"1": map[string]interface{}{"2": "two"}}).Query("1").ToStringMap())
+		assert.Equal(t, map[string]interface{}{"2": "two"}, NewStringMapV(map[string]interface{}{"1": map[string]interface{}{"2": "two"}}).Query("1").ToStringMapG())
 
-// 		// yaml
-// 		assert.Equal(t, "1", ToStringMap("one: 1").Query("one").ToString())
-// 		assert.Equal(t, []int{1, 2}, ToStringMap("foo: \n  - 1\n  - 2").Query("foo").ToIntSliceG())
-// 		assert.Equal(t, &IntSlice{1, 2}, ToStringMap("foo: \n  - 1\n  - 2").Query("foo").ToIntSlice())
-// 	}
-// }
+		// yaml
+		assert.Equal(t, "1", ToStringMap("one: 1").Query("one").ToString())
+		assert.Equal(t, []int{1, 2}, ToStringMap("foo: \n  - 1\n  - 2").Query("foo").ToIntSliceG())
+		assert.Equal(t, &IntSlice{1, 2}, ToStringMap("foo: \n  - 1\n  - 2").Query("foo").ToIntSlice())
+	}
+}
 
-// // Remove
-// //--------------------------------------------------------------------------------------------------
-// func ExampleStringMap_Remove() {
-// 	fmt.Println(ToStringMap("foo:\n  bar: 1\n  foo2: 2\n").Remove("foo.bar"))
-// 	// Output: &map[foo:map[foo2:2]]
-// }
+// Remove
+//--------------------------------------------------------------------------------------------------
+func ExampleStringMap_Remove() {
+	fmt.Println(ToStringMap("foo:\n  bar1: 1\n  bar2: 2\n").Remove("foo.bar1"))
+	// Output: &[{foo [{bar2 2}]}]
+}
 
-// func TestStringMap_Remove(t *testing.T) {
+func TestStringMap_Remove(t *testing.T) {
+	// Move through list
+	{
+		// Remove the order property on all maps in the list
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo", "order": "1"},
+				map[string]interface{}{"name": "bar", "order": "2"},
+				map[string]interface{}{"name": "bob", "order": "3"},
+			},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo"},
+				map[string]interface{}{"name": "bar"},
+				map[string]interface{}{"name": "bob"},
+			},
+		}
+		assert.Equal(t, expected, MV(a).Remove("2.[].order").MG())
+	}
+	{
+		// Remove the first item's order property
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo", "order": "1"},
+				map[string]interface{}{"name": "bar", "order": "2"},
+			},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo"},
+				map[string]interface{}{"name": "bar", "order": "2"},
+			},
+		}
+		assert.Equal(t, expected, MV(a).Remove("2.[0].order").MG())
+	}
+	{
+		// Remove the first item's order property - neg notation
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo", "order": "1"},
+				map[string]interface{}{"name": "bar", "order": "2"},
+			},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo"},
+				map[string]interface{}{"name": "bar", "order": "2"},
+			},
+		}
+		assert.Equal(t, expected, MV(a).Remove("2.[-2].order").MG())
+	}
+	{
+		// Remove the second item's order property - neg
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo", "order": "1"},
+				map[string]interface{}{"name": "bar", "order": "2"},
+			},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo", "order": "1"},
+				map[string]interface{}{"name": "bar"},
+			},
+		}
+		assert.Equal(t, expected, MV(a).Remove("2.[-1].order").MG())
+	}
+	{
+		// Remove the second item's order property
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo", "order": "1"},
+				map[string]interface{}{"name": "bar", "order": "2"},
+			},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo", "order": "1"},
+				map[string]interface{}{"name": "bar"},
+			},
+		}
+		assert.Equal(t, expected, MV(a).Remove("2.[1].order").MG())
+	}
+	{
+		// Remove list item's property by map's key value
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo"},
+				map[string]interface{}{"name": "bar", "order": "1"},
+				map[string]interface{}{"name": "bob"},
+			},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo"},
+				map[string]interface{}{"name": "bar"},
+				map[string]interface{}{"name": "bob"},
+			},
+		}
+		assert.Equal(t, expected, MV(a).Remove("2.[name==bar].order").MG())
+	}
 
-// 	// Move through list
-// 	{
-// 		// Remove the order property on all maps in the list
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []interface{}{
-// 				map[string]interface{}{"name": "foo", "order": "1"},
-// 				map[string]interface{}{"name": "bar", "order": "2"},
-// 				map[string]interface{}{"name": "bob", "order": "3"},
-// 			},
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []interface{}{
-// 				map[string]interface{}{"name": "foo"},
-// 				map[string]interface{}{"name": "bar"},
-// 				map[string]interface{}{"name": "bob"},
-// 			},
-// 		}
-// 		assert.Equal(t, expected, M(a).Remove("2.[].order").MG())
-// 	}
-// 	{
-// 		// Remove the first item's order property
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []interface{}{
-// 				map[string]interface{}{"name": "foo", "order": "1"},
-// 				map[string]interface{}{"name": "bar", "order": "2"},
-// 			},
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []interface{}{
-// 				map[string]interface{}{"name": "foo"},
-// 				map[string]interface{}{"name": "bar", "order": "2"},
-// 			},
-// 		}
-// 		assert.Equal(t, expected, M(a).Remove("2.[0].order").MG())
-// 	}
-// 	{
-// 		// Remove the first item's order property - neg notation
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []interface{}{
-// 				map[string]interface{}{"name": "foo", "order": "1"},
-// 				map[string]interface{}{"name": "bar", "order": "2"},
-// 			},
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []interface{}{
-// 				map[string]interface{}{"name": "foo"},
-// 				map[string]interface{}{"name": "bar", "order": "2"},
-// 			},
-// 		}
-// 		assert.Equal(t, expected, M(a).Remove("2.[-2].order").MG())
-// 	}
-// 	{
-// 		// Remove the second item's order property - neg
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []interface{}{
-// 				map[string]interface{}{"name": "foo", "order": "1"},
-// 				map[string]interface{}{"name": "bar", "order": "2"},
-// 			},
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []interface{}{
-// 				map[string]interface{}{"name": "foo", "order": "1"},
-// 				map[string]interface{}{"name": "bar"},
-// 			},
-// 		}
-// 		assert.Equal(t, expected, M(a).Remove("2.[-1].order").MG())
-// 	}
-// 	{
-// 		// Remove the second item's order property
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []interface{}{
-// 				map[string]interface{}{"name": "foo", "order": "1"},
-// 				map[string]interface{}{"name": "bar", "order": "2"},
-// 			},
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []interface{}{
-// 				map[string]interface{}{"name": "foo", "order": "1"},
-// 				map[string]interface{}{"name": "bar"},
-// 			},
-// 		}
-// 		assert.Equal(t, expected, M(a).Remove("2.[1].order").MG())
-// 	}
+	// Remove from list
+	{
+		// Remove all items from list
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo"},
+				map[string]interface{}{"name": "bar"},
+				map[string]interface{}{"name": "bob"},
+			},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{},
+		}
+		assert.Equal(t, expected, MV(a).Remove("2.[]").MG())
+	}
 
-// 	// Remove from list
-// 	{
-// 		// Remove list item by map's key value
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []interface{}{
-// 				map[string]interface{}{"name": "foo"},
-// 				map[string]interface{}{"name": "bar"},
-// 				map[string]interface{}{"name": "bob"},
-// 			},
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []interface{}{
-// 				map[string]interface{}{"name": "foo"},
-// 				map[string]interface{}{"name": "bob"},
-// 			},
-// 		}
-// 		assert.Equal(t, expected, M(a).Remove("2.[name==bar]").MG())
-// 	}
-// 	{
-// 		// Replace element in list
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []interface{}{"1", "2"},
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []interface{}{"2"},
-// 		}
-// 		assert.Equal(t, expected, M(a).Remove("2.[0]").MG())
-// 	}
-// 	{
-// 		// Remove the whole list by key
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": []string{"1", "2"},
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 		}
-// 		assert.Equal(t, expected, M(a).Remove("2").MG())
-// 	}
+	{
+		// Remove list item by map's key value
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo"},
+				map[string]interface{}{"name": "bar"},
+				map[string]interface{}{"name": "bob"},
+			},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo"},
+				map[string]interface{}{"name": "bob"},
+			},
+		}
+		assert.Equal(t, expected, MV(a).Remove("2.[name==bar]").MG())
+	}
 
-// 	// Identity: .
-// 	assert.Equal(t, &StringMap{"one": "1"}, NewStringMapV(map[string]interface{}{"one": "1"}).Remove(``))
-// 	assert.Equal(t, &StringMap{"one": "1"}, NewStringMapV(map[string]interface{}{"one": "1"}).Remove(`.`))
+	{
+		// Replace element in list
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{"1", "2"},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{"2"},
+		}
+		assert.Equal(t, expected, MV(a).Remove("2.[0]").MG())
+	}
+	{
+		// Remove the whole list by key
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []string{"1", "2"},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+		}
+		assert.Equal(t, expected, MV(a).Remove("2").MG())
+	}
 
-// 	// Object Identifier-Index: .foo, .foo.bar
-// 	assert.Equal(t, &StringMap{}, NewStringMapV(map[string]interface{}{"one": "1"}).Remove(`one`))
-// 	assert.Equal(t, &StringMap{}, NewStringMapV(map[string]interface{}{"one": "1"}).Remove(`.one`))
-// 	assert.Equal(t, &StringMap{}, NewStringMapV(map[string]interface{}{"one": "1"}).Remove(`."one"`))
-// 	assert.Equal(t, &StringMap{"one": map[string]interface{}{}}, NewStringMapV(map[string]interface{}{"one": map[string]interface{}{"two": "2"}}).Remove(`one.two`))
-// 	assert.Equal(t, &StringMap{"one": map[string]interface{}{"two": map[string]interface{}{}}}, NewStringMapV(map[string]interface{}{"one": map[string]interface{}{"two": map[string]interface{}{"three": "3"}}}).Remove(`one.two.three`))
-// 	assert.Equal(t, &StringMap{"one": map[string]interface{}{}}, NewStringMapV(map[string]interface{}{"one": map[string]interface{}{"two.three": "foo"}}).Remove(`one."two.three"`))
-// }
+	// Identity: .
+	assert.Equal(t, M().Add("one", "1"), NewStringMapV(map[string]interface{}{"one": "1"}).Remove(``))
+	assert.Equal(t, M().Add("one", "1"), NewStringMapV(map[string]interface{}{"one": "1"}).Remove(`.`))
 
-// // Set
-// //--------------------------------------------------------------------------------------------------
-// func ExampleStringMap_Set() {
-// 	fmt.Println(NewStringMapV().Set("key", "value"))
-// 	// Output: true
-// }
+	// Object Identifier-Index: .foo, .foo.bar
+	assert.Equal(t, M().G(), NewStringMapV(map[string]interface{}{"one": "1"}).Remove(`one`).MG())
+	assert.Equal(t, M().G(), NewStringMapV(map[string]interface{}{"one": "1"}).Remove(`.one`).MG())
+	assert.Equal(t, M().G(), NewStringMapV(map[string]interface{}{"one": "1"}).Remove(`."one"`).MG())
+	assert.Equal(t, M().Add("one", map[string]interface{}{}).G(), NewStringMapV(map[string]interface{}{"one": map[string]interface{}{"two": "2"}}).Remove(`one.two`).MG())
+	assert.Equal(t, M().Add("one", M().Add("two", map[string]interface{}{})).G(), NewStringMapV(map[string]interface{}{"one": map[string]interface{}{"two": map[string]interface{}{"three": "3"}}}).Remove(`one.two.three`).MG())
+	assert.Equal(t, M().Add("one", M()).G(), NewStringMapV(map[string]interface{}{"one": map[string]interface{}{"two.three": "foo"}}).Remove(`one."two.three"`).MG())
+}
 
-// func TestStringMap_Set(t *testing.T) {
-// 	// bool
-// 	{
-// 		m := NewStringMapV()
-// 		assert.Equal(t, true, m.Set("test", false))
-// 		assert.Equal(t, false, m.Set("test", true))
-// 		assert.Equal(t, true, (*m)["test"].(bool))
-// 	}
+// Set
+//--------------------------------------------------------------------------------------------------
+func ExampleStringMap_Set() {
+	fmt.Println(NewStringMapV().Set("key", "value"))
+	// Output: true
+}
 
-// 	// string
-// 	{
-// 		m := NewStringMapV()
-// 		assert.Equal(t, true, m.Set("1", "one"))
-// 		assert.Equal(t, false, m.Set("1", "two"))
-// 		assert.Equal(t, "two", (*m)["1"].(string))
-// 	}
-// }
+func TestStringMap_Set(t *testing.T) {
+	// bool
+	{
+		m := NewStringMapV()
+		assert.Equal(t, true, m.Set("test", false))
+		assert.Equal(t, false, m.Get("test").ToBool())
+		assert.Equal(t, false, m.Set("test", true))
+		assert.Equal(t, true, m.Get("test").ToBool())
+	}
+
+	// string
+	{
+		m := NewStringMapV()
+		assert.Equal(t, true, m.Set("1", "one"))
+		assert.Equal(t, "one", m.Get("1").A())
+		assert.Equal(t, false, m.Set("1", "two"))
+		assert.Equal(t, "two", m.Get("1").A())
+	}
+}
 
 // SetM
 //--------------------------------------------------------------------------------------------------
