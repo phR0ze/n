@@ -691,134 +691,52 @@ func TestStringMap_Merge(t *testing.T) {
 	// Location tests
 	{
 		// Nesting - merge advanced
-		a := map[string]interface{}{
-			"1": "one",
-			"2": map[string]interface{}{
-				"3": "three",
-				"4": "five",
-			},
-		}
-		b := map[string]interface{}{
-			"4": "four",
-			"5": "five",
-		}
-		expected := map[string]interface{}{
-			"1": "one",
-			"2": map[string]interface{}{
-				"3": "three",
-				"4": "four",
-				"5": "five",
-			},
-		}
-		assert.Equal(t, expected, MV(a).Merge(MV(b), "2").MG())
+		a := M().Add("1", "one").Add("2", M().Add("3", "three").Add("4", "five"))
+		b := M().Add("4", "four").Add("5", "five")
+		expected := M().Add("1", "one").Add("2", M().Add("3", "three").Add("4", "four").Add("5", "five"))
+		assert.Equal(t, expected, MV(a).Merge(MV(b), "2"))
 	}
 	{
 		// Nesting - merge
-		a := map[string]interface{}{
-			"1": "one",
-			"2": map[string]interface{}{
-				"3": "three",
-				"4": "five",
-			},
-		}
-		b := map[string]interface{}{
-			"4": "four",
-		}
-		expected := map[string]interface{}{
-			"1": "one",
-			"2": map[string]interface{}{
-				"3": "three",
-				"4": "four",
-			},
-		}
-		assert.Equal(t, expected, MV(a).Merge(MV(b), "2").MG())
+		a := M().Add("1", "one").Add("2", M().Add("3", "three").Add("4", "five"))
+		b := M().Add("4", "four")
+		expected := M().Add("1", "one").Add("2", M().Add("3", "three").Add("4", "four"))
+		assert.Equal(t, expected, MV(a).Merge(MV(b), "2"))
 	}
 	{
 		// Nesting - two
-		a := map[string]interface{}{
-			"1": "one",
-			"2": "2",
-		}
-		b := map[string]interface{}{
-			"4": "four",
-		}
-		expected := map[string]interface{}{
-			"1": "one",
-			"2": map[string]interface{}{
-				"3": map[string]interface{}{
-					"4": "four",
-				},
-			},
-		}
-		assert.Equal(t, expected, MV(a).Merge(MV(b), "2.3").MG())
+		a := M().Add("1", "one").Add("2", "2")
+		b := M().Add("4", "four")
+		expected := M().Add("1", "one").Add("2", M().Add("3", M().Add("4", "four")))
+		assert.Equal(t, expected, MV(a).Merge(MV(b), "2.3"))
 	}
 	{
 		// Nesting - one
-		a := map[string]interface{}{
-			"1": "one",
-			"2": "2",
-		}
-		b := map[string]interface{}{
-			"3": "three",
-		}
-		expected := map[string]interface{}{
-			"1": "one",
-			"2": map[string]interface{}{
-				"3": "three",
-			},
-		}
-		assert.Equal(t, expected, MV(a).Merge(MV(b), "2").MG())
+		a := M().Add("1", "one").Add("2", "2")
+		b := M().Add("3", "three")
+		expected := M().Add("1", "one").Add("2", M().Add("3", "three"))
+		assert.Equal(t, expected, MV(a).Merge(MV(b), "2"))
 	}
 	{
 		// Nesting - doesn't exist two
-		a := map[string]interface{}{
-			"1": "one",
-		}
-		b := map[string]interface{}{
-			"4": "four",
-		}
-		expected := map[string]interface{}{
-			"1": "one",
-			"2": map[string]interface{}{
-				"3": map[string]interface{}{
-					"4": "four",
-				},
-			},
-		}
-		assert.Equal(t, expected, MV(a).Merge(MV(b), "2.3").MG())
+		a := M().Add("1", "one")
+		b := M().Add("4", "four")
+		expected := M().Add("1", "one").Add("2", M().Add("3", M().Add("4", "four")))
+		assert.Equal(t, expected, MV(a).Merge(MV(b), "2.3"))
 	}
 	{
 		// Nesting - doesn't exist one
-		a := map[string]interface{}{
-			"1": "one",
-		}
-		b := map[string]interface{}{
-			"3": "three",
-		}
-		expected := map[string]interface{}{
-			"1": "one",
-			"2": map[string]interface{}{
-				"3": "three",
-			},
-		}
-		assert.Equal(t, expected, MV(a).Merge(MV(b), "2").MG())
+		a := M().Add("1", "one")
+		b := M().Add("3", "three")
+		expected := M().Add("1", "one").Add("2", M().Add("3", "three"))
+		assert.Equal(t, expected, MV(a).Merge(MV(b), "2"))
 	}
 	{
 		// root indicator
-		a := map[string]interface{}{
-			"1": "one",
-			"2": "2",
-		}
-		b := map[string]interface{}{
-			"2": "two",
-			"3": "three",
-		}
-		expected := map[string]interface{}{
-			"1": "one",
-			"2": "two",
-			"3": "three",
-		}
-		assert.Equal(t, expected, MV(a).Merge(MV(b), ".").MG())
+		a := M().Add("1", "one").Add("2", "2")
+		b := M().Add("2", "two").Add("3", "three")
+		expected := M().Add("1", "one").Add("2", "two").Add("3", "three")
+		assert.Equal(t, expected, MV(a).Merge(MV(b), "."))
 	}
 
 	// nil or empty
@@ -840,16 +758,9 @@ func TestStringMap_Merge(t *testing.T) {
 		assert.Equal(t, a, a.Merge(b))
 	}
 	{
-		a := NewStringMapV(map[string]interface{}{
-			"1": "one",
-		})
-		b := NewStringMapV(map[string]interface{}{
-			"2": "two",
-		})
-		expected := NewStringMapV(map[string]interface{}{
-			"1": "one",
-			"2": "two",
-		})
+		a := M().Add("1", "one")
+		b := M().Add("2", "two")
+		expected := M().Add("1", "one").Add("2", "two")
 		assert.Equal(t, expected, a.Merge(b))
 	}
 	{
