@@ -14,15 +14,15 @@ func TestSliceOfMap_Methods(t *testing.T) {
 	// Test conversion directly
 	m, err := ToSliceOfMapE([]map[string]interface{}{{"foo": "bar"}})
 	assert.Nil(t, err)
-	assert.Equal(t, []map[string]interface{}{{"foo": "bar"}}, m.O())
+	assert.Equal(t, (&SliceOfMap{M().Add("foo", "bar")}).G(), m.G())
 
 	// Test indirectly
 	p := NewSliceOfMapV([]map[string]interface{}{{"foo": "bar"}})
-	assert.Equal(t, []map[string]interface{}{{"foo": "bar"}}, p.O())
+	assert.Equal(t, (&SliceOfMap{M().Add("foo", "bar")}).G(), p.G())
 
 	slice := *p
-	assert.Equal(t, []map[string]interface{}{}, slice.DropAt(0).O())
-	assert.Equal(t, []map[string]interface{}{}, slice.O())
+	assert.Equal(t, []*StringMap{}, slice.DropAt(0).O())
+	assert.Equal(t, []*StringMap{}, slice.O())
 }
 
 // NewSliceOfMap
@@ -44,24 +44,24 @@ func TestSliceOfMap_Methods(t *testing.T) {
 func ExampleNewSliceOfMap() {
 	slice := NewSliceOfMap([]map[string]interface{}{{"foo": "bar"}})
 	fmt.Println(slice)
-	// Output: [&map[foo:bar]]
+	// Output: [&[{foo bar}]]
 }
 
 func TestSliceOfMap_NewSliceOfMap(t *testing.T) {
 
 	// empty
-	assert.Equal(t, &SliceOfMap{}, NewSliceOfMap([]map[string]interface{}{}))
-	assert.Equal(t, []map[string]interface{}{}, NewSliceOfMap([]map[string]interface{}{}).O())
+	assert.Equal(t, &SliceOfMap{}, NewSliceOfMap([]*StringMap{}))
+	assert.Equal(t, []*StringMap{}, NewSliceOfMap([]*StringMap{}).O())
 
 	// slice
-	assert.Equal(t, &SliceOfMap{{"foo": "bar"}}, NewSliceOfMap([]map[string]interface{}{{"foo": "bar"}}))
-	assert.Equal(t, []map[string]interface{}{{"foo": "bar"}}, NewSliceOfMap([]map[string]interface{}{{"foo": "bar"}}).O())
+	assert.Equal(t, &SliceOfMap{M().Add("foo", "bar")}, NewSliceOfMap([]*StringMap{M().Add("foo", "bar")}))
+	assert.Equal(t, []*StringMap{M().Add("foo", "bar")}, NewSliceOfMap([]*StringMap{M().Add("foo", "bar")}).O())
 
 	// Conversion
-	assert.Equal(t, []map[string]interface{}{}, NewSliceOfMap("1").O())
-	assert.Equal(t, &SliceOfMap{{"foo": "bar"}}, NewSliceOfMap(map[string]string{"foo": "bar"}))
-	assert.Equal(t, &SliceOfMap{{"foo": "bar"}}, NewSliceOfMap(map[string]interface{}{"foo": "bar"}))
-	assert.Equal(t, &SliceOfMap{{"foo": "bar"}}, NewSliceOfMap([]map[string]string{{"foo": "bar"}}))
+	assert.Equal(t, []*StringMap{}, NewSliceOfMap("1").O())
+	assert.Equal(t, &SliceOfMap{M().Add("foo", "bar")}, NewSliceOfMap(map[string]interface{}{"foo": "bar"}))
+	assert.Equal(t, &SliceOfMap{M().Add("foo", "bar")}, NewSliceOfMap(map[string]interface{}{"foo": "bar"}))
+	assert.Equal(t, &SliceOfMap{M().Add("foo", "bar")}, NewSliceOfMap([]map[string]string{{"foo": "bar"}}))
 }
 
 // NewSliceOfMapV
@@ -89,28 +89,28 @@ func ExampleNewSliceOfMapV_empty() {
 func ExampleNewSliceOfMapV_variadic() {
 	slice := NewSliceOfMapV(map[string]interface{}{"foo1": "1"}, map[string]interface{}{"foo2": "2"})
 	fmt.Println(slice)
-	// Output: [&map[foo1:1] &map[foo2:2]]
+	// Output: [&[{foo1 1}] &[{foo2 2}]]
 }
 
 func TestSliceOfMap_NewSliceOfMapV(t *testing.T) {
 
 	// empty
 	assert.Equal(t, &SliceOfMap{}, NewSliceOfMapV())
-	assert.Equal(t, &SliceOfMap{}, NewSliceOfMapV([]map[string]interface{}{}))
-	assert.Equal(t, []map[string]interface{}{}, NewSliceOfMapV([]map[string]interface{}{}).O())
+	assert.Equal(t, &SliceOfMap{}, NewSliceOfMapV([]*StringMap{}))
+	assert.Equal(t, []*StringMap{}, NewSliceOfMapV([]*StringMap{}).O())
 
 	// multiples
-	assert.Equal(t, &SliceOfMap{{"foo": "bar"}}, NewSliceOfMapV([]map[string]interface{}{{"foo": "bar"}}))
-	assert.Equal(t, &SliceOfMap{{"foo1": "1"}, {"foo2": "2"}}, NewSliceOfMapV(map[string]interface{}{"foo1": "1"}, map[string]interface{}{"foo2": "2"}))
+	assert.Equal(t, (&SliceOfMap{M().Add("foo", "bar")}).G(), NewSliceOfMapV([]map[string]interface{}{{"foo": "bar"}}).G())
+	assert.Equal(t, (&SliceOfMap{M().Add("foo1", "1"), M().Add("foo2", "2")}).G(), NewSliceOfMapV(map[string]interface{}{"foo1": "1"}, map[string]interface{}{"foo2": "2"}).G())
 
 	// Conversion
-	assert.Equal(t, &SliceOfMap{{"foo": "bar"}}, NewSliceOfMapV(map[string]string{"foo": "bar"}))
-	assert.Equal(t, &SliceOfMap{{"foo": "bar"}}, NewSliceOfMapV(map[string]interface{}{"foo": "bar"}))
-	assert.Equal(t, &SliceOfMap{{"foo": "bar"}}, NewSliceOfMapV([]map[string]string{{"foo": "bar"}}))
+	assert.Equal(t, (&SliceOfMap{M().Add("foo", "bar")}).G(), NewSliceOfMapV(M().Add("foo", "bar")).G())
+	assert.Equal(t, (&SliceOfMap{M().Add("foo", "bar")}).G(), NewSliceOfMapV(map[string]interface{}{"foo": "bar"}).G())
+	assert.Equal(t, (&SliceOfMap{M().Add("foo", "bar")}).G(), NewSliceOfMapV([]map[string]string{{"foo": "bar"}}).G())
 }
 
-// // Any
-// //--------------------------------------------------------------------------------------------------
+// Any
+//--------------------------------------------------------------------------------------------------
 // func BenchmarkSliceOfMap_Any_Go(t *testing.B) {
 // 	any := func(list []string, x []string) bool {
 // 		for i := range x {
@@ -138,65 +138,65 @@ func TestSliceOfMap_NewSliceOfMapV(t *testing.T) {
 // 	}
 // }
 
-// func ExampleSliceOfMap_Any_empty() {
-// 	slice := NewSliceOfMapV()
-// 	fmt.Println(slice.Any())
-// 	// Output: false
-// }
+func ExampleSliceOfMap_Any_empty() {
+	slice := NewSliceOfMapV()
+	fmt.Println(slice.Any())
+	// Output: false
+}
 
-// func ExampleSliceOfMap_Any_notEmpty() {
-// 	slice := NewSliceOfMapapV("1", "2", "3")
-// 	fmt.Println(slice.Any())
-// 	// Output: true
-// }
+func ExampleSliceOfMap_Any_notEmpty() {
+	slice := NewSliceOfMapV("1:", "2:", "3:")
+	fmt.Println(slice.Any())
+	// Output: true
+}
 
-// func ExampleSliceOfMapap_Any_contains() {
-// 	slice := NewSliceOfMapapV("1", "2", "3")
-// 	fmt.Println(slice.Any("1"))
-// 	// Output: true
-// }
+func ExampleSliceOfMap_Any_contains() {
+	slice := NewSliceOfMapV("1:", "2:", "3:")
+	fmt.Println(slice.Any("1"))
+	// Output: true
+}
 
-// func ExampleSliceOfMapapap_Any_containsAny() {
-// 	slice := NewSliceOfMapapapapV("1", "2", "3")
-// 	fmt.Println(slice.Any("0", "1"))
-// 	// Output: true
-// }
+func ExampleSliceOfMap_Any_containsAny() {
+	slice := NewSliceOfMapV("1:", "2:", "3:")
+	fmt.Println(slice.Any("0", "1"))
+	// Output: true
+}
 
-// func TestSliceOfMapapapapapapap_Any(t *testing.T) {
+func TestSliceOfMap_Any(t *testing.T) {
 
-// 	// empty
-// 	var nilSlice *SliceOfMap
-// 	assert.False(t, nilSlice.Any())
-// 	assert.False(t, NewSliceOfMapV().Any())
+	// empty
+	var nilSlice *SliceOfMap
+	assert.False(t, nilSlice.Any())
+	assert.False(t, NewSliceOfMapV().Any())
 
-// 	// single
-// 	assert.True(t, NewSliceOfMapV("2").Any())
+	// single
+	assert.True(t, NewSliceOfMapV("2:").Any())
 
-// 	// invalid
-// 	assert.False(t, NewSliceOfMapV("1", "2").Any(TestObj{"2"}))
+	// invalid
+	assert.False(t, NewSliceOfMapV("1:", "2").Any(TestObj{"2"}))
 
-// 	assert.True(t, NewSliceOfMapV("1", "2", "3").Any("2"))
-// 	assert.False(t, NewSliceOfMapV("1", "2", "3").Any(4))
-// 	assert.True(t, NewSliceOfMapV("1", "2", "3").Any(4, "3"))
-// 	assert.False(t, NewSliceOfMapV("1", "2", "3").Any(4, 5))
+	assert.True(t, NewSliceOfMapV("1:", "2:", "3:").Any("2"))
+	assert.False(t, NewSliceOfMapV("1:", "2:", "3:").Any(4))
+	assert.True(t, NewSliceOfMapV("1:", "2:", "3:").Any(4, "3"))
+	assert.False(t, NewSliceOfMapV("1:", "2:", "3:").Any(4, 5))
 
-// 	// conversion
-// 	assert.True(t, NewSliceOfMapV("1", "2").Any(Object{2}))
-// 	assert.True(t, NewSliceOfMapV("1", "2", "3").Any(int8(2)))
-// 	assert.True(t, NewSliceOfMapV("1", "2", "3").Any(int16(2)))
-// 	assert.True(t, NewSliceOfMapV("1", "2", "3").Any(int32('2')))
-// 	assert.False(t, NewSliceOfMapV("1", "2", "3").Any(int32(2)))
-// 	assert.True(t, NewSliceOfMapV("1", "2", "3").Any(int64(2)))
-// 	assert.True(t, NewSliceOfMapV("1", "2", "3").Any(uint8('2')))
-// 	assert.False(t, NewSliceOfMapV("1", "2", "3").Any(uint8(2)))
-// 	assert.True(t, NewSliceOfMapV("1", "2", "3").Any(uint16(2)))
-// 	assert.True(t, NewSliceOfMapV("1", "2", "3").Any(uint32(2)))
-// 	assert.True(t, NewSliceOfMapV("1", "2", "3").Any(uint64(2)))
-// 	assert.True(t, NewSliceOfMapV("1", "2", "3").Any(uint64(2)))
-// }
+	// conversion
+	assert.True(t, NewSliceOfMapV("1:", "2:").Any(Object{2}))
+	assert.True(t, NewSliceOfMapV("1:", "2:", "3:").Any(int8(2)))
+	assert.True(t, NewSliceOfMapV("1:", "2:", "3:").Any(int16(2)))
+	assert.True(t, NewSliceOfMapV("1:", "2:", "3:").Any(int32('2')))
+	assert.False(t, NewSliceOfMapV("1:", "2:", "3:").Any(int32(2)))
+	assert.True(t, NewSliceOfMapV("1:", "2:", "3:").Any(int64(2)))
+	assert.True(t, NewSliceOfMapV("1:", "2:", "3:").Any(uint8('2')))
+	assert.False(t, NewSliceOfMapV("1:", "2:", "3:").Any(uint8(2)))
+	assert.True(t, NewSliceOfMapV("1:", "2:", "3:").Any(uint16(2)))
+	assert.True(t, NewSliceOfMapV("1:", "2:", "3:").Any(uint32(2)))
+	assert.True(t, NewSliceOfMapV("1:", "2:", "3:").Any(uint64(2)))
+	assert.True(t, NewSliceOfMapV("1:", "2:", "3:").Any(uint64(2)))
+}
 
-// // AnyS
-// //--------------------------------------------------------------------------------------------------
+// AnyS
+//--------------------------------------------------------------------------------------------------
 // func BenchmarkSliceOfMap_AnyS_Go(t *testing.B) {
 // 	any := func(list []string, x []string) bool {
 // 		for i := range x {
@@ -224,71 +224,71 @@ func TestSliceOfMap_NewSliceOfMapV(t *testing.T) {
 // 	}
 // }
 
-// func ExampleSliceOfMap_AnyS() {
-// 	slice := NewSliceOfMapV("1", "2", "3")
-// 	fmt.Println(slice.AnyS([]string{"0", "1"}))
-// 	// Output: true
-// }
+func ExampleSliceOfMap_AnyS() {
+	slice := NewSliceOfMapV("1:", "2:", "3:")
+	fmt.Println(slice.AnyS([]string{"0", "1"}))
+	// Output: true
+}
 
-// func TestSliceOfMap_AnyS(t *testing.T) {
-// 	// nil
-// 	{
-// 		var slice *SliceOfMap
-// 		assert.False(t, slice.AnyS([]string{"1"}))
-// 		assert.False(t, NewSliceOfMapV("1").AnyS(nil))
-// 	}
+func TestSliceOfMap_AnyS(t *testing.T) {
+	// nil
+	{
+		var slice *SliceOfMap
+		assert.False(t, slice.AnyS([]string{"1"}))
+		assert.False(t, NewSliceOfMapV("1:").AnyS(nil))
+	}
 
-// 	// []string
-// 	{
-// 		assert.True(t, NewSliceOfMapV("1", "2", "3").AnyS([]string{"1"}))
-// 		assert.True(t, NewSliceOfMapV("1", "2", "3").AnyS([]string{"4", "3"}))
-// 		assert.False(t, NewSliceOfMapV("1", "2", "3").AnyS([]string{"4", "5"}))
-// 	}
+	// []string
+	{
+		assert.True(t, NewSliceOfMapV("1:", "2:", "3:").AnyS([]string{"1"}))
+		assert.True(t, NewSliceOfMapV("1:", "2:", "3:").AnyS([]string{"4", "3"}))
+		assert.False(t, NewSliceOfMapV("1:", "2:", "3:").AnyS([]string{"4", "5"}))
+	}
 
-// 	// *[]string
-// 	{
-// 		assert.True(t, NewSliceOfMapV("1", "2", "3").AnyS(&([]string{"1"})))
-// 		assert.True(t, NewSliceOfMapV("1", "2", "3").AnyS(&([]string{"4", "3"})))
-// 		assert.False(t, NewSliceOfMapV("1", "2", "3").AnyS(&([]string{"4", "5"})))
-// 	}
+	// *[]string
+	{
+		assert.True(t, NewSliceOfMapV("1:", "2:", "3:").AnyS(&([]string{"1"})))
+		assert.True(t, NewSliceOfMapV("1:", "2:", "3:").AnyS(&([]string{"4", "3"})))
+		assert.False(t, NewSliceOfMapV("1:", "2:", "3:").AnyS(&([]string{"4", "5"})))
+	}
 
-// 	// Slice
-// 	{
-// 		assert.True(t, NewSliceOfMapV("1", "2", "3").AnyS(ISlice(NewSliceOfMapV("1"))))
-// 		assert.True(t, NewSliceOfMapV("1", "2", "3").AnyS(ISlice(NewSliceOfMapV("4", "3"))))
-// 		assert.False(t, NewSliceOfMapV("1", "2", "3").AnyS(ISlice(NewSliceOfMapV("4", "5"))))
-// 	}
+	// Slice
+	{
+		assert.True(t, NewSliceOfMapV("1:", "2:", "3:").AnyS(ISlice(NewSliceOfMapV("1:"))))
+		assert.True(t, NewSliceOfMapV("1:", "2:", "3:").AnyS(ISlice(NewSliceOfMapV("4:", "3:"))))
+		assert.False(t, NewSliceOfMapV("1:", "2:", "3:").AnyS(ISlice(NewSliceOfMapV("4:", "5:"))))
+	}
 
-// 	// SliceOfMap
-// 	{
-// 		assert.True(t, NewSliceOfMapV("1", "2", "3").AnyS(*NewSliceOfMapV("1")))
-// 		assert.True(t, NewSliceOfMapV("1", "2", "3").AnyS(*NewSliceOfMapV("4", "3")))
-// 		assert.False(t, NewSliceOfMapV("1", "2", "3").AnyS(*NewSliceOfMapV("4", "5")))
-// 	}
+	// SliceOfMap
+	{
+		assert.True(t, NewSliceOfMapV("1:", "2:", "3:").AnyS(*NewSliceOfMapV("1:")))
+		assert.True(t, NewSliceOfMapV("1:", "2:", "3:").AnyS(*NewSliceOfMapV("4:", "3:")))
+		assert.False(t, NewSliceOfMapV("1:", "2:", "3:").AnyS(*NewSliceOfMapV("4:", "5:")))
+	}
 
-// 	// *SliceOfMap
-// 	{
-// 		assert.True(t, NewSliceOfMapV("1", "2", "3").AnyS(NewSliceOfMapV("1")))
-// 		assert.True(t, NewSliceOfMapV("1", "2", "3").AnyS(NewSliceOfMapV("4", "3")))
-// 		assert.False(t, NewSliceOfMapV("1", "2", "3").AnyS(NewSliceOfMapV("4", "5")))
-// 	}
+	// *SliceOfMap
+	{
+		assert.True(t, NewSliceOfMapV("1:", "2:", "3:").AnyS(NewSliceOfMapV("1:")))
+		assert.True(t, NewSliceOfMapV("1:", "2:", "3:").AnyS(NewSliceOfMapV("4:", "3:")))
+		assert.False(t, NewSliceOfMapV("1:", "2:", "3:").AnyS(NewSliceOfMapV("4:", "5:")))
+	}
 
-// 	// invalid types
-// 	assert.False(t, NewSliceOfMapV("1", "2").AnyS(nil))
-// 	assert.False(t, NewSliceOfMapV("1", "2").AnyS((*[]string)(nil)))
-// 	assert.False(t, NewSliceOfMapV("1", "2").AnyS((*SliceOfMap)(nil)))
+	// invalid types
+	assert.False(t, NewSliceOfMapV("1:", "2").AnyS(nil))
+	assert.False(t, NewSliceOfMapV("1:", "2").AnyS((*[]string)(nil)))
+	assert.False(t, NewSliceOfMapV("1:", "2").AnyS((*SliceOfMap)(nil)))
 
-// 	// Conversion
-// 	{
-// 		assert.True(t, NewSliceOfMapV("1", "2", "3").AnyS(NewSliceOfMapV(int64(1))))
-// 		assert.True(t, NewSliceOfMapV("1", "2", "3").AnyS(NewSliceOfMapV(2)))
-// 		assert.False(t, NewSliceOfMapV("1", "2", "3").AnyS(NewSliceOfMapV(true)))
-// 		assert.True(t, NewSliceOfMapV("1", "2", "3").AnyS(NewSliceOfMapV(Char('3'))))
-// 	}
-// }
+	// Conversion
+	{
+		assert.True(t, NewSliceOfMapV("1:", "2:", "3:").AnyS(int64(1)))
+		assert.True(t, NewSliceOfMapV("1:", "2:", "3:").AnyS(2))
+		assert.False(t, NewSliceOfMapV("1:", "2:", "3:").AnyS(true))
+		assert.True(t, NewSliceOfMapV("1:", "2:", "3:").AnyS(Char('3')))
+	}
+}
 
-// // AnyW
-// //--------------------------------------------------------------------------------------------------
+// AnyW
+//--------------------------------------------------------------------------------------------------
 // func BenchmarkSliceOfMap_AnyW_Go(t *testing.B) {
 // 	src := RangeString(nines5)
 // 	for _, x := range src {
@@ -313,21 +313,21 @@ func TestSliceOfMap_NewSliceOfMapV(t *testing.T) {
 // 	// Output: true
 // }
 
-// func TestSliceOfMap_AnyW(t *testing.T) {
+func TestSliceOfMap_AnyW(t *testing.T) {
 
-// 	// empty
-// 	var slice *SliceOfMap
-// 	assert.False(t, slice.AnyW(func(x O) bool { return ExB(x.(string) > "0") }))
-// 	assert.False(t, NewSliceOfMapV().AnyW(func(x O) bool { return ExB(x.(string) > "0") }))
+	// empty
+	var slice *SliceOfMap
+	assert.False(t, slice.AnyW(func(x O) bool { return ToStringMap(x).Exists("2") }))
+	assert.False(t, NewSliceOfMapV().AnyW(func(x O) bool { return ToStringMap(x).Exists("2") }))
 
-// 	// single
-// 	assert.True(t, NewSliceOfMapV("2").AnyW(func(x O) bool { return ExB(x.(string) > "0") }))
-// 	assert.True(t, NewSliceOfMapV("1", "2").AnyW(func(x O) bool { return ExB(x.(string) == "2") }))
-// 	assert.True(t, NewSliceOfMapV("1", "2", "3").AnyW(func(x O) bool { return ExB(x.(string) == "4" || x.(string) == "3") }))
-// }
+	// single
+	assert.True(t, NewSliceOfMapV("2:").AnyW(func(x O) bool { return ToStringMap(x).Exists("2") }))
+	assert.True(t, NewSliceOfMapV("1:", "2:").AnyW(func(x O) bool { return ToStringMap(x).Any("2") }))
+	assert.True(t, NewSliceOfMapV("1:", "2:", "3:").AnyW(func(x O) bool { return ToStringMap(x).Any("4", "3") }))
+}
 
-// // Append
-// //--------------------------------------------------------------------------------------------------
+// Append
+//--------------------------------------------------------------------------------------------------
 // func BenchmarkSliceOfMap_Append_Go(t *testing.B) {
 // 	src := []string{}
 // 	for _, i := range RangeString(nines6) {
@@ -348,87 +348,80 @@ func TestSliceOfMap_NewSliceOfMapV(t *testing.T) {
 // 	// Output: [1 2 3]
 // }
 
-// func TestSliceOfMap_Append(t *testing.T) {
+func TestSliceOfMap_Append(t *testing.T) {
 
-// 	// nil
-// 	{
-// 		var nilSlice *SliceOfMap
-// 		assert.Equal(t, NewSliceOfMapV("0"), nilSlice.Append("0"))
-// 		assert.Equal(t, (*SliceOfMap)(nil), nilSlice)
-// 	}
+	// nil
+	{
+		var nilSlice *SliceOfMap
+		assert.Equal(t, NewSliceOfMapV("0:"), nilSlice.Append("0:"))
+		assert.Equal(t, (*SliceOfMap)(nil), nilSlice)
+	}
 
-// 	// Append one back to back
-// 	{
-// 		var slice *SliceOfMap
-// 		assert.Equal(t, true, slice.Nil())
-// 		slice = NewSliceOfMapV()
-// 		assert.Equal(t, 0, slice.Len())
-// 		assert.Equal(t, false, slice.Nil())
+	// Append one back to back
+	{
+		var slice *SliceOfMap
+		assert.Equal(t, true, slice.Nil())
+		slice = NewSliceOfMapV()
+		assert.Equal(t, 0, slice.Len())
+		assert.Equal(t, false, slice.Nil())
 
-// 		// First append invokes 10x reflect overhead because the slice is nil
-// 		slice.Append("1")
-// 		assert.Equal(t, 1, slice.Len())
-// 		assert.Equal(t, []string{"1"}, slice.O())
+		// First append invokes 10x reflect overhead because the slice is nil
+		slice.Append("1:")
+		assert.Equal(t, 1, slice.Len())
+		assert.Equal(t, (&SliceOfMap{M().Add("1", nil)}).G(), slice.G())
 
-// 		// Second append another which will be 2x at most
-// 		slice.Append("2")
-// 		assert.Equal(t, 2, slice.Len())
-// 		assert.Equal(t, []string{"1", "2"}, slice.O())
-// 		assert.Equal(t, NewSliceOfMapV("1", "2"), slice)
-// 	}
+		// Second append another which will be 2x at most
+		slice.Append("2:")
+		assert.Equal(t, 2, slice.Len())
+		assert.Equal(t, (&SliceOfMap{M().Add("1", nil), MV("2:")}).G(), slice.G())
+		assert.Equal(t, NewSliceOfMapV("1:", "2:").G(), slice.G())
+	}
 
-// 	// Start with just appending without chaining
-// 	{
-// 		slice := NewSliceOfMapV()
-// 		assert.Equal(t, 0, slice.Len())
-// 		slice.Append("1")
-// 		assert.Equal(t, []string{"1"}, slice.O())
-// 		slice.Append("2")
-// 		assert.Equal(t, []string{"1", "2"}, slice.O())
-// 	}
+	// Start with just appending without chaining
+	{
+		slice := NewSliceOfMapV()
+		assert.Equal(t, 0, slice.Len())
+		slice.Append("1:")
+		assert.Equal(t, (&SliceOfMap{M().Add("1", nil)}).G(), slice.G())
+		slice.Append("2:")
+		assert.Equal(t, (&SliceOfMap{M().Add("1", nil), MV("2:")}).G(), slice.G())
+	}
 
-// 	// Start with nil not chained
-// 	{
-// 		slice := NewSliceOfMapV()
-// 		assert.Equal(t, 0, slice.Len())
-// 		slice.Append("1").Append("2").Append("3")
-// 		assert.Equal(t, 3, slice.Len())
-// 		assert.Equal(t, []string{"1", "2", "3"}, slice.O())
-// 	}
+	// Start with nil not chained
+	{
+		slice := NewSliceOfMapV()
+		assert.Equal(t, 0, slice.Len())
+		slice.Append("1:").Append("2:").Append("3:")
+		assert.Equal(t, 3, slice.Len())
+		assert.Equal(t, (&SliceOfMap{MV("1:"), MV("2:"), MV("3:")}).G(), slice.G())
+	}
 
-// 	// Start with nil chained
-// 	{
-// 		slice := NewSliceOfMapV().Append("1").Append("2")
-// 		assert.Equal(t, 2, slice.Len())
-// 		assert.Equal(t, []string{"1", "2"}, slice.O())
-// 	}
+	// Start with nil chained
+	{
+		slice := NewSliceOfMapV().Append("1:").Append("2:")
+		assert.Equal(t, 2, slice.Len())
+		assert.Equal(t, (&SliceOfMap{MV("1:"), MV("2:")}).G(), ToSliceOfMap(slice).G())
+	}
 
-// 	// Start with non nil
-// 	{
-// 		slice := NewSliceOfMapV("1").Append("2").Append("3")
-// 		assert.Equal(t, 3, slice.Len())
-// 		assert.Equal(t, []string{"1", "2", "3"}, slice.O())
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3"), slice)
-// 	}
+	// Start with non nil
+	{
+		slice := NewSliceOfMapV("1:").Append("2:").Append("3:")
+		assert.Equal(t, 3, slice.Len())
+		assert.Equal(t, (&SliceOfMap{MV("1:"), MV("2:"), MV("3:")}).G(), ToSliceOfMap(slice).G())
+		assert.Equal(t, NewSliceOfMapV("1:", "2:", "3:").G(), ToSliceOfMap(slice).G())
+	}
 
-// 	// Use append result directly
-// 	{
-// 		slice := NewSliceOfMapV("1")
-// 		assert.Equal(t, 1, slice.Len())
-// 		assert.Equal(t, []string{"1", "2"}, slice.Append("2").O())
-// 		assert.Equal(t, NewSliceOfMapV("1", "2"), slice)
-// 	}
+	// Use append result directly
+	{
+		slice := NewSliceOfMapV("1:")
+		assert.Equal(t, 1, slice.Len())
+		assert.Equal(t, (&SliceOfMap{MV("1:"), MV("2:")}).G(), ToSliceOfMap(slice.Append("2:")).G())
+		assert.Equal(t, NewSliceOfMapV("1:", "2:").G(), ToSliceOfMap(slice).G())
+	}
+}
 
-// 	// Conversion
-// 	{
-// 		assert.Equal(t, NewSliceOfMapV("1", "2"), NewSliceOfMapV(1).Append(Object{2}))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2"), NewSliceOfMapV(1).Append("2"))
-// 		assert.Equal(t, NewSliceOfMapV("true", "2"), NewSliceOfMapV().Append(true).Append(Char('2')))
-// 	}
-// }
-
-// // AppendV
-// //--------------------------------------------------------------------------------------------------
+// AppendV
+//--------------------------------------------------------------------------------------------------
 // func BenchmarkSliceOfMap_AppendV_Go(t *testing.B) {
 // 	src := []string{}
 // 	src = append(src, RangeString(nines6)...)
@@ -440,36 +433,29 @@ func TestSliceOfMap_NewSliceOfMapV(t *testing.T) {
 // 	n.AppendV(new...)
 // }
 
-// func ExampleSliceOfMap_AppendV() {
-// 	slice := NewSliceOfMapV("1").AppendV("2", "3")
-// 	fmt.Println(slice)
-// 	// Output: [1 2 3]
-// }
+func ExampleSliceOfMap_AppendV() {
+	slice := NewSliceOfMapV("1:").AppendV("2:", "3:")
+	fmt.Println(slice)
+	// Output: [&[{1 <nil>}] &[{2 <nil>}] &[{3 <nil>}]]
+}
 
-// func TestSliceOfMap_AppendV(t *testing.T) {
+func TestSliceOfMap_AppendV(t *testing.T) {
 
-// 	// nil
-// 	{
-// 		var nilSlice *SliceOfMap
-// 		assert.Equal(t, NewSliceOfMapV("1", "2"), nilSlice.AppendV("1", "2"))
-// 	}
+	// nil
+	{
+		var nilSlice *SliceOfMap
+		assert.Equal(t, NewSliceOfMapV("1:", "2:").G(), ToSliceOfMap(nilSlice.AppendV("1:", "2:")).G())
+	}
 
-// 	// Append many src
-// 	{
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3"), NewSliceOfMapV("1").AppendV("2", "3"))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3", "4", "5"), NewSliceOfMapV("1").AppendV("2", "3").AppendV("4", "5"))
-// 	}
+	// Append many src
+	{
+		assert.Equal(t, NewSliceOfMapV("1:", "2:", "3:").G(), ToSliceOfMap(NewSliceOfMapV("1:").AppendV("2:", "3:")).G())
+		assert.Equal(t, NewSliceOfMapV("1:", "2:", "3:", "4:", "5:").G(), ToSliceOfMap(NewSliceOfMapV("1:").AppendV("2:", "3:").AppendV("4:", "5:")).G())
+	}
+}
 
-// 	// Conversion
-// 	{
-// 		assert.Equal(t, NewSliceOfMapV("0", "1"), NewSliceOfMapV().AppendV(Object{0}, Object{1}))
-// 		assert.Equal(t, NewSliceOfMapV("0", "1"), NewSliceOfMapV().AppendV("0", "1"))
-// 		assert.Equal(t, NewSliceOfMapV("false", "true"), NewSliceOfMapV().AppendV(false, true))
-// 	}
-// }
-
-// // At
-// //--------------------------------------------------------------------------------------------------
+// At
+//--------------------------------------------------------------------------------------------------
 // func BenchmarkSliceOfMap_At_Go(t *testing.B) {
 // 	src := RangeString(nines6)
 // 	for _, x := range src {
@@ -486,70 +472,70 @@ func TestSliceOfMap_NewSliceOfMapV(t *testing.T) {
 // 	}
 // }
 
-// func ExampleSliceOfMap_At() {
-// 	slice := NewSliceOfMapV("1", "2", "3")
-// 	fmt.Println(slice.At(2))
-// 	// Output: 3
-// }
+func ExampleSliceOfMap_At() {
+	slice := NewSliceOfMapV("1:", "2:", "3:")
+	fmt.Println(slice.At(2))
+	// Output: &[{3 <nil>}]
+}
 
-// func TestSliceOfMap_At(t *testing.T) {
+func TestSliceOfMap_At(t *testing.T) {
 
-// 	// nil
-// 	{
-// 		var nilSlice *SliceOfMap
-// 		assert.Equal(t, Obj(nil), nilSlice.At(0))
-// 	}
+	// nil
+	{
+		var nilSlice *SliceOfMap
+		assert.Equal(t, Obj(nil), nilSlice.At(0))
+	}
 
-// 	// src
-// 	{
-// 		slice := NewSliceOfMapV("1", "2", "3", "4")
-// 		assert.Equal(t, "4", slice.At(-1).O())
-// 		assert.Equal(t, "3", slice.At(-2).O())
-// 		assert.Equal(t, "2", slice.At(-3).O())
-// 		assert.Equal(t, "1", slice.At(0).O())
-// 		assert.Equal(t, "2", slice.At(1).O())
-// 		assert.Equal(t, "3", slice.At(2).O())
-// 		assert.Equal(t, "4", slice.At(3).O())
-// 	}
+	// src
+	{
+		slice := NewSliceOfMapV("1:", "2:", "3:", "4:")
+		assert.Equal(t, MV("4:").G(), slice.At(-1).ToStringMap().G())
+		assert.Equal(t, MV("3:").G(), slice.At(-2).ToStringMap().G())
+		assert.Equal(t, MV("2:").G(), slice.At(-3).ToStringMap().G())
+		assert.Equal(t, MV("1:").G(), slice.At(0).ToStringMap().G())
+		assert.Equal(t, MV("2:").G(), slice.At(1).ToStringMap().G())
+		assert.Equal(t, MV("3:").G(), slice.At(2).ToStringMap().G())
+		assert.Equal(t, MV("4:").G(), slice.At(3).ToStringMap().G())
+	}
 
-// 	// index out of bounds
-// 	{
-// 		slice := NewSliceOfMapV("1")
-// 		assert.Equal(t, &Object{}, slice.At(3))
-// 		assert.Equal(t, nil, slice.At(3).O())
-// 		assert.Equal(t, &Object{}, slice.At(-3))
-// 		assert.Equal(t, nil, slice.At(-3).O())
-// 	}
-// }
+	// index out of bounds
+	{
+		slice := NewSliceOfMapV("1:")
+		assert.Equal(t, &Object{}, slice.At(3))
+		assert.Equal(t, nil, slice.At(3).O())
+		assert.Equal(t, &Object{}, slice.At(-3))
+		assert.Equal(t, nil, slice.At(-3).O())
+	}
+}
 
-// // Clear
-// //--------------------------------------------------------------------------------------------------
-// func ExampleSliceOfMap_Clear() {
-// 	slice := NewSliceOfMapV("1").Concat([]string{"2", "3"})
-// 	fmt.Println(slice.Clear())
-// 	// Output: []
-// }
+// Clear
+//--------------------------------------------------------------------------------------------------
+func ExampleSliceOfMap_Clear() {
+	slice := NewSliceOfMapV("1:").Concat([]string{"2", "3"})
+	fmt.Println(slice.Clear())
+	// Output: []
+}
 
-// func TestSliceOfMap_Clear(t *testing.T) {
+func TestSliceOfMap_Clear(t *testing.T) {
 
-// 	// nil
-// 	{
-// 		var slice *SliceOfMap
-// 		assert.Equal(t, NewSliceOfMapV(), slice.Clear())
-// 		assert.Equal(t, (*SliceOfMap)(nil), slice)
-// 	}
+	// nil
+	{
+		var slice *SliceOfMap
+		assert.Equal(t, NewSliceOfMapV(), slice.Clear())
+		assert.Equal(t, (*SliceOfMap)(nil), slice)
+	}
 
-// 	// int
-// 	{
-// 		slice := NewSliceOfMapV("1", "2", "3", "4")
-// 		assert.Equal(t, NewSliceOfMapV(), slice.Clear())
-// 		assert.Equal(t, NewSliceOfMapV(), slice.Clear())
-// 		assert.Equal(t, NewSliceOfMapV(), slice)
-// 	}
-// }
+	// int
+	{
+		slice := NewSliceOfMapV(1, 2, 3, 4)
+		assert.Equal(t, NewSliceOfMapV(), slice.Clear())
+		assert.Equal(t, NewSliceOfMapV(), slice.Clear())
+		assert.Equal(t, NewSliceOfMapV(), slice)
+	}
+}
 
-// // Concat
-// //--------------------------------------------------------------------------------------------------
+// Concat
+//--------------------------------------------------------------------------------------------------
 // func BenchmarkSliceOfMap_Concat_Go(t *testing.B) {
 // 	dest := []string{}
 // 	src := RangeString(nines6)
@@ -570,82 +556,70 @@ func TestSliceOfMap_NewSliceOfMapV(t *testing.T) {
 // 	}
 // }
 
-// func ExampleSliceOfMap_Concat() {
-// 	slice := NewSliceOfMapV("1").Concat([]string{"2", "3"})
-// 	fmt.Println(slice)
-// 	// Output: [1 2 3]
-// }
+func ExampleSliceOfMap_Concat() {
+	slice := NewSliceOfMapV("1:").Concat([]interface{}{"2:", "3:"})
+	fmt.Println(slice)
+	// Output: [&[{1 <nil>}] &[{2 <nil>}] &[{3 <nil>}]]
+}
 
-// func TestSliceOfMap_Concat(t *testing.T) {
+func TestSliceOfMap_Concat(t *testing.T) {
 
-// 	// nil
-// 	{
-// 		var slice *SliceOfMap
-// 		assert.Equal(t, NewSliceOfMapV("1", "2"), slice.Concat([]string{"1", "2"}))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2"), NewSliceOfMapV("1", "2").Concat(nil))
-// 	}
+	// nil
+	{
+		var slice *SliceOfMap
+		assert.Equal(t, NewSliceOfMapV("1:", "2:"), slice.Concat([]interface{}{"1:", "2:"}))
+		assert.Equal(t, NewSliceOfMapV("1:", "2:"), NewSliceOfMapV("1:", "2:").Concat(nil))
+	}
 
-// 	// []string
-// 	{
-// 		slice := NewSliceOfMapV("1")
-// 		concated := slice.Concat([]string{"2", "3"})
-// 		assert.Equal(t, NewSliceOfMapV("1", "2"), slice.Append("2"))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3"), concated)
-// 	}
+	// []string
+	{
+		slice := NewSliceOfMapV("1:")
+		concated := slice.Concat([]interface{}{"2:", "3:"})
+		assert.Equal(t, NewSliceOfMapV("1:", "2:"), slice.Append("2:"))
+		assert.Equal(t, NewSliceOfMapV("1:", "2:", "3:"), concated)
+	}
 
-// 	// *[]string
-// 	{
-// 		slice := NewSliceOfMapV("1")
-// 		concated := slice.Concat(&([]string{"2", "3"}))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2"), slice.Append("2"))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3"), concated)
-// 	}
+	// *[]string
+	{
+		slice := NewSliceOfMapV("1:")
+		concated := slice.Concat(&([]interface{}{"2:", "3:"}))
+		assert.Equal(t, NewSliceOfMapV("1:", "2:"), slice.Append("2:"))
+		assert.Equal(t, NewSliceOfMapV("1:", "2:", "3:"), concated)
+	}
 
-// 	// *SliceOfMap
-// 	{
-// 		slice := NewSliceOfMapV("1")
-// 		concated := slice.Concat(NewSliceOfMapV("2", "3"))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2"), slice.Append("2"))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3"), concated)
-// 	}
+	// *SliceOfMap
+	{
+		slice := NewSliceOfMapV("1:")
+		concated := slice.Concat(NewSliceOfMapV("2:", "3:"))
+		assert.Equal(t, NewSliceOfMapV("1:", "2:"), slice.Append("2:"))
+		assert.Equal(t, NewSliceOfMapV("1:", "2:", "3:"), concated)
+	}
 
-// 	// SliceOfMap
-// 	{
-// 		slice := NewSliceOfMapV("1")
-// 		concated := slice.Concat(*NewSliceOfMapV("2", "3"))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2"), slice.Append("2"))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3"), concated)
-// 	}
+	// SliceOfMap
+	{
+		slice := NewSliceOfMapV("1:")
+		concated := slice.Concat(*NewSliceOfMapV("2:", "3:"))
+		assert.Equal(t, NewSliceOfMapV("1:", "2:"), slice.Append("2:"))
+		assert.Equal(t, NewSliceOfMapV("1:", "2:", "3:"), concated)
+	}
 
-// 	// Slice
-// 	{
-// 		slice := NewSliceOfMapV("1")
-// 		concated := slice.Concat(ISlice(NewSliceOfMapV("2", "3")))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2"), slice.Append("2"))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3"), concated)
-// 	}
+	// Slice
+	{
+		slice := NewSliceOfMapV("1:")
+		concated := slice.Concat(ISlice(NewSliceOfMapV("2:", "3:")))
+		assert.Equal(t, NewSliceOfMapV("1:", "2:"), slice.Append("2:"))
+		assert.Equal(t, NewSliceOfMapV("1:", "2:", "3:"), concated)
+	}
 
-// 	// nils
-// 	{
-// 		assert.Equal(t, NewSliceOfMapV("1", "2"), NewSliceOfMapV("1", "2").Concat((*[]string)(nil)))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2"), NewSliceOfMapV("1", "2").Concat((*SliceOfMap)(nil)))
-// 	}
+	// nils
+	{
+		assert.Equal(t, NewSliceOfMapV("1:", "2:"), NewSliceOfMapV("1:", "2:").Concat((*[]interface{})(nil)))
+		assert.Equal(t, NewSliceOfMapV("1:", "2:"), NewSliceOfMapV("1:", "2:").Concat((*SliceOfMap)(nil)))
+	}
+}
 
-// 	// Conversion
-// 	{
-// 		assert.Equal(t, NewSliceOfMapV("0", "1"), NewSliceOfMapV().Concat([]Object{{0}, {1}}))
-// 		assert.Equal(t, NewSliceOfMapV("0", "1"), NewSliceOfMapV().Concat([]string{"0", "1"}))
-// 		assert.Equal(t, NewSliceOfMapV("false", "true"), NewSliceOfMapV().Concat([]bool{false, true}))
-
-// 		slice := NewSliceOfMapV(Object{1})
-// 		concated := slice.Concat([]int64{2, 3})
-// 		assert.Equal(t, NewSliceOfMapV("1", "4"), slice.Append(Char('4')))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3"), concated)
-// 	}
-// }
-
-// // ConcatM
-// //--------------------------------------------------------------------------------------------------
+// ConcatM
+//--------------------------------------------------------------------------------------------------
 // func BenchmarkSliceOfMap_ConcatM_Go(t *testing.B) {
 // 	dest := []string{}
 // 	src := RangeString(nines6)
@@ -666,78 +640,70 @@ func TestSliceOfMap_NewSliceOfMapV(t *testing.T) {
 // 	}
 // }
 
-// func ExampleSliceOfMap_ConcatM() {
-// 	slice := NewSliceOfMapV("1").ConcatM([]string{"2", "3"})
-// 	fmt.Println(slice)
-// 	// Output: [1 2 3]
-// }
+func ExampleSliceOfMap_ConcatM() {
+	slice := NewSliceOfMapV("1:").ConcatM([]interface{}{"2:", "3:"})
+	fmt.Println(slice)
+	// Output: [&[{1 <nil>}] &[{2 <nil>}] &[{3 <nil>}]]
+}
 
-// func TestSliceOfMap_ConcatM(t *testing.T) {
+func TestSliceOfMap_ConcatM(t *testing.T) {
 
-// 	// nil
-// 	{
-// 		var slice *SliceOfMap
-// 		assert.Equal(t, NewSliceOfMapV("1", "2"), slice.ConcatM([]string{"1", "2"}))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2"), NewSliceOfMapV("1", "2").ConcatM(nil))
-// 	}
+	// nil
+	{
+		var slice *SliceOfMap
+		assert.Equal(t, NewSliceOfMapV("1:", "2:"), slice.ConcatM([]interface{}{"1:", "2:"}))
+		assert.Equal(t, NewSliceOfMapV("1:", "2:"), NewSliceOfMapV("1:", "2:").ConcatM(nil))
+	}
 
-// 	// []string
-// 	{
-// 		slice := NewSliceOfMapV("1")
-// 		concated := slice.ConcatM([]string{"2", "3"})
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3", "4"), slice.Append("4"))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3", "4"), concated)
-// 	}
+	// []string
+	{
+		slice := NewSliceOfMapV("1:")
+		concated := slice.ConcatM([]interface{}{"2:", "3:"})
+		assert.Equal(t, NewSliceOfMapV("1:", "2:", "3:", "4:"), slice.Append("4:"))
+		assert.Equal(t, NewSliceOfMapV("1:", "2:", "3:", "4:"), concated)
+	}
 
-// 	// *[]string
-// 	{
-// 		slice := NewSliceOfMapV("1")
-// 		concated := slice.ConcatM(&([]string{"2", "3"}))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3", "4"), slice.Append("4"))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3", "4"), concated)
-// 	}
+	// *[]string
+	{
+		slice := NewSliceOfMapV("1:")
+		concated := slice.ConcatM(&([]interface{}{"2:", "3:"}))
+		assert.Equal(t, NewSliceOfMapV("1:", "2:", "3:", "4:"), slice.Append("4:"))
+		assert.Equal(t, NewSliceOfMapV("1:", "2:", "3:", "4:"), concated)
+	}
 
-// 	// *SliceOfMap
-// 	{
-// 		slice := NewSliceOfMapV("1")
-// 		concated := slice.ConcatM(NewSliceOfMapV("2", "3"))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3", "4"), slice.Append("4"))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3", "4"), concated)
-// 	}
+	// *SliceOfMap
+	{
+		slice := NewSliceOfMapV("1:")
+		concated := slice.ConcatM(NewSliceOfMapV("2:", "3:"))
+		assert.Equal(t, NewSliceOfMapV("1:", "2:", "3:", "4:"), slice.Append("4:"))
+		assert.Equal(t, NewSliceOfMapV("1:", "2:", "3:", "4:"), concated)
+	}
 
-// 	// SliceOfMap
-// 	{
-// 		slice := NewSliceOfMapV("1")
-// 		concated := slice.ConcatM(*NewSliceOfMapV("2", "3"))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3", "4"), slice.Append("4"))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3", "4"), concated)
-// 	}
+	// SliceOfMap
+	{
+		slice := NewSliceOfMapV("1:")
+		concated := slice.ConcatM(*NewSliceOfMapV("2:", "3:"))
+		assert.Equal(t, NewSliceOfMapV("1:", "2:", "3:", "4:"), slice.Append("4:"))
+		assert.Equal(t, NewSliceOfMapV("1:", "2:", "3:", "4:"), concated)
+	}
 
-// 	// Slice
-// 	{
-// 		slice := NewSliceOfMapV("1")
-// 		concated := slice.ConcatM(ISlice(NewSliceOfMapV("2", "3")))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3", "4"), slice.Append("4"))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3", "4"), concated)
-// 	}
+	// Slice
+	{
+		slice := NewSliceOfMapV("1:")
+		concated := slice.ConcatM(ISlice(NewSliceOfMapV("2:", "3:")))
+		assert.Equal(t, NewSliceOfMapV("1:", "2:", "3:", "4:"), slice.Append("4:"))
+		assert.Equal(t, NewSliceOfMapV("1:", "2:", "3:", "4:"), concated)
+	}
 
-// 	// nils
-// 	{
-// 		assert.Equal(t, NewSliceOfMapV("1", "2"), NewSliceOfMapV("1", "2").ConcatM((*[]string)(nil)))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2"), NewSliceOfMapV("1", "2").ConcatM((*SliceOfMap)(nil)))
-// 	}
+	// nils
+	{
+		assert.Equal(t, NewSliceOfMapV("1:", "2:"), NewSliceOfMapV("1:", "2:").ConcatM((*[]interface{})(nil)))
+		assert.Equal(t, NewSliceOfMapV("1:", "2:"), NewSliceOfMapV("1:", "2:").ConcatM((*SliceOfMap)(nil)))
+	}
+}
 
-// 	// Conversion
-// 	{
-// 		slice := NewSliceOfMapV(Object{1})
-// 		concated := slice.ConcatM([]Object{{2}, {3}})
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3", "4"), slice.Append(Char('4')))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3", "4"), concated)
-// 	}
-// }
-
-// // Copy
-// //--------------------------------------------------------------------------------------------------
+// Copy
+//--------------------------------------------------------------------------------------------------
 // func BenchmarkSliceOfMap_Copy_Go(t *testing.B) {
 // 	src := RangeString(nines6)
 // 	dst := make([]string, len(src), len(src))
@@ -749,108 +715,108 @@ func TestSliceOfMap_NewSliceOfMapV(t *testing.T) {
 // 	slice.Copy()
 // }
 
-// func ExampleSliceOfMap_Copy() {
-// 	slice := NewSliceOfMapV("1", "2", "3")
-// 	fmt.Println(slice.Copy())
-// 	// Output: [1 2 3]
-// }
+func ExampleSliceOfMap_Copy() {
+	slice := NewSliceOfMapV("1:", "2:", "3:")
+	fmt.Println(slice.Copy())
+	// Output: [&[{1 <nil>}] &[{2 <nil>}] &[{3 <nil>}]]
+}
 
-// func TestSliceOfMap_Copy(t *testing.T) {
+func TestSliceOfMap_Copy(t *testing.T) {
 
-// 	// nil or empty
-// 	{
-// 		var slice *SliceOfMap
-// 		assert.Equal(t, NewSliceOfMapV(), slice.Copy(0, -1))
-// 		assert.Equal(t, NewSliceOfMapV(), NewSliceOfMapV("0").Clear().Copy(0, -1))
-// 	}
+	// nil or empty
+	{
+		var slice *SliceOfMap
+		assert.Equal(t, NewSliceOfMapV(), slice.Copy(0, -1))
+		assert.Equal(t, NewSliceOfMapV(), NewSliceOfMapV(0).Clear().Copy(0, -1))
+	}
 
-// 	// Test that the original is NOT modified when the slice is modified
-// 	{
-// 		original := NewSliceOfMapV("1", "2", "3")
-// 		result := original.Copy(0, -1)
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3"), original)
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3"), result)
-// 		result.Set(0, "0")
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3"), original)
-// 		assert.Equal(t, NewSliceOfMapV("0", "2", "3"), result)
-// 	}
+	// Test that the original is NOT modified when the slice is modified
+	{
+		original := NewSliceOfMapV(1, 2, 3)
+		result := original.Copy(0, -1)
+		assert.Equal(t, NewSliceOfMapV(1, 2, 3).G(), original.G())
+		assert.Equal(t, NewSliceOfMapV(1, 2, 3).G(), ToSliceOfMap(result).G())
+		result.Set(0, 0)
+		assert.Equal(t, NewSliceOfMapV(1, 2, 3).G(), original.G())
+		assert.Equal(t, NewSliceOfMapV(0, 2, 3).G(), ToSliceOfMap(result).G())
+	}
 
-// 	// copy full array
-// 	{
-// 		assert.Equal(t, NewSliceOfMapV(), NewSliceOfMapV().Copy())
-// 		assert.Equal(t, NewSliceOfMapV(), NewSliceOfMapV().Copy(0, -1))
-// 		assert.Equal(t, NewSliceOfMapV(), NewSliceOfMapV().Copy(0, 1))
-// 		assert.Equal(t, NewSliceOfMapV(), NewSliceOfMapV().Copy(0, 5))
-// 		assert.Equal(t, NewSliceOfMapV("1"), NewSliceOfMapV("1").Copy())
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3"), NewSliceOfMapV("1", "2", "3").Copy())
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3"), NewSliceOfMapV("1", "2", "3").Copy(0, -1))
-// 		assert.Equal(t, NewSliceOfMap([]string{"1", "2", "3"}), NewSliceOfMap([]string{"1", "2", "3"}).Copy())
-// 		assert.Equal(t, NewSliceOfMap([]string{"1", "2", "3"}), NewSliceOfMap([]string{"1", "2", "3"}).Copy(0, -1))
-// 	}
+	// copy full array
+	{
+		assert.Equal(t, NewSliceOfMapV(), NewSliceOfMapV().Copy())
+		assert.Equal(t, NewSliceOfMapV(), NewSliceOfMapV().Copy(0, -1))
+		assert.Equal(t, NewSliceOfMapV(), NewSliceOfMapV().Copy(0, 1))
+		assert.Equal(t, NewSliceOfMapV(), NewSliceOfMapV().Copy(0, 5))
+		assert.Equal(t, NewSliceOfMapV(1), NewSliceOfMapV(1).Copy())
+		assert.Equal(t, NewSliceOfMapV(1, 2, 3), NewSliceOfMapV(1, 2, 3).Copy())
+		assert.Equal(t, NewSliceOfMapV(1, 2, 3), NewSliceOfMapV(1, 2, 3).Copy(0, -1))
+		assert.Equal(t, NewSliceOfMap([]interface{}{1, 2, 3}), NewSliceOfMap([]interface{}{1, 2, 3}).Copy())
+		assert.Equal(t, NewSliceOfMap([]interface{}{1, 2, 3}), NewSliceOfMap([]interface{}{1, 2, 3}).Copy(0, -1))
+	}
 
-// 	// out of bounds should be moved in
-// 	{
-// 		assert.Equal(t, NewSliceOfMapV("1"), NewSliceOfMapV("1").Copy(0, 2))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3"), NewSliceOfMapV("1", "2", "3").Copy(-6, 6))
-// 	}
+	// out of bounds should be moved in
+	{
+		assert.Equal(t, NewSliceOfMapV(1), NewSliceOfMapV(1).Copy(0, 2))
+		assert.Equal(t, NewSliceOfMapV(1, 2, 3), NewSliceOfMapV(1, 2, 3).Copy(-6, 6))
+	}
 
-// 	// mutually exclusive
-// 	{
-// 		slice := NewSliceOfMapV("1", "2", "3", "4")
-// 		assert.Equal(t, NewSliceOfMapV(), slice.Copy(2, -3))
-// 		assert.Equal(t, NewSliceOfMapV(), slice.Copy(0, -5))
-// 		assert.Equal(t, NewSliceOfMapV(), slice.Copy(4, -1))
-// 		assert.Equal(t, NewSliceOfMapV(), slice.Copy(6, -1))
-// 		assert.Equal(t, NewSliceOfMapV(), slice.Copy(3, -2))
-// 	}
+	// mutually exclusive
+	{
+		slice := NewSliceOfMapV(1, 2, 3, 4)
+		assert.Equal(t, NewSliceOfMapV(), slice.Copy(2, -3))
+		assert.Equal(t, NewSliceOfMapV(), slice.Copy(0, -5))
+		assert.Equal(t, NewSliceOfMapV(), slice.Copy(4, -1))
+		assert.Equal(t, NewSliceOfMapV(), slice.Copy(6, -1))
+		assert.Equal(t, NewSliceOfMapV(), slice.Copy(3, -2))
+	}
 
-// 	// singles
-// 	{
-// 		slice := NewSliceOfMapV("1", "2", "3", "4")
-// 		assert.Equal(t, NewSliceOfMapV("4"), slice.Copy(-1, -1))
-// 		assert.Equal(t, NewSliceOfMapV("3"), slice.Copy(-2, -2))
-// 		assert.Equal(t, NewSliceOfMapV("2"), slice.Copy(-3, -3))
-// 		assert.Equal(t, NewSliceOfMapV("1"), slice.Copy(0, 0))
-// 		assert.Equal(t, NewSliceOfMapV("1"), slice.Copy(-4, -4))
-// 		assert.Equal(t, NewSliceOfMapV("2"), slice.Copy(1, 1))
-// 		assert.Equal(t, NewSliceOfMapV("2"), slice.Copy(1, -3))
-// 		assert.Equal(t, NewSliceOfMapV("3"), slice.Copy(2, 2))
-// 		assert.Equal(t, NewSliceOfMapV("3"), slice.Copy(2, -2))
-// 		assert.Equal(t, NewSliceOfMapV("4"), slice.Copy(3, 3))
-// 		assert.Equal(t, NewSliceOfMapV("4"), slice.Copy(3, -1))
-// 	}
+	// singles
+	{
+		slice := NewSliceOfMapV(1, 2, 3, 4)
+		assert.Equal(t, NewSliceOfMapV(4), slice.Copy(-1, -1))
+		assert.Equal(t, NewSliceOfMapV(3), slice.Copy(-2, -2))
+		assert.Equal(t, NewSliceOfMapV(2), slice.Copy(-3, -3))
+		assert.Equal(t, NewSliceOfMapV(1), slice.Copy(0, 0))
+		assert.Equal(t, NewSliceOfMapV(1), slice.Copy(-4, -4))
+		assert.Equal(t, NewSliceOfMapV(2), slice.Copy(1, 1))
+		assert.Equal(t, NewSliceOfMapV(2), slice.Copy(1, -3))
+		assert.Equal(t, NewSliceOfMapV(3), slice.Copy(2, 2))
+		assert.Equal(t, NewSliceOfMapV(3), slice.Copy(2, -2))
+		assert.Equal(t, NewSliceOfMapV(4), slice.Copy(3, 3))
+		assert.Equal(t, NewSliceOfMapV(4), slice.Copy(3, -1))
+	}
 
-// 	// grab all but first
-// 	{
-// 		assert.Equal(t, NewSliceOfMapV("2", "3"), NewSliceOfMapV("1", "2", "3").Copy(1, -1))
-// 		assert.Equal(t, NewSliceOfMapV("2", "3"), NewSliceOfMapV("1", "2", "3").Copy(1, 2))
-// 		assert.Equal(t, NewSliceOfMapV("2", "3"), NewSliceOfMapV("1", "2", "3").Copy(-2, -1))
-// 		assert.Equal(t, NewSliceOfMapV("2", "3"), NewSliceOfMapV("1", "2", "3").Copy(-2, 2))
-// 	}
+	// grab all but first
+	{
+		assert.Equal(t, NewSliceOfMapV(2, 3), NewSliceOfMapV(1, 2, 3).Copy(1, -1))
+		assert.Equal(t, NewSliceOfMapV(2, 3), NewSliceOfMapV(1, 2, 3).Copy(1, 2))
+		assert.Equal(t, NewSliceOfMapV(2, 3), NewSliceOfMapV(1, 2, 3).Copy(-2, -1))
+		assert.Equal(t, NewSliceOfMapV(2, 3), NewSliceOfMapV(1, 2, 3).Copy(-2, 2))
+	}
 
-// 	// grab all but last
-// 	{
-// 		assert.Equal(t, NewSliceOfMapV("1", "2"), NewSliceOfMapV("1", "2", "3").Copy(0, -2))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2"), NewSliceOfMapV("1", "2", "3").Copy(-3, -2))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2"), NewSliceOfMapV("1", "2", "3").Copy(-3, 1))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2"), NewSliceOfMapV("1", "2", "3").Copy(0, 1))
-// 	}
+	// grab all but last
+	{
+		assert.Equal(t, NewSliceOfMapV(1, 2), NewSliceOfMapV(1, 2, 3).Copy(0, -2))
+		assert.Equal(t, NewSliceOfMapV(1, 2), NewSliceOfMapV(1, 2, 3).Copy(-3, -2))
+		assert.Equal(t, NewSliceOfMapV(1, 2), NewSliceOfMapV(1, 2, 3).Copy(-3, 1))
+		assert.Equal(t, NewSliceOfMapV(1, 2), NewSliceOfMapV(1, 2, 3).Copy(0, 1))
+	}
 
-// 	// grab middle
-// 	{
-// 		assert.Equal(t, NewSliceOfMapV("2", "3"), NewSliceOfMapV("1", "2", "3", "4").Copy(1, -2))
-// 		assert.Equal(t, NewSliceOfMapV("2", "3"), NewSliceOfMapV("1", "2", "3", "4").Copy(-3, -2))
-// 		assert.Equal(t, NewSliceOfMapV("2", "3"), NewSliceOfMapV("1", "2", "3", "4").Copy(-3, 2))
-// 		assert.Equal(t, NewSliceOfMapV("2", "3"), NewSliceOfMapV("1", "2", "3", "4").Copy(1, 2))
-// 	}
+	// grab middle
+	{
+		assert.Equal(t, NewSliceOfMapV(2, 3), NewSliceOfMapV(1, 2, 3, 4).Copy(1, -2))
+		assert.Equal(t, NewSliceOfMapV(2, 3), NewSliceOfMapV(1, 2, 3, 4).Copy(-3, -2))
+		assert.Equal(t, NewSliceOfMapV(2, 3), NewSliceOfMapV(1, 2, 3, 4).Copy(-3, 2))
+		assert.Equal(t, NewSliceOfMapV(2, 3), NewSliceOfMapV(1, 2, 3, 4).Copy(1, 2))
+	}
 
-// 	// random
-// 	{
-// 		assert.Equal(t, NewSliceOfMapV("1"), NewSliceOfMapV("1", "2", "3").Copy(0, -3))
-// 		assert.Equal(t, NewSliceOfMapV("2", "3"), NewSliceOfMapV("1", "2", "3").Copy(1, 2))
-// 		assert.Equal(t, NewSliceOfMapV("1", "2", "3"), NewSliceOfMapV("1", "2", "3").Copy(0, 2))
-// 	}
-// }
+	// random
+	{
+		assert.Equal(t, NewSliceOfMapV(1), NewSliceOfMapV(1, 2, 3).Copy(0, -3))
+		assert.Equal(t, NewSliceOfMapV(2, 3), NewSliceOfMapV(1, 2, 3).Copy(1, 2))
+		assert.Equal(t, NewSliceOfMapV(1, 2, 3), NewSliceOfMapV(1, 2, 3).Copy(0, 2))
+	}
+}
 
 // // Count
 // //--------------------------------------------------------------------------------------------------
@@ -1313,7 +1279,7 @@ func ExampleSliceOfMap_Each() {
 	NewSliceOfMapV([]map[string]interface{}{{"foo": "bar"}}).Each(func(x O) {
 		fmt.Printf("%v", x)
 	})
-	// Output: map[foo:bar]
+	// Output: &[{foo bar}]
 }
 
 func TestSliceOfMap_Each(t *testing.T) {
@@ -1328,7 +1294,7 @@ func TestSliceOfMap_Each(t *testing.T) {
 	{
 		results := []string{}
 		NewSliceOfMapV([]map[string]interface{}{{"foo": "1"}, {"foo": "2"}}).Each(func(x O) {
-			results = append(results, (x.(map[string]interface{}))["foo"].(string))
+			results = append(results, ToStringMap(x).Get("foo").A())
 		})
 		assert.Equal(t, []string{"1", "2"}, results)
 	}
@@ -1357,7 +1323,7 @@ func ExampleSliceOfMap_EachE() {
 		fmt.Printf("%v", x)
 		return nil
 	})
-	// Output: map[foo:bar]
+	// Output: &[{foo bar}]
 }
 
 func TestSliceOfMap_EachE(t *testing.T) {
@@ -1374,7 +1340,7 @@ func TestSliceOfMap_EachE(t *testing.T) {
 	{
 		results := []string{}
 		NewSliceOfMapV([]map[string]interface{}{{"foo": "1"}, {"foo": "2"}, {"foo": "3"}}).EachE(func(x O) error {
-			results = append(results, (x.(map[string]interface{}))["foo"].(string))
+			results = append(results, ToStringMap(x).Get("foo").A())
 			return nil
 		})
 		assert.Equal(t, []string{"1", "2", "3"}, results)
@@ -1384,10 +1350,10 @@ func TestSliceOfMap_EachE(t *testing.T) {
 	{
 		results := []string{}
 		NewSliceOfMapV([]map[string]interface{}{{"foo": "1"}, {"foo": "2"}, {"foo": "3"}}).EachE(func(x O) error {
-			if (x.(map[string]interface{}))["foo"].(string) == "3" {
+			if ToStringMap(x).Get("foo").A() == "3" {
 				return Break
 			}
-			results = append(results, (x.(map[string]interface{}))["foo"].(string))
+			results = append(results, ToStringMap(x).Get("foo").A())
 			return nil
 		})
 		assert.Equal(t, []string{"1", "2"}, results)

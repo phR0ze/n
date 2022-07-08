@@ -137,7 +137,16 @@ func (p *StringMap) Dump() (pretty string) {
 
 // Exists checks if the given key exists in this Map.
 func (p *StringMap) Exists(key interface{}) bool {
-	return !p.Get(key).Nil()
+	if p == nil {
+		return false
+	}
+	k := ToString(key)
+	for i := 0; i < len(*p); i++ {
+		if k == ToString((*p)[i].Key) {
+			return true
+		}
+	}
+	return false
 }
 
 // G returns the underlying data structure as a Go type.

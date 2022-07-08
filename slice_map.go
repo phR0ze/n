@@ -9,7 +9,7 @@ import (
 
 // SliceOfMap implements the Slice interface providing a generic way to work with slice types
 // including convenience methods on par with rapid development languages.
-type SliceOfMap []map[string]interface{}
+type SliceOfMap []*StringMap
 
 // NewSliceOfMap creates a new *SliceOfMap
 func NewSliceOfMap(slice interface{}) *SliceOfMap {
@@ -18,8 +18,16 @@ func NewSliceOfMap(slice interface{}) *SliceOfMap {
 
 // NewSliceOfMapV creates a new *SliceOfMap from the given variadic elements. Always returns
 // at least a reference to an empty SliceOfMap.
-func NewSliceOfMapV(elems ...interface{}) *SliceOfMap {
-	return ToSliceOfMap(elems)
+func NewSliceOfMapV(obj ...interface{}) *SliceOfMap {
+	var new *SliceOfMap
+	if len(obj) == 0 {
+		new = &SliceOfMap{}
+	} else if len(obj) == 1 {
+		new = ToSliceOfMap(obj[0])
+	} else {
+		new = ToSliceOfMap(obj)
+	}
+	return new
 }
 
 // A is an alias to String for brevity
@@ -88,17 +96,14 @@ func (p *SliceOfMap) AnyS(slice interface{}) bool {
 		return false
 	}
 
-	panic("NOT IMPLEMENTED")
-	// if elems, err := ToSliceOfMapE(slice); err == nil {
-	// 	for i := range *elems {
-	// 		for j := range *p {
-	// 			if (*p)[j] == (*elems)[i] {
-	// 				return true
-	// 			}
-	// 		}
-	// 	}
-	// }
-	// return false
+	for _, k := range ToStringSlice(slice).G() {
+		for i := 0; i < len(*p); i++ {
+			if (*p)[i].Exists(k) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // AnyW tests if this Slice contains any that match the lambda selector.
@@ -111,7 +116,7 @@ func (p *SliceOfMap) Append(elem interface{}) ISlice {
 	if p == nil {
 		p = NewSliceOfMapV()
 	}
-	*p = append(*p, ToStringMap(elem).G())
+	*p = append(*p, ToStringMap(elem))
 	return p
 }
 
@@ -121,7 +126,7 @@ func (p *SliceOfMap) AppendV(elems ...interface{}) ISlice {
 		p = NewSliceOfMapV()
 	}
 	for _, elem := range elems {
-		*p = append(*p, ToStringMap(elem).G())
+		*p = append(*p, ToStringMap(elem))
 	}
 	return p
 }
@@ -186,7 +191,7 @@ func (p *SliceOfMap) Copy(indices ...int) (new ISlice) {
 	}
 
 	// Copy elements over to new Slice
-	x := make([]map[string]interface{}, j-i, j-i)
+	x := make([]*StringMap, j-i, j-i)
 	copy(x, (*p)[i:j])
 	return NewSliceOfMap(x)
 }
@@ -419,7 +424,11 @@ func (p *SliceOfMap) FirstN(n int) ISlice {
 
 // G returns the underlying data structure as a builtin Go type
 func (p *SliceOfMap) G() []map[string]interface{} {
-	return p.O().([]map[string]interface{})
+	val := []map[string]interface{}{}
+	for i := range *p {
+		val = append(val, ToStringMap((*p)[i]).G())
+	}
+	return val
 }
 
 // Index returns the index of the first element in this Slice where element == elem
@@ -547,18 +556,15 @@ func (p *SliceOfMap) Map(mod func(O) O) ISlice {
 
 // Nil tests if this Slice is nil
 func (p *SliceOfMap) Nil() bool {
-	if p == nil {
-		return true
-	}
-	return false
+	return p == nil
 }
 
 // O returns the underlying data structure as is
 func (p *SliceOfMap) O() interface{} {
 	if p == nil {
-		return []map[string]interface{}{}
+		return []*StringMap{}
 	}
-	return []map[string]interface{}(*p)
+	return []*StringMap(*p)
 }
 
 // Pair simply returns the first and second Slice elements as Objects
@@ -641,34 +647,36 @@ func (p *SliceOfMap) Select(sel func(O) bool) (new ISlice) {
 	return slice
 }
 
-// Set the element(s) at the given index location to the given element(s). Allows for negative notation.
+// Set the element at the given index location to the given element. Allows for negative notation.
 // Returns a reference to this Slice and swallows any errors.
 func (p *SliceOfMap) Set(i int, elem interface{}) ISlice {
 	slice, _ := p.SetE(i, elem)
 	return slice
 }
 
-// SetE the element(s) at the given index location to the given element(s). Allows for negative notation.
+// SetE the element at the given index location to the given element. Allows for negative notation.
 // Returns a referenc to this Slice and an error if out of bounds or elem is the wrong type.
-func (p *SliceOfMap) SetE(i int, elems interface{}) (ISlice, error) {
-	var err error
+func (p *SliceOfMap) SetE(i int, elems interface{}) (slice ISlice, err error) {
+	slice = p
 	if p == nil {
-		return p, err
+		return
 	}
 	if i = absIndex(len(*p), i); i == -1 {
 		err = errors.Errorf("slice assignment is out of bounds")
-		return p, err
+		return
 	}
 
 	// Account for length of elems
-	if x, err := ToSliceOfMapE(elems); err == nil {
-		if len(*x) > 0 {
-			copy((*p)[i:], *x)
-		}
-	} else {
+	var x *StringMap
+	if x, err = ToStringMapE(elems); err != nil {
 		err = errors.Wrapf(err, "can't set type '%T' in '%T'", elems, p)
+		return
+	} else {
+		if len(*x) > 0 {
+			(*p)[i] = x
+		}
 	}
-	return p, err
+	return
 }
 
 // Shift modifies this Slice to remove the first element and returns the removed element as an Object.

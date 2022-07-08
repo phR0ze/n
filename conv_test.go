@@ -3806,6 +3806,30 @@ func TestToString(t *testing.T) {
 	}
 }
 
+// ToSliceOfMapE
+//--------------------------------------------------------------------------------------------------
+func ExampleToSliceOfMapE() {
+	fmt.Println(ToSliceOfMapE([]map[interface{}]interface{}{{"1": "one"}}))
+	// Output: [&[{1 one}]] <nil>
+}
+
+func TestToSliceOfMapE(t *testing.T) {
+
+	// convert slice of yaml to SliceOfMap
+	{
+		yamlData := `apps:
+  - name: 1
+    type: a
+  - name: 2
+    type: b
+`
+		q := ToStringMap(yamlData).Query("apps")
+		val, err := q.ToSliceOfMapE()
+		assert.Nil(t, err)
+		assert.Equal(t, (&SliceOfMap{M().Add("name", 1).Add("type", "a"), M().Add("name", 2).Add("type", "b")}).G(), val.G())
+	}
+}
+
 // ToStringMapE
 //--------------------------------------------------------------------------------------------------
 func ExampleToStringMapE() {

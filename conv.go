@@ -428,6 +428,16 @@ func DeReference(obj interface{}) interface{} {
 		}
 		return *x
 
+	// SliceOfMap
+	//---------------------------------------------------------------------------------
+	case SliceOfMap:
+		return x
+	case *SliceOfMap:
+		if x == nil {
+			return SliceOfMap{}
+		}
+		return *x
+
 	// Str
 	//----------------------------------------------------------------------------------------------
 	case Str:
@@ -1368,6 +1378,13 @@ func Reference(obj interface{}) interface{} {
 	case *yaml.MapSlice:
 		return x
 
+	// SliceOfMap
+	//---------------------------------------------------------------------------------
+	case SliceOfMap:
+		return &x
+	case *SliceOfMap:
+		return x
+
 	// Str
 	//----------------------------------------------------------------------------------------------
 	case Str:
@@ -1407,6 +1424,14 @@ func Reference(obj interface{}) interface{} {
 	case StringMap:
 		return &x
 	case *StringMap:
+		return x
+	case []StringMap:
+		return &x
+	case []*StringMap:
+		return &x
+	case *[]StringMap:
+		return x
+	case *[]*StringMap:
 		return x
 
 	// StringSlice
@@ -3969,11 +3994,11 @@ func ToSliceOfMapE(obj interface{}) (val *SliceOfMap, err error) {
 	case *[]interface{}:
 		if x != nil {
 			for _, raw := range *x {
-				var m *SliceOfMap
-				if m, err = ToSliceOfMapE(raw); err != nil {
+				var m *StringMap
+				if m, err = ToStringMapE(raw); err != nil {
 					return
 				}
-				*val = append(*val, *m...)
+				*val = append(*val, m)
 			}
 		}
 
@@ -3982,22 +4007,22 @@ func ToSliceOfMapE(obj interface{}) (val *SliceOfMap, err error) {
 	case *InterSlice:
 		if x != nil {
 			for _, raw := range *x {
-				var m *SliceOfMap
-				if m, err = ToSliceOfMapE(raw); err != nil {
+				var m *StringMap
+				if m, err = ToStringMapE(raw); err != nil {
 					return
 				}
-				*val = append(*val, *m...)
+				*val = append(*val, m)
 			}
 		}
 	case *[]InterSlice:
 		if x != nil {
 			for i := range *x {
 				for _, raw := range (*x)[i] {
-					var m *SliceOfMap
-					if m, err = ToSliceOfMapE(raw); err != nil {
+					var m *StringMap
+					if m, err = ToStringMapE(raw); err != nil {
 						return
 					}
-					*val = append(*val, *m...)
+					*val = append(*val, m)
 				}
 			}
 		}
@@ -4006,11 +4031,11 @@ func ToSliceOfMapE(obj interface{}) (val *SliceOfMap, err error) {
 			for i := range *x {
 				if (*x)[i] != nil {
 					for _, raw := range *((*x)[i]) {
-						var m *SliceOfMap
-						if m, err = ToSliceOfMapE(raw); err != nil {
+						var m *StringMap
+						if m, err = ToStringMapE(raw); err != nil {
 							return
 						}
-						*val = append(*val, *m...)
+						*val = append(*val, m)
 					}
 				}
 			}
@@ -4022,39 +4047,71 @@ func ToSliceOfMapE(obj interface{}) (val *SliceOfMap, err error) {
 		if x != nil {
 			val = x
 		}
+	case *[]*StringMap:
+		if x != nil {
+			m := SliceOfMap(*x)
+			val = &m
+		}
+	case *StringMap:
+		if x != nil {
+			*val = append(*val, x)
+		}
 	case *map[string]interface{}:
 		if x != nil {
-			*val = append(*val, *x)
+			var m *StringMap
+			if m, err = ToStringMapE(*x); err != nil {
+				return
+			}
+			*val = append(*val, m)
 		}
 	case *map[string]string:
 		if x != nil {
-			new := map[string]interface{}{}
-			for k, v := range *x {
-				new[k] = v
+			var m *StringMap
+			if m, err = ToStringMapE(*x); err != nil {
+				return
 			}
-			*val = append(*val, new)
+			*val = append(*val, m)
 		}
 
 	// []map[string]interface{}
 	//----------------------------------------------------------------------------------------------
 	case *[]map[string]interface{}:
 		if x != nil {
-			v := SliceOfMap(*x)
-			val = &v
+			for _, raw := range *x {
+				var m *StringMap
+				if m, err = ToStringMapE(raw); err != nil {
+					return
+				}
+				*val = append(*val, m)
+			}
 		}
 	case *[]map[string]string:
 		if x != nil {
 			for _, raw := range *x {
-				var m *SliceOfMap
-				if m, err = ToSliceOfMapE(raw); err != nil {
+				var m *StringMap
+				if m, err = ToStringMapE(raw); err != nil {
 					return
 				}
-				*val = append(*val, *m...)
+				*val = append(*val, m)
 			}
 		}
-
+	case *[]map[interface{}]interface{}:
+		if x != nil {
+			for _, raw := range *x {
+				var m *StringMap
+				if m, err = ToStringMapE(raw); err != nil {
+					return
+				}
+				*val = append(*val, m)
+			}
+		}
 	default:
-		err = errors.Errorf("failed to convert type %T to a MapString", x)
+		var m *StringMap
+		if m, err = ToStringMapE(x); err != nil {
+			err = errors.Errorf("failed to convert type %T to a SliceOfMap", x)
+		} else {
+			*val = append(*val, m)
+		}
 	}
 
 	return
@@ -4719,6 +4776,7 @@ func ToStringMapE(obj interface{}) (val *StringMap, err error) {
 				val.Set(k.Interface(), v.MapIndex(k).Interface())
 			}
 
+		// unhandled types
 		default:
 			err = errors.Errorf("unable to convert type %T to a StringMap", x)
 			return
@@ -4953,6 +5011,18 @@ func ToStringSliceE(obj interface{}) (val *StringSlice, err error) {
 	case []*Object:
 		for i := range x {
 			*val = append(*val, ToString(x[i]))
+		}
+
+	// SliceOfMap
+	// Extract all the StringMap keys
+	//----------------------------------------------------------------------------------------------
+	case SliceOfMap:
+		for i := range x {
+			*val = append(*val, x[i].Keys().ToStrs()...)
+		}
+	case []*StringMap:
+		for i := range x {
+			*val = append(*val, x[i].Keys().ToStrs()...)
 		}
 
 	// Str
