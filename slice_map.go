@@ -196,11 +196,10 @@ func (p *SliceOfMap) Copy(indices ...int) (new ISlice) {
 	return NewSliceOfMap(x)
 }
 
-// Count the number of elements in this Slice equal to the given element.
-func (p *SliceOfMap) Count(elem interface{}) (cnt int) {
-	if y, ok := elem.(string); ok {
-		cnt = p.CountW(func(x O) bool { return ExB(x.(string) == y) })
-	}
+// Count the number of elements in this Slice that contain the given key
+func (p *SliceOfMap) Count(key interface{}) (cnt int) {
+	k := ToString(key)
+	cnt = p.CountW(func(x O) bool { return ToStringMap(x).Exists(k) })
 	return
 }
 

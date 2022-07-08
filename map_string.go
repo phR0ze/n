@@ -63,6 +63,20 @@ func (p *StringMap) Add(key, val interface{}) *StringMap {
 	return p
 }
 
+// At gets the key value pair for the given index location
+func (p *StringMap) At(i int) (key string, val *Object) {
+	val = &Object{}
+	if p == nil {
+		return
+	}
+	if i = absIndex(len(*p), i); i == -1 {
+		return
+	}
+	key = ToString((*p)[i].Key)
+	val.o = (*p)[i].Value
+	return
+}
+
 // Clear modifies this Map to clear out all key-value pairs and returns a reference to this Map.
 func (p *StringMap) Clear() IMap {
 	if p == nil {
