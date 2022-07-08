@@ -115,8 +115,8 @@ func Map(obj interface{}) (new *StringMap) {
 
 // MergeStringMap b into a at location and returns the new modified a, b takes higher precedence and will override a.
 // Only merges map types by key recursively, does not attempt to merge lists.
-func MergeStringMap(a, b map[string]interface{}, location ...string) map[string]interface{} {
-	return ToStringMap(a).MergeG(ToStringMap(b))
+func MergeStringMap(a, b map[string]interface{}, selector ...string) map[string]interface{} {
+	return ToStringMap(a).MergeG(ToStringMap(b), selector...)
 }
 
 // IdxFromSelector splits the given array index selector into individual components.
