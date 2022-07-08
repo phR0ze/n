@@ -9,8 +9,8 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
+	yaml "gopkg.in/yaml.v2"
 )
 
 var gUseLocalTime bool
@@ -391,6 +391,16 @@ func DeReference(obj interface{}) interface{} {
 	case *[]*InterSlice:
 		if x == nil {
 			return []*InterSlice{}
+		}
+		return *x
+
+	// yaml.MapSlice
+	//---------------------------------------------------------------------------------
+	case yaml.MapSlice:
+		return x
+	case *yaml.MapSlice:
+		if x == nil {
+			return yaml.MapSlice{}
 		}
 		return *x
 
@@ -1349,6 +1359,13 @@ func Reference(obj interface{}) interface{} {
 	case *[]Object:
 		return x
 	case *[]*Object:
+		return x
+
+	// yaml.MapSlice
+	//---------------------------------------------------------------------------------
+	case yaml.MapSlice:
+		return &x
+	case *yaml.MapSlice:
 		return x
 
 	// Str
@@ -3956,9 +3973,7 @@ func ToMapSliceE(obj interface{}) (val *MapSlice, err error) {
 				if m, err = ToMapSliceE(raw); err != nil {
 					return
 				}
-				for _, v := range *m {
-					*val = append(*val, v)
-				}
+				*val = append(*val, *m...)
 			}
 		}
 
@@ -3971,9 +3986,7 @@ func ToMapSliceE(obj interface{}) (val *MapSlice, err error) {
 				if m, err = ToMapSliceE(raw); err != nil {
 					return
 				}
-				for _, v := range *m {
-					*val = append(*val, v)
-				}
+				*val = append(*val, *m...)
 			}
 		}
 	case *[]InterSlice:
@@ -3984,9 +3997,7 @@ func ToMapSliceE(obj interface{}) (val *MapSlice, err error) {
 					if m, err = ToMapSliceE(raw); err != nil {
 						return
 					}
-					for _, v := range *m {
-						*val = append(*val, v)
-					}
+					*val = append(*val, *m...)
 				}
 			}
 		}
@@ -3999,9 +4010,7 @@ func ToMapSliceE(obj interface{}) (val *MapSlice, err error) {
 						if m, err = ToMapSliceE(raw); err != nil {
 							return
 						}
-						for _, v := range *m {
-							*val = append(*val, v)
-						}
+						*val = append(*val, *m...)
 					}
 				}
 			}
@@ -4040,9 +4049,7 @@ func ToMapSliceE(obj interface{}) (val *MapSlice, err error) {
 				if m, err = ToMapSliceE(raw); err != nil {
 					return
 				}
-				for _, v := range *m {
-					*val = append(*val, v)
-				}
+				*val = append(*val, *m...)
 			}
 		}
 
@@ -4560,7 +4567,7 @@ func ToStringMapE(obj interface{}) (val *StringMap, err error) {
 	//----------------------------------------------------------------------------------------------
 	case *[]byte:
 		if x != nil && len(*x) != 0 {
-			m := map[string]interface{}{}
+			m := yaml.MapSlice{}
 			if err = yaml.Unmarshal(*x, &m); err != nil {
 				err = errors.Wrap(err, "failed to unmarshal bytes into StringMap")
 				return
@@ -4578,8 +4585,9 @@ func ToStringMapE(obj interface{}) (val *StringMap, err error) {
 		}
 	case *map[string]interface{}:
 		if x != nil {
-			y := StringMap(*x)
-			val = &y
+			for k, v := range *x {
+				val.Set(ToString(k), v)
+			}
 		}
 	case *map[string]string:
 		if x != nil {
@@ -4677,7 +4685,7 @@ func ToStringMapE(obj interface{}) (val *StringMap, err error) {
 	//----------------------------------------------------------------------------------------------
 	case *string:
 		if x != nil {
-			m := map[string]interface{}{}
+			m := yaml.MapSlice{}
 			if err = yaml.Unmarshal([]byte(*x), &m); err != nil {
 				err = errors.Wrap(err, "failed to unmarshal string into StringMap")
 				return
@@ -4687,6 +4695,11 @@ func ToStringMapE(obj interface{}) (val *StringMap, err error) {
 
 	// StringMap
 	//----------------------------------------------------------------------------------------------
+	case *yaml.MapSlice:
+		if x != nil {
+			y := StringMap(*x)
+			val = &y
+		}
 	case *StringMap:
 		if x != nil {
 			val = x
@@ -4715,13 +4728,19 @@ func ToStringMapE(obj interface{}) (val *StringMap, err error) {
 	return
 }
 
-// ToStringMapG converts an interface to a map[string]interface{} type. Supports converting yaml string as well.
+// ToStringMapG converts an interface to a map[string]interface{} type
 func ToStringMapG(obj interface{}) map[string]interface{} {
 	x, _ := ToStringMapE(obj)
-	if x == nil {
-		return map[string]interface{}{}
-	}
 	return x.G()
+}
+
+// ToStringMapGE converts an interface to a map[string]interface{} type
+func ToStringMapGE(obj interface{}) (val map[string]interface{}, err error) {
+	var m *StringMap
+	if m, err = ToStringMapE(obj); err == nil {
+		return m.GE()
+	}
+	return
 }
 
 // ToStringSlice convert an interface to a StringSlice type.
@@ -5759,16 +5778,4 @@ func ToUint64E(obj interface{}) (val uint64, err error) {
 		err = errors.Errorf("unable to convert type %T to uint64", x)
 	}
 	return
-}
-
-// YAMLCont checks if the given value is a valid YAML container
-func YAMLCont(obj interface{}) bool {
-	switch obj.(type) {
-	case map[string]interface{}, *StringMap:
-		return true
-	case []interface{}, []string, []int:
-		return true
-	default:
-		return false
-	}
 }

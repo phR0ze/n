@@ -5,12 +5,13 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/ghodss/yaml"
 	"github.com/phR0ze/n/pkg/sys"
 	"github.com/pkg/errors"
+
+	yaml "gopkg.in/yaml.v2"
 )
 
-// Marshal wraps the ghodss/yaml.Marshal
+// Marshal wraps the yaml.Marshal
 func Marshal(o interface{}) ([]byte, error) {
 	return yaml.Marshal(o)
 }
@@ -38,8 +39,11 @@ func ReadYAML(filepath string) (obj map[string]interface{}, err error) {
 }
 
 // Unmarshal wraps the ghodss/yaml.Unmarshal
-func Unmarshal(y []byte, o interface{}) error {
-	return yaml.Unmarshal(y, o)
+func Unmarshal(y []byte, obj interface{}) error {
+	if v, ok := obj.(*yaml.MapSlice); ok {
+		return yaml.Unmarshal(y, v)
+	}
+	return yaml.Unmarshal(y, obj)
 }
 
 // WriteYAML converts the given obj interface{} into yaml then writes to disk
@@ -58,7 +62,12 @@ func WriteYAML(filepath string, obj interface{}, perms ...uint32) (err error) {
 
 	// Convert data structure into a yaml string
 	var data []byte
-	if data, err = yaml.Marshal(obj); err != nil {
+	if v, ok := obj.(yaml.MapSlice); ok {
+		data, err = yaml.Marshal(v)
+	} else {
+		data, err = yaml.Marshal(obj)
+	}
+	if err != nil {
 		err = errors.Wrapf(err, "failed to marshal object %T", obj)
 		return
 	}

@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Object is a wrapper around an interface{} value wproviding a number of export methods
+// Object is a wrapper around an interface{} value providing a number of export methods
 // for casting and converting to other types via the excellent cast package.
 type Object struct {
 	o interface{} // value

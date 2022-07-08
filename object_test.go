@@ -9,7 +9,7 @@ import (
 
 func TestObject_Query(t *testing.T) {
 	obj := NewStringMapV(map[string]interface{}{"one": map[string]interface{}{"two": "2"}}).Query("one")
-	assert.Equal(t, &StringMap{"two": "2"}, obj.ToStringMap())
+	assert.Equal(t, M().Add("two", "2"), obj.ToStringMap())
 	assert.Equal(t, "2", obj.Query("two").ToString())
 
 	// Check invalid keys

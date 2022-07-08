@@ -11,19 +11,19 @@ import (
 //--------------------------------------------------------------------------------------------------
 func ExampleMap() {
 	fmt.Println(Map(map[string]interface{}{"k": "v"}))
-	// Output: &map[k:v]
+	// Output: &[{k v}]
 }
 
 func TestMap(t *testing.T) {
 
 	// map[string]bool
 	{
-		assert.Equal(t, &StringMap{"1": true}, Map(map[string]bool{"1": true}))
+		assert.Equal(t, M().Add("1", true), Map(map[string]bool{"1": true}))
 	}
 
 	// float64: map[string]interface{}
 	{
-		assert.Equal(t, &StringMap{"foo": map[string]interface{}{"bar": float64(1)}}, Map("foo:\n bar: 1\n"))
+		assert.Equal(t, M().Add("foo", M().Add("bar", int(1))), Map("foo:\n bar: 1\n"))
 	}
 
 	// string: map[string]interface{}

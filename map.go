@@ -38,8 +38,8 @@ type IMap interface {
 	// Empty() bool                                      // Empty tests if this Map is empty.
 	Generic() bool                                           // Generic returns true if the underlying implementation uses reflection
 	Get(key interface{}) (val *Object)                       // Get returns the value at the given key location. Returns empty *Object if not found.
-	Inject(key string, val interface{}) IMap                 // Inject sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
-	InjectE(key string, val interface{}) (m IMap, err error) // InjectE sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
+	Update(key string, val interface{}) IMap                 // Update sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
+	UpdateE(key string, val interface{}) (m IMap, err error) // UpdateE sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
 	// Join(separator ...string) (str *Object)           // Join converts each element into a string then joins them together using the given separator or comma by default.
 	Keys() ISlice                          // Keys returns all the keys in this Map as a Slice of the key type.
 	Len() int                              // Len returns the number of elements in this Map.
@@ -89,12 +89,11 @@ type IMap interface {
 
 // Map provides a generic way to work with Map types. It does this by wrapping Go types
 // directly for optimized types thus avoiding reflection processing overhead and making a plethora
-// of Map methods available. Non optimized types will fall back on reflection to generically
-// handle the type incurring the full 10x reflection processing overhead. Defaults to StringMap
-// type if nothing is given.
+// of Map methods available. Non-optimized types will fall back on reflection to generically
+// handle the type incurring the full 10x reflection processing overhead.
 //
 // Optimized: map[string]interface{}
-func Map(obj interface{}) (new IMap) {
+func Map(obj interface{}) (new *StringMap) {
 	o := Reference(obj)
 	switch x := o.(type) {
 
@@ -116,83 +115,8 @@ func Map(obj interface{}) (new IMap) {
 
 // MergeStringMap b into a at location and returns the new modified a, b takes higher precedence and will override a.
 // Only merges map types by key recursively, does not attempt to merge lists.
-func MergeStringMap(a, b map[string]interface{}, location ...string) map[string]interface{} {
-	a2 := a
-
-	// 1. Handle location if given
-	key := ""
-	if len(location) > 0 {
-		key = location[0]
-		var val interface{}
-		val = a
-
-		// Process keys from left to right
-		keys, err := KeysFromSelector(key)
-		if err == nil {
-			for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
-				key := ko.ToString()
-				m := ToStringMap(val)
-
-				// Set a new map as the value if not a map
-				if v, ok := (*m)[key]; ok {
-					if !ToStringMap(v).Any() {
-						m.Set(key, map[string]interface{}{})
-					}
-				} else {
-					m.Set(key, map[string]interface{}{})
-				}
-				val = (*m)[key]
-			}
-		}
-		a2 = ToStringMap(val).G()
-	}
-
-	// 2. Merge at location
-	switch {
-	case a2 == nil && b == nil:
-		return map[string]interface{}{}
-	case a2 == nil:
-		return b
-	case b == nil:
-		return a2
-	}
-
-	for k, v := range b {
-		var av, bv interface{}
-
-		// Ensure b value is Go type
-		if val, ok := v.(*StringMap); ok {
-			bv = val.G()
-		} else {
-			bv = v
-		}
-
-		// a doesn't have the key so just set b's value
-		if val, exists := a2[k]; !exists {
-			a2[k] = bv
-		} else {
-			if _val, ok := val.(*StringMap); ok {
-				av = _val.G()
-			} else {
-				av = val
-			}
-
-			if bc, ok := bv.(map[string]interface{}); ok {
-				if ac, ok := av.(map[string]interface{}); ok {
-					// a and b both contain the key and are both submaps so recurse
-					a2[k] = MergeStringMap(ac, bc)
-				} else {
-					// a is not a map so just override with b
-					a2[k] = bv
-				}
-			} else {
-				// b is not a map so just override a, no need to recurse
-				a2[k] = bv
-			}
-		}
-	}
-
-	return a
+func MergeStringMap(a, b map[string]interface{}, selector ...string) map[string]interface{} {
+	return ToStringMap(a).MergeG(ToStringMap(b), selector...)
 }
 
 // IdxFromSelector splits the given array index selector into individual components.

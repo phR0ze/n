@@ -2,22 +2,24 @@ package n
 
 import (
 	"github.com/phR0ze/n/pkg/enc/json"
-	"github.com/phR0ze/n/pkg/enc/yaml"
+	yaml_enc "github.com/phR0ze/n/pkg/enc/yaml"
 	"github.com/pkg/errors"
+	yaml "gopkg.in/yaml.v2"
 )
 
-// StringMap implements the Map interface providing a generic way to work with map types
+// StringMap implements the IMap interface providing a generic way to work with map types
 // including convenience methods on par with rapid development languages. This type is
-// also specifically designed to handle YAML constructs.
-type StringMap map[string]interface{}
+// also specifically designed to handle ordered YAML constructs to work with YAML files
+// with minimal structural changes i.e. no mass sorting changes.
+type StringMap yaml.MapSlice
 
 // M is an alias to NewStringMap
-func M(obj interface{}) *StringMap {
-	return ToStringMap(obj)
+func M() *StringMap {
+	return &StringMap{}
 }
 
 // MV is an alias to NewStringMapV
-func MV(m ...map[string]interface{}) *StringMap {
+func MV(m ...interface{}) *StringMap {
 	return NewStringMapV(m...)
 }
 
@@ -26,16 +28,16 @@ func NewStringMap(obj interface{}) *StringMap {
 	return ToStringMap(obj)
 }
 
-// NewStringMapV creates a new empty StringMap if nothing given else simply
-// casts the given map to StringMap.
-func NewStringMapV(m ...map[string]interface{}) *StringMap {
-	var new StringMap
+// NewStringMapV creates a new empty StringMap if nothing given else
+// converts the given value into a StringMap.
+func NewStringMapV(m ...interface{}) *StringMap {
+	var new *StringMap
 	if len(m) == 0 {
-		new = StringMap{}
+		new = &StringMap{}
 	} else {
-		new = *ToStringMap(m[0])
+		new = ToStringMap(m[0])
 	}
-	return &new
+	return new
 }
 
 // Any tests if this Map is not empty or optionally if it contains any of the given variadic keys.
@@ -43,16 +45,22 @@ func (p *StringMap) Any(keys ...interface{}) bool {
 	if p == nil || len(*p) == 0 {
 		return false
 	}
-	if len(keys) == 0 {
+	ks := ToStrs(keys)
+	if len(ks) == 0 {
 		return true
 	}
-	for i := 0; i < len(keys); i++ {
-		key := ToString(keys[i])
-		if _, ok := (*p)[key]; ok {
+	for _, k := range ks {
+		if p.Exists(k) {
 			return true
 		}
 	}
 	return false
+}
+
+// Add the value to the map if it doesn't exist or update value if it does
+func (p *StringMap) Add(key, val interface{}) *StringMap {
+	p.Set(key, val)
+	return p
 }
 
 // Clear modifies this Map to clear out all key-value pairs and returns a reference to this Map.
@@ -75,12 +83,15 @@ func (p *StringMap) Copy(keys ...interface{}) (new IMap) {
 	// Copy target keys or all keys
 	ks := ToStrs(keys)
 	if len(ks) == 0 {
-		for k := range *p {
-			(*val)[k] = (*p)[k]
-		}
+		(*val) = append(*val, (*p)...)
 	} else {
 		for _, k := range ks {
-			(*val)[k] = (*p)[k]
+			for i := 0; i < len(*p); i++ {
+				if k == ToString((*p)[i].Key) {
+					(*val) = append(*val, (*p)[i])
+					break
+				}
+			}
 		}
 	}
 	return val
@@ -93,26 +104,32 @@ func (p *StringMap) Delete(key interface{}) (val *Object) {
 		return
 	}
 	k := ToString(key)
-	if v, ok := (*p)[k]; ok {
-		val.o = v
-		delete(*p, k)
+	for i := 0; i < len(*p); i++ {
+		if k == ToString((*p)[i].Key) {
+			val.o = (*p)[i].Value
+			if i+1 < len(*p) {
+				*p = append((*p)[:i], (*p)[i+1:]...)
+			} else {
+				*p = (*p)[:i]
+			}
+			break
+		}
 	}
 	return
 }
 
 // DeleteM modifies this Map to delete the indicated key-value pair and returns a reference to this Map rather than the key-value pair.
 func (p *StringMap) DeleteM(key interface{}) IMap {
-	if p == nil {
-		return p
-	}
-	k := ToString(key)
-	delete(*p, k)
+	p.Delete(key)
 	return p
 }
 
 // Dump convert the StringMap into a pretty printed yaml string
 func (p *StringMap) Dump() (pretty string) {
-	if yml, err := yaml.Marshal(p.G()); err == nil {
+	if p == nil {
+		return
+	}
+	if yml, err := yaml.Marshal(yaml.MapSlice(*p)); err == nil {
 		pretty = string(yml)
 	}
 	return
@@ -120,22 +137,48 @@ func (p *StringMap) Dump() (pretty string) {
 
 // Exists checks if the given key exists in this Map.
 func (p *StringMap) Exists(key interface{}) bool {
-	if p == nil {
-		return false
-	}
-	k := ToString(key)
-	if _, ok := (*p)[k]; ok {
-		return true
-	}
-	return false
+	return !p.Get(key).Nil()
 }
 
 // G returns the underlying data structure as a Go type.
 func (p *StringMap) G() map[string]interface{} {
+	val, _ := p.GE()
+	return val
+}
+
+// GE returns the underlying data structure as a Go type
+func (p *StringMap) GE() (val map[string]interface{}, err error) {
+	val = map[string]interface{}{}
 	if p == nil {
-		return map[string]interface{}{}
+		return
 	}
-	return map[string]interface{}(*p)
+	for _, o := range *p {
+		k := ToString(o.Key)
+		v := DeReference(o.Value)
+		switch x := v.(type) {
+		case StringMap, yaml.MapSlice:
+			var m map[string]interface{}
+			if m, err = ToStringMap(x).GE(); err != nil {
+				return
+			}
+			val[k] = m
+		case []interface{}:
+			for i := 0; i < len(x); i++ {
+				switch x2 := x[i].(type) {
+				case StringMap, yaml.MapSlice:
+					var m map[string]interface{}
+					if m, err = ToStringMap(x2).GE(); err != nil {
+						return
+					}
+					x[i] = m
+				}
+			}
+			val[k] = x
+		default:
+			val[k] = v
+		}
+	}
+	return
 }
 
 // Generic returns true if the underlying implementation uses reflection
@@ -150,36 +193,50 @@ func (p *StringMap) Get(key interface{}) (val *Object) {
 		return
 	}
 	k := ToString(key)
-	if v, ok := (*p)[k]; ok {
-		val.o = v
+	for i := 0; i < len(*p); i++ {
+		if k == ToString((*p)[i].Key) {
+			val.o = (*p)[i].Value
+			break
+		}
 	}
 	return
 }
 
-// Inject sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
-func (p *StringMap) Inject(key string, val interface{}) IMap {
-	m, _ := p.InjectE(key, val)
+// Update sets the value for the given selector, using jq type selectors. Returns a reference to this Map.
+func (p *StringMap) Update(selector string, val interface{}) IMap {
+	m, _ := p.UpdateE(selector, val)
 	return m
 }
 
-// InjectE sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
-func (p *StringMap) InjectE(key string, val interface{}) (m IMap, err error) {
+// UpdateE sets the value for the given selector, using jq type selectors. Returns a reference to this Map.
+func (p *StringMap) UpdateE(selector string, val interface{}) (m IMap, err error) {
 	if p == nil {
 		p = NewStringMapV()
 	}
 	m = p
+	val = convertValue(val)
 
 	// Process keys from left to right
 	var keys *StringSlice
-	if keys, err = KeysFromSelector(key); err != nil {
+	if keys, err = KeysFromSelector(selector); err != nil {
 		return
 	}
 
-	// Inject at root as no keys were given
+	// Merge at root as no keys were given
 	if !keys.Any() {
 		if x, e := ToStringMapE(val); e == nil {
-			for k, v := range *x {
-				(*p)[k] = v
+			for i := 0; i < len(*x); i++ {
+				found := false
+				for j := 0; j < len(*p); j++ {
+					if ToString((*x)[i].Key) == ToString((*p)[j].Key) {
+						(*p)[j].Value = (*x)[i].Value
+						found = true
+						break
+					}
+				}
+				if !found {
+					p.Set((*x)[i].Key, (*x)[i].Value)
+				}
 			}
 		} else {
 			err = errors.Errorf("invalid selector for the type of value given, '%T'", val)
@@ -187,76 +244,117 @@ func (p *StringMap) InjectE(key string, val interface{}) (m IMap, err error) {
 		}
 	}
 
-	// Inject at given selector location
-	obj := &Object{o: p}
+	var pk interface{}
+	var m1, m2 *StringMap
+	cx, px := interface{}(p), interface{}(p)
 	for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
 		key := ko.ToStr()
 
-		// All array selector is handled on previous loop
-		if key.A() == "[]" {
-			break
-		}
-
-		switch o := obj.o.(type) {
+		switch x := cx.(type) {
 
 		// Identifier Index: .foo, .foo.bar
-		case map[string]interface{}, *StringMap:
-			x := ToStringMap(o)
-
-			// Continue to drill or update and done
-			create := false
-			if keys.Any() && keys.First().A() != "[]" {
-				if v, ok := (*x)[key.A()]; ok {
-					if YAMLCont(v) {
-						obj.o = v
-					} else {
-						create = true
-					}
-				} else {
-					create = true
-				}
-			} else {
-				x.Set(key.A(), val)
+		case map[string]interface{}, *StringMap, StringMap, yaml.MapSlice:
+			if m1, err = ToStringMapE(x); err != nil {
+				return
 			}
 
-			// Doesn't exist so create and drill further
-			if create {
-				x.Set(key.A(), map[string]interface{}{})
-				obj.o = (*x)[key.A()]
+			// Continue to drill or update and done
+			addOrReplace := false
+			if keys.Any() {
+				if v := m1.Get(key); !v.Nil() {
+					if YAMLCont(v.O()) {
+						cx = v.O()
+						pk, px = key, m1
+					} else {
+						addOrReplace = true
+					}
+				} else {
+					addOrReplace = true
+				}
+			} else {
+				m1.Set(key, val)
+				if px != nil && pk != nil {
+					if v, ok := px.([]interface{}); ok {
+						v[ToInt(pk)] = yaml.MapSlice(*m1)
+					} else {
+						if m2, err = ToStringMapE(px); err != nil {
+							return
+						}
+						m2.Set(pk, m1)
+					}
+				}
+			}
+			if addOrReplace {
+				m1.Set(key, M())
+				cx = m1.Get(key).O()
+				pk, px = key, m1
 			}
 
 		// Array Index/Iterator: .[2], .[-1], .[], .[key==val]
 		case []interface{}:
-			x := ToInterSlice(o)
 
 			// Get array selectors
 			var i int
 			var k, v string
-			if i, k, v, err = IdxFromSelector(key.A(), len(o)); err != nil {
-				obj.o = nil
+			if i, k, v, err = IdxFromSelector(key.A(), len(x)); err != nil {
+				err = errors.Errorf("invalid array index selector %v", key.A())
+				cx = nil
 				return
 			}
 
-			// Select by key==value, e.g. .[k==v]
-			if k != "" && v != "" {
-				idx := -1
-				x.EachIE(func(i int, y O) error {
-					if hit := ToStringMap(y).Get(k); !hit.Nil() && hit.A() == v {
-						idx = i
-						return Break
+			// Select single element by key==value or index, e.g. .[k==v], [i]
+			if (k != "" && v != "") || i != -1 {
+
+				// Determine index
+				if k != "" && v != "" {
+					for j := 0; j < len(x); j++ {
+						if m1, err = ToStringMapE(x[j]); err != nil {
+							return
+						}
+						if m1.Get(k).A() == v {
+							i = j
+							break
+						}
 					}
-					return nil
-				})
-				i = idx // reuse code below for indexing
+				}
+
+				// Move through or update index
+				if keys.Any() {
+					cx = x[i]
+					pk, px = i, x
+				} else {
+					x[i] = val
+					if px != nil && pk != nil {
+						if v, ok := px.([]interface{}); ok {
+							v[ToInt(pk)] = x
+						} else {
+							if m2, err = ToStringMapE(px); err != nil {
+								return
+							}
+							m2.Set(pk, x)
+						}
+					}
+				}
 			}
 
-			// Index in if the value is a valid integer, e.g. .[2], .[-1]
-			// -1 indicates all should be selected.
-			if i != -1 {
+			// Select all elements by .[] and translated to a -1 at this level
+			if i == -1 {
 				if keys.Any() {
-					obj.o = (*x)[i]
+					for j := 0; j < len(x); j++ {
+						var o IMap
+						if o, err = ToStringMap(x[j]).UpdateE(keys.Join(".").A(), val); err != nil {
+							return
+						}
+						if m1, err = ToStringMapE(o); err != nil {
+							return
+						}
+						x[j] = yaml.MapSlice(*m1)
+					}
+					keys.Clear()
 				} else {
-					x.Set(i, val)
+					for j := 0; j < len(x); j++ {
+						x[j] = val
+					}
 				}
 			}
 		}
@@ -271,8 +369,8 @@ func (p *StringMap) InjectE(key string, val interface{}) (m IMap, err error) {
 func (p *StringMap) Keys() ISlice {
 	keys := NewStringSliceV()
 	if p != nil {
-		for key := range *p {
-			*keys = append(*keys, key)
+		for i := 0; i < len(*p); i++ {
+			*keys = append(*keys, ToString((*p)[i].Key))
 		}
 	}
 	return keys
@@ -293,157 +391,104 @@ func (p *StringMap) M() (m *StringMap) {
 
 // MG is an alias ToStringMapG
 func (p *StringMap) MG() (m map[string]interface{}) {
-	return p.O().(map[string]interface{})
+	return p.G()
 }
 
-// Merge modifies this Map by overriding its values at location with the given map where they both exist and returns a reference to this Map.
-// Converting all string maps into *StringMap instances.
-func (p *StringMap) Merge(m IMap, location ...string) IMap {
-	p2 := p
+// Merge modifies this Map by overriding its values at selector with the given map
+// where they both exist and returns a reference to this Map. Converting all string
+// maps into *StringMap instances.
+// Note: this function is unable to traverse through lists
+func (p *StringMap) Merge(m IMap, selector ...string) IMap {
+	x1 := p
 
-	// 1. Handle location if given
-	key := ""
-	if len(location) > 0 {
-		key = location[0]
-		var val interface{}
-		val = *p
+	// 1. Select target if given
+	var pk1, px1 interface{}
+	if len(selector) > 0 {
+		key := selector[0]
+		cx1 := interface{}(*p)
 
 		// Process keys from left to right
 		keys, err := KeysFromSelector(key)
 		if err == nil {
 			for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
 				key := ko.ToString()
-				m := ToStringMap(val)
+				m := ToStringMap(cx1)
 
 				// Set a new map as the value if not a map
-				if v, ok := (*m)[key]; ok {
-					if !ToStringMap(v).Any() {
-						m.Set(key, map[string]interface{}{})
+				v := m.Get(key)
+				if v.Nil() || !YAMLMap(v.O()) {
+					m.Set(key, M())
+					v = m.Get(key)
+					if pk1 != nil && px1 != nil {
+						ToStringMap(px1).Set(pk1, m)
 					}
-				} else {
-					m.Set(key, map[string]interface{}{})
 				}
-				val = (*m)[key]
+				pk1, px1 = key, cx1
+				cx1 = v.O()
 			}
 		}
-		p2 = ToStringMap(val)
+		x1 = ToStringMap(cx1)
 	}
 
-	// 2. Merge at location
-	x, err := ToStringMapE(m)
+	// 2. Merge at selection or root
+	x2, err := ToStringMapE(m)
 	switch {
-	case p2 == nil && (err != nil || m == nil):
-		return NewStringMapV()
-	case p2 == nil:
-		return x
+	case x1 == nil && (err != nil || m == nil):
+		return M()
+	case x1 == nil:
+		return x2
 	case err != nil || m == nil:
-		return p2
+		return x1
 	}
 
-	for k, v := range *x {
-		var av, bv interface{}
+	for _, o := range *x2 {
+		k := o.Key
+		v2 := DeReference(o.Value)
 
-		// Ensure b value is n type
-		if val, ok := v.(map[string]interface{}); ok {
-			bv = ToStringMap(val)
+		// x1 doesn't have the key so just set x2's value
+		v1 := x1.Get(k)
+		if v1.Nil() {
+			x1.Set(k, v2)
 		} else {
-			bv = v
-		}
-
-		// a doesn't have the key so just set b's value
-		if val, exists := (*p2)[k]; !exists {
-			(*p2)[k] = bv
-		} else {
-			if _val, ok := val.(map[string]interface{}); ok {
-				av = ToStringMap(_val)
+			if YAMLMap(v1.o) && YAMLMap(v2) {
+				// x1 and x2 both contain the key and are both map types so recurse
+				x1.Set(k, ToStringMap(v1.o).Merge(ToStringMap(v2)))
 			} else {
-				av = val
-			}
-
-			if bc, ok := bv.(*StringMap); ok {
-				if ac, ok := av.(*StringMap); ok {
-					// a and b both contain the key and are both submaps so recurse
-					(*p2)[k] = ac.Merge(bc)
-				} else {
-					// a is not a map so just override with b
-					(*p2)[k] = bv
-				}
-			} else {
-				// b is not a map so just override a, no need to recurse
-				(*p2)[k] = bv
+				// x1 or x2 is not a map so just override
+				x1.Set(k, v2)
 			}
 		}
+	}
+	if len(selector) > 0 {
+		p.Update(selector[0], x1)
 	}
 
 	return p
 }
 
-// MergeG modifies this Map by overriding its values with the given map location where they both exist and returns the Go type
-func (p *StringMap) MergeG(m IMap, location ...string) map[string]interface{} {
-	p2 := p
-
-	// 1. Handle location if given
-	key := ""
-	if len(location) > 0 {
-		key = location[0]
-		var val interface{}
-		val = *p
-
-		// Process keys from left to right
-		keys, err := KeysFromSelector(key)
-		if err == nil {
-			for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
-				key := ko.ToString()
-				m := ToStringMap(val)
-
-				// Set a new map as the value if not a map
-				if v, ok := (*m)[key]; ok {
-					if !ToStringMap(v).Any() {
-						m.Set(key, map[string]interface{}{})
-					}
-				} else {
-					m.Set(key, map[string]interface{}{})
-				}
-				val = (*m)[key]
-			}
-		}
-		p2 = ToStringMap(val)
-	}
-
-	// 2. Merge at location
-	x, err := ToStringMapE(m)
-	switch {
-	case p2 == nil && (err != nil || m == nil):
-		return NewStringMapV().G()
-	case p2 == nil:
-		return x.G()
-	case err != nil || m == nil:
-		return p2.G()
-	}
-
-	// Call type specific function helper
-	*p2 = MergeStringMap(*p2, *x)
-	return p.G()
+// Merge modifies this Map by overriding its values at selector with the given map
+// where they both exist and returns a reference to this Map. Converting all string
+// maps into *StringMap instances.
+// Note: this function is unable to traverse through lists
+func (p *StringMap) MergeG(m IMap, selector ...string) map[string]interface{} {
+	return p.Merge(m, selector...).MG()
 }
 
 // O returns the underlying data structure as is.
 func (p *StringMap) O() interface{} {
-	if p == nil {
-		return map[string]interface{}{}
-	}
-	return map[string]interface{}(*p)
+	return p.G()
 }
 
-// Query returns the value at the given key location, using a jq type selectors. Returns empty *Object if not found.
+// Query returns the value for the given selector, using jq type selectors. Returns empty *Object if not found.
 // see dot notation from https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
-func (p *StringMap) Query(key string) (val *Object) {
-	val, _ = p.QueryE(key)
+func (p *StringMap) Query(selector string) (val *Object) {
+	val, _ = p.QueryE(selector)
 	return val
 }
 
-// QueryE returns the value at the given key location, using a jq type selectors. Returns empty *Object if not found.
+// QueryE returns the value for the given selector, using jq type selectors. Returns empty *Object if not found.
 // see dot notation from https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
-func (p *StringMap) QueryE(key string) (val *Object, err error) {
+func (p *StringMap) QueryE(selector string) (val *Object, err error) {
 	if p == nil || len(*p) == 0 {
 		err = errors.Errorf("failed to query empty map")
 		return
@@ -451,13 +496,10 @@ func (p *StringMap) QueryE(key string) (val *Object, err error) {
 
 	// Default object is self for identity case: .
 	val = &Object{o: p}
-	if p == nil {
-		return
-	}
 
 	// Process keys from left to right
 	var keys *StringSlice
-	if keys, err = KeysFromSelector(key); err != nil {
+	if keys, err = KeysFromSelector(selector); err != nil {
 		return
 	}
 	for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
@@ -466,9 +508,9 @@ func (p *StringMap) QueryE(key string) (val *Object, err error) {
 		switch x := val.o.(type) {
 
 		// Identifier Index: .foo, .foo.bar
-		case map[string]interface{}, *StringMap:
+		case map[string]interface{}, *StringMap, StringMap, yaml.MapSlice:
 			m := ToStringMap(x)
-			val.o = (*m)[key.A()]
+			val.o = m.Get(key).O()
 
 		// Array Index/Iterator: .[2], .[-1], .[], .[key==val]
 		case []interface{}:
@@ -477,28 +519,24 @@ func (p *StringMap) QueryE(key string) (val *Object, err error) {
 			var i int
 			var k, v string
 			if i, k, v, err = IdxFromSelector(key.A(), len(x)); err != nil {
+				err = errors.Errorf("invalid array index selector %v", key.A())
 				val.o = nil
 				return
 			}
 
 			// Select by key==value, e.g. .[k==v]
 			if k != "" && v != "" {
-				m := Slice(x).Select(func(x O) bool {
-					return ToStringMap(x).Get(k).A() == v
-				})
-				if m.Any() {
-					val.o = m.First().o
+				for j := 0; j < len(x); j++ {
+					m := ToStringMap(x[j])
+					if m.Get(k).A() == v {
+						val.o = m
+					}
 				}
 			}
 
-			// Index in if the value is a valid integer, e.g. .[2], .[-1]
-			// -1 indicates all should be selected.
+			// Index in if the value is a valid integer
 			if i != -1 {
-				if val.o = Slice(x).At(i).o; val.Nil() {
-					err = errors.Errorf("invalid array index %v", i)
-					val.o = nil
-					return
-				}
+				val.o = x[i]
 			}
 		}
 	}
@@ -508,15 +546,15 @@ func (p *StringMap) QueryE(key string) (val *Object, err error) {
 // Remove modifies this Map to delete the given key location, using jq type selectors
 // and returns a reference to this Map rather than the deleted value.
 // see dot notation from https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
-func (p *StringMap) Remove(key string) IMap {
-	_, _ = p.RemoveE(key)
+func (p *StringMap) Remove(selector string) IMap {
+	_, _ = p.RemoveE(selector)
 	return p
 }
 
 // RemoveE modifies this Map to delete the given key location, using jq type selectors
 // and returns a reference to this Map rather than the deleted value.
 // see dot notation from https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
-func (p *StringMap) RemoveE(key string) (m IMap, err error) {
+func (p *StringMap) RemoveE(selector string) (m IMap, err error) {
 	if p == nil {
 		p = NewStringMapV()
 	}
@@ -524,90 +562,119 @@ func (p *StringMap) RemoveE(key string) (m IMap, err error) {
 
 	// Process keys from left to right
 	var keys *StringSlice
-	if keys, err = KeysFromSelector(key); err != nil {
+	if keys, err = KeysFromSelector(selector); err != nil {
 		return
 	}
-
-	// Inject at given selector location
-	pk := ""
-	obj, pobj := interface{}(p), interface{}(p)
+	var pk interface{}
+	var m1, m2 *StringMap
+	cx, px := interface{}(p), interface{}(p)
 	for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
 		key := ko.ToStr()
 
-		switch o := obj.(type) {
+		switch x := cx.(type) {
 
 		// Identifier Index: .foo, .foo.bar
-		case map[string]interface{}, *StringMap:
-			x := ToStringMap(o)
-
-			// Continue to drill or remove and done
-			done := false
-			if keys.Any() {
-				if v, ok := (*x)[key.A()]; ok {
-					if YAMLCont(v) {
-						pobj = obj
-						pk = key.A()
-						obj = v
-					} else {
-						done = true
-					}
-				} else {
-					done = true
-				}
-			} else {
-				x.Delete(key.A())
+		case map[string]interface{}, *StringMap, StringMap, yaml.MapSlice:
+			if m1, err = ToStringMapE(x); err != nil {
+				return
 			}
 
-			// Key doesn't exist or is invalid type
-			if done {
-				return
+			// Continue to drill or remove and done
+			if keys.Any() {
+				cx = m1.Get(key).O()
+				pk = key
+				px = m1
+			} else {
+				m1.DeleteM(key)
+				if px != nil && pk != nil {
+					if v, ok := px.([]interface{}); ok {
+						v[ToInt(pk)] = yaml.MapSlice(*m1)
+					} else {
+						if m2, err = ToStringMapE(px); err != nil {
+							return
+						}
+						m2.Set(pk, m1)
+					}
+				}
 			}
 
 		// Array Index/Iterator: .[2], .[-1], .[], .[key==val]
 		case []interface{}:
-			x := ToInterSlice(o)
 
 			// Get array selectors
 			var i int
 			var k, v string
-			if i, k, v, err = IdxFromSelector(key.A(), len(o)); err != nil {
-				obj = nil
+			if i, k, v, err = IdxFromSelector(key.A(), len(x)); err != nil {
+				err = errors.Errorf("invalid array index selector %v", key.A())
+				cx = nil
 				return
 			}
 
-			// Select by key==value, e.g. .[k==v]
-			if k != "" && v != "" {
-				idx := -1
-				x.EachIE(func(i int, y O) error {
-					if hit := ToStringMap(y).Get(k); !hit.Nil() && hit.A() == v {
-						idx = i
-						return Break
+			// Select single element by key==value or index, e.g. .[k==v], [i]
+			if (k != "" && v != "") || i != -1 {
+
+				// Determine index
+				if k != "" && v != "" {
+					for j := 0; j < len(x); j++ {
+						if m1, err = ToStringMapE(x[j]); err != nil {
+							return
+						}
+						if m1.Get(k).A() == v {
+							i = j
+							break
+						}
 					}
-					return nil
-				})
-				if idx == -1 {
-					return
 				}
-				i = idx // reuse code below for indexing
+
+				// Move through or remove index
+				if keys.Any() {
+					cx = x[i]
+					pk = i
+					px = x
+				} else {
+					if i+1 < len(x) {
+						x = append(x[:i], x[i+1:]...)
+					} else {
+						x = x[:i]
+					}
+					if px != nil && pk != nil {
+						if v, ok := px.([]interface{}); ok {
+							v[ToInt(pk)] = x
+						} else {
+							if m2, err = ToStringMapE(px); err != nil {
+								return
+							}
+							m2.Set(pk, x)
+						}
+					}
+				}
 			}
 
-			// Index in if the value is a valid integer, e.g. .[2], .[-1]
-			// -1 indicates all should be selected.
-			if i == -1 && keys.Any() {
-				childKeys := keys.Copy()
-				for _, elem := range *x {
-					if _, err = ToStringMap(elem).RemoveE(childKeys.Join(".").A()); err != nil {
-						return
-					}
-				}
-				keys.Clear()
-			} else {
+			// Select all elements by .[] and translated to a -1 at this level
+			if i == -1 {
 				if keys.Any() {
-					pobj = obj
-					pk = key.A()
-					obj = (*x)[i]
+					for j := 0; j < len(x); j++ {
+						var o IMap
+						if o, err = ToStringMap(x[j]).RemoveE(keys.Join(".").A()); err != nil {
+							return
+						}
+						if m1, err = ToStringMapE(o); err != nil {
+							return
+						}
+						x[j] = yaml.MapSlice(*m1)
+					}
+					keys.Clear()
 				} else {
-					ToStringMap(pobj).Set(pk, x.DropAt(i).O())
+					if px != nil && pk != nil {
+						if v, ok := px.([]interface{}); ok {
+							v[ToInt(pk)] = []interface{}{}
+						} else {
+							if m2, err = ToStringMapE(px); err != nil {
+								return
+							}
+							m2.Set(pk, []interface{}{})
+						}
+					}
 				}
 			}
 		}
@@ -618,16 +685,44 @@ func (p *StringMap) RemoveE(key string) (m IMap, err error) {
 	return
 }
 
-// Set the value for the given key to the given val. Returns true if the key did not yet exists in this Map.
+// Set the value for the given key to the given val. Returns true if the key did not yet exist in this Map.
 func (p *StringMap) Set(key, val interface{}) (new bool) {
 	if p == nil {
 		return
 	}
+	new = true
 	k := ToString(key)
-	if _, ok := (*p)[k]; !ok {
-		new = true
+	for i := 0; i < len(*p); i++ {
+		if k == ToString((*p)[i].Key) {
+			new = false
+			(*p)[i].Value = convertValue(val)
+			break
+		}
 	}
-	(*p)[k] = val
+	if new {
+		*p = append(*p, yaml.MapItem{Key: k, Value: convertValue(val)})
+	}
+	return
+}
+
+// Convert known types
+func convertValue(in interface{}) (out interface{}) {
+	v1 := DeReference(in)
+	switch x1 := v1.(type) {
+	case StringMap, map[string]interface{}:
+		out = yaml.MapSlice(*ToStringMap(x1))
+	case []interface{}:
+		for j := 0; j < len(x1); j++ {
+			v2 := DeReference(x1[j])
+			switch x2 := v2.(type) {
+			case StringMap, map[string]interface{}:
+				x1[j] = yaml.MapSlice(*ToStringMap(x2))
+			}
+		}
+		out = x1
+	default:
+		out = in
+	}
 	return
 }
 
@@ -652,7 +747,7 @@ func (p *StringMap) ToStringMapG() (m map[string]interface{}) {
 
 // YAML converts the Map into a YAML string
 func (p *StringMap) YAML() (data string) {
-	_data, err := yaml.Marshal(p.G())
+	_data, err := yaml.Marshal(yaml.MapSlice(*p))
 	if err != nil {
 		return
 	}
@@ -663,7 +758,7 @@ func (p *StringMap) YAML() (data string) {
 // YAMLE converts the Map into a YAML string
 func (p *StringMap) YAMLE() (data string, err error) {
 	var _data []byte
-	if _data, err = yaml.Marshal(p.G()); err != nil {
+	if _data, err = yaml.Marshal(yaml.MapSlice(*p)); err != nil {
 		err = errors.Wrapf(err, "failed to marshal map[string]interface{}")
 		return
 	}
@@ -680,5 +775,5 @@ func (p *StringMap) WriteJSON(filename string) (err error) {
 // WriteYAML converts the *StringMap into a map[string]interface{} then calls
 // yaml.WriteYAML on it to write it out to disk.
 func (p *StringMap) WriteYAML(filename string) (err error) {
-	return yaml.WriteYAML(filename, p.G())
+	return yaml_enc.WriteYAML(filename, yaml.MapSlice(*p))
 }

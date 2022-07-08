@@ -66,6 +66,7 @@ import (
 	"io/ioutil"
 
 	"github.com/pkg/errors"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // Misc convenience type/functions
@@ -158,7 +159,6 @@ func LoadJSON(filepath string) (m *StringMap) {
 
 // LoadJSONE reads in a json file and converts it to a *StringMap
 func LoadJSONE(filepath string) (m *StringMap, err error) {
-	m = NewStringMapV()
 
 	// Read in the yaml file
 	var data []byte
@@ -168,10 +168,12 @@ func LoadJSONE(filepath string) (m *StringMap, err error) {
 	}
 
 	// Unmarshal the json into a *StringMap
-	if err = json.Unmarshal(data, m); err != nil {
+	buff := map[string]interface{}{}
+	if err = json.Unmarshal(data, &buff); err != nil {
 		err = errors.Wrapf(err, "failed to unmarshal json file %s into a *StringMap", filepath)
 		return
 	}
+	m = MV(buff)
 
 	return
 }
@@ -197,4 +199,39 @@ func LoadYAMLE(filepath string) (m *StringMap, err error) {
 	m, err = ToStringMapE(data)
 
 	return
+}
+
+// YAMLCont checks if the given value is a valid YAML container
+func YAMLCont(obj interface{}) bool {
+	o := DeReference(obj)
+	switch o.(type) {
+	case map[string]interface{}, StringMap, yaml.MapSlice:
+		return true
+	case []interface{}, []string, []int:
+		return true
+	default:
+		return false
+	}
+}
+
+// YAMLMap checks if the given value is map compatible
+func YAMLMap(obj interface{}) bool {
+	o := DeReference(obj)
+	switch o.(type) {
+	case map[string]interface{}, StringMap, yaml.MapSlice:
+		return true
+	default:
+		return false
+	}
+}
+
+// YAMLArray checks if the given value is array compatible
+func YAMLArray(obj interface{}) bool {
+	o := DeReference(obj)
+	switch o.(type) {
+	case []interface{}, []string, []int:
+		return true
+	default:
+		return false
+	}
 }
