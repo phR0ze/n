@@ -3946,18 +3946,18 @@ func ToInterSlice(obj interface{}) (slice *InterSlice) {
 	return
 }
 
-// ToMapSlice converts an interface to a MapSlice type.
-func ToMapSlice(obj interface{}) *MapSlice {
-	x, _ := ToMapSliceE(obj)
+// ToSliceOfMap converts an interface to a SliceOfMap type.
+func ToSliceOfMap(obj interface{}) *SliceOfMap {
+	x, _ := ToSliceOfMapE(obj)
 	if x == nil {
-		return &MapSlice{}
+		return &SliceOfMap{}
 	}
 	return x
 }
 
-// ToMapSliceE converts an interface to a MapSlice type.
-func ToMapSliceE(obj interface{}) (val *MapSlice, err error) {
-	val = &MapSlice{}
+// ToSliceOfMapE converts an interface to a SliceOfMap type.
+func ToSliceOfMapE(obj interface{}) (val *SliceOfMap, err error) {
+	val = &SliceOfMap{}
 	o := Reference(obj)
 
 	// Optimized types
@@ -3969,8 +3969,8 @@ func ToMapSliceE(obj interface{}) (val *MapSlice, err error) {
 	case *[]interface{}:
 		if x != nil {
 			for _, raw := range *x {
-				var m *MapSlice
-				if m, err = ToMapSliceE(raw); err != nil {
+				var m *SliceOfMap
+				if m, err = ToSliceOfMapE(raw); err != nil {
 					return
 				}
 				*val = append(*val, *m...)
@@ -3982,8 +3982,8 @@ func ToMapSliceE(obj interface{}) (val *MapSlice, err error) {
 	case *InterSlice:
 		if x != nil {
 			for _, raw := range *x {
-				var m *MapSlice
-				if m, err = ToMapSliceE(raw); err != nil {
+				var m *SliceOfMap
+				if m, err = ToSliceOfMapE(raw); err != nil {
 					return
 				}
 				*val = append(*val, *m...)
@@ -3993,8 +3993,8 @@ func ToMapSliceE(obj interface{}) (val *MapSlice, err error) {
 		if x != nil {
 			for i := range *x {
 				for _, raw := range (*x)[i] {
-					var m *MapSlice
-					if m, err = ToMapSliceE(raw); err != nil {
+					var m *SliceOfMap
+					if m, err = ToSliceOfMapE(raw); err != nil {
 						return
 					}
 					*val = append(*val, *m...)
@@ -4006,8 +4006,8 @@ func ToMapSliceE(obj interface{}) (val *MapSlice, err error) {
 			for i := range *x {
 				if (*x)[i] != nil {
 					for _, raw := range *((*x)[i]) {
-						var m *MapSlice
-						if m, err = ToMapSliceE(raw); err != nil {
+						var m *SliceOfMap
+						if m, err = ToSliceOfMapE(raw); err != nil {
 							return
 						}
 						*val = append(*val, *m...)
@@ -4016,9 +4016,9 @@ func ToMapSliceE(obj interface{}) (val *MapSlice, err error) {
 			}
 		}
 
-	// MapSlice
+	// SliceOfMap
 	//----------------------------------------------------------------------------------------------
-	case *MapSlice:
+	case *SliceOfMap:
 		if x != nil {
 			val = x
 		}
@@ -4039,14 +4039,14 @@ func ToMapSliceE(obj interface{}) (val *MapSlice, err error) {
 	//----------------------------------------------------------------------------------------------
 	case *[]map[string]interface{}:
 		if x != nil {
-			v := MapSlice(*x)
+			v := SliceOfMap(*x)
 			val = &v
 		}
 	case *[]map[string]string:
 		if x != nil {
 			for _, raw := range *x {
-				var m *MapSlice
-				if m, err = ToMapSliceE(raw); err != nil {
+				var m *SliceOfMap
+				if m, err = ToSliceOfMapE(raw); err != nil {
 					return
 				}
 				*val = append(*val, *m...)

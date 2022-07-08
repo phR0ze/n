@@ -125,7 +125,7 @@ func Slice(obj interface{}) (new ISlice) {
 			// MapSlice
 			//----------------------------------------------------------------------------------------------
 			case *yaml.MapSlice, *map[string]interface{}, *map[string]string:
-				new = ToMapSlice(*x)
+				new = ToSliceOfMap(*x)
 
 			// RefSlice
 			// ---------------------------------------------------------------------------------------------
@@ -163,8 +163,8 @@ func Slice(obj interface{}) (new ISlice) {
 
 	// MapSlice
 	//----------------------------------------------------------------------------------------------
-	case *MapSlice, *map[string]interface{}, *map[string]string, *[]map[string]interface{}, *[]map[string]string:
-		new = ToMapSlice(o)
+	case *SliceOfMap, *map[string]interface{}, *map[string]string, *[]map[string]interface{}, *[]map[string]string:
+		new = ToSliceOfMap(o)
 
 	// RefSlice
 	// ---------------------------------------------------------------------------------------------

@@ -446,36 +446,36 @@ func (p *Object) ToStringMapGE() (map[string]interface{}, error) {
 // Slice related
 //--------------------------------------------------------------------------------------------------
 
-// ToMapSlice converts an interface to a *MapSlice type.
-func (p *Object) ToMapSlice() *MapSlice {
+// ToSliceOfMap converts an interface to a *SliceOfMap type.
+func (p *Object) ToSliceOfMap() *SliceOfMap {
 	if p == nil {
-		return NewMapSliceV()
+		return NewSliceOfMapV()
 	}
-	return ToMapSlice(p.o)
+	return ToSliceOfMap(p.o)
 }
 
-// ToMapSliceE converts an interface to a *MapSlice type.
-func (p *Object) ToMapSliceE() (*MapSlice, error) {
+// ToSliceOfMapE converts an interface to a *SliceOfMap type.
+func (p *Object) ToSliceOfMapE() (*SliceOfMap, error) {
 	if p == nil {
-		return NewMapSliceV(), nil
+		return NewSliceOfMapV(), nil
 	}
-	return ToMapSliceE(p.o)
+	return ToSliceOfMapE(p.o)
 }
 
-// ToMapSliceG converts an interface to a []map[string]interface{} type.
-func (p *Object) ToMapSliceG() []map[string]interface{} {
+// ToSliceOfMapG converts an interface to a []map[string]interface{} type.
+func (p *Object) ToSliceOfMapG() []map[string]interface{} {
 	if p == nil {
-		return NewMapSliceV().G()
+		return NewSliceOfMapV().G()
 	}
-	return ToMapSlice(p.o).G()
+	return ToSliceOfMap(p.o).G()
 }
 
-// ToMapSliceGE converts an interface to a []map[string]interface{} type.
-func (p *Object) ToMapSliceGE() ([]map[string]interface{}, error) {
+// ToSliceOfMapGE converts an interface to a []map[string]interface{} type.
+func (p *Object) ToSliceOfMapGE() ([]map[string]interface{}, error) {
 	if p == nil {
-		return NewMapSliceV().G(), nil
+		return NewSliceOfMapV().G(), nil
 	}
-	m, err := ToMapSliceE(p.o)
+	m, err := ToSliceOfMapE(p.o)
 	if err != nil {
 		return nil, err
 	}

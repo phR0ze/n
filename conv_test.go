@@ -4016,7 +4016,7 @@ foo3: bar3
 `
 		val, err = ToStringMapE(yml)
 		assert.Nil(t, err)
-		assert.Equal(t, M().Add("foo", []interface{}{map[string]interface{}{"name": "foo1", "val": map[string]interface{}{"bar1": int(1)}}, map[string]interface{}{"name": "foo2", "val": map[string]interface{}{"bar2": int(1)}}}), val)
+		assert.Equal(t, M().Add("foo", []interface{}{M().Add("name", "foo1").Add("val", M().Add("bar1", int(1))), M().Add("name", "foo2").Add("val", M().Add("bar2", int(1)))}), val)
 		assert.Equal(t, map[string]interface{}{"foo": []interface{}{map[string]interface{}{"name": "foo1", "val": map[string]interface{}{"bar1": int(1)}}, map[string]interface{}{"name": "foo2", "val": map[string]interface{}{"bar2": int(1)}}}}, val.G())
 	}
 }

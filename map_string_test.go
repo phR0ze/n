@@ -319,7 +319,7 @@ func TestToStringMapG(t *testing.T) {
 	}
 
 	{
-		// nested MapSlice values
+		// nested SliceOfMap values
 		y := yaml.MapSlice{yaml.MapItem{Key: "k1", Value: yaml.MapSlice{yaml.MapItem{Key: "k2", Value: "v2"}}}}
 		g := NewStringMapV(y).G()
 		assert.Equal(t, map[string]interface{}{"k1": map[string]interface{}{"k2": "v2"}}, g)
