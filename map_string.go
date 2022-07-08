@@ -402,30 +402,32 @@ func (p *StringMap) Merge(m IMap, selector ...string) IMap {
 	x1 := p
 
 	// 1. Select target if given
+	var pk1, px1 interface{}
 	if len(selector) > 0 {
-		k := selector[0]
-		val := interface{}(*p)
+		key := selector[0]
+		cx1 := interface{}(*p)
 
 		// Process keys from left to right
-		keys, err := KeysFromSelector(k)
+		keys, err := KeysFromSelector(key)
 		if err == nil {
 			for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
 				key := ko.ToString()
-				m := ToStringMap(val)
+				m := ToStringMap(cx1)
 
 				// Set a new map as the value if not a map
 				v := m.Get(key)
-				if !v.Nil() {
-					if !ToStringMap(v.O()).Any() {
-						m.Set(key, M())
-					}
-				} else {
+				if v.Nil() || !YAMLMap(v.O()) {
 					m.Set(key, M())
+					v = m.Get(key)
+					if pk1 != nil && px1 != nil {
+						ToStringMap(px1).Set(pk1, m)
+					}
 				}
-				val = v.O()
+				pk1, px1 = key, cx1
+				cx1 = v.O()
 			}
 		}
-		x1 = ToStringMap(val)
+		x1 = ToStringMap(cx1)
 	}
 
 	// 2. Merge at selection or root
@@ -457,56 +459,19 @@ func (p *StringMap) Merge(m IMap, selector ...string) IMap {
 			}
 		}
 	}
+	if len(selector) > 0 {
+		p.Update(selector[0], x1)
+	}
 
 	return p
 }
 
-// MergeG modifies this Map by overriding its values with the given map location where they both exist and returns the Go type
-func (p *StringMap) MergeG(m IMap, location ...string) map[string]interface{} {
-	// p2 := p
-
-	// // 1. Handle location if given
-	// key := ""
-	// if len(location) > 0 {
-	// 	key = location[0]
-	// 	var val interface{}
-	// 	val = *p
-
-	// 	// Process keys from left to right
-	// 	keys, err := KeysFromSelector(key)
-	// 	if err == nil {
-	// 		for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
-	// 			key := ko.ToString()
-	// 			m := ToStringMap(val)
-
-	// 			// Set a new map as the value if not a map
-	// 			if v, ok := (*m)[key]; ok {
-	// 				if !ToStringMap(v).Any() {
-	// 					m.Set(key, map[string]interface{}{})
-	// 				}
-	// 			} else {
-	// 				m.Set(key, map[string]interface{}{})
-	// 			}
-	// 			val = (*m)[key]
-	// 		}
-	// 	}
-	// 	p2 = ToStringMap(val)
-	// }
-
-	// // 2. Merge at location
-	// x, err := ToStringMapE(m)
-	// switch {
-	// case p2 == nil && (err != nil || m == nil):
-	// 	return NewStringMapV().G()
-	// case p2 == nil:
-	// 	return x.G()
-	// case err != nil || m == nil:
-	// 	return p2.G()
-	// }
-
-	// // Call type specific function helper
-	// *p2 = MergeStringMap(*p2, *x)
-	return p.G()
+// Merge modifies this Map by overriding its values at selector with the given map
+// where they both exist and returns a reference to this Map. Converting all string
+// maps into *StringMap instances.
+// Note: this function is unable to traverse through lists
+func (p *StringMap) MergeG(m IMap, selector ...string) map[string]interface{} {
+	return p.Merge(m, selector...).MG()
 }
 
 // O returns the underlying data structure as is.

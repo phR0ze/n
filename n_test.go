@@ -151,12 +151,19 @@ func TestLoadYAML(t *testing.T) {
 	// Load yaml file
 	{
 		// Write out the yaml to read in
-		data := "foo:\n  bar: 1\n"
-		sys.WriteBytes(tmpFile, []byte(data))
+		data1 := "b: b1\na: a1\n"
+		assert.NoError(t, sys.WriteBytes(tmpFile, []byte(data1)))
 
-		// Load the yaml and validate
-		m := LoadYAML(tmpFile)
-		assert.Equal(t, M().Add("foo", map[interface{}]interface{}{"bar": int(1)}), m)
+		// Load yaml and modify target
+		m := LoadYAML(tmpFile).Update("a", "a2")
+		assert.NoError(t, sys.Remove(tmpFile))
+		assert.False(t, sys.Exists(tmpFile))
+
+		// Write YAML out to disk and read back in and assert order
+		assert.NoError(t, m.WriteYAML(tmpFile))
+		data2, err := sys.ReadBytes(tmpFile)
+		assert.NoError(t, err)
+		assert.Equal(t, "b: b1\na: a2\n", string(data2))
 	}
 }
 
@@ -166,13 +173,21 @@ func TestLoadYAMLE(t *testing.T) {
 	// Load yaml file
 	{
 		// Write out the yaml to read in
-		data := "foo:\n  bar: 1\n"
-		sys.WriteBytes(tmpFile, []byte(data))
+		data1 := "b: b1\na: a1\n"
+		assert.NoError(t, sys.WriteBytes(tmpFile, []byte(data1)))
 
-		// Load the yaml and validate
+		// Load yaml and modify target
 		m, err := LoadYAMLE(tmpFile)
-		assert.Nil(t, err)
-		assert.Equal(t, M().Add("foo", map[interface{}]interface{}{"bar": int(1)}), m)
+		assert.NoError(t, err)
+		m.Update("a", "a2")
+		assert.NoError(t, sys.Remove(tmpFile))
+		assert.False(t, sys.Exists(tmpFile))
+
+		// Write YAML out to disk and read back in and assert order
+		assert.NoError(t, m.WriteYAML(tmpFile))
+		data2, err := sys.ReadBytes(tmpFile)
+		assert.NoError(t, err)
+		assert.Equal(t, "b: b1\na: a2\n", string(data2))
 	}
 }
 

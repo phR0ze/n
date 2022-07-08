@@ -252,14 +252,14 @@ func ExampleStringMap_Dump() {
 
 func TestStringMap_Dump(t *testing.T) {
 	{
-		m := NewStringMapV(map[string]interface{}{"1": "one", "2": "two", "3": "three"})
+		m := M().Add("1", "one").Add("2", "two").Add("3", "three")
 		assert.Equal(t, `"1": one
 "2": two
 "3": three
 `, m.Dump())
 	}
 	{
-		m := NewStringMapV(map[string]interface{}{"1": map[string]interface{}{"2": "two", "3": "three"}})
+		m := M().Add("1", M().Add("2", "two").Add("3", "three"))
 		assert.Equal(t, `"1":
   "2": two
   "3": three
@@ -712,468 +712,422 @@ func TestStringMap_Merge(t *testing.T) {
 		}
 		assert.Equal(t, expected, MV(a).Merge(MV(b), "2").MG())
 	}
-	// 	{
-	// 		// Nesting - merge
-	// 		a := map[string]interface{}{
-	// 			"1": "one",
-	// 			"2": map[string]interface{}{
-	// 				"3": "three",
-	// 				"4": "five",
-	// 			},
-	// 		}
-	// 		b := map[string]interface{}{
-	// 			"4": "four",
-	// 		}
-	// 		expected := map[string]interface{}{
-	// 			"1": "one",
-	// 			"2": map[string]interface{}{
-	// 				"3": "three",
-	// 				"4": "four",
-	// 			},
-	// 		}
-	// 		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), "2").MG())
-	// 	}
-	// 	{
-	// 		// Nesting - two
-	// 		a := map[string]interface{}{
-	// 			"1": "one",
-	// 			"2": "2",
-	// 		}
-	// 		b := map[string]interface{}{
-	// 			"4": "four",
-	// 		}
-	// 		expected := map[string]interface{}{
-	// 			"1": "one",
-	// 			"2": map[string]interface{}{
-	// 				"3": map[string]interface{}{
-	// 					"4": "four",
-	// 				},
-	// 			},
-	// 		}
-	// 		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), "2.3").MG())
-	// 	}
-	// 	{
-	// 		// Nesting - one
-	// 		a := map[string]interface{}{
-	// 			"1": "one",
-	// 			"2": "2",
-	// 		}
-	// 		b := map[string]interface{}{
-	// 			"3": "three",
-	// 		}
-	// 		expected := map[string]interface{}{
-	// 			"1": "one",
-	// 			"2": map[string]interface{}{
-	// 				"3": "three",
-	// 			},
-	// 		}
-	// 		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), "2").MG())
-	// 	}
-	// 	{
-	// 		// Nesting - doesn't exist two
-	// 		a := map[string]interface{}{
-	// 			"1": "one",
-	// 		}
-	// 		b := map[string]interface{}{
-	// 			"4": "four",
-	// 		}
-	// 		expected := map[string]interface{}{
-	// 			"1": "one",
-	// 			"2": map[string]interface{}{
-	// 				"3": map[string]interface{}{
-	// 					"4": "four",
-	// 				},
-	// 			},
-	// 		}
-	// 		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), "2.3").MG())
-	// 	}
-	// 	{
-	// 		// Nesting - doesn't exist one
-	// 		a := map[string]interface{}{
-	// 			"1": "one",
-	// 		}
-	// 		b := map[string]interface{}{
-	// 			"3": "three",
-	// 		}
-	// 		expected := map[string]interface{}{
-	// 			"1": "one",
-	// 			"2": map[string]interface{}{
-	// 				"3": "three",
-	// 			},
-	// 		}
-	// 		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), "2").MG())
-	// 	}
-	// 	{
-	// 		// root indicator
-	// 		a := map[string]interface{}{
-	// 			"1": "one",
-	// 			"2": "2",
-	// 		}
-	// 		b := map[string]interface{}{
-	// 			"2": "two",
-	// 			"3": "three",
-	// 		}
-	// 		expected := map[string]interface{}{
-	// 			"1": "one",
-	// 			"2": "two",
-	// 			"3": "three",
-	// 		}
-	// 		assert.Equal(t, expected, NewStringMap(a).Merge(M(b), ".").MG())
-	// 	}
+	{
+		// Nesting - merge
+		a := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+				"4": "five",
+			},
+		}
+		b := map[string]interface{}{
+			"4": "four",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+				"4": "four",
+			},
+		}
+		assert.Equal(t, expected, MV(a).Merge(MV(b), "2").MG())
+	}
+	{
+		// Nesting - two
+		a := map[string]interface{}{
+			"1": "one",
+			"2": "2",
+		}
+		b := map[string]interface{}{
+			"4": "four",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": map[string]interface{}{
+					"4": "four",
+				},
+			},
+		}
+		assert.Equal(t, expected, MV(a).Merge(MV(b), "2.3").MG())
+	}
+	{
+		// Nesting - one
+		a := map[string]interface{}{
+			"1": "one",
+			"2": "2",
+		}
+		b := map[string]interface{}{
+			"3": "three",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+			},
+		}
+		assert.Equal(t, expected, MV(a).Merge(MV(b), "2").MG())
+	}
+	{
+		// Nesting - doesn't exist two
+		a := map[string]interface{}{
+			"1": "one",
+		}
+		b := map[string]interface{}{
+			"4": "four",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": map[string]interface{}{
+					"4": "four",
+				},
+			},
+		}
+		assert.Equal(t, expected, MV(a).Merge(MV(b), "2.3").MG())
+	}
+	{
+		// Nesting - doesn't exist one
+		a := map[string]interface{}{
+			"1": "one",
+		}
+		b := map[string]interface{}{
+			"3": "three",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+			},
+		}
+		assert.Equal(t, expected, MV(a).Merge(MV(b), "2").MG())
+	}
+	{
+		// root indicator
+		a := map[string]interface{}{
+			"1": "one",
+			"2": "2",
+		}
+		b := map[string]interface{}{
+			"2": "two",
+			"3": "three",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": "two",
+			"3": "three",
+		}
+		assert.Equal(t, expected, MV(a).Merge(MV(b), ".").MG())
+	}
 
-	// 	// nil or empty
-	// 	{
-	// 		assert.Equal(t, NewStringMapV(), (*StringMap)(nil).Merge(nil))
-	// 		assert.Equal(t, NewStringMapV(), NewStringMapV().Merge(nil))
-	// 		assert.Equal(t, map[string]interface{}{}, NewStringMapV().Merge(nil).O())
-	// 		assert.Equal(t, NewStringMapV(), NewStringMapV().Merge(NewStringMapV()))
-	// 		assert.Equal(t, map[string]interface{}{}, NewStringMapV().Merge(NewStringMapV()).O())
-	// 	}
-	// 	{
-	// 		a := NewStringMapV(map[string]interface{}{})
-	// 		b := NewStringMapV(map[string]interface{}{"1": "one"})
-	// 		assert.Equal(t, b, a.Merge(b))
-	// 	}
-	// 	{
-	// 		a := NewStringMapV(map[string]interface{}{"1": "one"})
-	// 		b := NewStringMapV(map[string]interface{}{})
-	// 		assert.Equal(t, a, a.Merge(b))
-	// 	}
-	// 	{
-	// 		a := NewStringMapV(map[string]interface{}{
-	// 			"1": "one",
-	// 		})
-	// 		b := NewStringMapV(map[string]interface{}{
-	// 			"2": "two",
-	// 		})
-	// 		expected := NewStringMapV(map[string]interface{}{
-	// 			"1": "one",
-	// 			"2": "two",
-	// 		})
-	// 		assert.Equal(t, expected, a.Merge(b))
-	// 	}
-	// 	{
-	// 		// Override string in a with string in b
-	// 		a := NewStringMapV(map[string]interface{}{
-	// 			"1": "one",
-	// 			"2": "2",
-	// 		})
-	// 		b := NewStringMapV(map[string]interface{}{
-	// 			"2": "two",
-	// 			"3": "three",
-	// 		})
-	// 		expected := NewStringMapV(map[string]interface{}{
-	// 			"1": "one",
-	// 			"2": "two",
-	// 			"3": "three",
-	// 		})
-	// 		assert.Equal(t, expected, a.Merge(b))
-	// 	}
-	// 	{
-	// 		// Override string in a with map from b
-	// 		a := NewStringMapV(map[string]interface{}{
-	// 			"1": "one",
-	// 			"2": "two",
-	// 		})
-	// 		b := NewStringMapV(map[string]interface{}{
-	// 			"2": NewStringMapV(map[string]interface{}{"foo": "bar"}),
-	// 			"3": "three",
-	// 		})
-	// 		expected := NewStringMapV(map[string]interface{}{
-	// 			"1": "one",
-	// 			"2": NewStringMapV(map[string]interface{}{"foo": "bar"}),
-	// 			"3": "three",
-	// 		})
-	// 		assert.Equal(t, expected, a.Merge(b))
-	// 	}
-	// 	{
-	// 		// Override map in a with string from b
-	// 		a := NewStringMapV(map[string]interface{}{
-	// 			"1": "one",
-	// 			"2": NewStringMapV(map[string]interface{}{"foo": "bar"}),
-	// 		})
-	// 		b := NewStringMapV(map[string]interface{}{
-	// 			"2": "two",
-	// 			"3": "three",
-	// 		})
-	// 		expected := NewStringMapV(map[string]interface{}{
-	// 			"1": "one",
-	// 			"2": "two",
-	// 			"3": "three",
-	// 		})
-	// 		assert.Equal(t, expected, a.Merge(b))
-	// 	}
-	// 	{
-	// 		// Override sub map string in a with sub map string from b
-	// 		a := NewStringMapV(map[string]interface{}{
-	// 			"1": "one",
-	// 			"2": NewStringMapV(map[string]interface{}{"foo": "bar1"}),
-	// 		})
-	// 		b := NewStringMapV(map[string]interface{}{
-	// 			"2": NewStringMapV(map[string]interface{}{
-	// 				"foo":  "bar2",
-	// 				"foo2": "bar2",
-	// 			}),
-	// 			"3": "three",
-	// 		})
-	// 		expected := NewStringMapV(map[string]interface{}{
-	// 			"1": "one",
-	// 			"2": NewStringMapV(map[string]interface{}{
-	// 				"foo":  "bar2",
-	// 				"foo2": "bar2",
-	// 			}),
-	// 			"3": "three",
-	// 		})
-	// 		assert.Equal(t, expected, a.Merge(b))
-	// 	}
+	// nil or empty
+	{
+		assert.Equal(t, NewStringMapV(), (*StringMap)(nil).Merge(nil))
+		assert.Equal(t, NewStringMapV(), NewStringMapV().Merge(nil))
+		assert.Equal(t, map[string]interface{}{}, NewStringMapV().Merge(nil).O())
+		assert.Equal(t, NewStringMapV(), NewStringMapV().Merge(NewStringMapV()))
+		assert.Equal(t, map[string]interface{}{}, NewStringMapV().Merge(NewStringMapV()).O())
+	}
+	{
+		a := NewStringMapV(map[string]interface{}{})
+		b := NewStringMapV(map[string]interface{}{"1": "one"})
+		assert.Equal(t, b, a.Merge(b))
+	}
+	{
+		a := NewStringMapV(map[string]interface{}{"1": "one"})
+		b := NewStringMapV(map[string]interface{}{})
+		assert.Equal(t, a, a.Merge(b))
+	}
+	{
+		a := NewStringMapV(map[string]interface{}{
+			"1": "one",
+		})
+		b := NewStringMapV(map[string]interface{}{
+			"2": "two",
+		})
+		expected := NewStringMapV(map[string]interface{}{
+			"1": "one",
+			"2": "two",
+		})
+		assert.Equal(t, expected, a.Merge(b))
+	}
+	{
+		// Override string in a with string in b
+		a := M().Add("1", "one").Add("2", "2")
+		b := M().Add("2", "two").Add("3", "three")
+		expected := M().Add("1", "one").Add("2", "two").Add("3", "three")
+		assert.Equal(t, expected, a.Merge(b))
+	}
+	{
+		// Override string in a with map from b
+		a := M().Add("1", "one").Add("2", "two")
+		b := M().Add("2", M().Add("foo", "bar")).Add("3", "three")
+		expected := M().Add("1", "one").Add("2", M().Add("foo", "bar")).Add("3", "three")
+		assert.Equal(t, expected, a.Merge(b))
+	}
+	{
+		// Override map in a with string from b
+		a := M().Add("1", "one").Add("2", M().Add("foo", "bar"))
+		b := M().Add("2", "two").Add("3", "three")
+		expected := M().Add("1", "one").Add("2", "two").Add("3", "three")
+		assert.Equal(t, expected, a.Merge(b))
+	}
+	{
+		// Override sub map string in a with sub map string from b
+		a := M().Add("1", "one").Add("2", M().Add("foo", "bar1"))
+		b := M().Add("2", M().Add("foo", "bar2")).Add("foo2", "bar2").Add("3", "three")
+		expected := M().Add("1", "one").Add("2", M().Add("foo", "bar2")).Add("foo2", "bar2").Add("3", "three")
+		assert.Equal(t, expected, a.Merge(b))
+	}
 }
 
-// // MergeG
-// //--------------------------------------------------------------------------------------------------
-// func ExampleStringMap_MergeG() {
-// 	fmt.Println(NewStringMapV(map[string]interface{}{"1": "two"}).MergeG(NewStringMapV(map[string]interface{}{"1": "one"})))
-// 	// Output: map[1:one]
-// }
+// MergeG
+//--------------------------------------------------------------------------------------------------
+func ExampleStringMap_MergeG() {
+	fmt.Println(NewStringMapV(map[string]interface{}{"1": "two"}).MergeG(NewStringMapV(map[string]interface{}{"1": "one"})))
+	// Output: map[1:one]
+}
 
-// func TestStringMap_MergeG(t *testing.T) {
+func TestStringMap_MergeG(t *testing.T) {
 
-// 	// Location tests
-// 	{
-// 		// Nesting - merge advanced
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{
-// 				"3": "three",
-// 				"4": "five",
-// 			},
-// 		}
-// 		b := map[string]interface{}{
-// 			"4": "four",
-// 			"5": "five",
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{
-// 				"3": "three",
-// 				"4": "four",
-// 				"5": "five",
-// 			},
-// 		}
-// 		assert.Equal(t, expected, NewStringMap(a).MergeG(M(b), "2"))
-// 	}
-// 	{
-// 		// Nesting - merge
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{
-// 				"3": "three",
-// 				"4": "five",
-// 			},
-// 		}
-// 		b := map[string]interface{}{
-// 			"4": "four",
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{
-// 				"3": "three",
-// 				"4": "four",
-// 			},
-// 		}
-// 		assert.Equal(t, expected, NewStringMap(a).MergeG(M(b), "2"))
-// 	}
-// 	{
-// 		// Nesting - two
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": "2",
-// 		}
-// 		b := map[string]interface{}{
-// 			"4": "four",
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{
-// 				"3": map[string]interface{}{
-// 					"4": "four",
-// 				},
-// 			},
-// 		}
-// 		assert.Equal(t, expected, NewStringMap(a).MergeG(M(b), "2.3"))
-// 	}
-// 	{
-// 		// Nesting - one
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": "2",
-// 		}
-// 		b := map[string]interface{}{
-// 			"3": "three",
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{
-// 				"3": "three",
-// 			},
-// 		}
-// 		assert.Equal(t, expected, NewStringMap(a).MergeG(M(b), "2"))
-// 	}
-// 	{
-// 		// Nesting - doesn't exist two
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 		}
-// 		b := map[string]interface{}{
-// 			"4": "four",
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{
-// 				"3": map[string]interface{}{
-// 					"4": "four",
-// 				},
-// 			},
-// 		}
-// 		assert.Equal(t, expected, NewStringMap(a).MergeG(M(b), "2.3"))
-// 	}
-// 	{
-// 		// Nesting - doesn't exist one
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 		}
-// 		b := map[string]interface{}{
-// 			"3": "three",
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{
-// 				"3": "three",
-// 			},
-// 		}
-// 		assert.Equal(t, expected, NewStringMap(a).MergeG(M(b), "2"))
-// 	}
-// 	{
-// 		// root indicator
-// 		a := map[string]interface{}{
-// 			"1": "one",
-// 			"2": "2",
-// 		}
-// 		b := map[string]interface{}{
-// 			"2": "two",
-// 			"3": "three",
-// 		}
-// 		expected := map[string]interface{}{
-// 			"1": "one",
-// 			"2": "two",
-// 			"3": "three",
-// 		}
-// 		assert.Equal(t, expected, NewStringMap(a).MergeG(M(b), "."))
-// 	}
+	// Location tests
+	{
+		// Nesting - merge advanced
+		a := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+				"4": "five",
+			},
+		}
+		b := map[string]interface{}{
+			"4": "four",
+			"5": "five",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+				"4": "four",
+				"5": "five",
+			},
+		}
+		assert.Equal(t, expected, NewStringMap(a).MergeG(MV(b), "2"))
+	}
+	{
+		// Nesting - merge
+		a := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+				"4": "five",
+			},
+		}
+		b := map[string]interface{}{
+			"4": "four",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+				"4": "four",
+			},
+		}
+		assert.Equal(t, expected, NewStringMap(a).MergeG(MV(b), "2"))
+	}
+	{
+		// Nesting - two
+		a := map[string]interface{}{
+			"1": "one",
+			"2": "2",
+		}
+		b := map[string]interface{}{
+			"4": "four",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": map[string]interface{}{
+					"4": "four",
+				},
+			},
+		}
+		assert.Equal(t, expected, NewStringMap(a).MergeG(MV(b), "2.3"))
+	}
+	{
+		// Nesting - one
+		a := map[string]interface{}{
+			"1": "one",
+			"2": "2",
+		}
+		b := map[string]interface{}{
+			"3": "three",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+			},
+		}
+		assert.Equal(t, expected, NewStringMap(a).MergeG(MV(b), "2"))
+	}
+	{
+		// Nesting - doesn't exist two
+		a := map[string]interface{}{
+			"1": "one",
+		}
+		b := map[string]interface{}{
+			"4": "four",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": map[string]interface{}{
+					"4": "four",
+				},
+			},
+		}
+		assert.Equal(t, expected, NewStringMap(a).MergeG(MV(b), "2.3"))
+	}
+	{
+		// Nesting - doesn't exist one
+		a := map[string]interface{}{
+			"1": "one",
+		}
+		b := map[string]interface{}{
+			"3": "three",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"3": "three",
+			},
+		}
+		assert.Equal(t, expected, NewStringMap(a).MergeG(MV(b), "2"))
+	}
+	{
+		// root indicator
+		a := map[string]interface{}{
+			"1": "one",
+			"2": "2",
+		}
+		b := map[string]interface{}{
+			"2": "two",
+			"3": "three",
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": "two",
+			"3": "three",
+		}
+		assert.Equal(t, expected, NewStringMap(a).MergeG(MV(b), "."))
+	}
 
-// 	// nil or empty
-// 	{
-// 		assert.Equal(t, map[string]interface{}{}, NewStringMapV().MergeG(nil))
-// 		assert.Equal(t, map[string]interface{}{}, NewStringMapV().MergeG(NewStringMapV()))
-// 	}
-// 	{
-// 		a := NewStringMapV(map[string]interface{}{})
-// 		b := NewStringMapV(map[string]interface{}{"1": "one"})
-// 		assert.Equal(t, b.G(), a.MergeG(b))
-// 	}
-// 	{
-// 		a := NewStringMapV(map[string]interface{}{"1": "one"})
-// 		b := NewStringMapV(map[string]interface{}{})
-// 		assert.Equal(t, a.G(), a.MergeG(b))
-// 	}
-// 	{
-// 		a := NewStringMapV(map[string]interface{}{
-// 			"1": "one",
-// 		})
-// 		b := NewStringMapV(map[string]interface{}{
-// 			"2": "two",
-// 		})
-// 		expected := NewStringMapV(map[string]interface{}{
-// 			"1": "one",
-// 			"2": "two",
-// 		})
-// 		assert.Equal(t, expected.G(), a.MergeG(b))
-// 	}
-// 	{
-// 		// Override string in a with string in b
-// 		a := NewStringMapV(map[string]interface{}{
-// 			"1": "one",
-// 			"2": "2",
-// 		})
-// 		b := NewStringMapV(map[string]interface{}{
-// 			"2": "two",
-// 			"3": "three",
-// 		})
-// 		expected := NewStringMapV(map[string]interface{}{
-// 			"1": "one",
-// 			"2": "two",
-// 			"3": "three",
-// 		})
-// 		assert.Equal(t, expected.G(), a.MergeG(b))
-// 	}
-// 	{
-// 		// Override string in a with map from b
-// 		a := NewStringMapV(map[string]interface{}{
-// 			"1": "one",
-// 			"2": "two",
-// 		})
-// 		b := NewStringMapV(map[string]interface{}{
-// 			"2": NewStringMapV(map[string]interface{}{"foo": "bar"}),
-// 			"3": "three",
-// 		})
-// 		expected := NewStringMapV(map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{"foo": "bar"},
-// 			"3": "three",
-// 		})
-// 		assert.Equal(t, expected.G(), a.MergeG(b))
-// 	}
-// 	{
-// 		// Override map in a with string from b
-// 		a := NewStringMapV(map[string]interface{}{
-// 			"1": "one",
-// 			"2": NewStringMapV(map[string]interface{}{"foo": "bar"}),
-// 		})
-// 		b := NewStringMapV(map[string]interface{}{
-// 			"2": "two",
-// 			"3": "three",
-// 		})
-// 		expected := NewStringMapV(map[string]interface{}{
-// 			"1": "one",
-// 			"2": "two",
-// 			"3": "three",
-// 		})
-// 		assert.Equal(t, expected.G(), a.MergeG(b))
-// 	}
-// 	{
-// 		// Override sub map string in a with sub map string from b
-// 		a := NewStringMapV(map[string]interface{}{
-// 			"1": "one",
-// 			"2": NewStringMapV(map[string]interface{}{"foo": "bar1"}),
-// 		})
-// 		b := NewStringMapV(map[string]interface{}{
-// 			"2": NewStringMapV(map[string]interface{}{
-// 				"foo":  "bar2",
-// 				"foo2": "bar2",
-// 			}),
-// 			"3": "three",
-// 		})
-// 		expected := NewStringMapV(map[string]interface{}{
-// 			"1": "one",
-// 			"2": map[string]interface{}{
-// 				"foo":  "bar2",
-// 				"foo2": "bar2",
-// 			},
-// 			"3": "three",
-// 		})
-// 		assert.Equal(t, expected.G(), a.MergeG(b))
-// 		assert.Equal(t, map[string]interface{}{"foo": "bar2", "foo2": "bar2"}, expected.G()["2"])
-// 	}
-// }
+	// nil or empty
+	{
+		assert.Equal(t, map[string]interface{}{}, NewStringMapV().MergeG(nil))
+		assert.Equal(t, map[string]interface{}{}, NewStringMapV().MergeG(NewStringMapV()))
+	}
+	{
+		a := NewStringMapV(map[string]interface{}{})
+		b := NewStringMapV(map[string]interface{}{"1": "one"})
+		assert.Equal(t, b.G(), a.MergeG(b))
+	}
+	{
+		a := NewStringMapV(map[string]interface{}{"1": "one"})
+		b := NewStringMapV(map[string]interface{}{})
+		assert.Equal(t, a.G(), a.MergeG(b))
+	}
+	{
+		a := NewStringMapV(map[string]interface{}{
+			"1": "one",
+		})
+		b := NewStringMapV(map[string]interface{}{
+			"2": "two",
+		})
+		expected := NewStringMapV(map[string]interface{}{
+			"1": "one",
+			"2": "two",
+		})
+		assert.Equal(t, expected.G(), a.MergeG(b))
+	}
+	{
+		// Override string in a with string in b
+		a := NewStringMapV(map[string]interface{}{
+			"1": "one",
+			"2": "2",
+		})
+		b := NewStringMapV(map[string]interface{}{
+			"2": "two",
+			"3": "three",
+		})
+		expected := NewStringMapV(map[string]interface{}{
+			"1": "one",
+			"2": "two",
+			"3": "three",
+		})
+		assert.Equal(t, expected.G(), a.MergeG(b))
+	}
+	{
+		// Override string in a with map from b
+		a := NewStringMapV(map[string]interface{}{
+			"1": "one",
+			"2": "two",
+		})
+		b := NewStringMapV(map[string]interface{}{
+			"2": NewStringMapV(map[string]interface{}{"foo": "bar"}),
+			"3": "three",
+		})
+		expected := NewStringMapV(map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{"foo": "bar"},
+			"3": "three",
+		})
+		assert.Equal(t, expected.G(), a.MergeG(b))
+	}
+	{
+		// Override map in a with string from b
+		a := NewStringMapV(map[string]interface{}{
+			"1": "one",
+			"2": NewStringMapV(map[string]interface{}{"foo": "bar"}),
+		})
+		b := NewStringMapV(map[string]interface{}{
+			"2": "two",
+			"3": "three",
+		})
+		expected := NewStringMapV(map[string]interface{}{
+			"1": "one",
+			"2": "two",
+			"3": "three",
+		})
+		assert.Equal(t, expected.G(), a.MergeG(b))
+	}
+	{
+		// Override sub map string in a with sub map string from b
+		a := NewStringMapV(map[string]interface{}{
+			"1": "one",
+			"2": NewStringMapV(map[string]interface{}{"foo": "bar1"}),
+		})
+		b := NewStringMapV(map[string]interface{}{
+			"2": NewStringMapV(map[string]interface{}{
+				"foo":  "bar2",
+				"foo2": "bar2",
+			}),
+			"3": "three",
+		})
+		expected := NewStringMapV(map[string]interface{}{
+			"1": "one",
+			"2": map[string]interface{}{
+				"foo":  "bar2",
+				"foo2": "bar2",
+			},
+			"3": "three",
+		})
+		assert.Equal(t, expected.G(), a.MergeG(b))
+		assert.Equal(t, map[string]interface{}{"foo": "bar2", "foo2": "bar2"}, expected.G()["2"])
+	}
+}
 
 // O
 //--------------------------------------------------------------------------------------------------
