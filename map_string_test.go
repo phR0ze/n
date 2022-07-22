@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"testing"
 
+	yaml "github.com/phR0ze/yaml/v2"
 	"github.com/stretchr/testify/assert"
-	yaml "gopkg.in/yaml.v2"
 )
 
 // Benchmarks

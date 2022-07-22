@@ -9,8 +9,8 @@ import (
 	"time"
 	"unicode/utf8"
 
+	yaml "github.com/phR0ze/yaml/v2"
 	"github.com/pkg/errors"
-	yaml "gopkg.in/yaml.v2"
 )
 
 var gUseLocalTime bool

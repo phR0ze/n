@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/phR0ze/n/pkg/sys"
+	yaml "github.com/phR0ze/yaml/v2"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v2"
 )
 
 var tmpDir = "../../../test/temp"

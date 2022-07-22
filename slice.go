@@ -1,8 +1,8 @@
 package n
 
 import (
+	yaml "github.com/phR0ze/yaml/v2"
 	"github.com/pkg/errors"
-	yaml "gopkg.in/yaml.v2"
 )
 
 // ISlice provides a generic way to work with slice types providing convenience methods

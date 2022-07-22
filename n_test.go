@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/phR0ze/n/pkg/sys"
+	yaml "github.com/phR0ze/yaml/v2"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -170,24 +171,70 @@ func TestLoadYAML(t *testing.T) {
 func TestLoadYAMLE(t *testing.T) {
 	clearTmpDir()
 
-	// Load yaml file
+	// Anchors and aliases are handled correctly
 	{
-		// Write out the yaml to read in
-		data1 := "b: b1\na: a1\n"
-		assert.NoError(t, sys.WriteBytes(tmpFile, []byte(data1)))
-
-		// Load yaml and modify target
-		m, err := LoadYAMLE(tmpFile)
+		m := map[string]interface{}{}
+		data1 := `
+foo:
+  <<: &foobar1
+    bar1: val1
+  <<: &foobar2
+    bar2: val2
+  <<: &foobar3
+    bar3: val3
+  foo1:
+    - <<: *foobar2
+      blah1:
+        <<: *foobar1
+  foo2:
+    - <<: *foobar2
+      <<: *foobar3
+      blah2: true
+`
+		err := yaml.Unmarshal([]byte(data1), &m)
 		assert.NoError(t, err)
-		m.Update("a", "a2")
-		assert.NoError(t, sys.Remove(tmpFile))
-		assert.False(t, sys.Exists(tmpFile))
 
-		// Write YAML out to disk and read back in and assert order
-		assert.NoError(t, m.WriteYAML(tmpFile))
-		data2, err := sys.ReadBytes(tmpFile)
+		// Validate complete structure
+		assert.Equal(t, 1, len(m))
+		foo := m["foo"].(map[interface{}]interface{})
+		assert.Equal(t, 5, len(foo))
+		assert.Equal(t, "val1", foo["bar1"])
+		assert.Equal(t, "val2", foo["bar2"])
+		assert.Equal(t, "val3", foo["bar3"])
+
+		foo1slice := foo["foo1"].([]interface{})
+		assert.Equal(t, 1, len(foo1slice))
+		foo1 := foo1slice[0].(map[interface{}]interface{})
+		assert.Equal(t, 2, len(foo1))
+		assert.Equal(t, "val2", foo1["bar2"])
+		assert.Equal(t, "val1", foo1["blah1"].(map[interface{}]interface{})["bar1"])
+
+		foo2slice := foo["foo2"].([]interface{})
+		assert.Equal(t, 1, len(foo2slice))
+		foo2 := foo2slice[0].(map[interface{}]interface{})
+		assert.Equal(t, 3, len(foo2))
+		assert.Equal(t, "val2", foo2["bar2"])
+		assert.Equal(t, "val3", foo2["bar3"])
+		assert.Equal(t, true, foo2["blah2"])
+
+		// Validate complete structure
+		fn := func(x *StringMap) {
+			assert.Equal(t, 1, x.Len())
+			assert.Equal(t, "val1", x.Query("foo.bar1").A())
+			assert.Equal(t, "val2", x.Query("foo.bar2").A())
+			assert.Equal(t, "val3", x.Query("foo.bar3").A())
+			assert.Equal(t, "val2", x.Query("foo.foo1.[0].bar2").A())
+			assert.Equal(t, "val1", x.Query("foo.foo1.[0].blah1.bar1").A())
+			assert.Equal(t, "val2", x.Query("foo.foo2.[0].bar2").A())
+			assert.Equal(t, "val3", x.Query("foo.foo2.[0].bar3").A())
+			assert.Equal(t, true, x.Query("foo.foo2.[0].blah2").O())
+		}
+		fn(MV(m))
+
+		// Now repeat with yaml.StringMap load
+		x, err := ToStringMapE(data1)
 		assert.NoError(t, err)
-		assert.Equal(t, "b: b1\na: a2\n", string(data2))
+		fn(x)
 	}
 }
 

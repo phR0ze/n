@@ -3,8 +3,8 @@ package n
 import (
 	"github.com/phR0ze/n/pkg/enc/json"
 	yaml_enc "github.com/phR0ze/n/pkg/enc/yaml"
+	yaml "github.com/phR0ze/yaml/v2"
 	"github.com/pkg/errors"
-	yaml "gopkg.in/yaml.v2"
 )
 
 // StringMap implements the IMap interface providing a generic way to work with map types
@@ -732,13 +732,13 @@ func (p *StringMap) Set(key, val interface{}) (new bool) {
 func convertValue(in interface{}) (out interface{}) {
 	v1 := DeReference(in)
 	switch x1 := v1.(type) {
-	case StringMap, map[string]interface{}:
+	case StringMap, map[string]interface{}, map[interface{}]interface{}:
 		out = yaml.MapSlice(*ToStringMap(x1))
 	case []interface{}:
 		for j := 0; j < len(x1); j++ {
 			v2 := DeReference(x1[j])
 			switch x2 := v2.(type) {
-			case StringMap, map[string]interface{}:
+			case StringMap, map[string]interface{}, map[interface{}]interface{}:
 				x1[j] = yaml.MapSlice(*ToStringMap(x2))
 			}
 		}

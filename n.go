@@ -65,8 +65,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
+	yaml "github.com/phR0ze/yaml/v2"
 	"github.com/pkg/errors"
-	yaml "gopkg.in/yaml.v2"
 )
 
 // Misc convenience type/functions

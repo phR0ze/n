@@ -6,9 +6,8 @@ import (
 	"os"
 
 	"github.com/phR0ze/n/pkg/sys"
+	yaml "github.com/phR0ze/yaml/v2"
 	"github.com/pkg/errors"
-
-	yaml "gopkg.in/yaml.v2"
 )
 
 // Marshal wraps the yaml.Marshal
