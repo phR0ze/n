@@ -10,7 +10,7 @@ import (
 )
 
 // Methods on both pointer and non-pointer
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func TestStringSlice_Methods(t *testing.T) {
 	pointer := NewStringSliceV("0")
 	assert.Equal(t, []string{"0"}, pointer.O())
@@ -21,7 +21,7 @@ func TestStringSlice_Methods(t *testing.T) {
 }
 
 // NewStringSlice
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkNewStringSlice_Go(t *testing.B) {
 	src := RangeString(nines6)
 	for i := 0; i < len(src); i += 10 {
@@ -70,7 +70,7 @@ func TestStringSlice_NewStringSlice(t *testing.T) {
 }
 
 // NewStringSliceV
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkNewStringSliceV_Go(t *testing.B) {
 	src := RangeString(nines6)
 	for i := 0; i < len(src); i += 10 {
@@ -116,7 +116,7 @@ func TestStringSlice_NewStringSliceV(t *testing.T) {
 }
 
 // All
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringSlice_All_empty() {
 	slice := NewStringSliceV()
 	fmt.Println(slice.All())
@@ -175,7 +175,7 @@ func TestStringSlice_All(t *testing.T) {
 }
 
 // AllS
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringSlice_AllS() {
 	slice := NewStringSliceV("1", "2", "3")
 	fmt.Println(slice.AllS([]string{"2", "1"}))
@@ -240,7 +240,7 @@ func TestStringSlice_AllS(t *testing.T) {
 }
 
 // Any
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Any_Go(t *testing.B) {
 	any := func(list []string, x []string) bool {
 		for i := range x {
@@ -326,7 +326,7 @@ func TestStringSlice_Any(t *testing.T) {
 }
 
 // AnyS
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_AnyS_Go(t *testing.B) {
 	any := func(list []string, x []string) bool {
 		for i := range x {
@@ -418,7 +418,7 @@ func TestStringSlice_AnyS(t *testing.T) {
 }
 
 // AnyW
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_AnyW_Go(t *testing.B) {
 	src := RangeString(nines5)
 	for _, x := range src {
@@ -457,7 +457,7 @@ func TestStringSlice_AnyW(t *testing.T) {
 }
 
 // Append
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Append_Go(t *testing.B) {
 	src := []string{}
 	for _, i := range RangeString(nines6) {
@@ -558,7 +558,7 @@ func TestStringSlice_Append(t *testing.T) {
 }
 
 // AppendV
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_AppendV_Go(t *testing.B) {
 	src := []string{}
 	src = append(src, RangeString(nines6)...)
@@ -599,7 +599,7 @@ func TestStringSlice_AppendV(t *testing.T) {
 }
 
 // At
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_At_Go(t *testing.B) {
 	src := RangeString(nines6)
 	for _, x := range src {
@@ -653,7 +653,7 @@ func TestStringSlice_At(t *testing.T) {
 }
 
 // Clear
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringSlice_Clear() {
 	slice := NewStringSliceV("1").Concat([]string{"2", "3"})
 	fmt.Println(slice.Clear())
@@ -679,7 +679,7 @@ func TestStringSlice_Clear(t *testing.T) {
 }
 
 // Concat
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Concat_Go(t *testing.B) {
 	dest := []string{}
 	src := RangeString(nines6)
@@ -775,7 +775,7 @@ func TestStringSlice_Concat(t *testing.T) {
 }
 
 // ConcatM
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_ConcatM_Go(t *testing.B) {
 	dest := []string{}
 	src := RangeString(nines6)
@@ -867,7 +867,7 @@ func TestStringSlice_ConcatM(t *testing.T) {
 }
 
 // Copy
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Copy_Go(t *testing.B) {
 	src := RangeString(nines6)
 	dst := make([]string, len(src), len(src))
@@ -983,7 +983,7 @@ func TestStringSlice_Copy(t *testing.T) {
 }
 
 // Count
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Count_Go(t *testing.B) {
 	src := RangeString(nines5)
 	for _, x := range src {
@@ -1019,7 +1019,7 @@ func TestStringSlice_Count(t *testing.T) {
 }
 
 // CountW
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_CountW_Go(t *testing.B) {
 	src := RangeString(nines5)
 	for _, x := range src {
@@ -1057,7 +1057,7 @@ func TestStringSlice_CountW(t *testing.T) {
 }
 
 // Drop
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Drop_Go(t *testing.B) {
 	src := RangeString(nines7)
 	for len(src) > 11 {
@@ -1132,7 +1132,7 @@ func TestStringSlice_Drop(t *testing.T) {
 }
 
 // DropAt
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_DropAt_Go(t *testing.B) {
 	src := RangeString(nines5)
 	index := Range(0, nines5)
@@ -1194,7 +1194,7 @@ func TestStringSlice_DropAt(t *testing.T) {
 }
 
 // DropFirst
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_DropFirst_Go(t *testing.B) {
 	src := RangeString(nines7)
 	for len(src) > 1 {
@@ -1234,7 +1234,7 @@ func TestStringSlice_DropFirst(t *testing.T) {
 }
 
 // DropFirstN
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_DropFirstN_Go(t *testing.B) {
 	src := RangeString(nines7)
 	for len(src) > 10 {
@@ -1283,7 +1283,7 @@ func TestStringSlice_DropFirstN(t *testing.T) {
 }
 
 // DropLast
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_DropLast_Go(t *testing.B) {
 	src := RangeString(nines7)
 	for len(src) > 1 {
@@ -1323,7 +1323,7 @@ func TestStringSlice_DropLast(t *testing.T) {
 }
 
 // DropLastN
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_DropLastN_Go(t *testing.B) {
 	src := RangeString(nines7)
 	for len(src) > 10 {
@@ -1369,7 +1369,7 @@ func TestStringSlice_DropLastN(t *testing.T) {
 }
 
 // DropW
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_DropW_Go(t *testing.B) {
 	src := RangeString(nines5)
 	l := len(src)
@@ -1423,7 +1423,7 @@ func TestStringSlice_DropW(t *testing.T) {
 }
 
 // Each
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Each_Go(t *testing.B) {
 	action := func(x interface{}) {
 		assert.IsType(t, "", x)
@@ -1465,7 +1465,7 @@ func TestStringSlice_Each(t *testing.T) {
 }
 
 // EachE
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_EachE_Go(t *testing.B) {
 	action := func(x interface{}) {
 		assert.IsType(t, "0", x)
@@ -1525,7 +1525,7 @@ func TestStringSlice_EachE(t *testing.T) {
 }
 
 // EachI
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_EachI_Go(t *testing.B) {
 	action := func(x interface{}) {
 		assert.IsType(t, "", x)
@@ -1567,7 +1567,7 @@ func TestStringSlice_EachI(t *testing.T) {
 }
 
 // EachIE
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_EachIE_Go(t *testing.B) {
 	action := func(x interface{}) {
 		assert.IsType(t, "", x)
@@ -1627,7 +1627,7 @@ func TestStringSlice_EachIE(t *testing.T) {
 }
 
 // EachR
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_EachR_Go(t *testing.B) {
 	action := func(x interface{}) {
 		assert.IsType(t, "", x)
@@ -1669,7 +1669,7 @@ func TestStringSlice_EachR(t *testing.T) {
 }
 
 // EachRE
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_EachRE_Go(t *testing.B) {
 	action := func(x interface{}) {
 		assert.IsType(t, "", x)
@@ -1729,7 +1729,7 @@ func TestStringSlice_EachRE(t *testing.T) {
 }
 
 // EachRI
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_EachRI_Go(t *testing.B) {
 	action := func(x interface{}) {
 		assert.IsType(t, "", x)
@@ -1771,7 +1771,7 @@ func TestStringSlice_EachRI(t *testing.T) {
 }
 
 // EachRIE
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_EachRIE_Go(t *testing.B) {
 	action := func(x interface{}) {
 		assert.IsType(t, "", x)
@@ -1831,7 +1831,7 @@ func TestStringSlice_EachRIE(t *testing.T) {
 }
 
 // Empty
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringSlice_Empty() {
 	fmt.Println(NewStringSliceV().Empty())
 	// Output: true
@@ -1853,7 +1853,7 @@ func TestStringSlice_Empty(t *testing.T) {
 }
 
 // First
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_First_Go(t *testing.B) {
 	src := RangeString(nines7)
 	for len(src) > 1 {
@@ -1887,7 +1887,7 @@ func TestStringSlice_First(t *testing.T) {
 }
 
 // FirstN
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_FirstN_Go(t *testing.B) {
 	src := RangeString(nines7)
 	_ = src[0:10]
@@ -1935,8 +1935,22 @@ func TestStringSlice_FirstN(t *testing.T) {
 	assert.Equal(t, NewStringSliceV("1", "2"), NewStringSliceV("1", "2", "3").FirstN(2))
 }
 
+// FirstW
+// --------------------------------------------------------------------------------------------------
+func TestStringSlice_FirstW(t *testing.T) {
+
+	// empty
+	assert.Equal(t, Obj(nil), NewStringSliceV().FirstW(func(o O) bool { return A(o).G() == "1" }))
+
+	// item doesn't exist
+	assert.Equal(t, Obj(nil), NewStringSliceV("2").FirstW(func(o O) bool { return A(o).G() == "1" }))
+
+	// item exists
+	assert.Equal(t, Obj("1"), NewStringSliceV("2", "1").FirstW(func(o O) bool { return A(o).G() == "1" }))
+}
+
 // G
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringSlice_G() {
 	fmt.Println(NewStringSliceV("1", "2", "3").G())
 	// Output: [1 2 3]
@@ -1948,7 +1962,7 @@ func TestStringSlice_G(t *testing.T) {
 }
 
 // Generic
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringSlice_Generic() {
 	slice := NewStringSliceV("1", "2", "3")
 	fmt.Println(slice.InterSlice())
@@ -1956,7 +1970,7 @@ func ExampleStringSlice_Generic() {
 }
 
 // Index
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Index_Go(t *testing.B) {
 	for _, x := range RangeString(nines5) {
 		if x == fmt.Sprint(nines4) {
@@ -1999,7 +2013,7 @@ func TestStringSlice_Index(t *testing.T) {
 }
 
 // Insert
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Insert_Go(t *testing.B) {
 	src := []string{}
 	for _, x := range RangeString(nines6) {
@@ -2126,7 +2140,7 @@ func TestStringSlice_Insert(t *testing.T) {
 }
 
 // Join
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Join_Go(t *testing.B) {
 	src := RangeString(nines4)
 	strings.Join(src, ",")
@@ -2160,7 +2174,7 @@ func TestStringSlice_Join(t *testing.T) {
 }
 
 // Last
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Last_Go(t *testing.B) {
 	src := RangeString(nines7)
 	for len(src) > 1 {
@@ -2194,7 +2208,7 @@ func TestStringSlice_Last(t *testing.T) {
 }
 
 // LastN
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_LastN_Go(t *testing.B) {
 	src := RangeString(nines7)
 	_ = src[0:10]
@@ -2249,7 +2263,7 @@ func TestStringSlice_LastN(t *testing.T) {
 }
 
 // Len
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringSlice_Len() {
 	fmt.Println(NewStringSliceV("1", "2", "3").Len())
 	// Output: 3
@@ -2262,7 +2276,7 @@ func TestStringSlice_Len(t *testing.T) {
 }
 
 // Less
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Less_Go(t *testing.B) {
 	src := RangeString(nines6)
 	for i := 0; i < len(src); i++ {
@@ -2308,7 +2322,7 @@ func TestStringSlice_Less(t *testing.T) {
 }
 
 // Map
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringSlice_Map() {
 	slice := NewStringSliceV("1", "2", "3")
 	slice = slice.Map(func(x O) O {
@@ -2340,7 +2354,7 @@ func TestStringSlice_Map(t *testing.T) {
 }
 
 // Nil
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringSlice_Nil() {
 	var slice *StringSlice
 	fmt.Println(slice.Nil())
@@ -2355,7 +2369,7 @@ func TestStringSlice_Nil(t *testing.T) {
 }
 
 // O
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringSlice_O() {
 	fmt.Println(NewStringSliceV("1", "2", "3"))
 	// Output: [1 2 3]
@@ -2409,7 +2423,7 @@ func TestStringSlice_Pair(t *testing.T) {
 }
 
 // Pop
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Pop_Go(t *testing.B) {
 	src := RangeString(nines7)
 	for len(src) > 1 {
@@ -2453,7 +2467,7 @@ func TestStringSlice_Pop(t *testing.T) {
 }
 
 // PopN
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_PopN_Go(t *testing.B) {
 	src := RangeString(nines7)
 	for len(src) > 10 {
@@ -2519,7 +2533,7 @@ func TestStringSlice_PopN(t *testing.T) {
 }
 
 // Prepend
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Prepend_Go(t *testing.B) {
 	src := []string{}
 	for _, x := range RangeString(nines6) {
@@ -2560,7 +2574,7 @@ func TestStringSlice_Prepend(t *testing.T) {
 }
 
 // Reverse
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Reverse_Go(t *testing.B) {
 	src := RangeString(nines6)
 	for i, j := 0, len(src)-1; i < j; i, j = i+1, j-1 {
@@ -2610,7 +2624,7 @@ func TestStringSlice_Reverse(t *testing.T) {
 }
 
 // ReverseM
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_ReverseM_Go(t *testing.B) {
 	src := RangeString(nines6)
 	for i, j := 0, len(src)-1; i < j; i, j = i+1, j-1 {
@@ -2660,7 +2674,7 @@ func TestStringSlice_ReverseM(t *testing.T) {
 }
 
 // Select
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Select_Go(t *testing.B) {
 	even := []string{}
 	src := RangeString(nines6)
@@ -2712,7 +2726,7 @@ func TestStringSlice_Select(t *testing.T) {
 }
 
 // Set
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Set_Go(t *testing.B) {
 	src := RangeString(nines6)
 	for i := 0; i < len(src); i++ {
@@ -2761,7 +2775,7 @@ func TestStringSlice_Set(t *testing.T) {
 }
 
 // SetE
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_SetE_Go(t *testing.B) {
 	src := RangeString(nines6)
 	for i := 0; i < len(src); i++ {
@@ -2878,7 +2892,7 @@ func TestStringSlice_SetE(t *testing.T) {
 }
 
 // Shift
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Shift_Go(t *testing.B) {
 	src := RangeString(nines7)
 	for len(src) > 1 {
@@ -2922,7 +2936,7 @@ func TestStringSlice_Shift(t *testing.T) {
 }
 
 // ShiftN
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_ShiftN_Go(t *testing.B) {
 	src := RangeString(nines7)
 	for len(src) > 10 {
@@ -3011,7 +3025,7 @@ func TestStringSlice_Single(t *testing.T) {
 }
 
 // Slice
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Slice_Go(t *testing.B) {
 	src := RangeString(nines7)
 	_ = src[0:len(src)]
@@ -3118,7 +3132,7 @@ func TestStringSlice_Slice(t *testing.T) {
 }
 
 // Sort
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Sort_Go(t *testing.B) {
 	src := RangeString(nines6)
 	sort.Sort(sort.StringSlice(src))
@@ -3158,7 +3172,7 @@ func TestStringSlice_Sort(t *testing.T) {
 }
 
 // SortM
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_SortM_Go(t *testing.B) {
 	src := RangeString(nines6)
 	sort.Sort(sort.StringSlice(src))
@@ -3198,7 +3212,7 @@ func TestStringSlice_SortM(t *testing.T) {
 }
 
 // SortReverse
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_SortReverse_Go(t *testing.B) {
 	src := RangeString(nines6)
 	sort.Sort(sort.Reverse(sort.StringSlice(src)))
@@ -3238,7 +3252,7 @@ func TestStringSlice_SortReverse(t *testing.T) {
 }
 
 // SortReverseM
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_SortReverseM_Go(t *testing.B) {
 	src := RangeString(nines6)
 	sort.Sort(sort.Reverse(sort.StringSlice(src)))
@@ -3278,7 +3292,7 @@ func TestStringSlice_SortReverseM(t *testing.T) {
 }
 
 // String
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_String_Go(t *testing.B) {
 	src := RangeString(nines6)
 	_ = fmt.Sprintf("%v", src)
@@ -3320,7 +3334,7 @@ func TestStringSlice_String(t *testing.T) {
 }
 
 // Swap
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Swap_Go(t *testing.B) {
 	src := RangeString(nines6)
 	for i := 0; i < len(src); i++ {
@@ -3378,7 +3392,7 @@ func TestStringSlice_Swap(t *testing.T) {
 }
 
 // Take
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Take_Go(t *testing.B) {
 	src := RangeString(nines7)
 	for len(src) > 11 {
@@ -3564,7 +3578,7 @@ func TestStringSlice_Take(t *testing.T) {
 }
 
 // TakeAt
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_TakeAt_Go(t *testing.B) {
 	src := RangeString(nines5)
 	index := RangeString(nines5)
@@ -3671,7 +3685,7 @@ func TestStringSlice_TakeAt(t *testing.T) {
 }
 
 // TakeW
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_TakeW_Go(t *testing.B) {
 	new := []string{}
 	src := RangeString(nines5)
@@ -3723,7 +3737,7 @@ func TestStringSlice_TakeW(t *testing.T) {
 }
 
 // Union
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Union_Go(t *testing.B) {
 	// src := RangeStr(nines7)
 	// for len(src) > 10 {
@@ -3793,7 +3807,7 @@ func TestStringSlice_Union(t *testing.T) {
 }
 
 // UnionM
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_UnionM_Go(t *testing.B) {
 	// src := RangeStr(nines7)
 	// for len(src) > 10 {
@@ -3863,7 +3877,7 @@ func TestStringSlice_UnionM(t *testing.T) {
 }
 
 // Uniq
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_Uniq_Go(t *testing.B) {
 	// src := RangeStr(nines7)
 	// for len(src) > 10 {
@@ -3930,7 +3944,7 @@ func TestStringSlice_Uniq(t *testing.T) {
 }
 
 // UniqM
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_UniqM_Go(t *testing.B) {
 	// src := RangeStr(nines7)
 	// for len(src) > 10 {

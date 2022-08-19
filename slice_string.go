@@ -434,6 +434,22 @@ func (p *StringSlice) FirstN(n int) ISlice {
 	return p.Slice(0, abs(n)-1)
 }
 
+// FirstW returns the first element in this Slice as an Object where the lamda selector returns true
+// Object.Nil() == true will be returned when there are no elements in the slice that match the lambda
+func (p *StringSlice) FirstW(sel func(O) bool) (elem *Object) {
+	elem = &Object{}
+	if p == nil || len(*p) == 0 {
+		return elem
+	}
+	for i := range *p {
+		if sel((*p)[i]) {
+			elem.o = (*p)[i]
+			return
+		}
+	}
+	return elem
+}
+
 // G returns the underlying data structure as a builtin Go type
 func (p *StringSlice) G() []string {
 	return p.O().([]string)
