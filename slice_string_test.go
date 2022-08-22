@@ -1282,6 +1282,27 @@ func TestStringSlice_DropFirstN(t *testing.T) {
 	assert.Equal(t, NewStringSliceV(), NewStringSliceV("1", "2", "3").DropFirstN(4))
 }
 
+func TestStringSlice_DropFirstW(t *testing.T) {
+
+	// nil or empty
+	{
+		var slice *StringSlice
+		assert.Equal(t, (*StringSlice)(nil), slice.DropFirstW(func(o O) bool { return true }))
+	}
+
+	// drop none
+	assert.Equal(t, NewStringSliceV("1", "2", "3"), NewStringSliceV("1", "2", "3").DropFirstW(func(o O) bool { return Obj(o).A() == "4" }))
+
+	// drop 1
+	assert.Equal(t, NewStringSliceV("2", "3"), NewStringSliceV("1", "2", "3").DropFirstW(func(o O) bool { return Obj(o).A() == "1" }))
+
+	// drop 2
+	assert.Equal(t, NewStringSliceV("3"), NewStringSliceV("1", "2", "3").DropFirstW(func(o O) bool { return Obj(o).A() == "1" || Obj(o).A() == "2" }))
+
+	// drop 3
+	assert.Equal(t, NewStringSliceV(), NewStringSliceV("1", "2", "3").DropFirstW(func(o O) bool { return Obj(o).A() == "1" || Obj(o).A() == "2" || Obj(o).A() == "3" }))
+}
+
 // DropLast
 // --------------------------------------------------------------------------------------------------
 func BenchmarkStringSlice_DropLast_Go(t *testing.B) {

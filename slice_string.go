@@ -273,6 +273,22 @@ func (p *StringSlice) DropFirstN(n int) ISlice {
 	return p.Drop(0, abs(n)-1)
 }
 
+// DropFirstW modifies this Slice to delete the first elements that match the lambda selector and returns a reference to this Slice;
+// The slice is updated instantly when lambda expression is evaluated not after DropFirstW completes.
+func (p *StringSlice) DropFirstW(sel func(O) bool) ISlice {
+	if p == nil || len(*p) == 0 {
+		return p
+	}
+	for {
+		if sel(p.First()) {
+			p.DropFirst()
+		} else {
+			break
+		}
+	}
+	return p
+}
+
 // DropLast modifies this Slice to delete the last element and returns a reference to this Slice.
 func (p *StringSlice) DropLast() ISlice {
 	return p.Drop(-1, -1)
