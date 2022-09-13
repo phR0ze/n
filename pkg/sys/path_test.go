@@ -299,6 +299,13 @@ func TestAllDirs(t *testing.T) {
 		paths, err := AllDirs(tmpDir)
 		assert.Nil(t, err)
 		assert.Equal(t, expected, paths)
+
+		// Now include the root
+		paths, err = AllDirs(tmpDir, RootOpt(true))
+		assert.Nil(t, err)
+		root, _ := Abs(tmpDir)
+		expected = append([]string{root}, expected...)
+		assert.Equal(t, expected, paths)
 	}
 }
 

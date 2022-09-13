@@ -90,3 +90,19 @@ func getRecurseOpt(opts []*opt.Opt) (result bool) {
 	}
 	return
 }
+
+// RootOpt creates a new root option with the given value
+// -------------------------------------------------------------------------------------------------
+func RootOpt(val bool) *opt.Opt {
+	return &opt.Opt{Key: "root", Val: val}
+}
+
+// get the root option from the options slice defaulting to false
+func getRootOpt(opts []*opt.Opt) (result bool) {
+	if o := opt.Get(opts, "root"); o != nil {
+		if val, ok := o.Val.(bool); ok {
+			result = val
+		}
+	}
+	return
+}

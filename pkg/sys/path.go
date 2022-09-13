@@ -44,11 +44,17 @@ func Abs(target string) (result string, err error) {
 
 // AllDirs returns a list of all dirs recursively for the given root path
 // in a deterministic order. Follows links by default, but can be stopped
-// by passing FollowOpt(false). Paths are distinct.
+// by passing FollowOpt(false). Paths are distinct. The root path can be
+// included by passing the RootOpt(true).
 func AllDirs(root string, opts ...*opt.Opt) (result []string, err error) {
 	distinct := map[string]bool{}
 	if root, err = Abs(root); err != nil {
 		return
+	}
+
+	// Include the root as the first path if directed to
+	if getRootOpt(opts) {
+		result = append(result, root)
 	}
 
 	// Set following links by default
