@@ -303,6 +303,35 @@ func TestExtractAllIntegrityCheckExternal(t *testing.T) {
 	}
 }
 
+func Test_foo(t *testing.T) {
+	prepTmpDir()
+
+	// Create test tarball
+	dir1, err := sys.MkdirP(path.Join(tmpDir, "dir1"))
+	assert.NoError(t, err)
+	_, err = sys.CopyFile(testfile, path.Join(dir1, "file1"))
+	assert.NoError(t, err)
+	err = sys.Symlink("./file1", path.Join(dir1, "link1"))
+	assert.NoError(t, err)
+
+	tarball := path.Join(tmpDir, "test.tgz")
+	sys.ExecOut(`tar -C %s -cvzf %s dir1`, tmpDir, tarball)
+	// err = Create(tarball, dir1)
+	// assert.Nil(t, err)
+	assert.True(t, sys.Exists(tarball))
+
+	// Now extract the newly created tarball
+	dir2 := path.Join(tmpDir, "dir2")
+	sys.MkdirP(dir2)
+	err = ExtractAll(tarball, dir2)
+	assert.NoError(t, err)
+	assert.True(t, sys.Exists(path.Join(dir2, "dir1/file1")))
+	assert.True(t, sys.Exists(path.Join(dir2, "dir1/link1")))
+	file1, err := sys.SymlinkTarget(path.Join(dir2, "dir1/link1"))
+	assert.NoError(t, err)
+	assert.Equal(t, "./file1", file1)
+}
+
 func TestExtractAll(t *testing.T) {
 	prepTmpDir()
 
