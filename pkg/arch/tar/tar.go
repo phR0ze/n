@@ -203,8 +203,6 @@ func ExtractAll(tarfile, dest string) (err error) {
 
 		// Create file and write content to it
 		if info.Typeflag == tar.TypeReg {
-
-			// Create file and write content to it
 			var fw *os.File
 			if fw, err = os.Create(filePath); err != nil {
 				err = errors.Wrapf(err, "failed to create file %s from tarfile", filePath)
@@ -221,18 +219,30 @@ func ExtractAll(tarfile, dest string) (err error) {
 				err = errors.Wrap(err, "failed to close file")
 				return
 			}
+		}
 
-			// Set file mode to the original value
-			if err = os.Chmod(filePath, os.FileMode(info.Mode)); err != nil {
-				err = errors.Wrapf(err, "failed to set file mode for %s", filePath)
+		// Create links
+		if info.Linkname != "" {
+			if err = sys.Symlink(info.Linkname, filePath); err != nil {
+				err = errors.Wrapf(err, "failed to create link %s from tarfile", filePath)
 				return
 			}
 		}
 
-		// Set file access times to the original values
-		if err = os.Chtimes(filePath, info.AccessTime, info.ModTime); err != nil {
-			err = errors.Wrapf(err, "failed to set file access times for %s", filePath)
-			return
+		// Update mode and times for dirs and files
+		if info.Typeflag == tar.TypeReg || info.Typeflag == tar.TypeDir {
+
+			// Set file or link mode to the original value
+			if err = os.Chmod(filePath, os.FileMode(info.Mode)); err != nil {
+				err = errors.Wrapf(err, "failed to set file mode for %s", filePath)
+				return
+			}
+
+			// Set file access times to the original values
+			if err = os.Chtimes(filePath, info.AccessTime, info.ModTime); err != nil {
+				err = errors.Wrapf(err, "failed to set file access times for %s", filePath)
+				return
+			}
 		}
 	}
 	return
