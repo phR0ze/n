@@ -23,7 +23,7 @@ func Create(tarfile, glob string) (err error) {
 		return
 	}
 
-	// Create the new file for writing to
+	// Create the new tarball file for writing to
 	var fw *os.File
 	if fw, err = os.Create(tarfile); err != nil {
 		err = errors.Wrapf(err, "failed to create tarfile %s", tarfile)
@@ -93,7 +93,7 @@ func Create(tarfile, glob string) (err error) {
 
 // AddFiles to the given tar writer recursively where infos are the paths to
 // recurse on and base is the path the tar files should be based on in the tar
-func addFiles(tw *tar.Writer, infos []*sys.FileInfo, base string) (err error) {
+func addFiles(writer *tar.Writer, infos []*sys.FileInfo, base string) (err error) {
 	for _, info := range infos {
 
 		// Recurse on directory
@@ -104,23 +104,22 @@ func addFiles(tw *tar.Writer, infos []*sys.FileInfo, base string) (err error) {
 				return
 			}
 			newBase := path.Join(base, info.Name())
-			if err = addFiles(tw, newInfos, newBase); err != nil {
+			if err = addFiles(writer, newInfos, newBase); err != nil {
 				return
 			}
 		} else {
-
-			// Open the file for reading
-			var fr *os.File
-			if fr, err = os.Open(info.Path); err != nil {
-				err = errors.Wrapf(err, "failed to open target file %s for tarball", info.Path)
-				return
+			link := ""
+			if info.IsSymlink() {
+				if link, err = info.SymlinkTarget(); err != nil {
+					err = errors.Wrapf(err, "failed to read link target %s for tarball", info.Path)
+					return
+				}
 			}
 
 			// Add the files to the tar
 			var header *tar.Header
-			if header, err = tar.FileInfoHeader(info.Obj, ""); err != nil {
+			if header, err = tar.FileInfoHeader(info.Obj, link); err != nil {
 				err = errors.Wrapf(err, "failed to create target file header %s for tarball", info.Path)
-				fr.Close()
 				return
 			}
 
@@ -128,21 +127,29 @@ func addFiles(tw *tar.Writer, infos []*sys.FileInfo, base string) (err error) {
 			header.Name = path.Join(base, info.Name())
 
 			// Write header to tarball
-			if err = tw.WriteHeader(header); err != nil {
+			if err = writer.WriteHeader(header); err != nil {
 				err = errors.Wrapf(err, "failed to write target file header %s for tarball", info.Path)
-				fr.Close()
 				return
 			}
 
-			// Stream the data from the reader to the writer
-			if _, err = io.Copy(tw, fr); err != nil {
-				err = errors.Wrapf(err, "failed to copy data from reader to writer for tar target %s", info.Path)
-				fr.Close()
-				return
-			}
+			// Write file data to tarball
+			if !info.IsSymlink() {
+				var f *os.File
+				if f, err = os.Open(info.Path); err != nil {
+					err = errors.Wrapf(err, "failed to open target file %s for tarball", info.Path)
+					return
+				}
 
-			// Close reader on success
-			fr.Close()
+				// Stream the data from the reader to the writer
+				if _, err = io.Copy(writer, f); err != nil {
+					err = errors.Wrapf(err, "failed to copy data from reader to writer for tar target %s", info.Path)
+					f.Close()
+					return
+				}
+
+				// Close reader on success
+				f.Close()
+			}
 		}
 	}
 
