@@ -49,7 +49,7 @@ func BenchmarkStringMap_SetValueRefSlice(t *testing.B) {
 }
 
 // NewStringMap
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleNewStringMap() {
 	fmt.Println(NewStringMap(map[string]interface{}{"k": "v"}))
 	// Output: &[{k v}]
@@ -72,7 +72,7 @@ func TestNewStringMap(t *testing.T) {
 }
 
 // NewStringMapV
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleNewStringMapV() {
 	fmt.Println(NewStringMapV(map[string]interface{}{"k": "v"}))
 	// Output: &[{k v}]
@@ -95,7 +95,7 @@ func TestNewStringMapV(t *testing.T) {
 }
 
 // Any
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringMap_Any() {
 	m := NewStringMapV(map[string]interface{}{"k": "v"})
 	fmt.Println(m.Any())
@@ -117,7 +117,7 @@ func TestStringMap_Any(t *testing.T) {
 }
 
 // Clear
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringMap_Clear() {
 	m := NewStringMapV(map[string]interface{}{"1": "one"})
 	fmt.Println(m.Clear())
@@ -154,7 +154,7 @@ func TestStringMap_Clear(t *testing.T) {
 }
 
 // Copy
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringMap_Copy() {
 	m := NewStringMapV(map[string]interface{}{"1": "one", "2": "two"})
 	fmt.Println(m.Copy("1"))
@@ -182,7 +182,7 @@ func TestStringMap_Copy(t *testing.T) {
 }
 
 // Delete
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringMap_Delete() {
 	m := NewStringMapV(map[string]interface{}{"1": "one"})
 	fmt.Println(m.Delete("1").O())
@@ -215,7 +215,7 @@ func TestStringMap_Delete(t *testing.T) {
 }
 
 // DeleteM
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringMap_DeleteM() {
 	m := NewStringMapV(map[string]interface{}{"1": "one"})
 	fmt.Println(m.DeleteM("1"))
@@ -243,7 +243,7 @@ func TestStringMap_DeleteM(t *testing.T) {
 }
 
 // Dump
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringMap_Dump() {
 	m := NewStringMapV(map[string]interface{}{"1": "one"})
 	fmt.Println(m.Dump())
@@ -268,7 +268,7 @@ func TestStringMap_Dump(t *testing.T) {
 }
 
 // Exists
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringMap_Exists() {
 	m := NewStringMapV(map[string]interface{}{"1": "one"})
 	fmt.Println(m.Exists("1"))
@@ -309,7 +309,7 @@ func TestStringMap_Exists(t *testing.T) {
 }
 
 // Convert to Golang internal types
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func TestToStringMapG(t *testing.T) {
 	{
 		// single value
@@ -360,7 +360,7 @@ func TestToStringMapGE(t *testing.T) {
 }
 
 // Generic
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringMap_Generic() {
 	fmt.Println(NewStringMapV().Generic())
 	// Output: false
@@ -371,7 +371,7 @@ func TestStringMap_Generic(t *testing.T) {
 }
 
 // Get
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringMap_Get() {
 	m := NewStringMapV(map[string]interface{}{"1": "one"})
 	fmt.Println(m.Get("1").O())
@@ -404,7 +404,7 @@ func TestStringMap_Get(t *testing.T) {
 }
 
 // Update
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringMap_Update() {
 	fmt.Println(NewStringMapV().Update(".", map[string]interface{}{"1": "one"}))
 	// Output: &[{1 one}]
@@ -638,7 +638,7 @@ func TestStringMap_Update(t *testing.T) {
 }
 
 // Keys
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringMap_Keys() {
 	m := NewStringMapV(map[string]interface{}{"1": "one"})
 	fmt.Println(m.Keys().O())
@@ -664,7 +664,7 @@ func TestStringMap_Keys(t *testing.T) {
 }
 
 // Len
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringMap_Len() {
 	fmt.Println(NewStringMapV().SetM("k", "v").Len())
 	// Output: 1
@@ -680,7 +680,7 @@ func TestStringMap_Len(t *testing.T) {
 }
 
 // Merge
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringMap_Merge() {
 	fmt.Println(M().Add("1", "two").Merge(M().Add("1", "one")))
 	// Output: &[{1 one}]
@@ -794,7 +794,7 @@ func TestStringMap_Merge(t *testing.T) {
 }
 
 // MergeG
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringMap_MergeG() {
 	fmt.Println(NewStringMapV(map[string]interface{}{"1": "two"}).MergeG(NewStringMapV(map[string]interface{}{"1": "one"})))
 	// Output: map[1:one]
@@ -1041,7 +1041,7 @@ func TestStringMap_MergeG(t *testing.T) {
 }
 
 // O
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringMap_O() {
 	fmt.Println(NewStringMapV(map[string]interface{}{"1": "one"}).O())
 	// Output: map[1:one]
@@ -1054,13 +1054,29 @@ func TestStringMap_O(t *testing.T) {
 }
 
 // Query
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringMap_Query() {
 	fmt.Println(ToStringMap("foo:\n  bar: 1\n").Query("foo.bar"))
 	// Output: 1
 }
 
 func TestStringMap_Query(t *testing.T) {
+
+	// list sub key doesn't exist
+	{
+		yml := `one:
+  - name: foo
+    val:
+      - 3.3
+      - 1.1
+      - 2.2
+  - name: bar
+    val: 3
+`
+		val, err := NewStringMap(yml).QueryE("one.[name==%s]", "blah")
+		assert.Error(t, err)
+		assert.True(t, val.Nil())
+	}
 
 	// malformed yaml
 	{
@@ -1121,7 +1137,9 @@ func TestStringMap_Query(t *testing.T) {
   - name: bar
     val: 3
 `
+		assert.Equal(t, 3, NewStringMap(yml).Query("one.[name==%s].val", "bar").ToInt())
 		assert.Equal(t, 3, NewStringMap(yml).Query(`one.[name==bar].val`).ToInt())
+		assert.Equal(t, 2, NewStringMap(yml).Query("one.[name==foo].val.[%d]", -1).ToInt())
 		assert.Equal(t, 2, NewStringMap(yml).Query(`one.[name==foo].val.[-1]`).ToInt())
 		assert.Equal(t, 1.1, NewStringMap(yml).Query(`one.[name==foo].val.[-2]`).ToFloat64())
 		assert.Equal(t, "3.3", NewStringMap(yml).Query(`one.[name==foo].val.[-3]`).ToString())
@@ -1156,7 +1174,7 @@ func TestStringMap_Query(t *testing.T) {
 }
 
 // Remove
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringMap_Remove() {
 	fmt.Println(ToStringMap("foo:\n  bar1: 1\n  bar2: 2\n").Remove("foo.bar1"))
 	// Output: &[{foo [{bar2 2}]}]
@@ -1353,7 +1371,7 @@ func TestStringMap_Remove(t *testing.T) {
 }
 
 // Set
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringMap_Set() {
 	fmt.Println(NewStringMapV().Set("key", "value"))
 	// Output: true
@@ -1380,7 +1398,7 @@ func TestStringMap_Set(t *testing.T) {
 }
 
 // SetM
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleStringMap_SetM() {
 	fmt.Println(NewStringMapV().SetM("k", "v"))
 	// Output: &[{k v}]
@@ -1407,7 +1425,7 @@ func TestStringMap_SetM(t *testing.T) {
 }
 
 // WriteJSON
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func TestWriteJSON(t *testing.T) {
 	clearTmpDir()
 
@@ -1426,7 +1444,7 @@ func TestWriteJSON(t *testing.T) {
 }
 
 // WriteYAML
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func TestWriteYAML(t *testing.T) {
 	clearTmpDir()
 

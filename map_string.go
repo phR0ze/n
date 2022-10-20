@@ -503,15 +503,17 @@ func (p *StringMap) O() interface{} {
 }
 
 // Query returns the value for the given selector, using jq type selectors. Returns empty *Object if not found.
-// see dot notation from https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
-func (p *StringMap) Query(selector string) (val *Object) {
-	val, _ = p.QueryE(selector)
+//   - `selector` supports dot notation similar to https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
+//   - `params` are the string interpolation paramaters similar to fmt.Sprintf()
+func (p *StringMap) Query(selector string, params ...interface{}) (val *Object) {
+	val, _ = p.QueryE(selector, params...)
 	return val
 }
 
 // QueryE returns the value for the given selector, using jq type selectors. Returns empty *Object if not found.
-// see dot notation from https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
-func (p *StringMap) QueryE(selector string) (val *Object, err error) {
+//   - `selector` supports dot notation similar to https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
+//   - `params` are the string interpolation paramaters similar to fmt.Sprintf()
+func (p *StringMap) QueryE(selector string, params ...interface{}) (val *Object, err error) {
 	if p == nil || len(*p) == 0 {
 		err = errors.Errorf("failed to query empty map")
 		return
@@ -522,7 +524,7 @@ func (p *StringMap) QueryE(selector string) (val *Object, err error) {
 
 	// Process keys from left to right
 	var keys *StringSlice
-	if keys, err = KeysFromSelector(selector); err != nil {
+	if keys, err = KeysFromSelector(selector, params...); err != nil {
 		return
 	}
 	for ko := keys.Shift(); !ko.Nil(); ko = keys.Shift() {
@@ -549,11 +551,18 @@ func (p *StringMap) QueryE(selector string) (val *Object, err error) {
 
 			// Select by key==value, e.g. .[k==v]
 			if k != "" && v != "" {
+				selected := false
 				for j := 0; j < len(x); j++ {
 					m := ToStringMap(x[j])
 					if m.Get(k).A() == v {
+						selected = true
 						val.o = m
 					}
+				}
+				if !selected {
+					err = errors.Errorf("invalid array element selection %v", key.A())
+					val.o = nil
+					return
 				}
 			}
 
@@ -568,16 +577,18 @@ func (p *StringMap) QueryE(selector string) (val *Object, err error) {
 
 // Remove modifies this Map to delete the given key location, using jq type selectors
 // and returns a reference to this Map rather than the deleted value.
-// see dot notation from https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
-func (p *StringMap) Remove(selector string) IMap {
-	_, _ = p.RemoveE(selector)
+//   - `selector` supports dot notation similar to https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
+//   - `params` are the string interpolation paramaters similar to fmt.Sprintf()
+func (p *StringMap) Remove(selector string, params ...interface{}) IMap {
+	_, _ = p.RemoveE(selector, params...)
 	return p
 }
 
 // RemoveE modifies this Map to delete the given key location, using jq type selectors
 // and returns a reference to this Map rather than the deleted value.
-// see dot notation from https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
-func (p *StringMap) RemoveE(selector string) (m IMap, err error) {
+//   - `selector` supports dot notation similar to https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
+//   - `params` are the string interpolation paramaters similar to fmt.Sprintf()
+func (p *StringMap) RemoveE(selector string, params ...interface{}) (m IMap, err error) {
 	if p == nil {
 		p = NewStringMapV()
 	}
@@ -585,7 +596,7 @@ func (p *StringMap) RemoveE(selector string) (m IMap, err error) {
 
 	// Process keys from left to right
 	var keys *StringSlice
-	if keys, err = KeysFromSelector(selector); err != nil {
+	if keys, err = KeysFromSelector(selector, params...); err != nil {
 		return
 	}
 	var pk interface{}

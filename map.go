@@ -1,6 +1,7 @@
 package n
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -36,10 +37,10 @@ type IMap interface {
 	// EachRI(action func(int, O)) Slice                 // EachRI calls the given lambda once for each element in this Map in reverse, passing in that element
 	// EachRIE(action func(int, O) error) (ISlice, error) // EachRIE calls the given lambda once for each element in this Map in reverse, passing in that element
 	// Empty() bool                                      // Empty tests if this Map is empty.
-	Generic() bool                                           // Generic returns true if the underlying implementation uses reflection
-	Get(key interface{}) (val *Object)                       // Get returns the value at the given key location. Returns empty *Object if not found.
-	Update(key string, val interface{}) IMap                 // Update sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
-	UpdateE(key string, val interface{}) (m IMap, err error) // UpdateE sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
+	Generic() bool                                                // Generic returns true if the underlying implementation uses reflection
+	Get(key interface{}) (val *Object)                            // Get returns the value at the given key location. Returns empty *Object if not found.
+	Update(selector string, val interface{}) IMap                 // Update sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
+	UpdateE(selector string, val interface{}) (m IMap, err error) // UpdateE sets the value for the given key location, using jq type selectors. Returns a reference to this Map.
 	// Join(separator ...string) (str *Object)           // Join converts each element into a string then joins them together using the given separator or comma by default.
 	Keys() ISlice                          // Keys returns all the keys in this Map as a Slice of the key type.
 	Len() int                              // Len returns the number of elements in this Map.
@@ -53,15 +54,15 @@ type IMap interface {
 	// Pop() (elem *Object)                              // Pop modifies this Map to remove the last element and returns the removed element as an Object.
 	// PopN(n int) (new Map)                           // PopN modifies this Map to remove the last n elements and returns the removed elements as a new Map.
 	// Prepend(elem interface{}) Slice                   // Prepend modifies this Map to add the given element at the begining and returns a reference to this Map.
-	Query(key string) (val *Object)             // Query returns the value at the given key location, using jq type selectors. Returns empty *Object if not found.
-	QueryE(key string) (val *Object, err error) // Query returns the value at the given key location, using jq type selectors. Returns empty *Object if not found.
-	Remove(key string) IMap                     // Remove modifies this map to remove the value at the given key location, using jq type selectors. Returns a reference to this Map
-	RemoveE(key string) (m IMap, err error)     // RemoveE modifies this map to remove the value at the given key location, using jq type selectors. Returns a reference to this Map
+	Query(selector string, params ...interface{}) (val *Object)             // Query returns the value at the given selector location, using jq type selectors. Returns empty *Object if not found.
+	QueryE(selector string, params ...interface{}) (val *Object, err error) // Query returns the value at the given selector location, using jq type selectors. Returns empty *Object if not found.
+	Remove(selector string, params ...interface{}) IMap                     // Remove modifies this map to remove the value at the given selector location, using jq type selectors. Returns a reference to this Map
+	RemoveE(selector string, params ...interface{}) (m IMap, err error)     // RemoveE modifies this map to remove the value at the given selector location, using jq type selectors. Returns a reference to this Map
 	// Reverse() (new Map)                             // Reverse returns a new Map with the order of the elements reversed.
 	// ReverseM() Slice                                  // ReverseM modifies this Map reversing the order of the elements and returns a reference to this Map.
 	// Select(sel func(O) bool) (new Map)              // Select creates a new Map with the elements that match the lambda selector.
-	Set(key, val interface{}) bool  // Set the value for the given key to the given val. Returns true if the key did not yet exists in this Map.
-	SetM(key, val interface{}) IMap // SetM the value for the given key to the given val creating map if necessary. Returns a reference to this Map.
+	Set(selector, val interface{}) bool  // Set the value for the given key to the given val. Returns true if the selector did not yet exists in this Map.
+	SetM(selector, val interface{}) IMap // SetM the value for the given selector to the given val creating map if necessary. Returns a reference to this Map.
 	// Shift() (elem *Object)                            // Shift modifies this Map to remove the first element and returns the removed element as an Object.
 	// ShiftN(n int) (new Map)                         // ShiftN modifies this Map to remove the first n elements and returns the removed elements as a new Map.
 	// Single() bool                                     // Single reports true if there is only one element in this Map.
@@ -159,11 +160,13 @@ func IdxFromSelector(selector string, size int) (i int, k, v string, err error) 
 }
 
 // KeysFromSelector splits the given key selectors into individual keys
-func KeysFromSelector(selector string) (keys *StringSlice, err error) {
+//   - `selector` supports dot notation similar to https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
+//   - `params` are the string interpolation paramaters similar to fmt.Sprintf()
+func KeysFromSelector(selector string, params ...interface{}) (keys *StringSlice, err error) {
 	keys = NewStringSliceV()
 
 	var quotes *StringSlice
-	if quotes, err = A(selector).SplitQuotes(); err != nil {
+	if quotes, err = A(fmt.Sprintf(selector, params...)).SplitQuotes(); err != nil {
 		return
 	}
 	for i := 0; i < quotes.Len(); i++ {
