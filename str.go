@@ -1087,7 +1087,7 @@ func (p *Str) SortReverseM() ISlice {
 	return p
 }
 
-// Split this Str into all substrings deliniated by separator and returns a slice of the
+// Split this Str into all substrings delimited by separator and returns a slice of the
 // substrings. If Str does not contain separator, Split returns a slice of length 1 whose
 // only element is Str. If Str is empty, Split returns an empty slice. separator defaults
 // to comma if not given.
@@ -1115,6 +1115,40 @@ func (p *Str) SplitAfter(separator ...string) (slice *StringSlice) {
 		sep = separator[0]
 	}
 	return ToStringSlice(strings.SplitAfter(p.A(), sep))
+}
+
+// SplitEscape wraps the Split function handling a possible escape string. When given
+// the escape character will cause the split to be ignored and the escape string to be
+// stripped out
+func (p *Str) SplitEscape(separator string, escape ...string) (slice *StringSlice) {
+	if p == nil || len(*p) == 0 {
+		return NewStringSliceV()
+	}
+
+	// Split the string using Split
+	slice = p.Split(separator)
+
+	// Process escape string if given
+	if len(escape) > 0 {
+		prev := ""
+		esc := escape[0]
+		len := slice.Len()
+		newSlice := NewStringSliceV()
+
+		for i, x := range slice.G() {
+			if strings.HasSuffix(x, esc) && i < len-1 {
+				prev += strings.TrimSuffix(x, esc) + separator
+			} else if prev != "" {
+				newSlice.Append(prev + x)
+				prev = ""
+			} else {
+				newSlice.Append(x)
+			}
+		}
+		slice = newSlice
+	}
+
+	return
 }
 
 // SplitQuotes splits this Str into substrings starting and ending with double quotes and
@@ -1252,7 +1286,7 @@ func (p *Str) ToStrs() (slice []string) {
 	return ToStrs(p.O())
 }
 
-//Title returns a copy of the string s with all Unicode letters that begin words mapped to their title case.
+// Title returns a copy of the string s with all Unicode letters that begin words mapped to their title case.
 // BUG(rsc): The rule Title uses for word boundaries does not handle Unicode punctuation properly.
 // Pass through for strings.Title
 func (p *Str) Title() (new *Str) {

@@ -1062,6 +1062,29 @@ func ExampleStringMap_Query() {
 
 func TestStringMap_Query(t *testing.T) {
 
+	{
+		// escape sequences
+		yml := `one:
+  - ver: 1.2.3
+    val: 1
+  - ver: 1.0.0
+    val: 2
+  - ver: 3.2.1
+    val: 3
+`
+		val, err := NewStringMap(yml).QueryE(`one.[ver==1\.0\.0]`)
+		assert.NoError(t, err)
+		assert.Equal(t, val.ToStringMapG(), map[string]interface{}{"val": 2, "ver": "1.0.0"})
+
+		val, err = NewStringMap(yml).QueryE(`one.[ver==3\.2\.1]`)
+		assert.NoError(t, err)
+		assert.Equal(t, val.ToStringMapG(), map[string]interface{}{"val": 3, "ver": "3.2.1"})
+
+		val, err = NewStringMap(yml).QueryE(`one.[ver==1\.2\.3]`)
+		assert.NoError(t, err)
+		assert.Equal(t, val.ToStringMapG(), map[string]interface{}{"val": 1, "ver": "1.2.3"})
+	}
+
 	// list sub key doesn't exist
 	{
 		yml := `one:
@@ -1331,6 +1354,26 @@ func TestStringMap_Remove(t *testing.T) {
 			},
 		}
 		assert.Equal(t, expected, MV(a).Remove("2.[name==bar]").MG())
+	}
+
+	{
+		// Remove list item by map's key value with escapes
+		a := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo"},
+				map[string]interface{}{"name": "1.2.3"},
+				map[string]interface{}{"name": "bob"},
+			},
+		}
+		expected := map[string]interface{}{
+			"1": "one",
+			"2": []interface{}{
+				map[string]interface{}{"name": "foo"},
+				map[string]interface{}{"name": "bob"},
+			},
+		}
+		assert.Equal(t, expected, MV(a).Remove(`2.[name==1\.2\.3]`).MG())
 	}
 
 	{

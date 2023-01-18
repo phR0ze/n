@@ -177,7 +177,7 @@ func KeysFromSelector(selector string, params ...interface{}) (keys *StringSlice
 		// 2. a single quoted key to leave intact
 		var qKeys *StringSlice
 		if quote.First().A() != `"` {
-			qKeys = A(quote).Split(".")
+			qKeys = A(quote).SplitEscape(".", "\\")
 		} else {
 			qKeys = ToStringSlice(quote.TrimPrefix(`"`).TrimSuffix(`"`))
 		}

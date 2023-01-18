@@ -505,6 +505,7 @@ func (p *StringMap) O() interface{} {
 // Query returns the value for the given selector, using jq type selectors. Returns empty *Object if not found.
 //   - `selector` supports dot notation similar to https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
 //   - `params` are the string interpolation paramaters similar to fmt.Sprintf()
+//   - use the \\ character to escape periods that don't separate keys e.g. "[version=1\\.2\\.3]"
 func (p *StringMap) Query(selector string, params ...interface{}) (val *Object) {
 	val, _ = p.QueryE(selector, params...)
 	return val
@@ -513,6 +514,7 @@ func (p *StringMap) Query(selector string, params ...interface{}) (val *Object) 
 // QueryE returns the value for the given selector, using jq type selectors. Returns empty *Object if not found.
 //   - `selector` supports dot notation similar to https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
 //   - `params` are the string interpolation paramaters similar to fmt.Sprintf()
+//   - use the \\ character to escape periods that don't separate keys e.g. "[version=1\\.2\\.3]"
 func (p *StringMap) QueryE(selector string, params ...interface{}) (val *Object, err error) {
 	if p == nil || len(*p) == 0 {
 		err = errors.Errorf("failed to query empty map")
@@ -579,6 +581,7 @@ func (p *StringMap) QueryE(selector string, params ...interface{}) (val *Object,
 // and returns a reference to this Map rather than the deleted value.
 //   - `selector` supports dot notation similar to https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
 //   - `params` are the string interpolation paramaters similar to fmt.Sprintf()
+//   - use the \\ character to escape periods that don't separate keys e.g. "[version=1\\.2\\.3]"
 func (p *StringMap) Remove(selector string, params ...interface{}) IMap {
 	_, _ = p.RemoveE(selector, params...)
 	return p
@@ -588,6 +591,7 @@ func (p *StringMap) Remove(selector string, params ...interface{}) IMap {
 // and returns a reference to this Map rather than the deleted value.
 //   - `selector` supports dot notation similar to https://stedolan.github.io/jq/manual/#Basicfilters with some caveats
 //   - `params` are the string interpolation paramaters similar to fmt.Sprintf()
+//   - use the \\ character to escape periods that don't separate keys e.g. "[version=1\\.2\\.3]"
 func (p *StringMap) RemoveE(selector string, params ...interface{}) (m IMap, err error) {
 	if p == nil {
 		p = NewStringMapV()

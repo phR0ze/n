@@ -8,7 +8,7 @@ import (
 )
 
 // Map
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleMap() {
 	fmt.Println(Map(map[string]interface{}{"k": "v"}))
 	// Output: &[{k v}]
@@ -41,7 +41,7 @@ func TestMap(t *testing.T) {
 }
 
 // MergeStringMap
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func ExampleMergeStringMap() {
 	fmt.Println(MergeStringMap(map[string]interface{}{"1": "two"}, map[string]interface{}{"1": "one"}))
 	// Output: map[1:one]
@@ -291,7 +291,7 @@ func TestMergeStringMap(t *testing.T) {
 }
 
 // IdxFromSelector
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func TestStringMap_IdxFromSelector(t *testing.T) {
 
 	assert.Equal(t, []int{0, 1, 2}, ToStringMap("foo:\n  - 0\n  - 1\n  - 2\n").Query(`foo.[]`).ToIntSliceG())
@@ -378,7 +378,7 @@ func TestStringMap_IdxFromSelector(t *testing.T) {
 }
 
 // KeysFromSelector
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 func TestStringMap_KeysFromSelector(t *testing.T) {
 
 	// Empty
@@ -446,6 +446,11 @@ func TestStringMap_KeysFromSelector(t *testing.T) {
 	keys, err = KeysFromSelector("one.[name==bar].val.[-2]")
 	assert.Nil(t, err)
 	assert.Equal(t, &StringSlice{"one", "[name==bar]", "val", "[-2]"}, keys)
+
+	// quotes
+	keys, err = KeysFromSelector(`one.[name==1\.2\.3].val`)
+	assert.Nil(t, err)
+	assert.Equal(t, &StringSlice{"one", `[name==1.2.3]`, "val"}, keys)
 
 	// no dot notation
 	keys, err = KeysFromSelector("one")
