@@ -52,7 +52,7 @@ func TestExecPath(t *testing.T) {
 	// happy
 	{
 		path := ExecPath("sh")
-		assert.True(t, path == "/bin/sh" || path == "/usr/bin/sh")
+		assert.True(t, path == "/bin/sh" || path == "/usr/bin/sh" || path == "/run/current-system/sw/bin/sh")
 	}
 
 	// sad
