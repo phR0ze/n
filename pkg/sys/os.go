@@ -3,6 +3,7 @@ package sys
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"regexp"
 	"runtime"
@@ -76,6 +77,11 @@ func ExecExists(target string) (ok bool) {
 
 // ExecOut executes the given command and returns the output as a string.
 func ExecOut(str string, a ...interface{}) (out string, err error) {
+
+	// Disable creation of .DS_Store ._* files on OSX during file copy
+	if Darwin() {
+		os.Setenv("COPYFILE_DISABLE", "1")
+	}
 
 	// Parse command
 	cmd := fmt.Sprintf(str, a...)
