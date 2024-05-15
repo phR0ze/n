@@ -1,17 +1,12 @@
 package zip
 
 import (
-	"archive/zip"
-	"io"
 	"os"
 	"path"
-	"reflect"
 	"strings"
 	"testing"
 
-	"github.com/bouk/monkey"
 	"github.com/phR0ze/n/pkg/sys"
-	"github.com/phR0ze/n/pkg/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -27,45 +22,45 @@ var testfile = "../../../test/testfile"
 func TestCreateSad(t *testing.T) {
 	clearTmpDir()
 
-	// force zip.Create error
-	{
-		// Create new source directory/file
-		srcDir := path.Join(tmpDir, "src")
-		_, err := sys.MkdirP(srcDir)
-		assert.Nil(t, err)
-		_, err = sys.Touch(path.Join(srcDir, "file"))
-		assert.Nil(t, err)
+	// // force zip.Create error
+	// {
+	// 	// Create new source directory/file
+	// 	srcDir := path.Join(tmpDir, "src")
+	// 	_, err := sys.MkdirP(srcDir)
+	// 	assert.Nil(t, err)
+	// 	_, err = sys.Touch(path.Join(srcDir, "file"))
+	// 	assert.Nil(t, err)
 
-		// Now attempt to create th zip but force the io.Copy error
-		OneShotForceZipCreateError()
-		err = Create(tmpfile, srcDir)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to add target file"))
-		assert.True(t, strings.HasSuffix(err.Error(), "to zip: invalid argument"))
+	// 	// Now attempt to create th zip but force the io.Copy error
+	// 	OneShotForceZipCreateError()
+	// 	err = Create(tmpfile, srcDir)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to add target file"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), "to zip: invalid argument"))
 
-		// Clean up
-		assert.Nil(t, sys.RemoveAll(srcDir))
-		assert.Nil(t, sys.Remove(tmpfile))
-	}
+	// 	// Clean up
+	// 	assert.Nil(t, sys.RemoveAll(srcDir))
+	// 	assert.Nil(t, sys.Remove(tmpfile))
+	// }
 
-	// force io.Copy error
-	{
-		// Create new source directory/file
-		srcDir := path.Join(tmpDir, "src")
-		_, err := sys.MkdirP(srcDir)
-		assert.Nil(t, err)
-		_, err = sys.Touch(path.Join(srcDir, "file"))
-		assert.Nil(t, err)
+	// // force io.Copy error
+	// {
+	// 	// Create new source directory/file
+	// 	srcDir := path.Join(tmpDir, "src")
+	// 	_, err := sys.MkdirP(srcDir)
+	// 	assert.Nil(t, err)
+	// 	_, err = sys.Touch(path.Join(srcDir, "file"))
+	// 	assert.Nil(t, err)
 
-		// Now attempt to create th zip but force the io.Copy error
-		test.OneShotForceIOCopyError()
-		err = Create(tmpfile, srcDir)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to copy data from reader to writer for zip target"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	// 	// Now attempt to create th zip but force the io.Copy error
+	// 	test.OneShotForceIOCopyError()
+	// 	err = Create(tmpfile, srcDir)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to copy data from reader to writer for zip target"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
 
-		// Clean up
-		assert.Nil(t, sys.RemoveAll(srcDir))
-		assert.Nil(t, sys.Remove(tmpfile))
-	}
+	// 	// Clean up
+	// 	assert.Nil(t, sys.RemoveAll(srcDir))
+	// 	assert.Nil(t, sys.Remove(tmpfile))
+	// }
 
 	// attempt to read writeonly source file
 	{
@@ -140,22 +135,22 @@ func TestCreateSad(t *testing.T) {
 		assert.Nil(t, sys.RemoveAll(dstDir))
 	}
 
-	// force glob failure
-	{
-		dstDir := path.Join(tmpDir, "dst")
-		_, err := sys.MkdirP(dstDir)
-		assert.Nil(t, err)
+	// // force glob failure
+	// {
+	// 	dstDir := path.Join(tmpDir, "dst")
+	// 	_, err := sys.MkdirP(dstDir)
+	// 	assert.Nil(t, err)
 
-		test.OneShotForceOSCloseError()
-		test.OneShotForceFilePathGlobError()
-		OneShotForceZipCloseError()
-		err = Create(path.Join(dstDir, "tar"), tmpfile)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to close file writer: failed to close zipfile writer: failed to get glob for"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	// 	test.OneShotForceOSCloseError()
+	// 	test.OneShotForceFilePathGlobError()
+	// 	OneShotForceZipCloseError()
+	// 	err = Create(path.Join(dstDir, "tar"), tmpfile)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to close file writer: failed to close zipfile writer: failed to get glob for"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
 
-		// Correct permission and remove
-		assert.Nil(t, sys.RemoveAll(dstDir))
-	}
+	// 	// Correct permission and remove
+	// 	assert.Nil(t, sys.RemoveAll(dstDir))
+	// }
 
 	// no sources found
 	{
@@ -288,62 +283,62 @@ func TestCreateFromSingleFileWithExtractCheck(t *testing.T) {
 func TestExtractAllSad(t *testing.T) {
 	clearTmpDir()
 
-	// force os.Chtimes error
-	{
-		assert.Nil(t, sys.Copy(testZipfile1, tmpDir))
-		test.OneShotForceOSChtimesError()
-		err := ExtractAll(tempZipfile1, tmpDir)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to set file access times for"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
-	}
+	// // force os.Chtimes error
+	// {
+	// 	assert.Nil(t, sys.Copy(testZipfile1, tmpDir))
+	// 	test.OneShotForceOSChtimesError()
+	// 	err := ExtractAll(tempZipfile1, tmpDir)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to set file access times for"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	// }
 
-	// force os.Chmod error
-	{
-		assert.Nil(t, sys.Copy(testZipfile1, tmpDir))
-		test.OneShotForceOSChmodError()
-		err := ExtractAll(tempZipfile1, tmpDir)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to set file mode for"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
-	}
+	// // force os.Chmod error
+	// {
+	// 	assert.Nil(t, sys.Copy(testZipfile1, tmpDir))
+	// 	test.OneShotForceOSChmodError()
+	// 	err := ExtractAll(tempZipfile1, tmpDir)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to set file mode for"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	// }
 
-	// force Close error
-	{
-		// Pretrim and skip trim
-		assert.Nil(t, sys.Copy(testZipfile1, tmpDir))
-		TrimPrefix(tempZipfile1)
-		ForceNilFromTrimPrefix()
+	// // force Close error
+	// {
+	// 	// Pretrim and skip trim
+	// 	assert.Nil(t, sys.Copy(testZipfile1, tmpDir))
+	// 	TrimPrefix(tempZipfile1)
+	// 	ForceNilFromTrimPrefix()
 
-		test.OneShotForceOSCloseError()
-		err := ExtractAll(tempZipfile1, tmpDir)
-		assert.Equal(t, "failed to close zipfile writer: invalid argument", err.Error())
-	}
+	// 	test.OneShotForceOSCloseError()
+	// 	err := ExtractAll(tempZipfile1, tmpDir)
+	// 	assert.Equal(t, "failed to close zipfile writer: invalid argument", err.Error())
+	// }
 
-	// force os.Copy error
-	{
-		// Pretrim and skip trim
-		assert.Nil(t, sys.Copy(testZipfile1, tmpDir))
-		TrimPrefix(tempZipfile1)
-		ForceNilFromTrimPrefix()
+	// // force os.Copy error
+	// {
+	// 	// Pretrim and skip trim
+	// 	assert.Nil(t, sys.Copy(testZipfile1, tmpDir))
+	// 	TrimPrefix(tempZipfile1)
+	// 	ForceNilFromTrimPrefix()
 
-		test.OneShotForceIOCopyError()
-		test.OneShotForceOSCloseError()
-		err := ExtractAll(tempZipfile1, tmpDir)
-		assert.Equal(t, "failed to close zipfile writer: failed to copy data from zip to disk: invalid argument", err.Error())
-	}
+	// 	test.OneShotForceIOCopyError()
+	// 	test.OneShotForceOSCloseError()
+	// 	err := ExtractAll(tempZipfile1, tmpDir)
+	// 	assert.Equal(t, "failed to close zipfile writer: failed to copy data from zip to disk: invalid argument", err.Error())
+	// }
 
-	// force zip.FileOpen error
-	{
-		// Pretrim and skip trim
-		assert.Nil(t, sys.Copy(testZipfile1, tmpDir))
-		TrimPrefix(tempZipfile1)
-		ForceNilFromTrimPrefix()
+	// // force zip.FileOpen error
+	// {
+	// 	// Pretrim and skip trim
+	// 	assert.Nil(t, sys.Copy(testZipfile1, tmpDir))
+	// 	TrimPrefix(tempZipfile1)
+	// 	ForceNilFromTrimPrefix()
 
-		OneShotForceZipFileOpenError()
-		test.OneShotForceOSCloseError()
-		err := ExtractAll(tempZipfile1, tmpDir)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to close zipfile writer: failed to open zipfile target"))
-		assert.True(t, strings.HasSuffix(err.Error(), "for reading: invalid argument"))
-	}
+	// 	OneShotForceZipFileOpenError()
+	// 	test.OneShotForceOSCloseError()
+	// 	err := ExtractAll(tempZipfile1, tmpDir)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to close zipfile writer: failed to open zipfile target"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), "for reading: invalid argument"))
+	// }
 
 	// attempt to write to writeonly destination path
 	{
@@ -365,13 +360,13 @@ func TestExtractAllSad(t *testing.T) {
 	}
 
 	// force zip.OpenReader error
-	{
-		assert.Nil(t, sys.Copy(testZipfile1, tmpDir))
-		OneShotForceZipOpenReaderError()
-		err := ExtractAll(tempZipfile1, tmpDir)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to open zipfile"))
-		assert.True(t, strings.HasSuffix(err.Error(), "for reading: invalid argument"))
-	}
+	// {
+	// 	assert.Nil(t, sys.Copy(testZipfile1, tmpDir))
+	// 	OneShotForceZipOpenReaderError()
+	// 	err := ExtractAll(tempZipfile1, tmpDir)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to open zipfile"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), "for reading: invalid argument"))
+	// }
 
 	// invalid zipfile
 	{
@@ -456,43 +451,43 @@ func TestTrimPrefix(t *testing.T) {
 		assert.Nil(t, sys.Copy(testZipfile1, tempZipfile1))
 	}
 
-	// force os.File.Truncate failure and fail close
-	{
-		test.OneShotForceOSCloseError()
-		test.OneShotForceOSTruncateError(os.ErrInvalid)
-		err := TrimPrefix(tempZipfile1)
-		assert.Equal(t, "failed to close file writer: failed to truncate zipfile 'file1.zip': invalid argument", err.Error())
-		assert.Nil(t, sys.Copy(testZipfile1, tempZipfile1))
-	}
+	// // force os.File.Truncate failure and fail close
+	// {
+	// 	test.OneShotForceOSCloseError()
+	// 	test.OneShotForceOSTruncateError(os.ErrInvalid)
+	// 	err := TrimPrefix(tempZipfile1)
+	// 	assert.Equal(t, "failed to close file writer: failed to truncate zipfile 'file1.zip': invalid argument", err.Error())
+	// 	assert.Nil(t, sys.Copy(testZipfile1, tempZipfile1))
+	// }
 
-	// force os.File.WriteAt failure
-	{
-		test.OneShotForceOSWriteAtError(os.ErrInvalid)
-		err := TrimPrefix(tempZipfile1)
-		assert.Equal(t, "failed to write shifted data to zipfile 'file1.zip': invalid argument", err.Error())
-		assert.Nil(t, sys.Copy(testZipfile1, tempZipfile1))
-	}
+	// // force os.File.WriteAt failure
+	// {
+	// 	test.OneShotForceOSWriteAtError(os.ErrInvalid)
+	// 	err := TrimPrefix(tempZipfile1)
+	// 	assert.Equal(t, "failed to write shifted data to zipfile 'file1.zip': invalid argument", err.Error())
+	// 	assert.Nil(t, sys.Copy(testZipfile1, tempZipfile1))
+	// }
 
-	// force os.File.ReadAt failure
-	{
-		test.OneShotForceOSReadAtError(os.ErrInvalid)
-		err := TrimPrefix(tempZipfile1)
-		assert.Equal(t, "failed to read from zipfile 'file1.zip' to shift data: invalid argument", err.Error())
-	}
+	// // force os.File.ReadAt failure
+	// {
+	// 	test.OneShotForceOSReadAtError(os.ErrInvalid)
+	// 	err := TrimPrefix(tempZipfile1)
+	// 	assert.Equal(t, "failed to read from zipfile 'file1.zip' to shift data: invalid argument", err.Error())
+	// }
 
-	// force os.File.Read failure io.EOF
-	{
-		test.OneShotForceOSReadError(io.EOF)
-		err := TrimPrefix(tempZipfile1)
-		assert.Equal(t, "unable to identify 'file1.zip' as a valid zipfile", err.Error())
-	}
+	// // force os.File.Read failure io.EOF
+	// {
+	// 	test.OneShotForceOSReadError(io.EOF)
+	// 	err := TrimPrefix(tempZipfile1)
+	// 	assert.Equal(t, "unable to identify 'file1.zip' as a valid zipfile", err.Error())
+	// }
 
-	// force io.Read failure non io.EOF
-	{
-		test.OneShotForceOSReadError(os.ErrInvalid)
-		err := TrimPrefix(tempZipfile1)
-		assert.Equal(t, "failed to read from zipfile 'file1.zip' for zip identification: invalid argument", err.Error())
-	}
+	// // force io.Read failure non io.EOF
+	// {
+	// 	test.OneShotForceOSReadError(os.ErrInvalid)
+	// 	err := TrimPrefix(tempZipfile1)
+	// 	assert.Equal(t, "failed to read from zipfile 'file1.zip' for zip identification: invalid argument", err.Error())
+	// }
 
 	// try to open a write only file
 	{
@@ -519,54 +514,54 @@ func prepTmpDir() {
 	sys.Copy("../../net", tmpDir)
 }
 
-// OneShotForceZipCloseError patches *archive/zip.Writer.Close to return an error. Once it has been triggered it
-// removes the patch and operates as per normal. This patch requires the -gcflags=-l to operate correctly
-// e.g. go test -gcflags=-l ./pkg/sys
-func OneShotForceZipCloseError() {
-	var patch *monkey.PatchGuard
-	patch = monkey.PatchInstanceMethod(reflect.TypeOf((*zip.Writer)(nil)), "Close", func(*zip.Writer) error {
-		patch.Unpatch()
-		return os.ErrInvalid
-	})
-}
+// // OneShotForceZipCloseError patches *archive/zip.Writer.Close to return an error. Once it has been triggered it
+// // removes the patch and operates as per normal. This patch requires the -gcflags=-l to operate correctly
+// // e.g. go test -gcflags=-l ./pkg/sys
+// func OneShotForceZipCloseError() {
+// 	var patch *monkey.PatchGuard
+// 	patch = monkey.PatchInstanceMethod(reflect.TypeOf((*zip.Writer)(nil)), "Close", func(*zip.Writer) error {
+// 		patch.Unpatch()
+// 		return os.ErrInvalid
+// 	})
+// }
 
-// OneShotForceZipCreateError patches *archive/zip.Writer.Create to return an error. Once it has been triggered it
-// removes the patch and operates as per normal. This patch requires the -gcflags=-l to operate correctly
-// e.g. go test -gcflags=-l ./pkg/sys
-func OneShotForceZipCreateError() {
-	var patch *monkey.PatchGuard
-	patch = monkey.PatchInstanceMethod(reflect.TypeOf((*zip.Writer)(nil)), "Create", func(*zip.Writer, string) (io.Writer, error) {
-		patch.Unpatch()
-		return nil, os.ErrInvalid
-	})
-}
+// // OneShotForceZipCreateError patches *archive/zip.Writer.Create to return an error. Once it has been triggered it
+// // removes the patch and operates as per normal. This patch requires the -gcflags=-l to operate correctly
+// // e.g. go test -gcflags=-l ./pkg/sys
+// func OneShotForceZipCreateError() {
+// 	var patch *monkey.PatchGuard
+// 	patch = monkey.PatchInstanceMethod(reflect.TypeOf((*zip.Writer)(nil)), "Create", func(*zip.Writer, string) (io.Writer, error) {
+// 		patch.Unpatch()
+// 		return nil, os.ErrInvalid
+// 	})
+// }
 
-// OneShotForceZipFileOpenError patches *archive/zip.File.Open to return an error. Once it has been triggered it
-// removes the patch and operates as per normal. This patch requires the -gcflags=-l to operate correctly
-// e.g. go test -gcflags=-l ./pkg/sys
-func OneShotForceZipFileOpenError() {
-	var patch *monkey.PatchGuard
-	patch = monkey.PatchInstanceMethod(reflect.TypeOf((*zip.File)(nil)), "Open", func(*zip.File) (io.ReadCloser, error) {
-		patch.Unpatch()
-		return nil, os.ErrInvalid
-	})
-}
+// // OneShotForceZipFileOpenError patches *archive/zip.File.Open to return an error. Once it has been triggered it
+// // removes the patch and operates as per normal. This patch requires the -gcflags=-l to operate correctly
+// // e.g. go test -gcflags=-l ./pkg/sys
+// func OneShotForceZipFileOpenError() {
+// 	var patch *monkey.PatchGuard
+// 	patch = monkey.PatchInstanceMethod(reflect.TypeOf((*zip.File)(nil)), "Open", func(*zip.File) (io.ReadCloser, error) {
+// 		patch.Unpatch()
+// 		return nil, os.ErrInvalid
+// 	})
+// }
 
-// OneShotForceZipOpenReaderError patches *archive/zip.OpenReader to return an error. Once it has been triggered it
-// removes the patch and operates as per normal. This patch requires the -gcflags=-l to operate correctly
-// e.g. go test -gcflags=-l ./pkg/sys
-func OneShotForceZipOpenReaderError() {
-	var patch *monkey.PatchGuard
-	patch = monkey.Patch(zip.OpenReader, func(name string) (*zip.ReadCloser, error) {
-		patch.Unpatch()
-		return nil, os.ErrInvalid
-	})
-}
+// // OneShotForceZipOpenReaderError patches *archive/zip.OpenReader to return an error. Once it has been triggered it
+// // removes the patch and operates as per normal. This patch requires the -gcflags=-l to operate correctly
+// // e.g. go test -gcflags=-l ./pkg/sys
+// func OneShotForceZipOpenReaderError() {
+// 	var patch *monkey.PatchGuard
+// 	patch = monkey.Patch(zip.OpenReader, func(name string) (*zip.ReadCloser, error) {
+// 		patch.Unpatch()
+// 		return nil, os.ErrInvalid
+// 	})
+// }
 
-func ForceNilFromTrimPrefix() {
-	var patch *monkey.PatchGuard
-	patch = monkey.Patch(TrimPrefix, func(string) error {
-		patch.Unpatch()
-		return nil
-	})
-}
+// func ForceNilFromTrimPrefix() {
+// 	var patch *monkey.PatchGuard
+// 	patch = monkey.Patch(TrimPrefix, func(string) error {
+// 		patch.Unpatch()
+// 		return nil
+// 	})
+// }

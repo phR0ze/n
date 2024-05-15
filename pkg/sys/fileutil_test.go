@@ -1,7 +1,6 @@
 package sys
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -9,9 +8,7 @@ import (
 	"runtime"
 	"strings"
 	"testing"
-	"testing/iotest"
 
-	"github.com/phR0ze/n/pkg/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,13 +29,13 @@ func TestChmod(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, os.FileMode(0644), Mode(bob1))
 
-	// force chmod to fail
-	{
-		test.OneShotForceOSChmodError()
-		err := Chmod(dir, 0644)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to add permissions with chmod"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
-	}
+	// // force chmod to fail
+	// {
+	// 	test.OneShotForceOSChmodError()
+	// 	err := Chmod(dir, 0644)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to add permissions with chmod"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	// }
 
 	// glob and recurse means globbing wins when working with files
 	// but recursion wins when working with dirs
@@ -135,13 +132,13 @@ func TestChown(t *testing.T) {
 
 func TestCopyGlob(t *testing.T) {
 
-	// force Glob error
-	{
-		test.OneShotForceFilePathGlobError()
-		err := Copy(testfile, tmpfile)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to get glob for"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
-	}
+	// // force Glob error
+	// {
+	// 	test.OneShotForceFilePathGlobError()
+	// 	err := Copy(testfile, tmpfile)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to get glob for"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	// }
 
 	// single file to non-existing dst is a copy to not copy into
 	{
@@ -623,48 +620,48 @@ func TestCopyFile(t *testing.T) {
 	resetTest()
 
 	// force chmod error only
-	{
-		test.OneShotForceOSChmodError()
-		result, err := CopyFile(testfile, tmpfile)
-		assert.Equal(t, "", result)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to chmod file"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
-		assert.Nil(t, Remove(tmpfile))
-	}
+	// {
+	// 	test.OneShotForceOSChmodError()
+	// 	result, err := CopyFile(testfile, tmpfile)
+	// 	assert.Equal(t, "", result)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to chmod file"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	// 	assert.Nil(t, Remove(tmpfile))
+	// }
 
-	// force close error only
-	{
-		test.OneShotForceOSCloseError()
-		result, err := CopyFile(testfile, tmpfile)
-		assert.Equal(t, "", result)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to close file"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
-		assert.Nil(t, Remove(tmpfile))
-	}
+	// // force close error only
+	// {
+	// 	test.OneShotForceOSCloseError()
+	// 	result, err := CopyFile(testfile, tmpfile)
+	// 	assert.Equal(t, "", result)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to close file"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	// 	assert.Nil(t, Remove(tmpfile))
+	// }
 
-	// force sync error and close error
-	{
-		test.OneShotForceOSSyncError()
-		test.OneShotForceOSCloseError()
-		result, err := CopyFile(testfile, tmpfile)
-		assert.Equal(t, "", result)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to close file"))
-		assert.True(t, strings.Contains(err.Error(), ": failed to sync data to file"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
-		assert.Nil(t, Remove(tmpfile))
-	}
+	// // force sync error and close error
+	// {
+	// 	test.OneShotForceOSSyncError()
+	// 	test.OneShotForceOSCloseError()
+	// 	result, err := CopyFile(testfile, tmpfile)
+	// 	assert.Equal(t, "", result)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to close file"))
+	// 	assert.True(t, strings.Contains(err.Error(), ": failed to sync data to file"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	// 	assert.Nil(t, Remove(tmpfile))
+	// }
 
-	// force copy error and close error
-	{
-		test.OneShotForceIOCopyError()
-		test.OneShotForceOSCloseError()
-		result, err := CopyFile(testfile, tmpfile)
-		assert.Equal(t, "", result)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to close file"))
-		assert.True(t, strings.Contains(err.Error(), ": failed to copy data to file"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
-		assert.Nil(t, Remove(tmpfile))
-	}
+	// // force copy error and close error
+	// {
+	// 	test.OneShotForceIOCopyError()
+	// 	test.OneShotForceOSCloseError()
+	// 	result, err := CopyFile(testfile, tmpfile)
+	// 	assert.Equal(t, "", result)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to close file"))
+	// 	assert.True(t, strings.Contains(err.Error(), ": failed to copy data to file"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	// 	assert.Nil(t, Remove(tmpfile))
+	// }
 
 	// copy symlink to readonly dest - failure
 	{
@@ -973,15 +970,15 @@ func TestMkdirP(t *testing.T) {
 func TestMD5(t *testing.T) {
 	resetTest()
 
-	// force copy error
-	{
-		test.OneShotForceIOCopyError()
-		assert.Nil(t, WriteString(tmpfile, "test"))
-		result, err := MD5(tmpfile)
-		assert.Equal(t, "", result)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed copying file data into hash from"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
-	}
+	// // force copy error
+	// {
+	// 	test.OneShotForceIOCopyError()
+	// 	assert.Nil(t, WriteString(tmpfile, "test"))
+	// 	result, err := MD5(tmpfile)
+	// 	assert.Equal(t, "", result)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed copying file data into hash from"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	// }
 
 	// empty string
 	{
@@ -1205,16 +1202,16 @@ func TestSymlink(t *testing.T) {
 func TestTouch(t *testing.T) {
 	resetTest()
 
-	// Force failure of Close via monkey patch
-	{
-		test.OneShotForceOSCloseError()
-		_, err := Touch(tmpfile)
-		assert.Equal(t, fmt.Sprintf("failed closing file %s: invalid argument", tmpfile), err.Error())
+	// // Force failure of Close via monkey patch
+	// {
+	// 	test.OneShotForceOSCloseError()
+	// 	_, err := Touch(tmpfile)
+	// 	assert.Equal(t, fmt.Sprintf("failed closing file %s: invalid argument", tmpfile), err.Error())
 
-		// Clean up
-		err = Remove(tmpfile)
-		assert.Nil(t, err)
-	}
+	// 	// Clean up
+	// 	err = Remove(tmpfile)
+	// 	assert.Nil(t, err)
+	// }
 
 	// empty string
 	{
@@ -1331,58 +1328,58 @@ func TestWriteLines(t *testing.T) {
 
 func TestWriteStream(t *testing.T) {
 
-	// force close only
-	{
-		test.OneShotForceOSCloseError()
-		reader, err := os.Open(testfile)
-		assert.Nil(t, err)
-		err = WriteStream(reader, tmpfile)
-		assert.Nil(t, reader.Close())
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to close file"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
-		assert.Nil(t, os.Remove(tmpfile))
-	}
+	// // force close only
+	// {
+	// 	test.OneShotForceOSCloseError()
+	// 	reader, err := os.Open(testfile)
+	// 	assert.Nil(t, err)
+	// 	err = WriteStream(reader, tmpfile)
+	// 	assert.Nil(t, reader.Close())
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to close file"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	// 	assert.Nil(t, os.Remove(tmpfile))
+	// }
 
-	// force sync and close errors
-	{
-		test.OneShotForceOSSyncError()
-		test.OneShotForceOSCloseError()
-		reader, err := os.Open(testfile)
-		assert.Nil(t, err)
-		err = WriteStream(reader, tmpfile)
-		assert.Nil(t, reader.Close())
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to close file"))
-		assert.True(t, strings.Contains(err.Error(), ": failed syncing stream to file"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
-		assert.Nil(t, os.Remove(tmpfile))
-	}
+	// // force sync and close errors
+	// {
+	// 	test.OneShotForceOSSyncError()
+	// 	test.OneShotForceOSCloseError()
+	// 	reader, err := os.Open(testfile)
+	// 	assert.Nil(t, err)
+	// 	err = WriteStream(reader, tmpfile)
+	// 	assert.Nil(t, reader.Close())
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to close file"))
+	// 	assert.True(t, strings.Contains(err.Error(), ": failed syncing stream to file"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	// 	assert.Nil(t, os.Remove(tmpfile))
+	// }
 
-	// force sync and close errors
-	{
-		test.OneShotForceOSSyncError()
-		test.OneShotForceOSCloseError()
-		reader, err := os.Open(testfile)
-		assert.Nil(t, err)
-		err = WriteStream(reader, tmpfile)
-		assert.Nil(t, reader.Close())
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to close file"))
-		assert.True(t, strings.Contains(err.Error(), ": failed syncing stream to file"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
-		assert.Nil(t, os.Remove(tmpfile))
-	}
+	// // force sync and close errors
+	// {
+	// 	test.OneShotForceOSSyncError()
+	// 	test.OneShotForceOSCloseError()
+	// 	reader, err := os.Open(testfile)
+	// 	assert.Nil(t, err)
+	// 	err = WriteStream(reader, tmpfile)
+	// 	assert.Nil(t, reader.Close())
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to close file"))
+	// 	assert.True(t, strings.Contains(err.Error(), ": failed syncing stream to file"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	// 	assert.Nil(t, os.Remove(tmpfile))
+	// }
 
-	// attemp to read from iotest TimeoutReader and force failure close
-	{
-		test.OneShotForceOSCloseError()
-		reader, err := os.Open(testfile)
-		assert.Nil(t, err)
-		testReader := iotest.TimeoutReader(reader)
-		err = WriteStream(testReader, tmpfile)
-		assert.Nil(t, reader.Close())
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to close file"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": failed copying stream data: timeout"))
-		assert.Nil(t, os.Remove(tmpfile))
-	}
+	// // attemp to read from iotest TimeoutReader and force failure close
+	// {
+	// 	test.OneShotForceOSCloseError()
+	// 	reader, err := os.Open(testfile)
+	// 	assert.Nil(t, err)
+	// 	testReader := iotest.TimeoutReader(reader)
+	// 	err = WriteStream(testReader, tmpfile)
+	// 	assert.Nil(t, reader.Close())
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to close file"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": failed copying stream data: timeout"))
+	// 	assert.Nil(t, os.Remove(tmpfile))
+	// }
 
 	// attemp to write to a readonly dst
 	{

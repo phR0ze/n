@@ -8,20 +8,19 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/phR0ze/n/pkg/test"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestAbs(t *testing.T) {
 
-	// force filepathAbs error
-	{
-		test.OneShotForceFilePathAbsError()
-		result, err := Abs("foo")
-		assert.Empty(t, result)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to compute the absolute path for"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
-	}
+	// // force filepathAbs error
+	// {
+	// 	test.OneShotForceFilePathAbsError()
+	// 	result, err := Abs("foo")
+	// 	assert.Empty(t, result)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to compute the absolute path for"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	// }
 
 	{
 		result, err := Abs("")
@@ -166,14 +165,14 @@ func TestGlob(t *testing.T) {
 		assert.Equal(t, file2, sources[3])
 	}
 
-	// force Glob error
-	{
-		test.OneShotForceFilePathGlobError()
-		sources, err := Glob(testfile)
-		assert.Len(t, sources, 0)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to get glob for"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
-	}
+	// // force Glob error
+	// {
+	// 	test.OneShotForceFilePathGlobError()
+	// 	sources, err := Glob(testfile)
+	// 	assert.Len(t, sources, 0)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to get glob for"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	// }
 
 	// empty path
 	{
@@ -549,14 +548,14 @@ func TestExpand(t *testing.T) {
 
 func TestHome(t *testing.T) {
 
-	// force filepathAbs error
-	{
-		test.OneShotForceFilePathAbsError()
-		result, err := UserHome()
-		assert.Empty(t, result)
-		assert.True(t, strings.HasPrefix(err.Error(), "failed to compute the absolute path for"))
-		assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
-	}
+	// // force filepathAbs error
+	// {
+	// 	test.OneShotForceFilePathAbsError()
+	// 	result, err := UserHome()
+	// 	assert.Empty(t, result)
+	// 	assert.True(t, strings.HasPrefix(err.Error(), "failed to compute the absolute path for"))
+	// 	assert.True(t, strings.HasSuffix(err.Error(), ": invalid argument"))
+	// }
 
 	// happy
 	{

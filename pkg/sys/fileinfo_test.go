@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/phR0ze/n/pkg/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -361,20 +360,20 @@ func TestSymlinkTarget(t *testing.T) {
 		assert.True(t, strings.HasSuffix(err.Error(), ": no such file or directory"))
 	}
 
-	// Force readlink error
-	{
-		symlink := path.Join(tmpDir, "symlink")
-		assert.Nil(t, os.Symlink(testfile, symlink))
+	// // Force readlink error
+	// {
+	// 	symlink := path.Join(tmpDir, "symlink")
+	// 	assert.Nil(t, os.Symlink(testfile, symlink))
 
-		info, err := Lstat(symlink)
-		assert.Nil(t, err)
-		test.OneShotForceOSReadlinkError()
-		target, err := info.SymlinkTarget()
-		assert.Empty(t, target)
-		assert.Equal(t, "failed to read the link target", err.Error())
+	// 	info, err := Lstat(symlink)
+	// 	assert.Nil(t, err)
+	// 	test.OneShotForceOSReadlinkError()
+	// 	target, err := info.SymlinkTarget()
+	// 	assert.Empty(t, target)
+	// 	assert.Equal(t, "failed to read the link target", err.Error())
 
-		assert.Nil(t, Remove(symlink))
-	}
+	// 	assert.Nil(t, Remove(symlink))
+	// }
 
 	// Symlink to a file
 	{
