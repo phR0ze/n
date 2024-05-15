@@ -1,7 +1,6 @@
 package sys
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -1276,13 +1275,13 @@ func TestWriteBytes(t *testing.T) {
 	// happy
 	{
 		// Read and write file
-		data, err := ioutil.ReadFile(testfile)
+		data, err := os.ReadFile(testfile)
 		assert.Nil(t, err)
 		err = WriteBytes(tmpfile, data, 0644)
 		assert.Nil(t, err)
 
 		// Test the resulting file
-		data2, err := ioutil.ReadFile(tmpfile)
+		data2, err := os.ReadFile(tmpfile)
 		assert.Nil(t, err)
 		assert.Equal(t, data, data2)
 	}
@@ -1402,7 +1401,7 @@ func TestWriteStream(t *testing.T) {
 	}
 
 	var expectedData []byte
-	expectedData, err := ioutil.ReadFile(testfile)
+	expectedData, err := os.ReadFile(testfile)
 	assert.Nil(t, err)
 
 	// No file exists
@@ -1418,7 +1417,7 @@ func TestWriteStream(t *testing.T) {
 
 		// Test the resulting file
 		var data []byte
-		data, err = ioutil.ReadFile(tmpfile)
+		data, err = os.ReadFile(tmpfile)
 		assert.Nil(t, err)
 		assert.Equal(t, expectedData, data)
 		assert.Nil(t, os.Remove(tmpfile))
@@ -1435,7 +1434,7 @@ func TestWriteStream(t *testing.T) {
 
 		// Test the resulting file
 		var data []byte
-		data, err = ioutil.ReadFile(testfile)
+		data, err = os.ReadFile(testfile)
 		assert.Nil(t, err)
 		assert.Equal(t, expectedData, data)
 		assert.Nil(t, os.Remove(tmpfile))
@@ -1468,13 +1467,13 @@ func TestWriteString(t *testing.T) {
 	// happy
 	{
 		// Read and write file
-		data, err := ioutil.ReadFile(testfile)
+		data, err := os.ReadFile(testfile)
 		assert.Nil(t, err)
 		err = WriteString(tmpfile, string(data), 0644)
 		assert.Nil(t, err)
 
 		// Test the resulting file
-		data2, err := ioutil.ReadFile(tmpfile)
+		data2, err := os.ReadFile(tmpfile)
 		assert.Nil(t, err)
 		assert.Equal(t, data, data2)
 	}

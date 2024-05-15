@@ -6,7 +6,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -463,7 +462,7 @@ func ReadBytes(filepath string) (result []byte, err error) {
 		return
 	}
 
-	if result, err = ioutil.ReadFile(filepath); err != nil {
+	if result, err = os.ReadFile(filepath); err != nil {
 		err = errors.Wrapf(err, "failed reading the file %s", filepath)
 		return
 	}
@@ -477,7 +476,7 @@ func ReadLines(filepath string) (result []string, err error) {
 	}
 
 	var data []byte
-	if data, err = ioutil.ReadFile(filepath); err != nil {
+	if data, err = os.ReadFile(filepath); err != nil {
 		err = errors.Wrapf(err, "failed reading the file %s", filepath)
 		return
 	}
@@ -504,7 +503,7 @@ func ReadString(filepath string) (result string, err error) {
 	}
 
 	var data []byte
-	if data, err = ioutil.ReadFile(filepath); err != nil {
+	if data, err = os.ReadFile(filepath); err != nil {
 		err = errors.Wrapf(err, "failed reading the file %s", filepath)
 		return
 	}
@@ -561,7 +560,7 @@ func Touch(filepath string) (path string, err error) {
 	return
 }
 
-// WriteBytes is a pass through to ioutil.WriteBytes with default permissions
+// WriteBytes is a pass through to os.WriteFile with default permissions
 func WriteBytes(filepath string, data []byte, perms ...uint32) (err error) {
 	if filepath, err = Abs(filepath); err != nil {
 		return
@@ -571,14 +570,14 @@ func WriteBytes(filepath string, data []byte, perms ...uint32) (err error) {
 	if len(perms) > 0 {
 		perm = os.FileMode(perms[0])
 	}
-	if err = ioutil.WriteFile(filepath, data, perm); err != nil {
+	if err = os.WriteFile(filepath, data, perm); err != nil {
 		err = errors.Wrapf(err, "failed writing bytes to file %s", filepath)
 		return
 	}
 	return
 }
 
-// WriteLines is a pass through to ioutil.WriteFile with default permissions
+// WriteLines is a pass through to os.WriteFile with default permissions
 func WriteLines(filepath string, lines []string, perms ...uint32) (err error) {
 	if filepath, err = Abs(filepath); err != nil {
 		return
@@ -588,7 +587,7 @@ func WriteLines(filepath string, lines []string, perms ...uint32) (err error) {
 	if len(perms) > 0 {
 		perm = os.FileMode(perms[0])
 	}
-	if err = ioutil.WriteFile(filepath, []byte(strings.Join(lines, "\n")), perm); err != nil {
+	if err = os.WriteFile(filepath, []byte(strings.Join(lines, "\n")), perm); err != nil {
 		err = errors.Wrapf(err, "failed writing lines to file %s", filepath)
 		return
 	}
@@ -635,7 +634,7 @@ func WriteStream(reader io.Reader, filepath string, perms ...uint32) (err error)
 	return
 }
 
-// WriteString is a pass through to ioutil.WriteFile with default permissions
+// WriteString is a pass through to os.WriteFile with default permissions
 func WriteString(filepath string, data string, perms ...uint32) (err error) {
 	if filepath, err = Abs(filepath); err != nil {
 		return
@@ -645,7 +644,7 @@ func WriteString(filepath string, data string, perms ...uint32) (err error) {
 	if len(perms) > 0 {
 		perm = os.FileMode(perms[0])
 	}
-	if err = ioutil.WriteFile(filepath, []byte(data), perm); err != nil {
+	if err = os.WriteFile(filepath, []byte(data), perm); err != nil {
 		err = errors.Wrapf(err, "failed writing string to file %s", filepath)
 		return
 	}

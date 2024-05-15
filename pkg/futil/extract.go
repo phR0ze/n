@@ -2,7 +2,7 @@
 package futil
 
 import (
-	"io/ioutil"
+	"os"
 	"regexp"
 
 	"github.com/phR0ze/n/pkg/sys"
@@ -20,7 +20,7 @@ func ExtractString(filepath string, exp string) (match string, err error) {
 
 	// Read in the file data
 	var data []byte
-	if data, err = ioutil.ReadFile(filepath); err != nil {
+	if data, err = os.ReadFile(filepath); err != nil {
 		err = errors.Wrapf(err, "failed reading the file %s", filepath)
 		return
 	}
@@ -51,7 +51,7 @@ func ExtractStrings(filepath string, exp string) (matches []string, err error) {
 
 	// Read in the file data
 	var data []byte
-	if data, err = ioutil.ReadFile(filepath); err != nil {
+	if data, err = os.ReadFile(filepath); err != nil {
 		err = errors.Wrapf(err, "failed reading the file %s", filepath)
 		return
 	}
@@ -82,7 +82,7 @@ func ExtractStringP(filepath string, exp *regexp.Regexp) (match string, err erro
 
 	// Read in the file data
 	var data []byte
-	if data, err = ioutil.ReadFile(filepath); err != nil {
+	if data, err = os.ReadFile(filepath); err != nil {
 		err = errors.Wrapf(err, "failed reading the file %s", filepath)
 		return
 	}
@@ -104,7 +104,7 @@ func ExtractStringsP(filepath string, exp *regexp.Regexp) (matches []string, err
 
 	// Read in the file data
 	var data []byte
-	if data, err = ioutil.ReadFile(filepath); err != nil {
+	if data, err = os.ReadFile(filepath); err != nil {
 		err = errors.Wrapf(err, "failed reading the file %s", filepath)
 		return
 	}

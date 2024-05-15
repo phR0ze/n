@@ -3,7 +3,7 @@ package tmpl
 
 import (
 	"bytes"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/phR0ze/n/pkg/errs"
@@ -24,7 +24,7 @@ type Engine struct {
 // Load a yaml file from disk and processes any templating returning a string
 func Load(filepath string, startTag, endTag string, vars map[string]string) (result string, err error) {
 	var data []byte
-	if data, err = ioutil.ReadFile(filepath); err == nil {
+	if data, err = os.ReadFile(filepath); err == nil {
 		var tpl *Engine
 		if tpl, err = New(string(data), startTag, endTag); err == nil {
 			if result, err = tpl.Process(vars); err == nil {

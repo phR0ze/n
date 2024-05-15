@@ -3,7 +3,6 @@ package json
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -25,7 +24,7 @@ func ReadJSON(filepath string) (obj map[string]interface{}, err error) {
 
 	// Read in the file data
 	var data []byte
-	if data, err = ioutil.ReadFile(filepath); err != nil {
+	if data, err = os.ReadFile(filepath); err != nil {
 		err = errors.Wrapf(err, "failed to read the file %s", filepath)
 		return
 	}
@@ -77,7 +76,7 @@ func WriteJSON(filepath string, obj interface{}, indent ...int) (err error) {
 	}
 
 	// Use default permissions for file
-	if err = ioutil.WriteFile(filepath, data, os.FileMode(0644)); err != nil {
+	if err = os.WriteFile(filepath, data, os.FileMode(0644)); err != nil {
 		err = errors.Wrapf(err, "failed to write out json data to file %s", filepath)
 	}
 	return

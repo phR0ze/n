@@ -1,7 +1,6 @@
 package sys
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -190,7 +189,7 @@ func Dirs(target string) (result []string) {
 	result = []string{}
 	if target, err := Abs(target); err == nil {
 		if IsDir(target) {
-			if items, err := ioutil.ReadDir(target); err == nil {
+			if items, err := os.ReadDir(target); err == nil {
 				for _, item := range items {
 					if item.IsDir() {
 						result = append(result, path.Join(target, item.Name()))
@@ -249,7 +248,7 @@ func Files(target string) (result []string) {
 	result = []string{}
 	if target, err := Abs(target); err == nil {
 		if IsDir(target) {
-			if items, err := ioutil.ReadDir(target); err == nil {
+			if items, err := os.ReadDir(target); err == nil {
 				for _, item := range items {
 					if !item.IsDir() {
 						result = append(result, path.Join(target, item.Name()))
@@ -299,7 +298,7 @@ func Paths(target string) (result []string) {
 	result = []string{}
 	if target, err := Abs(target); err == nil {
 		if IsDir(target) {
-			if items, err := ioutil.ReadDir(target); err == nil {
+			if items, err := os.ReadDir(target); err == nil {
 				for _, item := range items {
 					result = append(result, path.Join(target, item.Name()))
 				}
@@ -310,7 +309,7 @@ func Paths(target string) (result []string) {
 }
 
 // ReadDir reads the directory named by dirname and returns a list of directory entries
-// sorted by filename. Similar to ioutil.ReadDir but using internal FileInfo types.
+// sorted by filename. Similar to os.ReadDir but using internal FileInfo types.
 func ReadDir(dirname string) (infos []*FileInfo, err error) {
 	if dirname, err = Abs(dirname); err != nil {
 		return

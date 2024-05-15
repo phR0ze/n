@@ -2,7 +2,6 @@
 package yaml
 
 import (
-	"io/ioutil"
 	"os"
 
 	"github.com/phR0ze/n/pkg/sys"
@@ -24,7 +23,7 @@ func ReadYAML(filepath string) (obj map[string]interface{}, err error) {
 
 	// Read in the file data
 	var data []byte
-	if data, err = ioutil.ReadFile(filepath); err != nil {
+	if data, err = os.ReadFile(filepath); err != nil {
 		err = errors.Wrapf(err, "failed to read the file %s", filepath)
 		return
 	}
@@ -75,7 +74,7 @@ func WriteYAML(filepath string, obj interface{}, perms ...uint32) (err error) {
 	if len(perms) > 0 {
 		perm = os.FileMode(perms[0])
 	}
-	if err = ioutil.WriteFile(filepath, data, perm); err != nil {
+	if err = os.WriteFile(filepath, data, perm); err != nil {
 		err = errors.Wrapf(err, "failed to write out yaml data to file %s", filepath)
 	}
 	return

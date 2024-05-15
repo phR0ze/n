@@ -6,7 +6,6 @@ package runes
 
 import (
 	"io"
-	"io/ioutil"
 
 	"github.com/phR0ze/n/pkg/buf"
 	"github.com/phR0ze/n/pkg/errs"
@@ -45,7 +44,7 @@ func (s *Scanner) readAll() (err error) {
 
 	// Read all data into memory and conver to rune slice
 	var data []byte
-	if data, err = ioutil.ReadAll(s.src); err != nil {
+	if data, err = io.ReadAll(s.src); err != nil {
 		err = errors.Wrap(err, "failed to read all data from source reader")
 		return
 	}

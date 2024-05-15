@@ -2,7 +2,7 @@ package json
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/phR0ze/n/pkg/sys"
@@ -54,7 +54,7 @@ func TestWriteJSONCompact(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Read the file back into memory and compare data structure
-	data, err := ioutil.ReadFile(tmpfile)
+	data, err := os.ReadFile(tmpfile)
 	assert.Nil(t, err)
 	assert.Equal(t, jsondata1, string(data))
 }
@@ -80,7 +80,7 @@ func TestWriteJSONPretty(t *testing.T) {
 
 	// Read the file back into memory and compare data structure
 	var jsondata2 []byte
-	jsondata2, err = ioutil.ReadFile(tmpfile)
+	jsondata2, err = os.ReadFile(tmpfile)
 	assert.Nil(t, err)
 	data2 := &map[string]interface{}{}
 	err = Unmarshal(jsondata2, data2)

@@ -2,7 +2,7 @@ package n
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	yaml "github.com/phR0ze/yaml/v2"
@@ -1514,7 +1514,7 @@ func TestWriteYAML(t *testing.T) {
 
 		// Read the file back into memory and compare raw string
 		var buffer []byte
-		buffer, err = ioutil.ReadFile(tmpFile)
+		buffer, err = os.ReadFile(tmpFile)
 		assert.Nil(t, err)
 		data2 := string(buffer)
 		assert.Equal(t, data1, data2)

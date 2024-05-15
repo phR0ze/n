@@ -1,7 +1,7 @@
 package yaml
 
 import (
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/phR0ze/n/pkg/sys"
@@ -57,7 +57,7 @@ func TestWriteYAML(t *testing.T) {
 
 		// Read the file back into memory and compare data structure
 		var yamldata2 []byte
-		yamldata2, err = ioutil.ReadFile(tmpfile)
+		yamldata2, err = os.ReadFile(tmpfile)
 		assert.NoError(t, err)
 		data2 := &map[string]interface{}{}
 		err = Unmarshal(yamldata2, data2)
@@ -80,7 +80,7 @@ func TestOrderedReadWriteYaml(t *testing.T) {
 
 	// Read the file back into memory and compare raw string
 	var buffer []byte
-	buffer, err = ioutil.ReadFile(tmpfile)
+	buffer, err = os.ReadFile(tmpfile)
 	assert.Nil(t, err)
 	data2 := string(buffer)
 	assert.Equal(t, data1, data2)

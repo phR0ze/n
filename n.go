@@ -11,7 +11,7 @@
 // using the terms 'n types' or 'queryable' interchangeably in the documentation and
 // examples.
 //
-// Conventions used across n types and pkgs
+// # Conventions used across n types and pkgs
 //
 // • In order to deal with Golang's decision to not support function overloading or special
 // characters in their function names n makes use of a variety of prefix/suffix capital
@@ -48,7 +48,7 @@
 // combinations may be used to indicate complex types. The documentation will always call
 // out what exactly they mean, but the function name may be cryptic until understood.
 //
-// Summary of Types
+// # Summary of Types
 //
 // • Char
 // • FloatSlice
@@ -63,7 +63,7 @@ package n
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 
 	yaml "github.com/phR0ze/yaml/v2"
 	"github.com/pkg/errors"
@@ -162,7 +162,7 @@ func LoadJSONE(filepath string) (m *StringMap, err error) {
 
 	// Read in the yaml file
 	var data []byte
-	if data, err = ioutil.ReadFile(filepath); err != nil {
+	if data, err = os.ReadFile(filepath); err != nil {
 		err = errors.Wrapf(err, "failed to read in the yaml file %s", filepath)
 		return
 	}
@@ -190,7 +190,7 @@ func LoadYAMLE(filepath string) (m *StringMap, err error) {
 
 	// Read in the yaml file
 	var data []byte
-	if data, err = ioutil.ReadFile(filepath); err != nil {
+	if data, err = os.ReadFile(filepath); err != nil {
 		err = errors.Wrapf(err, "failed to read in the yaml file %s", filepath)
 		return
 	}
