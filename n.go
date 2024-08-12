@@ -86,6 +86,14 @@ func EitherStr(first, second string) string {
 	return second
 }
 
+// EitherInt returns the first int if not zero else the second
+func EitherInt(first, second int) int {
+	if first != 0 {
+		return first
+	}
+	return second
+}
+
 // ExB avoids Go's gastly 4 line monstrosity required to implement this providing
 // instead a single clean line of code for lambdas.
 func ExB(exp bool) bool {
