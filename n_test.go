@@ -27,6 +27,23 @@ func ExampleEitherStr() {
 	// Output: default
 }
 
+func EampleEitherInt() {
+	fmt.Println(EitherInt(0, 1))
+	// Output: 1
+}
+
+func TestEitherInt(t *testing.T) {
+	// Test default set
+	{
+		assert.Equal(t, 1, EitherInt(0, 1))
+	}
+
+	// Test value set
+	{
+		assert.Equal(t, 0, EitherInt(0, 0))
+	}
+}
+
 func TestEitherStr(t *testing.T) {
 	// Test default set
 	{
